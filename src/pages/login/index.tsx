@@ -1,9 +1,8 @@
 import { Helmet } from "react-helmet-async";
-import { Alert, Card, Divider, Layout, Typography } from "antd";
-import ReactIcon from "@/assets/svg/react.svg?react";
+import { Card, Layout, Typography } from "antd";
 import { ThemeSwitch } from "@/components/theme-switch";
+import loginBg from "../../../public/aa.webp";
 import LoginForm from "./components/login-form";
-import ThirdPartyLogin from "./components/third-party-login";
 
 export default function Login() {
   return (
@@ -13,22 +12,22 @@ export default function Login() {
       </Helmet>
       <Layout className="min-h-screen relative">
         <Layout.Content className="flex">
-          <div className="w-2/5 bg-zinc-800 dark:bg-zinc-950 hidden md:flex justify-center items-center">
-            <ReactIcon className="size-24 animate-spin-slow" />
+          <div className="w-2/5  hidden md:flex justify-center items-center ml-[100px]">
+            <img src={loginBg} alt="登录图标" /> {/* 使用登录图标 */}
           </div>
           <div className="w-screen md:w-3/5 flex justify-center items-center">
             <Card
               title={
                 <Typography.Title level={2} className="flex justify-center pt-8 pb-4">
-                  React Vite Admin
+                  管理系统
                 </Typography.Title>
               }
               className="w-[450px]"
             >
-              <Alert message="用户名：admin，密码：123456" type="info" showIcon className="mb-6" />
+              {/*<Alert message="用户名：admin，密码：123456" type="info" showIcon className="mb-6" />*/}
               <LoginForm />
-              <Divider>其他登录方式</Divider>
-              <ThirdPartyLogin />
+              {/*<Divider>其他登录方式</Divider>*/}
+              {/*<ThirdPartyLogin />*/}
             </Card>
           </div>
         </Layout.Content>

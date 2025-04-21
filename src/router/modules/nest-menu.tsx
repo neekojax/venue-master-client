@@ -9,30 +9,30 @@ export const nestMenuRoute: RouteObject = {
   }),
   HydrateFallback: ProgressBar,
   handle: {
-    title: "嵌套菜单",
+    title: "收益管理",
     crumb: () => "嵌套菜单",
   },
   children: [
     {
-      path: ROUTE_PATHS.subMenu1,
+      path: ROUTE_PATHS.link,
       lazy: async () => ({
         Component: (await import("@/pages/nest-menu/sub-menu-1")).default,
       }),
       HydrateFallback: ProgressBar,
       handle: {
-        title: "二级菜单-1",
-        crumb: () => <Link to={ROUTE_PATHS.subMenu1}>二级菜单-1</Link>,
+        title: "观察者链接",
+        crumb: () => <Link to={ROUTE_PATHS.link}>观察者链接</Link>,
       },
     },
     {
-      path: ROUTE_PATHS.subMenu2,
+      path: ROUTE_PATHS.report,
       lazy: async () => ({
         Component: (await import("@/pages/nest-menu/sub-menu-2")).default,
       }),
       HydrateFallback: ProgressBar,
       handle: {
-        title: "二级菜单-2",
-        crumb: () => <Link to={ROUTE_PATHS.subMenu2}>二级菜单-2</Link>,
+        title: "收益记录",
+        crumb: () => <Link to={ROUTE_PATHS.report}>收益记录</Link>,
       },
     },
   ],

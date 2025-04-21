@@ -1,7 +1,7 @@
 import { useEffect, useRef } from "react";
 
 export function useEventListener<K extends keyof HTMLElementEventMap, T extends HTMLElement = any>(
-  type: K,
+  type: string,
   listener: (this: HTMLDivElement, event: HTMLElementEventMap[K]) => any,
   options?: boolean | AddEventListenerOptions,
 ) {

@@ -2,6 +2,7 @@ import { useNavigate } from "react-router-dom";
 import { LogoutOutlined } from "@ant-design/icons";
 import { Avatar, Dropdown, type MenuProps } from "antd";
 import { ROUTE_PATHS } from "@/constants/common";
+import { loginOut } from "@/pages/login/api.ts";
 
 export default function UserAvatar() {
   const navigate = useNavigate();
@@ -15,14 +16,20 @@ export default function UserAvatar() {
         </>
       ),
       onClick: () => {
+        const token = localStorage.getItem("refresh_token");
+        loginOut({ refresh_token: token });
         navigate(ROUTE_PATHS.login);
       },
     },
   ];
 
+  const randomSeed = Math.floor(Math.random() * 10000); // 生成一个 0 到 9999 的随机种子
+
+  const apiUrl = `https://api.dicebear.com/9.x/bottts/svg?seed=${randomSeed}`;
+
   return (
     <Dropdown menu={{ items }} trigger={["click"]}>
-      <Avatar size={36} src="https://api.dicebear.com/7.x/miniavs/svg?seed=1" className="cursor-pointer" />
+      <Avatar size={50} src={apiUrl} className="cursor-pointer" />
     </Dropdown>
   );
 }

@@ -48,7 +48,7 @@ export default function MainLayout() {
             />
             <Breadcrumb />
             <Flex gap={12} className="ml-auto items-center">
-              <CustomSkin />
+              {/*<CustomSkin />*/}
               <ThemeSwitch />
               <UserAvatar />
             </Flex>

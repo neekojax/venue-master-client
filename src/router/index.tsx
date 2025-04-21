@@ -1,10 +1,12 @@
 import { createBrowserRouter, Navigate, type RouteObject } from "react-router-dom";
 import { ProgressBar } from "@/components/progress-bar";
-import { echartsDemoRoute } from "./modules/echarts-demo";
+import { baseRoute } from "./modules/base";
+// import { echartsDemoRoute } from "./modules/echarts-demo";
 import { landingRoute } from "./modules/landing";
 import { nestMenuRoute } from "./modules/nest-menu";
-import { userManagerRoute } from "./modules/user-management";
+// import { userManagerRoute } from "./modules/user-management";
 import { ROUTE_PATHS } from "@/constants/common";
+import { venueRoute } from "@/router/modules/venue.tsx";
 
 const routes: RouteObject[] = [
   {
@@ -25,10 +27,13 @@ const routes: RouteObject[] = [
         index: true,
         element: <Navigate replace to={ROUTE_PATHS.landing} />,
       },
+
       landingRoute,
-      userManagerRoute,
+      venueRoute,
+      baseRoute,
+      // userManagerRoute,
       nestMenuRoute,
-      echartsDemoRoute,
+      // echartsDemoRoute,
     ],
   },
   {

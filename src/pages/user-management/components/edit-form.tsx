@@ -13,6 +13,7 @@ export default function EditForm({ initialValues, onFormInstanceReady }: EditFor
   const [hasChanged, setHasChanged] = useState(false);
 
   useEffect(() => {
+    console.log("onFormInstanceReady");
     onFormInstanceReady(form);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);

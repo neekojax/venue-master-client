@@ -9,7 +9,7 @@ export const userManagerRoute: RouteObject = {
   }),
   HydrateFallback: ProgressBar,
   handle: {
-    title: "用户管理",
-    crumb: () => <Link to={ROUTE_PATHS.userManagement}>用户管理</Link>,
+    title: "资产管理",
+    crumb: () => <Link to={ROUTE_PATHS.userManagement}>资产管理</Link>,
   },
 };
