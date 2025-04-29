@@ -9,4 +9,8 @@ export const ROUTE_PATHS = {
   link: "/nest-menu/sub-link",
   report: "/nest-menu/sub-report",
   echartsDemo: "/echarts-demo",
+  custodyMenu: "/custody-menu",
+  setting: "/custody-menu/setting",
+  statistics: "/custody-menu/statistics",
+  dailyAveragePrice: "/custody-menu/price",
 };

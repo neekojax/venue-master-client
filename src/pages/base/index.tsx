@@ -1,15 +1,22 @@
-import { Alert, Spin, Table, Tag } from "antd";
-
-import AddVenueTemplateButton from "@/pages/base/components/add-button.tsx";
-import DeleteButton from "@/pages/base/components/delete-button.tsx";
-import EditButton from "@/pages/base/components/edit-button.tsx";
-import { useVenueTemplates } from "@/pages/base/hook/hook.ts";
+import { Alert, message, Spin, Table, Tag } from "antd";
+import { ActionButton, ActionButtonMode } from "@/components/action-button";
 import useAuthRedirect from "@/hooks/useAuthRedirect.ts";
+
+import DeleteButton from "@/pages/base/components/delete-button.tsx";
+import EditForm from "@/pages/base/components/edit-form.tsx";
+import {
+  useSubmitVenueTemplateChange,
+  useSubmitVenueTemplateNew,
+  useVenueTemplates,
+} from "@/pages/base/hook/hook.ts";
+import type { TemplateDataChange, TemplateDataNew, Values } from "@/pages/base/type.ts";
 
 export default function BasePage() {
   useAuthRedirect();
 
   const { data, error, isLoading } = useVenueTemplates();
+  const newTemplateMutation = useSubmitVenueTemplateNew();
+  const changeTemplateMutation = useSubmitVenueTemplateChange();
 
   // Loading 状态
   if (isLoading) {
@@ -27,6 +34,57 @@ export default function BasePage() {
     serialNumber: 0, // 空的序号
     templateName: "", // 空的模板名称
     fields: [], // 空的字段信息
+  };
+
+  const transformDataToValues = (data: any): Values => {
+    return {
+      templateID: data.key,
+      templateName: data.templateName || "",
+      fields: data.fields.map((field: any) => ({
+        ID: field.ID,
+        value: field.FieldName || "", // 提供默认值
+        status: "default", // 提供默认值
+      })),
+    };
+  };
+
+  const handleAddTemplate = async (values: Values) => {
+    const templateDataNew: TemplateDataNew = {
+      ID: 0,
+      templateName: values.templateName,
+      fields: values.fields,
+    };
+    newTemplateMutation.mutate(templateDataNew, {
+      onSuccess: () => {
+        message.success("模版已成功新增");
+      },
+      onError: (error) => {
+        message.error(`新增失败: ${error.message}`);
+      },
+    });
+  };
+
+  const handleEditTemplate = async (values: Values) => {
+    const templateDataChange: TemplateDataChange = {
+      ID: values.templateID,
+      templateNameBefore: values.templateName,
+      templateNameAfter: values.templateName,
+      fields: values.fields.map((field) => {
+        // 检查 ID，若为 0 则更新 status 为 "new"
+        if (field.ID === 0) {
+          return { ...field, status: "new" };
+        }
+        return field; // 否则保持不变
+      }),
+    };
+    changeTemplateMutation.mutate(templateDataChange, {
+      onSuccess: () => {
+        message.success("模版已成功更新");
+      },
+      onError: (error) => {
+        message.error(`更新失败: ${error.message}`);
+      },
+    });
   };
 
   // 处理表格数据
@@ -76,7 +134,14 @@ export default function BasePage() {
       key: "action",
       render: (_text: any, record: { key: any }) => (
         <>
-          <EditButton data={record} />
+          {/*<EditButton data={record} />*/}
+          <ActionButton
+            label={""}
+            initialValues={transformDataToValues(record)}
+            onSubmit={handleEditTemplate}
+            FormComponent={EditForm}
+            mode={ActionButtonMode.EDIT} // 使用 AddButtonMode.EDIT 进行编辑操作
+          />
           <DeleteButton data={record} />
         </>
       ),
@@ -85,7 +150,13 @@ export default function BasePage() {
 
   return (
     <div>
-      <AddVenueTemplateButton data={emptyData} />
+      <ActionButton
+        label={"添加模版"}
+        initialValues={emptyData}
+        onSubmit={handleAddTemplate}
+        FormComponent={EditForm}
+        mode={ActionButtonMode.ADD} // 使用 AddButtonMode.EDIT 进行编辑操作
+      />
 
       <Table
         dataSource={tableData}

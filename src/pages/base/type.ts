@@ -2,6 +2,7 @@
 
 export type Values = {
   templateName: string;
+  templateID: number;
   fields: Field[];
 };
 

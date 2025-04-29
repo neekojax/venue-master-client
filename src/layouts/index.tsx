@@ -4,7 +4,6 @@ import { Button, Flex, Layout } from "antd";
 import { AppHelmet } from "@/components/helmet";
 import { ThemeSwitch } from "@/components/theme-switch";
 import Breadcrumb from "./components/bread-crumb";
-import CustomSkin from "./components/custom-skin";
 import Content from "./components/main-content";
 import SiderBar from "./components/sider-bar";
 import UserAvatar from "./components/user-avatar";

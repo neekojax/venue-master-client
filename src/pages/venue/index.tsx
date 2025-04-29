@@ -1,9 +1,10 @@
 import { useEffect, useState } from "react";
 import { Input, message, Space, Spin } from "antd";
+import ActionButton, { ActionButtonMode } from "@/components/action-button";
 import EditTable from "@/components/edit-table";
 import useAuthRedirect from "@/hooks/useAuthRedirect.ts";
 
-import AddVenueRecordButton from "@/pages/venue/components/add-button.tsx";
+import EditForm from "@/pages/venue/components/edit-form.tsx";
 import TemplateSelect from "@/pages/venue/components/select.tsx";
 import {
   useVenueRecord,
@@ -14,8 +15,6 @@ import {
   useVenueTemplateList,
 } from "@/pages/venue/hook/hook.ts";
 import { type Values, type VenueRecordNew, VenueRecordUpdate } from "@/pages/venue/type.ts";
-import AddButton from "@/components/add-button";
-import EditForm from "@/pages/venue/components/edit-form.tsx";
 
 export default function VenuePage() {
   useAuthRedirect();
@@ -191,17 +190,17 @@ export default function VenuePage() {
               selectedTemplate={selectedTemplate}
               onTemplateChange={handleTemplateChange}
             />
-            {/*<AddVenueRecordButton*/}
-            {/*  templates={templates}*/}
-            {/*  selectedTemplate={selectedTemplate}*/}
-            {/*  fields={fields?.data}*/}
-            {/*/>*/}
 
-            <AddButton
+            <ActionButton
               label={"添加数据"}
-              initialValues={transformDataToValues(templates?.data || [], selectedTemplate, fields?.data || [])}
+              initialValues={transformDataToValues(
+                templates?.data || [],
+                selectedTemplate,
+                fields?.data || [],
+              )}
               onSubmit={handleSubmit}
               FormComponent={EditForm}
+              mode={ActionButtonMode.ADD}
             />
           </Space>
           <Input

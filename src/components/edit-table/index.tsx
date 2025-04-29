@@ -75,7 +75,13 @@ export default function EditTable({
           }
           return col;
         })}
-        style={{ marginTop: 20 }}
+        style={{
+          marginTop: 20,
+          // backgroundColor: "#fff",
+          // borderRadius: "8px",
+          // boxShadow: "0 2px 8px rgba(0, 0, 0, 0.1)",
+          // padding: "20px",
+        }}
       />
       {/* 分页组件 */}
       <div style={{ display: "flex", justifyContent: "center", marginTop: 16 }}>

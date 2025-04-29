@@ -1,6 +1,12 @@
 import { useEffect, useRef, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { HomeOutlined, RadiusSettingOutlined, UserOutlined, MenuOutlined } from "@ant-design/icons"; //<RadiusSettingOutlined />
+import {
+  HomeOutlined,
+  MenuOutlined,
+  ProductOutlined,
+  RadiusSettingOutlined,
+  UserOutlined,
+} from "@ant-design/icons"; //<RadiusSettingOutlined />
 import Icon from "@ant-design/icons";
 import { GetProps, Layout, Menu, type MenuProps } from "antd";
 import { useTheme } from "@/components/theme-provider";
@@ -79,6 +85,25 @@ const items: MenuProps["items"] = [
     icon: <UserOutlined />,
     label: <Link to={ROUTE_PATHS.venue}>场地管理</Link>,
     key: ROUTE_PATHS.venue,
+  },
+  {
+    icon: <ProductOutlined />,
+    label: "托管统计",
+    key: ROUTE_PATHS.custodyMenu,
+    children: [
+      {
+        key: ROUTE_PATHS.setting,
+        label: <Link to={ROUTE_PATHS.setting}>基础设置</Link>,
+      },
+      {
+        key: ROUTE_PATHS.statistics,
+        label: <Link to={ROUTE_PATHS.statistics}>信息统计</Link>,
+      },
+      {
+        key: ROUTE_PATHS.dailyAveragePrice,
+        label: <Link to={ROUTE_PATHS.dailyAveragePrice}>BTC每日均价</Link>,
+      },
+    ],
   },
   {
     icon: <MenuOutlined />,

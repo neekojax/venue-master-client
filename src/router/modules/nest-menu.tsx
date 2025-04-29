@@ -10,7 +10,7 @@ export const nestMenuRoute: RouteObject = {
   HydrateFallback: ProgressBar,
   handle: {
     title: "收益管理",
-    crumb: () => "嵌套菜单",
+    crumb: () => "收益管理",
   },
   children: [
     {

@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Alert, Input, message, Space, Spin, Table, Tag, Tooltip } from "antd";
 import EditTable from "@/components/edit-table";
 import useAuthRedirect from "@/hooks/useAuthRedirect.ts";
+import { getShortenedLink } from "@/utils/short-link.ts";
 
 import AddLink from "@/pages/nest-menu/components/add-button.tsx";
 import { useLinkList } from "@/pages/nest-menu/hook/hook.ts";
@@ -66,6 +67,7 @@ export default function LinkPage() {
         title: "AntPool链接",
         dataIndex: "antpool_link",
         key: "antpool_link",
+        width: 300,
         render: (link: string) => (
           <a
             href={link}
@@ -73,7 +75,7 @@ export default function LinkPage() {
             rel="noopener noreferrer"
             style={{ color: "blue", textDecoration: "underline" }}
           >
-            {link.length > 40 ? `${link.substring(0, 20)}...${link.substring(link.length - 20)}` : link}
+            {link.length > 40 ? getShortenedLink(link) : link}
           </a>
         ),
       },
@@ -81,27 +83,23 @@ export default function LinkPage() {
         title: "F2Pool链接",
         dataIndex: "f2pool_link",
         key: "f2pool_link",
+        width: 300,
         render: (link: string) => (
           <a
             href={link}
             target="_blank"
             rel="noopener noreferrer"
             style={{ color: "blue", textDecoration: "underline" }}
+            title={link} // 悬停显示完整链接
           >
-            {link.length > 40 ? `${link.substring(0, 20)}...${link.substring(link.length - 20)}` : link}
+            {link.length > 40 ? getShortenedLink(link) : link}
           </a>
         ),
       },
       {
         title: "操作",
-        key: "action",
-        render: (_text: any, record: { key: any }) => (
-          <>
-            {/* 在这里添加编辑和删除按钮 */}
-            {/* <EditButton data={record} /> */}
-            {/* <DeleteButton data={record} onDelete={() => handleDelete(record.key)} /> */}
-          </>
-        ),
+        valueType: "option",
+        key: "operation",
       },
     ]);
   }, []);
@@ -115,38 +113,6 @@ export default function LinkPage() {
   if (error) {
     return <Alert message="错误" description={error.message} type="error" showIcon />;
   }
-
-  // 创建一个空的数据对象
-  // const emptyData = {
-  //   key: 0, // 空的 ID
-  //   serialNumber: 0, // 空的序号
-  //   templateName: "", // 空的模板名称
-  //   fields: [], // 空的字段信息
-  // };
-
-  // 处理表格数据
-  // const tableData = (Array.isArray(data.data) ? data.data : []).map(
-  //   (item: { id: any; site_name: any; sub_account: any; antpool_link: any; f2pool_link: any}, index: number) => {
-  //     return {
-  //       key: item.id, // 使用项目的 ID 作为唯一 key
-  //       serialNumber: index + 1,
-  //       siteName: item.site_name,
-  //       subAccount: item.sub_account,
-  //       antpoolLink: item.antpool_link,
-  //       f2poolLink: item.f2pool_link,
-  //     };
-  //   },
-  // );
-
-  // 中间省略的函数
-  const getShortenedLink = (link: string) => {
-    if (link.length <= 40) {
-      return link; // 如果链接短于等于20个字符，直接返回
-    }
-    const start = link.substring(0, 20); // 前10个字符
-    const end = link.substring(link.length - 20); // 后10个字符
-    return `${start}...${end}`; // 中间用省略号连接
-  };
 
   // 搜索处理函数
   const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {

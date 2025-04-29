@@ -65,6 +65,7 @@ export default function EditForm({ initialValues, onFormInstanceReady }: EditFor
       wrapperCol={{ flex: 1 }}
       className="mt-4"
     >
+      <Form.Item name="templateID" style={{ display: "none" }} />
       <Form.Item name="templateName" label="模版名称" rules={[{ required: true, message: "请输入模板名称" }]}>
         <Input value={templateName} onChange={(e) => handleTemplateNameChange(e)} />
       </Form.Item>
