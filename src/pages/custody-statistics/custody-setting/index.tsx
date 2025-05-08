@@ -105,7 +105,7 @@ export default function SettingPage() {
             href={link}
             target="_blank"
             rel="noopener noreferrer"
-            style={{ color: "blue", textDecoration: "underline" }}
+            style={{ color: "blue"}}
             title={link} // 悬停显示完整链接
           >
             {link.length > 40 ? getShortenedLink(link) : link}

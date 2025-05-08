@@ -49,7 +49,8 @@ export default function LoginForm() {
     try {
       const data = await onLogin(values);
       localStorage.setItem("access_token", data.data.access_token);
-      localStorage.setItem("refresh_token", data.data.refresh_token);
+      localStorage.setItem("" +
+        "refresh_token", data.data.refresh_token);
 
       const token = localStorage.getItem("access_token");
 

@@ -1,10 +1,12 @@
 import { useEffect, useState } from "react";
-import { Alert, Input, message, Space, Spin, Select, Typography } from "antd";
+import { FaAdn, FaFish } from "react-icons/fa6";
+import { DownloadOutlined } from "@ant-design/icons";
+import { Alert, Button, Input, Select, Space, Spin, Typography } from "antd";
 import EditTable from "@/components/edit-table";
 import useAuthRedirect from "@/hooks/useAuthRedirect.ts";
 
 import { useCustodyStatisticsList } from "@/pages/custody-statistics/hook/hook.ts";
-import { FaAdn, FaFish } from "react-icons/fa6";
+import { exportCustodyStatisticsToExcel } from "@/utils/excel";
 
 // 初始化时从 localStorage 获取值
 const getInitialTimeRange = () => {
@@ -294,13 +296,25 @@ export default function StatisticsPage() {
             />
           </div>
         </Space>
-        <Input
-          placeholder="请输入搜索字段"
-          value={searchTerm}
-          onChange={handleSearch}
-          style={{ width: 250 }} // 设定宽度
-          className="text-sm mr-24"
-        />
+
+        <div style={{ display: "flex", justifyContent: "space-between" }}>
+          <Input
+            placeholder="请输入搜索字段"
+            value={searchTerm}
+            onChange={handleSearch}
+            style={{ width: 250 }} // 设定宽度
+            className="text-sm mr-10"
+          />
+          <Button
+            type="text"
+            icon={<DownloadOutlined />}
+            size="middle"
+            className={"text-blue-500"}
+            onClick={() => exportCustodyStatisticsToExcel(filteredData)}
+          >
+            导出
+          </Button>
+        </div>
       </div>
 
       {isLoading ? (
@@ -310,10 +324,8 @@ export default function StatisticsPage() {
           tableData={filteredData}
           setTableData={setTableData}
           columns={columns}
-          handleDelete={() => {
-          }}
-          handleSave={() => {
-          }}
+          handleDelete={() => {}}
+          handleSave={() => {}}
         />
       )}
     </div>

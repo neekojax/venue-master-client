@@ -101,7 +101,7 @@ const items: MenuProps["items"] = [
       },
       {
         key: ROUTE_PATHS.dailyAveragePrice,
-        label: <Link to={ROUTE_PATHS.dailyAveragePrice}>BTC每日均价</Link>,
+        label: <Link to={ROUTE_PATHS.dailyAveragePrice}>BTC均价</Link>,
       },
     ],
   },
