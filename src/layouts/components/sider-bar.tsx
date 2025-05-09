@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
+import logo from "../../../public/logo.svg";
 import {
   HomeOutlined,
   MenuOutlined,
@@ -167,8 +168,9 @@ export default function SiderBar() {
         className="font-bold text-xl hover:text-current h-16 flex justify-center items-center gap-2 text-nowrap"
         to="/"
       >
-        <PandaIcon className="size-9" />
-        {collapsed ? null : <span className="text-gradient-ripple">运营管理</span>}
+        {/*<PandaIcon className="size-9" />*/}
+        <img src={logo} alt="Logo" className="size-9" /> {/* 替换为 logo */}
+        {collapsed ? null : <span className="text-gradient-ripple">运营管理系统</span>}
       </Link>
       <Menu
         theme={isDarkMode ? "dark" : "light"}
