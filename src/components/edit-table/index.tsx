@@ -2,12 +2,18 @@ import React, { useState } from "react";
 import { EditableProTable } from "@ant-design/pro-components";
 import { message, Pagination, Popconfirm } from "antd";
 
+// import "../styles.css";
+
 type EditTableProps = {
   tableData: any[];
   setTableData: React.Dispatch<React.SetStateAction<any[]>>;
   columns: any;
   handleDelete: (recordId: number) => Promise<void>; // 添加 handleDelete 作为参数
   handleSave: (rowKey: number, data: { [x: string]: string }) => Promise<void>; // 添加 handleSave 作为参数
+};
+
+const getRowClassName = (record, index) => {
+  return index % 2 === 0 ? "even-row" : "odd-row";
 };
 
 export default function EditTable({
@@ -19,7 +25,7 @@ export default function EditTable({
 }: EditTableProps) {
   const [editableKeys, setEditableRowKeys] = useState<React.Key[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
-  const [pageSize, setPageSize] = useState(10);
+  const [pageSize, setPageSize] = useState(20);
 
   // 渲染操作列的函数
   const renderActions = (record: { key: number }, action: { startEditable: (arg0: any) => void }) => [
@@ -82,6 +88,7 @@ export default function EditTable({
           // boxShadow: "0 2px 8px rgba(0, 0, 0, 0.1)",
           // padding: "20px",
         }}
+        rowClassName={getRowClassName} // 为主表添加行样式
       />
       {/* 分页组件 */}
       <div style={{ display: "flex", justifyContent: "center", marginTop: 16 }}>
@@ -94,7 +101,7 @@ export default function EditTable({
             setPageSize(pageSize); // 更新每页大小
           }}
           showSizeChanger
-          pageSizeOptions={[5, 10, 20]} // 提供的选项
+          pageSizeOptions={[10, 20, 50]} // 提供的选项
         />
       </div>
     </>

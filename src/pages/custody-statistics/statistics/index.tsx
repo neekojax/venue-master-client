@@ -1,12 +1,15 @@
 import { useEffect, useState } from "react";
-import { FaAdn, FaFish } from "react-icons/fa6";
-import { DownloadOutlined } from "@ant-design/icons";
-import { Alert, Button, Input, Select, Space, Spin, Typography } from "antd";
+import { AiOutlineCalendar } from "react-icons/ai";
+import { FaAdn, FaFish, FaList } from "react-icons/fa6";
+import { FcCalendar } from "react-icons/fc";
+import { GiMining } from "react-icons/gi";
+import { DownloadOutlined } from "@ant-design/icons"; // 导入时钟图标
+import { Alert, Button, Input, Select, Space, Spin } from "antd";
 import EditTable from "@/components/edit-table";
 import useAuthRedirect from "@/hooks/useAuthRedirect.ts";
+import { exportCustodyStatisticsToExcel } from "@/utils/excel";
 
 import { useCustodyStatisticsList } from "@/pages/custody-statistics/hook/hook.ts";
-import { exportCustodyStatisticsToExcel } from "@/utils/excel";
 
 // 初始化时从 localStorage 获取值
 const getInitialTimeRange = () => {
@@ -159,7 +162,7 @@ export default function StatisticsPage() {
         sorter: (a: any, b: any) => a.total_income_btc - b.total_income_btc, // 添加排序逻辑
         render: (text: any) => (
           <span>
-            <span style={{ color: "blue" }}>{text}</span> {/* 数字部分设置为蓝色 */}
+            <span>{text}</span> {/* 数字部分设置为蓝色 */}
             <span style={{ fontSize: "1em", color: "#888" }}> BTC</span> {/* 单位颜色不变 */}
           </span>
         ), // 渲染单位
@@ -243,54 +246,107 @@ export default function StatisticsPage() {
         style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}
       >
         <Space size={24}>
-          <div>
-            <Typography.Text
-              style={{
-                fontSize: "16px",
-                padding: "4px 8px",
-                borderRadius: "4px",
-                color: "#1890ff", // 更一致的蓝色
-                fontWeight: "500", // 设置字体粗细
-              }}
-            >
-              矿池:
-            </Typography.Text>
+          <div style={{ display: "flex", alignItems: "center" }}>
+            <GiMining style={{ fontSize: "20px", color: "#1890ff", marginRight: "16px" }} />
             <Select
               placeholder="选择池"
-              style={{ width: 180 }}
+              style={{ width: 180, height: 32 }}
+              className={"text-xs"}
+              size={"small"}
               onChange={handlePoolFilterChange}
               options={[
-                { value: "", label: "全部" },
-                { value: "antpool", label: "蚂蚁矿池" },
-                { value: "f2pool", label: "鱼池" },
+                {
+                  value: "",
+                  label: (
+                    <span style={{ display: "flex", alignItems: "center" }}>
+                      <FaList style={{ color: "green", fontSize: 14, marginRight: 8 }} /> 全部
+                    </span>
+                  ),
+                },
+                {
+                  value: "antpool",
+                  label: (
+                    <span style={{ display: "flex", alignItems: "center" }}>
+                      <FaAdn style={{ color: "green", fontSize: 14, marginRight: 8 }} /> 蚂蚁矿池
+                    </span>
+                  ),
+                },
+                {
+                  value: "f2pool",
+                  label: (
+                    <span style={{ display: "flex", alignItems: "center" }}>
+                      <FaFish style={{ color: "blue", fontSize: 14, marginRight: 8 }} /> 鱼池
+                    </span>
+                  ),
+                },
               ]}
               value={poolFilter} // 设置选中的值
             />
           </div>
-          <div>
-            <Typography.Text
-              style={{
-                fontSize: "16px",
-                padding: "4px 8px",
-                borderRadius: "4px",
-                color: "#1890ff", // 更一致的蓝色
-                fontWeight: "500", // 设置字体粗细
-              }}
-            >
-              时间范围:
-            </Typography.Text>
+          <div style={{ display: "flex", alignItems: "center" }}>
+            <FcCalendar style={{ fontSize: "20px", color: "#1890ff", marginRight: "16px" }} />
             <Select
               placeholder="选择时间"
-              style={{ width: 180 }}
+              style={{ width: 180, height: 32 }}
+              size={"small"}
               onChange={handleChange}
               options={[
-                { value: "all", label: "全部" },
-                { value: "1days", label: "最近一天" },
-                { value: "3days", label: "最近三天" },
-                { value: "7days", label: "最近一周" },
-                { value: "1month", label: "最近一个月" },
-                { value: "3month", label: "最近三个月" },
-                { value: "6month", label: "最近半年" },
+                {
+                  value: "all",
+                  label: (
+                    <span style={{ display: "flex", alignItems: "center" }}>
+                      <FaList style={{ color: "green", fontSize: 14, marginRight: 8 }} /> 全部
+                    </span>
+                  ),
+                },
+                {
+                  value: "1days",
+                  label: (
+                    <span style={{ display: "flex", alignItems: "center" }}>
+                      <AiOutlineCalendar style={{ color: "blue", fontSize: 14, marginRight: 8 }} /> 一天
+                    </span>
+                  ),
+                },
+                {
+                  value: "3days",
+                  label: (
+                    <span style={{ display: "flex", alignItems: "center" }}>
+                      <AiOutlineCalendar style={{ color: "blue", fontSize: 14, marginRight: 8 }} /> 三天
+                    </span>
+                  ),
+                },
+                {
+                  value: "7days",
+                  label: (
+                    <span style={{ display: "flex", alignItems: "center" }}>
+                      <AiOutlineCalendar style={{ color: "blue", fontSize: 14, marginRight: 8 }} /> 一周
+                    </span>
+                  ),
+                },
+                {
+                  value: "1month",
+                  label: (
+                    <span style={{ display: "flex", alignItems: "center" }}>
+                      <AiOutlineCalendar style={{ color: "blue", fontSize: 14, marginRight: 8 }} /> 一个月
+                    </span>
+                  ),
+                },
+                {
+                  value: "3month",
+                  label: (
+                    <span style={{ display: "flex", alignItems: "center" }}>
+                      <AiOutlineCalendar style={{ color: "blue", fontSize: 14, marginRight: 8 }} /> 三个月
+                    </span>
+                  ),
+                },
+                {
+                  value: "6month",
+                  label: (
+                    <span style={{ display: "flex", alignItems: "center" }}>
+                      <AiOutlineCalendar style={{ color: "blue", fontSize: 14, marginRight: 8 }} /> 半年
+                    </span>
+                  ),
+                },
               ]}
               value={timeRange} // 设置选中的值
             />

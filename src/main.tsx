@@ -9,6 +9,7 @@ import App from "./App";
 import "./styles/index.css";
 import "./styles/light.css";
 import "./styles/dark.css";
+import "./styles/table.css";
 
 const queryClient = new QueryClient({
   defaultOptions: {
