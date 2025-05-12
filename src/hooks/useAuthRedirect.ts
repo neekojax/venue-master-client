@@ -1,26 +1,21 @@
 // useAuthRedirect.ts
 import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { ROUTE_PATHS } from "@/constants/common";
-import { useEventListener } from "@/hooks/use-event-listener.ts";
+import eventBus from "@/components/event-bus";
 
 const useAuthRedirect = () => {
   const navigate = useNavigate();
 
-  // 处理 token 变更的函数
-  const handleTokenChange = () => {
-    const token = localStorage.getItem("access_token");
-    if (!token) {
-      navigate(ROUTE_PATHS.login); // 如果没有 token，直接重定向
-    }
-  };
-
-  // 使用 useEventListener 来监听 storage 事件
-  useEventListener("storage", handleTokenChange);
-
-  // 初始检查
   useEffect(() => {
-    handleTokenChange();
+    const handleRedirect = (path: any) => {
+      navigate(path); // 使用 navigate 进行页面跳转
+    };
+
+    eventBus.on("redirect", handleRedirect);
+
+    return () => {
+      eventBus.off("redirect", handleRedirect); // 清理事件监听器
+    };
   }, [navigate]);
 };
 

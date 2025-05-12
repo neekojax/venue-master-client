@@ -1,5 +1,7 @@
 // axiosInstance.ts
 import axios from "axios";
+import eventBus from "@/components/event-bus";
+import { ROUTE_PATHS } from "@/constants/common.ts";
 
 // 存储当前的请求队列
 let isRefreshing = false;
@@ -68,6 +70,7 @@ axiosInstance.interceptors.response.use(
           // eslint-disable-next-line @typescript-eslint/no-unused-vars
         } catch (error) {
           isRefreshing = false;
+          eventBus.emit("redirect", ROUTE_PATHS.login); // Emit the redirect event
           return Promise.reject(new Error("刷新 token 失败，用户请重新登录。"));
         }
       }
@@ -84,6 +87,7 @@ axiosInstance.interceptors.response.use(
     // 处理 token 刷新
     if (response && response.data?.code === 200205) {
       localStorage.removeItem("access_token");
+      eventBus.emit("redirect", ROUTE_PATHS.login); // Emit the redirect event
       return Promise.reject(new Error("User needs to log in")); // 直接返回，后续逻辑不再执行
     }
 
