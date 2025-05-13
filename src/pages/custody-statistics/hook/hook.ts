@@ -2,7 +2,8 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 import {
   fetchCustodyInfoList,
-  fetchCustodyStatisticsList, fetchDailyAveragePrice,
+  fetchCustodyStatisticsList,
+  fetchDailyAveragePrice,
   submitCustodyInfoDelete,
   submitCustodyInfoNew,
   submitCustodyUpdate,
