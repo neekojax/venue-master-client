@@ -6,6 +6,7 @@ import { nestMenuRoute } from "./modules/nest-menu";
 import { ROUTE_PATHS } from "@/constants/common";
 import { custodyMenuRoute } from "@/router/modules/custody-statistics.tsx";
 import { venueRoute } from "@/router/modules/venue.tsx";
+import { electricMenuRoute } from "@/router/modules/electric-data.tsx";
 
 const routes: RouteObject[] = [
   {
@@ -31,6 +32,7 @@ const routes: RouteObject[] = [
       venueRoute,
       baseRoute,
       custodyMenuRoute,
+      electricMenuRoute,
       nestMenuRoute,
     ],
   },

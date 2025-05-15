@@ -13,4 +13,7 @@ export const ROUTE_PATHS = {
   setting: "/custody-menu/setting",
   statistics: "/custody-menu/statistics",
   dailyAveragePrice: "/custody-menu/price",
+  electric: "/electric",
+  electricLimit: "/electric/limit",
+  electricAverage: "/electric/average",
 };

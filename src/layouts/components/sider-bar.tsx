@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import logo from "../../../public/logo.svg";
+import { BiLoaderCircle } from "react-icons/bi";
 import {
   HomeOutlined,
   MenuOutlined,
@@ -103,6 +104,21 @@ const items: MenuProps["items"] = [
       {
         key: ROUTE_PATHS.dailyAveragePrice,
         label: <Link to={ROUTE_PATHS.dailyAveragePrice}>BTC均价</Link>,
+      },
+    ],
+  },
+  {
+    icon: <BiLoaderCircle  />,
+    label: "电网数据",
+    key: ROUTE_PATHS.electric,
+    children: [
+      {
+        key: ROUTE_PATHS.electricLimit,
+        label: <Link to={ROUTE_PATHS.electricLimit}>限电记录</Link>,
+      },
+      {
+        key: ROUTE_PATHS.electricAverage,
+        label: <Link to={ROUTE_PATHS.electricAverage}>平均电价</Link>,
       },
     ],
   },
