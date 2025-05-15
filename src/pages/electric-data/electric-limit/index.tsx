@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Row, Col } from 'antd';
-import { SearchOutlined } from "@ant-design/icons";
+import { DownloadOutlined, SearchOutlined } from "@ant-design/icons";
 import { CascaderProps, Spin } from "antd";
 import { Cascader } from "antd";
 import { DatePicker } from "antd";
@@ -11,6 +11,7 @@ import EditTable from "@/components/edit-table";
 import { fetSettlementData } from "@/pages/electric-data/api.tsx";
 import { useSettlementPointsList } from "@/pages/electric-data/hook.ts";
 import { SettlementQueryParam } from "@/pages/electric-data/type.tsx";
+import { exportElectricDataToExcel } from "@/utils/excel.ts";
 
 const { RangePicker } = DatePicker;
 
@@ -66,12 +67,12 @@ export default function ElectricLimit() {
         width: 300,
       },
       {
-        title: "限定时间范围",
+        title: "限电时间范围",
         dataIndex: "time_range",
         key: "time_range",
       },
       {
-        title: "限定时长",
+        title: "限电时长",
         dataIndex: "time_length",
         key: "time_length",
         width: 100,
@@ -111,6 +112,8 @@ export default function ElectricLimit() {
   useEffect(() => {
     if (Object.keys(selectedNames).length > 0 && dateRange && dateRange[0] && dateRange[1]) {
       handleSearch();
+    } else {
+      setTableData([]); // 假设 result.data 是您需要的数组
     }
   }, [selectedNames, dateRange]);
 
@@ -174,50 +177,62 @@ export default function ElectricLimit() {
 
   return (
     <div style={{ padding: "20px" }}>
-      <Row gutter={16}>
-        <Col span={6}>
-          <Cascader
-            style={{ width: "100%" }}
-            options={options}
-            onChange={onChange}
-            multiple
-            maxTagCount="responsive"
-            showCheckedStrategy={SHOW_CHILD}
-            placeholder="请选择类型（可多选）"
-            value={Object.entries(selectedNames).flatMap(([key, values]) =>
-              values.map(value => [key, value]) // 生成 [key, value] 的数组
-            )}
-          />
-        </Col>
+      <div style={{ display: "flex", justifyContent: "space-between" }}>
+        <Row gutter={16} style={{ width: "80%", flexGrow: 1 }}>
+          <Col span={6}>
+            <Cascader
+              style={{ width: "100%" }}
+              options={options}
+              onChange={onChange}
+              multiple
+              maxTagCount="responsive"
+              showCheckedStrategy={SHOW_CHILD}
+              placeholder="请选择类型（可多选）"
+              value={Object.entries(selectedNames).flatMap(([key, values]) =>
+                values.map(value => [key, value]) // 生成 [key, value] 的数组
+              )}
+            />
+          </Col>
 
-        <Col span={6}>
-          <RangePicker
-            value={dateRange}
-            onChange={onDateChange}
-            style={{ width: "100%" }} // 使日期选择器填满
-          />
-        </Col>
+          <Col span={6}>
+            <RangePicker
+              value={dateRange}
+              onChange={onDateChange}
+              style={{ width: "100%" }} // 使日期选择器填满
+            />
+          </Col>
 
-        <Col span={2}>
-          <Button
-            type="primary"
-            icon={<SearchOutlined />}
-            onClick={handleSearch}
-            style={{ width: "100%", backgroundColor: "#40A9FF", borderColor: "#40A9FF", color: "#FFFFFF" }}
-          >
-            搜索
-          </Button>
-        </Col>
-      </Row>
-
+          <Col span={2}>
+            <Button
+              type="primary"
+              icon={<SearchOutlined />}
+              onClick={handleSearch}
+              style={{ width: "100%", backgroundColor: "#40A9FF", borderColor: "#40A9FF", color: "#FFFFFF" }}
+            >
+              搜索
+            </Button>
+          </Col>
+        </Row>
+        <Button
+          type="text"
+          icon={<DownloadOutlined />}
+          size="middle"
+          className={"text-blue-500"}
+          onClick={() => exportElectricDataToExcel(tableData)}
+        >
+          导出
+        </Button>
+      </div>
       <div style={{ marginTop: "20px", minWidth: "300px" }}>
         {tableData.length > 0 ? (
           <EditTable
             tableData={tableData}
             setTableData={setTableData}
             columns={columns}
-            handleDelete={() => {}}
-            handleSave={() => {}}
+            handleDelete={() => {
+            }}
+            handleSave={() => {
+            }}
           />
         ) : (
           <div style={{ textAlign: "center", marginTop: "60px" }}>

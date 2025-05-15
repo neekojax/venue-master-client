@@ -72,3 +72,55 @@ export const exportCustodyStatisticsToExcel = (data: any) => {
   // 导出 Excel 文件
   XLSX.writeFile(workbook, fileName);
 };
+
+export const exportElectricDataToExcel = (data: any) => {
+  // 创建一个工作簿
+  const workbook = XLSX.utils.book_new();
+
+  // 自定义表头
+  const customHeader = [
+    { header: "电站名称", key: "name" },
+    { header: "电站类型", key: "type" },
+    { header: "限定时间范围", key: "time_range" },
+    { header: "限定时长（分钟）", key: "time_length" },
+  ];
+
+  // 处理数据并生成工作表
+  const formattedData = data.map((item: any) => ({
+    name: item.name,
+    type: item.type,
+    time_range: item.time_range,
+    time_length: item.time_length,
+  }));
+
+  // 将自定义表头和数据合并
+  const worksheetData = [
+    customHeader.map((field) => field.header),
+    ...formattedData.map((item: { [x: string]: any }) => customHeader.map((field) => item[field.key])),
+  ];
+
+  // 生成工作表
+  const worksheet = XLSX.utils.aoa_to_sheet(worksheetData);
+
+  // 设置列宽度
+  // 设置每一列的宽度
+  worksheet["!cols"] = [
+    { wch: 20 }, // 场地
+    { wch: 20 }, // 子账号
+    { wch: 40 }, // 收益日期
+    { wch: 20 }, // 能耗比
+  ];
+
+  // 将工作表添加到工作簿
+  XLSX.utils.book_append_sheet(workbook, worksheet, "限电记录");
+
+  // 获取当前日期并格式化为 YYYY-MM-DD
+  const date = new Date();
+  const formattedDate = date.toISOString().split("T")[0]; // 获取日期部分
+
+  // 生成文件名
+  const fileName = `限电记录_${formattedDate}.xlsx`;
+
+  // 导出 Excel 文件
+  XLSX.writeFile(workbook, fileName);
+};
