@@ -5,6 +5,10 @@ export const fetchSettlementPoints = async () => {
   return await fetchGet("settlement/settlementPointList");
 };
 
-export const fetSettlementData = async (data: SettlementQueryParam) => {
+export const fetchSettlementData = async (data: SettlementQueryParam) => {
   return await fetchPost("settlement/findSettlementData", data);
+};
+
+export const fetchSettlementAverage = async (data: SettlementQueryParam) => {
+  return await fetchPost("settlement/findSettlementAverage", data);
 };

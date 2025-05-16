@@ -1,14 +1,14 @@
 import { useEffect, useState } from "react";
 import { Row, Col } from 'antd';
-import { DownloadOutlined, SearchOutlined } from "@ant-design/icons";
+import { DownloadOutlined, PlusOutlined, SearchOutlined } from "@ant-design/icons";
 import { CascaderProps, Spin } from "antd";
 import { Cascader } from "antd";
 import { DatePicker } from "antd";
-import { Button, Flex, Tooltip } from "antd";
+import { Button, Space, Flex, Tooltip } from "antd";
 import dayjs, { Dayjs } from "dayjs";
 import EditTable from "@/components/edit-table";
 
-import { fetSettlementData } from "@/pages/electric-data/api.tsx";
+import { fetchSettlementData } from "@/pages/electric-data/api.tsx";
 import { useSettlementPointsList } from "@/pages/electric-data/hook.ts";
 import { SettlementQueryParam } from "@/pages/electric-data/type.tsx";
 import { exportElectricDataToExcel } from "@/utils/excel.ts";
@@ -55,13 +55,13 @@ export default function ElectricLimit() {
   useEffect(() => {
     setColumns([
       {
-        title: "电站名称",
+        title: "电力接入点",
         dataIndex: "name",
         key: "name",
         width: 300,
       },
       {
-        title: "电站类型",
+        title: "数据口径",
         dataIndex: "type",
         key: "type",
         width: 300,
@@ -101,7 +101,7 @@ export default function ElectricLimit() {
 
     // 调用 fetSettlementData 函数
     try {
-      const result = await fetSettlementData(queryParam);
+      const result = await fetchSettlementData(queryParam);
       setTableData(result.data || []); // 假设 result.data 是您需要的数组
       console.log(result); // 处理获取的数据
     } catch (error) {
@@ -177,11 +177,11 @@ export default function ElectricLimit() {
 
   return (
     <div style={{ padding: "20px" }}>
-      <div style={{ display: "flex", justifyContent: "space-between" }}>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
         <Row gutter={16} style={{ width: "80%", flexGrow: 1 }}>
           <Col span={6}>
             <Cascader
-              style={{ width: "100%" }}
+              style={{ width: "100%", fontSize: "14px" }}
               options={options}
               onChange={onChange}
               multiple
@@ -198,16 +198,22 @@ export default function ElectricLimit() {
             <RangePicker
               value={dateRange}
               onChange={onDateChange}
-              style={{ width: "100%" }} // 使日期选择器填满
+              style={{ width: "100%", fontSize: "14px" }} // 使日期选择器填满
             />
           </Col>
 
-          <Col span={2}>
+          <Col span={3} style={{ display: "flex", justifyContent: "center", alignItems: "center" }}>
             <Button
               type="primary"
-              icon={<SearchOutlined />}
-              onClick={handleSearch}
-              style={{ width: "100%", backgroundColor: "#40A9FF", borderColor: "#40A9FF", color: "#FFFFFF" }}
+              danger
+              size="middle"
+              icon={<SearchOutlined style={{ color: "white" }} />}
+              style={{
+                backgroundColor: "#40A9FF",
+                borderColor: "#40A9FF",
+                color: "#FFFFFF",
+                width: "100%", // 使按钮填满
+              }}
             >
               搜索
             </Button>
