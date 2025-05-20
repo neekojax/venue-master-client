@@ -1,8 +1,8 @@
 import { fetchGet, fetchPost } from "@/helper/fetchHelper.ts";
 import { SettlementQueryParam } from "@/pages/electric-data/type.tsx";
 
-export const fetchSettlementPoints = async () => {
-  return await fetchGet("settlement/settlementPointList");
+export const fetchSettlementPoints = async (type: any) => {
+  return await fetchGet(`settlement/settlementPointList/${type}`);
 };
 
 export const fetchSettlementData = async (data: SettlementQueryParam) => {
