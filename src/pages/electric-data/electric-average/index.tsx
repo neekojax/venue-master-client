@@ -218,6 +218,17 @@ export default function ElectricAverage() {
     localStorage.setItem("selectedNames2", JSON.stringify(newSelectedNames));
   };
 
+  const getCascaderValue = () => {
+    return Object.entries(selectedNames).flatMap(([key, values]) => {
+      // 对于实时价格：需要返回 [key, value] 的数组
+      if (selectedType === PRICE_TYPE_REAL_TIME) {
+        return values.map(value => [key, value]);
+      }
+      // 对于 T-1 价格，假设只返回 value
+      return values.map(value => [value]);
+    });
+  };
+
   return (
     <div style={{ padding: "20px" }}>
       <div style={{ display: "flex", justifyContent: "space-between" }}>
@@ -237,6 +248,7 @@ export default function ElectricAverage() {
               maxTagCount="responsive"
               showCheckedStrategy={SHOW_CHILD}
               placeholder="请选择类型（可多选）"
+              value={getCascaderValue()}
             />
           </Col>
 
