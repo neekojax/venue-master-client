@@ -108,7 +108,7 @@ const items: MenuProps["items"] = [
     ],
   },
   {
-    icon: <BiLoaderCircle  />,
+    icon: <BiLoaderCircle />,
     label: "电网数据",
     key: ROUTE_PATHS.electric,
     children: [
@@ -119,6 +119,10 @@ const items: MenuProps["items"] = [
       {
         key: ROUTE_PATHS.electricAverage,
         label: <Link to={ROUTE_PATHS.electricAverage}>平均电价</Link>,
+      },
+      {
+        key: ROUTE_PATHS.electricBasic,
+        label: <Link to={ROUTE_PATHS.electricBasic}>基础数据</Link>,
       },
     ],
   },

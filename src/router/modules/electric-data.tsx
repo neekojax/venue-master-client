@@ -35,5 +35,16 @@ export const electricMenuRoute: RouteObject = {
         crumb: () => <Link to={ROUTE_PATHS.electricAverage}>平均电价</Link>,
       },
     },
+    {
+      path: ROUTE_PATHS.electricBasic,
+      lazy: async () => ({
+        Component: (await import("@/pages/electric-data/basic-data")).default,
+      }),
+      HydrateFallback: ProgressBar,
+      handle: {
+        title: "基础数据",
+        crumb: () => <Link to={ROUTE_PATHS.electricAverage}>基础数据</Link>,
+      },
+    },
   ],
 };

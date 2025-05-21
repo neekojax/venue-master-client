@@ -4,3 +4,6 @@ export type SettlementQueryParam = {
   start: string; // 开始时间，字符串格式
   end: string; // 结束时间，字符串格式
 };
+
+export const PRICE_TYPE_REAL_TIME = "realTime"; // 实时价格
+export const PRICE_TYPE_T1 = "t1"; // T-1价格

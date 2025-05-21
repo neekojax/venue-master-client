@@ -16,4 +16,5 @@ export const ROUTE_PATHS = {
   electric: "/electric",
   electricLimit: "/electric/limit",
   electricAverage: "/electric/average",
+  electricBasic: "/electric/basic",
 };
