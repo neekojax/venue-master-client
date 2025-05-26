@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { message, Pagination, Radio, Table } from "antd";
+import { message, Pagination, Radio, Table, Spin } from "antd";
 import { exportElectricBasicToExcel } from "@/utils/excel.ts";
 
 import { downloadSettlementData, fetchSettlementDataWithPagination } from "@/pages/electric-data/api.tsx";
@@ -32,6 +32,8 @@ export default function ElectricBasic() {
   const [isInitialMount, setIsInitialMount] = useState(true); // 标识是否初次挂载
 
   const [queryParam, setQueryParam] = useState<SettlementQueryWithPageParam | null>(null); // 新增状态保存 queryParam
+
+  const [loading, setLoading] = useState<boolean>(false); // 新增加载状态
 
   // 表头定义
   useEffect(() => {
@@ -70,6 +72,7 @@ export default function ElectricBasic() {
 
   // 定义 handleSearch 函数
   const handleSearch = async (params: SettlementQueryParam) => {
+    setLoading(true); // 开始加载
     // 调用 fetSettlementData 函数
     try {
       const queryParam: SettlementQueryWithPageParam = {
@@ -86,7 +89,10 @@ export default function ElectricBasic() {
       setTableData(result.data.data || []); // 假设 result.data 是您需要的数组
       setTotal(result.data.total); // 假设 result.data.total 是总条目数
     } catch (error) {
+      setLoading(false); // 结束加载
       console.error("Error fetching settlement data:", error);
+    } finally {
+      setLoading(false); // 结束加载
     }
   };
 
@@ -154,33 +160,32 @@ export default function ElectricBasic() {
       </div>
 
       <div style={{ marginTop: "20px", minWidth: "300px" }}>
-        {tableData.length > 0 ? (
-          <div>
-            <Table
-              columns={columns}
-              dataSource={tableData}
-              pagination={false} // 关闭 Table 内置分页
-            />
-            <Pagination
-              className={"mt-5"}
-              current={currentPage} // 当前页数
-              pageSize={pageSize} // 每页显示的条目数
-              total={total} // 总条目数
-              onChange={onPageChange} // 页码变化时的回调
-              showSizeChanger // 显示每页条数选择器
-              showQuickJumper
-              pageSizeOptions={[20, 50, 100]} // 每页条数选择
-              align={"center"}
-            />
-          </div>
-        ) : (
-          <div style={{ textAlign: "center", marginTop: "60px" }}>
-            <p style={{ color: "#888", fontSize: "16px" }}>
-              <i className="fas fa-exclamation-circle" style={{ marginRight: "8px", color: "#f39c12" }}></i>
-              请选择电网场地搜索数据
-            </p>
-          </div>
-        )}
+        <Spin spinning={loading}>
+          {/* 包裹内容以实现加载效果 */}
+          {tableData.length > 0 ? (
+            <div>
+              <Table columns={columns} dataSource={tableData} pagination={false} />
+              <Pagination
+                className={"mt-5"}
+                current={currentPage}
+                pageSize={pageSize}
+                total={total}
+                onChange={onPageChange}
+                showSizeChanger
+                showQuickJumper
+                pageSizeOptions={[20, 50, 100]}
+                align={"center"}
+              />
+            </div>
+          ) : (
+            <div style={{ textAlign: "center", marginTop: "60px" }}>
+              <p style={{ color: "#888", fontSize: "16px" }}>
+                <i className="fas fa-exclamation-circle" style={{ marginRight: "8px", color: "#f39c12" }}></i>
+                请选择电网场地搜索数据
+              </p>
+            </div>
+          )}
+        </Spin>
       </div>
     </div>
   );
