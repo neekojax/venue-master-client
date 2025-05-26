@@ -1,344 +1,184 @@
-import { useEffect, useState } from "react";
-import { DownloadOutlined, PlusOutlined, SearchOutlined } from "@ant-design/icons";
-import { Col, RadioChangeEvent, Row } from "antd";
-import { CascaderProps, Radio } from "antd";
-import { Cascader } from "antd";
-import { DatePicker } from "antd";
-import { Button, Flex, Space, Tooltip } from "antd";
-import dayjs, { Dayjs } from "dayjs";
-import EditTable from "@/components/edit-table";
-import { exportElectricDataToExcel, exportElectricDataToExcelT } from "@/utils/excel.ts";
+import { useEffect, useRef, useState } from "react";
+import { message, Pagination, Radio, Table } from "antd";
+import { exportElectricBasicToExcel } from "@/utils/excel.ts";
 
-import { fetchSettlementData } from "@/pages/electric-data/api.tsx";
-import { useSettlementPointsList } from "@/pages/electric-data/hook.ts";
-import { SettlementQueryParam } from "@/pages/electric-data/type.tsx";
+import { downloadSettlementData, fetchSettlementDataWithPagination } from "@/pages/electric-data/api.tsx";
+import ElectricSelectComponent from "@/pages/electric-data/components/electric-select.tsx";
+import {
+  PRICE_TYPE_REAL_TIME,
+  SettlementQueryParam,
+  SettlementQueryWithPageParam,
+} from "@/pages/electric-data/type.tsx";
 
-const { RangePicker } = DatePicker;
-
-const PRICE_TYPE_REAL_TIME = "realTime"; // 实时价格
-const PRICE_TYPE_T1 = "t1"; // T-1价格
-
-const { SHOW_CHILD } = Cascader;
-interface Option {
-  value: string | number;
-  label: string;
-  children?: Option[];
-}
-
-const getStoredType = () => {
-  const storedType = localStorage.getItem("selectedType3");
-  return storedType ? storedType : PRICE_TYPE_REAL_TIME; // 如果有存储的类型，则返回它，否则返回默认值
-};
+const StoragePrefix = "electric-basic";
 
 export default function ElectricBasic() {
-  const [selectedType, setSelectedType] = useState<string>(getStoredType); // 默认值为实时价格
-  const {
-    data: settlementPointData,
-    error,
-    isLoading: isSettlementPointLoading,
-  } = useSettlementPointsList(selectedType);
+  const [selectedType, setSelectedType] = useState<string>(
+    localStorage.getItem(`${StoragePrefix}_selectedType`) || PRICE_TYPE_REAL_TIME,
+  );
 
-  // 使用状态来存储日期范围
-  const [dateRange, setDateRange] = useState<[dayjs.Dayjs | null, dayjs.Dayjs | null] | null>(null);
-  const [selectedNames, setSelectedNames] = useState<{ [key: string]: string[] }>({});
+  // 计算当前页的数据
+  const [currentPage, setCurrentPage] = useState(1); // 当前页
+  const [pageSize, setPageSize] = useState(20); // 每页显示的条目数
+  const [total, setTotal] = useState(0); // 总条目数
+  const [priceType, setPriceType] = useState<string>(() => {
+    return localStorage.getItem(`${StoragePrefix}_priceType`) || "all";
+  }); // 每页显示的条目数
 
   const [columns, setColumns] = useState<any>([]);
   const [tableData, setTableData] = useState<any>([]);
 
-  useEffect(() => {
-    // 从本地存储获取日期
-    const storedStartDate = localStorage.getItem("startDate3");
-    const storedEndDate = localStorage.getItem("endDate3");
+  const electricSelectRef = useRef<any>(null); // 创建 ref 用于访问子组件
+  const [isInitialMount, setIsInitialMount] = useState(true); // 标识是否初次挂载
 
-    if (storedStartDate && storedEndDate) {
-      setDateRange([
-        dayjs(storedStartDate), // 使用 dayjs 解析存储的日期字符串
-        dayjs(storedEndDate),
-      ]);
-    }
-
-    // 从本地存储获取选中的名称
-    const storedSelectedNames = localStorage.getItem("selectedNames3");
-    if (storedSelectedNames) {
-      setSelectedNames(JSON.parse(storedSelectedNames)); // 解析并设置状态
-    }
-  }, []);
+  const [queryParam, setQueryParam] = useState<SettlementQueryWithPageParam | null>(null); // 新增状态保存 queryParam
 
   // 表头定义
   useEffect(() => {
-    if (selectedType === PRICE_TYPE_REAL_TIME) {
-      setColumns([
-        {
-          title: "电力接入点",
-          dataIndex: "name",
-          key: "name",
-          width: 300,
-        },
-        {
-          title: "数据口径",
-          dataIndex: "type",
-          key: "type",
-          width: 300,
-        },
-        {
-          title: "限电时间范围",
-          dataIndex: "time_range",
-          key: "time_range",
-        },
-        {
-          title: "限电时长",
-          dataIndex: "time_length",
-          key: "time_length",
-          width: 100,
-          sorter: (a: any, b: any) => a.time_length - b.time_length,
-          render: (text: any) => (
-            <span>
-              {text} <span style={{ fontSize: "em", color: "#888" }}> 分 </span>
-            </span>
-          ),
-        },
-      ]);
-    } else if (selectedType === PRICE_TYPE_T1) {
-      setColumns([
-        {
-          title: "电力接入点",
-          dataIndex: "name",
-          key: "name",
-          width: 100,
-        },
-        {
-          title: "限电时间范围",
-          dataIndex: "time_range",
-          key: "time_range",
-          width: 100,
-        },
-        {
-          title: "限电时长",
-          dataIndex: "time_length",
-          key: "time_length",
-          width: 100,
-          sorter: (a: any, b: any) => a.time_length - b.time_length,
-          render: (text: any) => (
-            <span>
-              {text} <span style={{ fontSize: "em", color: "#888" }}> 小时 </span>
-            </span>
-          ),
-        },
-      ]);
-    }
-  }, [selectedType]);
+    setColumns([
+      {
+        title: "电力接入点",
+        dataIndex: "name",
+        key: "name",
+        width: 300,
+      },
+      {
+        title: "数据口径",
+        dataIndex: "type",
+        key: "type",
+        width: 200,
+      },
+      {
+        title: "限电时间范围",
+        dataIndex: "time",
+        key: "time",
+      },
+      {
+        title: "电力价格",
+        dataIndex: "price",
+        key: "price",
+        width: 300,
+        // sorter: (a: any, b: any) => a.price - b.price,
+        render: (text: any) => (
+          <span>
+            {text} <span style={{ fontSize: "em", color: "#888" }}> US$ Cent/KWH </span>
+          </span>
+        ),
+      },
+    ]);
+  }, []);
 
   // 定义 handleSearch 函数
-  const handleSearch = async () => {
-    const queryParam: SettlementQueryParam = {
-      type: selectedType,
-      name: selectedNames,
-      start: dateRange ? dateRange[0]?.format("YYYY-MM-DD") || "" : "",
-      end: dateRange ? dateRange[1]?.format("YYYY-MM-DD") || "" : "",
-    };
-
+  const handleSearch = async (params: SettlementQueryParam) => {
     // 调用 fetSettlementData 函数
     try {
-      const result = await fetchSettlementData(queryParam);
-      setTableData(result.data || []); // 假设 result.data 是您需要的数组
+      const queryParam: SettlementQueryWithPageParam = {
+        type: params.type,
+        name: params.name,
+        start: params.start, // 开始时间
+        end: params.end, // 结束时间
+        price: priceType,
+        page: currentPage, // 当前页
+        page_size: pageSize, // 每页显示的条目数
+      };
+      setQueryParam(queryParam); // 保存 queryParam
+      const result = await fetchSettlementDataWithPagination(queryParam);
+      setTableData(result.data.data || []); // 假设 result.data 是您需要的数组
+      setTotal(result.data.total); // 假设 result.data.total 是总条目数
     } catch (error) {
       console.error("Error fetching settlement data:", error);
     }
   };
 
-  useEffect(() => {
-    if (Object.keys(selectedNames).length > 0 && dateRange && dateRange[0] && dateRange[1]) {
-      handleSearch();
-    } else {
-      setTableData([]); // 假设 result.data 是您需要的数组
-    }
-  }, [selectedNames, dateRange]);
-
-  // 如果数据加载中或者出现错误，处理相应的情况
-  if (isSettlementPointLoading) {
-    return <div>Loading...</div>;
-  }
-
-  if (error) {
-    return <div>Error loading data</div>;
-  }
-
-  // 动态构建 Cascader 选项
-  const options: Option[] =
-    selectedType === PRICE_TYPE_REAL_TIME
-      ? Object.keys(settlementPointData?.data).map((key) => ({
-        label: key,
-        value: key,
-        children: settlementPointData?.data[key].map((child) => ({
-          label: child,
-          value: child,
-        })),
-      }))
-      : settlementPointData?.data.map((item) => ({
-      label: item, // 假设 item 是需要显示的文本
-      value: item, // 假设 item 本身就是值
-    })) || []; // 如果 settlementPointData 为 undefined，返回空数组
-
-  const onChange: CascaderProps<Option, "value", true>["onChange"] = (value) => {
-    console.log("value:",value)
-    const newSelectedNames: { [key: string]: string[] } = {};
-    value.forEach((item: any) => {
-      if (selectedType === PRICE_TYPE_REAL_TIME) {
-        const [key, childValue] = item; // 解析 key 和 value
-        if (!newSelectedNames[key]) {
-          newSelectedNames[key] = [];
-        }
-        newSelectedNames[key].push(childValue);
+  const handleDownload = async () => {
+    // 调用 fetSettlementData 函数
+    try {
+      if (queryParam) {
+        const result = await downloadSettlementData(queryParam);
+        exportElectricBasicToExcel(result.data.data);
       } else {
-        const [key] = item;
-        // 对于 T-1 类型，直接将值添加到 newSelectedNames
-        if (!newSelectedNames[key]) {
-          newSelectedNames[key] = [];
-        }
-        newSelectedNames[key].push(key);
+        message.error("无效的下载参数");
       }
-    });
-
-    setSelectedNames(newSelectedNames); // 更新状态
-
-    // 保存到本地存储
-    localStorage.setItem("selectedNames", JSON.stringify(newSelectedNames));
-  };
-
-  const onDateChange = (_date: Dayjs | (Dayjs | null)[] | null, dateString: string | string[]) => {
-    if (dateString[0] && dateString[1]) {
-      const startDate = dateString[0];
-      const endDate = dateString[1];
-
-      setDateRange([
-        dayjs(startDate), // 使用 dayjs 解析存储的日期字符串
-        dayjs(endDate),
-      ]);
-
-      localStorage.setItem("startDate", startDate);
-      localStorage.setItem("endDate", endDate);
-    } else {
-      setDateRange([null, null]);
-
-      localStorage.setItem("startDate", "");
-      localStorage.setItem("endDate", "");
+    } catch (error) {
+      console.error("Error fetching settlement data:", error);
     }
   };
 
-  const onRadioChange = (e: RadioChangeEvent) => {
-    const value = e.target.value;
-    setSelectedType(value); // 使用新的变量名
-    localStorage.setItem("selectedType", value); // 存储到本地
-
-    // 设置日期为null
-    setDateRange([null, null]);
-    localStorage.setItem("startDate", "");
-    localStorage.setItem("endDate", "");
-
-    // 设置所选电力点为空
-    const newSelectedNames: { [key: string]: string[] } = {};
-    setSelectedNames(newSelectedNames);
-    localStorage.setItem("selectedNames", JSON.stringify(newSelectedNames));
+  // 处理页码变化
+  const onPageChange = (page, pageSize) => {
+    setCurrentPage(page);
+    setPageSize(pageSize);
+  };
+  const onPriceTypeChange = (e: any) => {
+    const newPriceType = e.target.value;
+    setCurrentPage(1);
+    setPriceType(newPriceType);
+    localStorage.setItem(`${StoragePrefix}_priceType`, newPriceType); // 将新的价格类型存储到 localStorage
   };
 
-  const getCascaderValue = () => {
-    console.log("getCascaderValue selecedNames：", selectedNames);
-    return Object.entries(selectedNames).flatMap(([key, values]) => {
-      // 对于实时价格：需要返回 [key, value] 的数组
-      if (selectedType === PRICE_TYPE_REAL_TIME) {
-        return values.map(value => [key, value]);
+  // 使用 useEffect 监听 currentPage 和 pageSize 的变化
+  useEffect(() => {
+    if (!isInitialMount) {
+      // 当 currentPage 或 pageSize 变化时，调用 handleSearch
+      if (electricSelectRef.current) {
+        electricSelectRef.current.triggerSearch(); // 触发电力选择组件中的搜索
       }
-      // 对于 T-1 价格，假设只返回 value
-      return values.map(value => [value]);
-    });
-  };
+    } else {
+      // 在首次挂载后，将 isInitialMount 设为 false
+      setIsInitialMount(false);
+    }
+  }, [currentPage, pageSize, priceType]); // 仅在 currentPage 或 pageSize 改变时调用
 
   return (
     <div style={{ padding: "20px" }}>
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-        <div className={"mr-4"}>
-          <Radio.Group onChange={onRadioChange} defaultValue={selectedType}>
-            <Radio.Button value={PRICE_TYPE_REAL_TIME}>实时价格</Radio.Button>
-            <Radio.Button value={PRICE_TYPE_T1}>T-1价格</Radio.Button>
-          </Radio.Group>
-        </div>
-        <Row gutter={16} style={{ width: "80%", flexGrow: 1 }}>
-          <Col span={6}>
-            <Cascader
-              style={{ width: "100%", fontSize: "14px" }}
-              options={options}
-              onChange={onChange}
-              multiple
-              maxTagCount="responsive"
-              showCheckedStrategy={SHOW_CHILD}
-              placeholder="请选择类型（可多选）"
-              value={getCascaderValue()}
-            />
-          </Col>
+      <ElectricSelectComponent
+        ref={electricSelectRef} // 将 ref 传递给子组件
+        selectedType={selectedType}
+        setSelectedType={setSelectedType}
+        handleSearch={handleSearch}
+        onDownload={handleDownload}
+        storagePrefix={StoragePrefix}
+      />
 
-          <Col span={6}>
-            <RangePicker
-              value={dateRange}
-              onChange={onDateChange}
-              style={{ width: "100%", fontSize: "14px" }} // 使日期选择器填满
-            />
-          </Col>
-
-          <Col span={3} style={{ display: "flex", justifyContent: "center", alignItems: "center" }}>
-            <Button
-              type="primary"
-              danger
-              // size="middle"
-              icon={<SearchOutlined style={{ color: "white" }} />}
-              style={{
-                backgroundColor: "#40A9FF",
-                borderColor: "#40A9FF",
-                color: "#FFFFFF",
-                width: "100%", // 使按钮填满
-              }}
-            >
-              搜索
-            </Button>
-          </Col>
-        </Row>
-        <Button
-          type="text"
-          icon={<DownloadOutlined />}
-          size="middle"
-          className={"text-blue-500"}
-          onClick={() => {
-            if (selectedType === PRICE_TYPE_REAL_TIME) {
-              exportElectricDataToExcel(tableData); // 调用实时数据导出函数
-            } else if (selectedType === PRICE_TYPE_T1) {
-              exportElectricDataToExcelT(tableData); // 调用 T-1 数据导出函数
-            }
-          }}
-        >
-          导出
-        </Button>
+      <div className={"mt-5"}>
+        <Radio.Group
+          name="priceType"
+          value={priceType}
+          onChange={onPriceTypeChange} // 处理变化的回调
+          options={[
+            { value: "all", label: "全部" },
+            { value: "greaterThan7.5", label: "大于7.5" },
+            { value: "lessThanEqual7.5", label: "小于7.5" },
+          ]}
+        />
       </div>
+
       <div style={{ marginTop: "20px", minWidth: "300px" }}>
         {tableData.length > 0 ? (
-          <EditTable
-            tableData={tableData}
-            setTableData={setTableData}
-            columns={columns}
-            handleDelete={() => {}}
-            handleSave={() => {}}
-          />
+          <div>
+            <Table
+              columns={columns}
+              dataSource={tableData}
+              pagination={false} // 关闭 Table 内置分页
+            />
+            <Pagination
+              className={"mt-5"}
+              current={currentPage} // 当前页数
+              pageSize={pageSize} // 每页显示的条目数
+              total={total} // 总条目数
+              onChange={onPageChange} // 页码变化时的回调
+              showSizeChanger // 显示每页条数选择器
+              showQuickJumper
+              pageSizeOptions={[20, 50, 100]} // 每页条数选择
+              align={"center"}
+            />
+          </div>
         ) : (
           <div style={{ textAlign: "center", marginTop: "60px" }}>
-            {Object.keys(selectedNames).length > 0 && dateRange && dateRange[0] && dateRange[1] ? (
-              <p style={{ color: "#888", fontSize: "16px" }}>
-                <i className="fas fa-exclamation-circle" style={{ marginRight: "8px", color: "#f39c12" }}></i>
-                暂无数据
-              </p>
-            ) : (
-              <p style={{ color: "#888", fontSize: "16px" }}>
-                <i className="fas fa-exclamation-circle" style={{ marginRight: "8px", color: "#f39c12" }}></i>
-                请选择电网场地搜索数据
-              </p>
-            )}
+            <p style={{ color: "#888", fontSize: "16px" }}>
+              <i className="fas fa-exclamation-circle" style={{ marginRight: "8px", color: "#f39c12" }}></i>
+              请选择电网场地搜索数据
+            </p>
           </div>
         )}
       </div>

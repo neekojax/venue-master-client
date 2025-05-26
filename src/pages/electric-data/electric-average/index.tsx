@@ -4,7 +4,7 @@ import { exportElectricAverageToExcel } from "@/utils/excel.ts";
 
 import { fetchSettlementAverage } from "@/pages/electric-data/api.tsx";
 import ElectricSelectComponent from "@/pages/electric-data/components/electric-select.tsx";
-import { PRICE_TYPE_REAL_TIME, PRICE_TYPE_T1, SettlementQueryParam } from "@/pages/electric-data/type.tsx";
+import { PRICE_TYPE_REAL_TIME, SettlementQueryParam } from "@/pages/electric-data/type.tsx";
 
 const StoragePrefix = "electric-average";
 
@@ -59,8 +59,12 @@ export default function ElectricAverage() {
 
   const handleSearch = async (params: SettlementQueryParam) => {
     try {
-      const result = await fetchSettlementAverage(params);
-      setTableData(result.data || []);
+      if (Object.keys(params.name).length > 0 && params.start != "" && params.end != "") {
+        const result = await fetchSettlementAverage(params);
+        setTableData(result.data || []);
+      } else {
+        setTableData([]);
+      }
     } catch (error) {
       console.error("Error fetching settlement data:", error);
     }
@@ -76,7 +80,6 @@ export default function ElectricAverage() {
         selectedType={selectedType}
         setSelectedType={setSelectedType}
         handleSearch={handleSearch}
-        setTableData={setTableData}
         onDownload={handleDownload}
         storagePrefix={StoragePrefix}
       />

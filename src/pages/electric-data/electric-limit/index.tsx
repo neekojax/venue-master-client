@@ -82,8 +82,12 @@ export default function ElectricLimit() {
 
   const handleSearch = async (params: SettlementQueryParam) => {
     try {
-      const result = await fetchSettlementData(params);
-      setTableData(result.data || []);
+      if (Object.keys(params.name).length > 0 && params.start != "" && params.end != "") {
+        const result = await fetchSettlementData(params);
+        setTableData(result.data || []);
+      } else {
+        setTableData([]);
+      }
     } catch (error) {
       console.error("Error fetching settlement data:", error);
     }
@@ -104,7 +108,6 @@ export default function ElectricLimit() {
         selectedType={selectedType}
         setSelectedType={setSelectedType}
         handleSearch={handleSearch}
-        setTableData={setTableData}
         onDownload={handleDownload}
         storagePrefix={StoragePrefix}
       />

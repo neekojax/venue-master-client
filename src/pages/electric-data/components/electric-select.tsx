@@ -1,5 +1,5 @@
 // ElectricDataComponent.tsx
-import { useEffect, useState } from "react";
+import { useEffect, useState, forwardRef, useImperativeHandle } from "react";
 import { DownloadOutlined, SearchOutlined } from "@ant-design/icons";
 import { Button, Cascader, CascaderProps, Col, DatePicker, Radio, Row, Spin } from "antd";
 import dayjs, { Dayjs } from "dayjs";
@@ -21,7 +21,6 @@ interface ElectricSelectComponentProps {
   selectedType: string;
   setSelectedType: (type: string) => void;
   handleSearch: (params: SettlementQueryParam) => Promise<void>;
-  setTableData: (data: any[]) => void;
   onDownload: () => void;
   storagePrefix: string;
 }
@@ -34,49 +33,58 @@ const contentStyle: React.CSSProperties = {
 
 const content = <div style={contentStyle} />;
 
-const ElectricSelectComponent: React.FC<ElectricSelectComponentProps> = ({
-  selectedType,
-  setSelectedType,
-  handleSearch,
-  setTableData,
-  onDownload,
-  storagePrefix,
-}) => {
+// const ElectricSelectComponent: React.FC<ElectricSelectComponentProps> = ({
+//   selectedType,
+//   setSelectedType,
+//   handleSearch,
+//   onDownload,
+//   storagePrefix,
+// }) => {
+// 使用 forwardRef 和 useImperativeHandle 来暴露 triggerSearch 方法
+const ElectricSelectComponent = forwardRef((props: ElectricSelectComponentProps, ref) => {
+  const { selectedType, setSelectedType, handleSearch, onDownload, storagePrefix } = props;
+
   const {
     data: settlementPointData,
     error,
     isLoading: isSettlementPointLoading,
   } = useSettlementPointsList(selectedType);
 
-  // 使用状态来存储日期范围
-  const [selectedNames, setSelectedNames] = useState<{ [key: string]: string[] }>({});
-  const [dateRange, setDateRange] = useState<[Dayjs | null, Dayjs | null] | null>(null);
+  // 从 localStorage 中读取 selectedNames，若不存在则初始化为 {}
+  const [selectedNames, setSelectedNames] = useState<{ [key: string]: string[] }>(
+    JSON.parse(localStorage.getItem(`${storagePrefix}_selectedNames`) || "{}"),
+  );
 
-  // 从本地存储获取日期和选中的名称
-  useEffect(() => {
-    const storedStartDate = localStorage.getItem(`${storagePrefix}_startDate`);
-    const storedEndDate = localStorage.getItem(`${storagePrefix}_endDate`);
-    const storedSelectedNames = localStorage.getItem(`${storagePrefix}_selectedNames`);
+  // 从 localStorage 中读取 dateRange，若不存在则初始化为 [null, null]
+  const [dateRange, setDateRange] = useState<[Dayjs | null, Dayjs | null]>(
+    (() => {
+      const storedStartDate = localStorage.getItem(`${storagePrefix}_startDate`);
+      const storedEndDate = localStorage.getItem(`${storagePrefix}_endDate`);
+      return storedStartDate && storedEndDate ? [dayjs(storedStartDate), dayjs(storedEndDate)] : [null, null];
+    })(),
+  );
 
-    if (storedStartDate && storedEndDate) {
-      setDateRange([dayjs(storedStartDate), dayjs(storedEndDate)]);
-    }
-    if (storedSelectedNames) {
-      setSelectedNames(JSON.parse(storedSelectedNames));
-    }
-  }, []);
 
-  useEffect(() => {
-    if (Object.keys(selectedNames).length > 0 && dateRange && dateRange[0] && dateRange[1]) {
-      handleSearch({
+  // 使用 useImperativeHandle 来暴露 triggerSearch 函数
+  useImperativeHandle(ref, () => ({
+    triggerSearch: () => {
+      const params: SettlementQueryParam = {
         type: selectedType,
         name: selectedNames,
-        start: dateRange ? dateRange[0]?.format("YYYY-MM-DD") || "" : "",
-        end: dateRange ? dateRange[1]?.format("YYYY-MM-DD") || "" : "",
-      });
-    } else {
-      setTableData([]);
-    }
+        start: dateRange[0]?.format("YYYY-MM-DD") || "",
+        end: dateRange[1]?.format("YYYY-MM-DD") || "",
+      };
+      handleSearch(params);
+    },
+  }));
+
+  useEffect(() => {
+    handleSearch({
+      type: selectedType,
+      name: selectedNames,
+      start: dateRange ? dateRange[0]?.format("YYYY-MM-DD") || "" : "",
+      end: dateRange ? dateRange[1]?.format("YYYY-MM-DD") || "" : "",
+    });
   }, [selectedNames, dateRange]);
 
   if (isSettlementPointLoading) return <Spin tip="Loading">{content}</Spin>;
@@ -121,7 +129,7 @@ const ElectricSelectComponent: React.FC<ElectricSelectComponentProps> = ({
   };
 
   const onDateChange = (dates: Dayjs[]) => {
-    if (dates[0] && dates[1]) {
+    if (dates && dates[0] && dates[1]) {
       const startDate = dates[0];
       const endDate = dates[1];
       setDateRange([startDate, endDate]);
@@ -142,14 +150,13 @@ const ElectricSelectComponent: React.FC<ElectricSelectComponentProps> = ({
   };
 
   const getCascaderValue = () => {
-    // console.log("selectedNames", selectedNames);
     return Object.entries(selectedNames).flatMap(([key, values]) => {
       // 对于实时价格：需要返回 [key, value] 的数组
       if (selectedType === PRICE_TYPE_REAL_TIME) {
-        return values.map(value => [key, value]);
+        return values.map((value) => [key, value]);
       }
       // 对于 T-1 价格，假设只返回 value
-      return values.map(value => [value]);
+      return values.map((value) => [value]);
     });
   };
 
@@ -216,6 +223,6 @@ const ElectricSelectComponent: React.FC<ElectricSelectComponentProps> = ({
       </Button>
     </div>
   );
-};
+});
 
 export default ElectricSelectComponent;
