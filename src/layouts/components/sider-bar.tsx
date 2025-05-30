@@ -84,6 +84,21 @@ const items: MenuProps["items"] = [
     key: ROUTE_PATHS.landing,
   },
   {
+    icon: <ProductOutlined />,
+    label: "矿池数据",
+    key: ROUTE_PATHS.mining,
+    children: [
+      {
+        key: ROUTE_PATHS.miningHashRate,
+        label: <Link to={ROUTE_PATHS.miningHashRate}>实时算力</Link>,
+      },
+      {
+        key: ROUTE_PATHS.miningSetting,
+        label: <Link to={ROUTE_PATHS.miningSetting}>矿池列表</Link>,
+      },
+    ],
+  },
+  {
     icon: <UserOutlined />,
     label: <Link to={ROUTE_PATHS.venue}>场地管理</Link>,
     key: ROUTE_PATHS.venue,

@@ -7,6 +7,7 @@ import { ROUTE_PATHS } from "@/constants/common";
 import { custodyMenuRoute } from "@/router/modules/custody-statistics.tsx";
 import { venueRoute } from "@/router/modules/venue.tsx";
 import { electricMenuRoute } from "@/router/modules/electric-data.tsx";
+import { miningRoute } from "@/router/modules/mining.tsx";
 
 const routes: RouteObject[] = [
   {
@@ -28,6 +29,7 @@ const routes: RouteObject[] = [
         element: <Navigate replace to={ROUTE_PATHS.landing} />,
       },
 
+      miningRoute,
       landingRoute,
       venueRoute,
       baseRoute,

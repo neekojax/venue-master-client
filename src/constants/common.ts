@@ -17,4 +17,8 @@ export const ROUTE_PATHS = {
   electricLimit: "/electric/limit",
   electricAverage: "/electric/average",
   electricBasic: "/electric/basic",
+
+  mining: "/mining",
+  miningSetting: "/mining/setting",
+  miningHashRate: "/mining/hash",
 };
