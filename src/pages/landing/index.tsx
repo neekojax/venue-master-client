@@ -1,7 +1,9 @@
-import { Spin, Typography } from "antd";
-import useAuthRedirect from "@/hooks/useAuthRedirect.ts";
-import { useCustodyHostingFeeCurve } from "@/pages/landing/hook.ts";
 import { Line } from "@ant-design/plots";
+import { Col, Row, Spin } from "antd";
+import useAuthRedirect from "@/hooks/useAuthRedirect.ts";
+
+import MiningPoolCard from "@/pages/landing/components/mining-pool-card.tsx";
+import { useCustodyHostingFeeCurve } from "@/pages/landing/hook.ts";
 
 export default function LandingPage() {
   useAuthRedirect();
@@ -30,14 +32,27 @@ export default function LandingPage() {
   };
 
   return (
-    <div className="flex">
-      <div className="mt-10">
-        {isLoadingHosting ? <Spin style={{ marginTop: 20 }} /> : <Line {...config} />}
-      </div>
-
-      <div className="mt-20 ml-10">
-        <Typography.Paragraph></Typography.Paragraph>
-        {/* 可以添加更多内容 */}
+    <div>
+      <Row gutter={24}>
+        <Col xs={24} sm={12}>
+          <MiningPoolCard poolType="NS" />
+        </Col>
+        <Col xs={24} sm={12}>
+          <MiningPoolCard poolType="CANG" />
+        </Col>
+      </Row>
+      <div className="mt-20 ml-10 w-10/12">
+        <div className="mt-10">
+          {isLoadingHosting ? (
+            <Spin style={{ marginTop: 20 }} />
+          ) : (
+            <div style={{ width: "100%", height: "350px" }}>
+              {" "}
+              {/* 设置宽度为100% */}
+              <Line {...config} />
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );

@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { MenuFoldOutlined, MenuUnfoldOutlined } from "@ant-design/icons";
 import { Button, Flex, Layout } from "antd";
 import { AppHelmet } from "@/components/helmet";
@@ -8,9 +8,20 @@ import Content from "./components/main-content";
 import SiderBar from "./components/sider-bar";
 import UserAvatar from "./components/user-avatar";
 import { setCollapsed, useSelector, useSettingsStore } from "@/stores";
+import { useMediaQuery } from "react-responsive";
 
 export default function MainLayout() {
   const { collapsed } = useSettingsStore(useSelector(["collapsed"]));
+  const [isSidebarVisible, setIsSidebarVisible] = useState(false); // 状态管理 SiderBar 显示与否
+  const isMobile = useMediaQuery({ query: "(max-width: 768px)" });
+
+  useEffect(() => {
+    if (isMobile) {
+      setIsSidebarVisible(false); // 手机端默认关闭 SiderBar
+    } else {
+      setIsSidebarVisible(true); // 电脑端默认显示 SiderBar
+    }
+  }, [isMobile]);
 
   // 设置header阴影
   useEffect(() => {
@@ -33,18 +44,31 @@ export default function MainLayout() {
     <>
       <AppHelmet />
       <Layout>
-        <SiderBar />
+        {isSidebarVisible && <SiderBar />} {/* 根据状态显示 SiderBar */}
         <Layout>
           <Layout.Header
             id="app-header-bar"
             className="flex items-center sticky top-0 z-[999] pl-0 bg-white dark:bg-[#001529]"
           >
-            <Button
-              type="text"
-              icon={collapsed ? <MenuUnfoldOutlined /> : <MenuFoldOutlined />}
-              onClick={() => setCollapsed(!collapsed)}
-              className="mr-2"
-            />
+            {isMobile ? (
+              // 手机端按钮
+              <Button
+                type="text"
+                icon={isSidebarVisible ? <MenuUnfoldOutlined /> : <MenuFoldOutlined />}
+                onClick={() => setIsSidebarVisible(!isSidebarVisible)} // 切换 SiderBar 状态
+                className="mr-2"
+              />
+            ) : (
+              // 电脑端按钮
+              <Button
+                type="text"
+                icon={collapsed ? <MenuUnfoldOutlined /> : <MenuFoldOutlined />}
+                onClick={() => {
+                  setCollapsed(!collapsed); // 切换 collapsed 状态
+                }}
+                className="mr-2"
+              />
+            )}
             <Breadcrumb />
             <Flex gap={12} className="ml-auto items-center">
               {/*<CustomSkin />*/}

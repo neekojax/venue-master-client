@@ -17,3 +17,16 @@ export const submitMiningPoolUpdate = async (data: MiningPool) => {
 export const fetchMiningHashRateList = async (poolType: string, poolCategory: string) => {
   return await fetchGet(`miningPool/listBtcMiningPoolHashRate/${poolType}/${poolCategory}`);
 };
+
+export const fetchTotalRealTimeStatus = async (poolType: string) => {
+  return await fetchGet(`miningPool/getTotalRealTimeStatus/${poolType}`);
+};
+
+export const fetchTotalLastDayStatus = async (poolType: string) => {
+  return await fetchGet(`miningPool/getTotalLastDayStatus/${poolType}`);
+};
+
+
+export const fetchTotalLastWeekStatus = async (poolType: string) => {
+  return await fetchGet(`miningPool/getTotalLastWeekStatus/${poolType}`);
+};

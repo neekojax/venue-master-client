@@ -41,6 +41,7 @@ export default function MiningHashRatePage() {
             online: any;
             offline: any;
             last_hash: any;
+            last_settlement_hash: any;
             theoretical: any;
             last_hash_rate_effective: any;
             last_settlement_profit_btc: any;
@@ -57,6 +58,7 @@ export default function MiningHashRatePage() {
           online: item.online,
           offline: item.offline,
           last_hash: item.last_hash,
+          last_settlement_hash: item.last_settlement_hash,
           theoretical: item.theoretical,
           last_hash_rate_effective: item.last_hash_rate_effective,
           last_settlement_profit_btc: item.last_settlement_profit_btc,
@@ -138,6 +140,19 @@ export default function MiningHashRatePage() {
         },
       },
       {
+        title: "上次结算算力",
+        dataIndex: "last_settlement_hash",
+        key: "last_settlement_hash",
+        render: (text: any) => {
+          const parts = text.split(" "); // 根据空格分割
+          return (
+            <span>
+              {parts[0]} <span style={{ color: "#888" }}>{parts[1]}</span>
+            </span>
+          );
+        },
+      },
+      {
         title: "理论算力",
         dataIndex: "theoretical",
         key: "theoretical",
@@ -151,7 +166,7 @@ export default function MiningHashRatePage() {
         },
       },
       {
-        title: "算力有效率",
+        title: "算力达成率",
         dataIndex: "last_hash_rate_effective",
         key: "last_hash_rate_effective",
         width: 100,

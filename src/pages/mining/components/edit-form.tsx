@@ -30,6 +30,11 @@ const formFields = [
     ],
   },
   {
+    label: "所属国家",
+    name: "country",
+    component: Input,
+  },
+  {
     label: "理论算力",
     name: "theoretical_hashrate",
     component: Input,

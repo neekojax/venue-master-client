@@ -14,6 +14,7 @@ import { MiningPool } from "@/pages/mining/type.tsx";
 const emptyData = {
   name: "",
   pool_type: "",
+  country: "",
   pool_category: "",
   theoretical_hashrate: 0,
   link: "",
@@ -47,6 +48,7 @@ export default function MiningSettingPage() {
             id: any;
             pool_name: any;
             pool_type: any;
+            country: any;
             pool_category: any;
             theoretical_hashrate: any;
             link: any;
@@ -57,6 +59,7 @@ export default function MiningSettingPage() {
           key: item.id, // 使用 ID 作为唯一 key
           pool_name: item.pool_name,
           pool_type: item.pool_type,
+          country: item.country,
           pool_category: item.pool_category,
           theoretical_hashrate: item.theoretical_hashrate,
           link: item.link,
@@ -101,6 +104,11 @@ export default function MiningSettingPage() {
         title: "场地类型",
         dataIndex: "pool_category",
         key: "pool_category",
+      },
+      {
+        title: "所属国家",
+        dataIndex: "country",
+        key: "country",
       },
       {
         title: "理论算力",
@@ -167,10 +175,13 @@ export default function MiningSettingPage() {
       id: rowKey as number, // 假设 rowKey 是 RecordID
       pool_name: data.pool_name,
       pool_type: data.pool_type,
+      country: data.country,
       pool_category: data.pool_category,
       theoretical_hashrate: data.theoretical_hashrate,
       link: data.link,
     };
+
+    console.log(miningPoolUpdate);
 
     updateMutation.mutate(miningPoolUpdate, {
       onSuccess: () => {
@@ -224,6 +235,7 @@ export default function MiningSettingPage() {
       {isLoadingNewPool && (
         <Spin
           tip="正在添加矿池..."
+          size="large"
           style={{
             position: "absolute", // 绝对定位
             top: "30%", // 垂直居中
