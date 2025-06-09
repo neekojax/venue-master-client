@@ -3,6 +3,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   fetchMiningHashRateList,
   fetchMiningPoolList,
+  submitMiningPoolDelete,
   submitMiningPoolNew,
   submitMiningPoolUpdate,
 } from "@/pages/mining/api.tsx";
@@ -35,6 +36,22 @@ export const useMiningPoolUpdate = () => {
 
   return useMutation({
     mutationFn: submitMiningPoolUpdate,
+    onSuccess: () => {
+      // 在成功提交后，可能需要刷新 venue-templates 数据
+      queryClient.invalidateQueries(["mining-pool-list"]);
+    },
+    onError: (error) => {
+      // 错误处理
+      console.error("更新矿池出错:", error);
+    },
+  });
+};
+
+export const useMiningPoolDelete = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: submitMiningPoolDelete,
     onSuccess: () => {
       // 在成功提交后，可能需要刷新 venue-templates 数据
       queryClient.invalidateQueries(["mining-pool-list"]);

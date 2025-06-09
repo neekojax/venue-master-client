@@ -1,6 +1,6 @@
 // 增加矿池
-import { fetchGet, fetchPost } from "@/helper/fetchHelper.ts";
-import { MiningPool } from "@/pages/mining/type.tsx";
+import { fetchDelete, fetchGet, fetchPost } from "@/helper/fetchHelper.ts";
+import { MiningPool, MiningPoolUpdate } from "@/pages/mining/type.tsx";
 
 export const fetchMiningPoolList = async (poolType: string, poolCategory: string) => {
   return await fetchGet(`miningPool/listBtcMiningPool/${poolType}/${poolCategory}`);
@@ -10,8 +10,13 @@ export const submitMiningPoolNew = async (data: MiningPool) => {
   return await fetchPost("miningPool/createBtcMiningPool", data);
 };
 
-export const submitMiningPoolUpdate = async (data: MiningPool) => {
+export const submitMiningPoolUpdate = async (data: MiningPoolUpdate) => {
   return await fetchPost("miningPool/updateBtcMiningPool", data);
+};
+
+// 删除模版
+export const submitMiningPoolDelete = async (id: number) => {
+  return await fetchDelete(`miningPool/deleteBtcMiningPool/${id}`);
 };
 
 export const fetchMiningHashRateList = async (poolType: string, poolCategory: string) => {

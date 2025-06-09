@@ -8,16 +8,17 @@ import { getShortenedLink } from "@/utils/short-link.ts";
 
 import { PRICE_TYPE_REAL_TIME, PRICE_TYPE_T1 } from "@/pages/electric-data/type.tsx";
 import EditForm from "@/pages/mining/components/edit-form.tsx";
-import { useMiningPoolList, useMiningPoolNew, useMiningPoolUpdate } from "@/pages/mining/hook.ts";
-import { MiningPool } from "@/pages/mining/type.tsx";
+import { useMiningPoolDelete, useMiningPoolList, useMiningPoolNew, useMiningPoolUpdate } from "@/pages/mining/hook.ts";
+import { MiningPool, MiningPoolUpdate } from "@/pages/mining/type.tsx";
 
 const emptyData = {
   name: "",
   pool_type: "",
   country: "",
-  pool_category: "",
+  // pool_category: "",
   theoretical_hashrate: 0,
-  link: "",
+  master_link: "",
+  backup_link: "",
 };
 
 const StoragePrefix = "mining-setting";
@@ -37,6 +38,7 @@ export default function MiningSettingPage() {
 
   const newMutation = useMiningPoolNew();
   const updateMutation = useMiningPoolUpdate();
+  const deleteMutation = useMiningPoolDelete();
 
   const [isLoadingNewPool, setIsLoadingNewPool] = useState(false);
 
@@ -147,6 +149,7 @@ export default function MiningSettingPage() {
 
   const handleNewMiningPool = async (values: MiningPool) => {
     setIsLoadingNewPool(true); // 开始加载
+    console.log(values);
     newMutation.mutate(values, {
       onSuccess: () => {
         message.success("添加成功");
@@ -160,18 +163,18 @@ export default function MiningSettingPage() {
   };
 
   const handleDelete = (recordId: number) => {
-    // deleteMutation.mutate(recordId, {
-    //   onSuccess: () => {
-    //     message.success("删除记录成功");
-    //   },
-    //   onError: (error) => {
-    //     message.error(`删除记录失败: ${error.message}`);
-    //   },
-    // });
+    deleteMutation.mutate(recordId, {
+      onSuccess: () => {
+        message.success("删除记录成功");
+      },
+      onError: (error) => {
+        message.error(`删除记录失败: ${error.message}`);
+      },
+    });
   };
 
   const handleSave = (rowKey: number, data: { [x: string]: string }) => {
-    const miningPoolUpdate: MiningPool = {
+    const miningPoolUpdate: MiningPoolUpdate = {
       id: rowKey as number, // 假设 rowKey 是 RecordID
       pool_name: data.pool_name,
       pool_type: data.pool_type,

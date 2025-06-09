@@ -20,15 +20,15 @@ const formFields = [
       { value: "CANG", label: "CANG" },
     ],
   },
-  {
-    label: "场地类型",
-    name: "pool_category",
-    component: Select,
-    options: [
-      { value: "主矿池", label: "主矿池" },
-      { value: "备用矿池", label: "备用矿池" },
-    ],
-  },
+  // {
+  //   label: "矿池类型",
+  //   name: "pool_category",
+  //   component: Select,
+  //   options: [
+  //     { value: "主矿池", label: "主矿池" },
+  //     { value: "备用矿池", label: "备用矿池" },
+  //   ],
+  // },
   {
     label: "所属国家",
     name: "country",
@@ -39,7 +39,8 @@ const formFields = [
     name: "theoretical_hashrate",
     component: Input,
   },
-  { label: "链接", name: "link", component: Input },
+  { label: "主链接", name: "master_link", component: Input },
+  { label: "备用链接", name: "backup_link", component: Input },
 ];
 
 export default function EditForm({ initialValues, onFormInstanceReady }: EditFormProps) {
