@@ -26,7 +26,14 @@ export const fetchTotalLastDayStatus = async (poolType: string) => {
   return await fetchGet(`miningPool/getTotalLastDayStatus/${poolType}`);
 };
 
-
 export const fetchTotalLastWeekStatus = async (poolType: string) => {
   return await fetchGet(`miningPool/getTotalLastWeekStatus/${poolType}`);
+};
+
+export const fetchLastestHashRateEfficiency = async (poolType: string, day: string) => {
+  return await fetchGet(`miningPool/getHashRateEfficiency/${poolType}/${day}`);
+};
+
+export const fetchLastestHashRate = async (poolType: string, day: string) => {
+  return await fetchGet(`miningPool/getLastestHashRate/${poolType}/${day}`);
 };

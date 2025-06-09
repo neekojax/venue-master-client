@@ -41,6 +41,8 @@ axiosInstance.interceptors.request.use(
     const token = localStorage.getItem("access_token");
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
+    } else {
+      eventBus.emit("redirect", ROUTE_PATHS.login); // Emit the redirect event
     }
     return config;
   },
@@ -58,7 +60,6 @@ axiosInstance.interceptors.response.use(
       if (!isRefreshing) {
         isRefreshing = true;
         try {
-          console.log("refresh response");
           const newTokenData = await refreshToken();
           localStorage.setItem("access_token", newTokenData.access_token); // 更新存储的 token
 

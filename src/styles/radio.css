@@ -1,0 +1,13 @@
+.radio-button {
+    /*background-color: transparent !important;  !* 默认背景色透明 *!*/
+    /*border:  solid #d9d9d9 !important;  !* 默认边框颜色 *!*/
+    /*color: #000 !important;  !* 默认字体颜色 *!*/
+    /*!*border-radius: 4px; !* 圆角边框 *!*!*/
+}
+
+.radio-button.active {
+    background-color: #e6f7ff !important;  /* 选中时的背景色（浅蓝色） */
+    color: #1890ff !important;  /* 选中时的字体颜色（蓝色） */
+    border-color: #1890ff !important;  /* 选中时的边框颜色（蓝色） */
+}
+

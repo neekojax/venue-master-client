@@ -10,6 +10,7 @@ import "./styles/index.css";
 import "./styles/light.css";
 import "./styles/dark.css";
 import "./styles/table.css";
+import "./styles/radio.css";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -23,14 +24,14 @@ const queryClient = new QueryClient({
 });
 
 createRoot(document.getElementById("root")!).render(
-  <StrictMode>
-    <ErrorBoundary>
-      <HelmetProvider>
-        <QueryClientProvider client={queryClient}>
-          <App />
-          <ReactQueryDevtools initialIsOpen={false} />
-        </QueryClientProvider>
-      </HelmetProvider>
-    </ErrorBoundary>
-  </StrictMode>,
+  // <StrictMode>
+  <ErrorBoundary>
+    <HelmetProvider>
+      <QueryClientProvider client={queryClient}>
+        <App />
+        <ReactQueryDevtools initialIsOpen={false} />
+      </QueryClientProvider>
+    </HelmetProvider>
+  </ErrorBoundary>,
+  {/*</StrictMode>,*/}
 );
