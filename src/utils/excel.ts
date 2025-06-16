@@ -277,3 +277,147 @@ export const exportElectricBasicToExcel = (data: any) => {
   // 导出 Excel 文件
   XLSX.writeFile(workbook, fileName);
 };
+
+export const exportHashRateToExcel = (data: any) => {
+  // 创建一个工作簿
+  const workbook = XLSX.utils.book_new();
+  // 自定义表头
+  const customHeader = [
+    { header: "场地", key: "pool_name" },
+    { header: "实时算力", key: "current_hash" },
+    { header: "在线", key: "online" },
+    { header: "离线", key: "offline" },
+    { header: "24小时算力", key: "last_hash" },
+    { header: "上次结算算力", key: "last_settlement_hash" },
+    { header: "理论算力", key: "theoretical" },
+    { header: "算力达成率", key: "last_hash_rate_effective" },
+    { header: "上次结算收益BTC", key: "last_settlement_profit_btc" },
+    { header: "上次结算收益FB", key: "last_settlement_profit_fb" },
+    { header: "上次结算时间", key: "last_settlement_date" },
+    { header: "刷新时间", key: "update_time" },
+    { header: "链接", key: "link" },
+  ];
+
+  // 处理数据并生成工作表
+  const formattedData = data.map((item: any) => ({
+    pool_name: item.pool_name,
+    current_hash: item.current_hash,
+    online: item.online,
+    offline: item.offline,
+
+    last_hash: item.last_hash,
+    last_settlement_hash: item.last_settlement_hash,
+    theoretical: item.theoretical,
+    last_hash_rate_effective: item.last_hash_rate_effective,
+
+    last_settlement_profit_btc: item.last_settlement_profit_btc,
+    last_settlement_profit_fb: item.last_settlement_profit_fb,
+    last_settlement_date: item.last_settlement_date,
+    update_time: item.update_time,
+    link: item.link,
+  }));
+
+  // 将自定义表头和数据合并
+  const worksheetData = [
+    customHeader.map((field) => field.header),
+    ...formattedData.map((item: { [x: string]: any }) => customHeader.map((field) => item[field.key])),
+  ];
+
+  // 生成工作表
+  const worksheet = XLSX.utils.aoa_to_sheet(worksheetData);
+
+  // 设置列宽度
+  // 设置每一列的宽度
+  worksheet["!cols"] = [
+    { wch: 40 },
+    { wch: 20 },
+    { wch: 10 },
+    { wch: 10 },
+    { wch: 20 },
+    { wch: 20 },
+    { wch: 20 },
+    { wch: 20 },
+    { wch: 20 },
+    { wch: 20 },
+    { wch: 20 },
+    { wch: 20 },
+    { wch: 20 },
+  ];
+
+  // 将工作表添加到工作簿
+  XLSX.utils.book_append_sheet(workbook, worksheet, "哈希记录");
+
+  // 获取当前日期并格式化为 YYYY-MM-DD
+  const date = new Date();
+  const formattedDate = date.toISOString().split("T")[0]; // 获取日期部分
+
+  // 生成文件名
+  const fileName = `哈希记录_${formattedDate}.xlsx`;
+
+  // 导出 Excel 文件
+  XLSX.writeFile(workbook, fileName);
+};
+
+export const exportMiningPoolListToExcel = (data: any) => {
+  // 创建一个工作簿
+  const workbook = XLSX.utils.book_new();
+  // 自定义表头
+
+  const customHeader = [
+    { header: "账户", key: "pool_name" },
+    { header: "主体类型", key: "pool_type" },
+    { header: "场地类型", key: "pool_category" },
+    { header: "所属国家", key: "country" },
+    { header: "理论算力", key: "theoretical_hashrate" },
+    { header: "能耗比(J/T)", key: "energy_ratio" },
+    { header: "基础托管费($/kwh)", key: "basic_hosting_fee" },
+    { header: "链接", key: "link" },
+  ];
+
+  // 处理数据并生成工作表
+  const formattedData = data.map((item: any) => ({
+    pool_name: item.pool_name,
+    pool_type: item.pool_type,
+    pool_category: item.pool_category,
+    country: item.country,
+    theoretical_hashrate: item.theoretical_hashrate,
+    energy_ratio: item.energy_ratio,
+    basic_hosting_fee: item.basic_hosting_fee,
+    link: item.link,
+  }));
+
+  // 将自定义表头和数据合并
+  const worksheetData = [
+    customHeader.map((field) => field.header),
+    ...formattedData.map((item: { [x: string]: any }) => customHeader.map((field) => item[field.key])),
+  ];
+
+  // 生成工作表
+  const worksheet = XLSX.utils.aoa_to_sheet(worksheetData);
+
+  // 设置列宽度
+  // 设置每一列的宽度
+  worksheet["!cols"] = [
+    { wch: 40 },
+    { wch: 20 },
+    { wch: 20 },
+    { wch: 20 },
+    { wch: 20 },
+    { wch: 20 },
+    { wch: 20 },
+    { wch: 20 },
+  ];
+
+  // 将工作表添加到工作簿
+  XLSX.utils.book_append_sheet(workbook, worksheet, "矿池列表");
+
+  // 获取当前日期并格式化为 YYYY-MM-DD
+  const date = new Date();
+  const formattedDate = date.toISOString().split("T")[0]; // 获取日期部分
+
+  // 生成文件名
+  const fileName = `矿池列表_${formattedDate}.xlsx`;
+
+  // 导出 Excel 文件
+  XLSX.writeFile(workbook, fileName);
+};

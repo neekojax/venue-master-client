@@ -1,11 +1,13 @@
 import { useEffect, useState } from "react";
 import { FaAdn, FaFish } from "react-icons/fa6";
 import { WiDirectionUpRight } from "react-icons/wi";
-import { Input, message, Radio, Space, Spin } from "antd";
+import { Button, Input, message, Radio, Space, Spin } from "antd";
 import EditTable from "@/components/edit-table";
 import useAuthRedirect from "@/hooks/useAuthRedirect.ts";
 import { useMiningHashRateList } from "@/pages/mining/hook.ts";
 import { useSelector, useSettingsStore } from "@/stores";
+import { DownloadOutlined } from "@ant-design/icons";
+import { exportHashRateToExcel } from "@/utils/excel";
 
 const emptyData = {
   name: "",
@@ -235,6 +237,9 @@ export default function MiningHashRatePage() {
   const handleDelete = () => {};
 
   const handleSave = () => {};
+  const onDownload = () => {
+    exportHashRateToExcel(hashData.data);
+  };
 
   const handlePoolCategoryChange = (e: any) => {
     setPoolCategoryType(e.target.value);
@@ -254,6 +259,15 @@ export default function MiningHashRatePage() {
             </Radio.Group>
           </div>
         </div>
+        <Button
+          type="text"
+          icon={<DownloadOutlined />}
+          size="large"
+          className={"text-blue-500"}
+          onClick={onDownload}
+        >
+          导出
+        </Button>
       </div>
 
       {isLoadingPools ? (

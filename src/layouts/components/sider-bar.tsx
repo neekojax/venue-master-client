@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import logo from "../../../public/logo.svg";
 import { BiLoaderCircle } from "react-icons/bi";
+import { GiMiner } from "react-icons/gi";
 import {
   HomeOutlined,
   MenuOutlined,
@@ -84,7 +85,7 @@ const items: MenuProps["items"] = [
     key: ROUTE_PATHS.landing,
   },
   {
-    icon: <ProductOutlined />,
+    icon: <GiMiner />,
     label: "矿池数据",
     key: ROUTE_PATHS.mining,
     children: [

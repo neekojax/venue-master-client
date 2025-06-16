@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { FaAdn, FaFish } from "react-icons/fa6";
-import { Input, message, Radio, Space, Spin } from "antd";
+import { Button, Input, message, Radio, Space, Spin } from "antd";
 import ActionButton, { ActionButtonMode } from "@/components/action-button";
 import EditTable from "@/components/edit-table";
 import useAuthRedirect from "@/hooks/useAuthRedirect.ts";
@@ -11,6 +11,8 @@ import EditForm from "@/pages/mining/components/edit-form.tsx";
 import { useMiningPoolDelete, useMiningPoolList, useMiningPoolNew, useMiningPoolUpdate } from "@/pages/mining/hook.ts";
 import { MiningPool, MiningPoolUpdate } from "@/pages/mining/type.tsx";
 import { useSelector, useSettingsStore } from "@/stores";
+import { DownloadOutlined } from "@ant-design/icons";
+import { exportHashRateToExcel, exportMiningPoolListToExcel } from "@/utils/excel.ts";
 
 const emptyData = {
   name: "",
@@ -207,8 +209,6 @@ export default function MiningSettingPage() {
       link: data.link,
     };
 
-    console.log(miningPoolUpdate);
-
     updateMutation.mutate(miningPoolUpdate, {
       onSuccess: () => {
         message.success("更新成功");
@@ -224,6 +224,10 @@ export default function MiningSettingPage() {
     localStorage.setItem(`${StoragePrefix}_poolCategory`, e.target.value);
   };
 
+  const onDownload = () => {
+    exportMiningPoolListToExcel(poolsData.data);
+  };
+
   return (
     <div style={{ padding: "20px" }}>
       <div
@@ -237,13 +241,25 @@ export default function MiningSettingPage() {
             </Radio.Group>
           </div>
         </div>
-        <ActionButton
-          label={"添加矿池"}
-          initialValues={emptyData}
-          onSubmit={handleNewMiningPool}
-          FormComponent={EditForm}
-          mode={ActionButtonMode.ADD}
-        />
+        <div>
+          <ActionButton
+            label={"添加矿池"}
+            initialValues={emptyData}
+            onSubmit={handleNewMiningPool}
+            FormComponent={EditForm}
+            mode={ActionButtonMode.ADD}
+          />
+          <Button
+            type="text"
+            icon={<DownloadOutlined />}
+            size="large"
+            className={"text-blue-500"}
+            onClick={onDownload}
+          >
+            导出
+          </Button>
+        </div>
+
       </div>
 
       {/* 覆盖在 EditTable 上方的 Spin */}
