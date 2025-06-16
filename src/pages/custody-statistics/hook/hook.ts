@@ -64,9 +64,9 @@ export const useCustodyInfoNew = () => {
   });
 };
 
-export const useCustodyStatisticsList = (timeRange: string) => {
+export const useCustodyStatisticsList = (timeRange: string, poolType: string) => {
   return useQuery({
-    queryKey: ["custody-statistics-list", timeRange],
+    queryKey: ["custody-statistics-list", timeRange, poolType],
     queryFn: fetchCustodyStatisticsList,
   });
 };

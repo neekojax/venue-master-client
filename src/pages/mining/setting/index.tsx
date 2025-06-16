@@ -10,6 +10,7 @@ import { PRICE_TYPE_REAL_TIME, PRICE_TYPE_T1 } from "@/pages/electric-data/type.
 import EditForm from "@/pages/mining/components/edit-form.tsx";
 import { useMiningPoolDelete, useMiningPoolList, useMiningPoolNew, useMiningPoolUpdate } from "@/pages/mining/hook.ts";
 import { MiningPool, MiningPoolUpdate } from "@/pages/mining/type.tsx";
+import { useSelector, useSettingsStore } from "@/stores";
 
 const emptyData = {
   name: "",
@@ -28,7 +29,7 @@ const StoragePrefix = "mining-setting";
 export default function MiningSettingPage() {
   useAuthRedirect();
 
-  const [poolType, setPoolType] = useState<string>(localStorage.getItem(`${StoragePrefix}_poolType`) || "NS");
+  const { poolType } = useSettingsStore(useSelector(["poolType"]));
   const [poolCategory, setPoolCategoryType] = useState<string>(
     localStorage.getItem(`${StoragePrefix}_poolCategory`) || "主矿池",
   );
@@ -218,11 +219,6 @@ export default function MiningSettingPage() {
     });
   };
 
-  const handlePoolTypeChange = (e: any) => {
-    setPoolType(e.target.value);
-    localStorage.setItem(`${StoragePrefix}_poolType`, e.target.value);
-  };
-
   const handlePoolCategoryChange = (e: any) => {
     setPoolCategoryType(e.target.value);
     localStorage.setItem(`${StoragePrefix}_poolCategory`, e.target.value);
@@ -234,12 +230,6 @@ export default function MiningSettingPage() {
         style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}
       >
         <div className={"flex"}>
-          <div className={"mr-4"}>
-            <Radio.Group onChange={handlePoolTypeChange} value={poolType}>
-              <Radio.Button value="NS">NS</Radio.Button>
-              <Radio.Button value="CANG">CANG</Radio.Button>
-            </Radio.Group>
-          </div>
           <div className={"mr-4"}>
             <Radio.Group onChange={handlePoolCategoryChange} value={poolCategory}>
               <Radio.Button value="主矿池">主矿池</Radio.Button>

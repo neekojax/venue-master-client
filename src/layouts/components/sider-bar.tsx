@@ -99,19 +99,14 @@ const items: MenuProps["items"] = [
     ],
   },
   {
-    icon: <UserOutlined />,
-    label: <Link to={ROUTE_PATHS.venue}>场地管理</Link>,
-    key: ROUTE_PATHS.venue,
-  },
-  {
     icon: <ProductOutlined />,
     label: "托管统计",
     key: ROUTE_PATHS.custodyMenu,
     children: [
-      {
-        key: ROUTE_PATHS.setting,
-        label: <Link to={ROUTE_PATHS.setting}>基础设置</Link>,
-      },
+      // {
+      //   key: ROUTE_PATHS.setting,
+      //   label: <Link to={ROUTE_PATHS.setting}>基础设置</Link>,
+      // },
       {
         key: ROUTE_PATHS.statistics,
         label: <Link to={ROUTE_PATHS.statistics}>信息统计</Link>,
@@ -142,20 +137,25 @@ const items: MenuProps["items"] = [
     ],
   },
   {
-    icon: <MenuOutlined />,
-    label: "收益管理",
-    key: ROUTE_PATHS.nestMenu,
-    children: [
-      {
-        key: ROUTE_PATHS.link,
-        label: <Link to={ROUTE_PATHS.link}>观察者链接</Link>,
-      },
-      {
-        key: ROUTE_PATHS.report,
-        label: <Link to={ROUTE_PATHS.report}>收益记录</Link>,
-      },
-    ],
+    icon: <UserOutlined />,
+    label: <Link to={ROUTE_PATHS.venue}>场地管理</Link>,
+    key: ROUTE_PATHS.venue,
   },
+  // {
+  //   icon: <MenuOutlined />,
+  //   label: "收益管理",
+  //   key: ROUTE_PATHS.nestMenu,
+  //   children: [
+  //     {
+  //       key: ROUTE_PATHS.link,
+  //       label: <Link to={ROUTE_PATHS.link}>观察者链接</Link>,
+  //     },
+  //     {
+  //       key: ROUTE_PATHS.report,
+  //       label: <Link to={ROUTE_PATHS.report}>收益记录</Link>,
+  //     },
+  //   ],
+  // },
   {
     icon: <RadiusSettingOutlined />,
     label: <Link to={ROUTE_PATHS.base}>模版管理</Link>,

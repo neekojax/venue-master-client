@@ -4,9 +4,8 @@ import { WiDirectionUpRight } from "react-icons/wi";
 import { Input, message, Radio, Space, Spin } from "antd";
 import EditTable from "@/components/edit-table";
 import useAuthRedirect from "@/hooks/useAuthRedirect.ts";
-import { getShortenedLink } from "@/utils/short-link.ts";
-
 import { useMiningHashRateList } from "@/pages/mining/hook.ts";
+import { useSelector, useSettingsStore } from "@/stores";
 
 const emptyData = {
   name: "",
@@ -21,7 +20,7 @@ const StoragePrefix = "mining-hash";
 export default function MiningHashRatePage() {
   useAuthRedirect();
 
-  const [poolType, setPoolType] = useState<string>(localStorage.getItem(`${StoragePrefix}_poolType`) || "NS");
+  const { poolType } = useSettingsStore(useSelector(["poolType"]));
   const [poolCategory, setPoolCategoryType] = useState<string>(
     localStorage.getItem(`${StoragePrefix}_poolCategory`) || "主矿池",
   );
@@ -237,11 +236,6 @@ export default function MiningHashRatePage() {
 
   const handleSave = () => {};
 
-  const handlePoolTypeChange = (e: any) => {
-    setPoolType(e.target.value);
-    localStorage.setItem(`${StoragePrefix}_poolType`, e.target.value);
-  };
-
   const handlePoolCategoryChange = (e: any) => {
     setPoolCategoryType(e.target.value);
     localStorage.setItem(`${StoragePrefix}_poolCategory`, e.target.value);
@@ -253,12 +247,6 @@ export default function MiningHashRatePage() {
         style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}
       >
         <div className={"flex"}>
-          <div className={"mr-4"}>
-            <Radio.Group onChange={handlePoolTypeChange} value={poolType}>
-              <Radio.Button value="NS">NS</Radio.Button>
-              <Radio.Button value="CANG">CANG</Radio.Button>
-            </Radio.Group>
-          </div>
           <div className={"mr-4"}>
             <Radio.Group onChange={handlePoolCategoryChange} value={poolCategory}>
               <Radio.Button value="主矿池">主矿池</Radio.Button>

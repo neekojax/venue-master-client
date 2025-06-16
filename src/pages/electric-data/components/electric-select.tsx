@@ -57,7 +57,6 @@ const ElectricSelectComponent = forwardRef((props: ElectricSelectComponentProps,
     })(),
   );
 
-
   // 使用 useImperativeHandle 来暴露 triggerSearch 函数
   useImperativeHandle(ref, () => ({
     triggerSearch: () => {

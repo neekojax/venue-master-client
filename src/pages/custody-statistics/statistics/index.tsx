@@ -10,6 +10,7 @@ import useAuthRedirect from "@/hooks/useAuthRedirect.ts";
 import { exportCustodyStatisticsToExcel } from "@/utils/excel";
 
 import { useCustodyStatisticsList } from "@/pages/custody-statistics/hook/hook.ts";
+import { useSelector, useSettingsStore } from "@/stores";
 
 // 初始化时从 localStorage 获取值
 const getInitialTimeRange = () => {
@@ -26,9 +27,11 @@ const getInitialPoolFilter = () => {
 export default function StatisticsPage() {
   useAuthRedirect();
 
+  const { poolType } = useSettingsStore(useSelector(["poolType"]));
+
   const [timeRange, setTimeRange] = useState(getInitialTimeRange()); // 默认时间范围
   const [poolFilter, setPoolFilter] = useState(getInitialPoolFilter()); // 默认池过滤
-  const { data: statisticsData, error, isLoading } = useCustodyStatisticsList(timeRange);
+  const { data: statisticsData, error, isLoading } = useCustodyStatisticsList(timeRange, poolType);
 
   // const { data: linksData, error, isLoading: isLoadingFields } = useCustodyInfoList();
   const [columns, setColumns] = useState<any>([]);
