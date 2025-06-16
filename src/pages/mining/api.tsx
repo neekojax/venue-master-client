@@ -24,15 +24,15 @@ export const fetchMiningHashRateList = async (poolType: string, poolCategory: st
 };
 
 export const fetchTotalRealTimeStatus = async (poolType: string) => {
-  return await fetchGet(`miningPool/getTotalRealTimeStatus/${poolType}`);
+  return await fetchGet(`miningPool/getTotalRealTimeHashStatus/${poolType}`);
 };
 
-export const fetchTotalLastDayStatus = async (poolType: string) => {
-  return await fetchGet(`miningPool/getTotalLastDayStatus/${poolType}`);
+export const fetchTotalLastHashStatus = async (poolType: string) => {
+  return await fetchGet(`miningPool/getTotalLastHashStatus/${poolType}`);
 };
 
-export const fetchTotalLastWeekStatus = async (poolType: string) => {
-  return await fetchGet(`miningPool/getTotalLastWeekStatus/${poolType}`);
+export const fetchTotalLastProfitStatus = async (poolType: string) => {
+  return await fetchGet(`miningPool/getTotalLastProfitStatus/${poolType}`);
 };
 
 export const fetchLastestHashRateEfficiency = async (poolType: string, day: string) => {

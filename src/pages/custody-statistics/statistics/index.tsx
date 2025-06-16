@@ -58,11 +58,11 @@ export default function StatisticsPage() {
         ) => ({
           key: item.id, // 使用 ID 作为唯一 key
           serialNumber: index + 1,
-          venue_name: item.custody_info.venue_name,
-          sub_account_name: item.custody_info.sub_account_name,
-          observer_link: item.custody_info.observer_link,
-          energy_ratio: item.custody_info.energy_ratio,
-          basic_hosting_fee: item.custody_info.basic_hosting_fee,
+          venue_name: item.mining_pool_info.pool_name,
+          sub_account_name: item.mining_pool_info.pool_name,
+          observer_link: item.mining_pool_info.link,
+          energy_ratio: item.mining_pool_info.energy_ratio,
+          basic_hosting_fee: item.mining_pool_info.basic_hosting_fee,
           hourly_computing_power: item.hourly_computing_power,
           total_hosting_fee: item.total_hosting_fee,
           total_income_btc: item.total_income_btc,

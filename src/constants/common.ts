@@ -21,4 +21,7 @@ export const ROUTE_PATHS = {
   mining: "/mining",
   miningSetting: "/mining/setting",
   miningHashRate: "/mining/hash",
+
+  hashDetail: "/hash-detail",
+  profitDetail: "/profit-detail",
 };

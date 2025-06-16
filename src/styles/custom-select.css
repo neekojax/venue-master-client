@@ -1,0 +1,63 @@
+/*.custom-select {*/
+/*    width: 120px; !* 设置宽度 *!*/
+/*    border-radius: 4px; !* 圆角 *!*/
+/*    background-color: #1890ff; !* 背景颜色 *!*/
+/*    color: white; !* 字体颜色 *!*/
+/*    border: none; !* 取消边框 *!*/
+/*}*/
+
+/*.custom-select .ant-select-selector {*/
+/*    background-color: #1890ff; !* 选择框背景颜色 *!*/
+/*    color: white; !* 选择框文字颜色 *!*/
+/*    border: none !important; !* 取消选择框边框 *!*/
+/*    display: flex;*/
+/*    align-items: center; !* 垂直居中 *!*/
+/*}*/
+
+/*.custom-select .ant-select-arrow {*/
+/*    color: black; !* 下拉箭头颜色 *!*/
+/*}*/
+
+/*.custom-select .ant-select-item {*/
+/*    color: black; !* 下拉选项文字颜色 *!*/
+/*}*/
+
+/*.custom-select .ant-select-item-option-active {*/
+/*    background-color: rgba(255, 255, 255, 0.2); !* 选中项的背景颜色 *!*/
+/*}*/
+
+
+.custom-select {
+    width: 120px; /* 设置宽度 */
+    border-radius: 4px; /* 圆角 */
+    /*background-color: #1890ff; !* 背景颜色 *!*/
+    color: white; /* 字体颜色 */
+}
+
+.custom-select .ant-select-selector {
+    background-color: #1890ff !important; /* 选择框背景颜色 */
+    color: white !important; /* 选择框文字颜色 */
+    border: none !important; /* 取消选择框边框 */
+    box-shadow: none !important; /* 移除阴影 */
+    display: flex;
+    align-items: center; /* 垂直居中 */
+}
+
+.custom-select .ant-select-selector:focus,
+.custom-select .ant-select-selector:hover,
+.custom-select .ant-select-selector:active {
+    border: none !important; /* 取消聚焦、悬浮和激活态的边框 */
+    box-shadow: none !important; /* 移除聚焦、悬浮和激活态的阴影 */
+}
+
+.custom-select .ant-select-arrow {
+    color: black; /* 下拉箭头颜色 */
+}
+
+.custom-select .ant-select-item {
+    color: black; /* 下拉选项文字颜色 */
+}
+
+.custom-select .ant-select-item-option-active {
+    background-color: rgba(255, 255, 255, 0.2); /* 选中项的背景颜色 */
+}

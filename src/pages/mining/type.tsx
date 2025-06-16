@@ -5,6 +5,8 @@ export type MiningPool = {
   country: string;
   // pool_category: string;
   theoretical_hashrate: string;
+  energy_ratio: string;
+  basic_hosting_fee: string;
   master_link: string;
   backup_link: string;
 };
@@ -16,5 +18,7 @@ export type MiningPoolUpdate = {
   country: string;
   pool_category: string;
   theoretical_hashrate: string;
+  energy_ratio: string;
+  basic_hosting_fee: string;
   link: string;
 };

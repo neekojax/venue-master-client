@@ -33,13 +33,6 @@ const contentStyle: React.CSSProperties = {
 
 const content = <div style={contentStyle} />;
 
-// const ElectricSelectComponent: React.FC<ElectricSelectComponentProps> = ({
-//   selectedType,
-//   setSelectedType,
-//   handleSearch,
-//   onDownload,
-//   storagePrefix,
-// }) => {
 // 使用 forwardRef 和 useImperativeHandle 来暴露 triggerSearch 方法
 const ElectricSelectComponent = forwardRef((props: ElectricSelectComponentProps, ref) => {
   const { selectedType, setSelectedType, handleSearch, onDownload, storagePrefix } = props;

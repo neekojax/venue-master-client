@@ -17,6 +17,8 @@ const emptyData = {
   country: "",
   // pool_category: "",
   theoretical_hashrate: 0,
+  energy_ratio: 0,
+  basic_hosting_fee: 0,
   master_link: "",
   backup_link: "",
 };
@@ -53,6 +55,8 @@ export default function MiningSettingPage() {
             country: any;
             pool_category: any;
             theoretical_hashrate: any;
+            energy_ratio: any;
+            basic_hosting_fee: any;
             link: any;
           },
           index: any,
@@ -64,6 +68,8 @@ export default function MiningSettingPage() {
           country: item.country,
           pool_category: item.pool_category,
           theoretical_hashrate: item.theoretical_hashrate,
+          energy_ratio: item.energy_ratio,
+          basic_hosting_fee: item.basic_hosting_fee,
           link: item.link,
         }),
       );
@@ -95,12 +101,14 @@ export default function MiningSettingPage() {
         title: "账户",
         dataIndex: "pool_name",
         key: "pool_name",
+        width: 300,
         render: (text: any) => <span style={{ color: "#1a4fc9" }}>{text}</span>,
       },
       {
         title: "主体类型",
         dataIndex: "pool_type",
         key: "pool_type",
+        width: 100,
       },
       {
         title: "场地类型",
@@ -113,9 +121,21 @@ export default function MiningSettingPage() {
         key: "country",
       },
       {
-        title: "理论算力",
+        title: "理论算力(PH/s)",
         dataIndex: "theoretical_hashrate",
         key: "theoretical_hashrate",
+        width: 120,
+      },
+      {
+        title: "能耗比(J/T)",
+        dataIndex: "energy_ratio",
+        key: "energy_ratio",
+      },
+      {
+        title: "基础托管费($/kwh)",
+        dataIndex: "basic_hosting_fee",
+        key: "basic_hosting_fee",
+        width: 150,
       },
       {
         title: "链接",
@@ -180,7 +200,9 @@ export default function MiningSettingPage() {
       pool_type: data.pool_type,
       country: data.country,
       pool_category: data.pool_category,
-      theoretical_hashrate: data.theoretical_hashrate,
+      theoretical_hashrate: String(data.theoretical_hashrate),
+      energy_ratio: String(data.energy_ratio),
+      basic_hosting_fee: String(data.basic_hosting_fee),
       link: data.link,
     };
 

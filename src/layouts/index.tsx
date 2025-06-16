@@ -9,8 +9,12 @@ import SiderBar from "./components/sider-bar";
 import UserAvatar from "./components/user-avatar";
 import { setCollapsed, useSelector, useSettingsStore } from "@/stores";
 import { useMediaQuery } from "react-responsive";
+import PoolTypeSelect from "@/layouts/components/pool-type-select.tsx";
+import useAuthRedirect from "@/hooks/useAuthRedirect.ts";
 
 export default function MainLayout() {
+  useAuthRedirect();
+
   const { collapsed } = useSettingsStore(useSelector(["collapsed"]));
   const [isSidebarVisible, setIsSidebarVisible] = useState(false); // 状态管理 SiderBar 显示与否
   const isMobile = useMediaQuery({ query: "(max-width: 768px)" });
@@ -72,7 +76,8 @@ export default function MainLayout() {
             <Breadcrumb />
             <Flex gap={12} className="ml-auto items-center">
               {/*<CustomSkin />*/}
-              <ThemeSwitch />
+              {/*<ThemeSwitch />*/}
+              <PoolTypeSelect />
               <UserAvatar />
             </Flex>
           </Layout.Header>

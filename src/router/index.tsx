@@ -8,6 +8,8 @@ import { custodyMenuRoute } from "@/router/modules/custody-statistics.tsx";
 import { venueRoute } from "@/router/modules/venue.tsx";
 import { electricMenuRoute } from "@/router/modules/electric-data.tsx";
 import { miningRoute } from "@/router/modules/mining.tsx";
+import { hashDetailRoute } from "@/router/modules/hash-detail.tsx";
+import { profitDetailRoute } from "@/router/modules/profit-detail.tsx";
 
 const routes: RouteObject[] = [
   {
@@ -33,6 +35,8 @@ const routes: RouteObject[] = [
       landingRoute,
       venueRoute,
       baseRoute,
+      hashDetailRoute,
+      profitDetailRoute,
       custodyMenuRoute,
       electricMenuRoute,
       nestMenuRoute,

@@ -1,30 +1,32 @@
 import React, { useEffect, useState } from "react";
+import { FcLineChart } from "react-icons/fc";
 import { Line } from "@ant-design/charts";
 import { Card, Col, Radio, Row, Spin, Statistic, Tooltip } from "antd";
 import { ReactEcharts } from "@/components/react-echarts";
-import { AiFillFund } from "react-icons/ai";
-import { FcBullish } from "react-icons/fc";
 
-import { fetchLastestHashRateEfficiency } from "@/pages/mining/api.tsx";
-import { FcLineChart } from "react-icons/fc";
+import { fetchMiningBenefitLine } from "@/pages/landing/api.ts";
 
-const MiningEfficiencyCard = ({ poolType }) => {
+const MiningBenefitCard = ({ poolType }) => {
   const [data, setData] = useState([]);
-  // const [dataCang, setDataCang] = useState([]);
-  const [timeFrame, setTimeFrame] = useState("90");
+  const [timeFrame, setTimeFrame] = useState("30");
 
   const fetchData = async (timeFrame) => {
     try {
-      const Result = await fetchLastestHashRateEfficiency(poolType, timeFrame);
+      const Result = await fetchMiningBenefitLine(poolType, timeFrame);
 
-      const formattedData = Result.data?.map((item) => ({
-        date: item.date,
-        efficiency: item.efficiency,
+      const formattedData = Result.data.map((item) => ({
+        time: item.time,
+        income_usd: item.income_usd,
+        hosting_fee: item.hosting_fee,
+        fee_percentage: item.fee_percentage,
       }));
 
-      const sortedData = formattedData.sort((a, b) => new Date(a.date) - new Date(b.date));
+      // 按时间排序
+      const sortedData = formattedData.sort((a, b) => new Date(a.time) - new Date(b.time));
+      setData(sortedData);
 
       setData(sortedData);
+      // setDataCang(sortedCangData);
     } catch (error) {
       console.error("Error fetching hash rate efficiency:", error);
     }
@@ -35,8 +37,10 @@ const MiningEfficiencyCard = ({ poolType }) => {
   }, [poolType]);
 
   const getOption = () => {
-    const dates = data.map((item) => item.date);
-    const efficiencies = data.map((item) => item.efficiency);
+    const times = data.map((item) => item.time);
+    const income_usd = data.map((item) => item.income_usd);
+    const hosting_fee = data.map((item) => item.hosting_fee);
+    const fee_percentage = data.map((item) => item.fee_percentage);
 
     return {
       tooltip: {
@@ -46,37 +50,78 @@ const MiningEfficiencyCard = ({ poolType }) => {
         top: "5%", // 调整为 0% 或更小的值
         right: "5%",
         bottom: "12%",
-        left: "5%",
+        left: "10%",
       },
       xAxis: {
         type: "category",
-        data: dates,
+        data: times,
         axisLine: {
           lineStyle: {
             color: "#ccc",
           },
         },
       },
-      yAxis: {
-        type: "value",
-        min: 70,
-        splitLine: {
-          show: false, // 隐藏 y 轴的网格线
+
+      yAxis: [
+        {
+          type: "value",
+          name: "收入/托管费",
+          min: 0,
+          splitLine: {
+            show: false,
+          },
         },
-      },
+        {
+          type: "value",
+          name: "费用百分比 (%)",
+          min: 0,
+          max: 100,
+          splitLine: {
+            show: false,
+          },
+          position: "right",
+        },
+      ],
       series: [
         {
-          // name: poolType,
+          name: "收入(USD)",
           type: "line",
-          data: efficiencies,
+          data: income_usd,
           smooth: true,
           itemStyle: {
-            color: "#4b9bdc", // NS 线条颜色 #4b9bdc "#4CAF50",
+            color: "#4b9bdc",
           },
           lineStyle: {
             width: 1.5,
           },
-          showSymbol: false, // 不显示圆点
+          showSymbol: false,
+        },
+        {
+          name: "托管费",
+          type: "line",
+          data: hosting_fee,
+          smooth: true,
+          itemStyle: {
+            color: "#ff6f61",
+          },
+          lineStyle: {
+            width: 1.5,
+          },
+          showSymbol: false,
+        },
+        {
+          name: "费用百分比",
+          type: "line",
+          yAxisIndex: 1,
+          data: fee_percentage,
+          smooth: true,
+          itemStyle: {
+            color: "#f0ad4e",
+          },
+          lineStyle: {
+            width: 1.5,
+          },
+          showSymbol: false,
         },
       ],
     };
@@ -96,10 +141,10 @@ const MiningEfficiencyCard = ({ poolType }) => {
       title={
         <Row align="middle">
           <Col>
-            <FcBullish style={{ fontSize: "20px", marginRight: "5px" }} />
+            <FcLineChart style={{ fontSize: "20px", marginRight: "5px" }} />
           </Col>
           <Col>
-            <h3 style={{ marginLeft: 5, fontSize: "14px" }}>算力达成率</h3>
+            <h3 style={{ marginLeft: 5, fontSize: "14px" }}>收益+支出</h3>
           </Col>
         </Row>
       }
@@ -127,4 +172,4 @@ const MiningEfficiencyCard = ({ poolType }) => {
   );
 };
 
-export default MiningEfficiencyCard;
+export default MiningBenefitCard;

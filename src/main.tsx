@@ -11,6 +11,7 @@ import "./styles/light.css";
 import "./styles/dark.css";
 import "./styles/table.css";
 import "./styles/radio.css";
+import "./styles/custom-select.css";
 
 const queryClient = new QueryClient({
   defaultOptions: {

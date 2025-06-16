@@ -20,15 +20,6 @@ const formFields = [
       { value: "CANG", label: "CANG" },
     ],
   },
-  // {
-  //   label: "矿池类型",
-  //   name: "pool_category",
-  //   component: Select,
-  //   options: [
-  //     { value: "主矿池", label: "主矿池" },
-  //     { value: "备用矿池", label: "备用矿池" },
-  //   ],
-  // },
   {
     label: "所属国家",
     name: "country",
@@ -37,6 +28,16 @@ const formFields = [
   {
     label: "理论算力",
     name: "theoretical_hashrate",
+    component: Input,
+  },
+  {
+    label: "能耗比",
+    name: "energy_ratio",
+    component: Input,
+  },
+  {
+    label: "基础托管费",
+    name: "basic_hosting_fee",
     component: Input,
   },
   { label: "主链接", name: "master_link", component: Input },
@@ -80,7 +81,13 @@ export default function EditForm({ initialValues, onFormInstanceReady }: EditFor
           ) : (
             <Input
               placeholder={`请输入${field.label}`}
-              type={field.name === "theoretical_hashrate" ? "number" : "text"} // 设置为数字输入框
+              type={
+                field.name === "theoretical_hashrate" ||
+                field.name === "energy_ratio" ||
+                field.name === "basic_hosting_fee"
+                  ? "number"
+                  : "text"
+              } // 根据条件设置为数字输入框
             />
           )}
         </Form.Item>
