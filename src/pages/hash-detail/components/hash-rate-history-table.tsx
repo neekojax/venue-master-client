@@ -27,9 +27,6 @@ export default function HashRateHistoryTable() {
     })(),
   );
 
-  const [currentPage, setCurrentPage] = useState(1);
-  const [pageSize, setPageSize] = useState(10);
-
   const navigate = useNavigate();
 
   const handlePoolClick = (poolName: any) => {
@@ -38,6 +35,7 @@ export default function HashRateHistoryTable() {
 
   const fetchData = async (poolType: string) => {
     try {
+      setHashRateHistory(null); // 清空历史数据
       const start = dateRange[0]
         ? dateRange[0].format("YYYY-MM-DD")
         : dayjs().subtract(1, "day").format("YYYY-MM-DD");
@@ -50,7 +48,7 @@ export default function HashRateHistoryTable() {
       );
       setHashRateHistory(sortedData); // 假设返回数据在 result.data 中
 
-      console.log(sortedData);
+      console.log("hhhhhh:", sortedData);
     } catch (err) {
     } finally {
       setLoading(false);
@@ -117,7 +115,7 @@ export default function HashRateHistoryTable() {
   ];
 
   // 计算当前页的数据
-  const paginatedData = hashRateHistory?.slice((currentPage - 1) * pageSize, currentPage * pageSize);
+  // const paginatedData = hashRateHistory?.slice((currentPage - 1) * pageSize, currentPage * pageSize);
 
   const onDateChange = (dates: Dayjs[]) => {
     if (dates && dates[0] && dates[1]) {
@@ -126,6 +124,7 @@ export default function HashRateHistoryTable() {
       setDateRange([startDate, endDate]);
     } else {
       setDateRange([null, null]);
+      setHashRateHistory(null); // 清空历史数据
     }
   };
 
@@ -149,10 +148,15 @@ export default function HashRateHistoryTable() {
       style={{ width: "100%" }}
     >
       <Table
-        dataSource={paginatedData}
+        dataSource={hashRateHistory}
         columns={columns}
         rowKey="date"
-        pagination={false} // 如果不需要分页，可以设置为 false
+        pagination={{
+          position: ["bottomCenter"], // 将分页器位置设置为底部居中
+          showSizeChanger: true, // 允许用户改变每页显示的条目数
+          pageSizeOptions: ["10", "20", "50"], // 每页显示条目的选项
+          defaultPageSize: 10, // 默认每页显示的条目数
+        }}
         // sticky
         components={{
           header: {
@@ -163,19 +167,6 @@ export default function HashRateHistoryTable() {
         }}
         scroll={{ x: "max-content" }} // 如果需要横向滚动
       />
-      <div style={{ display: "flex", justifyContent: "center", marginTop: 16 }}>
-        <Pagination
-          current={currentPage}
-          pageSize={pageSize}
-          total={hashRateHistory?.length} // 总数据量
-          onChange={(page, pageSize) => {
-            setCurrentPage(page);
-            setPageSize(pageSize); // 更新每页大小
-          }}
-          showSizeChanger
-          pageSizeOptions={[10, 20, 50]} // 提供的选项
-        />
-      </div>
     </Card>
   );
 }
