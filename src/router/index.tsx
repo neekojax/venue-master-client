@@ -10,6 +10,8 @@ import { electricMenuRoute } from "@/router/modules/electric-data.tsx";
 import { miningRoute } from "@/router/modules/mining.tsx";
 import { hashDetailRoute } from "@/router/modules/hash-detail.tsx";
 import { profitDetailRoute } from "@/router/modules/profit-detail.tsx";
+import { poolProfitHistoryRoute } from "@/router/modules/pool-profit-history.tsx";
+import { poolHashHistoryRoute } from "@/router/modules/pool-hash-history.tsx";
 
 const routes: RouteObject[] = [
   {
@@ -37,6 +39,8 @@ const routes: RouteObject[] = [
       baseRoute,
       hashDetailRoute,
       profitDetailRoute,
+      poolProfitHistoryRoute,
+      poolHashHistoryRoute,
       custodyMenuRoute,
       electricMenuRoute,
       nestMenuRoute,

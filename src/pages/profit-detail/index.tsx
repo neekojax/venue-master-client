@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from "react";
 import { Card, Col, DatePicker, Row, Statistic, Table } from "antd";
 import dayjs, { Dayjs } from "dayjs";
-import { GaugeChart } from "echarts/charts";
-import { TitleComponent } from "echarts/components";
+import { BarChart, GaugeChart } from "echarts/charts";
+import { DataZoomComponent, TitleComponent } from "echarts/components";
 import * as echarts from "echarts/core";
 import { CanvasRenderer } from "echarts/renderers";
 import { ReactEcharts } from "@/components/react-echarts";
@@ -10,9 +10,11 @@ import useAuthRedirect from "@/hooks/useAuthRedirect.ts";
 import { useSelector, useSettingsStore } from "@/stores";
 
 import { fetchIncomeStatisticsHistory } from "@/pages/profit-detail/api.tsx";
+import { useNavigate } from "react-router-dom";
+import { ROUTE_PATHS } from "@/constants/common.ts";
 
 const { RangePicker } = DatePicker;
-echarts.use([TitleComponent, GaugeChart, CanvasRenderer]);
+echarts.use([TitleComponent, GaugeChart, CanvasRenderer, BarChart, DataZoomComponent]);
 
 export default function ProfitDetailPage() {
   useAuthRedirect();
@@ -32,6 +34,12 @@ export default function ProfitDetailPage() {
     })(),
   );
 
+  const navigate = useNavigate();
+
+  const handlePoolClick = (poolName: any) => {
+    navigate(ROUTE_PATHS.poolProfitHistory(poolName));
+  };
+
   const fetchData = async (poolType: string) => {
     try {
       const start = dateRange[0]
@@ -40,13 +48,7 @@ export default function ProfitDetailPage() {
       const end = dateRange[1] ? dateRange[1].format("YYYY-MM-DD") : dayjs().format("YYYY-MM-DD");
       const hashCompletionRateResult = await fetchIncomeStatisticsHistory(poolType, start, end);
 
-      // // 排序数据，确保最新的日期在前面
-      // const sortedData = hashCompletionRateResult.data?.sort(
-      //   (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime(),
-      // );
       setStatisticsHistory(hashCompletionRateResult.data); // 假设返回数据在 result.data 中
-
-      console.log(hashCompletionRateResult.data);
     } catch (err) {
     } finally {
       setLoading(false);
@@ -62,6 +64,14 @@ export default function ProfitDetailPage() {
       title: "矿池名称",
       dataIndex: "pool_name",
       key: "pool_name",
+      render: (text, record) => (
+        <a
+          onClick={() => handlePoolClick(record.pool_name)} // 点击事件
+          style={{ color: "blue", cursor: "pointer" }} // 视觉提示
+        >
+          {text}
+        </a>
+      ),
     },
     {
       title: "收入 (BTC)",
@@ -99,79 +109,6 @@ export default function ProfitDetailPage() {
     }
   };
 
-  // const gaugeChartOptions = {
-  //   title: {
-  //     text: "总托管比例",
-  //     left: "center",
-  //     top: "10%",
-  //     textStyle: {
-  //       fontSize: 12,
-  //     },
-  //   },
-  //   series: [
-  //     {
-  //       type: "gauge",
-  //       progress: {
-  //         show: true,
-  //         width: 12,
-  //       },
-  //       axisLine: {
-  //         lineStyle: {
-  //           width: 12,
-  //           color: [
-  //             [0.2, "#67e0e3"], // 绿色部分
-  //             [0.95, "#ffdb5c"], // 黄色部分
-  //             [1, "#ff5c5c"], // 红色部分
-  //           ],
-  //         },
-  //       },
-  //       axisTick: {
-  //         show: true,
-  //         splitNumber: 5,
-  //         lineStyle: {
-  //           color: "#999",
-  //           width: 2,
-  //         },
-  //       },
-  //       splitLine: {
-  //         show: true,
-  //         length: 15,
-  //         lineStyle: {
-  //           color: "#999",
-  //           width: 3,
-  //         },
-  //       },
-  //       axisLabel: {
-  //         distance: 25,
-  //         color: "#333",
-  //         fontSize: 20,
-  //       },
-  //       anchor: {
-  //         show: true,
-  //         showAbove: true,
-  //         size: 25,
-  //         itemStyle: {
-  //           borderWidth: 10,
-  //         },
-  //       },
-  //       title: {
-  //         show: false,
-  //       },
-  //       detail: {
-  //         valueAnimation: true,
-  //         fontSize: 40,
-  //         offsetCenter: [0, "70%"],
-  //         formatter: "{value}",
-  //       },
-  //       data: [
-  //         {
-  //           value: statisticsHistory?.total_hosting_ratio || 50, // 使用统计值或默认值
-  //         },
-  //       ],
-  //     },
-  //   ],
-  // };
-
   const gaugeChartOptions = {
     series: [
       {
@@ -181,7 +118,7 @@ export default function ProfitDetailPage() {
         center: ["50%", "75%"],
         radius: "90%",
         min: 0,
-        max: 1,
+        max: 100,
         splitNumber: 8,
         axisLine: {
           lineStyle: {
@@ -195,7 +132,7 @@ export default function ProfitDetailPage() {
         },
         pointer: {
           icon: "path://M12.8,0.7l12,40.1H0.7L12.8,0.7z",
-          length: "12%",
+          length: "25%",
           width: 6,
           offsetCenter: [0, "-60%"],
           itemStyle: {
@@ -232,6 +169,7 @@ export default function ProfitDetailPage() {
         detail: {
           fontSize: 30,
           offsetCenter: [0, "-35%"],
+
           valueAnimation: true,
           formatter: function (value) {
             return Math.round(value) + "";
@@ -248,6 +186,86 @@ export default function ProfitDetailPage() {
     ],
   };
 
+  const today = new Date(); // 获取当前日期
+  today.setHours(0, 0, 0, 0); // 将时间部分设置为00:00:00, 以便进行比较
+
+  const totalData = statisticsHistory?.data2
+    .filter((item) => new Date(item.date).getTime() < today.getTime()) // 过滤掉日期大于等于今天的数据
+    .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()); // 按日期升序排序
+
+  const option = {
+    tooltip: {
+      trigger: "axis",
+    },
+    legend: {
+      data: ["收入 (BTC)", "收入 (USD)", "托管费用"],
+    },
+    xAxis: {
+      type: "category",
+      data: totalData?.map((item) => item.date), // 使用过滤后的日期
+    },
+    yAxis: [
+      {
+        type: "value",
+        name: "收入 (BTC)",
+        position: "left",
+        axisLabel: {
+          formatter: "{value}",
+        },
+      },
+      {
+        type: "value",
+        name: "金额 (USD)",
+        position: "right",
+        axisLabel: {
+          formatter: "${value}",
+        },
+      },
+    ],
+    series: [
+      {
+        name: "收入 (BTC)",
+        type: "line",
+        data: totalData?.map((item) => item.income_btc), // 使用过滤后的收入数据
+        itemStyle: {
+          color: "#58D9F9",
+        },
+        yAxisIndex: 0,
+        smooth: true, // 使用平滑曲线
+      },
+      {
+        name: "收入 (USD)",
+        type: "line",
+        data: totalData?.map((item) => item.income_usd), // 使用过滤后的收入数据
+        itemStyle: {
+          color: "#FDDD60",
+        },
+        yAxisIndex: 1,
+        smooth: true, // 使用平滑曲线
+      },
+      {
+        name: "托管费用",
+        type: "line",
+        data: totalData?.map((item) => item.hosting_fee), // 使用过滤后的托管费用数据
+        itemStyle: {
+          color: "#FF6E76",
+        },
+        yAxisIndex: 1,
+        smooth: true, // 使用平滑曲线
+      },
+    ],
+    // dataZoom: [
+    //   {
+    //     type: "inside",
+    //     xAxisIndex: [0],
+    //     start: Math.max(0, (totalData.length - 5) / totalData.length * 100),
+    //     end: 100,
+    //     minValueSpan: 5, // 限制最小值间隔
+    //     maxValueSpan: 5, // 限制最大值间隔
+    //   },
+    // ],
+  };
+
   return (
     <div>
       <RangePicker
@@ -255,35 +273,66 @@ export default function ProfitDetailPage() {
         onChange={onDateChange}
         style={{ width: "280px", fontSize: "12px" }} // 可以调整宽度
       />
-      <div style={{ marginBottom: "20px" }}>
-        <Card title="统计数据" bordered={false}>
-          <Row gutter={16}>
+      <div style={{ marginBottom: "20px", marginTop: "20px" }}>
+        <Card>
+          <Row gutter={24} style={{ display: "flex" }}>
             <Col span={8}>
-              <h2 style={{ color: "#1890ff" }}>
-                总收入 (BTC): {statisticsHistory?.total_income_btc.toFixed(8)} BTC
-              </h2>
+              <Card title={"统计数据"}>
+                <Row gutter={24}>
+                  <Col span={24} style={{ marginBottom: "20px" }}>
+                    <Statistic
+                      title="总收益BTC"
+                      value={statisticsHistory?.total_income_btc}
+                      valueStyle={{ fontSize: "16px", fontWeight: "bold" }}
+                    />
+                    {/*<h2 style={{ color: "black", fontSize: "16px", marginBottom: "12px" }}>*/}
+                    {/*  总收入 (BTC): {statisticsHistory?.total_income_btc.toFixed(8)} BTC*/}
+                    {/*</h2>*/}
+                  </Col>
+                  <Col span={24} style={{ marginBottom: "20px" }}>
+                    <Statistic
+                      title="总收益($)"
+                      value={statisticsHistory?.total_income_usd}
+                      valueStyle={{ fontSize: "16px", fontWeight: "bold" }}
+                    />
+                    {/*<h2 style={{ color: "black", fontSize: "16px", marginBottom: "12px" }}>*/}
+                    {/*  总收入 (USD): ${statisticsHistory?.total_income_usd.toFixed(2)}*/}
+                    {/*</h2>*/}
+                  </Col>
+                  <Col span={24} style={{ marginBottom: "20px" }}>
+                    <Statistic
+                      title="总托管费用($)"
+                      value={statisticsHistory?.total_hosting_fee}
+                      valueStyle={{ fontSize: "16px", fontWeight: "bold" }}
+                    />
+                  </Col>
+                </Row>
+              </Card>
             </Col>
             <Col span={8}>
-              <h2 style={{ color: "#1890ff" }}>
-                总收入 (USD): ${statisticsHistory?.total_income_usd.toFixed(2)}
-              </h2>
+              <Card title={"托管费占比"}>
+                <ReactEcharts option={gaugeChartOptions} style={{ height: "212px", width: "100%" }} />
+              </Card>
             </Col>
             <Col span={8}>
-              <h2 style={{ color: "#1890ff" }}>
-                总托管费用: ${statisticsHistory?.total_hosting_fee.toFixed(2)}
-              </h2>
+              <Card title={"曲线图"}>
+                <ReactEcharts option={option} style={{ height: "212px", width: "100%" }} />
+              </Card>
             </Col>
           </Row>
         </Card>
-        <div style={{ marginTop: "20px", textAlign: "center" }}>
-          <ReactEcharts option={gaugeChartOptions} style={{ height: "250px", width: "100%" }} />
-        </div>
       </div>
       <Table
         dataSource={statisticsHistory?.data}
         columns={columns}
         rowKey="pool_name" // 使用矿池名称作为唯一标识
         style={{ marginTop: "20px" }}
+        pagination={{
+          position: ["bottomCenter"], // 将分页器位置设置为底部居中
+          showSizeChanger: true, // 允许用户改变每页显示的条目数
+          pageSizeOptions: ["10", "20", "30", "50"], // 每页显示条目的选项
+          defaultPageSize: 10, // 默认每页显示的条目数
+        }}
       />
     </div>
   );

@@ -5,6 +5,8 @@ import { useSelector, useSettingsStore } from "@/stores";
 
 import { fetchHashRateHistory } from "@/pages/hash-detail/api.tsx";
 import { LineChartOutlined } from "@ant-design/icons";
+import { useNavigate } from "react-router-dom";
+import { ROUTE_PATHS } from "@/constants/common.ts";
 
 const { RangePicker } = DatePicker;
 
@@ -27,6 +29,12 @@ export default function HashRateHistoryTable() {
 
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
+
+  const navigate = useNavigate();
+
+  const handlePoolClick = (poolName: any) => {
+    navigate(ROUTE_PATHS.poolHashHistory(poolName));
+  };
 
   const fetchData = async (poolType: string) => {
     try {
@@ -59,6 +67,14 @@ export default function HashRateHistoryTable() {
       dataIndex: "pool_name",
       key: "pool_name",
       width: "300px",
+      render: (text, record) => (
+        <a
+          onClick={() => handlePoolClick(record.pool_name)} // 点击事件
+          style={{ color: "blue", cursor: "pointer" }} // 视觉提示
+        >
+          {text}
+        </a>
+      ),
     },
     {
       title: "算力",

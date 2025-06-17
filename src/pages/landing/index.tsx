@@ -7,6 +7,8 @@ import { useSelector, useSettingsStore } from "@/stores";
 import MiningBenefitCard from "@/pages/landing/components/mining-benefit-card.tsx";
 import MiningOMCard from "@/pages/landing/components/mining-om-card.tsx";
 import MiningBenefitLine from "@/pages/landing/components/mining-benefit-line.tsx";
+import MiningRepairTrendChart from "@/pages/landing/components/repair-trend-chart.tsx";
+import PowerLimitationTrendChart from "@/pages/landing/components/power-limit-trend-chart.tsx";
 
 export default function LandingPage() {
   useAuthRedirect();
@@ -38,7 +40,10 @@ export default function LandingPage() {
               <MiningBenefitLine poolType={poolType} />
             </Col>
             <Col span={24} style={{ marginTop: "16px" }}>
-              <MiningEfficiencyCard poolType={poolType} />
+              <MiningRepairTrendChart poolType={poolType} />
+            </Col>
+            <Col span={24} style={{ marginTop: "16px" }}>
+              <PowerLimitationTrendChart poolType={poolType} />
             </Col>
           </Row>
         </Col>

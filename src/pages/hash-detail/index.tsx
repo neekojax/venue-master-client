@@ -11,11 +11,11 @@ export default function HashDetailPage() {
     <div>
       <HashRatePieChart />
       <Row gutter={24} style={{ marginTop: "20px" }}>
-        <Col span={10}>
-          <HashCompletionRateHistoryTable />
-        </Col>
         <Col span={14}>
           <HashRateHistoryTable />
+        </Col>
+        <Col span={10}>
+          <HashCompletionRateHistoryTable />
         </Col>
       </Row>
     </div>

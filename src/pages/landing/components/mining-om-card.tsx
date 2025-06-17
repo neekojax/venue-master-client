@@ -13,9 +13,7 @@ interface MiningPoolCardProps {
 }
 
 const MiningOMCard: React.FC<MiningPoolCardProps> = ({ poolType }) => {
-  const [realTimeStatus, setRealTimeStatus] = useState<any>(null); // 状态数据
-  const [lastDayStatus, setLastDayStatus] = useState<any>(null); // 状态数据
-  const [lastWeekStatus, setLastWeekStatus] = useState<any>(null); // 状态数据
+  const [data, setData] = useState<any>(null); // 状态数据
   const [loading, setLoading] = useState<boolean>(true); // 加载状态
   const [error, setError] = useState<string | null>(null); // 错误信息
 
@@ -25,35 +23,38 @@ const MiningOMCard: React.FC<MiningPoolCardProps> = ({ poolType }) => {
 
   const fetchData = async (poolType: string) => {
     try {
-      const realTimeStatusResult = await fetchTotalRealTimeStatus(poolType);
-      setRealTimeStatus(realTimeStatusResult.data); // 假设返回数据在 result.data 中
+      if (poolType === "NS") {
+        setData({
+          currentOnlineCount: 69836, // 随机生成值
+          totalFaultsCount: 12070, // 随机生成值
+          yesterdayPowerCutDuration: 1.5, // 随机生成值
+          lastWeekPowerCutDuration: 10, // 随机生成值
+          lastMonthPowerCutDuration: 28, // 随机生成值
+          yesterdayFaultsCount: 49,
+          lastWeekFaultsCount: 320,
+          lastMonthFaultsCount: 1902,
+          yesterdayFailureRate: 0.79,
+          lastWeekFailureRate: 1.07,
+          lastMonthFailureRate: 7.13,
 
+        })
+      } else {
+        setData({
+          currentOnlineCount: 88196, // 随机生成值
+          totalFaultsCount: 8837, // 随机生成值
+          yesterdayPowerCutDuration: 1, // 随机生成值
+          lastWeekPowerCutDuration: 8, // 随机生成值
+          lastMonthPowerCutDuration: 25, // 随机生成值
+          yesterdayFaultsCount: 46,
+          lastWeekFaultsCount: 290,
+          lastMonthFaultsCount: 1804,
+          yesterdayFailureRate: 0.76,
+          lastWeekFailureRate: 1.27,
+          lastMonthFailureRate: 6.13,
 
-      const lastWeekStatusResult = await fetchTotalLastProfitStatus(poolType);
-      setLastWeekStatus(lastWeekStatusResult.data); // 假设返回数据在 result.data 中
+        })
+      }
 
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    } catch (err) {
-      setLastDayStatus({
-        lastSettlementDate: "N/A", // 可以根据需要设置默认值
-        totalHashEfficiency: 0,
-        totalProfitBtc: 0,
-        totalMasterProfitBtc: 0,
-        totalBackUpProfitBtc: 0,
-      });
-      // setError("获取状态失败");
-
-      setLastWeekStatus({
-        averageEfficiency: 0, // 默认值
-      });
-
-      setRealTimeStatus({
-        totalCurrentHashRate: 0, // 默认算力
-        totalOnline: 0, // 默认在线人数
-        totalOffline: 0, // 默认离线人数
-        totalMasterCurrentHashrate: 0, // 默认主矿池算力
-        totalBackUpCurrentHashrate: 0, // 默认备用矿池算力
-      });
     } finally {
       setLoading(false);
     }
@@ -116,35 +117,19 @@ const MiningOMCard: React.FC<MiningPoolCardProps> = ({ poolType }) => {
               <span style={{ display: "flex", alignItems: "baseline" }}>
                 <span
                   style={{
-                    color: "red",
+                    color: "green",
                     fontWeight: "bold",
                     fontSize: "20px",
                   }}
                 >
-                  {/*{lastDayStatus?.totalProfitBtc}*/}1000
+                  {data?.currentOnlineCount}
                 </span>
                 <span style={{ margin: "0 8px" }}> / </span>
-                <span style={{ color: "green", fontWeight: "bold", fontSize: "20px" }}>
-                  {/*{lastDayStatus?.totalFaults}*/} 200000
+                <span style={{ color: "red", fontWeight: "bold", fontSize: "20px" }}>
+                  {data?.totalFaultsCount}
                 </span>
               </span>
             )}
-            // prefix={<BiLogoBitcoin style={{ fontSize: "20px", color: "gold" }} />}
-            // suffix={
-            //   <span style={{ fontSize: "16px", color: "gray", fontWeight: "normal" }}>
-            //     <Tooltip
-            //       title={
-            //         <>
-            //           主矿池: {lastDayStatus?.totalMasterProfitBtc}
-            //           <br />
-            //           备用矿池: {lastDayStatus?.totalBackUpProfitBtc}
-            //         </>
-            //       }
-            //     >
-            //       <InfoCircleOutlined style={{ marginLeft: "8px", fontSize: "12px", cursor: "pointer" }} />
-            //     </Tooltip>
-            //   </span>
-            // }
           />
         </Col>
         <Col span={14} style={{ borderLeft: "1px solid #f0f0f0", paddingLeft: "16px" }}>
@@ -162,13 +147,13 @@ const MiningOMCard: React.FC<MiningPoolCardProps> = ({ poolType }) => {
             </Col>
             <Col span={14}>
               <Col span={24} style={{ fontSize: "14px", color: "black", marginBottom: "12px" }}>
-                86 小时
+                1.5 小时
               </Col>
               <Col span={24} style={{ fontSize: "14px", color: "black", marginBottom: "12px" }}>
-                560 小时
+                10 小时
               </Col>
               <Col span={24} style={{ fontSize: "14px", color: "black", marginBottom: "12px" }}>
-                560 小时
+                28 小时
               </Col>
             </Col>
           </Row>
@@ -179,11 +164,11 @@ const MiningOMCard: React.FC<MiningPoolCardProps> = ({ poolType }) => {
           <Row gutter={24}>
             <Col span={24} style={{ fontSize: "14px", color: "gray", marginBottom: "12px" }}>
               <span style={{ fontSize: "14px", color: "gray" }}>昨日故障数</span>
-              <span style={{ fontSize: "14px", color: "black", marginLeft: "10px" }}>123 台</span>
+              <span style={{ fontSize: "14px", color: "black", marginLeft: "10px" }}>{data?.yesterdayFaultsCount} 台</span>
             </Col>
             <Col span={24} style={{ fontSize: "14px", color: "gray", marginBottom: "12px" }}>
               <span style={{ fontSize: "14px", color: "gray" }}>折合年故障率</span>
-              <span style={{ fontSize: "14px", color: "black", marginLeft: "10px" }}>86.09%</span>
+              <span style={{ fontSize: "14px", color: "black", marginLeft: "10px" }}>{data?.yesterdayFailureRate}%</span>
             </Col>
           </Row>
         </Col>
@@ -191,11 +176,11 @@ const MiningOMCard: React.FC<MiningPoolCardProps> = ({ poolType }) => {
           <Row gutter={24}>
             <Col span={24} style={{ fontSize: "14px", color: "gray", marginBottom: "12px" }}>
               <span style={{ fontSize: "14px", color: "gray" }}>近一周故障数</span>
-              <span style={{ fontSize: "14px", color: "black", marginLeft: "10px" }}>123 台</span>
+              <span style={{ fontSize: "14px", color: "black", marginLeft: "10px" }}>{data?.lastWeekFaultsCount}台</span>
             </Col>
             <Col span={24} style={{ fontSize: "14px", color: "gray", marginBottom: "12px" }}>
               <span style={{ fontSize: "14px", color: "gray" }}>折合年故障率</span>
-              <span style={{ fontSize: "14px", color: "black", marginLeft: "10px" }}>86.09%</span>
+              <span style={{ fontSize: "14px", color: "black", marginLeft: "10px" }}>{data?.lastWeekFailureRate}%</span>
             </Col>
           </Row>
         </Col>
@@ -203,11 +188,11 @@ const MiningOMCard: React.FC<MiningPoolCardProps> = ({ poolType }) => {
           <Row gutter={24}>
             <Col span={24} style={{ fontSize: "14px", color: "gray", marginBottom: "12px" }}>
               <span style={{ fontSize: "14px", color: "gray" }}>近一月故障数</span>
-              <span style={{ fontSize: "14px", color: "black", marginLeft: "10px" }}>123 台</span>
+              <span style={{ fontSize: "14px", color: "black", marginLeft: "10px" }}>{data?.lastMonthFaultsCount} 台</span>
             </Col>
             <Col span={24} style={{ fontSize: "14px", color: "gray", marginBottom: "12px" }}>
               <span style={{ fontSize: "14px", color: "gray" }}>折合年故障率</span>
-              <span style={{ fontSize: "14px", color: "black", marginLeft: "10px" }}>86.09%</span>
+              <span style={{ fontSize: "14px", color: "black", marginLeft: "10px" }}>{data?.lastMonthFailureRate}%</span>
             </Col>
           </Row>
         </Col>
