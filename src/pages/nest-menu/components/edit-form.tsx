@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { MinusCircleOutlined, PlusOutlined } from "@ant-design/icons";
 import { Button, Form, type FormInstance, Input, Space } from "antd";
+// @ts-ignore
 import type { Field, Values } from "../type";
 
 interface EditFormProps {
@@ -10,7 +11,7 @@ interface EditFormProps {
 
 export default function EditForm({ initialValues, onFormInstanceReady }: EditFormProps) {
   const [form] = Form.useForm();
-  const [hasChanged, setHasChanged] = useState(false);
+  // const [hasChanged, setHasChanged] = useState(false);
   const [fields, setFields] = useState<Field[]>(initialValues.fields || []);
   const [templateName, setTemplateName] = useState<string>(initialValues.templateName);
 
@@ -59,7 +60,7 @@ export default function EditForm({ initialValues, onFormInstanceReady }: EditFor
       preserve={false}
       labelAlign="left"
       onChange={() => {
-        setHasChanged(true);
+        // setHasChanged(true);
       }}
       labelCol={{ flex: "40px" }}
       wrapperCol={{ flex: 1 }}

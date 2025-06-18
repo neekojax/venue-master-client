@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Button, message } from "antd";
 import EditModal from "./edit-modal";
+// @ts-ignore
 import type { TemplateDataChange, Values } from "../type";
 import { useSubmitVenueTemplateChange } from "@/pages/base/hook/hook.ts";
 
@@ -42,7 +43,7 @@ export default function EditButton({ data }: EditButtonProps) {
       ID: data.key,
       templateNameBefore: templateName,
       templateNameAfter: values.templateName,
-      fields: values.fields.map((field) => {
+      fields: values.fields.map((field: { ID: number }) => {
         // 检查 ID，若为 0 则更新 status 为 "new"
         if (field.ID === 0) {
           return { ...field, status: "new" };

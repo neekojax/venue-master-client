@@ -1,28 +1,30 @@
-import React, { useEffect, useState } from "react";
-import { Line } from "@ant-design/charts";
-import { Card, Col, Radio, Row, Spin, Statistic, Tooltip } from "antd";
-import { ReactEcharts } from "@/components/react-echarts";
-import { AiFillFund } from "react-icons/ai";
+import { useEffect, useState } from "react";
 import { FcBullish } from "react-icons/fc";
+import { Card, Col, Radio, Row } from "antd";
+import { ReactEcharts } from "@/components/react-echarts";
 
 import { fetchLastestHashRateEfficiency } from "@/pages/mining/api.tsx";
-import { FcLineChart } from "react-icons/fc";
 
+// @ts-ignore
 const MiningEfficiencyCard = ({ poolType }) => {
   const [data, setData] = useState([]);
   // const [dataCang, setDataCang] = useState([]);
   const [timeFrame, setTimeFrame] = useState("90");
 
-  const fetchData = async (timeFrame) => {
+  const fetchData = async (timeFrame: string) => {
     try {
       const Result = await fetchLastestHashRateEfficiency(poolType, timeFrame);
 
-      const formattedData = Result.data?.map((item) => ({
+      const formattedData = Result.data?.map((item: { date: any; efficiency: any }) => ({
         date: item.date,
         efficiency: item.efficiency,
       }));
 
-      const sortedData = formattedData.sort((a, b) => new Date(a.date) - new Date(b.date));
+      const sortedData = formattedData.sort(
+        (a: { date: string | number | Date }, b: { date: string | number | Date }) =>
+          // @ts-ignore
+          new Date(a.date) - new Date(b.date),
+      );
 
       setData(sortedData);
     } catch (error) {
@@ -35,7 +37,9 @@ const MiningEfficiencyCard = ({ poolType }) => {
   }, [poolType]);
 
   const getOption = () => {
+    // @ts-ignore
     const dates = data.map((item) => item.date);
+    // @ts-ignore
     const efficiencies = data.map((item) => item.efficiency);
 
     return {
@@ -82,6 +86,7 @@ const MiningEfficiencyCard = ({ poolType }) => {
     };
   };
 
+  // @ts-ignore
   const handleTimeFrameChange = (e) => {
     const newTimeFrame = e.target.value;
     setTimeFrame(newTimeFrame); // 更新 timeFrame 状态

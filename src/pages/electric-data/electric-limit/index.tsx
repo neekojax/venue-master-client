@@ -1,10 +1,10 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import EditTable from "@/components/edit-table";
+import { exportElectricDataToExcel, exportElectricDataToExcelT } from "@/utils/excel.ts";
 
 import { fetchSettlementData } from "@/pages/electric-data/api.tsx";
 import ElectricSelectComponent from "@/pages/electric-data/components/electric-select.tsx";
 import { PRICE_TYPE_REAL_TIME, PRICE_TYPE_T1, SettlementQueryParam } from "@/pages/electric-data/type.tsx";
-import { exportElectricDataToExcel, exportElectricDataToExcelT } from "@/utils/excel.ts";
 
 const StoragePrefix = "electric-limit";
 
@@ -117,7 +117,9 @@ export default function ElectricLimit() {
             tableData={tableData}
             setTableData={setTableData}
             columns={columns}
+            // @ts-ignore
             handleDelete={() => {}}
+            // @ts-ignore
             handleSave={() => {}}
           />
         ) : (

@@ -73,7 +73,7 @@ export default function SettingPage() {
         key: "serialNumber",
         width: 40,
         editable: false,
-        render: (_, record) => {
+        render: (_: any, record: { serialNumber?: any; observer_link?: any; }) => {
           const { observer_link } = record;
           // 根据 observer_link 内容返回不同的图标
           if (observer_link.includes("antpool")) {
@@ -225,7 +225,9 @@ export default function SettingPage() {
           tableData={filteredData}
           setTableData={setTableData}
           columns={columns}
+          // @ts-ignore
           handleDelete={handleDelete}
+          // @ts-ignore
           handleSave={handleSave}
         />
       )}

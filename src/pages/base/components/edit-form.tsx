@@ -10,7 +10,7 @@ interface EditFormProps {
 
 export default function EditForm({ initialValues, onFormInstanceReady }: EditFormProps) {
   const [form] = Form.useForm();
-  const [hasChanged, setHasChanged] = useState(false);
+  // const [hasChanged, setHasChanged] = useState(false);
   const [fields, setFields] = useState<Field[]>(initialValues.fields || []);
   const [templateName, setTemplateName] = useState<string>(initialValues.templateName);
 
@@ -59,7 +59,7 @@ export default function EditForm({ initialValues, onFormInstanceReady }: EditFor
       preserve={false}
       labelAlign="left"
       onChange={() => {
-        setHasChanged(true);
+        // setHasChanged(true);
       }}
       labelCol={{ flex: "40px" }}
       wrapperCol={{ flex: 1 }}

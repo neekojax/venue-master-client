@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { JSXElementConstructor, ReactElement, ReactNode, ReactPortal, useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { Card, Table } from "antd";
 import { ReactEcharts } from "@/components/react-echarts";
@@ -17,14 +17,22 @@ export default function PoolHashHistoryPage() {
   const [history, setHistory] = useState<any>(null); // 状态数据
 
   const [loading, setLoading] = useState<boolean>(true); // 加载状态
-  const [error, setError] = useState<string | null>(null); // 错误信息
+  // const [error, setError] = useState<string | null>(null); // 错误信息
 
   const fetchData = async (poolType: string) => {
     try {
       const historyResult = await fetchHashRateHistoryByPoolName(poolType, poolName);
 
-      setHistory(historyResult?.data?.sort((a, b) => new Date(a.date) - new Date(b.date))); // 假设返回数据在 result.data 中
+      setHistory(
+        historyResult?.data?.sort(
+          (a: { date: string | number | Date }, b: { date: string | number | Date }) =>
+            // @ts-ignore
+            new Date(a.date) - new Date(b.date),
+        ),
+      ); // 假设返回数据在 result.data 中
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (err) {
+      /* empty */
     } finally {
       setLoading(false);
     }
@@ -34,12 +42,12 @@ export default function PoolHashHistoryPage() {
     fetchData(poolType);
   }, [poolType]);
 
-  const sortedData = history?.data?.sort((a, b) => new Date(a.date) - new Date(b.date));
-
   const getOption = () => {
-    const dates = history?.map((item) => item.date);
-    const hashRates = history?.map((item) => item.hash_rate);
-    const theoreticalHashes = history?.map((item) => item.settlement_theoretical_hash);
+    const dates = history?.map((item: { date: any }) => item.date);
+    const hashRates = history?.map((item: { hash_rate: any }) => item.hash_rate);
+    const theoreticalHashes = history?.map(
+      (item: { settlement_theoretical_hash: any }) => item.settlement_theoretical_hash,
+    );
 
     return {
       tooltip: {
@@ -96,13 +104,33 @@ export default function PoolHashHistoryPage() {
       title: "结算算力",
       dataIndex: "hash_rate",
       key: "hash_rate",
-      render: (text) => <span>{text} PH/s</span>, // Display unit
+      render: (
+        text:
+          | string
+          | number
+          | boolean
+          | ReactElement<any, string | JSXElementConstructor<any>>
+          | Iterable<ReactNode>
+          | ReactPortal
+          | null
+          | undefined,
+      ) => <span>{text} PH/s</span>, // Display unit
     },
     {
       title: "理论算力",
       dataIndex: "settlement_theoretical_hash",
       key: "settlement_theoretical_hash",
-      render: (text) => <span>{text} PH/s</span>, // Display unit
+      render: (
+        text:
+          | string
+          | number
+          | boolean
+          | ReactElement<any, string | JSXElementConstructor<any>>
+          | Iterable<ReactNode>
+          | ReactPortal
+          | null
+          | undefined,
+      ) => <span>{text} PH/s</span>, // Display unit
     },
     {
       title: "算力达成率",

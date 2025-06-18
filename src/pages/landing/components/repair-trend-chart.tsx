@@ -1,10 +1,8 @@
-import React, { useEffect, useState } from "react";
-import { Card, Col, Radio, Row, Spin, Statistic, Tooltip } from "antd";
-import { ReactEcharts } from "@/components/react-echarts";
 import { FcRefresh } from "react-icons/fc";
+import { Card, Col, Row } from "antd";
+import { ReactEcharts } from "@/components/react-echarts";
 
-const MiningRepairTrendChart = ({ poolType }) => {
-
+const MiningRepairTrendChart = () => {
   const generateRepairData = () => {
     const data = [];
     const today = new Date();

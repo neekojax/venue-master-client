@@ -1,22 +1,10 @@
 import { useEffect, useState } from "react";
-import { Alert, Input, message, Space, Spin, Table, Tag, Tooltip } from "antd";
+import { Alert, Input, Space, Spin } from "antd";
 import EditTable from "@/components/edit-table";
 import useAuthRedirect from "@/hooks/useAuthRedirect.ts";
 import { getShortenedLink } from "@/utils/short-link.ts";
 
-import AddLink from "@/pages/nest-menu/components/add-button.tsx";
 import { useLinkList } from "@/pages/nest-menu/hook/hook.ts";
-import { useVenueRecordDelete, useVenueRecordUpdate } from "@/pages/venue/hook/hook.ts";
-import { VenueRecordUpdate } from "@/pages/venue/type.ts";
-
-// interface TableDataType {
-//   key: number;
-//   serialNumber: number;
-//   site_name: string;
-//   sub_account: string;
-//   antpool_link: string;
-//   f2pool_link: string;
-// }
 
 export default function LinkPage() {
   useAuthRedirect();
@@ -119,104 +107,12 @@ export default function LinkPage() {
     setSearchTerm(e.target.value);
   };
 
-  // 定义表格列
-  // const columns = [
-  //   {
-  //     title: "序号",
-  //     dataIndex: "serialNumber",
-  //     key: "serialNumber",
-  //     // 如果需要，可以添加排序功能
-  //   },
-  //   {
-  //     title: "场地名称",
-  //     dataIndex: "siteName",
-  //     key: "siteName",
-  //   },
-  //   {
-  //     title: "子账号",
-  //     dataIndex: "subAccount",
-  //     key: "subAccount",
-  //   },
-  //   {
-  //     title: "AntPool链接",
-  //     dataIndex: "antpoolLink",
-  //     key: "antpoolLink",
-  //     render: (link: string) => (
-  //       <Tooltip title={link}>
-  //         <a
-  //           href={link}
-  //           target="_blank"
-  //           rel="noopener noreferrer"
-  //           style={{ color: "blue", textDecoration: "underline" }}
-  //         >
-  //           {getShortenedLink(link)}
-  //         </a>
-  //       </Tooltip>
-  //     ),
-  //   },
-  //   {
-  //     title: "F2Pool链接",
-  //     dataIndex: "f2poolLink",
-  //     key: "f2poolLink",
-  //     render: (link: string) => (
-  //       <Tooltip title={link}>
-  //         <a
-  //           href={link}
-  //           target="_blank"
-  //           rel="noopener noreferrer"
-  //           style={{ color: "blue", textDecoration: "underline" }}
-  //         >
-  //           {getShortenedLink(link)}
-  //         </a>
-  //       </Tooltip>
-  //     ),
-  //   },
-  //   {
-  //     title: "操作",
-  //     key: "action",
-  //     render: (_text: any, record: { key: any }) => (
-  //       <>
-  //         {/*<EditButton data={record} />*/}
-  //         {/*<DeleteButton data={record} />*/}
-  //       </>
-  //     ),
-  //   },
-  // ];
-
-  // const deleteMutation = useVenueRecordDelete();
-  // const updateMutation = useVenueRecordUpdate();
-
-  const handleDelete = (recordId: number) => {
-    // deleteMutation.mutate(recordId, {
-    //   onSuccess: () => {
-    //     message.success("删除记录成功");
-    //   },
-    //   onError: (error) => {
-    //     message.error(`删除记录失败: ${error.message}`);
-    //   },
-    // });
+  const handleDelete = (): Promise<void> => {
+    return new Promise(() => {});
   };
 
-  const handleSave = (rowKey: number, data: { [x: string]: string }) => {
-    // const venueRecordUpdate: VenueRecordUpdate = {
-    //   RecordID: rowKey as number, // 假设 rowKey 是 RecordID
-    //   Fields: Object.keys(data)
-    //     .filter((key) => key !== "index" && key !== "key") // 过滤掉 index 和 key
-    //     .map((key) => ({
-    //       ID: parseInt(key), // 将 key 转换为数字，假设它是字段的 ID
-    //       FieldName: "", // 这里假设 key 就是 FieldName
-    //       Value: data[key] as string, // 从 data 中获取对应的值
-    //     })),
-    // };
-    //
-    // updateMutation.mutate(venueRecordUpdate, {
-    //   onSuccess: () => {
-    //     message.success("更新记录成功");
-    //   },
-    //   onError: (error) => {
-    //     message.error(`更新记录失败: ${error.message}`);
-    //   },
-    // });
+  const handleSave = (): Promise<void> => {
+    return new Promise(() => {});
   };
 
   // 根据搜索词过滤数据
@@ -227,19 +123,13 @@ export default function LinkPage() {
   });
 
   // @ts-ignore
+  // @ts-ignore
   return (
     <div style={{ padding: "20px" }}>
       <div
         style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}
       >
-        <Space size={24}>
-          {/*<AddLink*/}
-          {/*  // templates={templates}*/}
-          {/*  // selectedTemplate={selectedTemplate}*/}
-          {/*  // fields={fields?.data}*/}
-          {/*  data={}*/}
-          {/*/>*/}
-        </Space>
+        <Space size={24}></Space>
         <Input
           placeholder="请输入搜索字段"
           value={searchTerm}

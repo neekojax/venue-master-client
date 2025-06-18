@@ -9,7 +9,7 @@ const { Option } = Select;
 const PoolTypeSelector = () => {
   const { poolType } = useSettingsStore(useSelector(["poolType"]));
 
-  const handleChange = (value) => {
+  const handleChange = (value: string) => {
     setPoolType(value); // 更新语言
   };
 

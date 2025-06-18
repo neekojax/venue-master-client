@@ -1,6 +1,5 @@
-import React, { useEffect, useState } from "react";
-import { Line } from "@ant-design/charts";
-import { Card, Col, Radio, Row, Spin, Statistic, Tooltip } from "antd";
+import { useEffect, useState } from "react";
+import { Card, Col, Radio, Row } from "antd";
 import { ReactEcharts } from "@/components/react-echarts";
 
 import { fetchLastestHashRate } from "@/pages/mining/api.tsx";
@@ -10,23 +9,31 @@ const MiningHashCard = () => {
   const [dataCang, setDataCang] = useState([]);
   const [timeFrame, setTimeFrame] = useState("7");
 
-  const fetchData = async (timeFrame) => {
+  const fetchData = async (timeFrame: string) => {
     try {
       const nsResult = await fetchLastestHashRate("NS", timeFrame);
       const cangResult = await fetchLastestHashRate("CANG", timeFrame);
 
-      const formattedNsData = nsResult.data?.map(item => ({
+      const formattedNsData = nsResult.data?.map((item: { date: any; day_hash_rate: any }) => ({
         date: item.date,
         hash: item.day_hash_rate,
       }));
 
-      const formattedCangData = cangResult.data?.map(item => ({
+      const formattedCangData = cangResult.data?.map((item: { date: any; day_hash_rate: any }) => ({
         date: item.date,
         hash: item.day_hash_rate,
       }));
 
-      const sortedNsData = formattedNsData.sort((a, b) => new Date(a.date) - new Date(b.date));
-      const sortedCangData = formattedCangData.sort((a, b) => new Date(a.date) - new Date(b.date));
+      const sortedNsData = formattedNsData.sort(
+        (a: { date: string | number | Date }, b: { date: string | number | Date }) =>
+          // @ts-ignore
+          new Date(a.date) - new Date(b.date),
+      );
+      const sortedCangData = formattedCangData.sort(
+        (a: { date: string | number | Date }, b: { date: string | number | Date }) =>
+          // @ts-ignore
+          new Date(a.date) - new Date(b.date),
+      );
 
       setDataNs(sortedNsData);
       setDataCang(sortedCangData);
@@ -38,13 +45,16 @@ const MiningHashCard = () => {
   };
 
   useEffect(() => {
-    fetchData(7);
+    fetchData("7");
   }, []);
 
   const getOption = () => {
-    const dates = dataNs.map(item => item.date);
-    const nsDayHashRate = dataNs.map(item => item.hash);
-    const cangDayHashRate = dataCang.map(item => item.hash);
+    // @ts-ignore
+    const dates = dataNs.map((item) => item.date);
+    // @ts-ignore
+    const nsDayHashRate = dataNs.map((item) => item.hash);
+    // @ts-ignore
+    const cangDayHashRate = dataCang.map((item) => item.hash);
 
     return {
       tooltip: {
@@ -104,6 +114,7 @@ const MiningHashCard = () => {
     };
   };
 
+  // @ts-ignore
   const handleTimeFrameChange = (e) => {
     const newTimeFrame = e.target.value;
     setTimeFrame(newTimeFrame); // 更新 timeFrame 状态

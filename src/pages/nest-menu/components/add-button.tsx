@@ -1,10 +1,10 @@
-import { useEffect, useState } from "react";
-import { MinusCircleOutlined, PlusOutlined } from "@ant-design/icons";
+import { useState } from "react";
+import { PlusOutlined } from "@ant-design/icons";
 import { Button, message } from "antd";
 import EditModal from "./edit-modal";
 
-import type { TemplateDataNew, Values } from "@/pages/base/type.ts";
 import { useSubmitVenueTemplateNew } from "@/pages/base/hook/hook.ts";
+import type { TemplateDataNew, Values } from "@/pages/base/type.ts";
 type EditButtonProps = {
   data: any;
 };

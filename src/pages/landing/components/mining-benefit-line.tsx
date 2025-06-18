@@ -1,28 +1,34 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { FcLineChart } from "react-icons/fc";
-import { Line } from "@ant-design/charts";
-import { Card, Col, Radio, Row, Spin, Statistic, Tooltip } from "antd";
+import { Card, Col, Radio, Row } from "antd";
 import { ReactEcharts } from "@/components/react-echarts";
 
 import { fetchMiningBenefitLine } from "@/pages/landing/api.ts";
 
+// @ts-ignore
 const MiningBenefitCard = ({ poolType }) => {
   const [data, setData] = useState([]);
   const [timeFrame, setTimeFrame] = useState("30");
 
-  const fetchData = async (timeFrame) => {
+  const fetchData = async (timeFrame: string) => {
     try {
       const Result = await fetchMiningBenefitLine(poolType, timeFrame);
 
-      const formattedData = Result.data.map((item) => ({
-        time: item.time,
-        income_usd: item.income_usd,
-        hosting_fee: item.hosting_fee,
-        fee_percentage: item.fee_percentage,
-      }));
+      const formattedData = Result.data.map(
+        (item: { time: any; income_usd: any; hosting_fee: any; fee_percentage: any }) => ({
+          time: item.time,
+          income_usd: item.income_usd,
+          hosting_fee: item.hosting_fee,
+          fee_percentage: item.fee_percentage,
+        }),
+      );
 
       // 按时间排序
-      const sortedData = formattedData.sort((a, b) => new Date(a.time) - new Date(b.time));
+      const sortedData = formattedData.sort(
+        (a: { time: string | number | Date }, b: { time: string | number | Date }) =>
+          // @ts-ignore
+          new Date(a.time) - new Date(b.time),
+      );
       setData(sortedData);
 
       setData(sortedData);
@@ -37,9 +43,13 @@ const MiningBenefitCard = ({ poolType }) => {
   }, [poolType]);
 
   const getOption = () => {
+    // @ts-ignore
     const times = data.map((item) => item.time);
+    // @ts-ignore
     const income_usd = data.map((item) => item.income_usd);
+    // @ts-ignore
     const hosting_fee = data.map((item) => item.hosting_fee);
+    // @ts-ignore
     const fee_percentage = data.map((item) => item.fee_percentage);
 
     return {
@@ -127,6 +137,7 @@ const MiningBenefitCard = ({ poolType }) => {
     };
   };
 
+  // @ts-ignore
   const handleTimeFrameChange = (e) => {
     const newTimeFrame = e.target.value;
     setTimeFrame(newTimeFrame); // 更新 timeFrame 状态

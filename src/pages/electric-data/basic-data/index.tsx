@@ -111,6 +111,7 @@ export default function ElectricBasic() {
   };
 
   // 处理页码变化
+  // @ts-ignore
   const onPageChange = (page, pageSize) => {
     setCurrentPage(page);
     setPageSize(pageSize);

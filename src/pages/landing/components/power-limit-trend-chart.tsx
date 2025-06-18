@@ -1,7 +1,6 @@
-import React from "react";
+import { AiOutlineThunderbolt } from "react-icons/ai"; // 新图标
 import { Card, Col, Row } from "antd";
 import { ReactEcharts } from "@/components/react-echarts";
-import { AiOutlineThunderbolt } from "react-icons/ai"; // 新图标
 
 const PowerLimitationTrendChart = () => {
   const generatePowerLimitationData = () => {

@@ -1,12 +1,8 @@
 // MiningStatusCard.tsx
 import React, { useEffect, useState } from "react";
-import { BiLogoBitcoin } from "react-icons/bi";
-import { InfoCircleOutlined } from "@ant-design/icons";
-import { Card, Col, Row, Spin, Statistic, Tooltip } from "antd";
-import { FaTachometerAlt } from "react-icons/fa";
 import { BsChevronRight } from "react-icons/bs";
-
-import { fetchTotalLastProfitStatus, fetchTotalRealTimeStatus } from "@/pages/mining/api.tsx";
+import { FaTachometerAlt } from "react-icons/fa";
+import { Card, Col, Row, Statistic} from "antd";
 
 interface MiningPoolCardProps {
   poolType: string; // 接收矿池类型作为 props
@@ -15,7 +11,7 @@ interface MiningPoolCardProps {
 const MiningOMCard: React.FC<MiningPoolCardProps> = ({ poolType }) => {
   const [data, setData] = useState<any>(null); // 状态数据
   const [loading, setLoading] = useState<boolean>(true); // 加载状态
-  const [error, setError] = useState<string | null>(null); // 错误信息
+  const [error] = useState<string | null>(null); // 错误信息
 
   const handleNavigate = () => {
     // history.push("/your-target-page"); // 替换为目标页面的路径
@@ -36,8 +32,7 @@ const MiningOMCard: React.FC<MiningPoolCardProps> = ({ poolType }) => {
           yesterdayFailureRate: 0.79,
           lastWeekFailureRate: 1.07,
           lastMonthFailureRate: 7.13,
-
-        })
+        });
       } else {
         setData({
           currentOnlineCount: 88196, // 随机生成值
@@ -51,10 +46,8 @@ const MiningOMCard: React.FC<MiningPoolCardProps> = ({ poolType }) => {
           yesterdayFailureRate: 0.76,
           lastWeekFailureRate: 1.27,
           lastMonthFailureRate: 6.13,
-
-        })
+        });
       }
-
     } finally {
       setLoading(false);
     }
@@ -167,7 +160,7 @@ const MiningOMCard: React.FC<MiningPoolCardProps> = ({ poolType }) => {
               <span style={{ fontSize: "14px", color: "black", marginLeft: "10px" }}>{data?.yesterdayFaultsCount} 台</span>
             </Col>
             <Col span={24} style={{ fontSize: "14px", color: "gray", marginBottom: "12px" }}>
-              <span style={{ fontSize: "14px", color: "gray" }}>折合年故障率</span>
+              <span style={{ fontSize: "14px", color: "gray" }}>折合年维修率</span>
               <span style={{ fontSize: "14px", color: "black", marginLeft: "10px" }}>{data?.yesterdayFailureRate}%</span>
             </Col>
           </Row>
@@ -179,7 +172,7 @@ const MiningOMCard: React.FC<MiningPoolCardProps> = ({ poolType }) => {
               <span style={{ fontSize: "14px", color: "black", marginLeft: "10px" }}>{data?.lastWeekFaultsCount}台</span>
             </Col>
             <Col span={24} style={{ fontSize: "14px", color: "gray", marginBottom: "12px" }}>
-              <span style={{ fontSize: "14px", color: "gray" }}>折合年故障率</span>
+              <span style={{ fontSize: "14px", color: "gray" }}>折合年维修率</span>
               <span style={{ fontSize: "14px", color: "black", marginLeft: "10px" }}>{data?.lastWeekFailureRate}%</span>
             </Col>
           </Row>
@@ -188,11 +181,15 @@ const MiningOMCard: React.FC<MiningPoolCardProps> = ({ poolType }) => {
           <Row gutter={24}>
             <Col span={24} style={{ fontSize: "14px", color: "gray", marginBottom: "12px" }}>
               <span style={{ fontSize: "14px", color: "gray" }}>近一月故障数</span>
-              <span style={{ fontSize: "14px", color: "black", marginLeft: "10px" }}>{data?.lastMonthFaultsCount} 台</span>
+              <span style={{ fontSize: "14px", color: "black", marginLeft: "10px" }}>
+                {data?.lastMonthFaultsCount} 台
+              </span>
             </Col>
             <Col span={24} style={{ fontSize: "14px", color: "gray", marginBottom: "12px" }}>
-              <span style={{ fontSize: "14px", color: "gray" }}>折合年故障率</span>
-              <span style={{ fontSize: "14px", color: "black", marginLeft: "10px" }}>{data?.lastMonthFailureRate}%</span>
+              <span style={{ fontSize: "14px", color: "gray" }}>折合年维修率</span>
+              <span style={{ fontSize: "14px", color: "black", marginLeft: "10px" }}>
+                {data?.lastMonthFailureRate}%
+              </span>
             </Col>
           </Row>
         </Col>

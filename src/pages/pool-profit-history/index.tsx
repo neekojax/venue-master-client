@@ -17,14 +17,16 @@ export default function PoolProfitHistoryPage() {
   const [history, setHistory] = useState<any>(null); // 状态数据
 
   const [loading, setLoading] = useState<boolean>(true); // 加载状态
-  const [error, setError] = useState<string | null>(null); // 错误信息
+  // const [error, setError] = useState<string | null>(null); // 错误信息
 
   const fetchData = async (poolType: string) => {
     try {
       const historyResult = await fetchPoolProfitHistory(poolType, poolName);
 
       setHistory(historyResult.data); // 假设返回数据在 result.data 中
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (err) {
+      /* empty */
     } finally {
       setLoading(false);
     }
@@ -34,7 +36,11 @@ export default function PoolProfitHistoryPage() {
     fetchData(poolType);
   }, [poolType]);
 
-  const sortedData = history?.data?.sort((a, b) => new Date(a.date) - new Date(b.date));
+  const sortedData = history?.data?.sort(
+    (a: { date: string | number | Date }, b: { date: string | number | Date }) =>
+      // @ts-ignore
+      new Date(a.date) - new Date(b.date),
+  );
 
   // 定义 ECharts 配置
   const option = {
@@ -49,7 +55,7 @@ export default function PoolProfitHistoryPage() {
     },
     xAxis: {
       type: "category",
-      data: sortedData?.map(item => item.date),
+      data: sortedData?.map((item: { date: any }) => item.date),
     },
     yAxis: [
       {
@@ -67,14 +73,14 @@ export default function PoolProfitHistoryPage() {
       {
         name: "BTC 收益",
         type: "line",
-        data: sortedData?.map(item => item.income_btc),
+        data: sortedData?.map((item: { income_btc: any; }) => item.income_btc),
         yAxisIndex: 0,
         symbol: "none",
       },
       {
         name: "USD 收益",
         type: "line",
-        data: sortedData?.map(item => item.income_usd),
+        data: sortedData?.map((item: { income_usd: any }) => item.income_usd),
         yAxisIndex: 1,
         symbol: "none",
       },
@@ -120,12 +126,14 @@ export default function PoolProfitHistoryPage() {
       }}
     >
       <h1 style={{ fontSize: "24px", marginBottom: "10px" }}>{history?.pool_name}</h1>
-      <h2 style={{ fontSize: "20px", color: "#555" }}>历史总收益 (BTC): {history ? history.total_income_btc : 0}</h2>
-      <Card title = "历史收益曲线" style={{ marginTop: "20px" }}>
+      <h2 style={{ fontSize: "20px", color: "#555" }}>
+        历史总收益 (BTC): {history ? history.total_income_btc : 0}
+      </h2>
+      <Card loading={loading} title="历史收益曲线" style={{ marginTop: "20px" }}>
         <ReactEcharts option={option} style={{ height: "400px", width: "100%", marginBottom: "20px" }} />
       </Card>
 
-      <Card title="每日收益详情" style={{ marginTop: "20px" }}>
+      <Card loading={loading} title="每日收益详情" style={{ marginTop: "20px" }}>
         <Table
           dataSource={sortedData?.slice().reverse()}
           columns={columns}

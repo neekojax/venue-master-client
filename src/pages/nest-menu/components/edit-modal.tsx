@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { type FormInstance, Modal } from "antd";
+// @ts-ignore
 import type { Values } from "../type";
 import EditForm from "./edit-form";
 

@@ -1,10 +1,9 @@
 import { useEffect, useState } from "react";
+import { Card } from "antd";
 import { ReactEcharts } from "@/components/react-echarts";
-import useAuthRedirect from "@/hooks/useAuthRedirect.ts";
 import { useSelector, useSettingsStore } from "@/stores";
 
 import { fetchRealTimeHashRateDetail } from "@/pages/hash-detail/api.tsx";
-import { Card } from "antd";
 
 export default function HashRatePieChart() {
   const { poolType } = useSettingsStore(useSelector(["poolType"]));
@@ -12,13 +11,15 @@ export default function HashRatePieChart() {
   const [hashRate, setHashRate] = useState<any>(null); // 状态数据
 
   const [loading, setLoading] = useState<boolean>(true); // 加载状态
-  const [error, setError] = useState<string | null>(null); // 错误信息
+  // const [error, setError] = useState<string | null>(null); // 错误信息
 
   const fetchData = async (poolType: string) => {
     try {
       const realTimeHashResult = await fetchRealTimeHashRateDetail(poolType);
       setHashRate(realTimeHashResult.data); // 假设返回数据在 result.data 中
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (err) {
+      /* empty */
     } finally {
       setLoading(false);
     }

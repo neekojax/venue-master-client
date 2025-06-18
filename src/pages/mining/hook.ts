@@ -22,6 +22,7 @@ export const useMiningPoolNew = () => {
     mutationFn: submitMiningPoolNew,
     onSuccess: () => {
       // 在成功提交后，可能需要刷新 venue-templates 数据
+      // @ts-ignore
       queryClient.invalidateQueries(["mining-pool-list"]);
     },
     onError: (error) => {
@@ -38,6 +39,7 @@ export const useMiningPoolUpdate = () => {
     mutationFn: submitMiningPoolUpdate,
     onSuccess: () => {
       // 在成功提交后，可能需要刷新 venue-templates 数据
+      // @ts-ignore
       queryClient.invalidateQueries(["mining-pool-list"]);
     },
     onError: (error) => {
@@ -54,6 +56,7 @@ export const useMiningPoolDelete = () => {
     mutationFn: submitMiningPoolDelete,
     onSuccess: () => {
       // 在成功提交后，可能需要刷新 venue-templates 数据
+      // @ts-ignore
       queryClient.invalidateQueries(["mining-pool-list"]);
     },
     onError: (error) => {

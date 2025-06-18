@@ -1,21 +1,14 @@
 import { useEffect, useState } from "react";
 import { FaAdn, FaFish } from "react-icons/fa6";
 import { WiDirectionUpRight } from "react-icons/wi";
-import { Button, Input, message, Radio, Space, Spin } from "antd";
+import { DownloadOutlined } from "@ant-design/icons";
+import { Button, Radio, Spin } from "antd";
 import EditTable from "@/components/edit-table";
 import useAuthRedirect from "@/hooks/useAuthRedirect.ts";
-import { useMiningHashRateList } from "@/pages/mining/hook.ts";
 import { useSelector, useSettingsStore } from "@/stores";
-import { DownloadOutlined } from "@ant-design/icons";
 import { exportHashRateToExcel } from "@/utils/excel";
 
-const emptyData = {
-  name: "",
-  pool_type: "",
-  pool_category: "",
-  theoretical_hashrate: 0,
-  link: "",
-};
+import { useMiningHashRateList } from "@/pages/mining/hook.ts";
 
 const StoragePrefix = "mining-hash";
 
@@ -27,7 +20,7 @@ export default function MiningHashRatePage() {
     localStorage.getItem(`${StoragePrefix}_poolCategory`) || "主矿池",
   );
 
-  const { data: hashData, error, isLoading: isLoadingPools } = useMiningHashRateList(poolType, poolCategory);
+  const { data: hashData, isLoading: isLoadingPools } = useMiningHashRateList(poolType, poolCategory);
 
   const [columns, setColumns] = useState<any>([]);
   const [tableData, setTableData] = useState<any>([]);
@@ -83,7 +76,7 @@ export default function MiningHashRatePage() {
         dataIndex: "serialNumber",
         key: "serialNumber",
         width: 40,
-        render: (_, record) => {
+        render: (_: any, record: { serialNumber?: any; link?: any }) => {
           const { link } = record;
           // 根据 observer_link 内容返回不同的图标
           if (link.includes("antpool")) {
@@ -119,7 +112,7 @@ export default function MiningHashRatePage() {
         title: "在线 / 离线",
         key: "status",
         width: 100,
-        render: (text: any, record: any) => (
+        render: (_text: any, record: any) => (
           <span>
             <span className="text-green-400">{record.online}</span>
             <span style={{ color: "#888" }}> / </span>
@@ -172,7 +165,7 @@ export default function MiningHashRatePage() {
         key: "last_hash_rate_effective",
         width: 100,
         render: (text: any) => {
-          const value = parseFloat(text.replace('%', '')); // 去掉 '%' 并解析为数字
+          const value = parseFloat(text.replace("%", "")); // 去掉 '%' 并解析为数字
           return <span style={{ color: value < 90 ? "red" : "black" }}>{text}</span>;
         },
       },
@@ -234,11 +227,15 @@ export default function MiningHashRatePage() {
     return <Spin tip="加载中..." />;
   }
 
-  const handleDelete = () => {};
+  const handleDelete = (): Promise<void> => {
+    return new Promise(() => {});
+  };
 
-  const handleSave = () => {};
+  const handleSave = (): Promise<void> => {
+    return new Promise(() => {});
+  };
   const onDownload = () => {
-    exportHashRateToExcel(hashData.data);
+    exportHashRateToExcel(hashData?.data);
   };
 
   const handlePoolCategoryChange = (e: any) => {

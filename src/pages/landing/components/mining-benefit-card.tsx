@@ -1,16 +1,10 @@
-// MiningStatusCard.tsx
 import React, { useEffect, useState } from "react";
-import { BiLogoBitcoin } from "react-icons/bi";
-import { InfoCircleOutlined } from "@ant-design/icons";
-import { Card, Col, Row, Spin, Statistic, Tooltip } from "antd";
 import { BsChevronRight, BsCurrencyDollar } from "react-icons/bs";
-
-import {
-  fetchTotalLastProfitStatus,
-  fetchTotalRealTimeStatus,
-} from "@/pages/mining/api.tsx";
 import { useNavigate } from "react-router-dom";
+import { Card, Col, Row, Statistic } from "antd";
 import { ROUTE_PATHS } from "@/constants/common.ts";
+
+import { fetchTotalLastProfitStatus } from "@/pages/mining/api.tsx";
 
 interface MiningPoolCardProps {
   poolType: string; // 接收矿池类型作为 props
@@ -19,7 +13,7 @@ interface MiningPoolCardProps {
 const MiningBenefitCard: React.FC<MiningPoolCardProps> = ({ poolType }) => {
   const [lastProfitStatus, setLastProfitStatus] = useState<any>(null); // 状态数据
   const [loading, setLoading] = useState<boolean>(true); // 加载状态
-  const [error, setError] = useState<string | null>(null); // 错误信息
+  const [error] = useState<string | null>(null); // 错误信息
 
   const navigate = useNavigate();
 
@@ -33,7 +27,7 @@ const MiningBenefitCard: React.FC<MiningPoolCardProps> = ({ poolType }) => {
       setLastProfitStatus(lastProfitStatusResult.data); // 假设返回数据在 result.data 中
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (err) {
-
+      /* empty */
     } finally {
       setLoading(false);
     }
@@ -109,13 +103,22 @@ const MiningBenefitCard: React.FC<MiningPoolCardProps> = ({ poolType }) => {
               </Col>
             </Col>
             <Col span={14}>
-              <Col span={24} style={{ fontSize: "14px", color: "black", marginBottom: "12px", fontWeight: "bold" }}>
+              <Col
+                span={24}
+                style={{ fontSize: "14px", color: "black", marginBottom: "12px", fontWeight: "bold" }}
+              >
                 {`${lastProfitStatus?.month_statistics.income_btc} BTC`}
               </Col>
-              <Col span={24} style={{ fontSize: "14px", color: "black", marginBottom: "12px", fontWeight: "bold" }}>
+              <Col
+                span={24}
+                style={{ fontSize: "14px", color: "black", marginBottom: "12px", fontWeight: "bold" }}
+              >
                 {`${lastProfitStatus?.month_statistics.income_usd} $`}
               </Col>
-              <Col span={24} style={{ fontSize: "14px", color: "black", marginBottom: "12px", fontWeight: "bold" }}>
+              <Col
+                span={24}
+                style={{ fontSize: "14px", color: "black", marginBottom: "12px", fontWeight: "bold" }}
+              >
                 {`${lastProfitStatus?.month_statistics.hosting_fee} $`}
               </Col>
             </Col>

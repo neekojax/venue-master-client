@@ -22,7 +22,7 @@ export default function VenuePage() {
   const { data: templates, isLoading: isLoadingTemplates } = useVenueTemplateList();
   const [selectedTemplate, setSelectedTemplate] = useState<number | null>(null); // 选择模板的状态为 number 或 null
   const { data: fields, isLoading: isLoadingFields } = useVenueTemplateFields(selectedTemplate);
-  const { data: fieldsData, isLoading: isLoadingFieldsData } = useVenueRecord(selectedTemplate);
+  const { data: fieldsData } = useVenueRecord(selectedTemplate);
   const [columns, setColumns] = useState([]);
   const [tableData, setTableData] = useState<any>([]);
   const [searchTerm, setSearchTerm] = useState(""); // 新增搜索状态
@@ -38,14 +38,18 @@ export default function VenuePage() {
       } else {
         // 如果 savedTemplateId 不在 templates 中，选择第一个模板
         if (templates?.data.length > 0) {
+          // @ts-ignore
           setSelectedTemplate(templates.data[0].ID);
+          // @ts-ignore
           localStorage.setItem("selectedTemplate", templates.data[0].ID.toString()); // 保存到 localStorage
         }
       }
 
       setSelectedTemplate(Number(savedTemplateId)); // 设置已保存的模板 ID
     } else if (templates?.data.length > 0 && !selectedTemplate) {
+      // @ts-ignore
       setSelectedTemplate(templates.data[0].ID);
+      // @ts-ignore
       localStorage.setItem("selectedTemplate", templates.data[0].ID.toString()); // 保存到 localStorage
     }
   }, [templates]);
@@ -104,18 +108,20 @@ export default function VenuePage() {
   const updateMutation = useVenueRecordUpdate();
   const newMutation = useVenueRecordNew();
 
-  const handleDelete = (recordId: number) => {
-    deleteMutation.mutate(recordId, {
-      onSuccess: () => {
-        message.success("删除记录成功");
-      },
-      onError: (error) => {
-        message.error(`删除记录失败: ${error.message}`);
-      },
+  const handleDelete = (recordId: number): Promise<void> => {
+    return new Promise(() => {
+      deleteMutation.mutate(recordId, {
+        onSuccess: () => {
+          message.success("删除记录成功");
+        },
+        onError: (error) => {
+          message.error(`删除记录失败: ${error.message}`);
+        },
+      });
     });
   };
 
-  const handleSave = (rowKey: number, data: { [x: string]: string }) => {
+  const handleSave = (rowKey: number, data: { [x: string]: string }): Promise<void> => {
     const venueRecordUpdate: VenueRecordUpdate = {
       RecordID: rowKey as number, // 假设 rowKey 是 RecordID
       Fields: Object.keys(data)
@@ -126,14 +132,15 @@ export default function VenuePage() {
           Value: data[key] as string, // 从 data 中获取对应的值
         })),
     };
-
-    updateMutation.mutate(venueRecordUpdate, {
-      onSuccess: () => {
-        message.success("更新记录成功");
-      },
-      onError: (error) => {
-        message.error(`更新记录失败: ${error.message}`);
-      },
+    return new Promise(() => {
+      updateMutation.mutate(venueRecordUpdate, {
+        onSuccess: () => {
+          message.success("更新记录成功");
+        },
+        onError: (error) => {
+          message.error(`更新记录失败: ${error.message}`);
+        },
+      });
     });
   };
 
@@ -165,7 +172,7 @@ export default function VenuePage() {
       fields: values.fields,
     };
     newMutation.mutate(newVenueRecord, {
-      onSuccess: (data) => {
+      onSuccess: () => {
         message.success("添加成功");
         // setOpen(false);
       },

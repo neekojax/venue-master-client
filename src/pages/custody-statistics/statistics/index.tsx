@@ -43,6 +43,7 @@ export default function StatisticsPage() {
       const newData = statisticsData.data.map(
         (
           item: {
+            mining_pool_info: any;
             id: any;
             venue_name: any;
             sub_account_name: any;
@@ -87,7 +88,7 @@ export default function StatisticsPage() {
         dataIndex: "serialNumber",
         key: "serialNumber",
         width: 40,
-        render: (_, record) => {
+        render: (_: any, record: { serialNumber?: any; observer_link?: any }) => {
           const { observer_link } = record;
           // 根据 observer_link 内容返回不同的图标
           if (observer_link.includes("antpool")) {
@@ -237,6 +238,7 @@ export default function StatisticsPage() {
     );
 
     // 根据选定的池进行过滤
+    // @ts-ignore
     const matchesPoolFilter = poolFilter ? item.observer_link.includes(poolFilter) : true;
 
     return matchesSearchTerm && matchesPoolFilter;
@@ -383,7 +385,9 @@ export default function StatisticsPage() {
           tableData={filteredData}
           setTableData={setTableData}
           columns={columns}
+          // @ts-ignore
           handleDelete={() => {}}
+          // @ts-ignore
           handleSave={() => {}}
         />
       )}

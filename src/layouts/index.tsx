@@ -1,16 +1,16 @@
 import { useEffect, useState } from "react";
+import { useMediaQuery } from "react-responsive";
 import { MenuFoldOutlined, MenuUnfoldOutlined } from "@ant-design/icons";
 import { Button, Flex, Layout } from "antd";
 import { AppHelmet } from "@/components/helmet";
-import { ThemeSwitch } from "@/components/theme-switch";
 import Breadcrumb from "./components/bread-crumb";
 import Content from "./components/main-content";
 import SiderBar from "./components/sider-bar";
 import UserAvatar from "./components/user-avatar";
-import { setCollapsed, useSelector, useSettingsStore } from "@/stores";
-import { useMediaQuery } from "react-responsive";
-import PoolTypeSelect from "@/layouts/components/pool-type-select.tsx";
 import useAuthRedirect from "@/hooks/useAuthRedirect.ts";
+import { setCollapsed, useSelector, useSettingsStore } from "@/stores";
+
+import PoolTypeSelect from "@/layouts/components/pool-type-select.tsx";
 
 export default function MainLayout() {
   useAuthRedirect();

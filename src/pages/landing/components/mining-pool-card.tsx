@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { FaCogs } from "react-icons/fa";
 import { InfoCircleOutlined } from "@ant-design/icons";
-import { Card, Col, Row, Spin, Statistic, Tooltip } from "antd";
+import { Card, Col, Row, Statistic, Tooltip } from "antd";
 import { BsChevronRight } from "react-icons/bs";
 
 import { fetchTotalLastHashStatus, fetchTotalRealTimeStatus } from "@/pages/mining/api.tsx";
@@ -16,7 +16,7 @@ const MiningPoolCard: React.FC<MiningPoolCardProps> = ({ poolType }) => {
   const [realTimeStatus, setRealTimeStatus] = useState<any>(null); // 状态数据
   const [lastHashStatus, setLastHashStatus] = useState<any>(null); // 状态数据
   const [loading, setLoading] = useState<boolean>(true); // 加载状态
-  const [error, setError] = useState<string | null>(null); // 错误信息
+  const [error] = useState<string | null>(null); // 错误信息
 
   const navigate = useNavigate();
 
@@ -78,7 +78,12 @@ const MiningPoolCard: React.FC<MiningPoolCardProps> = ({ poolType }) => {
       loading={loading}
       bordered={false}
       // style={{ background: "#f7f9fc" }}
-      style={{ background: "#f7f9fc", borderRadius: "8px", boxShadow: "0 2px 8px rgba(0, 0, 0, 0.1)",  padding: "5px" }} // 增加边框和阴影
+      style={{
+        background: "#f7f9fc",
+        borderRadius: "8px",
+        boxShadow: "0 2px 8px rgba(0, 0, 0, 0.1)",
+        padding: "5px",
+      }} // 增加边框和阴影
       extra={
         <span
           onClick={handleNavigate}

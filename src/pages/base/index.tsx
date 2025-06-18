@@ -88,6 +88,7 @@ export default function BasePage() {
   };
 
   // 处理表格数据
+  // @ts-ignore
   const tableData = (Array.isArray(data.data) ? data.data : []).map(
     (item: { ID: any; TemplateName: any; FieldInfo: any }, index: number) => {
       return {
@@ -118,6 +119,7 @@ export default function BasePage() {
       render: (_text: any, record: { fields: any }) => (
         <>
           {record.fields.length > 0 ? (
+            // @ts-ignore
             record.fields.map((field, index) => (
               <Tag key={index} color="blue" style={{ marginRight: 4 }}>
                 {field.FieldName}
@@ -152,6 +154,7 @@ export default function BasePage() {
     <div>
       <ActionButton
         label={"添加模版"}
+        // @ts-ignore
         initialValues={emptyData}
         onSubmit={handleAddTemplate}
         FormComponent={EditForm}

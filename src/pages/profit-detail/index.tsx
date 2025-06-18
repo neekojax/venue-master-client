@@ -24,7 +24,7 @@ export default function ProfitDetailPage() {
   const [statisticsHistory, setStatisticsHistory] = useState<any>(null); // 状态数据
 
   const [loading, setLoading] = useState<boolean>(true); // 加载状态
-  const [error, setError] = useState<string | null>(null); // 错误信息
+  // const [error, setError] = useState<string | null>(null); // 错误信息
 
   const [dateRange, setDateRange] = useState<[Dayjs | null, Dayjs | null]>(
     (() => {
@@ -49,7 +49,9 @@ export default function ProfitDetailPage() {
       const hashCompletionRateResult = await fetchIncomeStatisticsHistory(poolType, start, end);
 
       setStatisticsHistory(hashCompletionRateResult.data); // 假设返回数据在 result.data 中
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (err) {
+      /* empty */
     } finally {
       setLoading(false);
     }
@@ -64,7 +66,18 @@ export default function ProfitDetailPage() {
       title: "矿池名称",
       dataIndex: "pool_name",
       key: "pool_name",
-      render: (text, record) => (
+      render: (
+        text:
+          | string
+          | number
+          | boolean
+          | React.ReactElement<any, string | React.JSXElementConstructor<any>>
+          | Iterable<React.ReactNode>
+          | React.ReactPortal
+          | null
+          | undefined,
+        record: { pool_name: any },
+      ) => (
         <a
           onClick={() => handlePoolClick(record.pool_name)} // 点击事件
           style={{ color: "blue", cursor: "pointer" }} // 视觉提示
@@ -158,7 +171,7 @@ export default function ProfitDetailPage() {
           fontSize: 20,
           distance: -60,
           rotate: "tangential",
-          formatter: function (value) {
+          formatter: function () {
             return "";
           },
         },
@@ -171,7 +184,7 @@ export default function ProfitDetailPage() {
           offsetCenter: [0, "-35%"],
 
           valueAnimation: true,
-          formatter: function (value) {
+          formatter: function (value: number) {
             return Math.round(value) + "";
           },
           color: "inherit",
@@ -190,8 +203,11 @@ export default function ProfitDetailPage() {
   today.setHours(0, 0, 0, 0); // 将时间部分设置为00:00:00, 以便进行比较
 
   const totalData = statisticsHistory?.data2
-    .filter((item) => new Date(item.date).getTime() < today.getTime()) // 过滤掉日期大于等于今天的数据
-    .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()); // 按日期升序排序
+    .filter((item: { date: string | number | Date }) => new Date(item.date).getTime() < today.getTime()) // 过滤掉日期大于等于今天的数据
+    .sort(
+      (a: { date: string | number | Date }, b: { date: string | number | Date }) =>
+        new Date(a.date).getTime() - new Date(b.date).getTime(),
+    ); // 按日期升序排序
 
   const option = {
     tooltip: {
@@ -202,7 +218,7 @@ export default function ProfitDetailPage() {
     },
     xAxis: {
       type: "category",
-      data: totalData?.map((item) => item.date), // 使用过滤后的日期
+      data: totalData?.map((item: { date: any }) => item.date), // 使用过滤后的日期
     },
     yAxis: [
       {
@@ -226,7 +242,7 @@ export default function ProfitDetailPage() {
       {
         name: "收入 (BTC)",
         type: "line",
-        data: totalData?.map((item) => item.income_btc), // 使用过滤后的收入数据
+        data: totalData?.map((item: { income_btc: any }) => item.income_btc), // 使用过滤后的收入数据
         itemStyle: {
           color: "#58D9F9",
         },
@@ -236,7 +252,7 @@ export default function ProfitDetailPage() {
       {
         name: "收入 (USD)",
         type: "line",
-        data: totalData?.map((item) => item.income_usd), // 使用过滤后的收入数据
+        data: totalData?.map((item: { income_usd: any }) => item.income_usd), // 使用过滤后的收入数据
         itemStyle: {
           color: "#FDDD60",
         },
@@ -246,7 +262,7 @@ export default function ProfitDetailPage() {
       {
         name: "托管费用",
         type: "line",
-        data: totalData?.map((item) => item.hosting_fee), // 使用过滤后的托管费用数据
+        data: totalData?.map((item: { hosting_fee: any }) => item.hosting_fee), // 使用过滤后的托管费用数据
         itemStyle: {
           color: "#FF6E76",
         },
@@ -254,27 +270,18 @@ export default function ProfitDetailPage() {
         smooth: true, // 使用平滑曲线
       },
     ],
-    // dataZoom: [
-    //   {
-    //     type: "inside",
-    //     xAxisIndex: [0],
-    //     start: Math.max(0, (totalData.length - 5) / totalData.length * 100),
-    //     end: 100,
-    //     minValueSpan: 5, // 限制最小值间隔
-    //     maxValueSpan: 5, // 限制最大值间隔
-    //   },
-    // ],
   };
 
   return (
     <div>
       <RangePicker
         value={dateRange}
+        // @ts-ignore
         onChange={onDateChange}
         style={{ width: "280px", fontSize: "12px" }} // 可以调整宽度
       />
       <div style={{ marginBottom: "20px", marginTop: "20px" }}>
-        <Card>
+        <Card loading={loading}>
           <Row gutter={24} style={{ display: "flex" }}>
             <Col span={8}>
               <Card title={"统计数据"}>

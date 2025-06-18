@@ -1,18 +1,22 @@
 import { useEffect, useState } from "react";
 import { FaAdn, FaFish } from "react-icons/fa6";
-import { Button, Input, message, Radio, Space, Spin } from "antd";
+import { DownloadOutlined } from "@ant-design/icons";
+import { Button, message, Radio, Spin } from "antd";
 import ActionButton, { ActionButtonMode } from "@/components/action-button";
 import EditTable from "@/components/edit-table";
 import useAuthRedirect from "@/hooks/useAuthRedirect.ts";
+import { useSelector, useSettingsStore } from "@/stores";
+import { exportMiningPoolListToExcel } from "@/utils/excel.ts";
 import { getShortenedLink } from "@/utils/short-link.ts";
 
-import { PRICE_TYPE_REAL_TIME, PRICE_TYPE_T1 } from "@/pages/electric-data/type.tsx";
 import EditForm from "@/pages/mining/components/edit-form.tsx";
-import { useMiningPoolDelete, useMiningPoolList, useMiningPoolNew, useMiningPoolUpdate } from "@/pages/mining/hook.ts";
+import {
+  useMiningPoolDelete,
+  useMiningPoolList,
+  useMiningPoolNew,
+  useMiningPoolUpdate,
+} from "@/pages/mining/hook.ts";
 import { MiningPool, MiningPoolUpdate } from "@/pages/mining/type.tsx";
-import { useSelector, useSettingsStore } from "@/stores";
-import { DownloadOutlined } from "@ant-design/icons";
-import { exportHashRateToExcel, exportMiningPoolListToExcel } from "@/utils/excel.ts";
 
 const emptyData = {
   name: "",
@@ -36,7 +40,7 @@ export default function MiningSettingPage() {
     localStorage.getItem(`${StoragePrefix}_poolCategory`) || "主矿池",
   );
 
-  const { data: poolsData, error, isLoading: isLoadingPools } = useMiningPoolList(poolType, poolCategory);
+  const { data: poolsData, isLoading: isLoadingPools } = useMiningPoolList(poolType, poolCategory);
 
   const [columns, setColumns] = useState<any>([]);
   const [tableData, setTableData] = useState<any>([]);
@@ -88,7 +92,7 @@ export default function MiningSettingPage() {
         dataIndex: "serialNumber",
         key: "serialNumber",
         width: 40,
-        render: (_, record) => {
+        render: (_: any, record: { serialNumber?: any; link?: any }) => {
           const { link } = record;
           // 根据 observer_link 内容返回不同的图标
           if (link.includes("antpool")) {
@@ -172,7 +176,6 @@ export default function MiningSettingPage() {
 
   const handleNewMiningPool = async (values: MiningPool) => {
     setIsLoadingNewPool(true); // 开始加载
-    console.log(values);
     newMutation.mutate(values, {
       onSuccess: () => {
         message.success("添加成功");
@@ -185,18 +188,20 @@ export default function MiningSettingPage() {
     });
   };
 
-  const handleDelete = (recordId: number) => {
-    deleteMutation.mutate(recordId, {
-      onSuccess: () => {
-        message.success("删除记录成功");
-      },
-      onError: (error) => {
-        message.error(`删除记录失败: ${error.message}`);
-      },
+  const handleDelete = (recordId: number): Promise<void> => {
+    return new Promise(() => {
+      deleteMutation.mutate(recordId, {
+        onSuccess: () => {
+          message.success("删除记录成功");
+        },
+        onError: (error) => {
+          message.error(`删除记录失败: ${error.message}`);
+        },
+      });
     });
   };
 
-  const handleSave = (rowKey: number, data: { [x: string]: string }) => {
+  const handleSave = (rowKey: number, data: { [x: string]: string }): Promise<void> => {
     const miningPoolUpdate: MiningPoolUpdate = {
       id: rowKey as number, // 假设 rowKey 是 RecordID
       pool_name: data.pool_name,
@@ -209,13 +214,15 @@ export default function MiningSettingPage() {
       link: data.link,
     };
 
-    updateMutation.mutate(miningPoolUpdate, {
-      onSuccess: () => {
-        message.success("更新成功");
-      },
-      onError: (error) => {
-        message.error(`更新失败: ${error.message}`);
-      },
+    return new Promise(() => {
+      updateMutation.mutate(miningPoolUpdate, {
+        onSuccess: () => {
+          message.success("更新成功");
+        },
+        onError: (error) => {
+          message.error(`更新失败: ${error.message}`);
+        },
+      });
     });
   };
 
@@ -225,9 +232,11 @@ export default function MiningSettingPage() {
   };
 
   const onDownload = () => {
+    // @ts-ignore
     exportMiningPoolListToExcel(poolsData.data);
   };
 
+  // @ts-ignore
   return (
     <div style={{ padding: "20px" }}>
       <div
@@ -244,6 +253,7 @@ export default function MiningSettingPage() {
         <div>
           <ActionButton
             label={"添加矿池"}
+            // @ts-ignore
             initialValues={emptyData}
             onSubmit={handleNewMiningPool}
             FormComponent={EditForm}
@@ -259,7 +269,6 @@ export default function MiningSettingPage() {
             导出
           </Button>
         </div>
-
       </div>
 
       {/* 覆盖在 EditTable 上方的 Spin */}

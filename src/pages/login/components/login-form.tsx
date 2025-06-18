@@ -24,12 +24,13 @@ export default function LoginForm() {
   const loadCaptcha = async () => {
     try {
       const data = await fetchCaptcha();
-      console.log("data: ", data);
+      // @ts-ignore
       if (data.success) {
         setCaptcha(data.data.captcha); // 设置 captcha 状态
         setCaptchaId(data.data.captchaId); // 设置 captcha Id
       } else {
         // 处理失败情况
+        // @ts-ignore
         console.error("获取验证码失败:", data.message);
       }
     } catch (error) {
@@ -49,10 +50,7 @@ export default function LoginForm() {
     try {
       const data = await onLogin(values);
       localStorage.setItem("access_token", data.data.access_token);
-      localStorage.setItem("" +
-        "refresh_token", data.data.refresh_token);
-
-      const token = localStorage.getItem("access_token");
+      localStorage.setItem("" + "refresh_token", data.data.refresh_token);
 
       navigate(ROUTE_PATHS.landing);
       setTimeout(() => {
@@ -63,6 +61,7 @@ export default function LoginForm() {
       }, 300);
     } catch (err) {
       window.$notification?.error({
+        // @ts-ignore
         message: err.toString(),
       });
     }

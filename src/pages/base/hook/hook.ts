@@ -22,6 +22,7 @@ export const useSubmitVenueTemplateChange = () => {
     mutationFn: submitVenueTemplateChange,
     onSuccess: () => {
       // 在成功提交后，可能需要刷新 venue-templates 数据
+      // @ts-ignore
       queryClient.invalidateQueries(["venue-templates"]);
     },
     onError: (error) => {
@@ -39,6 +40,7 @@ export const useSubmitVenueTemplateNew = () => {
     mutationFn: submitVenueTemplateNew,
     onSuccess: () => {
       // 在成功提交后，可能需要刷新 venue-templates 数据
+      // @ts-ignore
       queryClient.invalidateQueries(["venue-templates"]);
     },
     onError: (error) => {
@@ -56,6 +58,7 @@ export const useSubmitVenueTemplateDelete = () => {
     mutationFn: submitVenueTemplateDelete,
     onSuccess: () => {
       // 在成功提交后，可能需要刷新 venue-templates 数据
+      // @ts-ignore
       queryClient.invalidateQueries(["venue-templates"]);
     },
     onError: (error) => {

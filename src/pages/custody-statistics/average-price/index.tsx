@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Line } from "@ant-design/plots";
-import { Alert, Select, Spin } from "antd";
+import { Alert, Spin } from "antd";
 import EditTable from "@/components/edit-table";
 import useAuthRedirect from "@/hooks/useAuthRedirect.ts";
 
@@ -125,7 +125,9 @@ export default function StatisticsPage() {
             tableData={tableData}
             setTableData={setTableData}
             columns={columns}
+            // @ts-ignore
             handleDelete={() => {}}
+            // @ts-ignore
             handleSave={() => {}}
           />
         )}

@@ -1,12 +1,13 @@
 import React, { useEffect, useState } from "react";
-import { Card, DatePicker, Pagination, Table } from "antd";
+import { useNavigate } from "react-router-dom";
+import { LineChartOutlined } from "@ant-design/icons";
+import { Card, DatePicker, Table } from "antd";
 import dayjs, { Dayjs } from "dayjs";
+import { ROUTE_PATHS } from "@/constants/common.ts";
 import { useSelector, useSettingsStore } from "@/stores";
 
 import { fetchHashRateHistory } from "@/pages/hash-detail/api.tsx";
-import { LineChartOutlined } from "@ant-design/icons";
-import { useNavigate } from "react-router-dom";
-import { ROUTE_PATHS } from "@/constants/common.ts";
+import { JSX } from "react/jsx-runtime";
 
 const { RangePicker } = DatePicker;
 
@@ -16,7 +17,7 @@ export default function HashRateHistoryTable() {
   const [hashRateHistory, setHashRateHistory] = useState<any>(null); // 状态数据
 
   const [loading, setLoading] = useState<boolean>(true); // 加载状态
-  const [error, setError] = useState<string | null>(null); // 错误信息
+  // const [error, setError] = useState<string | null>(null); // 错误信息
 
   // 从 localStorage 中读取 dateRange，若不存在则初始化为 [null, null]
   const [dateRange, setDateRange] = useState<[Dayjs | null, Dayjs | null]>(
@@ -44,11 +45,14 @@ export default function HashRateHistoryTable() {
 
       // 排序数据，确保最新的日期在前面
       const sortedData = hashCompletionRateResult.data?.sort(
-        (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime(),
+        (a: { date: string | number | Date }, b: { date: string | number | Date }) =>
+          new Date(b.date).getTime() - new Date(a.date).getTime(),
       );
       setHashRateHistory(sortedData); // 假设返回数据在 result.data 中
 
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (err) {
+      /* empty */
     } finally {
       setLoading(false);
     }
@@ -64,7 +68,18 @@ export default function HashRateHistoryTable() {
       dataIndex: "pool_name",
       key: "pool_name",
       width: "300px",
-      render: (text, record) => (
+      render: (
+        text:
+          | string
+          | number
+          | boolean
+          | React.ReactElement<any, string | React.JSXElementConstructor<any>>
+          | Iterable<React.ReactNode>
+          | React.ReactPortal
+          | null
+          | undefined,
+        record: { pool_name: any },
+      ) => (
         <a
           onClick={() => handlePoolClick(record.pool_name)} // 点击事件
           style={{ color: "blue", cursor: "pointer" }} // 视觉提示
@@ -102,14 +117,16 @@ export default function HashRateHistoryTable() {
       title: "算力达成率",
       dataIndex: "hash_completion_rate",
       key: "hash_completion_rate",
-      render: (text) => <span>{parseFloat(text).toFixed(2)}%</span>, // 将字符串转为数字并保留两位小数
-      sorter: (a, b) => parseFloat(a.hash_completion_rate) - parseFloat(b.hash_completion_rate), // 根据达成率排序
+      render: (text: string) => <span>{parseFloat(text).toFixed(2)}%</span>, // 将字符串转为数字并保留两位小数
+      sorter: (a: { hash_completion_rate: string }, b: { hash_completion_rate: string }) =>
+        parseFloat(a.hash_completion_rate) - parseFloat(b.hash_completion_rate), // 根据达成率排序
     },
     {
       title: "日期",
       dataIndex: "date",
       key: "date",
-      sorter: (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime(), // 排序函数，最新的日期在前
+      sorter: (a: { date: string | number | Date }, b: { date: string | number | Date }) =>
+        new Date(b.date).getTime() - new Date(a.date).getTime(), // 排序函数，最新的日期在前
     },
   ];
 
@@ -139,6 +156,7 @@ export default function HashRateHistoryTable() {
       extra={
         <RangePicker
           value={dateRange}
+          // @ts-ignore
           onChange={onDateChange}
           style={{ width: "280px", fontSize: "12px" }} // 可以调整宽度
         />
@@ -148,6 +166,7 @@ export default function HashRateHistoryTable() {
     >
       <Table
         dataSource={hashRateHistory}
+        // @ts-ignore
         columns={columns}
         rowKey="date"
         pagination={{
@@ -159,8 +178,15 @@ export default function HashRateHistoryTable() {
         // sticky
         components={{
           header: {
-            cell: (props) => (
-              <th {...props} style={{ color: "#888", fontSize: "12px", lineHeight: "10px", height: "10px" }} /> // 设置表头高度
+            cell: (
+              props: JSX.IntrinsicAttributes &
+                React.ClassAttributes<HTMLTableHeaderCellElement> &
+                React.ThHTMLAttributes<HTMLTableHeaderCellElement>,
+            ) => (
+              <th
+                {...props}
+                style={{ color: "#888", fontSize: "12px", lineHeight: "10px", height: "10px" }}
+              /> // 设置表头高度
             ),
           },
         }}

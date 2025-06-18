@@ -40,6 +40,7 @@ export const useVenueRecordNew = () => {
     mutationFn: submitVenueRecord,
     onSuccess: () => {
       // 在成功提交后，可能需要刷新 venue-templates 数据
+      // @ts-ignore
       queryClient.invalidateQueries(["venue-template-list"]);
     },
     onError: (error) => {
@@ -73,6 +74,7 @@ export const useVenueRecordUpdate = () => {
     mutationFn: submitVenueRecordUpdate,
     onSuccess: () => {
       // 在成功提交后，可能需要刷新 venue-templates 数据
+      // @ts-ignore
       queryClient.invalidateQueries(["venue-template-list"]);
     },
     onError: (error) => {

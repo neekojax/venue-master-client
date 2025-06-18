@@ -12,17 +12,11 @@ type EditTableProps = {
   handleSave: (rowKey: number, data: { [x: string]: string }) => Promise<void>; // 添加 handleSave 作为参数
 };
 
-const getRowClassName = (record, index) => {
+const getRowClassName = (_record: any, index: number) => {
   return index % 2 === 0 ? "even-row" : "odd-row";
 };
 
-export default function EditTable({
-  tableData,
-  setTableData,
-  columns,
-  handleDelete,
-  handleSave,
-}: EditTableProps) {
+export default function EditTable({ tableData, columns, handleDelete, handleSave }: EditTableProps) {
   const [editableKeys, setEditableRowKeys] = useState<React.Key[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(20);

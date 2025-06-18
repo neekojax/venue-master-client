@@ -23,6 +23,7 @@ export const useCustodyInfoDelete = () => {
     mutationFn: submitCustodyInfoDelete,
     onSuccess: () => {
       // 在成功提交后，可能需要刷新 venue-templates 数据
+      // @ts-ignore
       queryClient.invalidateQueries(["custody-info-list"]);
     },
     onError: (error) => {
@@ -39,6 +40,7 @@ export const useCustodyInfoUpdate = () => {
     mutationFn: submitCustodyUpdate,
     onSuccess: () => {
       // 在成功提交后，可能需要刷新 venue-templates 数据
+      // @ts-ignore
       queryClient.invalidateQueries(["custody-info-list"]);
     },
     onError: (error) => {
@@ -55,6 +57,7 @@ export const useCustodyInfoNew = () => {
     mutationFn: submitCustodyInfoNew,
     onSuccess: () => {
       // 在成功提交后，可能需要刷新 venue-templates 数据
+      // @ts-ignore
       queryClient.invalidateQueries(["custody-info-list"]);
     },
     onError: (error) => {

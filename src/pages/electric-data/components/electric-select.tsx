@@ -1,5 +1,5 @@
 // ElectricDataComponent.tsx
-import { useEffect, useState, forwardRef, useImperativeHandle } from "react";
+import { forwardRef, useEffect, useImperativeHandle,useState } from "react";
 import { DownloadOutlined, SearchOutlined } from "@ant-design/icons";
 import { Button, Cascader, CascaderProps, Col, DatePicker, Radio, Row, Spin } from "antd";
 import dayjs, { Dayjs } from "dayjs";
@@ -88,12 +88,12 @@ const ElectricSelectComponent = forwardRef((props: ElectricSelectComponentProps,
       ? Object.keys(settlementPointData?.data).map((key) => ({
           label: key,
           value: key,
-          children: settlementPointData?.data[key].map((child) => ({
+          children: settlementPointData?.data[key].map((child: any) => ({
             label: child,
             value: child,
           })),
         }))
-      : settlementPointData?.data.map((item) => ({
+      : settlementPointData?.data.map((item: any) => ({
           label: item, // 假设 item 是需要显示的文本
           value: item, // 假设 item 本身就是值
         })) || []; // 如果 settlementPointData 为 undefined，返回空数组
@@ -177,6 +177,7 @@ const ElectricSelectComponent = forwardRef((props: ElectricSelectComponentProps,
         <Col span={6}>
           <RangePicker
             value={dateRange}
+            // @ts-ignore
             onChange={onDateChange}
             style={{ width: "100%", fontSize: "14px" }}
           />

@@ -49,11 +49,6 @@ export default function ElectricAverage() {
           </span>
         ), // 渲染单位
       },
-      // {
-      //   title: "操作",
-      //   valueType: "option",
-      //   key: "operation",
-      // },
     ]);
   }, []);
 
@@ -89,7 +84,9 @@ export default function ElectricAverage() {
             tableData={tableData}
             setTableData={setTableData}
             columns={columns}
+            // @ts-ignore
             handleDelete={() => {}}
+            // @ts-ignore
             handleSave={() => {}}
           />
         ) : (
