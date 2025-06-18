@@ -48,7 +48,6 @@ export default function HashRateHistoryTable() {
       );
       setHashRateHistory(sortedData); // 假设返回数据在 result.data 中
 
-      console.log("hhhhhh:", sortedData);
     } catch (err) {
     } finally {
       setLoading(false);

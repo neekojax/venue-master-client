@@ -127,7 +127,7 @@ export default function PoolProfitHistoryPage() {
 
       <Card title="每日收益详情" style={{ marginTop: "20px" }}>
         <Table
-          dataSource={sortedData}
+          dataSource={sortedData?.slice().reverse()}
           columns={columns}
           rowKey="date"
           style={{ marginTop: "20px", borderRadius: "8px", overflow: "hidden" }}

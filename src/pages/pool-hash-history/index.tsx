@@ -120,25 +120,6 @@ export default function PoolHashHistoryPage() {
         boxShadow: "0 2px 10px rgba(0, 0, 0, 0.1)",
       }}
     >
-      {/*<h1 style={{ fontSize: "24px", marginBottom: "10px" }}>{history?.pool_name}</h1>*/}
-      {/*<h2 style={{ fontSize: "20px", color: "#555" }}>历史总收益 (BTC): {history ? history.total_income_btc : 0}</h2>*/}
-      {/*<Card title = "历史收益曲线" style={{ marginTop: "20px" }}>*/}
-      {/*  <ReactEcharts option={option} style={{ height: "400px", width: "100%", marginBottom: "20px" }} />*/}
-      {/*</Card>*/}
-      {/*<Card title="每日收益详情" style={{ marginTop: "20px" }}>*/}
-      {/*  <Table*/}
-      {/*    dataSource={sortedData}*/}
-      {/*    columns={columns}*/}
-      {/*    rowKey="date"*/}
-      {/*    style={{ marginTop: "20px", borderRadius: "8px", overflow: "hidden" }}*/}
-      {/*    pagination={{*/}
-      {/*      position: ["bottomCenter"], // 将分页器位置设置为底部居中*/}
-      {/*      showSizeChanger: true, // 允许用户改变每页显示的条目数*/}
-      {/*      pageSizeOptions: ["20", "30", "50"], // 每页显示条目的选项*/}
-      {/*      defaultPageSize: 10, // 默认每页显示的条目数*/}
-      {/*    }}*/}
-      {/*  />*/}
-      {/*</Card>*/}
       <h1 style={{ fontSize: "24px", marginBottom: "10px" }}>{poolName}</h1>
       <div style={{ marginTop: "20px" }}>
         <Card title="历史算力曲线" loading={loading}>
@@ -146,7 +127,7 @@ export default function PoolHashHistoryPage() {
         </Card>
         <Card title="历史算力数据" style={{ marginTop: "20px" }}>
           <Table
-            dataSource={history}
+            dataSource={history?.slice().reverse()}
             columns={columns}
             rowKey="date" // Use date as the unique key for rows
             pagination={{
