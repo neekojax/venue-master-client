@@ -48,5 +48,8 @@ export default defineConfig({
   },
   server: {
     host: "0.0.0.0", // 允许在局域网访问
+    watch: {
+      usePolling: false,
+    },
   },
 });
