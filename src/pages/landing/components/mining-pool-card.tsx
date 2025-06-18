@@ -1,16 +1,21 @@
 import React, { useEffect, useState } from "react";
-import { FaCogs } from "react-icons/fa";
-import { InfoCircleOutlined } from "@ant-design/icons";
-import { Card, Col, Row, Statistic, Tooltip } from "antd";
 import { BsChevronRight } from "react-icons/bs";
+import { FaCogs } from "react-icons/fa";
+import { useNavigate } from "react-router-dom";
+import { InfoCircleOutlined } from "@ant-design/icons";
+import { Card, Col, Flex, Progress, ProgressProps, Row, Statistic, Tooltip } from "antd";
+import { ROUTE_PATHS } from "@/constants/common.ts";
 
 import { fetchTotalLastHashStatus, fetchTotalRealTimeStatus } from "@/pages/mining/api.tsx";
-import { useNavigate } from "react-router-dom";
-import { ROUTE_PATHS } from "@/constants/common.ts";
 
 interface MiningPoolCardProps {
   poolType: string; // 接收矿池类型作为 props
 }
+
+const twoColors: ProgressProps["strokeColor"] = {
+  "0%": "#108ee9",
+  "100%": "#87d068",
+};
 
 const MiningPoolCard: React.FC<MiningPoolCardProps> = ({ poolType }) => {
   const [realTimeStatus, setRealTimeStatus] = useState<any>(null); // 状态数据
@@ -136,21 +141,32 @@ const MiningPoolCard: React.FC<MiningPoolCardProps> = ({ poolType }) => {
         </Col>
       </Row>
       <Row style={{ marginTop: "48px" }} gutter={16}>
-        {[
-          { title: "24小时算力达成率", value: lastHashStatus?.last24HourEfficiency },
-          { title: "近一周平均算力达成率", value: lastHashStatus?.lastWeekEfficiency },
-          { title: `${lastHashStatus?.lastMonth}月算力达成率`, value: lastHashStatus?.lastMonthEfficiency },
-          { title: `${lastHashStatus?.last2Month}月算力达成率`, value: lastHashStatus?.last2MonthEfficiency },
-        ].map((item, index) => (
-          <Col key={index} span={6} style={{ borderLeft: "1px solid #f0f0f0", paddingLeft: "16px" }}>
-            <Statistic
-              title={item.title}
-              value={item.value}
-              valueStyle={{ fontSize: "16px", fontWeight: "bold" }}
-              suffix="%"
-            />
-          </Col>
-        ))}
+        <Col span={24}>
+          <Flex gap="middle" vertical>
+            {[
+              { title: "24小时算力达成率", value: lastHashStatus?.last24HourEfficiency },
+              { title: "近一周平均算力达成率", value: lastHashStatus?.lastWeekEfficiency },
+              {
+                title: `${lastHashStatus?.lastMonth}月算力达成率`,
+                value: lastHashStatus?.lastMonthEfficiency,
+              },
+              {
+                title: `${lastHashStatus?.last2Month}月算力达成率`,
+                value: lastHashStatus?.last2MonthEfficiency,
+              },
+            ].map((item, index) => (
+              <Flex key={index} justify="space-between" align="center">
+                <span style={{ width: "200px", fontSize: "14px" }}>{item.title}</span>
+                <Progress
+                  percent={Number(item.value) || 0}
+                  status="active"
+                  strokeColor={twoColors}
+                  style={{ flex: 1 }}
+                />
+              </Flex>
+            ))}
+          </Flex>
+        </Col>
       </Row>
     </Card>
   );

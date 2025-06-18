@@ -151,6 +151,9 @@ export default function SiderBar() {
       collapsed={collapsed}
       theme={isDarkMode ? "dark" : "light"}
       className="h-screen overflow-auto !sticky top-0 left-0 start-0"
+      style={{
+        width: "265px !important",
+      }}
     >
       <Link
         className="font-bold text-xl hover:text-current h-16 flex justify-center items-center gap-2 text-nowrap"
@@ -160,6 +163,7 @@ export default function SiderBar() {
         <img src={logo} alt="Logo" className="size-9" /> {/* 替换为 logo */}
         {collapsed ? null : <span className="text-gradient-ripple">运营管理系统</span>}
       </Link>
+      {/* <div className="aside"> */}
       <Menu
         theme={isDarkMode ? "dark" : "light"}
         mode="inline"
@@ -170,6 +174,7 @@ export default function SiderBar() {
         onOpenChange={(openKeys) => setOpenKeys(openKeys)}
         className="!border-e-0"
       />
+      {/* </div> */}
     </Layout.Sider>
   );
 }
