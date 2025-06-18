@@ -128,6 +128,18 @@ const MiningPoolCard: React.FC<MiningPoolCardProps> = ({ poolType }) => {
         </Col>
         <Col span={8} style={{ borderLeft: "1px solid #f0f0f0", paddingLeft: "16px" }}>
           <Statistic
+            title={`理论算力`}
+            value={realTimeStatus?.totalTheoreticalHashrate} // 假设效率值在状态中
+            valueStyle={{ fontSize: "20px", fontWeight: "bold" }}
+            suffix={
+              <span style={{ fontSize: "16px", color: "gray", fontWeight: "normal" }}>
+                PH/s
+              </span>
+            }
+          />
+        </Col>
+        <Col span={8} style={{ borderLeft: "1px solid #f0f0f0", paddingLeft: "16px" }}>
+          <Statistic
             title={`实时算力达成率`}
             value={realTimeStatus?.realTimeHashEfficiency} // 假设效率值在状态中
             valueStyle={{ fontSize: "20px", fontWeight: "bold" }}
