@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { message, Pagination, Radio, Table, Spin } from "antd";
+import { message, Pagination, Radio, Spin, Table } from "antd";
 import { exportElectricBasicToExcel } from "@/utils/excel.ts";
 
 import { downloadSettlementData, fetchSettlementDataWithPagination } from "@/pages/electric-data/api.tsx";

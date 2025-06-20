@@ -29,7 +29,7 @@ const PoolTypeSelector = () => {
       style={{
         backgroundColor: "transparent",
         border: "none",
-        boxShadow: 'none',
+        boxShadow: "none",
       }}
       size={"middle"}
     >

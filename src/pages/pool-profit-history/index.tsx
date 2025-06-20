@@ -1,11 +1,11 @@
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
+import { Card, Table } from "antd";
+import { ReactEcharts } from "@/components/react-echarts";
 import useAuthRedirect from "@/hooks/useAuthRedirect.ts";
 import { useSelector, useSettingsStore } from "@/stores";
 
 import { fetchPoolProfitHistory } from "@/pages/pool-profit-history/api.tsx";
-import { Card, Table } from "antd";
-import { ReactEcharts } from "@/components/react-echarts";
 
 export default function PoolProfitHistoryPage() {
   useAuthRedirect();
@@ -73,7 +73,7 @@ export default function PoolProfitHistoryPage() {
       {
         name: "BTC 收益",
         type: "line",
-        data: sortedData?.map((item: { income_btc: any; }) => item.income_btc),
+        data: sortedData?.map((item: { income_btc: any }) => item.income_btc),
         yAxisIndex: 0,
         symbol: "none",
       },

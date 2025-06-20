@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { JSX } from "react/jsx-runtime";
 import { useNavigate } from "react-router-dom";
 import { LineChartOutlined } from "@ant-design/icons";
 import { Card, DatePicker, Table } from "antd";
@@ -7,7 +8,6 @@ import { ROUTE_PATHS } from "@/constants/common.ts";
 import { useSelector, useSettingsStore } from "@/stores";
 
 import { fetchHashRateHistory } from "@/pages/hash-detail/api.tsx";
-import { JSX } from "react/jsx-runtime";
 
 const { RangePicker } = DatePicker;
 
