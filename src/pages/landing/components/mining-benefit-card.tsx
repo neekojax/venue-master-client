@@ -127,28 +127,36 @@ const MiningBenefitCard: React.FC<MiningPoolCardProps> = ({ poolType }) => {
         </Col>
       </Row>
       <Row style={{ marginTop: "48px" }} gutter={24}>
-        <Col span={8} style={{ borderLeft: "1px solid #f0f0f0", paddingLeft: "16px" }}>
+        <Col span={6} style={{ borderLeft: "1px solid #f0f0f0", paddingLeft: "16px" }}>
           <Statistic
-            title={`昨日电费占比`}
+            title={`昨日托管费占比`}
             value={lastProfitStatus?.last_day_hosting_fee_ratio} // 假设效率值在状态中
             valueStyle={{ fontSize: "14px", fontWeight: "bold" }}
             // suffix="%"
           />
         </Col>
-        <Col span={8} style={{ borderLeft: "1px solid #f0f0f0", paddingLeft: "16px" }}>
+        <Col span={6} style={{ borderLeft: "1px solid #f0f0f0", paddingLeft: "16px" }}>
           <Statistic
-            title="近14天电费占比"
-            value={lastProfitStatus?.last_2week_hosting_fee_ratio} // 假设一周平均效率在状态中
+            title="昨日最高托管费占比"
+            value={lastProfitStatus?.max_last_day_custody_ratio} // 假设一周平均效率在状态中
+            valueStyle={{ fontSize: "14px", fontWeight: "bold" }}
+            suffix="%"
+          />
+        </Col>
+        <Col span={6} style={{ borderLeft: "1px solid #f0f0f0", paddingLeft: "16px" }}>
+          <Statistic
+            title={`${lastProfitStatus?.month}月托管费占比`} // 使用模板字符串来动态插入月份
+            value={lastProfitStatus?.month_hosting_fee_ratio} // 假设一周平均效率在状态中
             valueStyle={{ fontSize: "14px", fontWeight: "bold" }}
             // suffix="%"
           />
         </Col>
-        <Col span={8} style={{ borderLeft: "1px solid #f0f0f0", paddingLeft: "16px" }}>
+        <Col span={6} style={{ borderLeft: "1px solid #f0f0f0", paddingLeft: "16px" }}>
           <Statistic
-            title={`${lastProfitStatus?.month}月电费占比`} // 使用模板字符串来动态插入月份
-            value={lastProfitStatus?.month_hosting_fee_ratio} // 假设一周平均效率在状态中
+            title="最高场地近14天平均托管费占比" // 使用模板字符串来动态插入月份
+            value={lastProfitStatus?.max_last_2week_custody_ratio} // 假设一周平均效率在状态中
             valueStyle={{ fontSize: "14px", fontWeight: "bold" }}
-            // suffix="%"
+            suffix="%"
           />
         </Col>
       </Row>

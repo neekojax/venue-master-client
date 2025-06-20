@@ -36,7 +36,6 @@ const MiningPoolCard: React.FC<MiningPoolCardProps> = ({ poolType }) => {
 
       const lastHashStatusResult = await fetchTotalLastHashStatus(poolType);
       setLastHashStatus(lastHashStatusResult.data); // 假设返回数据在 result.data 中
-
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (err) {
       setLastHashStatus({
