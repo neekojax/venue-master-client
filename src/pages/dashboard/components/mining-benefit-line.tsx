@@ -146,9 +146,8 @@ const MiningBenefitCard = ({ poolType }) => {
 
   return (
     <Card
-      className="card-wapper"
       bordered={false}
-      // style={{ background: "#f7f9fc" }}
+      className="card-wapper"
       size={"small"}
       title={
         <Row align="middle">
@@ -179,7 +178,7 @@ const MiningBenefitCard = ({ poolType }) => {
         </Radio.Group>
       }
     >
-      <ReactEcharts option={getOption()} style={{ height: 230 }} />
+      <ReactEcharts option={getOption()} style={{ height: 310 }} />
     </Card>
   );
 };

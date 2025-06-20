@@ -5,10 +5,7 @@ import { useSelector, useSettingsStore } from "@/stores";
 import MiningBenefitCard from "@/pages/landing/components/mining-benefit-card.tsx";
 import MiningBenefitLine from "@/pages/landing/components/mining-benefit-line.tsx";
 import MiningEfficiencyCard from "@/pages/landing/components/mining-efficiency-card.tsx";
-import MiningOMCard from "@/pages/landing/components/mining-om-card.tsx";
 import MiningPoolCard from "@/pages/landing/components/mining-pool-card.tsx";
-import PowerLimitationTrendChart from "@/pages/landing/components/power-limit-trend-chart.tsx";
-import MiningRepairTrendChart from "@/pages/landing/components/repair-trend-chart.tsx";
 
 export default function LandingPage() {
   useAuthRedirect();
@@ -18,20 +15,20 @@ export default function LandingPage() {
   return (
     <div>
       <Row gutter={24}>
-        <Col span={15}>
+        <Col span={12}>
           <Row gutter={24}>
             <Col span={24} style={{ marginTop: "16px" }}>
               <MiningPoolCard poolType={poolType} />
             </Col>
-            <Col span={24} style={{ marginTop: "32px" }}>
+            <Col span={24} style={{ marginTop: "12px" }}>
               <MiningBenefitCard poolType={poolType} />
             </Col>
-            <Col span={24} style={{ marginTop: "32px" }}>
+            {/* <Col span={24} style={{ marginTop: "32px" }}>
               <MiningOMCard poolType={poolType} />
-            </Col>
+            </Col> */}
           </Row>
         </Col>
-        <Col span={9}>
+        <Col span={12}>
           <Row gutter={24}>
             <Col span={24} style={{ marginTop: "16px" }}>
               <MiningEfficiencyCard poolType={poolType} />
@@ -39,12 +36,12 @@ export default function LandingPage() {
             <Col span={24} style={{ marginTop: "16px" }}>
               <MiningBenefitLine poolType={poolType} />
             </Col>
-            <Col span={24} style={{ marginTop: "16px" }}>
+            {/* <Col span={24} style={{ marginTop: "16px" }}>
               <MiningRepairTrendChart />
             </Col>
             <Col span={24} style={{ marginTop: "16px" }}>
               <PowerLimitationTrendChart />
-            </Col>
+            </Col> */}
           </Row>
         </Col>
       </Row>

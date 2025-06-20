@@ -1,8 +1,9 @@
 import { useEffect, useState } from "react";
 import { Button, message } from "antd";
-import EditModal from "./edit-modal";
 // @ts-ignore
 import type { TemplateDataChange, Values } from "../type";
+import EditModal from "./edit-modal";
+
 import { useSubmitVenueTemplateChange } from "@/pages/base/hook/hook.ts";
 
 type EditButtonProps = {

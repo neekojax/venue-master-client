@@ -14,14 +14,14 @@ class EventBus {
   off(event: string, listener: (data?: any) => void): void {
     if (!this.listeners[event]) return;
 
-    this.listeners[event] = this.listeners[event].filter(l => l !== listener);
+    this.listeners[event] = this.listeners[event].filter((l) => l !== listener);
   }
 
   // 触发事件
   emit(event: string, data?: any): void {
     if (!this.listeners[event]) return;
 
-    this.listeners[event].forEach(listener => listener(data));
+    this.listeners[event].forEach((listener) => listener(data));
   }
 }
 

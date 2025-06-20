@@ -1,19 +1,19 @@
 import { useEffect, useState } from "react";
+import { FaAdn, FaFish } from "react-icons/fa6";
 import { Alert, Input, message, Space, Spin } from "antd";
+import ActionButton, { ActionButtonMode } from "@/components/action-button";
 import EditTable from "@/components/edit-table";
 import useAuthRedirect from "@/hooks/useAuthRedirect.ts";
 import { getShortenedLink } from "@/utils/short-link.ts";
-import ActionButton, { ActionButtonMode } from "@/components/action-button";
-import { FaAdn, FaFish } from "react-icons/fa6";
 
+import EditForm from "@/pages/custody-statistics/components/edit-form.tsx";
 import {
   useCustodyInfoDelete,
   useCustodyInfoList,
   useCustodyInfoNew,
   useCustodyInfoUpdate,
 } from "@/pages/custody-statistics/hook/hook.ts";
-import { CustodyInfoUpdate, CustodyInfoNew } from "@/pages/custody-statistics/type.tsx";
-import EditForm from "@/pages/custody-statistics/components/edit-form.tsx";
+import { CustodyInfoNew, CustodyInfoUpdate } from "@/pages/custody-statistics/type.tsx";
 
 // 创建一个空的数据对象
 const emptyData = {
@@ -73,7 +73,7 @@ export default function SettingPage() {
         key: "serialNumber",
         width: 40,
         editable: false,
-        render: (_: any, record: { serialNumber?: any; observer_link?: any; }) => {
+        render: (_: any, record: { serialNumber?: any; observer_link?: any }) => {
           const { observer_link } = record;
           // 根据 observer_link 内容返回不同的图标
           if (observer_link.includes("antpool")) {
@@ -105,7 +105,7 @@ export default function SettingPage() {
             href={link}
             target="_blank"
             rel="noopener noreferrer"
-            style={{ color: "blue"}}
+            style={{ color: "blue" }}
             title={link} // 悬停显示完整链接
           >
             {link.length > 40 ? getShortenedLink(link) : link}

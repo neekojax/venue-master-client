@@ -12,6 +12,7 @@ export const ROUTE_PATHS = {
   custodyMenu: "/custody-menu",
   setting: "/custody-menu/setting",
   statistics: "/custody-menu/statistics",
+  dashboard: "/dashboard",
   dailyAveragePrice: "/custody-menu/price",
   electric: "/electric",
   electricLimit: "/electric/limit",

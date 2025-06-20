@@ -2,7 +2,7 @@
 import React, { useEffect, useState } from "react";
 import { BsChevronRight } from "react-icons/bs";
 import { FaTachometerAlt } from "react-icons/fa";
-import { Card, Col, Row, Statistic} from "antd";
+import { Card, Col, Row, Statistic } from "antd";
 
 interface MiningPoolCardProps {
   poolType: string; // 接收矿池类型作为 props
@@ -163,7 +163,9 @@ const MiningOMCard: React.FC<MiningPoolCardProps> = ({ poolType }) => {
             </Col>
             <Col span={24} style={{ fontSize: "14px", color: "gray", marginBottom: "12px" }}>
               <span style={{ fontSize: "14px", color: "gray" }}>故障率</span>
-              <span style={{ fontSize: "14px", color: "black", marginLeft: "10px" }}>{data?.yesterdayFailureRate}%</span>
+              <span style={{ fontSize: "14px", color: "black", marginLeft: "10px" }}>
+                {data?.yesterdayFailureRate}%
+              </span>
             </Col>
           </Row>
         </Col>
@@ -171,11 +173,15 @@ const MiningOMCard: React.FC<MiningPoolCardProps> = ({ poolType }) => {
           <Row gutter={24}>
             <Col span={24} style={{ fontSize: "14px", color: "gray", marginBottom: "12px" }}>
               <span style={{ fontSize: "14px", color: "gray" }}>上上周故障数</span>
-              <span style={{ fontSize: "14px", color: "black", marginLeft: "10px" }}>{data?.lastWeekFaultsCount}台</span>
+              <span style={{ fontSize: "14px", color: "black", marginLeft: "10px" }}>
+                {data?.lastWeekFaultsCount}台
+              </span>
             </Col>
             <Col span={24} style={{ fontSize: "14px", color: "gray", marginBottom: "12px" }}>
               <span style={{ fontSize: "14px", color: "gray" }}>故障率</span>
-              <span style={{ fontSize: "14px", color: "black", marginLeft: "10px" }}>{data?.lastWeekFailureRate}%</span>
+              <span style={{ fontSize: "14px", color: "black", marginLeft: "10px" }}>
+                {data?.lastWeekFailureRate}%
+              </span>
             </Col>
           </Row>
         </Col>

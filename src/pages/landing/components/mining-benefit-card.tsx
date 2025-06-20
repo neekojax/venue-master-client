@@ -43,6 +43,7 @@ const MiningBenefitCard: React.FC<MiningPoolCardProps> = ({ poolType }) => {
 
   return (
     <Card
+      className="card-wapper"
       title={
         <Row align="middle">
           <Col>
@@ -55,12 +56,12 @@ const MiningBenefitCard: React.FC<MiningPoolCardProps> = ({ poolType }) => {
       }
       loading={loading}
       bordered={false}
-      style={{
-        background: "#f7f9fc",
-        borderRadius: "8px",
-        boxShadow: "0 2px 8px rgba(0, 0, 0, 0.1)",
-        padding: "5px",
-      }} // 增加边框和阴影
+      // style={{
+      //   background: "#f7f9fc",
+      //   borderRadius: "8px",
+      //   boxShadow: "0 2px 8px rgba(0, 0, 0, 0.1)",
+      //   padding: "5px",
+      // }} // 增加边框和阴影
       extra={
         <span
           onClick={handleNavigate}

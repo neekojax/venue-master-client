@@ -1,4 +1,4 @@
-import { BarChart, LineChart, PieChart } from "echarts/charts";
+import { BarChart, GaugeChart, LineChart, PieChart } from "echarts/charts";
 import {
   GridComponent,
   LegendComponent,
@@ -14,6 +14,7 @@ echarts.use([
   PieChart,
   GridComponent,
   LegendComponent,
+  GaugeChart,
   TitleComponent,
   ToolboxComponent,
   TooltipComponent,

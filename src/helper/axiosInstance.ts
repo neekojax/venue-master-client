@@ -19,7 +19,8 @@ const onRefreshed = (newToken: string) => {
 
 const axiosInstance = axios.create({
   // baseURL: import.meta.env.VITE_API_BASE_URL, // 你的 API 基础 URL
-  baseURL: "http://127.0.0.1:8080/admin-api/", // 你的 API 基础 UR
+  // baseURL: "http://127.0.0.1:8080/admin-api/", // 你的 API 基础 UR
+  baseURL: "http://45.76.191.253:11001/admin-api/", // 你的 API 基础 UR
 });
 
 // 刷新 token 的函数

@@ -2,6 +2,7 @@ import { useNavigate } from "react-router-dom";
 import { LogoutOutlined } from "@ant-design/icons";
 import { Avatar, Dropdown, type MenuProps } from "antd";
 import { ROUTE_PATHS } from "@/constants/common";
+
 import { loginOut } from "@/pages/login/api.ts";
 
 export default function UserAvatar() {

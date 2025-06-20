@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { Card, Col, DatePicker, Row, Statistic, Table } from "antd";
 import dayjs, { Dayjs } from "dayjs";
 import { BarChart, GaugeChart } from "echarts/charts";
@@ -6,12 +7,11 @@ import { DataZoomComponent, TitleComponent } from "echarts/components";
 import * as echarts from "echarts/core";
 import { CanvasRenderer } from "echarts/renderers";
 import { ReactEcharts } from "@/components/react-echarts";
+import { ROUTE_PATHS } from "@/constants/common.ts";
 import useAuthRedirect from "@/hooks/useAuthRedirect.ts";
 import { useSelector, useSettingsStore } from "@/stores";
 
 import { fetchIncomeStatisticsHistory } from "@/pages/profit-detail/api.tsx";
-import { useNavigate } from "react-router-dom";
-import { ROUTE_PATHS } from "@/constants/common.ts";
 
 const { RangePicker } = DatePicker;
 echarts.use([TitleComponent, GaugeChart, CanvasRenderer, BarChart, DataZoomComponent]);

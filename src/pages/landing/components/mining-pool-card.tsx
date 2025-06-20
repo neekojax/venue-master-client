@@ -1,16 +1,21 @@
 import React, { useEffect, useState } from "react";
-import { FaCogs } from "react-icons/fa";
-import { InfoCircleOutlined } from "@ant-design/icons";
-import { Card, Col, Row, Statistic, Tooltip } from "antd";
 import { BsChevronRight } from "react-icons/bs";
+import { FaCogs } from "react-icons/fa";
+import { useNavigate } from "react-router-dom";
+import { InfoCircleOutlined } from "@ant-design/icons";
+import { Card, Col, Flex, Progress, ProgressProps, Row, Statistic, Tooltip } from "antd";
+import { ROUTE_PATHS } from "@/constants/common.ts";
 
 import { fetchTotalLastHashStatus, fetchTotalRealTimeStatus } from "@/pages/mining/api.tsx";
-import { useNavigate } from "react-router-dom";
-import { ROUTE_PATHS } from "@/constants/common.ts";
 
 interface MiningPoolCardProps {
   poolType: string; // 接收矿池类型作为 props
 }
+
+const twoColors: ProgressProps["strokeColor"] = {
+  "0%": "#87d068",
+  "100%": "#108ee9",
+};
 
 const MiningPoolCard: React.FC<MiningPoolCardProps> = ({ poolType }) => {
   const [realTimeStatus, setRealTimeStatus] = useState<any>(null); // 状态数据
@@ -65,6 +70,7 @@ const MiningPoolCard: React.FC<MiningPoolCardProps> = ({ poolType }) => {
 
   return (
     <Card
+      className="card-wapper"
       title={
         <Row align="middle">
           <Col>
@@ -78,12 +84,12 @@ const MiningPoolCard: React.FC<MiningPoolCardProps> = ({ poolType }) => {
       loading={loading}
       bordered={false}
       // style={{ background: "#f7f9fc" }}
-      style={{
-        background: "#f7f9fc",
-        borderRadius: "8px",
-        boxShadow: "0 2px 8px rgba(0, 0, 0, 0.1)",
-        padding: "5px",
-      }} // 增加边框和阴影
+      // style={{
+      //   background: "#f7f9fc",
+      //   borderRadius: "8px",
+      //   boxShadow: "0 2px 8px rgba(0, 0, 0, 0.1)",
+      //   padding: "5px",
+      // }} // 增加边框和阴影
       extra={
         <span
           onClick={handleNavigate}
@@ -106,6 +112,7 @@ const MiningPoolCard: React.FC<MiningPoolCardProps> = ({ poolType }) => {
         <Col span={8}>
           <Statistic
             title="实时总算力"
+            className="fs-6 text-gray-500 fw-semibold"
             value={realTimeStatus?.totalCurrentHashRate}
             suffix={
               <span style={{ fontSize: "16px", color: "gray", fontWeight: "normal" }}>
@@ -126,21 +133,27 @@ const MiningPoolCard: React.FC<MiningPoolCardProps> = ({ poolType }) => {
             valueStyle={{ fontSize: "20px", fontWeight: "bold" }}
           />
         </Col>
-        <Col span={8} style={{ borderLeft: "1px solid #f0f0f0", paddingLeft: "16px" }}>
+        <Col span={8}>
+          <Statistic
+            title="理论算力"
+            className="fs-6 text-gray-500 fw-semibold"
+            value={realTimeStatus?.totalTheoreticalHashrate}
+            suffix={<span style={{ fontSize: "16px", color: "gray", fontWeight: "normal" }}>PH/s</span>}
+            valueStyle={{ fontSize: "20px", fontWeight: "bold" }}
+          />
+        </Col>
+        <Col span={8} style={{ paddingLeft: "16px" }}>
           <Statistic
             title={`理论算力`}
             value={realTimeStatus?.totalTheoreticalHashrate} // 假设效率值在状态中
             valueStyle={{ fontSize: "20px", fontWeight: "bold" }}
-            suffix={
-              <span style={{ fontSize: "16px", color: "gray", fontWeight: "normal" }}>
-                PH/s
-              </span>
-            }
+            suffix={<span style={{ fontSize: "16px", color: "gray", fontWeight: "normal" }}>PH/s</span>}
           />
         </Col>
         <Col span={8} style={{ borderLeft: "1px solid #f0f0f0", paddingLeft: "16px" }}>
           <Statistic
             title={`实时算力达成率`}
+            className="fs-6 text-gray-500 fw-semibold"
             value={realTimeStatus?.realTimeHashEfficiency} // 假设效率值在状态中
             valueStyle={{ fontSize: "20px", fontWeight: "bold" }}
             suffix="%"
@@ -148,21 +161,123 @@ const MiningPoolCard: React.FC<MiningPoolCardProps> = ({ poolType }) => {
         </Col>
       </Row>
       <Row style={{ marginTop: "48px" }} gutter={16}>
-        {[
-          { title: "24小时算力达成率", value: lastHashStatus?.last24HourEfficiency },
-          { title: "近一周平均算力达成率", value: lastHashStatus?.lastWeekEfficiency },
-          { title: `${lastHashStatus?.lastMonth}月算力达成率`, value: lastHashStatus?.lastMonthEfficiency },
-          { title: `${lastHashStatus?.last2Month}月算力达成率`, value: lastHashStatus?.last2MonthEfficiency },
-        ].map((item, index) => (
-          <Col key={index} span={6} style={{ borderLeft: "1px solid #f0f0f0", paddingLeft: "16px" }}>
-            <Statistic
-              title={item.title}
-              value={item.value}
-              valueStyle={{ fontSize: "16px", fontWeight: "bold" }}
-              suffix="%"
-            />
-          </Col>
-        ))}
+        <Col span={12}>
+          <Flex gap="middle" vertical>
+            {[
+              { title: "24小时算力达成率", color: "red", value: lastHashStatus?.last24HourEfficiency },
+              // { title: "近一周平均算力达成率", value: lastHashStatus?.lastWeekEfficiency },
+              {
+                title: `${lastHashStatus?.lastMonth}月算力达成率`,
+                color: "#09f119",
+                value: lastHashStatus?.lastMonthEfficiency,
+              },
+              // {
+              //   title: `${lastHashStatus?.last2Month}月算力达成率`,
+              //   value: lastHashStatus?.last2MonthEfficiency,
+              // },
+            ].map((item, index) => (
+              <Flex key={index} justify="space-between" align="center">
+                <Row
+                  style={{
+                    background: "#f9fafb",
+                    padding: "0.625rem",
+                    borderRadius: "0.375rem",
+                    width: "100%",
+                    boxShadow: "0 4px 12px rgba(0, 0, 0, 0.5);",
+                  }}
+                >
+                  <Col span={24}>
+                    <span className="text-gray-500 fs-8 fw-semibold">{item.title}</span>
+                  </Col>
+                  <Col span={24}>
+                    <span className="text-gray-800 fs-4 fw-bold">{item.value}%</span>
+                  </Col>
+                  <Col span={24}>
+                    <Progress
+                      percent={Number(item.value) || 0}
+                      status="active"
+                      strokeColor={item.color}
+                      style={{ flex: 1 }}
+                      percentPosition={{ align: "left", type: "outer" }}
+                      size="small"
+                    />
+                  </Col>
+                </Row>
+              </Flex>
+            ))}
+          </Flex>
+        </Col>
+        <Col span={12}>
+          <Flex gap="middle" vertical>
+            {[
+              // { title: "24小时算力达成率", color: "red", value: lastHashStatus?.last24HourEfficiency },
+              { title: "近一周平均算力达成率", color: twoColors, value: lastHashStatus?.lastWeekEfficiency },
+              // {
+              //   title: `${lastHashStatus?.lastMonth}月算力达成率`,
+              //   color: "green",
+              //   value: lastHashStatus?.lastMonthEfficiency,
+              // },
+              {
+                title: `${lastHashStatus?.last2Month}月算力达成率`,
+                value: lastHashStatus?.last2MonthEfficiency,
+              },
+            ].map((item, index) => (
+              <Flex key={index} justify="space-between" align="center">
+                <Row
+                  style={{
+                    background: "#f9fafb",
+                    padding: "0.625rem",
+                    borderRadius: "0.375rem",
+                    width: "100%",
+                  }}
+                >
+                  <Col span={24}>
+                    <span className="text-gray-500 fs-8 fw-semibold">{item.title}</span>
+                  </Col>
+                  <Col span={24}>
+                    <span className="text-gray-800 fs-4 fw-bold">{item.value}%</span>
+                  </Col>
+                  <Col span={24}>
+                    <Progress
+                      percent={Number(item.value) || 0}
+                      status="active"
+                      strokeColor={item.color}
+                      style={{ flex: 1 }}
+                      percentPosition={{ align: "left", type: "outer" }}
+                      size="small"
+                    />
+                  </Col>
+                </Row>
+              </Flex>
+            ))}
+          </Flex>
+        </Col>
+        {/* <Col span={12}>
+          <Flex gap="middle" vertical>
+            {[
+              { title: "24小时算力达成率", value: lastHashStatus?.last24HourEfficiency },
+              { title: "近一周平均算力达成率", value: lastHashStatus?.lastWeekEfficiency },
+              {
+                title: `${lastHashStatus?.lastMonth}月算力达成率`,
+                value: lastHashStatus?.lastMonthEfficiency,
+              },
+              {
+                title: `${lastHashStatus?.last2Month}月算力达成率`,
+                value: lastHashStatus?.last2MonthEfficiency,
+              },
+            ].map((item, index) => (
+              <Flex key={index} justify="space-between" align="center">
+                <span style={{ width: "200px", fontSize: "14px" }}>{item.title}</span>
+                <Progress
+                  percent={Number(item.value) || 0}
+                  status="active"
+                  strokeColor={twoColors}
+                  style={{ flex: 1 }}
+                />
+              </Flex>
+            ))}
+          </Flex>
+        </Col> */}
       </Row>
     </Card>
   );

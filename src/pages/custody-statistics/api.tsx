@@ -23,6 +23,7 @@ export const submitCustodyUpdate = async (data: CustodyInfoUpdate) => {
 // 获取托管统计信息
 export const fetchCustodyStatisticsList = async ({ queryKey }: { queryKey: [string, string, string] }) => {
   const [_key, timeRange, poolType] = queryKey; // 解构参数
+  console.log(_key);
   return await fetchGet(`custody/custodyStatisticsList/${timeRange}/${poolType}`);
 };
 
