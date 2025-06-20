@@ -96,6 +96,21 @@
     border: none;
 }
 
+.filter-button .radio-button{
+    background: none !important;
+    border: none !important;
+    font-size: 12px;
+    color: #99a1b7;
+    margin-right: 25px;
+}
+.filter-button .radio-button::before, .filter-button .radio-button::after{
+    background: none !important;
+    border: none !important;
+}
+.filter-button .radio-button.active{
+   color: #1b84ff;
+}
+
 
 .pt-1{
     padding-top: .25rem !important;

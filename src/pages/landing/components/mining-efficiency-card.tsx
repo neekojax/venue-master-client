@@ -78,9 +78,6 @@ const MiningEfficiencyCard = ({ poolType }) => {
         axisLabel: {
           color: "#99a1b7", // 字体颜色
           fontSize: 12, // 字体大小
-          // formatter: function (value) {
-          //   return formatNumberCN(value);
-          // }
         },
         lineStyle: {
           type: "dashed",
@@ -149,6 +146,7 @@ const MiningEfficiencyCard = ({ poolType }) => {
       extra={
         <Radio.Group
           value={timeFrame}
+          className="filter-button"
           onChange={handleTimeFrameChange}
           style={{ fontSize: "10px" }}
           size="small"

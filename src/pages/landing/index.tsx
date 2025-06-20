@@ -23,9 +23,6 @@ export default function LandingPage() {
             <Col span={24} style={{ marginTop: "12px" }}>
               <MiningBenefitCard poolType={poolType} />
             </Col>
-            {/* <Col span={24} style={{ marginTop: "32px" }}>
-              <MiningOMCard poolType={poolType} />
-            </Col> */}
           </Row>
         </Col>
         <Col span={12}>
@@ -36,12 +33,6 @@ export default function LandingPage() {
             <Col span={24} style={{ marginTop: "16px" }}>
               <MiningBenefitLine poolType={poolType} />
             </Col>
-            {/* <Col span={24} style={{ marginTop: "16px" }}>
-              <MiningRepairTrendChart />
-            </Col>
-            <Col span={24} style={{ marginTop: "16px" }}>
-              <PowerLimitationTrendChart />
-            </Col> */}
           </Row>
         </Col>
       </Row>

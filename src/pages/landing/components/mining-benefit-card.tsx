@@ -15,6 +15,13 @@ const MiningBenefitCard: React.FC<MiningPoolCardProps> = ({ poolType }) => {
   const [loading, setLoading] = useState<boolean>(true); // 加载状态
   const [error] = useState<string | null>(null); // 错误信息
 
+  const formatNumber = (value) => {
+    const num = Number(value);
+    if (isNaN(num)) return ""; // 非法值返回空字符串
+
+    return num.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+  };
+
   const navigate = useNavigate();
 
   const handleNavigate = () => {
@@ -58,12 +65,6 @@ const MiningBenefitCard: React.FC<MiningPoolCardProps> = ({ poolType }) => {
       }
       loading={loading}
       bordered={false}
-      // style={{
-      //   background: "#f7f9fc",
-      //   borderRadius: "8px",
-      //   boxShadow: "0 2px 8px rgba(0, 0, 0, 0.1)",
-      //   padding: "5px",
-      // }} // 增加边框和阴影
       extra={
         <span
           onClick={handleNavigate}
@@ -72,7 +73,7 @@ const MiningBenefitCard: React.FC<MiningPoolCardProps> = ({ poolType }) => {
             display: "flex",
             alignItems: "center",
             fontSize: "14px",
-            color: "#1890ff", // 默认颜色
+            color: "rgba(0, 0, 0, 0.45)",
             transition: "color 0.3s ease", // 添加过渡效果
           }}
           onMouseEnter={(e) => (e.currentTarget.style.color = "#40a9ff")} // 鼠标悬停颜色
@@ -86,7 +87,7 @@ const MiningBenefitCard: React.FC<MiningPoolCardProps> = ({ poolType }) => {
         <Col span={24}>
           <Statistic
             title={`昨日总收益`}
-            value={lastProfitStatus?.last_day_income_statistics.income_btc} // 假设昨日总收益在状态中
+            value={`${formatNumber(lastProfitStatus?.last_day_income_statistics.income_btc)}`} // 假设昨日总收益在状态中
             valueStyle={{ fontSize: "20px", fontWeight: "bold", color: "#3dbb32" }}
             // prefix={<BiLogoBitcoin style={{ fontSize: "20px", color: "gold" }} />}
             suffix={"BTC"}
@@ -95,7 +96,7 @@ const MiningBenefitCard: React.FC<MiningPoolCardProps> = ({ poolType }) => {
         <Col span={12} style={{ marginTop: "25px" }}>
           <Statistic
             title={`${lastProfitStatus?.month}月产出数量`}
-            value={`${lastProfitStatus?.month_statistics.income_btc} BTC`} // 假设昨日总收益在状态中
+            value={`${formatNumber(lastProfitStatus?.month_statistics.income_btc)} BTC`} // 假设昨日总收益在状态中
             valueStyle={{ fontSize: "16px", fontWeight: "bold" }}
             // prefix={<BiLogoBitcoin style={{ fontSize: "20px", color: "gold" }} />}
           />
@@ -103,67 +104,29 @@ const MiningBenefitCard: React.FC<MiningPoolCardProps> = ({ poolType }) => {
         <Col span={12} style={{ marginTop: "25px" }}>
           <Statistic
             title={`${lastProfitStatus?.month}月产出价值`}
-            value={`${lastProfitStatus?.month_statistics.income_usd} $`} // 假设昨日总收益在状态中
+            value={`${formatNumber(lastProfitStatus?.month_statistics.income_usd)} $`} // 假设昨日总收益在状态中
             valueStyle={{ fontSize: "16px", fontWeight: "bold" }}
-            // prefix={<BiLogoBitcoin style={{ fontSize: "20px", color: "gold" }} />}
-            suffix={"BTC"}
           />
         </Col>
 
         <Col span={12} style={{ marginTop: "25px" }}>
           <Statistic
             title={`${lastProfitStatus?.month}月托管+运维`}
-            value={`${lastProfitStatus?.month_statistics.hosting_fee} $`} // 假设昨日总收益在状态中
+            value={`${formatNumber(lastProfitStatus?.month_statistics.hosting_fee)} $`} // 假设昨日总收益在状态中
             valueStyle={{ fontSize: "16px", fontWeight: "bold" }}
           />
         </Col>
-
-        <Col span={14} style={{ borderLeft: "1px solid #f0f0f0", paddingLeft: "16px" }}>
-          <Row gutter={24}>
-            <Col span={10}>
-              {/* <Col span={24} style={{ fontSize: "14px", color: "gray", marginBottom: "12px" }}>
-                {`${lastProfitStatus?.month}月产出数量`}
-              </Col> */}
-              {/* <Col span={24} style={{ fontSize: "14px", color: "gray", marginBottom: "12px" }}>
-                {`${lastProfitStatus?.month}月产出价值`}
-              </Col> */}
-              {/* <Col span={24} style={{ fontSize: "14px", color: "gray", marginBottom: "12px" }}>
-                {`${lastProfitStatus?.month}月托管+运维`}
-              </Col> */}
-            </Col>
-            <Col span={14}>
-              {/* <Col
-                span={24}
-                style={{ fontSize: "14px", color: "black", marginBottom: "12px", fontWeight: "bold" }}
-              >
-                {`${lastProfitStatus?.month_statistics.income_btc} BTC`}
-              </Col> */}
-              {/* <Col
-                span={24}
-                style={{ fontSize: "14px", color: "black", marginBottom: "12px", fontWeight: "bold" }}
-              >
-                {`${lastProfitStatus?.month_statistics.income_usd} $`}
-              </Col> */}
-              {/* <Col
-                span={24}
-                style={{ fontSize: "14px", color: "black", marginBottom: "12px", fontWeight: "bold" }}
-              >
-                {`${lastProfitStatus?.month_statistics.hosting_fee} $`}
-              </Col> */}
-            </Col>
-          </Row>
-        </Col>
       </Row>
       <Row style={{ marginTop: "25px" }} gutter={24}>
-        <Col span={8} style={{ borderLeft: "1px solid #f0f0f0", paddingLeft: "16px" }}>
+        <Col span={6} style={{ borderLeft: "1px solid #f0f0f0", paddingLeft: "16px" }}>
           <Statistic
-            title={`昨日电费占比`}
+            title={`昨日托管费占比`}
             value={lastProfitStatus?.last_day_hosting_fee_ratio} // 假设效率值在状态中
             valueStyle={{ fontSize: "16px", fontWeight: "bold" }}
             // suffix="%"
           />
         </Col>
-        <Col span={8} style={{ borderLeft: "1px solid #f0f0f0", paddingLeft: "16px" }}>
+        <Col span={6} style={{ borderLeft: "1px solid #f0f0f0", paddingLeft: "16px" }}>
           <Statistic
             title="近14天电费占比"
             value={lastProfitStatus?.last_2week_hosting_fee_ratio} // 假设一周平均效率在状态中
@@ -171,10 +134,18 @@ const MiningBenefitCard: React.FC<MiningPoolCardProps> = ({ poolType }) => {
             // suffix="%"
           />
         </Col>
-        <Col span={8} style={{ borderLeft: "1px solid #f0f0f0", paddingLeft: "16px" }}>
+        <Col span={6} style={{ borderLeft: "1px solid #f0f0f0", paddingLeft: "16px" }}>
           <Statistic
             title={`${lastProfitStatus?.month}月电费占比`} // 使用模板字符串来动态插入月份
             value={lastProfitStatus?.month_hosting_fee_ratio} // 假设一周平均效率在状态中
+            valueStyle={{ fontSize: "16px", fontWeight: "bold" }}
+            // suffix="%"
+          />
+        </Col>
+        <Col span={6} style={{ borderLeft: "1px solid #f0f0f0", paddingLeft: "16px" }}>
+          <Statistic
+            title={`最高场地近14天平均托管费占比`} // 使用模板字符串来动态插入月份
+            value={lastProfitStatus?.max_last_2week_custody_ratio + "%"} // 假设一周平均效率在状态中
             valueStyle={{ fontSize: "16px", fontWeight: "bold" }}
             // suffix="%"
           />

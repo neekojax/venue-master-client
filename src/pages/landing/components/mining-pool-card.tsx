@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { BsChevronRight } from "react-icons/bs";
 import { FaCogs } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
-import { InfoCircleOutlined } from "@ant-design/icons";
+import { ArrowDownOutlined, ArrowUpOutlined, InfoCircleOutlined } from "@ant-design/icons";
 import { Card, Col, Flex, Progress, ProgressProps, Row, Statistic, Tooltip } from "antd";
 import { ROUTE_PATHS } from "@/constants/common.ts";
 
@@ -36,7 +36,6 @@ const MiningPoolCard: React.FC<MiningPoolCardProps> = ({ poolType }) => {
 
       const lastHashStatusResult = await fetchTotalLastHashStatus(poolType);
       setLastHashStatus(lastHashStatusResult.data); // 假设返回数据在 result.data 中
-
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (err) {
       setLastHashStatus({
@@ -68,6 +67,26 @@ const MiningPoolCard: React.FC<MiningPoolCardProps> = ({ poolType }) => {
     return <div>{error}</div>;
   }
 
+  const diffColor = (diff: number) => {
+    if (diff > 0) {
+      // 增加向上绿色箭头+数字百分比
+      return (
+        <span style={{ color: "green" }}>
+          <ArrowUpOutlined style={{ color: "green" }} />+ {diff.toFixed(2)}%
+        </span>
+      );
+    }
+    if (diff < 0) {
+      return (
+        <span style={{ color: "red" }}>
+          <ArrowDownOutlined style={{ color: "red" }} />
+          {diff.toFixed(2)}%
+        </span>
+      );
+    }
+    return "";
+  };
+
   return (
     <Card
       className="card-wapper"
@@ -83,13 +102,6 @@ const MiningPoolCard: React.FC<MiningPoolCardProps> = ({ poolType }) => {
       }
       loading={loading}
       bordered={false}
-      // style={{ background: "#f7f9fc" }}
-      // style={{
-      //   background: "#f7f9fc",
-      //   borderRadius: "8px",
-      //   boxShadow: "0 2px 8px rgba(0, 0, 0, 0.1)",
-      //   padding: "5px",
-      // }} // 增加边框和阴影
       extra={
         <span
           onClick={handleNavigate}
@@ -97,8 +109,8 @@ const MiningPoolCard: React.FC<MiningPoolCardProps> = ({ poolType }) => {
             cursor: "pointer",
             display: "flex",
             alignItems: "center",
-            fontSize: "18px",
-            color: "#1890ff",
+            fontSize: "14px",
+            color: "rgba(0, 0, 0, 0.45)",
             transition: "color 0.3s ease", // 添加过渡效果
           }}
           onMouseEnter={(e) => (e.currentTarget.style.color = "#40a9ff")} // 鼠标悬停变蓝色
@@ -143,7 +155,15 @@ const MiningPoolCard: React.FC<MiningPoolCardProps> = ({ poolType }) => {
             valueStyle={{ fontSize: "20px", fontWeight: "bold" }}
           />
         </Col>
-        <Col span={8} style={{ paddingLeft: "16px" }}>
+        {/* <Col span={8} style={{ paddingLeft: "16px" }}>
+          <Statistic
+            title={`理论算力`}
+            value={realTimeStatus?.totalTheoreticalHashrate} // 假设效率值在状态中
+            valueStyle={{ fontSize: "20px", fontWeight: "bold" }}
+            suffix={<span style={{ fontSize: "16px", color: "gray", fontWeight: "normal" }}>PH/s</span>}
+          />
+        </Col> */}
+        <Col span={8} style={{ borderLeft: "1px solid #f0f0f0", paddingLeft: "16px" }}>
           <Statistic
             title={`实时算力达成率`}
             className="fs-6 text-gray-500 fw-semibold"
@@ -157,11 +177,17 @@ const MiningPoolCard: React.FC<MiningPoolCardProps> = ({ poolType }) => {
         <Col span={12}>
           <Flex gap="middle" vertical>
             {[
-              { title: "24小时算力达成率", color: "red", value: lastHashStatus?.last24HourEfficiency },
+              {
+                title: "24小时算力达成率",
+                color: "red",
+                value: lastHashStatus?.last24HourEfficiency,
+                diff: lastHashStatus?.last24HourEfficiencyDiff,
+              },
               // { title: "近一周平均算力达成率", value: lastHashStatus?.lastWeekEfficiency },
               {
                 title: `${lastHashStatus?.lastMonth}月算力达成率`,
                 color: "#09f119",
+                diff: lastHashStatus?.lastMonthEfficiencyDiff,
                 value: lastHashStatus?.lastMonthEfficiency,
               },
               // {
@@ -179,8 +205,14 @@ const MiningPoolCard: React.FC<MiningPoolCardProps> = ({ poolType }) => {
                     boxShadow: "0 4px 12px rgba(0, 0, 0, 0.5);",
                   }}
                 >
-                  <Col span={24}>
+                  {/* <Col span={24}>
                     <span className="text-gray-500 fs-8 fw-semibold">{item.title}</span>
+                  </Col> */}
+                  <Col span={12}>
+                    <span className="text-gray-500 fs-8 fw-semibold">{item.title}</span>
+                  </Col>
+                  <Col span={12} style={{ textAlign: "right" }}>
+                    <span className="text-gray-500 fs-8 fw-semibold">{diffColor(item.diff)}</span>
                   </Col>
                   <Col span={24}>
                     <span className="text-gray-800 fs-4 fw-bold">{item.value}%</span>
@@ -204,15 +236,16 @@ const MiningPoolCard: React.FC<MiningPoolCardProps> = ({ poolType }) => {
           <Flex gap="middle" vertical>
             {[
               // { title: "24小时算力达成率", color: "red", value: lastHashStatus?.last24HourEfficiency },
-              { title: "近一周平均算力达成率", color: twoColors, value: lastHashStatus?.lastWeekEfficiency },
-              // {
-              //   title: `${lastHashStatus?.lastMonth}月算力达成率`,
-              //   color: "green",
-              //   value: lastHashStatus?.lastMonthEfficiency,
-              // },
+              {
+                title: "近一周平均算力达成率",
+                color: twoColors,
+                value: lastHashStatus?.lastWeekEfficiency,
+                diff: lastHashStatus?.lastWeekEfficiencyDiff,
+              },
               {
                 title: `${lastHashStatus?.last2Month}月算力达成率`,
                 value: lastHashStatus?.last2MonthEfficiency,
+                diff: lastHashStatus?.last2MonthEfficiencyDiff,
               },
             ].map((item, index) => (
               <Flex key={index} justify="space-between" align="center">
@@ -224,8 +257,11 @@ const MiningPoolCard: React.FC<MiningPoolCardProps> = ({ poolType }) => {
                     width: "100%",
                   }}
                 >
-                  <Col span={24}>
+                  <Col span={12}>
                     <span className="text-gray-500 fs-8 fw-semibold">{item.title}</span>
+                  </Col>
+                  <Col span={12} style={{ textAlign: "right" }}>
+                    <span className="text-gray-500 fs-8 fw-semibold">{diffColor(item.diff)}</span>
                   </Col>
                   <Col span={24}>
                     <span className="text-gray-800 fs-4 fw-bold">{item.value}%</span>

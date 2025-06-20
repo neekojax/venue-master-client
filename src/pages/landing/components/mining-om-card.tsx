@@ -102,7 +102,7 @@ const MiningOMCard: React.FC<MiningPoolCardProps> = ({ poolType }) => {
       <Row gutter={24}>
         <Col span={8}>
           <Statistic
-            title={`当前在线数 / 累计故障下架总数`}
+            title={`当前累计下架总数 / 理论总数`}
             // value={` 0 / 20000`} // 假设昨日总收益在状态中
             valueStyle={{ color: "green", fontSize: "20px", fontWeight: "bold" }}
             // valueStyle={{ display: 'flex', alignItems: 'center' }}
@@ -110,44 +110,44 @@ const MiningOMCard: React.FC<MiningPoolCardProps> = ({ poolType }) => {
               <span style={{ display: "flex", alignItems: "baseline" }}>
                 <span
                   style={{
-                    color: "green",
+                    color: "red",
                     fontWeight: "bold",
                     fontSize: "20px",
                   }}
                 >
-                  {data?.currentOnlineCount}
+                  {data?.totalFaultsCount}
                 </span>
                 <span style={{ margin: "0 8px" }}> / </span>
-                <span style={{ color: "red", fontWeight: "bold", fontSize: "20px" }}>
-                  {data?.totalFaultsCount}
+                <span style={{ color: "green", fontWeight: "bold", fontSize: "20px" }}>
+                  {data?.currentOnlineCount}
                 </span>
               </span>
             )}
           />
         </Col>
-        <Col span={14} style={{ borderLeft: "1px solid #f0f0f0", paddingLeft: "16px" }}>
+        <Col span={14} style={{ borderLeft: "1px solid #f0f0f0", paddingLeft: "16px", marginTop: "20px" }}>
           <Row gutter={24}>
             <Col span={10}>
-              <Col span={24} style={{ fontSize: "14px", color: "gray", marginBottom: "12px" }}>
-                昨日限电时长
+              <Col span={24} style={{ fontSize: "14px", color: "gray", marginBottom: "18px" }}>
+                上周限电影响在线率
               </Col>
               <Col span={24} style={{ fontSize: "14px", color: "gray", marginBottom: "12px" }}>
-                上周限电时长
+                上周其他时间影响在线率
               </Col>
-              <Col span={24} style={{ fontSize: "14px", color: "gray", marginBottom: "12px" }}>
-                上月限电时长
-              </Col>
+              {/*<Col span={24} style={{ fontSize: "14px", color: "gray", marginBottom: "12px" }}>*/}
+              {/*  上月限电时长*/}
+              {/*</Col>*/}
             </Col>
             <Col span={14}>
-              <Col span={24} style={{ fontSize: "14px", color: "black", marginBottom: "12px" }}>
-                1.5 小时
+              <Col span={24} style={{ fontSize: "14px", color: "black", marginBottom: "18px" }}>
+                3.1%
               </Col>
               <Col span={24} style={{ fontSize: "14px", color: "black", marginBottom: "12px" }}>
-                10 小时
+                6.2%
               </Col>
-              <Col span={24} style={{ fontSize: "14px", color: "black", marginBottom: "12px" }}>
-                28 小时
-              </Col>
+              {/*<Col span={24} style={{ fontSize: "14px", color: "black", marginBottom: "12px" }}>*/}
+              {/*  28 小时*/}
+              {/*</Col>*/}
             </Col>
           </Row>
         </Col>
@@ -156,13 +156,13 @@ const MiningOMCard: React.FC<MiningPoolCardProps> = ({ poolType }) => {
         <Col span={8} style={{ borderLeft: "1px solid #f0f0f0", paddingLeft: "16px" }}>
           <Row gutter={24}>
             <Col span={24} style={{ fontSize: "14px", color: "gray", marginBottom: "12px" }}>
-              <span style={{ fontSize: "14px", color: "gray" }}>昨日故障数</span>
+              <span style={{ fontSize: "14px", color: "gray" }}>上一周故障数</span>
               <span style={{ fontSize: "14px", color: "black", marginLeft: "10px" }}>
                 {data?.yesterdayFaultsCount} 台
               </span>
             </Col>
             <Col span={24} style={{ fontSize: "14px", color: "gray", marginBottom: "12px" }}>
-              <span style={{ fontSize: "14px", color: "gray" }}>折合年维修率</span>
+              <span style={{ fontSize: "14px", color: "gray" }}>故障率</span>
               <span style={{ fontSize: "14px", color: "black", marginLeft: "10px" }}>
                 {data?.yesterdayFailureRate}%
               </span>
@@ -172,13 +172,13 @@ const MiningOMCard: React.FC<MiningPoolCardProps> = ({ poolType }) => {
         <Col span={8} style={{ borderLeft: "1px solid #f0f0f0", paddingLeft: "16px" }}>
           <Row gutter={24}>
             <Col span={24} style={{ fontSize: "14px", color: "gray", marginBottom: "12px" }}>
-              <span style={{ fontSize: "14px", color: "gray" }}>近一周故障数</span>
+              <span style={{ fontSize: "14px", color: "gray" }}>上上周故障数</span>
               <span style={{ fontSize: "14px", color: "black", marginLeft: "10px" }}>
                 {data?.lastWeekFaultsCount}台
               </span>
             </Col>
             <Col span={24} style={{ fontSize: "14px", color: "gray", marginBottom: "12px" }}>
-              <span style={{ fontSize: "14px", color: "gray" }}>折合年维修率</span>
+              <span style={{ fontSize: "14px", color: "gray" }}>故障率</span>
               <span style={{ fontSize: "14px", color: "black", marginLeft: "10px" }}>
                 {data?.lastWeekFailureRate}%
               </span>
@@ -188,13 +188,13 @@ const MiningOMCard: React.FC<MiningPoolCardProps> = ({ poolType }) => {
         <Col span={8} style={{ borderLeft: "1px solid #f0f0f0", paddingLeft: "16px" }}>
           <Row gutter={24}>
             <Col span={24} style={{ fontSize: "14px", color: "gray", marginBottom: "12px" }}>
-              <span style={{ fontSize: "14px", color: "gray" }}>近一月故障数</span>
+              <span style={{ fontSize: "14px", color: "gray" }}>5月故障数</span>
               <span style={{ fontSize: "14px", color: "black", marginLeft: "10px" }}>
                 {data?.lastMonthFaultsCount} 台
               </span>
             </Col>
             <Col span={24} style={{ fontSize: "14px", color: "gray", marginBottom: "12px" }}>
-              <span style={{ fontSize: "14px", color: "gray" }}>折合年维修率</span>
+              <span style={{ fontSize: "14px", color: "gray" }}>故障率</span>
               <span style={{ fontSize: "14px", color: "black", marginLeft: "10px" }}>
                 {data?.lastMonthFailureRate}%
               </span>

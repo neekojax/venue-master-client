@@ -232,6 +232,7 @@ const MiningBenefitCard = ({ poolType }) => {
           onChange={handleTimeFrameChange}
           style={{ fontSize: "10px", border: "none" }}
           size="small"
+          className="filter-button"
         >
           <Radio.Button value="7" className={`radio-button ${timeFrame === "7" ? "active" : ""}`}>
             7天
