@@ -47,10 +47,12 @@ const MiningBenefitCard: React.FC<MiningPoolCardProps> = ({ poolType }) => {
       title={
         <Row align="middle">
           <Col>
-            <BsCurrencyDollar style={{ fontSize: "24px", marginRight: "8px", fontWeight: "bold" }} />
+            <BsCurrencyDollar
+              style={{ fontSize: "24px", marginRight: "8px", fontWeight: "bold", color: "#1890ff" }}
+            />
           </Col>
           <Col>
-            <h3 style={{ marginLeft: 10, fontSize: "24px" }}>效益</h3>
+            <h3 style={{ marginLeft: 0, fontSize: "18px" }}>效益</h3>
           </Col>
         </Row>
       }
@@ -69,7 +71,7 @@ const MiningBenefitCard: React.FC<MiningPoolCardProps> = ({ poolType }) => {
             cursor: "pointer",
             display: "flex",
             alignItems: "center",
-            fontSize: "18px",
+            fontSize: "14px",
             color: "#1890ff", // 默认颜色
             transition: "color 0.3s ease", // 添加过渡效果
           }}
@@ -81,57 +83,83 @@ const MiningBenefitCard: React.FC<MiningPoolCardProps> = ({ poolType }) => {
       }
     >
       <Row gutter={24}>
-        <Col span={8}>
+        <Col span={24}>
           <Statistic
             title={`昨日总收益`}
             value={lastProfitStatus?.last_day_income_statistics.income_btc} // 假设昨日总收益在状态中
-            valueStyle={{ color: "green", fontSize: "20px", fontWeight: "bold" }}
+            valueStyle={{ fontSize: "20px", fontWeight: "bold", color: "#3dbb32" }}
             // prefix={<BiLogoBitcoin style={{ fontSize: "20px", color: "gold" }} />}
             suffix={"BTC"}
           />
         </Col>
+        <Col span={12} style={{ marginTop: "25px" }}>
+          <Statistic
+            title={`${lastProfitStatus?.month}月产出数量`}
+            value={`${lastProfitStatus?.month_statistics.income_btc} BTC`} // 假设昨日总收益在状态中
+            valueStyle={{ fontSize: "16px", fontWeight: "bold" }}
+            // prefix={<BiLogoBitcoin style={{ fontSize: "20px", color: "gold" }} />}
+          />
+        </Col>
+        <Col span={12} style={{ marginTop: "25px" }}>
+          <Statistic
+            title={`${lastProfitStatus?.month}月产出价值`}
+            value={`${lastProfitStatus?.month_statistics.income_usd} $`} // 假设昨日总收益在状态中
+            valueStyle={{ fontSize: "16px", fontWeight: "bold" }}
+            // prefix={<BiLogoBitcoin style={{ fontSize: "20px", color: "gold" }} />}
+            suffix={"BTC"}
+          />
+        </Col>
+
+        <Col span={12} style={{ marginTop: "25px" }}>
+          <Statistic
+            title={`${lastProfitStatus?.month}月托管+运维`}
+            value={`${lastProfitStatus?.month_statistics.hosting_fee} $`} // 假设昨日总收益在状态中
+            valueStyle={{ fontSize: "16px", fontWeight: "bold" }}
+          />
+        </Col>
+
         <Col span={14} style={{ borderLeft: "1px solid #f0f0f0", paddingLeft: "16px" }}>
           <Row gutter={24}>
             <Col span={10}>
-              <Col span={24} style={{ fontSize: "14px", color: "gray", marginBottom: "12px" }}>
+              {/* <Col span={24} style={{ fontSize: "14px", color: "gray", marginBottom: "12px" }}>
                 {`${lastProfitStatus?.month}月产出数量`}
-              </Col>
-              <Col span={24} style={{ fontSize: "14px", color: "gray", marginBottom: "12px" }}>
+              </Col> */}
+              {/* <Col span={24} style={{ fontSize: "14px", color: "gray", marginBottom: "12px" }}>
                 {`${lastProfitStatus?.month}月产出价值`}
-              </Col>
-              <Col span={24} style={{ fontSize: "14px", color: "gray", marginBottom: "12px" }}>
+              </Col> */}
+              {/* <Col span={24} style={{ fontSize: "14px", color: "gray", marginBottom: "12px" }}>
                 {`${lastProfitStatus?.month}月托管+运维`}
-              </Col>
+              </Col> */}
             </Col>
             <Col span={14}>
-              <Col
+              {/* <Col
                 span={24}
                 style={{ fontSize: "14px", color: "black", marginBottom: "12px", fontWeight: "bold" }}
               >
                 {`${lastProfitStatus?.month_statistics.income_btc} BTC`}
-              </Col>
-              <Col
+              </Col> */}
+              {/* <Col
                 span={24}
                 style={{ fontSize: "14px", color: "black", marginBottom: "12px", fontWeight: "bold" }}
               >
                 {`${lastProfitStatus?.month_statistics.income_usd} $`}
-              </Col>
-              <Col
+              </Col> */}
+              {/* <Col
                 span={24}
                 style={{ fontSize: "14px", color: "black", marginBottom: "12px", fontWeight: "bold" }}
               >
                 {`${lastProfitStatus?.month_statistics.hosting_fee} $`}
-              </Col>
+              </Col> */}
             </Col>
           </Row>
         </Col>
       </Row>
-      <Row style={{ marginTop: "48px" }} gutter={24}>
+      <Row style={{ marginTop: "25px" }} gutter={24}>
         <Col span={8} style={{ borderLeft: "1px solid #f0f0f0", paddingLeft: "16px" }}>
           <Statistic
             title={`昨日电费占比`}
             value={lastProfitStatus?.last_day_hosting_fee_ratio} // 假设效率值在状态中
-            valueStyle={{ fontSize: "14px", fontWeight: "bold" }}
+            valueStyle={{ fontSize: "16px", fontWeight: "bold" }}
             // suffix="%"
           />
         </Col>
@@ -139,7 +167,7 @@ const MiningBenefitCard: React.FC<MiningPoolCardProps> = ({ poolType }) => {
           <Statistic
             title="近14天电费占比"
             value={lastProfitStatus?.last_2week_hosting_fee_ratio} // 假设一周平均效率在状态中
-            valueStyle={{ fontSize: "14px", fontWeight: "bold" }}
+            valueStyle={{ fontSize: "16px", fontWeight: "bold" }}
             // suffix="%"
           />
         </Col>
@@ -147,7 +175,7 @@ const MiningBenefitCard: React.FC<MiningPoolCardProps> = ({ poolType }) => {
           <Statistic
             title={`${lastProfitStatus?.month}月电费占比`} // 使用模板字符串来动态插入月份
             value={lastProfitStatus?.month_hosting_fee_ratio} // 假设一周平均效率在状态中
-            valueStyle={{ fontSize: "14px", fontWeight: "bold" }}
+            valueStyle={{ fontSize: "16px", fontWeight: "bold" }}
             // suffix="%"
           />
         </Col>

@@ -74,10 +74,10 @@ const MiningPoolCard: React.FC<MiningPoolCardProps> = ({ poolType }) => {
       title={
         <Row align="middle">
           <Col>
-            <FaCogs style={{ fontSize: "24px", marginRight: "8px" }} />
+            <FaCogs style={{ fontSize: "24px", marginRight: "8px", fontWeight: "bold", color: "#1890ff" }} />
           </Col>
           <Col>
-            <h3 style={{ marginLeft: 10, fontSize: "24px", color: "#333" }}>效率</h3>
+            <h3 style={{ marginLeft: 2, fontSize: "18px", color: "#333" }}>效率</h3>
           </Col>
         </Row>
       }
@@ -112,7 +112,8 @@ const MiningPoolCard: React.FC<MiningPoolCardProps> = ({ poolType }) => {
         <Col span={8}>
           <Statistic
             title="实时总算力"
-            className="fs-6 text-gray-500 fw-semibold"
+            className="text-gray-500 fw-semibold"
+            style={{ fontSize: "12px" }}
             value={realTimeStatus?.totalCurrentHashRate}
             suffix={
               <span style={{ fontSize: "16px", color: "gray", fontWeight: "normal" }}>
@@ -130,7 +131,7 @@ const MiningPoolCard: React.FC<MiningPoolCardProps> = ({ poolType }) => {
                 </Tooltip>
               </span>
             }
-            valueStyle={{ fontSize: "20px", fontWeight: "bold" }}
+            valueStyle={{ fontSize: "22px", fontWeight: "bold" }}
           />
         </Col>
         <Col span={8}>
@@ -147,7 +148,7 @@ const MiningPoolCard: React.FC<MiningPoolCardProps> = ({ poolType }) => {
             title={`实时算力达成率`}
             className="fs-6 text-gray-500 fw-semibold"
             value={realTimeStatus?.realTimeHashEfficiency} // 假设效率值在状态中
-            valueStyle={{ fontSize: "20px", fontWeight: "bold" }}
+            valueStyle={{ fontSize: "20px", fontWeight: "bold", color: "#3dbb32" }}
             suffix="%"
           />
         </Col>

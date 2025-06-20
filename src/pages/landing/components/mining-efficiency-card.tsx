@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { FcBullish } from "react-icons/fc";
 import { Card, Col, Radio, Row } from "antd";
+import * as echarts from "echarts";
 import { ReactEcharts } from "@/components/react-echarts";
 
 import { fetchLastestHashRateEfficiency } from "@/pages/mining/api.tsx";
@@ -55,15 +56,37 @@ const MiningEfficiencyCard = ({ poolType }) => {
       xAxis: {
         type: "category",
         data: dates,
+        boundaryGap: false,
+        axisLabel: {
+          color: "#99a1b7", // 字体颜色
+          fontSize: 12, // 字体大小
+          rotate: 0, //不旋转
+          formatter: function (value) {
+            // 只保留月-日
+            return value.substr(5);
+          },
+        },
         axisLine: {
           lineStyle: {
-            color: "#ccc",
+            color: "#99a1b7",
           },
         },
       },
       yAxis: {
         type: "value",
         min: 70,
+        axisLabel: {
+          color: "#99a1b7", // 字体颜色
+          fontSize: 12, // 字体大小
+          // formatter: function (value) {
+          //   return formatNumberCN(value);
+          // }
+        },
+        lineStyle: {
+          type: "dashed",
+          color: "#99a1b7",
+          // ...
+        },
         splitLine: {
           show: false, // 隐藏 y 轴的网格线
         },
@@ -77,8 +100,20 @@ const MiningEfficiencyCard = ({ poolType }) => {
           itemStyle: {
             color: "#4b9bdc", // NS 线条颜色 #4b9bdc "#4CAF50",
           },
+          areaStyle: {
+            color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
+              {
+                offset: 0,
+                color: "rgba(75, 155, 220, 0.4)",
+              },
+              {
+                offset: 1,
+                color: "rgba(75, 155, 220,0.03)",
+              },
+            ]),
+          },
           lineStyle: {
-            width: 1.5,
+            width: 3, //默认2
           },
           showSymbol: false, // 不显示圆点
         },
@@ -102,10 +137,12 @@ const MiningEfficiencyCard = ({ poolType }) => {
       title={
         <Row align="middle">
           <Col>
-            <FcBullish style={{ fontSize: "20px", marginRight: "5px" }} />
+            <FcBullish
+              style={{ fontSize: "24px", marginRight: "8px", fontWeight: "bold", color: "#1890ff" }}
+            />
           </Col>
           <Col>
-            <h3 style={{ marginLeft: 5, fontSize: "14px" }}>算力达成率</h3>
+            <h3 style={{ marginLeft: 2, fontSize: "18px", color: "#333" }}>算力达成率</h3>
           </Col>
         </Row>
       }

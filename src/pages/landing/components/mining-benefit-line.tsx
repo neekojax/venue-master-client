@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { FcLineChart } from "react-icons/fc";
 import { Card, Col, Radio, Row } from "antd";
+import * as echarts from "echarts";
 import { ReactEcharts } from "@/components/react-echarts";
 
 import { fetchMiningBenefitLine } from "@/pages/landing/api.ts";
@@ -52,6 +53,18 @@ const MiningBenefitCard = ({ poolType }) => {
     // @ts-ignore
     const fee_percentage = data.map((item) => item.fee_percentage);
 
+    const formatNumberCN = (value) => {
+      if (value >= 1e8) {
+        return (value / 1e8).toFixed(2) + "亿";
+      } else if (value >= 1e6) {
+        return (value / 1e6).toFixed(2) + "百万";
+      } else if (value >= 1e4) {
+        return (value / 1e4).toFixed(2) + "万";
+      } else {
+        return value.toFixed(2);
+      }
+    };
+
     return {
       tooltip: {
         trigger: "axis",
@@ -65,9 +78,19 @@ const MiningBenefitCard = ({ poolType }) => {
       xAxis: {
         type: "category",
         data: times,
+        boundaryGap: false,
+        axisLabel: {
+          color: "#99a1b7", // 字体颜色
+          fontSize: 12, // 字体大小
+          rotate: 0, //不旋转
+          formatter: function (value) {
+            // 只保留月-日
+            return value.substr(5);
+          },
+        },
         axisLine: {
           lineStyle: {
-            color: "#ccc",
+            color: "#99a1b7",
           },
         },
       },
@@ -77,6 +100,13 @@ const MiningBenefitCard = ({ poolType }) => {
           type: "value",
           name: "收入/托管费",
           min: 0,
+          axisLabel: {
+            color: "#99a1b7", // 字体颜色
+            fontSize: 12, // 字体大小
+            formatter: function (value) {
+              return formatNumberCN(value);
+            },
+          },
           splitLine: {
             show: false,
           },
@@ -101,8 +131,20 @@ const MiningBenefitCard = ({ poolType }) => {
           itemStyle: {
             color: "#4b9bdc",
           },
+          areaStyle: {
+            color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
+              {
+                offset: 0,
+                color: "rgba(75, 155, 220, 0.4)",
+              },
+              {
+                offset: 1,
+                color: "rgba(75, 155, 220,0.03)",
+              },
+            ]),
+          },
           lineStyle: {
-            width: 1.5,
+            width: 3,
           },
           showSymbol: false,
         },
@@ -112,10 +154,22 @@ const MiningBenefitCard = ({ poolType }) => {
           data: hosting_fee,
           smooth: true,
           itemStyle: {
-            color: "#ff6f61",
+            color: "#ff6f61", // #ff6f61
+          },
+          areaStyle: {
+            color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
+              {
+                offset: 0,
+                color: "rgba(255,111,97, 0.4)",
+              },
+              {
+                offset: 1,
+                color: "rgba(255,111,97,0.03)",
+              },
+            ]),
           },
           lineStyle: {
-            width: 1.5,
+            width: 3,
           },
           showSymbol: false,
         },
@@ -126,10 +180,22 @@ const MiningBenefitCard = ({ poolType }) => {
           data: fee_percentage,
           smooth: true,
           itemStyle: {
-            color: "#f0ad4e",
+            color: "#f0ad4e", // #f0ad4e
+          },
+          areaStyle: {
+            color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
+              {
+                offset: 0,
+                color: "rgba(240,173,78, 0.4)",
+              },
+              {
+                offset: 1,
+                color: "rgba(240,173,78,0.03)",
+              },
+            ]),
           },
           lineStyle: {
-            width: 1.5,
+            width: 3,
           },
           showSymbol: false,
         },
@@ -156,7 +222,7 @@ const MiningBenefitCard = ({ poolType }) => {
             <FcLineChart style={{ fontSize: "20px", marginRight: "5px" }} />
           </Col>
           <Col>
-            <h3 style={{ marginLeft: 5, fontSize: "14px" }}>收益+支出</h3>
+            <h3 style={{ marginLeft: 2, fontSize: "18px", color: "#333" }}>收益+支出</h3>
           </Col>
         </Row>
       }
@@ -164,7 +230,7 @@ const MiningBenefitCard = ({ poolType }) => {
         <Radio.Group
           value={timeFrame}
           onChange={handleTimeFrameChange}
-          style={{ fontSize: "10px" }}
+          style={{ fontSize: "10px", border: "none" }}
           size="small"
         >
           <Radio.Button value="7" className={`radio-button ${timeFrame === "7" ? "active" : ""}`}>
@@ -179,7 +245,7 @@ const MiningBenefitCard = ({ poolType }) => {
         </Radio.Group>
       }
     >
-      <ReactEcharts option={getOption()} style={{ height: 230 }} />
+      <ReactEcharts option={getOption()} style={{ height: 315 }} />
     </Card>
   );
 };
