@@ -34,11 +34,11 @@ const findSelectedKeys = (items: MenuProps["items"], pathname: string, path: str
 };
 
 const items: MenuProps["items"] = [
-  {
-    icon: <HomeOutlined />,
-    label: <Link to={ROUTE_PATHS.dashboard}>首页改版</Link>,
-    key: ROUTE_PATHS.dashboard,
-  },
+  // {
+  //   icon: <HomeOutlined />,
+  //   label: <Link to={ROUTE_PATHS.dashboard}>首页改版</Link>,
+  //   key: ROUTE_PATHS.dashboard,
+  // },
   {
     icon: <HomeOutlined />,
     label: <Link to={ROUTE_PATHS.landing}>首页</Link>,

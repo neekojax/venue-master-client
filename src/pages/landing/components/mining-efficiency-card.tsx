@@ -96,7 +96,8 @@ const MiningEfficiencyCard = ({ poolType }) => {
   return (
     <Card
       bordered={false}
-      style={{ background: "#f7f9fc" }}
+      className="card-wapper"
+      // style={{ background: "#f7f9fc" }}
       size={"small"}
       title={
         <Row align="middle">
@@ -127,7 +128,7 @@ const MiningEfficiencyCard = ({ poolType }) => {
         </Radio.Group>
       }
     >
-      <ReactEcharts option={getOption()} style={{ height: 180 }} />
+      <ReactEcharts option={getOption()} style={{ height: 355 }} />
     </Card>
   );
 };
