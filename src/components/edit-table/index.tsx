@@ -77,10 +77,32 @@ export default function EditTable({ tableData, columns, handleDelete, handleSave
         })}
         style={{
           marginTop: 20,
-          // backgroundColor: "#fff",
-          // borderRadius: "8px",
-          // boxShadow: "0 2px 8px rgba(0, 0, 0, 0.1)",
-          // padding: "20px",
+          backgroundColor: "#fff",
+          borderRadius: "8px",
+          boxShadow: "0 2px 8px rgba(0, 0, 0, 0.05)",
+          padding: "16px",
+        }}
+        cardProps={{
+          bodyStyle: {
+            padding: 0,
+          },
+        }}
+        tableStyle={{
+          borderRadius: "8px",
+          overflow: "hidden",
+        }}
+        tableClassName="custom-table"
+        headerStyle={{
+          background: "#f7f9fc",
+          fontWeight: 600,
+          color: "#1f2937",
+          padding: "12px 16px",
+          borderBottom: "1px solid #e5e7eb",
+        }}
+        rowStyle={{
+          padding: "12px 16px",
+          borderBottom: "1px solid #f0f0f0",
+          transition: "background-color 0.3s ease",
         }}
         rowClassName={getRowClassName} // 为主表添加行样式
       />

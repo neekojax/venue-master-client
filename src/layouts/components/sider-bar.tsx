@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { BiLoaderCircle } from "react-icons/bi";
 import { GiMiner } from "react-icons/gi";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { HomeOutlined, ProductOutlined, RadiusSettingOutlined, UserOutlined } from "@ant-design/icons"; //<RadiusSettingOutlined />
 import { Layout, Menu, type MenuProps } from "antd";
 import { useTheme } from "@/components/theme-provider";
@@ -70,10 +70,12 @@ const items: MenuProps["items"] = [
       // },
       {
         key: ROUTE_PATHS.statistics,
+        // label: "信息统计"
         label: <Link to={ROUTE_PATHS.statistics}>信息统计</Link>,
       },
       {
         key: ROUTE_PATHS.dailyAveragePrice,
+        // label: "BTC均价"
         label: <Link to={ROUTE_PATHS.dailyAveragePrice}>BTC均价</Link>,
       },
     ],
@@ -126,6 +128,7 @@ const items: MenuProps["items"] = [
 
 export default function SiderBar() {
   const location = useLocation();
+  const navigate = useNavigate();
 
   const firstRenderRef = useRef(true);
 
@@ -174,10 +177,13 @@ export default function SiderBar() {
         mode="inline"
         items={items}
         selectedKeys={selectedKeys}
-        // onSelect={({ selectedKeys }) => setSelectedKeys(selectedKeys)}
+        onSelect={({ selectedKeys }) => {
+          setSelectedKeys(selectedKeys);
+        }}
         openKeys={openKeys}
         onOpenChange={(openKeys) => setOpenKeys(openKeys)}
         className="!border-e-0"
+        onClick={({ key }) => navigate(key)} // ✅ 跳转页面
       />
       {/* </div> */}
     </Layout.Sider>

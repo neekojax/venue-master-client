@@ -9,6 +9,7 @@ import { fetchLastestHashRateEfficiency } from "@/pages/mining/api.tsx";
 // @ts-ignore
 const MiningEfficiencyCard = ({ poolType }) => {
   const [data, setData] = useState([]);
+  const [loading, setLoading] = useState<boolean>(true); // 加载状态
   // const [dataCang, setDataCang] = useState([]);
   const [timeFrame, setTimeFrame] = useState("90");
 
@@ -30,6 +31,8 @@ const MiningEfficiencyCard = ({ poolType }) => {
       setData(sortedData);
     } catch (error) {
       console.error("Error fetching hash rate efficiency:", error);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -129,6 +132,7 @@ const MiningEfficiencyCard = ({ poolType }) => {
     <Card
       bordered={false}
       className="card-wapper"
+      loading={loading}
       // style={{ background: "#f7f9fc" }}
       size={"small"}
       title={

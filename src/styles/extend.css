@@ -167,3 +167,14 @@
 .ant-statistic .ant-statistic-title{
     font-size: 12px !important;
 }
+
+/*表格样式*/
+.css-dev-only-do-not-override-yta69t.ant-table-wrapper .ant-table-thead >tr>th{
+    font-size: 13px;
+    color: #99A1B7;
+}
+.ant-table-wrapper .ant-table.ant-table-middle .ant-table-tbody>tr>td{
+    font-size: 14px;
+    color: #99A1B7;
+    font-weight: 600 !important;
+}

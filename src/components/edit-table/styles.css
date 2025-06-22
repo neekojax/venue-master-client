@@ -1,0 +1,27 @@
+.custom-table .ant-table-tbody > tr:hover > td {
+  background-color: #f5f9ff !important;
+}
+
+.custom-table .ant-table-row-selected > td {
+  background-color: #e6f4ff !important;
+}
+
+.custom-table .even-row {
+  background-color: #ffffff;
+}
+
+.custom-table .odd-row {
+  background-color: #fafafa;
+}
+
+.custom-table .ant-table-cell {
+  font-size: 14px;
+}
+
+.custom-table .ant-table-thead > tr > th {
+  white-space: nowrap;
+}
+
+.custom-table .ant-table-tbody > tr > td {
+  white-space: nowrap;
+}

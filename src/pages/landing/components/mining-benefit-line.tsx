@@ -10,6 +10,7 @@ import { fetchMiningBenefitLine } from "@/pages/landing/api.ts";
 const MiningBenefitCard = ({ poolType }) => {
   const [data, setData] = useState([]);
   const [timeFrame, setTimeFrame] = useState("30");
+  const [loading, setLoading] = useState<boolean>(true); // 加载状态
 
   const fetchData = async (timeFrame: string) => {
     try {
@@ -36,6 +37,8 @@ const MiningBenefitCard = ({ poolType }) => {
       // setDataCang(sortedCangData);
     } catch (error) {
       console.error("Error fetching hash rate efficiency:", error);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -216,6 +219,7 @@ const MiningBenefitCard = ({ poolType }) => {
       bordered={false}
       // style={{ background: "#f7f9fc" }}
       size={"small"}
+      loading={loading}
       title={
         <Row align="middle">
           <Col>
