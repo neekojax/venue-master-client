@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { FaAdn, FaFish } from "react-icons/fa6";
 import { WiDirectionUpRight } from "react-icons/wi";
 import { DownloadOutlined } from "@ant-design/icons";
-import { Button, Radio, Spin } from "antd";
+import { Button, Input, Radio, Spin } from "antd";
 import EditTable from "@/components/edit-table";
 import useAuthRedirect from "@/hooks/useAuthRedirect.ts";
 import { useSelector, useSettingsStore } from "@/stores";
@@ -24,6 +24,7 @@ export default function MiningHashRatePage() {
 
   const [columns, setColumns] = useState<any>([]);
   const [tableData, setTableData] = useState<any>([]);
+  const [searchTerm, setSearchTerm] = useState(""); // 新增搜索状态
 
   useEffect(() => {
     if (hashData && hashData.data) {
@@ -132,6 +133,13 @@ export default function MiningHashRatePage() {
             </span>
           );
         },
+        sorter: (a: any, b: any) => {
+          // 提取 parts[0] 并转换为数字进行比较
+          const valueA = parseFloat(a.last_hash.split(" ")[0]);
+          const valueB = parseFloat(b.last_hash.split(" ")[0]);
+
+          return valueA - valueB; // 返回值用于排序，升序
+        },
       },
       {
         title: "上次结算算力",
@@ -144,6 +152,13 @@ export default function MiningHashRatePage() {
               {parts[0]} <span>{parts[1]}</span>
             </span>
           );
+        },
+        sorter: (a: any, b: any) => {
+          // 提取 parts[0] 并转换为数字进行比较
+          const valueA = parseFloat(a.last_settlement_hash.split(" ")[0]);
+          const valueB = parseFloat(b.last_settlement_hash.split(" ")[0]);
+
+          return valueA - valueB; // 返回值用于排序，升序
         },
       },
       {
@@ -158,6 +173,13 @@ export default function MiningHashRatePage() {
             </span>
           );
         },
+        sorter: (a: any, b: any) => {
+          // 提取 parts[0] 并转换为数字进行比较
+          const valueA = parseFloat(a.theoretical.split(" ")[0]);
+          const valueB = parseFloat(b.theoretical.split(" ")[0]);
+
+          return valueA - valueB; // 返回值用于排序
+        },
       },
       {
         title: "算力达成率",
@@ -167,6 +189,13 @@ export default function MiningHashRatePage() {
         render: (text: any) => {
           const value = parseFloat(text.replace("%", "")); // 去掉 '%' 并解析为数字
           return <span style={{ color: value < 90 ? "red" : "black" }}>{text}</span>;
+        },
+        sorter: (a: any, b: any) => {
+          // 将带有 '%' 的字符串转换为数字进行比较
+          const valueA = parseFloat(a.last_hash_rate_effective.replace("%", ""));
+          const valueB = parseFloat(b.last_hash_rate_effective.replace("%", ""));
+
+          return valueA - valueB; // 返回值用于排序
         },
       },
       {
@@ -222,6 +251,11 @@ export default function MiningHashRatePage() {
     ]);
   }, []);
 
+  // 搜索处理函数
+  const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchTerm(e.target.value);
+  };
+
   // Loading 状态
   if (isLoadingPools) {
     return <Spin tip="加载中..." />;
@@ -235,13 +269,20 @@ export default function MiningHashRatePage() {
     return new Promise(() => {});
   };
   const onDownload = () => {
-    exportHashRateToExcel(hashData?.data);
+    exportHashRateToExcel(filteredData);
   };
 
   const handlePoolCategoryChange = (e: any) => {
     setPoolCategoryType(e.target.value);
     localStorage.setItem(`${StoragePrefix}_poolCategory`, e.target.value);
   };
+
+  // 根据搜索词过滤数据
+  const filteredData = tableData.filter((item: { [s: string]: unknown } | ArrayLike<unknown>) => {
+    return Object.values(item).some((value) =>
+      String(value).toLowerCase().includes(searchTerm.toLowerCase()),
+    );
+  });
 
   return (
     <div style={{ padding: "20px" }}>
@@ -256,22 +297,31 @@ export default function MiningHashRatePage() {
             </Radio.Group>
           </div>
         </div>
-        <Button
-          type="text"
-          icon={<DownloadOutlined />}
-          size="large"
-          className={"text-blue-500"}
-          onClick={onDownload}
-        >
-          导出
-        </Button>
+        <div style={{ display: "flex", justifyContent: "space-between" }}>
+          <Input
+            placeholder="请输入搜索字段"
+            value={searchTerm}
+            onChange={handleSearch}
+            style={{ width: 250 }} // 设定宽度
+            className="text-sm mr-10"
+          />
+          <Button
+            type="text"
+            icon={<DownloadOutlined />}
+            size="middle"
+            className={"text-blue-500"}
+            onClick={onDownload}
+          >
+            导出
+          </Button>
+        </div>
       </div>
 
       {isLoadingPools ? (
         <Spin style={{ marginTop: 20 }} />
       ) : (
         <EditTable
-          tableData={tableData}
+          tableData={filteredData}
           setTableData={setTableData}
           columns={columns}
           handleDelete={handleDelete}

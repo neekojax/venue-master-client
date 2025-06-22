@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { FaAdn, FaFish } from "react-icons/fa6";
 import { DownloadOutlined } from "@ant-design/icons";
-import { Button, message, Radio, Spin } from "antd";
+import { Button, Input, message, Radio, Spin } from "antd";
 import ActionButton, { ActionButtonMode } from "@/components/action-button";
 import EditTable from "@/components/edit-table";
 import useAuthRedirect from "@/hooks/useAuthRedirect.ts";
@@ -49,7 +49,9 @@ export default function MiningSettingPage() {
   const updateMutation = useMiningPoolUpdate();
   const deleteMutation = useMiningPoolDelete();
 
-  const [isLoadingNewPool, setIsLoadingNewPool] = useState(false);
+  const [isLoadingNewPool, setIsLoadingNewPool] = useState(false)
+
+  const [searchTerm, setSearchTerm] = useState(""); // 新增搜索状态;
 
   useEffect(() => {
     if (poolsData && poolsData.data) {
@@ -131,7 +133,11 @@ export default function MiningSettingPage() {
         title: "理论算力(PH/s)",
         dataIndex: "theoretical_hashrate",
         key: "theoretical_hashrate",
-        width: 120,
+        width: 150,
+        sorter: (a: any, b: any) => {
+          // 直接比较数值
+          return a.theoretical_hashrate - b.theoretical_hashrate; // 返回值用于升序排序
+        },
       },
       {
         title: "能耗比(J/T)",
@@ -233,8 +239,20 @@ export default function MiningSettingPage() {
 
   const onDownload = () => {
     // @ts-ignore
-    exportMiningPoolListToExcel(poolsData.data);
+    exportMiningPoolListToExcel(filteredData);
   };
+
+  // 搜索处理函数
+  const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchTerm(e.target.value);
+  };
+
+  // 根据搜索词过滤数据
+  const filteredData = tableData.filter((item: { [s: string]: unknown } | ArrayLike<unknown>) => {
+    return Object.values(item).some((value) =>
+      String(value).toLowerCase().includes(searchTerm.toLowerCase()),
+    );
+  });
 
   // @ts-ignore
   return (
@@ -251,6 +269,13 @@ export default function MiningSettingPage() {
           </div>
         </div>
         <div>
+          <Input
+            placeholder="请输入搜索字段"
+            value={searchTerm}
+            onChange={handleSearch}
+            style={{ width: 250 }} // 设定宽度
+            className="text-sm mr-10"
+          />
           <ActionButton
             label={"添加矿池"}
             // @ts-ignore
@@ -262,7 +287,7 @@ export default function MiningSettingPage() {
           <Button
             type="text"
             icon={<DownloadOutlined />}
-            size="large"
+            size="middle"
             className={"text-blue-500"}
             onClick={onDownload}
           >
@@ -290,7 +315,7 @@ export default function MiningSettingPage() {
         <Spin style={{ marginTop: 20 }} />
       ) : (
         <EditTable
-          tableData={tableData}
+          tableData={filteredData}
           setTableData={setTableData}
           columns={columns}
           handleDelete={handleDelete}
