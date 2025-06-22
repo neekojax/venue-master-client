@@ -82,7 +82,7 @@ export default function MiningHashRatePage() {
           if (link.includes("antpool")) {
             return <FaAdn style={{ color: "green", fontSize: 18 }} />;
           } else if (link.includes("f2pool")) {
-            return <FaFish style={{ color: "blue", fontSize: 18 }} />;
+            return <FaFish style={{ color: "#252F4A", fontSize: 18 }} />;
           } else {
             return <span>{record.serialNumber}</span>; // 如果没有匹配，则返回序号
           }
@@ -103,7 +103,7 @@ export default function MiningHashRatePage() {
           const parts = text.split(" "); // 根据空格分割
           return (
             <span>
-              {parts[0]} <span style={{ color: "#888" }}>{parts[1]}</span>
+              {parts[0]} <span>{parts[1]}</span>
             </span>
           );
         },
@@ -115,7 +115,7 @@ export default function MiningHashRatePage() {
         render: (_text: any, record: any) => (
           <span>
             <span className="text-green-400">{record.online}</span>
-            <span style={{ color: "#888" }}> / </span>
+            <span> / </span>
             <span className="text-red-600">{record.offline}</span>
           </span>
         ),
@@ -128,7 +128,7 @@ export default function MiningHashRatePage() {
           const parts = text.split(" "); // 根据空格分割
           return (
             <span>
-              {parts[0]} <span style={{ color: "#888" }}>{parts[1]}</span>
+              {parts[0]} <span>{parts[1]}</span>
             </span>
           );
         },
@@ -141,7 +141,7 @@ export default function MiningHashRatePage() {
           const parts = text.split(" "); // 根据空格分割
           return (
             <span>
-              {parts[0]} <span style={{ color: "#888" }}>{parts[1]}</span>
+              {parts[0]} <span>{parts[1]}</span>
             </span>
           );
         },
@@ -154,7 +154,7 @@ export default function MiningHashRatePage() {
           const parts = text.split(" "); // 根据空格分割
           return (
             <span>
-              {parts[0]} <span style={{ color: "#888" }}>{parts[1]}</span>
+              {parts[0]} <span>{parts[1]}</span>
             </span>
           );
         },
@@ -176,7 +176,7 @@ export default function MiningHashRatePage() {
         render: (text: any) => (
           <span>
             <span style={{ color: "#24ac95" }}>{text}</span>
-            <span style={{ fontSize: "em", color: "#888" }}> BTC </span>
+            <span style={{ fontSize: "em" }}> BTC </span>
           </span>
         ),
       },
@@ -187,7 +187,7 @@ export default function MiningHashRatePage() {
         render: (text: any) => (
           <span>
             <span style={{ color: "#24ac95" }}>{text}</span>
-            <span style={{ fontSize: "em", color: "#888" }}> FB </span>
+            <span style={{ fontSize: "em" }}> FB </span>
           </span>
         ),
       },
@@ -212,7 +212,7 @@ export default function MiningHashRatePage() {
             href={link}
             target="_blank"
             rel="noopener noreferrer"
-            style={{ color: "blue" }}
+            style={{ color: "#252F4A" }}
             title={link} // 悬停显示完整链接
           >
             <WiDirectionUpRight style={{ marginLeft: 8, fontSize: "32px" }} />

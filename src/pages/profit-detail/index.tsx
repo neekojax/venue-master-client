@@ -23,7 +23,7 @@ export default function ProfitDetailPage() {
 
   const [statisticsHistory, setStatisticsHistory] = useState<any>(null); // 状态数据
 
-  const [loading, setLoading] = useState<boolean>(true); // 加载状态
+  const [setLoading] = useState<boolean>(true); // 加载状态
   // const [error, setError] = useState<string | null>(null); // 错误信息
 
   const [dateRange, setDateRange] = useState<[Dayjs | null, Dayjs | null]>(
@@ -80,7 +80,7 @@ export default function ProfitDetailPage() {
       ) => (
         <a
           onClick={() => handlePoolClick(record.pool_name)} // 点击事件
-          style={{ color: "blue", cursor: "pointer" }} // 视觉提示
+          style={{ color: "#252F4A", cursor: "pointer" }} // 视觉提示
         >
           {text}
         </a>
@@ -123,13 +123,19 @@ export default function ProfitDetailPage() {
   };
 
   const gaugeChartOptions = {
+    grid: {
+      top: "0%", // 调整为 0% 或更小的值
+      right: "0%",
+      bottom: "5%",
+      left: "5%",
+    },
     series: [
       {
         type: "gauge",
         startAngle: 180,
         endAngle: 0,
         center: ["50%", "75%"],
-        radius: "90%",
+        radius: "100%",
         min: 0,
         max: 100,
         splitNumber: 8,
@@ -212,12 +218,52 @@ export default function ProfitDetailPage() {
   const option = {
     tooltip: {
       trigger: "axis",
+      axisPointer: {
+        type: "cross",
+        crossStyle: {
+          color: "#464646",
+          fontSize: 12,
+        },
+      },
+    },
+    grid: {
+      top: "25%", // 调整为 0% 或更小的值
+      right: "12%",
+      bottom: "12%",
+      left: "12%",
     },
     legend: {
       data: ["收入 (BTC)", "收入 (USD)", "托管费用"],
+      top: "-3%",
+      icon: "circle", // 图标形状：可选值有 'circle'、'rect'、'roundRect'、'triangle'、'diamond'、'pin'、'arrow' 或自定义路径
+      textStyle: {
+        fontSize: 12, // 字体大小
+        color: "#464646", // 字体颜色
+      },
+      itemWidth: 8, // 图标宽度
+      itemHeight: 8, // 图标高度
+      itemGap: 10, // 图例之间的间距
     },
+    // legend: {
+    //   // Try 'horizontal'
+    //   orient: 'vertical',
+    //   right: 10,
+    //   top: 'center'
+    // },
     xAxis: {
       type: "category",
+      axisLine: {
+        show: false, // 🔴隐藏 x 轴上的折线（轴线）
+      },
+      axisLabel: {
+        show: true, // 是否显示文字
+        // 字体颜色
+        color: "#464646",
+        formatter: function (value) {
+          // 只保留月-日
+          return value.substr(5);
+        },
+      },
       data: totalData?.map((item: { date: any }) => item.date), // 使用过滤后的日期
     },
     yAxis: [
@@ -233,6 +279,9 @@ export default function ProfitDetailPage() {
         type: "value",
         name: "金额 (USD)",
         position: "right",
+        splitLine: {
+          show: false, // ✅ 关闭背景横线
+        },
         axisLabel: {
           formatter: "${value}",
         },
@@ -241,7 +290,9 @@ export default function ProfitDetailPage() {
     series: [
       {
         name: "收入 (BTC)",
-        type: "line",
+        // type: "line",
+        type: "bar",
+        barWidth: 10,
         data: totalData?.map((item: { income_btc: any }) => item.income_btc), // 使用过滤后的收入数据
         itemStyle: {
           color: "#58D9F9",
@@ -251,23 +302,28 @@ export default function ProfitDetailPage() {
       },
       {
         name: "收入 (USD)",
-        type: "line",
+        // type: "line",
+        type: "bar",
         data: totalData?.map((item: { income_usd: any }) => item.income_usd), // 使用过滤后的收入数据
         itemStyle: {
           color: "#FDDD60",
         },
         yAxisIndex: 1,
-        smooth: true, // 使用平滑曲线
+        barWidth: 10,
+        // smooth: true, // 使用平滑曲线
       },
       {
         name: "托管费用",
-        type: "line",
+        // type: "line",
+        type: "bar",
+        barWidth: 10,
         data: totalData?.map((item: { hosting_fee: any }) => item.hosting_fee), // 使用过滤后的托管费用数据
         itemStyle: {
           color: "#FF6E76",
+          barWidth: 2,
         },
         yAxisIndex: 1,
-        smooth: true, // 使用平滑曲线
+        // smooth: true, // 使用平滑曲线
       },
     ],
   };
@@ -281,53 +337,53 @@ export default function ProfitDetailPage() {
         style={{ width: "280px", fontSize: "12px" }} // 可以调整宽度
       />
       <div style={{ marginBottom: "20px", marginTop: "20px" }}>
-        <Card loading={loading}>
-          <Row gutter={24} style={{ display: "flex" }}>
-            <Col span={8}>
-              <Card title={"统计数据"}>
-                <Row gutter={24}>
-                  <Col span={24} style={{ marginBottom: "20px" }}>
-                    <Statistic
-                      title="总收益BTC"
-                      value={statisticsHistory?.total_income_btc}
-                      valueStyle={{ fontSize: "16px", fontWeight: "bold" }}
-                    />
-                    {/*<h2 style={{ color: "black", fontSize: "16px", marginBottom: "12px" }}>*/}
-                    {/*  总收入 (BTC): {statisticsHistory?.total_income_btc.toFixed(8)} BTC*/}
-                    {/*</h2>*/}
-                  </Col>
-                  <Col span={24} style={{ marginBottom: "20px" }}>
-                    <Statistic
-                      title="总收益($)"
-                      value={statisticsHistory?.total_income_usd}
-                      valueStyle={{ fontSize: "16px", fontWeight: "bold" }}
-                    />
-                    {/*<h2 style={{ color: "black", fontSize: "16px", marginBottom: "12px" }}>*/}
-                    {/*  总收入 (USD): ${statisticsHistory?.total_income_usd.toFixed(2)}*/}
-                    {/*</h2>*/}
-                  </Col>
-                  <Col span={24} style={{ marginBottom: "20px" }}>
-                    <Statistic
-                      title="总托管费用($)"
-                      value={statisticsHistory?.total_hosting_fee}
-                      valueStyle={{ fontSize: "16px", fontWeight: "bold" }}
-                    />
-                  </Col>
-                </Row>
-              </Card>
-            </Col>
-            <Col span={8}>
-              <Card title={"托管费占比"}>
-                <ReactEcharts option={gaugeChartOptions} style={{ height: "212px", width: "100%" }} />
-              </Card>
-            </Col>
-            <Col span={8}>
-              <Card title={"曲线图"}>
-                <ReactEcharts option={option} style={{ height: "212px", width: "100%" }} />
-              </Card>
-            </Col>
-          </Row>
-        </Card>
+        {/* <Card loading={loading} style={}> */}
+        <Row gutter={24} style={{ display: "flex" }}>
+          <Col span={8}>
+            <Card title={"统计数据"}>
+              <Row gutter={24} style={{ height: "200px" }}>
+                <Col span={24} style={{ marginBottom: "20px" }}>
+                  <Statistic
+                    title="总收益BTC"
+                    value={statisticsHistory?.total_income_btc}
+                    valueStyle={{ fontSize: "16px", fontWeight: "bold" }}
+                  />
+                  {/*<h2 style={{ color: "black", fontSize: "16px", marginBottom: "12px" }}>*/}
+                  {/*  总收入 (BTC): {statisticsHistory?.total_income_btc.toFixed(8)} BTC*/}
+                  {/*</h2>*/}
+                </Col>
+                <Col span={24} style={{ marginBottom: "20px" }}>
+                  <Statistic
+                    title="总收益($)"
+                    value={statisticsHistory?.total_income_usd}
+                    valueStyle={{ fontSize: "16px", fontWeight: "bold" }}
+                  />
+                  {/*<h2 style={{ color: "black", fontSize: "16px", marginBottom: "12px" }}>*/}
+                  {/*  总收入 (USD): ${statisticsHistory?.total_income_usd.toFixed(2)}*/}
+                  {/*</h2>*/}
+                </Col>
+                <Col span={24} style={{ marginBottom: "20px" }}>
+                  <Statistic
+                    title="总托管费用($)"
+                    value={statisticsHistory?.total_hosting_fee}
+                    valueStyle={{ fontSize: "16px", fontWeight: "bold" }}
+                  />
+                </Col>
+              </Row>
+            </Card>
+          </Col>
+          <Col span={8}>
+            <Card title={"托管费占比"}>
+              <ReactEcharts option={gaugeChartOptions} style={{ height: "200px", width: "100%" }} />
+            </Card>
+          </Col>
+          <Col span={8}>
+            <Card title={"曲线图"}>
+              <ReactEcharts option={option} style={{ height: "200px", width: "100%" }} />
+            </Card>
+          </Col>
+        </Row>
+        {/* </Card> */}
       </div>
       <Table
         dataSource={statisticsHistory?.data}

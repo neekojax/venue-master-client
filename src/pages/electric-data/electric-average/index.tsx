@@ -45,7 +45,7 @@ export default function ElectricAverage() {
         sorter: (a: any, b: any) => a.average - b.average, // 添加排序逻辑
         render: (text: any) => (
           <span>
-            {text} <span style={{ fontSize: "em", color: "#888" }}>US$ Cent/KWH</span>
+            {text} <span style={{ fontSize: "em" }}>US$ Cent/KWH</span>
           </span>
         ), // 渲染单位
       },
@@ -92,12 +92,12 @@ export default function ElectricAverage() {
         ) : (
           <div style={{ textAlign: "center", marginTop: "60px" }}>
             {/*{Object.keys(selectedNames).length > 0 && dateRange && dateRange[0] && dateRange[1] ? (*/}
-            {/*  <p style={{ color: "#888", fontSize: "16px" }}>*/}
+            {/*  <p style={{ fontSize: "16px" }}>*/}
             {/*    <i className="fas fa-exclamation-circle" style={{ marginRight: "8px", color: "#f39c12" }}></i>*/}
             {/*    暂无数据*/}
             {/*  </p>*/}
             {/*) : (*/}
-            <p style={{ color: "#888", fontSize: "16px" }}>
+            <p style={{ fontSize: "16px" }}>
               <i className="fas fa-exclamation-circle" style={{ marginRight: "8px", color: "#f39c12" }}></i>
               暂无数据, 请选择电网场地搜索数据
             </p>

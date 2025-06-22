@@ -169,12 +169,39 @@
 }
 
 /*表格样式*/
-.css-dev-only-do-not-override-yta69t.ant-table-wrapper .ant-table-thead >tr>th{
+.css-dev-only-do-not-override-yta69t.ant-table-wrapper .ant-table-thead >tr>th,.ant-table-wrapper .ant-table-thead >tr>th{
     font-size: 13px;
     color: #99A1B7;
 }
 .ant-table-wrapper .ant-table.ant-table-middle .ant-table-tbody>tr>td{
-    font-size: 14px;
+    /* font-size: 14px; */
+    font-size: 13px;
     color: #99A1B7;
-    font-weight: 600 !important;
+    font-weight: 400 !important;
+}
+.ant-table-wrapper .ant-table-tbody >tr >td.ant-table-cell{
+    font-size: 13px;
+    font-weight: 400 !important;
+    color: #99A1B7;
+    /* font-size: .95rem !important; */
+}
+/*ant-picker 日期选择器*/
+.ant-picker .ant-picker-input{
+    background-color: #F9F9F9;
+    border-color: #F9F9F9;
+}
+.ant-picker .ant-picker-input > input{
+    font-size: 12px;
+    
+    background-color: #F9F9F9;
+    border-color: #F9F9F9;
+    color: #4B5675;
+    transition: color .2s ease;
+}
+
+.ant-select-outlined:not(.ant-select-customize-input) .ant-select-selector,.ant-select,.custom-select .ant-select-selector{
+    background-color: #F1F1F4 !important;
+    border-color: #F9F9F9 !important;
+    color: #4B5675 !important;
+    transition: color .2s ease;
 }

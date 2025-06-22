@@ -67,7 +67,9 @@ export default function HashRateHistoryTable() {
       title: "矿池名称",
       dataIndex: "pool_name",
       key: "pool_name",
-      width: "300px",
+      // width: "300px",
+      width: 150, // ✅ 限制列宽
+      ellipsis: true,
       render: (
         text:
           | string
@@ -82,7 +84,8 @@ export default function HashRateHistoryTable() {
       ) => (
         <a
           onClick={() => handlePoolClick(record.pool_name)} // 点击事件
-          style={{ color: "blue", cursor: "pointer" }} // 视觉提示
+          title={record.pool_name}
+          style={{ color: "#252F4A", cursor: "pointer" }} // 视觉提示
         >
           {text}
         </a>
@@ -95,7 +98,7 @@ export default function HashRateHistoryTable() {
       render: (text: any) => {
         return (
           <span>
-            {text} <span style={{ color: "#888" }}>PH/s</span>
+            {text} <span style={{ fontSize: "12px" }}>PH/s</span>
           </span>
         );
       },
@@ -108,7 +111,7 @@ export default function HashRateHistoryTable() {
       render: (text: any) => {
         return (
           <span>
-            {text} <span style={{ color: "#888" }}>PH/s</span>
+            {text} <span style={{ fontSize: "12px" }}>PH/s</span>
           </span>
         );
       },
@@ -162,7 +165,7 @@ export default function HashRateHistoryTable() {
         />
       }
       loading={loading}
-      style={{ width: "100%" }}
+      style={{ width: "100%", height: "100%" }}
     >
       <Table
         dataSource={hashRateHistory}

@@ -32,14 +32,16 @@ export default function HashRatePieChart() {
   // 获取 ECharts 配置
   const getOption = () => {
     return {
+      // radius: ['40%', '70%'],
       title: {
         text: "实时总算力详情",
-        left: "center",
-        top: "5%",
+        left: "left",
+        top: "0",
         textStyle: {
-          fontSize: 20,
+          // fontSize: 20,
           fontWeight: "bold",
-          color: "black",
+          fontSize: "16px",
+          color: "#333",
         },
       },
       tooltip: {
@@ -52,10 +54,13 @@ export default function HashRatePieChart() {
       },
       legend: {
         orient: "vertical",
-        left: "left",
+        right: "10",
+        itemWidth: 8,
+        itemHeight: 8,
         top: "top",
         textStyle: {
           fontSize: 12,
+          color: "#99A1B7",
         },
         type: "scroll", // 使图例可滚动
         padding: 10,
@@ -65,7 +70,13 @@ export default function HashRatePieChart() {
         {
           name: "实时算力",
           type: "pie",
-          radius: "50%",
+          // radius: "90%",
+          radius: ["60%", "90%"],
+          label: {
+            show: true,
+            color: "#99A1B7", // ✅ 设置文字颜色（例如黑色）
+            fontSize: 12, // ✅ 可选：设置文字大小
+          },
           data: hashRate
             ? hashRate.map(
                 ({ pool_name, current_hash_rate }: { pool_name: string; current_hash_rate: number }) => ({

@@ -55,7 +55,7 @@ export default function StatisticsPage() {
         key: "utc_avg_price",
         render: (text: any) => (
           <span>
-            {text} <span style={{ fontSize: "em", color: "#888" }}> USD</span>
+            {text} <span style={{ fontSize: "em" }}> USD</span>
           </span>
         ), // 渲染单位
       },

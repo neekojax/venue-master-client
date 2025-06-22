@@ -1,5 +1,5 @@
 import { useNavigate } from "react-router-dom";
-import { LogoutOutlined } from "@ant-design/icons";
+import { LogoutOutlined, UserOutlined } from "@ant-design/icons";
 import { Avatar, Dropdown, type MenuProps } from "antd";
 import { ROUTE_PATHS } from "@/constants/common";
 
@@ -24,13 +24,20 @@ export default function UserAvatar() {
     },
   ];
 
-  const randomSeed = Math.floor(Math.random() * 10000); // 生成一个 0 到 9999 的随机种子
+  // const randomSeed = Math.floor(Math.random() * 10000); // 生成一个 0 到 9999 的随机种子
 
-  const apiUrl = `https://api.dicebear.com/9.x/bottts/svg?seed=${randomSeed}`;
+  // const apiUrl = `https://api.dicebear.com/9.x/bottts/svg?seed=${randomSeed}`;
 
   return (
     <Dropdown menu={{ items }} trigger={["click"]}>
-      <Avatar size={50} src={apiUrl} className="cursor-pointer" />
+      <Avatar
+        size={25}
+        style={{ backgroundColor: "#E9F3FF" }}
+        icon={<UserOutlined style={{ color: "#1B84FF", fontWeight: "bold" }} />}
+      />
+      {/* <UserOutlined className="cursor-pointer" style={{ fontSize: 50, color: "#1B84FF" }} /> */}
+      {/* <Avatar size={50} src={<UserOutlined />} className="cursor-pointer" /> */}
+      {/* <Avatar size={50} src={apiUrl} className="cursor-pointer" /> */}
     </Dropdown>
   );
 }

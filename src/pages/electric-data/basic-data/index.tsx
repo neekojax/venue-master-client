@@ -63,7 +63,7 @@ export default function ElectricBasic() {
         // sorter: (a: any, b: any) => a.price - b.price,
         render: (text: any) => (
           <span>
-            {text} <span style={{ fontSize: "em", color: "#888" }}> US$ Cent/KWH </span>
+            {text} <span style={{ fontSize: "em" }}> US$ Cent/KWH </span>
           </span>
         ),
       },
@@ -180,7 +180,7 @@ export default function ElectricBasic() {
             </div>
           ) : (
             <div style={{ textAlign: "center", marginTop: "60px" }}>
-              <p style={{ color: "#888", fontSize: "16px" }}>
+              <p style={{ fontSize: "16px" }}>
                 <i className="fas fa-exclamation-circle" style={{ marginRight: "8px", color: "#f39c12" }}></i>
                 请选择电网场地搜索数据
               </p>

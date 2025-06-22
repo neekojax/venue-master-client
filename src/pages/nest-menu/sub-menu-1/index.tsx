@@ -61,7 +61,7 @@ export default function LinkPage() {
             href={link}
             target="_blank"
             rel="noopener noreferrer"
-            style={{ color: "blue", textDecoration: "underline" }}
+            style={{ color: "#252F4A", textDecoration: "underline" }}
           >
             {link.length > 40 ? getShortenedLink(link) : link}
           </a>
@@ -77,7 +77,7 @@ export default function LinkPage() {
             href={link}
             target="_blank"
             rel="noopener noreferrer"
-            style={{ color: "blue", textDecoration: "underline" }}
+            style={{ color: "#252F4A", textDecoration: "underline" }}
             title={link} // 悬停显示完整链接
           >
             {link.length > 40 ? getShortenedLink(link) : link}

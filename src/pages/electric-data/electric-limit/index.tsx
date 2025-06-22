@@ -45,7 +45,7 @@ export default function ElectricLimit() {
           sorter: (a: any, b: any) => a.time_length - b.time_length,
           render: (text: any) => (
             <span>
-              {text} <span style={{ fontSize: "em", color: "#888" }}> 分 </span>
+              {text} <span style={{ fontSize: "em" }}> 分 </span>
             </span>
           ),
         },
@@ -72,7 +72,7 @@ export default function ElectricLimit() {
           sorter: (a: any, b: any) => a.time_length - b.time_length,
           render: (text: any) => (
             <span>
-              {text} <span style={{ fontSize: "em", color: "#888" }}> 小时 </span>
+              {text} <span style={{ fontSize: "em" }}> 小时 </span>
             </span>
           ),
         },
@@ -125,12 +125,12 @@ export default function ElectricLimit() {
         ) : (
           <div style={{ textAlign: "center", marginTop: "60px" }}>
             {/*{Object.keys(selectedNames).length > 0 && dateRange && dateRange[0] && dateRange[1] ? (*/}
-            {/*  <p style={{ color: "#888", fontSize: "16px" }}>*/}
+            {/*  <p style={{ fontSize: "16px" }}>*/}
             {/*    <i className="fas fa-exclamation-circle" style={{ marginRight: "8px", color: "#f39c12" }}></i>*/}
             {/*    暂无数据*/}
             {/*  </p>*/}
             {/*) : (*/}
-            <p style={{ color: "#888", fontSize: "16px" }}>
+            <p style={{ fontSize: "16px" }}>
               <i className="fas fa-exclamation-circle" style={{ marginRight: "8px", color: "#f39c12" }}></i>
               暂无数据, 请选择电网场地搜索数据
             </p>

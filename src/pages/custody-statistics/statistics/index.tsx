@@ -94,7 +94,7 @@ export default function StatisticsPage() {
           if (observer_link.includes("antpool")) {
             return <FaAdn style={{ color: "green", fontSize: 18 }} />;
           } else if (observer_link.includes("f2pool")) {
-            return <FaFish style={{ color: "blue", fontSize: 18 }} />;
+            return <FaFish style={{ color: "#252F4A", fontSize: 18 }} />;
           } else {
             return <span>{record.serialNumber}</span>; // 如果没有匹配，则返回序号
           }
@@ -123,7 +123,7 @@ export default function StatisticsPage() {
         width: 100,
         render: (text: any) => (
           <span>
-            {text} <span style={{ fontSize: "em", color: "#888" }}> J/T</span>
+            {text} <span style={{ fontSize: "em" }}> J/T</span>
           </span>
         ), // 渲染单位
       },
@@ -133,7 +133,7 @@ export default function StatisticsPage() {
         key: "basic_hosting_fee",
         render: (text: any) => (
           <span>
-            {text} <span style={{ fontSize: "em", color: "#888" }}>$/kwh</span>
+            {text} <span style={{ fontSize: "em" }}>$/kwh</span>
           </span>
         ), // 渲染单位
       },
@@ -144,7 +144,7 @@ export default function StatisticsPage() {
         sorter: (a: any, b: any) => a.hourly_computing_power - b.hourly_computing_power, // 添加排序逻辑
         render: (text: any) => (
           <span>
-            {text} <span style={{ fontSize: "em", color: "#888" }}> TH/s</span>
+            {text} <span style={{ fontSize: "em" }}> TH/s</span>
           </span>
         ), // 渲染单位
       },
@@ -155,7 +155,7 @@ export default function StatisticsPage() {
         sorter: (a: any, b: any) => a.total_hosting_fee - b.total_hosting_fee, // 添加排序逻辑
         render: (text: any) => (
           <span>
-            {text} <span style={{ fontSize: "em", color: "#888" }}> USD</span>
+            {text} <span style={{ fontSize: "em" }}> USD</span>
           </span>
         ), // 渲染单位
       },
@@ -167,7 +167,7 @@ export default function StatisticsPage() {
         render: (text: any) => (
           <span>
             <span>{text}</span> {/* 数字部分设置为蓝色 */}
-            <span style={{ fontSize: "1em", color: "#888" }}> BTC</span> {/* 单位颜色不变 */}
+            <span style={{ fontSize: "1em" }}> BTC</span> {/* 单位颜色不变 */}
           </span>
         ), // 渲染单位
       },
@@ -280,7 +280,7 @@ export default function StatisticsPage() {
                   value: "f2pool",
                   label: (
                     <span style={{ display: "flex", alignItems: "center" }}>
-                      <FaFish style={{ color: "blue", fontSize: 14, marginRight: 8 }} /> 鱼池
+                      <FaFish style={{ color: "#252F4A", fontSize: 14, marginRight: 8 }} /> 鱼池
                     </span>
                   ),
                 },
@@ -308,7 +308,7 @@ export default function StatisticsPage() {
                   value: "1days",
                   label: (
                     <span style={{ display: "flex", alignItems: "center" }}>
-                      <AiOutlineCalendar style={{ color: "blue", fontSize: 14, marginRight: 8 }} /> 一天
+                      <AiOutlineCalendar style={{ color: "#252F4A", fontSize: 14, marginRight: 8 }} /> 一天
                     </span>
                   ),
                 },
@@ -316,7 +316,7 @@ export default function StatisticsPage() {
                   value: "3days",
                   label: (
                     <span style={{ display: "flex", alignItems: "center" }}>
-                      <AiOutlineCalendar style={{ color: "blue", fontSize: 14, marginRight: 8 }} /> 三天
+                      <AiOutlineCalendar style={{ color: "#252F4A", fontSize: 14, marginRight: 8 }} /> 三天
                     </span>
                   ),
                 },
@@ -324,7 +324,7 @@ export default function StatisticsPage() {
                   value: "7days",
                   label: (
                     <span style={{ display: "flex", alignItems: "center" }}>
-                      <AiOutlineCalendar style={{ color: "blue", fontSize: 14, marginRight: 8 }} /> 一周
+                      <AiOutlineCalendar style={{ color: "#252F4A", fontSize: 14, marginRight: 8 }} /> 一周
                     </span>
                   ),
                 },
@@ -332,7 +332,7 @@ export default function StatisticsPage() {
                   value: "1month",
                   label: (
                     <span style={{ display: "flex", alignItems: "center" }}>
-                      <AiOutlineCalendar style={{ color: "blue", fontSize: 14, marginRight: 8 }} /> 一个月
+                      <AiOutlineCalendar style={{ color: "#252F4A", fontSize: 14, marginRight: 8 }} /> 一个月
                     </span>
                   ),
                 },
@@ -340,7 +340,7 @@ export default function StatisticsPage() {
                   value: "3month",
                   label: (
                     <span style={{ display: "flex", alignItems: "center" }}>
-                      <AiOutlineCalendar style={{ color: "blue", fontSize: 14, marginRight: 8 }} /> 三个月
+                      <AiOutlineCalendar style={{ color: "#252F4A", fontSize: 14, marginRight: 8 }} /> 三个月
                     </span>
                   ),
                 },
@@ -348,7 +348,7 @@ export default function StatisticsPage() {
                   value: "6month",
                   label: (
                     <span style={{ display: "flex", alignItems: "center" }}>
-                      <AiOutlineCalendar style={{ color: "blue", fontSize: 14, marginRight: 8 }} /> 半年
+                      <AiOutlineCalendar style={{ color: "#252F4A", fontSize: 14, marginRight: 8 }} /> 半年
                     </span>
                   ),
                 },

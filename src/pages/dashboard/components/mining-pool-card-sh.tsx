@@ -122,7 +122,6 @@ const MiningPoolShCard: React.FC<MiningPoolCardProps> = ({ poolType }) => {
   return (
     <div>
       <Card
-        style={{}}
         title={"理论算力"}
         loading={loading}
         bordered={false}

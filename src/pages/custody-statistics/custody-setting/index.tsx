@@ -79,7 +79,7 @@ export default function SettingPage() {
           if (observer_link.includes("antpool")) {
             return <FaAdn style={{ color: "green", fontSize: 18 }} />;
           } else if (observer_link.includes("f2pool")) {
-            return <FaFish style={{ color: "blue", fontSize: 18 }} />;
+            return <FaFish style={{ color: "#252F4A", fontSize: 18 }} />;
           } else {
             return <span>{record.serialNumber}</span>; // 如果没有匹配，则返回序号
           }
@@ -105,7 +105,7 @@ export default function SettingPage() {
             href={link}
             target="_blank"
             rel="noopener noreferrer"
-            style={{ color: "blue" }}
+            style={{ color: "#252F4A" }}
             title={link} // 悬停显示完整链接
           >
             {link.length > 40 ? getShortenedLink(link) : link}
