@@ -94,7 +94,7 @@ export default function MiningHashRatePage() {
         dataIndex: "pool_name",
         key: "pool_name",
         width: 230,
-        render: (text: any) => <span style={{ color: "#1a4fc9" }}>{text}</span>,
+        render: (text: any) => <span style={{ color: "#333" }}>{text}</span>,
       },
       {
         title: "实时算力",

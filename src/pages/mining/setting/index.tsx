@@ -49,7 +49,7 @@ export default function MiningSettingPage() {
   const updateMutation = useMiningPoolUpdate();
   const deleteMutation = useMiningPoolDelete();
 
-  const [isLoadingNewPool, setIsLoadingNewPool] = useState(false)
+  const [isLoadingNewPool, setIsLoadingNewPool] = useState(false);
 
   const [searchTerm, setSearchTerm] = useState(""); // 新增搜索状态;
 
@@ -111,7 +111,7 @@ export default function MiningSettingPage() {
         dataIndex: "pool_name",
         key: "pool_name",
         width: 300,
-        render: (text: any) => <span style={{ color: "#1a4fc9" }}>{text}</span>,
+        render: (text: any) => <span style={{ color: "#333" }}>{text}</span>,
       },
       {
         title: "主体类型",

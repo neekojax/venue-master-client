@@ -19,7 +19,7 @@ const getRowClassName = (_record: any, index: number) => {
 export default function EditTable({ tableData, columns, handleDelete, handleSave }: EditTableProps) {
   const [editableKeys, setEditableRowKeys] = useState<React.Key[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
-  const [pageSize, setPageSize] = useState(20);
+  const [pageSize, setPageSize] = useState(10);
 
   // 渲染操作列的函数
   const renderActions = (record: { key: number }, action: { startEditable: (arg0: any) => void }) => [
