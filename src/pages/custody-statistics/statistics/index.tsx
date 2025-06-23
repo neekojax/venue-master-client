@@ -104,7 +104,7 @@ export default function StatisticsPage() {
         title: "场地",
         dataIndex: "venue_name",
         key: "venue_name",
-        width: 220,
+        width: 200,
       },
       // {
       //   title: "子账号",
@@ -115,7 +115,7 @@ export default function StatisticsPage() {
         title: "能耗比",
         dataIndex: "energy_ratio",
         key: "energy_ratio",
-        width: 95,
+        width: 90,
         render: (text: any) => (
           <span>
             {text}{" "}
@@ -166,7 +166,7 @@ export default function StatisticsPage() {
         title: "收益(BTC/USD/净USD)",
         dataIndex: "total_income_btc",
         key: "total_income_btc",
-        width: 300,
+        width: 280,
         sorter: (a: any, b: any) => a.total_income_btc - b.total_income_btc, // 添加排序逻辑
         render: (text: any, record: any) => (
           <span>
@@ -181,7 +181,7 @@ export default function StatisticsPage() {
         title: "托管费(基础/总计)",
         dataIndex: "hosting_fee_ratio",
         key: "hosting_fee_ratio",
-        width: 220,
+        width: 200,
         render: (text: any, record: any) => (
           <span>
             <span style={{ color: "#3498DB" }}> {record.basic_hosting_fee}</span>{" "}
