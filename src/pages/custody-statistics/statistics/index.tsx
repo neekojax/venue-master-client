@@ -104,12 +104,13 @@ export default function StatisticsPage() {
         title: "场地",
         dataIndex: "venue_name",
         key: "venue_name",
+        width: 250,
       },
-      {
-        title: "子账号",
-        dataIndex: "sub_account_name",
-        key: "sub_account_name",
-      },
+      // {
+      //   title: "子账号",
+      //   dataIndex: "sub_account_name",
+      //   key: "sub_account_name",
+      // },
       {
         title: "收益日期",
         dataIndex: "report_date",
