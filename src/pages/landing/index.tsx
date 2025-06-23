@@ -14,26 +14,20 @@ export default function LandingPage() {
 
   return (
     <div>
-      <Row gutter={24}>
+      <Row gutter={24} style={{ marginTop: "16px" }}>
         <Col span={12}>
-          <Row gutter={24}>
-            <Col span={24} style={{ marginTop: "16px" }}>
-              <MiningPoolCard poolType={poolType} />
-            </Col>
-            <Col span={24} style={{ marginTop: "12px" }}>
-              <MiningBenefitCard poolType={poolType} />
-            </Col>
-          </Row>
+          <MiningPoolCard poolType={poolType} />
         </Col>
         <Col span={12}>
-          <Row gutter={24}>
-            <Col span={24} style={{ marginTop: "16px" }}>
-              <MiningEfficiencyCard poolType={poolType} />
-            </Col>
-            <Col span={24} style={{ marginTop: "16px" }}>
-              <MiningBenefitLine poolType={poolType} />
-            </Col>
-          </Row>
+          <MiningEfficiencyCard poolType={poolType} />
+        </Col>
+      </Row>
+      <Row gutter={24} style={{ marginTop: "12px" }}>
+        <Col span={12}>
+          <MiningBenefitCard poolType={poolType} />
+        </Col>
+        <Col span={12}>
+          <MiningBenefitLine poolType={poolType} />
         </Col>
       </Row>
     </div>
