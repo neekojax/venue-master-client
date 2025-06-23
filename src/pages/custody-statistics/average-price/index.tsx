@@ -44,12 +44,13 @@ export default function StatisticsPage() {
         title: "序号", // 使用英文标题
         dataIndex: "serialNumber",
         key: "serialNumber",
-        width: 100, // 设置序号列的宽度
+        width: 50, // 设置序号列的宽度
       },
       {
         title: "日期",
         dataIndex: "date",
         key: "date",
+        width: 150,
       },
       {
         title: "日平均价格",
@@ -218,6 +219,7 @@ export default function StatisticsPage() {
             tableData={tableData}
             setTableData={setTableData}
             columns={columns}
+            width={400}
             // @ts-ignore
             handleDelete={() => {}}
             // @ts-ignore

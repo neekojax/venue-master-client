@@ -76,14 +76,14 @@ export default function MiningHashRatePage() {
         // title: "序号", // 使用英文标题
         dataIndex: "serialNumber",
         key: "serialNumber",
-        width: 40,
+        width: 30,
         render: (_: any, record: { serialNumber?: any; link?: any }) => {
           const { link } = record;
           // 根据 observer_link 内容返回不同的图标
           if (link.includes("antpool")) {
-            return <FaAdn style={{ color: "green", fontSize: 18 }} />;
+            return <FaAdn style={{ color: "green", fontSize: 16 }} />;
           } else if (link.includes("f2pool")) {
-            return <FaFish style={{ color: "#252F4A", fontSize: 18 }} />;
+            return <FaFish style={{ color: "orange", fontSize: 16 }} />;
           } else {
             return <span>{record.serialNumber}</span>; // 如果没有匹配，则返回序号
           }
@@ -93,26 +93,79 @@ export default function MiningHashRatePage() {
         title: "场地",
         dataIndex: "pool_name",
         key: "pool_name",
-        width: 230,
+        width: 150,
         render: (text: any) => <span style={{ color: "#333" }}>{text}</span>,
       },
       {
-        title: "实时算力",
-        dataIndex: "current_hash",
-        key: "current_hash",
-        render: (text: any) => {
-          const parts = text.split(" "); // 根据空格分割
-          return (
-            <span>
-              {parts[0]} <span>{parts[1]}</span>
-            </span>
-          );
+        title: "算力",
+        className: "border-bottom",
+        style: {
+          borderBottom: "1px solid #e0e0e0",
         },
+        children: [
+          {
+            title: "实时",
+            dataIndex: "current_hash",
+            key: "current_hash",
+            // width: 95,
+            render: (text: any) => {
+              const parts = text.split(" "); // 根据空格分割
+              return (
+                <span>
+                  {parts[0]} <span className="text-sm text-gray-500">{parts[1]}</span>
+                </span>
+              );
+            },
+          },
+          {
+            title: "理论",
+            // width: 95,
+            dataIndex: "theoretical",
+            key: "theoretical",
+            render: (text: any) => {
+              const parts = text.split(" "); // 根据空格分割
+              return (
+                <span>
+                  {parts[0]} <span className="text-sm text-gray-500">{parts[1]}</span>
+                </span>
+              );
+            },
+            sorter: (a: any, b: any) => {
+              // 提取 parts[0] 并转换为数字进行比较
+              const valueA = parseFloat(a.theoretical.split(" ")[0]);
+              const valueB = parseFloat(b.theoretical.split(" ")[0]);
+
+              return valueA - valueB; // 返回值用于排序
+            },
+          },
+          {
+            title: "24小时",
+            // width: 95,
+            dataIndex: "last_hash",
+            key: "last_hash",
+            render: (text: any) => {
+              const parts = text.split(" "); // 根据空格分割
+              return (
+                <span>
+                  {parts[0]} <span className="text-sm text-gray-500">{parts[1]}</span>
+                </span>
+              );
+            },
+            sorter: (a: any, b: any) => {
+              // 提取 parts[0] 并转换为数字进行比较
+              const valueA = parseFloat(a.last_hash.split(" ")[0]);
+              const valueB = parseFloat(b.last_hash.split(" ")[0]);
+
+              return valueA - valueB; // 返回值用于排序，升序
+            },
+          },
+        ],
       },
+
       {
-        title: "在线 / 离线",
+        title: "在线/离线",
         key: "status",
-        width: 100,
+        width: 80,
         render: (_text: any, record: any) => (
           <span>
             <span className="text-green-400">{record.online}</span>
@@ -122,70 +175,10 @@ export default function MiningHashRatePage() {
         ),
       },
       {
-        title: "24小时算力",
-        dataIndex: "last_hash",
-        key: "last_hash",
-        render: (text: any) => {
-          const parts = text.split(" "); // 根据空格分割
-          return (
-            <span>
-              {parts[0]} <span>{parts[1]}</span>
-            </span>
-          );
-        },
-        sorter: (a: any, b: any) => {
-          // 提取 parts[0] 并转换为数字进行比较
-          const valueA = parseFloat(a.last_hash.split(" ")[0]);
-          const valueB = parseFloat(b.last_hash.split(" ")[0]);
-
-          return valueA - valueB; // 返回值用于排序，升序
-        },
-      },
-      {
-        title: "上次结算算力",
-        dataIndex: "last_settlement_hash",
-        key: "last_settlement_hash",
-        render: (text: any) => {
-          const parts = text.split(" "); // 根据空格分割
-          return (
-            <span>
-              {parts[0]} <span>{parts[1]}</span>
-            </span>
-          );
-        },
-        sorter: (a: any, b: any) => {
-          // 提取 parts[0] 并转换为数字进行比较
-          const valueA = parseFloat(a.last_settlement_hash.split(" ")[0]);
-          const valueB = parseFloat(b.last_settlement_hash.split(" ")[0]);
-
-          return valueA - valueB; // 返回值用于排序，升序
-        },
-      },
-      {
-        title: "理论算力",
-        dataIndex: "theoretical",
-        key: "theoretical",
-        render: (text: any) => {
-          const parts = text.split(" "); // 根据空格分割
-          return (
-            <span>
-              {parts[0]} <span>{parts[1]}</span>
-            </span>
-          );
-        },
-        sorter: (a: any, b: any) => {
-          // 提取 parts[0] 并转换为数字进行比较
-          const valueA = parseFloat(a.theoretical.split(" ")[0]);
-          const valueB = parseFloat(b.theoretical.split(" ")[0]);
-
-          return valueA - valueB; // 返回值用于排序
-        },
-      },
-      {
         title: "算力达成率",
         dataIndex: "last_hash_rate_effective",
         key: "last_hash_rate_effective",
-        width: 100,
+        width: 120,
         render: (text: any) => {
           const value = parseFloat(text.replace("%", "")); // 去掉 '%' 并解析为数字
           return <span style={{ color: value < 90 ? "red" : "black" }}>{text}</span>;
@@ -199,43 +192,88 @@ export default function MiningHashRatePage() {
         },
       },
       {
-        title: "上次结算收益",
-        dataIndex: "last_settlement_profit_btc",
-        key: "last_settlement_profit_btc",
-        render: (text: any) => (
-          <span>
-            <span style={{ color: "#24ac95" }}>{text}</span>
-            <span style={{ fontSize: "em" }}> BTC </span>
-          </span>
-        ),
-      },
-      {
-        title: "上次结算收益",
-        dataIndex: "last_settlement_profit_fb",
-        key: "last_settlement_profit_fb",
-        render: (text: any) => (
-          <span>
-            <span style={{ color: "#24ac95" }}>{text}</span>
-            <span style={{ fontSize: "em" }}> FB </span>
-          </span>
-        ),
-      },
-      {
-        title: "上次结算时间",
-        dataIndex: "last_settlement_date",
-        key: "last_settlement_date",
+        title: "上次结算",
+        className: "border-bottom",
+        style: {
+          borderBottom: "1px solid #e0e0e0",
+        },
+        children: [
+          {
+            title: "算力",
+            dataIndex: "last_settlement_hash",
+            key: "last_settlement_hash",
+            width: 100,
+            render: (text: any) => {
+              const parts = text.split(" "); // 根据空格分割
+              return (
+                <span>
+                  {parts[0]} <span>{parts[1]}</span>
+                </span>
+              );
+            },
+            sorter: (a: any, b: any) => {
+              // 提取 parts[0] 并转换为数字进行比较
+              const valueA = parseFloat(a.last_settlement_hash.split(" ")[0]);
+              const valueB = parseFloat(b.last_settlement_hash.split(" ")[0]);
+
+              return valueA - valueB; // 返回值用于排序，升序
+            },
+          },
+          {
+            title: "BTC收益",
+            dataIndex: "last_settlement_profit_btc",
+            key: "last_settlement_profit_btc",
+            render: (text: any) => (
+              <span>
+                <span style={{ color: "#24ac95" }}>{text}</span>
+                {/* <span style={{ fontSize: "em" }}> </span> */}
+              </span>
+            ),
+          },
+          {
+            title: "FB收益",
+            dataIndex: "last_settlement_profit_fb",
+            key: "last_settlement_profit_fb",
+            render: (text: any) => (
+              <span>
+                <span style={{ color: "#24ac95" }}>{text}</span>
+                {/* <span style={{ fontSize: "em" }}> FB </span> */}
+              </span>
+            ),
+          },
+          {
+            title: "时间",
+            dataIndex: "last_settlement_date",
+            key: "last_settlement_date",
+            render: (text: any) => {
+              const date = new Date(text);
+              const month = (date.getMonth() + 1).toString().padStart(2, "0");
+              const day = date.getDate().toString().padStart(2, "0");
+              return `${month}-${day}`;
+            },
+          },
+        ],
       },
       {
         title: "刷新时间",
         dataIndex: "update_time",
         key: "update_time",
-        width: 160,
+        width: 80,
+        render: (text: any) => {
+          const date = new Date(text);
+          // const month = (date.getMonth() + 1).toString().padStart(2, '0');
+          // const day = date.getDate().toString().padStart(2, '0');
+          const hours = date.getHours().toString().padStart(2, "0");
+          const minutes = date.getMinutes().toString().padStart(2, "0");
+          const seconds = date.getSeconds().toString().padStart(2, "0");
+          return `${hours}:${minutes}:${seconds}`;
+        },
       },
       {
         title: "链接",
         dataIndex: "link",
         key: "link",
-        width: 80,
+        width: 50,
         render: (link: string) => (
           <a
             href={link}
@@ -285,13 +323,13 @@ export default function MiningHashRatePage() {
   });
 
   return (
-    <div style={{ padding: "20px" }}>
+    <div style={{ padding: "20px 0px" }} className="longdataTable">
       <div
         style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}
       >
         <div className={"flex"}>
           <div className={"mr-4"}>
-            <Radio.Group onChange={handlePoolCategoryChange} value={poolCategory}>
+            <Radio.Group className="filterRadio" onChange={handlePoolCategoryChange} value={poolCategory}>
               <Radio.Button value="主矿池">主矿池</Radio.Button>
               <Radio.Button value="备用矿池">备用矿池</Radio.Button>
             </Radio.Group>
@@ -302,7 +340,7 @@ export default function MiningHashRatePage() {
             placeholder="请输入搜索字段"
             value={searchTerm}
             onChange={handleSearch}
-            style={{ width: 250 }} // 设定宽度
+            style={{ width: 220 }} // 设定宽度
             className="text-sm mr-10"
           />
           <Button

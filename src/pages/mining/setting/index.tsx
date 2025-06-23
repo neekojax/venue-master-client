@@ -98,9 +98,9 @@ export default function MiningSettingPage() {
           const { link } = record;
           // 根据 observer_link 内容返回不同的图标
           if (link.includes("antpool")) {
-            return <FaAdn style={{ color: "green", fontSize: 18 }} />;
+            return <FaAdn style={{ color: "green", fontSize: 16 }} />;
           } else if (link.includes("f2pool")) {
-            return <FaFish style={{ color: "#252F4A", fontSize: 18 }} />;
+            return <FaFish style={{ color: "orange", fontSize: 16 }} />;
           } else {
             return <span>{record.serialNumber}</span>; // 如果没有匹配，则返回序号
           }
@@ -110,30 +110,32 @@ export default function MiningSettingPage() {
         title: "账户",
         dataIndex: "pool_name",
         key: "pool_name",
-        width: 300,
+        width: 200,
         render: (text: any) => <span style={{ color: "#333" }}>{text}</span>,
       },
       {
         title: "主体类型",
         dataIndex: "pool_type",
         key: "pool_type",
-        width: 100,
+        width: 75,
       },
       {
         title: "场地类型",
         dataIndex: "pool_category",
         key: "pool_category",
+        width: 75,
       },
       {
         title: "所属国家",
         dataIndex: "country",
         key: "country",
+        width: 75,
       },
       {
         title: "理论算力(PH/s)",
         dataIndex: "theoretical_hashrate",
         key: "theoretical_hashrate",
-        width: 150,
+        width: 140,
         sorter: (a: any, b: any) => {
           // 直接比较数值
           return a.theoretical_hashrate - b.theoretical_hashrate; // 返回值用于升序排序
@@ -143,6 +145,7 @@ export default function MiningSettingPage() {
         title: "能耗比(J/T)",
         dataIndex: "energy_ratio",
         key: "energy_ratio",
+        width: 120,
       },
       {
         title: "基础托管费($/kwh)",
@@ -154,13 +157,13 @@ export default function MiningSettingPage() {
         title: "链接",
         dataIndex: "link",
         key: "link",
-        width: 300,
+        width: 200,
         render: (link: string) => (
           <a
             href={link}
             target="_blank"
             rel="noopener noreferrer"
-            style={{ color: "#252F4A" }}
+            style={{ color: "#1E90FF" }}
             title={link} // 悬停显示完整链接
           >
             {link.length > 40 ? getShortenedLink(link) : link}
@@ -262,7 +265,7 @@ export default function MiningSettingPage() {
       >
         <div className={"flex"}>
           <div className={"mr-4"}>
-            <Radio.Group onChange={handlePoolCategoryChange} value={poolCategory}>
+            <Radio.Group className="filterRadio" onChange={handlePoolCategoryChange} value={poolCategory}>
               <Radio.Button value="主矿池">主矿池</Radio.Button>
               <Radio.Button value="备用矿池">备用矿池</Radio.Button>
             </Radio.Group>

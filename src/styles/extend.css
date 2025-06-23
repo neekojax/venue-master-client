@@ -169,14 +169,14 @@
 }
 
 /*表格样式*/
-/* .css-dev-only-do-not-override-yta69t.ant-table-wrapper .ant-table-thead >tr>th,.ant-table-wrapper .ant-table-thead >tr>th{
+.css-dev-only-do-not-override-yta69t.ant-table-wrapper .ant-table-thead >tr>th,.ant-table-wrapper .ant-table-thead >tr>th{
     font-size: 13px;
-    color: #99A1B7;
-} */
+    /* color: #99A1B7; */
+}
 .ant-table-wrapper .ant-table.ant-table-middle .ant-table-tbody>tr>td{
     /* font-size: 14px; */
-    /* font-size: 13px;
-    color: #99A1B7;
+     font-size: 13px;
+    /*color: #99A1B7;
     font-weight: 400 !important;
 }
 .ant-table-wrapper .ant-table-tbody >tr >td.ant-table-cell{
@@ -204,4 +204,58 @@
     border-color: #F9F9F9 !important;
     color: #4B5675 !important;
     transition: color .2s ease;
+}
+
+.filterRadio .ant-radio-button-wrapper{
+    background: none;
+    border: none !important;
+    color: #333;
+    font-size: 12px;
+    text-align: center;
+    font-weight: 600;
+    min-width: 85px;
+    margin-right: 25px;
+}
+.filterRadio .ant-radio-button-wrapper.ant-radio-button-wrapper-checked{
+    color: #1E90FF !important;
+}
+.filterRadio .ant-radio-button-wrapper .ant-radio-button.ant-radio-button-checked{
+    background: #f0f6fe !important;
+    color: #1E90FF !important;
+    border-radius: 25px !important;
+}
+.ant-layout-content{
+    background-color: #fff;
+}
+.filterRadio .ant-radio-button-wrapper-checked:not(.ant-radio-button-wrapper-disabled)::before{
+    background: none !important;
+    color: #1E90FF !important;
+}
+.ant-radio-button-wrapper:not(:first-child)::before{
+    background: none !important;
+}
+
+.longdataTable  .ant-table-thead > tr > th{
+    /* border: 1px solid #c1c1c1 !important; 或自定义颜色*/
+    /* background-color: #a7dff5; 可选：添加背景色 */
+    background-color: #f9fafb;
+    font-size: 13px;
+    font-weight: 500;
+    /* border-right: 1px solid #e0e0e0; */
+    white-space: nowrap;
+    padding: 8px 12px;
+    border-top: 1px solid #fefefe;
+}
+.longdataTable  .ant-table-thead > tr .ant-table-cell.border-bottom{
+    border-bottom: 1px solid #e0e0e0 !important;
+    background-color: #ebebeb;
+}
+.css-dev-only-do-not-override-yta69t.ant-table-wrapper .ant-table-thead >tr>th:not(:last-child):not(.ant-table-selection-column):not(.ant-table-row-expand-icon-cell):not([colspan])::before{
+    /* background: none !important; */
+    height: 2em;
+    /* background-color: #e0e0e0; */
+}
+
+.longdataTable .text-sm{
+    font-size: 12px;
 }

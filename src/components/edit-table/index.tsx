@@ -80,7 +80,7 @@ export default function EditTable({ tableData, columns, handleDelete, handleSave
           backgroundColor: "#fff",
           borderRadius: "8px",
           boxShadow: "0 2px 8px rgba(0, 0, 0, 0.05)",
-          padding: "16px",
+          padding: "0px",
         }}
         cardProps={{
           bodyStyle: {
