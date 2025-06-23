@@ -108,7 +108,7 @@ export default function ProfitDetailPage() {
       title: "托管比例",
       dataIndex: "hosting_ratio",
       key: "hosting_ratio",
-      render: (text: number) => text.toFixed(2), // 格式化数字
+      render: (text: number) => text.toFixed(2) + " %", // 格式化数字
     },
   ];
 

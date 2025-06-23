@@ -3,8 +3,8 @@ import { AiOutlineCalendar } from "react-icons/ai";
 import { FaAdn, FaFish, FaList } from "react-icons/fa6";
 import { FcCalendar } from "react-icons/fc";
 import { GiMining } from "react-icons/gi";
-import { DownloadOutlined } from "@ant-design/icons"; // 导入时钟图标
-import { Alert, Button, Input, Select, Space, Spin, Tag } from "antd";
+import { DownloadOutlined, SearchOutlined } from "@ant-design/icons"; // 导入时钟图标
+import { Alert, Button, Input, Select, Space, Spin, Tag, Tooltip } from "antd";
 import EditTable from "@/components/edit-table";
 import useAuthRedirect from "@/hooks/useAuthRedirect.ts";
 import { useSelector, useSettingsStore } from "@/stores";
@@ -105,6 +105,26 @@ export default function StatisticsPage() {
         dataIndex: "venue_name",
         key: "venue_name",
         width: 200,
+        render: (text: any) => (
+          <Tooltip
+            title={text}
+            placement="top"
+            overlayInnerStyle={{ color: "white" }}
+            style={{ color: "white" }}
+          >
+            <div
+              style={{
+                width: "100%",
+                overflow: "hidden",
+                color: "#333",
+                textOverflow: "ellipsis",
+                whiteSpace: "nowrap",
+              }}
+            >
+              {text}
+            </div>
+          </Tooltip>
+        ),
       },
       // {
       //   title: "子账号",
@@ -115,7 +135,7 @@ export default function StatisticsPage() {
         title: "能耗比",
         dataIndex: "energy_ratio",
         key: "energy_ratio",
-        width: 90,
+        width: 100,
         render: (text: any) => (
           <span>
             {text}{" "}
@@ -140,6 +160,7 @@ export default function StatisticsPage() {
         title: "24h平均算力",
         dataIndex: "hourly_computing_power",
         key: "hourly_computing_power",
+        width: 140,
         sorter: (a: any, b: any) => a.hourly_computing_power - b.hourly_computing_power, // 添加排序逻辑
         render: (text: any) => (
           <span>
@@ -166,7 +187,7 @@ export default function StatisticsPage() {
         title: "收益(BTC/USD/净USD)",
         dataIndex: "total_income_btc",
         key: "total_income_btc",
-        width: 280,
+        // width: 280,
         sorter: (a: any, b: any) => a.total_income_btc - b.total_income_btc, // 添加排序逻辑
         render: (text: any, record: any) => (
           <span>
@@ -219,6 +240,7 @@ export default function StatisticsPage() {
         title: "托管费占比",
         dataIndex: "hosting_fee_ratio",
         key: "hosting_fee_ratio",
+        width: 100,
         sorter: (a: any, b: any) => {
           const ratioA = parseFloat(a.hosting_fee_ratio.replace("%", "")); // 去掉 '%' 并转换为数字
           const ratioB = parseFloat(b.hosting_fee_ratio.replace("%", ""));
@@ -235,6 +257,7 @@ export default function StatisticsPage() {
         title: "收益日期",
         dataIndex: "report_date",
         key: "report_date",
+        width: 100,
         sorter: (a: any, b: any) => new Date(a.report_date).getTime() - new Date(b.report_date).getTime(), // 确保将日期转换为时间戳进行比较
         render: (text: any) => {
           const date = new Date(text);
@@ -412,6 +435,7 @@ export default function StatisticsPage() {
 
         <div style={{ display: "flex", justifyContent: "space-between" }}>
           <Input
+            prefix={<SearchOutlined style={{ color: "rgba(0, 0, 0, 0.25)" }} size={18} />}
             placeholder="请输入搜索字段"
             value={searchTerm}
             onChange={handleSearch}

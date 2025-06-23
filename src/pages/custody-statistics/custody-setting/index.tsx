@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { FaAdn, FaFish } from "react-icons/fa6";
+import { SearchOutlined } from "@ant-design/icons";
 import { Alert, Input, message, Space, Spin } from "antd";
 import ActionButton, { ActionButtonMode } from "@/components/action-button";
 import EditTable from "@/components/edit-table";
@@ -210,6 +211,7 @@ export default function SettingPage() {
           />
         </Space>
         <Input
+          prefix={<SearchOutlined style={{ color: "rgba(0, 0, 0, 0.25)" }} size={18} />}
           placeholder="请输入搜索字段"
           value={searchTerm}
           onChange={handleSearch}

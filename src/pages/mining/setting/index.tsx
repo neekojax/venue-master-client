@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { FaAdn, FaFish } from "react-icons/fa6";
-import { DownloadOutlined } from "@ant-design/icons";
+import { DownloadOutlined, SearchOutlined } from "@ant-design/icons";
 import { Button, Input, message, Radio, Spin } from "antd";
 import ActionButton, { ActionButtonMode } from "@/components/action-button";
 import EditTable from "@/components/edit-table";
@@ -174,6 +174,7 @@ export default function MiningSettingPage() {
         title: "操作",
         valueType: "option",
         key: "operation",
+        width: 100,
       },
     ]);
   }, []);
@@ -273,6 +274,7 @@ export default function MiningSettingPage() {
         </div>
         <div>
           <Input
+            prefix={<SearchOutlined style={{ color: "rgba(0, 0, 0, 0.25)" }} size={18} />}
             placeholder="请输入搜索字段"
             value={searchTerm}
             onChange={handleSearch}

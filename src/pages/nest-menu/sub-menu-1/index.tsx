@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { SearchOutlined } from "@ant-design/icons";
 import { Alert, Input, Space, Spin } from "antd";
 import EditTable from "@/components/edit-table";
 import useAuthRedirect from "@/hooks/useAuthRedirect.ts";
@@ -131,6 +132,7 @@ export default function LinkPage() {
       >
         <Space size={24}></Space>
         <Input
+          prefix={<SearchOutlined style={{ color: "rgba(0, 0, 0, 0.25)" }} size={18} />}
           placeholder="请输入搜索字段"
           value={searchTerm}
           onChange={handleSearch}

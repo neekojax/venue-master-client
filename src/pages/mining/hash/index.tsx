@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
 import { FaAdn, FaFish } from "react-icons/fa6";
 import { WiDirectionUpRight } from "react-icons/wi";
-import { DownloadOutlined } from "@ant-design/icons";
-import { Button, Input, Radio, Spin } from "antd";
+import { DownloadOutlined, SearchOutlined } from "@ant-design/icons";
+import { Button, Input, Radio, Spin, Tag, Tooltip } from "antd";
 import EditTable from "@/components/edit-table";
 import useAuthRedirect from "@/hooks/useAuthRedirect.ts";
 import { useSelector, useSettingsStore } from "@/stores";
@@ -93,85 +93,113 @@ export default function MiningHashRatePage() {
         title: "场地",
         dataIndex: "pool_name",
         key: "pool_name",
-        width: 150,
-        render: (text: any) => <span style={{ color: "#333" }}>{text}</span>,
+        width: 180,
+        // render: (text: any) => <span style={{ color: "#333" }}>{text}</span>,
+        render: (text: any) => (
+          <Tooltip
+            title={text}
+            placement="top"
+            overlayInnerStyle={{ color: "white" }}
+            style={{ color: "white" }}
+          >
+            <div
+              style={{
+                width: "100%",
+                overflow: "hidden",
+                color: "#333",
+                textOverflow: "ellipsis",
+                whiteSpace: "nowrap",
+              }}
+            >
+              {text}
+            </div>
+          </Tooltip>
+        ),
+      },
+      // {
+      //   title: "算力",
+      //   className: "border-bottom",
+      //   style: {
+      //     borderBottom: "1px solid #e0e0e0",
+      //   },
+      //   children: [
+      {
+        title: "实时算力",
+        dataIndex: "current_hash",
+        key: "current_hash",
+        // width: 95,
+        render: (text: any) => {
+          const parts = text.split(" "); // 根据空格分割
+          return (
+            <span>
+              {parts[0]} <span className="text-sm text-gray-500">{parts[1]}</span>
+            </span>
+          );
+        },
       },
       {
-        title: "算力",
-        className: "border-bottom",
-        style: {
-          borderBottom: "1px solid #e0e0e0",
+        title: "理论算力",
+        // width: 95,
+        dataIndex: "theoretical",
+        key: "theoretical",
+        render: (text: any) => {
+          const parts = text.split(" "); // 根据空格分割
+          return (
+            <span>
+              {parts[0]} <span className="text-sm text-gray-500">{parts[1]}</span>
+            </span>
+          );
         },
-        children: [
-          {
-            title: "实时",
-            dataIndex: "current_hash",
-            key: "current_hash",
-            // width: 95,
-            render: (text: any) => {
-              const parts = text.split(" "); // 根据空格分割
-              return (
-                <span>
-                  {parts[0]} <span className="text-sm text-gray-500">{parts[1]}</span>
-                </span>
-              );
-            },
-          },
-          {
-            title: "理论",
-            // width: 95,
-            dataIndex: "theoretical",
-            key: "theoretical",
-            render: (text: any) => {
-              const parts = text.split(" "); // 根据空格分割
-              return (
-                <span>
-                  {parts[0]} <span className="text-sm text-gray-500">{parts[1]}</span>
-                </span>
-              );
-            },
-            sorter: (a: any, b: any) => {
-              // 提取 parts[0] 并转换为数字进行比较
-              const valueA = parseFloat(a.theoretical.split(" ")[0]);
-              const valueB = parseFloat(b.theoretical.split(" ")[0]);
+        sorter: (a: any, b: any) => {
+          // 提取 parts[0] 并转换为数字进行比较
+          const valueA = parseFloat(a.theoretical.split(" ")[0]);
+          const valueB = parseFloat(b.theoretical.split(" ")[0]);
 
-              return valueA - valueB; // 返回值用于排序
-            },
-          },
-          {
-            title: "24小时",
-            // width: 95,
-            dataIndex: "last_hash",
-            key: "last_hash",
-            render: (text: any) => {
-              const parts = text.split(" "); // 根据空格分割
-              return (
-                <span>
-                  {parts[0]} <span className="text-sm text-gray-500">{parts[1]}</span>
-                </span>
-              );
-            },
-            sorter: (a: any, b: any) => {
-              // 提取 parts[0] 并转换为数字进行比较
-              const valueA = parseFloat(a.last_hash.split(" ")[0]);
-              const valueB = parseFloat(b.last_hash.split(" ")[0]);
+          return valueA - valueB; // 返回值用于排序
+        },
+      },
+      {
+        title: "24h算力",
+        // width: 95,
+        dataIndex: "last_hash",
+        key: "last_hash",
+        render: (text: any) => {
+          const parts = text.split(" "); // 根据空格分割
+          return (
+            <span>
+              {parts[0]} <span className="text-sm text-gray-500">{parts[1]}</span>
+            </span>
+          );
+        },
+        sorter: (a: any, b: any) => {
+          // 提取 parts[0] 并转换为数字进行比较
+          const valueA = parseFloat(a.last_hash.split(" ")[0]);
+          const valueB = parseFloat(b.last_hash.split(" ")[0]);
 
-              return valueA - valueB; // 返回值用于排序，升序
-            },
-          },
-        ],
+          return valueA - valueB; // 返回值用于排序，升序
+        },
+        //   },
+        // ],
       },
 
       {
         title: "在线/离线",
         key: "status",
-        width: 80,
+        width: 120,
         render: (_text: any, record: any) => (
           <span>
-            <span className="text-green-400">{record.online}</span>
-            <span> / </span>
-            <span className="text-red-600">{record.offline}</span>
+            <Tag color="success" v-if={record.online != 0}>
+              {record.online}
+            </Tag>
+            <Tag color="error" v-if={record.offline != "0"}>
+              {record.offline}
+            </Tag>
           </span>
+          // <span>
+          //   <span className="text-green-400">{record.online}</span>
+          //   <span> / </span>
+          //   <span className="text-red-600">{record.offline}</span>
+          // </span>
         ),
       },
       {
@@ -181,7 +209,7 @@ export default function MiningHashRatePage() {
         width: 120,
         render: (text: any) => {
           const value = parseFloat(text.replace("%", "")); // 去掉 '%' 并解析为数字
-          return <span style={{ color: value < 90 ? "red" : "black" }}>{text}</span>;
+          return <span style={{ color: value < 90 ? "red" : "green" }}>{text}</span>;
         },
         sorter: (a: any, b: any) => {
           // 将带有 '%' 的字符串转换为数字进行比较
@@ -191,68 +219,73 @@ export default function MiningHashRatePage() {
           return valueA - valueB; // 返回值用于排序
         },
       },
+      // {
+      //   title: "结算",
+      //   className: "border-bottom",
+      //   style: {
+      //     borderBottom: "1px solid #e0e0e0",
+      //   },
+      //   children: [
       {
-        title: "上次结算",
-        className: "border-bottom",
-        style: {
-          borderBottom: "1px solid #e0e0e0",
+        title: "结算算力",
+        dataIndex: "last_settlement_hash",
+        key: "last_settlement_hash",
+        width: 120,
+        render: (text: any) => {
+          const parts = text.split(" "); // 根据空格分割
+          return (
+            <span>
+              {parts[0]} <span className="text-sm text-gray-500">{parts[1]}</span>
+            </span>
+          );
         },
-        children: [
-          {
-            title: "算力",
-            dataIndex: "last_settlement_hash",
-            key: "last_settlement_hash",
-            width: 100,
-            render: (text: any) => {
-              const parts = text.split(" "); // 根据空格分割
-              return (
-                <span>
-                  {parts[0]} <span>{parts[1]}</span>
-                </span>
-              );
-            },
-            sorter: (a: any, b: any) => {
-              // 提取 parts[0] 并转换为数字进行比较
-              const valueA = parseFloat(a.last_settlement_hash.split(" ")[0]);
-              const valueB = parseFloat(b.last_settlement_hash.split(" ")[0]);
+        sorter: (a: any, b: any) => {
+          // 提取 parts[0] 并转换为数字进行比较
+          const valueA = parseFloat(a.last_settlement_hash.split(" ")[0]);
+          const valueB = parseFloat(b.last_settlement_hash.split(" ")[0]);
 
-              return valueA - valueB; // 返回值用于排序，升序
-            },
-          },
-          {
-            title: "BTC收益",
-            dataIndex: "last_settlement_profit_btc",
-            key: "last_settlement_profit_btc",
-            render: (text: any) => (
-              <span>
-                <span style={{ color: "#24ac95" }}>{text}</span>
-                {/* <span style={{ fontSize: "em" }}> </span> */}
-              </span>
-            ),
-          },
-          {
-            title: "FB收益",
-            dataIndex: "last_settlement_profit_fb",
-            key: "last_settlement_profit_fb",
-            render: (text: any) => (
-              <span>
-                <span style={{ color: "#24ac95" }}>{text}</span>
-                {/* <span style={{ fontSize: "em" }}> FB </span> */}
-              </span>
-            ),
-          },
-          {
-            title: "时间",
-            dataIndex: "last_settlement_date",
-            key: "last_settlement_date",
-            render: (text: any) => {
-              const date = new Date(text);
-              const month = (date.getMonth() + 1).toString().padStart(2, "0");
-              const day = date.getDate().toString().padStart(2, "0");
-              return `${month}-${day}`;
-            },
-          },
-        ],
+          return valueA - valueB; // 返回值用于排序，升序
+        },
+      },
+      {
+        title: "结算BTC",
+        dataIndex: "last_settlement_profit_btc",
+        key: "last_settlement_profit_btc",
+        render: (text: any) => (
+          <span>
+            <Tag color="#f50">{text}</Tag>
+            {/* <span style={{ color: "#24ac95" }}>{text}</span> */}
+            {/* <span style={{ fontSize: "em" }}> </span> */}
+          </span>
+        ),
+      },
+      {
+        title: "结算FB",
+        dataIndex: "last_settlement_profit_fb",
+        key: "last_settlement_profit_fb",
+        render: (text: any) => (
+          <Tag color="#2db7f5" v-if={text != 0}>
+            {text}
+          </Tag>
+          // <span>
+
+          //   <span style={{ color: "#24ac95" }}>{text}</span>
+          //   {/* <span style={{ fontSize: "em" }}> FB </span> */}
+          // </span>
+        ),
+      },
+      {
+        title: "结算时间",
+        dataIndex: "last_settlement_date",
+        key: "last_settlement_date",
+        render: (text: any) => {
+          const date = new Date(text);
+          const month = (date.getMonth() + 1).toString().padStart(2, "0");
+          const day = date.getDate().toString().padStart(2, "0");
+          return `${month}-${day}`;
+        },
+        //   },
+        // ],
       },
       {
         title: "刷新时间",
@@ -337,6 +370,7 @@ export default function MiningHashRatePage() {
         </div>
         <div style={{ display: "flex", justifyContent: "space-between" }}>
           <Input
+            prefix={<SearchOutlined style={{ color: "rgba(0, 0, 0, 0.25)" }} size={18} />}
             placeholder="请输入搜索字段"
             value={searchTerm}
             onChange={handleSearch}
