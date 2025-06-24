@@ -22,6 +22,7 @@ export default function MiningHashRatePage() {
     try {
       const runningDataResult = await fetchMiningPoolRunningData(poolType);
       setRunningData(runningDataResult.data); // 假设返回数据在 result.data 中
+      console.log(runningDataResult.data);
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (err) {
       // 处理错误
@@ -94,13 +95,25 @@ export default function MiningHashRatePage() {
       },
       {
         title: "历史月度达成率",
-        key: "efficiencyChart",
+        dataIndex: "monthEfficiencys",
+        key: "monthEfficiencys",
         render: (_text: any, record: { monthEfficiencys: any[] }) => {
-          const efficiencies = record.monthEfficiencys?.map((item: { efficiency: any }) => item.efficiency);
+          // 检查 monthEfficiencys 是否存在且是数组
+          if (!Array.isArray(record.monthEfficiencys) || record.monthEfficiencys.length === 0) {
+            return <div>数据不足</div>; // 如果没有数据，返回提示
+          }
+
+          // 提取效率数据
+          const efficiencies = record.monthEfficiencys.map((item: { efficiency: any }) => item.efficiency);
+
+          // 检查 efficiencies 的长度，确保有至少两个数据点
+          if (efficiencies.length < 2) {
+            return <div>数据不足</div>; // 如果数据少于两个，返回提示
+          }
+
           const minEfficiency = Math.min(...efficiencies); // 获取最低值
           const lastEfficiency = efficiencies[efficiencies.length - 1]; // 获取最后一个数据
           const secondLastEfficiency = efficiencies[efficiencies.length - 2]; // 获取倒数第二个数据
-
           // 根据最后两个数据点的值设置颜色
           const lineColor = lastEfficiency > secondLastEfficiency ? "#4CAF50" : "#ff4d4f"; // 绿色或红色
 
