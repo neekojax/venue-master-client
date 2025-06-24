@@ -245,7 +245,17 @@ export default function VenueRunningKpi() {
         </div>
       </div>
 
-      <Table dataSource={filteredData} columns={columns} rowKey="name" pagination={false} />
+      <Table
+        dataSource={filteredData}
+        columns={columns}
+        rowKey="name"
+        pagination={{
+          position: ["bottomCenter"], // 将分页器位置设置为底部居中
+          showSizeChanger: true, // 允许用户改变每页显示的条目数
+          pageSizeOptions: ["20", "30", "50"], // 每页显示条目的选项
+          defaultPageSize: 20, // 默认每页显示的条目数
+        }}
+      />
     </div>
   );
 }

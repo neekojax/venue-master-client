@@ -203,7 +203,7 @@ export default function MiningHashRatePage() {
         ),
       },
       {
-        title: "算力达成率",
+        title: "昨日算力达成率",
         dataIndex: "last_hash_rate_effective",
         key: "last_hash_rate_effective",
         width: 120,
