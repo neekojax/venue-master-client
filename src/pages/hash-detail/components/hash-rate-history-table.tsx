@@ -85,7 +85,7 @@ export default function HashRateHistoryTable() {
         <a
           onClick={() => handlePoolClick(record.pool_name)} // 点击事件
           title={record.pool_name}
-          style={{ color: "#252F4A", cursor: "pointer" }} // 视觉提示
+          style={{ color: "#6bacf8", cursor: "pointer" }} // 视觉提示
         >
           {text}
         </a>

@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { WiDirectionUpRight } from "react-icons/wi";
-import { Input, Spin, Table, Tag, Tooltip } from "antd";
+import { Input, Spin, Table, Tooltip } from "antd";
 import { ReactEcharts } from "@/components/react-echarts"; // 导入自定义的 ReactEcharts 组件
 import useAuthRedirect from "@/hooks/useAuthRedirect.ts";
 import { useSelector, useSettingsStore } from "@/stores";
@@ -45,7 +45,7 @@ export default function VenueRunningKpi() {
           >
             <div
               style={{
-                width: "80px",
+                width: "120px",
                 overflow: "hidden",
                 color: "#333",
                 textOverflow: "ellipsis",
@@ -58,45 +58,53 @@ export default function VenueRunningKpi() {
           </Tooltip>
         ),
       },
-      {
-        title: "算力(理论/24h)",
-        dataIndex: "theoreticalHashRate",
-        key: "theoreticalHashRate",
-        width: "15%",
-        render: (text: any, record: any) => (
-          <span>
-            <Tag color="gold" style={{ padding: 0 }}>
-              {record.theoreticalHashRate} TH/s
-            </Tag>
-            <Tag color="green" style={{ padding: 0 }}>
-              {record.lastHash}
-            </Tag>
-          </span>
-        ),
-        // {
-        //   return `${record.theoreticalHashRate}TH/s${record.lastHash}`;
-        // }
-
-        // <span>
-        //   <Tag color="gold">{record.theoreticalHashRate}</Tag>
-        //   <Tag color="green">{record.lastHash}</Tag>
-        // </span>
-        // )
-        // return `${text}TH/s`;
-        // return `${record.theoreticalHashRate}TH/s ${record.lastHash}`;
-        // },
-      },
-
       // {
-      //   title: "理论算力",
+      //   title: "算力(理论/24h)",
       //   dataIndex: "theoreticalHashRate",
       //   key: "theoreticalHashRate",
-      // },
+      //   width: "15%",
+      //   render: (text: any, record: any) => (
+      //     <span>
+      //       {record.theoreticalHashRate}
+      //       <span className="text-sm text-gray-400"> PH/s</span>
+      //       {record.lastHash}
+      //       {/* <Tag color="gold" style={{ padding: 0 }}>
+      //         {record.theoreticalHashRate} PH/s
+      //       </Tag>
+      //       <Tag color="green" style={{ padding: 0 }}>
+      //         {record.lastHash}
+      //       </Tag> */}
+      //     </span>
+      //   // ),
       // {
-      //   title: "24h算力",
-      //   dataIndex: "lastHash",
-      //   key: "lastHash",
+      //   return `${record.theoreticalHashRate}TH/s${record.lastHash}`;
+      // }
+
+      // <span>
+      //   <Tag color="gold">{record.theoreticalHashRate}</Tag>
+      //   <Tag color="green">{record.lastHash}</Tag>
+      // </span>
+      // )
+      // return `${text}TH/s`;
+      // return `${record.theoreticalHashRate}TH/s ${record.lastHash}`;
       // },
+      // },
+
+      {
+        title: "理论算力",
+        dataIndex: "theoreticalHashRate",
+        key: "theoreticalHashRate",
+        render: (text: any, record: any) => (
+          <span>
+            <span style={{ fontSize: 12 }}>{record.theoreticalHashRate} PH/s </span>
+          </span>
+        ),
+      },
+      {
+        title: "24h算力",
+        dataIndex: "lastHash",
+        key: "lastHash",
+      },
       {
         title: "算力达成率(当前/昨日/上周)",
         dataIndex: "lastHash",
@@ -104,9 +112,16 @@ export default function VenueRunningKpi() {
         width: "20%",
         render: (text: any, record: any) => (
           <span>
-            <Tag color="gold">{record.currentEffective} %</Tag>
+            <span style={{ fontSize: 12, fontWeight: "bolder" }}>{record.currentEffective} % </span>/{" "}
+            <span style={{ fontSize: 12, fontWeight: "bolder" }}>{record.lastDayEffective} % </span>/{" "}
+            <span style={{ fontSize: 12, fontWeight: "bolder" }}>{record.lastWeekHashEfficiency} %</span>
+            {/* <Tag color="#f50">{record.currentEffective} %</Tag>
+            <Tag color="#2db7f5">{record.lastDayEffective} %</Tag>
+            {/* <Tag color="#87d068">#87d068</Tag> */}
+            {/* <Tag color="#108ee9">{record.lastWeekHashEfficiency} %</Tag>  */}
+            {/* <Tag color="gold">{record.currentEffective} %</Tag>
             <Tag color="lime">{record.lastDayEffective} %</Tag>
-            <Tag color="green">{record.lastWeekHashEfficiency} %</Tag>
+            <Tag color="green">{record.lastWeekHashEfficiency} %</Tag> */}
           </span>
         ),
         // {
@@ -134,7 +149,7 @@ export default function VenueRunningKpi() {
       {
         title: "周算力达成率增幅",
         key: "weekDiff",
-        width: "20%",
+        // width: "10%",
         render: (_text: any, record: { last2WeekHashEfficiency: number; lastWeekHashEfficiency: number }) => {
           const increase = record.last2WeekHashEfficiency - record.lastWeekHashEfficiency; // 计算增幅
           const formattedIncrease = increase.toFixed(2); // 保留两位小数
@@ -177,7 +192,7 @@ export default function VenueRunningKpi() {
         title: "月达成率",
         dataIndex: "monthEfficiencys",
         key: "monthEfficiencys",
-        width: 85,
+        width: 155,
         render: (_text: any, record: { monthEfficiencys: any[] }) => {
           // 检查 monthEfficiencys 是否存在且是数组
           if (!Array.isArray(record.monthEfficiencys) || record.monthEfficiencys.length === 0) {
@@ -234,7 +249,7 @@ export default function VenueRunningKpi() {
                   containLabel: false,
                 },
               }}
-              style={{ height: "30px", width: "60%" }} // 设置图表的样式
+              style={{ height: "20px", width: "120px" }} // 设置图表的样式
             />
           );
         },
@@ -307,7 +322,7 @@ export default function VenueRunningKpi() {
     }) || [];
 
   return (
-    <div style={{ padding: "20px" }}>
+    <div style={{ padding: "20px" }} className="longdataTable">
       <div
         style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}
       >
