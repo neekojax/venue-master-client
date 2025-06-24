@@ -32,9 +32,6 @@ export default function MiningHashRatePage() {
 
   useEffect(() => {
     fetchData(poolType);
-  }, [poolType]);
-
-  useEffect(() => {
     setColumns([
       {
         title: "矿池名称",
@@ -195,7 +192,7 @@ export default function MiningHashRatePage() {
         },
       },
     ]);
-  }, []);
+  }, [poolType]);
 
   // 搜索处理函数
   const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
