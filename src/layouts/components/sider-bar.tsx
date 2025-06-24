@@ -1,8 +1,9 @@
 import { useEffect, useRef, useState } from "react";
 import { BiLoaderCircle } from "react-icons/bi";
-import { GiMiner } from "react-icons/gi";
+import { MdMonitorHeart } from "react-icons/md";
+import { SiNginxproxymanager } from "react-icons/si";
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { HomeOutlined, ProductOutlined, RadiusSettingOutlined, UserOutlined } from "@ant-design/icons"; //<RadiusSettingOutlined />
+import { HomeOutlined, ProductOutlined, RadiusSettingOutlined } from "@ant-design/icons"; //<RadiusSettingOutlined />
 import { Layout, Menu, type MenuProps } from "antd";
 import { useTheme } from "@/components/theme-provider";
 import logo from "../../../public/logo.svg";
@@ -45,8 +46,8 @@ const items: MenuProps["items"] = [
     key: ROUTE_PATHS.landing,
   },
   {
-    icon: <GiMiner />,
-    label: "矿池数据",
+    icon: <MdMonitorHeart />,
+    label: "算力监控",
     key: ROUTE_PATHS.mining,
     children: [
       {
@@ -55,13 +56,24 @@ const items: MenuProps["items"] = [
       },
       {
         key: ROUTE_PATHS.miningSetting,
-        label: <Link to={ROUTE_PATHS.miningSetting}>矿池列表</Link>,
+        label: <Link to={ROUTE_PATHS.miningSetting}>矿池设置</Link>,
+      },
+    ],
+  },
+  {
+    icon: <SiNginxproxymanager />,
+    label: "场地管理",
+    key: ROUTE_PATHS.venue,
+    children: [
+      {
+        key: ROUTE_PATHS.miningSiteData,
+        label: <Link to={ROUTE_PATHS.miningSiteData}>运行指标</Link>,
       },
     ],
   },
   {
     icon: <ProductOutlined />,
-    label: "托管统计",
+    label: "电费监控",
     key: ROUTE_PATHS.custodyMenu,
     children: [
       // {
@@ -71,7 +83,7 @@ const items: MenuProps["items"] = [
       {
         key: ROUTE_PATHS.statistics,
         // label: "信息统计"
-        label: <Link to={ROUTE_PATHS.statistics}>信息统计</Link>,
+        label: <Link to={ROUTE_PATHS.statistics}>费用统计</Link>,
       },
       {
         key: ROUTE_PATHS.dailyAveragePrice,
@@ -98,11 +110,6 @@ const items: MenuProps["items"] = [
         label: <Link to={ROUTE_PATHS.electricBasic}>基础数据</Link>,
       },
     ],
-  },
-  {
-    icon: <UserOutlined />,
-    label: <Link to={ROUTE_PATHS.venue}>场地管理</Link>,
-    key: ROUTE_PATHS.venue,
   },
   // {
   //   icon: <MenuOutlined />,

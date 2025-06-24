@@ -3,7 +3,6 @@ export const ROUTE_PATHS = {
   notFound: "/not-found",
   landing: "/landing",
   base: "/base",
-  venue: "/venue",
   userManagement: "/user-management",
   nestMenu: "/nest-menu",
   link: "/nest-menu/sub-link",
@@ -22,6 +21,9 @@ export const ROUTE_PATHS = {
   mining: "/mining",
   miningSetting: "/mining/setting",
   miningHashRate: "/mining/hash",
+
+  venue: "/venue",
+  miningSiteData: "/venue/running-kpi",
 
   hashDetail: "/hash-detail",
   profitDetail: "/profit-detail",

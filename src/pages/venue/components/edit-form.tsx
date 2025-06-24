@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Form, type FormInstance, Input } from "antd";
-import type { Field, Values } from "../type";
+import type { Field, Values } from "../venue-order/type.ts";
 
 interface EditFormProps {
   initialValues: Values;
