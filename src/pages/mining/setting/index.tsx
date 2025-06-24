@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { FaAdn, FaFish } from "react-icons/fa6";
 import { DownloadOutlined, SearchOutlined } from "@ant-design/icons";
-import { Button, Input, message, Radio, Spin } from "antd";
+import { Button, Input, message, Radio, Spin, Tooltip } from "antd";
 import ActionButton, { ActionButtonMode } from "@/components/action-button";
 import EditTable from "@/components/edit-table";
 import useAuthRedirect from "@/hooks/useAuthRedirect.ts";
@@ -111,7 +111,27 @@ export default function MiningSettingPage() {
         dataIndex: "pool_name",
         key: "pool_name",
         width: 200,
-        render: (text: any) => <span style={{ color: "#333" }}>{text}</span>,
+        // render: (text: any) => <span style={{ color: "#333" }}>{text}</span>,
+        render: (text: any) => (
+          <Tooltip
+            title={text}
+            placement="top"
+            overlayInnerStyle={{ color: "white" }}
+            style={{ color: "white" }}
+          >
+            <div
+              style={{
+                width: "100%",
+                overflow: "hidden",
+                color: "#333",
+                textOverflow: "ellipsis",
+                whiteSpace: "nowrap",
+              }}
+            >
+              {text}
+            </div>
+          </Tooltip>
+        ),
       },
       {
         title: "主体类型",
