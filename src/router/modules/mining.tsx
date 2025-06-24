@@ -35,16 +35,16 @@ export const miningRoute: RouteObject = {
         crumb: () => <Link to={ROUTE_PATHS.miningHashRate}>实时算力</Link>,
       },
     },
-    // {
-    //   path: ROUTE_PATHS.electricBasic,
-    //   lazy: async () => ({
-    //     Component: (await import("@/pages/electric-data/basic-data")).default,
-    //   }),
-    //   HydrateFallback: ProgressBar,
-    //   handle: {
-    //     title: "基础数据",
-    //     crumb: () => <Link to={ROUTE_PATHS.electricAverage}>基础数据</Link>,
-    //   },
-    // },
+    {
+      path: ROUTE_PATHS.miningSiteData,
+      lazy: async () => ({
+        Component: (await import("@/pages/mining/site-data")).default,
+      }),
+      HydrateFallback: ProgressBar,
+      handle: {
+        title: "场地运行数据",
+        crumb: () => <Link to={ROUTE_PATHS.miningSiteData}>场地运行数据</Link>,
+      },
+    },
   ],
 };

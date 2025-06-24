@@ -57,6 +57,10 @@ const items: MenuProps["items"] = [
         key: ROUTE_PATHS.miningSetting,
         label: <Link to={ROUTE_PATHS.miningSetting}>矿池列表</Link>,
       },
+      {
+        key: ROUTE_PATHS.miningSiteData,
+        label: <Link to={ROUTE_PATHS.miningSiteData}>场地运行数据</Link>,
+      },
     ],
   },
   {
