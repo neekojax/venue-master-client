@@ -104,7 +104,8 @@ export default function StatisticsPage() {
         title: "场地",
         dataIndex: "venue_name",
         key: "venue_name",
-        width: 200,
+        // width: 200,
+        width: "20%",
         render: (text: any) => (
           <Tooltip
             title={text}
@@ -135,7 +136,8 @@ export default function StatisticsPage() {
         title: "能耗比",
         dataIndex: "energy_ratio",
         key: "energy_ratio",
-        width: 100,
+        // width: 100,
+        width: "10%",
         render: (text: any) => (
           <span>
             {text}{" "}
@@ -160,7 +162,8 @@ export default function StatisticsPage() {
         title: "24h平均算力",
         dataIndex: "hourly_computing_power",
         key: "hourly_computing_power",
-        width: 140,
+        // width: 140,
+        width: "25%",
         sorter: (a: any, b: any) => a.hourly_computing_power - b.hourly_computing_power, // 添加排序逻辑
         render: (text: any) => (
           <span>
@@ -188,6 +191,7 @@ export default function StatisticsPage() {
         dataIndex: "total_income_btc",
         key: "total_income_btc",
         // width: 280,
+        width: "33.33%",
         sorter: (a: any, b: any) => a.total_income_btc - b.total_income_btc, // 添加排序逻辑
         render: (text: any, record: any) => (
           <span>
@@ -202,7 +206,8 @@ export default function StatisticsPage() {
         title: "托管费(基础/总计)",
         dataIndex: "hosting_fee_ratio",
         key: "hosting_fee_ratio",
-        width: 200,
+        // width: 200,
+        width: "25%",
         render: (text: any, record: any) => (
           <span>
             <span style={{ color: "#3498DB" }}> {record.basic_hosting_fee}</span>{" "}
@@ -240,7 +245,8 @@ export default function StatisticsPage() {
         title: "托管费占比",
         dataIndex: "hosting_fee_ratio",
         key: "hosting_fee_ratio",
-        width: 100,
+        // width: 100,
+        width: "15%",
         sorter: (a: any, b: any) => {
           const ratioA = parseFloat(a.hosting_fee_ratio.replace("%", "")); // 去掉 '%' 并转换为数字
           const ratioB = parseFloat(b.hosting_fee_ratio.replace("%", ""));
