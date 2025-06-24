@@ -259,3 +259,7 @@
 .longdataTable .text-sm{
     font-size: 12px;
 }
+
+.ant-table-content .ant-table-cell{
+    font-size: 13px;
+}

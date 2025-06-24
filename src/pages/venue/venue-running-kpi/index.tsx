@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { WiDirectionUpRight } from "react-icons/wi";
-import { Input, Spin, Table } from "antd";
+import { Input, Spin, Table, Tag, Tooltip } from "antd";
 import { ReactEcharts } from "@/components/react-echarts"; // 导入自定义的 ReactEcharts 组件
 import useAuthRedirect from "@/hooks/useAuthRedirect.ts";
 import { useSelector, useSettingsStore } from "@/stores";
@@ -15,7 +15,7 @@ export default function VenueRunningKpi() {
   const [columns, setColumns] = useState<any>([]);
   const [searchTerm, setSearchTerm] = useState(""); // 新增搜索状态
   const [loading, setLoading] = useState<boolean>(true); // 加载状态
-  const [error] = useState<string | null>(null); // 错误信息
+  // const [error] = useState<string | null>(null); // 错误信息
 
   const fetchData = async (poolType: string) => {
     try {
@@ -36,38 +36,105 @@ export default function VenueRunningKpi() {
         title: "矿池名称",
         dataIndex: "name",
         key: "name",
+        render: (text: any) => (
+          <Tooltip
+            title={text}
+            placement="top"
+            overlayInnerStyle={{ color: "white" }}
+            style={{ color: "white" }}
+          >
+            <div
+              style={{
+                width: "80px",
+                overflow: "hidden",
+                color: "#333",
+                textOverflow: "ellipsis",
+                whiteSpace: "nowrap",
+                cursor: "pointer",
+              }}
+            >
+              {text}
+            </div>
+          </Tooltip>
+        ),
       },
       {
-        title: "理论算力",
+        title: "算力(理论/24h)",
         dataIndex: "theoreticalHashRate",
         key: "theoreticalHashRate",
+        width: "15%",
+        render: (text: any, record: any) => (
+          <span>
+            <Tag color="gold" style={{ padding: 0 }}>
+              {record.theoreticalHashRate} TH/s
+            </Tag>
+            <Tag color="green" style={{ padding: 0 }}>
+              {record.lastHash}
+            </Tag>
+          </span>
+        ),
+        // {
+        //   return `${record.theoreticalHashRate}TH/s${record.lastHash}`;
+        // }
+
+        // <span>
+        //   <Tag color="gold">{record.theoreticalHashRate}</Tag>
+        //   <Tag color="green">{record.lastHash}</Tag>
+        // </span>
+        // )
+        // return `${text}TH/s`;
+        // return `${record.theoreticalHashRate}TH/s ${record.lastHash}`;
+        // },
       },
+
+      // {
+      //   title: "理论算力",
+      //   dataIndex: "theoreticalHashRate",
+      //   key: "theoreticalHashRate",
+      // },
+      // {
+      //   title: "24h算力",
+      //   dataIndex: "lastHash",
+      //   key: "lastHash",
+      // },
       {
-        title: "24小时算力",
+        title: "算力达成率(当前/昨日/上周)",
         dataIndex: "lastHash",
         key: "lastHash",
+        width: "20%",
+        render: (text: any, record: any) => (
+          <span>
+            <Tag color="gold">{record.currentEffective} %</Tag>
+            <Tag color="lime">{record.lastDayEffective} %</Tag>
+            <Tag color="green">{record.lastWeekHashEfficiency} %</Tag>
+          </span>
+        ),
+        // {
+        // return `${record.lastHash}TH/s`;
+        // },
       },
-      {
-        title: "当前算力达成率",
-        dataIndex: "currentEffective",
-        key: "currentEffective",
-        render: (text) => `${text}%`, // 在这里加上单位 "%"
-      },
-      {
-        title: "昨日算力达成率",
-        dataIndex: "lastDayEffective",
-        key: "lastDayEffective",
-        render: (text) => `${text}%`, // 在这里加上单位 "%"
-      },
-      {
-        title: "上周算力达成率",
-        dataIndex: "lastWeekHashEfficiency",
-        key: "lastWeekHashEfficiency",
-        render: (text) => `${text}%`, // 在这里加上单位 "%"
-      },
+      // {
+      //   title: "当前算力达成率",
+      //   dataIndex: "currentEffective",
+      //   key: "currentEffective",
+      //   render: (text) => `${text}%`, // 在这里加上单位 "%"
+      // },
+      // {
+      //   title: "昨日算力达成率",
+      //   dataIndex: "lastDayEffective",
+      //   key: "lastDayEffective",
+      //   render: (text) => `${text}%`, // 在这里加上单位 "%"
+      // },
+      // {
+      //   title: "上周算力达成率",
+      //   dataIndex: "lastWeekHashEfficiency",
+      //   key: "lastWeekHashEfficiency",
+      //   render: (text) => `${text}%`, // 在这里加上单位 "%"
+      // },
       {
         title: "周算力达成率增幅",
         key: "weekDiff",
+        width: "20%",
         render: (_text: any, record: { last2WeekHashEfficiency: number; lastWeekHashEfficiency: number }) => {
           const increase = record.last2WeekHashEfficiency - record.lastWeekHashEfficiency; // 计算增幅
           const formattedIncrease = increase.toFixed(2); // 保留两位小数
@@ -77,20 +144,29 @@ export default function VenueRunningKpi() {
 
           return <span style={{ color }}>{formattedIncrease}%</span>;
         },
-        width: 180,
+        // width: 180,
       },
       {
-        title: "昨日故障率",
+        title: "故障率(昨日/周)",
         dataIndex: "lastDayFault",
         key: "lastDayEffective",
-        render: () => "-",
+        render: () => {
+          return `-`;
+        },
       },
-      {
-        title: "周故障率",
-        dataIndex: "lastWeekFault",
-        key: "lastWeekFault",
-        render: () => "-",
-      },
+
+      // {
+      //   title: "昨日故障率",
+      //   dataIndex: "lastDayFault",
+      //   key: "lastDayEffective",
+      //   render: () => "-",
+      // },
+      // {
+      //   title: "周故障率",
+      //   dataIndex: "lastWeekFault",
+      //   key: "lastWeekFault",
+      //   render: () => "-",
+      // },
       {
         title: "周故障率增幅",
         dataIndex: "lastWeekFaultDiff",
@@ -98,9 +174,10 @@ export default function VenueRunningKpi() {
         render: () => "-",
       },
       {
-        title: "历史月度达成率",
+        title: "月达成率",
         dataIndex: "monthEfficiencys",
         key: "monthEfficiencys",
+        width: 85,
         render: (_text: any, record: { monthEfficiencys: any[] }) => {
           // 检查 monthEfficiencys 是否存在且是数组
           if (!Array.isArray(record.monthEfficiencys) || record.monthEfficiencys.length === 0) {
@@ -120,7 +197,6 @@ export default function VenueRunningKpi() {
           const secondLastEfficiency = efficiencies[efficiencies.length - 2]; // 获取倒数第二个数据
           // 根据最后两个数据点的值设置颜色
           const lineColor = lastEfficiency > secondLastEfficiency ? "#4CAF50" : "#ff4d4f"; // 绿色或红色
-
           return (
             <ReactEcharts
               option={{
@@ -145,7 +221,7 @@ export default function VenueRunningKpi() {
                     smooth: true,
                     lineStyle: {
                       color: lineColor, // 动态设置曲线颜色
-                      width: 2, // 曲线宽度
+                      width: 1, // 曲线宽度
                     },
                     symbol: "none", // 去掉圆点
                   },
@@ -153,20 +229,21 @@ export default function VenueRunningKpi() {
                 grid: {
                   left: "0%",
                   right: "0%",
-                  bottom: "0%",
-                  top: "0%",
+                  bottom: "10%",
+                  top: "10%",
                   containLabel: false,
                 },
               }}
-              style={{ height: "50px", width: "100%" }} // 设置图表的样式
+              style={{ height: "30px", width: "60%" }} // 设置图表的样式
             />
           );
         },
       },
       {
-        title: "历史月度故障率",
+        title: "月故障率",
         dataIndex: "historyMonthFault",
         key: "historyMonthFault",
+        // width: 10,
         render: () => "-",
       },
       {
@@ -184,10 +261,10 @@ export default function VenueRunningKpi() {
         },
       },
       {
-        title: "一键导出",
+        title: "导出",
         dataIndex: "export",
         key: "export",
-        width: 100,
+        width: 50,
         render: () => {
           return (
             <button
@@ -249,6 +326,7 @@ export default function VenueRunningKpi() {
         dataSource={filteredData}
         columns={columns}
         rowKey="name"
+        scroll={{ x: true }}
         pagination={{
           position: ["bottomCenter"], // 将分页器位置设置为底部居中
           showSizeChanger: true, // 允许用户改变每页显示的条目数

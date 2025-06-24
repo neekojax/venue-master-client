@@ -12,9 +12,9 @@ type EditTableProps = {
   handleSave: (rowKey: number, data: { [x: string]: string }) => Promise<void>; // 添加 handleSave 作为参数
 };
 
-const getRowClassName = (_record: any, index: number) => {
-  return index % 2 === 0 ? "even-row" : "odd-row";
-};
+// const getRowClassName = (_record: any, index: number) => {
+//   return index % 2 === 0 ? "even-row" : "odd-row";
+// };
 
 export default function EditTable({ tableData, columns, handleDelete, handleSave }: EditTableProps) {
   const [editableKeys, setEditableRowKeys] = useState<React.Key[]>([]);
@@ -104,7 +104,7 @@ export default function EditTable({ tableData, columns, handleDelete, handleSave
           borderBottom: "1px solid #f0f0f0",
           transition: "background-color 0.3s ease",
         }}
-        rowClassName={getRowClassName} // 为主表添加行样式
+        // rowClassName={getRowClassName} // 为主表添加行样式
       />
       {/* 分页组件 */}
       <div style={{ display: "flex", justifyContent: "center", marginTop: 16 }}>

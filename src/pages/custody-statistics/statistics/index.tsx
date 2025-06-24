@@ -132,22 +132,7 @@ export default function StatisticsPage() {
       //   dataIndex: "sub_account_name",
       //   key: "sub_account_name",
       // },
-      {
-        title: "能耗比",
-        dataIndex: "energy_ratio",
-        key: "energy_ratio",
-        // width: 100,
-        width: "10%",
-        render: (text: any) => (
-          <span>
-            {text}{" "}
-            <span className="text-sm text-gray-500" style={{ fontSize: "em" }}>
-              {" "}
-              J/T
-            </span>
-          </span>
-        ), // 渲染单位
-      },
+
       // {
       //   title: "基础托管费",
       //   dataIndex: "basic_hosting_fee",
@@ -203,15 +188,41 @@ export default function StatisticsPage() {
         ), // 渲染单位
       },
       {
-        title: "托管费(基础/总计)",
-        dataIndex: "hosting_fee_ratio",
-        key: "hosting_fee_ratio",
-        // width: 200,
+        title: "托管费(基础/能耗比)",
+        dataIndex: "energy_ratio",
+        key: "energy_ratio",
+        // width: 100,
         width: "25%",
         render: (text: any, record: any) => (
           <span>
-            <span style={{ color: "#3498DB" }}> {record.basic_hosting_fee}</span>{" "}
+            <Tag color="gold">{record.basic_hosting_fee} $/kwh</Tag>
+            <Tag color="green">{text} J/T</Tag>
+            {/* <span style={{ color: "#3498DB" }}> {record.basic_hosting_fee}</span>{" "}
             <span className="text-sm text-gray-500">$/kwh</span> /{" "}
+            <span style={{ color: "#3498DB" }}> {record.energy_ratio}</span>{" "}
+            <span className="text-sm text-gray-500">J/T</span> */}
+          </span>
+        ),
+        // render: (text: any) => (
+        //   <span>
+        //     {text}{" "}
+        //     <span className="text-sm text-gray-500" style={{ fontSize: "em" }}>
+        //       {" "}
+        //       J/T
+        //     </span>
+        //   </span>
+        // ), // 渲染单位
+      },
+      {
+        title: "总托管费",
+        dataIndex: "hosting_fee_ratio",
+        key: "hosting_fee_ratio",
+        // width: 200,
+        width: "15%",
+        render: (text: any, record: any) => (
+          <span>
+            {/* <span style={{ color: "#3498DB" }}> {record.basic_hosting_fee}</span>{" "}
+            <span className="text-sm text-gray-500">$/kwh</span> /{" "} */}
             <span style={{ color: "#3498DB" }}>{record.total_hosting_fee}</span>
             <span className="text-sm text-gray-500"> usd</span>
           </span>

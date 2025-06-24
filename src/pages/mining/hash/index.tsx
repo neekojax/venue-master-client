@@ -76,7 +76,7 @@ export default function MiningHashRatePage() {
         // title: "序号", // 使用英文标题
         dataIndex: "serialNumber",
         key: "serialNumber",
-        width: 30,
+        width: 20,
         render: (_: any, record: { serialNumber?: any; link?: any }) => {
           const { link } = record;
           // 根据 observer_link 内容返回不同的图标
@@ -93,7 +93,7 @@ export default function MiningHashRatePage() {
         title: "场地",
         dataIndex: "pool_name",
         key: "pool_name",
-        width: 180,
+        width: "10%",
         // render: (text: any) => <span style={{ color: "#333" }}>{text}</span>,
         render: (text: any) => (
           <Tooltip
@@ -140,6 +140,7 @@ export default function MiningHashRatePage() {
       {
         title: "理论算力",
         // width: 95,
+        width: "10%",
         dataIndex: "theoretical",
         key: "theoretical",
         render: (text: any) => {
@@ -185,7 +186,7 @@ export default function MiningHashRatePage() {
       {
         title: "在线/离线",
         key: "status",
-        width: 120,
+        width: "12%",
         render: (_text: any, record: any) => (
           <span>
             <Tag color="success" v-if={record.online != 0}>
@@ -206,7 +207,7 @@ export default function MiningHashRatePage() {
         title: "昨日算力达成率",
         dataIndex: "last_hash_rate_effective",
         key: "last_hash_rate_effective",
-        width: 120,
+        width: "10%",
         render: (text: any) => {
           const value = parseFloat(text.replace("%", "")); // 去掉 '%' 并解析为数字
           return <span style={{ color: value < 90 ? "red" : "green" }}>{text}</span>;
@@ -228,9 +229,10 @@ export default function MiningHashRatePage() {
       //   children: [
       {
         title: "结算算力",
+        width: "10%",
         dataIndex: "last_settlement_hash",
         key: "last_settlement_hash",
-        width: 120,
+        // width: 120,
         render: (text: any) => {
           const parts = text.split(" "); // 根据空格分割
           return (
@@ -278,6 +280,9 @@ export default function MiningHashRatePage() {
         title: "结算时间",
         dataIndex: "last_settlement_date",
         key: "last_settlement_date",
+        style: {
+          textAlign: "right",
+        },
         render: (text: any) => {
           const date = new Date(text);
           const month = (date.getMonth() + 1).toString().padStart(2, "0");
