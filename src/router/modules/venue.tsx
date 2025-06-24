@@ -10,6 +10,19 @@ export const venueRoute: RouteObject = {
   HydrateFallback: ProgressBar,
   handle: {
     title: "场地管理",
-    crumb: () => <Link to={ROUTE_PATHS.venue}>场地管理</Link>,
+    crumb: () => "场地管理",
   },
+  children: [
+    {
+      path: ROUTE_PATHS.miningSiteData,
+      lazy: async () => ({
+        Component: (await import("@/pages/venue/venue-running-kpi")).default,
+      }),
+      HydrateFallback: ProgressBar,
+      handle: {
+        title: "运行指标",
+        crumb: () => <Link to={ROUTE_PATHS.miningSiteData}>运行指标</Link>,
+      },
+    },
+  ],
 };

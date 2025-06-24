@@ -9,8 +9,8 @@ export const miningRoute: RouteObject = {
   }),
   HydrateFallback: ProgressBar,
   handle: {
-    title: "矿池",
-    crumb: () => "矿池",
+    title: "算力监控",
+    crumb: () => "算力监控",
   },
   children: [
     {
@@ -20,7 +20,7 @@ export const miningRoute: RouteObject = {
       }),
       HydrateFallback: ProgressBar,
       handle: {
-        title: "矿池列表",
+        title: "矿池设置",
         crumb: () => <Link to={ROUTE_PATHS.miningSetting}>矿池设置</Link>,
       },
     },
@@ -33,17 +33,6 @@ export const miningRoute: RouteObject = {
       handle: {
         title: "实时算力",
         crumb: () => <Link to={ROUTE_PATHS.miningHashRate}>实时算力</Link>,
-      },
-    },
-    {
-      path: ROUTE_PATHS.miningSiteData,
-      lazy: async () => ({
-        Component: (await import("@/pages/mining/site-data")).default,
-      }),
-      HydrateFallback: ProgressBar,
-      handle: {
-        title: "场地运行数据",
-        crumb: () => <Link to={ROUTE_PATHS.miningSiteData}>场地运行数据</Link>,
       },
     },
   ],

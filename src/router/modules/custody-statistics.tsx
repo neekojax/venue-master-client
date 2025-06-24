@@ -9,8 +9,8 @@ export const custodyMenuRoute: RouteObject = {
   }),
   HydrateFallback: ProgressBar,
   handle: {
-    title: "托管管理",
-    crumb: () => "托管统计",
+    title: "电费监控",
+    crumb: () => "电费监控",
   },
   children: [
     {

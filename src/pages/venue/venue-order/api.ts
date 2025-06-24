@@ -1,6 +1,6 @@
 // api.ts
-import { fetchDelete, fetchGet, fetchPost } from "@/helper/fetchHelper";
-import { VenueRecordNew, VenueRecordUpdate } from "@/pages/venue/type.ts";
+import { fetchDelete, fetchGet, fetchPost } from "@/helper/fetchHelper.ts";
+import { VenueRecordNew, VenueRecordUpdate } from "@/pages/venue/venue-order/type.ts";
 
 // 获取模版列表
 export const fetchVenueTemplateList = async () => {

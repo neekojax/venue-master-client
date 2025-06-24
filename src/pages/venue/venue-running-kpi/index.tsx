@@ -4,11 +4,10 @@ import { Input, Spin, Table } from "antd";
 import { ReactEcharts } from "@/components/react-echarts"; // 导入自定义的 ReactEcharts 组件
 import useAuthRedirect from "@/hooks/useAuthRedirect.ts";
 import { useSelector, useSettingsStore } from "@/stores";
-import { exportHashRateToExcel } from "@/utils/excel";
 
-import { fetchMiningPoolRunningData } from "@/pages/mining/api.tsx";
+import { fetchMiningPoolRunningData } from "@/pages/venue/api.tsx";
 
-export default function MiningHashRatePage() {
+export default function VenueRunningKpi() {
   useAuthRedirect();
   const { poolType } = useSettingsStore(useSelector(["poolType"]));
 
@@ -22,7 +21,6 @@ export default function MiningHashRatePage() {
     try {
       const runningDataResult = await fetchMiningPoolRunningData(poolType);
       setRunningData(runningDataResult.data); // 假设返回数据在 result.data 中
-      console.log(runningDataResult.data);
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (err) {
       // 处理错误
@@ -53,16 +51,19 @@ export default function MiningHashRatePage() {
         title: "当前算力达成率",
         dataIndex: "currentEffective",
         key: "currentEffective",
+        render: (text) => `${text}%`, // 在这里加上单位 "%"
       },
       {
         title: "昨日算力达成率",
         dataIndex: "lastDayEffective",
         key: "lastDayEffective",
+        render: (text) => `${text}%`, // 在这里加上单位 "%"
       },
       {
         title: "上周算力达成率",
         dataIndex: "lastWeekHashEfficiency",
         key: "lastWeekHashEfficiency",
+        render: (text) => `${text}%`, // 在这里加上单位 "%"
       },
       {
         title: "周算力达成率增幅",
@@ -82,16 +83,19 @@ export default function MiningHashRatePage() {
         title: "昨日故障率",
         dataIndex: "lastDayFault",
         key: "lastDayEffective",
+        render: () => "-",
       },
       {
         title: "周故障率",
         dataIndex: "lastWeekFault",
         key: "lastWeekFault",
+        render: () => "-",
       },
       {
         title: "周故障率增幅",
         dataIndex: "lastWeekFaultDiff",
         key: "lastWeekFaultDiff",
+        render: () => "-",
       },
       {
         title: "历史月度达成率",
@@ -163,6 +167,7 @@ export default function MiningHashRatePage() {
         title: "历史月度故障率",
         dataIndex: "historyMonthFault",
         key: "historyMonthFault",
+        render: () => "-",
       },
       {
         title: "观察者链接",
@@ -223,10 +228,6 @@ export default function MiningHashRatePage() {
         String(value).toLowerCase().includes(searchTerm.toLowerCase()),
       );
     }) || [];
-
-  const onDownload = () => {
-    exportHashRateToExcel(filteredData);
-  };
 
   return (
     <div style={{ padding: "20px" }}>

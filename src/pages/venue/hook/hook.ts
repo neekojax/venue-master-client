@@ -8,7 +8,7 @@ import {
   submitVenueRecord,
   submitVenueRecordDelete,
   submitVenueRecordUpdate,
-} from "@/pages/venue/api.ts";
+} from "@/pages/venue/venue-order/api.ts";
 
 export const useVenueTemplateList = () => {
   return useQuery({
