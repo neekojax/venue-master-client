@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { WiDirectionUpRight } from "react-icons/wi";
-import { DownloadOutlined, EyeOutlined } from "@ant-design/icons";
-import { Button, Input, Spin, Table } from "antd";
+import { Input, Spin, Table } from "antd";
 import { ReactEcharts } from "@/components/react-echarts"; // 导入自定义的 ReactEcharts 组件
 import useAuthRedirect from "@/hooks/useAuthRedirect.ts";
 import { useSelector, useSettingsStore } from "@/stores";
@@ -100,7 +99,7 @@ export default function MiningHashRatePage() {
         title: "历史月度达成率",
         key: "efficiencyChart",
         render: (_text: any, record: { monthEfficiencys: any[] }) => {
-          const efficiencies = record.monthEfficiencys.map((item: { efficiency: any }) => item.efficiency);
+          const efficiencies = record.monthEfficiencys?.map((item: { efficiency: any }) => item.efficiency);
           const minEfficiency = Math.min(...efficiencies); // 获取最低值
           const lastEfficiency = efficiencies[efficiencies.length - 1]; // 获取最后一个数据
           const secondLastEfficiency = efficiencies[efficiencies.length - 2]; // 获取倒数第二个数据
@@ -116,7 +115,7 @@ export default function MiningHashRatePage() {
                 },
                 xAxis: {
                   type: "category",
-                  data: record.monthEfficiencys.map((item) => item.time), // 提取时间数据
+                  data: record.monthEfficiencys?.map((item) => item.time), // 提取时间数据
                   show: false, // 隐藏 X 轴
                 },
                 yAxis: {
