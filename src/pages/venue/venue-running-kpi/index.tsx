@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { WiDirectionUpRight } from "react-icons/wi";
+import { SearchOutlined } from "@ant-design/icons";
 import { Input, Spin, Table, Tooltip } from "antd";
 import { ReactEcharts } from "@/components/react-echarts"; // 导入自定义的 ReactEcharts 组件
 import useAuthRedirect from "@/hooks/useAuthRedirect.ts";
@@ -236,7 +237,7 @@ export default function VenueRunningKpi() {
                     smooth: true,
                     lineStyle: {
                       color: lineColor, // 动态设置曲线颜色
-                      width: 1, // 曲线宽度
+                      width: 2, // 曲线宽度
                     },
                     symbol: "none", // 去掉圆点
                   },
@@ -328,6 +329,7 @@ export default function VenueRunningKpi() {
       >
         <div style={{ display: "flex", justifyContent: "space-between" }}>
           <Input
+            prefix={<SearchOutlined style={{ color: "rgba(0, 0, 0, 0.25)", fontSize: 18 }} />}
             placeholder="请输入搜索字段"
             value={searchTerm}
             onChange={handleSearch}

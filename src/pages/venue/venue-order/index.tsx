@@ -212,7 +212,7 @@ export default function VenuePage() {
             />
           </Space>
           <Input
-            prefix={<SearchOutlined style={{ color: "rgba(0, 0, 0, 0.25)" }} size={18} />}
+            prefix={<SearchOutlined style={{ color: "rgba(0, 0, 0, 0.25)", fontSize: 18 }} />}
             placeholder="请输入搜索字段"
             value={searchTerm}
             onChange={handleSearch}

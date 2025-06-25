@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { FaAdn, FaFish } from "react-icons/fa6";
 import { WiDirectionUpRight } from "react-icons/wi";
-import { DownloadOutlined, SearchOutlined } from "@ant-design/icons";
+import { ExportOutlined, SearchOutlined } from "@ant-design/icons";
 import { Button, Input, Radio, Spin, Tag, Tooltip } from "antd";
 import EditTable from "@/components/edit-table";
 import useAuthRedirect from "@/hooks/useAuthRedirect.ts";
@@ -76,7 +76,7 @@ export default function MiningHashRatePage() {
         // title: "序号", // 使用英文标题
         dataIndex: "serialNumber",
         key: "serialNumber",
-        width: 20,
+        width: 25,
         render: (_: any, record: { serialNumber?: any; link?: any }) => {
           const { link } = record;
           // 根据 observer_link 内容返回不同的图标
@@ -375,7 +375,7 @@ export default function MiningHashRatePage() {
         </div>
         <div style={{ display: "flex", justifyContent: "space-between" }}>
           <Input
-            prefix={<SearchOutlined style={{ color: "rgba(0, 0, 0, 0.25)" }} size={18} />}
+            prefix={<SearchOutlined style={{ color: "rgba(0, 0, 0, 0.25)", fontSize: 18 }} />}
             placeholder="请输入搜索字段"
             value={searchTerm}
             onChange={handleSearch}
@@ -383,14 +383,18 @@ export default function MiningHashRatePage() {
             className="text-sm mr-10"
           />
           <Button
-            type="text"
-            icon={<DownloadOutlined />}
+            icon={<ExportOutlined className="exportIcon" />}
             size="middle"
-            className={"text-blue-500"}
+            className={"text-blue-500 exportButton"}
             onClick={onDownload}
           >
             导出
           </Button>
+          {/* <UploadOutlined /> */}
+          {/* <Button onClick={onDownload} style={{ marginLeft: 8 }}>
+            <img src={exportIcon} alt="导出" style={{ width: 30, height: 20 }} />
+            导出
+          </Button> */}
         </div>
       </div>
 

@@ -263,3 +263,14 @@
 .ant-table-content .ant-table-cell{
     font-size: 13px;
 }
+
+.exportIcon{
+    color: #333;
+    font-weight: bolder;
+    font-size: small;
+}
+.exportButton{
+    color: #333;
+    font-weight: 500;
+    font-size: 13px
+}
