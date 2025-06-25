@@ -32,6 +32,7 @@ const MiningBenefitCard: React.FC<MiningPoolCardProps> = ({ poolType }) => {
     try {
       const lastProfitStatusResult = await fetchTotalLastProfitStatus(poolType);
       setLastProfitStatus(lastProfitStatusResult.data); // 假设返回数据在 result.data 中
+      console.log(lastProfitStatusResult.data);
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (err) {
       /* empty */
@@ -120,7 +121,7 @@ const MiningBenefitCard: React.FC<MiningPoolCardProps> = ({ poolType }) => {
       <Row style={{ marginTop: "25px" }} gutter={24}>
         <Col span={6} style={{ paddingLeft: "10px" }}>
           <Statistic
-            title={`昨日托管费占比`}
+            title={`昨日平均托管费占比`}
             value={lastProfitStatus?.last_day_hosting_fee_ratio} // 假设效率值在状态中
             valueStyle={{ fontSize: "16px", fontWeight: "bold" }}
             // suffix="%"
