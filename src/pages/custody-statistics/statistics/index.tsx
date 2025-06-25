@@ -3,7 +3,7 @@ import { AiOutlineCalendar } from "react-icons/ai";
 import { FaAdn, FaFish, FaList } from "react-icons/fa6";
 import { FcCalendar } from "react-icons/fc";
 import { GiMining } from "react-icons/gi";
-import { DownloadOutlined, SearchOutlined } from "@ant-design/icons"; // 导入时钟图标
+import { ExportOutlined, SearchOutlined } from "@ant-design/icons"; // 导入时钟图标
 import { Alert, Button, Input, Select, Space, Spin, Tag, Tooltip } from "antd";
 import EditTable from "@/components/edit-table";
 import useAuthRedirect from "@/hooks/useAuthRedirect.ts";
@@ -452,7 +452,7 @@ export default function StatisticsPage() {
 
         <div style={{ display: "flex", justifyContent: "space-between" }}>
           <Input
-            prefix={<SearchOutlined style={{ color: "rgba(0, 0, 0, 0.25)" }} size={18} />}
+            prefix={<SearchOutlined style={{ color: "rgba(0, 0, 0, 0.25)", fontSize: 18 }} />}
             placeholder="请输入搜索字段"
             value={searchTerm}
             onChange={handleSearch}
@@ -460,10 +460,10 @@ export default function StatisticsPage() {
             className="text-sm mr-10"
           />
           <Button
-            type="text"
-            icon={<DownloadOutlined />}
+            // type="text"
+            icon={<ExportOutlined className="exportIcon" />}
             size="middle"
-            className={"text-blue-500"}
+            className={"text-blue-500 exportButton"}
             onClick={() => exportCustodyStatisticsToExcel(filteredData)}
           >
             导出

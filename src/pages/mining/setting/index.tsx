@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { FaAdn, FaFish } from "react-icons/fa6";
-import { DownloadOutlined, SearchOutlined } from "@ant-design/icons";
+import { ExportOutlined, SearchOutlined } from "@ant-design/icons";
 import { Button, Input, message, Radio, Spin, Tooltip } from "antd";
 import ActionButton, { ActionButtonMode } from "@/components/action-button";
 import EditTable from "@/components/edit-table";
@@ -310,10 +310,12 @@ export default function MiningSettingPage() {
             mode={ActionButtonMode.ADD}
           />
           <Button
-            type="text"
-            icon={<DownloadOutlined />}
+            // type="primary"
+            // icon={<DownloadOutlined />}
+            icon={<ExportOutlined className="exportIcon" />}
             size="middle"
-            className={"text-blue-500"}
+            className={"text-blue-500 exportButton"}
+            style={{ marginLeft: "10px" }}
             onClick={onDownload}
           >
             导出
