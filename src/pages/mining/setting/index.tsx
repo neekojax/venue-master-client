@@ -59,6 +59,7 @@ export default function MiningSettingPage() {
         (
           item: {
             id: any;
+            venue_name: any;
             pool_name: any;
             pool_type: any;
             country: any;
@@ -72,6 +73,7 @@ export default function MiningSettingPage() {
         ) => ({
           serialNumber: index + 1,
           key: item.id, // 使用 ID 作为唯一 key
+          venue_name: item.venue_name,
           pool_name: item.pool_name,
           pool_type: item.pool_type,
           country: item.country,
@@ -107,7 +109,34 @@ export default function MiningSettingPage() {
         },
       },
       {
-        title: "账户",
+        title: "场地",
+        dataIndex: "venue_name",
+        key: "venue_name",
+        width: 100,
+        // render: (text: any) => <span style={{ color: "#333" }}>{text}</span>,
+        render: (text: any) => (
+          <Tooltip
+            title={text}
+            placement="top"
+            overlayInnerStyle={{ color: "white" }}
+            style={{ color: "white" }}
+          >
+            <div
+              style={{
+                width: "100%",
+                overflow: "hidden",
+                color: "#333",
+                textOverflow: "ellipsis",
+                whiteSpace: "nowrap",
+              }}
+            >
+              {text}
+            </div>
+          </Tooltip>
+        ),
+      },
+      {
+        title: "子账户",
         dataIndex: "pool_name",
         key: "pool_name",
         width: 200,
@@ -234,6 +263,7 @@ export default function MiningSettingPage() {
   const handleSave = (rowKey: number, data: { [x: string]: string }): Promise<void> => {
     const miningPoolUpdate: MiningPoolUpdate = {
       id: rowKey as number, // 假设 rowKey 是 RecordID
+      venue_name: data.venue_name,
       pool_name: data.pool_name,
       pool_type: data.pool_type,
       country: data.country,

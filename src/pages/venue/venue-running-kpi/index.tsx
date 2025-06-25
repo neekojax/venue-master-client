@@ -34,7 +34,33 @@ export default function VenueRunningKpi() {
     fetchData(poolType);
     setColumns([
       {
-        title: "矿池名称",
+        title: "场地",
+        dataIndex: "venueName",
+        key: "venueName",
+        render: (text: any) => (
+          <Tooltip
+            title={text}
+            placement="top"
+            overlayInnerStyle={{ color: "white" }}
+            style={{ color: "white" }}
+          >
+            <div
+              style={{
+                width: "80px",
+                overflow: "hidden",
+                color: "#333",
+                textOverflow: "ellipsis",
+                whiteSpace: "nowrap",
+                cursor: "pointer",
+              }}
+            >
+              {text}
+            </div>
+          </Tooltip>
+        ),
+      },
+      {
+        title: "子账户",
         dataIndex: "name",
         key: "name",
         render: (text: any) => (
