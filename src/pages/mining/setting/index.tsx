@@ -53,16 +53,32 @@ export default function MiningSettingPage() {
 
   const [searchTerm, setSearchTerm] = useState(""); // 新增搜索状态;
 
+  const StatusColumn = ({ status }) => {
+    let statusText = '';
+    let statusStyle = {};
+
+    if (status === 1) {
+      statusText = '活跃';
+      statusStyle = { color: 'green' }; // 活跃状态，绿色
+    } else if (status === 0) {
+      statusText = '暂停';
+      statusStyle = { color: 'red' }; // 暂停状态，红色
+    }
+
+    return <span style={statusStyle}>{statusText}</span>;
+  };
+
   useEffect(() => {
     if (poolsData && poolsData.data) {
+      console.log(poolsData.data);
       const newData = poolsData.data.map(
         (
           item: {
             id: any;
             venue_name: any;
             pool_name: any;
-            pool_type: any;
             country: any;
+            status: any;
             pool_category: any;
             theoretical_hashrate: any;
             energy_ratio: any;
@@ -75,8 +91,8 @@ export default function MiningSettingPage() {
           key: item.id, // 使用 ID 作为唯一 key
           venue_name: item.venue_name,
           pool_name: item.pool_name,
-          pool_type: item.pool_type,
           country: item.country,
+          status: item.status,
           pool_category: item.pool_category,
           theoretical_hashrate: item.theoretical_hashrate,
           energy_ratio: item.energy_ratio,
@@ -163,12 +179,6 @@ export default function MiningSettingPage() {
         ),
       },
       {
-        title: "主体类型",
-        dataIndex: "pool_type",
-        key: "pool_type",
-        width: 75,
-      },
-      {
         title: "场地类型",
         dataIndex: "pool_category",
         key: "pool_category",
@@ -179,6 +189,13 @@ export default function MiningSettingPage() {
         dataIndex: "country",
         key: "country",
         width: 75,
+      },
+      {
+        title: "状态",
+        dataIndex: "status",
+        key: "status",
+        width: 75,
+        render: (_text: any, record: { status: unknown }) => <StatusColumn status={record.status} />,
       },
       {
         title: "理论算力(PH/s)",
