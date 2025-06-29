@@ -98,16 +98,32 @@ export default function MiningSettingPage() {
   const handleCancel = () => {
     setIsModalOpen(false);
   };
+  const StatusColumn = ({ status }) => {
+    let statusText = "";
+    let statusStyle = {};
+
+    if (status === 1) {
+      statusText = "活跃";
+      statusStyle = { color: "green" }; // 活跃状态，绿色
+    } else if (status === 0) {
+      statusText = "暂停";
+      statusStyle = { color: "red" }; // 暂停状态，红色
+    }
+
+    return <span style={statusStyle}>{statusText}</span>;
+  };
 
   useEffect(() => {
     if (poolsData && poolsData.data) {
+      console.log(poolsData.data);
       const newData = poolsData.data.map(
         (
           item: {
             id: any;
+            venue_name: any;
             pool_name: any;
-            pool_type: any;
             country: any;
+            status: any;
             pool_category: any;
             theoretical_hashrate: any;
             energy_ratio: any;
@@ -118,9 +134,10 @@ export default function MiningSettingPage() {
         ) => ({
           serialNumber: index + 1,
           key: item.id, // 使用 ID 作为唯一 key
+          venue_name: item.venue_name,
           pool_name: item.pool_name,
-          pool_type: item.pool_type,
           country: item.country,
+          status: item.status,
           pool_category: item.pool_category,
           theoretical_hashrate: item.theoretical_hashrate,
           energy_ratio: item.energy_ratio,
@@ -157,7 +174,34 @@ export default function MiningSettingPage() {
         },
       },
       {
-        title: "账户",
+        title: "场地",
+        dataIndex: "venue_name",
+        key: "venue_name",
+        width: 100,
+        // render: (text: any) => <span style={{ color: "#333" }}>{text}</span>,
+        render: (text: any) => (
+          <Tooltip
+            title={text}
+            placement="top"
+            overlayInnerStyle={{ color: "white" }}
+            style={{ color: "white" }}
+          >
+            <div
+              style={{
+                width: "100%",
+                overflow: "hidden",
+                color: "#333",
+                textOverflow: "ellipsis",
+                whiteSpace: "nowrap",
+              }}
+            >
+              {text}
+            </div>
+          </Tooltip>
+        ),
+      },
+      {
+        title: "子账户",
         dataIndex: "pool_name",
         key: "pool_name",
         width: 200,
@@ -184,12 +228,6 @@ export default function MiningSettingPage() {
         ),
       },
       {
-        title: "主体类型",
-        dataIndex: "pool_type",
-        key: "pool_type",
-        width: 75,
-      },
-      {
         title: "场地类型",
         dataIndex: "pool_category",
         key: "pool_category",
@@ -200,6 +238,13 @@ export default function MiningSettingPage() {
         dataIndex: "country",
         key: "country",
         width: 75,
+      },
+      {
+        title: "状态",
+        dataIndex: "status",
+        key: "status",
+        width: 75,
+        render: (_text: any, record: { status: unknown }) => <StatusColumn status={record.status} />,
       },
       {
         title: "理论算力(PH/s)",
@@ -321,6 +366,7 @@ export default function MiningSettingPage() {
     console.log("rowKey", rowKey);
     const miningPoolUpdate: MiningPoolUpdate = {
       id: rowKey as number, // 假设 rowKey 是 RecordID
+      venue_name: data.venue_name,
       pool_name: data.pool_name,
       pool_type: data.pool_type,
       country: data.country,

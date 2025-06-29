@@ -31,6 +31,7 @@ export default function MiningHashRatePage() {
       const newData = hashData.data.map(
         (
           item: {
+            venue_name: any;
             pool_name: any;
             current_hash: any;
             online: any;
@@ -48,6 +49,7 @@ export default function MiningHashRatePage() {
           index: any,
         ) => ({
           serialNumber: index + 1,
+          venue_name: item.venue_name,
           pool_name: item.pool_name,
           current_hash: item.current_hash,
           online: item.online,
@@ -91,6 +93,33 @@ export default function MiningHashRatePage() {
       },
       {
         title: "场地",
+        dataIndex: "venue_name",
+        key: "venue_name",
+        width: "5%",
+        // render: (text: any) => <span style={{ color: "#333" }}>{text}</span>,
+        render: (text: any) => (
+          <Tooltip
+            title={text}
+            placement="top"
+            overlayInnerStyle={{ color: "white" }}
+            style={{ color: "white" }}
+          >
+            <div
+              style={{
+                width: "100%",
+                overflow: "hidden",
+                color: "#333",
+                textOverflow: "ellipsis",
+                whiteSpace: "nowrap",
+              }}
+            >
+              {text}
+            </div>
+          </Tooltip>
+        ),
+      },
+      {
+        title: "子账户",
         dataIndex: "pool_name",
         key: "pool_name",
         width: "10%",

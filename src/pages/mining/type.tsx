@@ -1,5 +1,6 @@
 export type MiningPool = {
   id: number;
+  venue_name: string;
   pool_name: string;
   pool_type: string;
   country: string;
@@ -13,6 +14,7 @@ export type MiningPool = {
 
 export type MiningPoolUpdate = {
   id: number;
+  venue_name: string;
   pool_name: string;
   pool_type: string;
   country: string;

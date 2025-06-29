@@ -10,7 +10,8 @@ interface EditFormProps {
 }
 
 const formFields = [
-  { label: "账户", name: "pool_name", component: Input },
+  { label: "场地", name: "venue_name", component: Input },
+  { label: "子账户", name: "pool_name", component: Input },
   {
     label: "场地主体",
     name: "pool_type",

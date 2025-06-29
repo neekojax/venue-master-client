@@ -421,3 +421,50 @@ export const exportMiningPoolListToExcel = (data: any) => {
   // 导出 Excel 文件
   XLSX.writeFile(workbook, fileName);
 };
+
+export const exportMiningPoolMonthRecordToExcel = (data: any) => {
+  // 创建工作簿
+  const workbook = XLSX.utils.book_new();
+
+  // 定义静态表头
+  const staticHeaders = [
+    "场地名/编码",
+    "机器数量",
+    "理论算力",
+    "昨日故障率",
+    "3月故障率",
+    "4月故障率",
+    "4月故障率",
+  ];
+
+  // 生成动态列标题和对应数据
+  const monthRows = data.monthEfficiencys.map((month) => [
+    `${new Date(month.time).getMonth() + 1}月算力达成率`, // 动态列标题
+    month.efficiency, // 对应的数据
+  ]);
+
+  // 完整的行数据
+  const rowData = [
+    [data.name], // 场地名/编码
+    ["N/A"], // 机器数量
+    [data.theoreticalHashRate], // 理论算力
+    ["N/A"], // 昨日故障率
+    ["N/A"], // 3月故障率
+    ["N/A"], // 4月故障率
+    ["N/A"], // 4月故障率
+    // 将动态生成的月份行添加到 rowData
+    ...monthRows,
+  ];
+
+  // 将静态表头与数据合并
+  const fullHeaders = [...staticHeaders.map((header) => [header, "N/A"]), ...monthRows];
+
+  // 将数据转换为工作表
+  const worksheet = XLSX.utils.aoa_to_sheet(fullHeaders.concat(rowData));
+
+  // 将工作表添加到工作簿
+  XLSX.utils.book_append_sheet(workbook, worksheet, "矿池数据");
+
+  // 导出 Excel 文件
+  XLSX.writeFile(workbook, "矿池数据.xlsx");
+};
