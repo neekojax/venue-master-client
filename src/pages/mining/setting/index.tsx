@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { FaAdn, FaFish } from "react-icons/fa6";
-import { ExportOutlined, SearchOutlined } from "@ant-design/icons";
-import { Button, Input, message, Radio, Spin, Tooltip } from "antd";
+import { DeleteOutlined, ExportOutlined, FormOutlined, SearchOutlined } from "@ant-design/icons";
+import { Button, Form, Input, message, Modal, Popconfirm, Radio, Spin, Tooltip } from "antd";
 import ActionButton, { ActionButtonMode } from "@/components/action-button";
 import EditTable from "@/components/edit-table";
 import useAuthRedirect from "@/hooks/useAuthRedirect.ts";
@@ -53,6 +53,52 @@ export default function MiningSettingPage() {
 
   const [searchTerm, setSearchTerm] = useState(""); // 新增搜索状态;
 
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [currentRow, setCurrentRow] = useState<MiningPoolUpdate | null>(null);
+  const [editableKey, setEditableRowKey] = useState<number>(0);
+
+  const [form] = Form.useForm();
+
+  const showModal = (record: any) => {
+    console.log("当前行 record:", record);
+    setCurrentRow(record);
+    setEditableRowKey(record.key);
+    // form.setFieldsValue(record);
+    setIsModalOpen(true);
+  };
+
+  type FieldType = {
+    key?: number;
+    id?: number;
+    pool_name?: string;
+    pool_type?: string;
+    country?: string;
+    pool_category?: string;
+    theoretical_hashrate?: number;
+    energy_ratio?: number;
+    basic_hosting_fee?: number;
+
+    link?: string;
+  };
+
+  const handleOk = () => {
+    form.validateFields().then((values: MiningPoolUpdate) => {
+      if (currentRow) {
+        const updatedData: MiningPoolUpdate = {
+          ...values,
+          id: currentRow.id,
+        };
+        handleSave(editableKey, updatedData);
+        setIsModalOpen(false);
+        form.resetFields();
+      }
+    });
+  };
+
+  const handleCancel = () => {
+    setIsModalOpen(false);
+  };
+
   useEffect(() => {
     if (poolsData && poolsData.data) {
       const newData = poolsData.data.map(
@@ -84,7 +130,11 @@ export default function MiningSettingPage() {
       );
       setTableData(newData); // 设置表格数据源
     }
-  }, [poolsData]);
+    if (isModalOpen) {
+      //console.log("56565", currentRow?.id);
+      form.setFieldsValue(currentRow); // 设置表单初始值
+    }
+  }, [poolsData, currentRow, editableKey]);
 
   // 表头定义
   useEffect(() => {
@@ -183,7 +233,7 @@ export default function MiningSettingPage() {
             href={link}
             target="_blank"
             rel="noopener noreferrer"
-            style={{ color: "#1E90FF" }}
+            style={{ color: "#1E90FF", fontSize: 12 }}
             title={link} // 悬停显示完整链接
           >
             {link.length > 40 ? getShortenedLink(link) : link}
@@ -192,9 +242,45 @@ export default function MiningSettingPage() {
       },
       {
         title: "操作",
-        valueType: "option",
+        valueType: "option1",
         key: "operation",
         width: 100,
+        render: (_text: any, record: any) => (
+          <>
+            <a key={`edit-${record.key}`} onClick={() => showModal(record)} style={{ marginRight: "7px" }}>
+              <FormOutlined />
+            </a>
+            <Popconfirm
+              title="确认删除此记录吗？"
+              onConfirm={() => handleDelete(record.key)} // 调用 onDelete
+              okText="是"
+              cancelText="否"
+            >
+              <a key={`delete-${record.key}`}>
+                {/* 删除 */}
+                <DeleteOutlined style={{ color: "red" }} />
+              </a>
+            </Popconfirm>
+          </>
+        ),
+        // render: (record: { key: number }, action: { startEditable: (arg0: any) => void }) => [
+        //   <a key={`edit-${record.key}`} onClick={() => showModal(record.key, record)}>
+        //     {/* // <a key={`edit-${record.key}`} onClick={() => showModal(record.key)}> */}
+        //     {/* 编辑 */}
+        //     <FormOutlined />
+        //   </a>,
+        //   <Popconfirm
+        //     title="确认删除此记录吗？"
+        //     onConfirm={() => handleDelete(record.key)} // 调用 onDelete
+        //     okText="是"
+        //     cancelText="否"
+        //   >
+        //     <a key={`delete-${record.key}`}>
+        //       {/* 删除 */}
+        //       <DeleteOutlined style={{ color: "red" }} />
+        //     </a>
+        //   </Popconfirm>,
+        // ],
       },
     ]);
   }, []);
@@ -232,6 +318,7 @@ export default function MiningSettingPage() {
   };
 
   const handleSave = (rowKey: number, data: { [x: string]: string }): Promise<void> => {
+    console.log("rowKey", rowKey);
     const miningPoolUpdate: MiningPoolUpdate = {
       id: rowKey as number, // 假设 rowKey 是 RecordID
       pool_name: data.pool_name,
@@ -349,6 +436,95 @@ export default function MiningSettingPage() {
           handleSave={handleSave}
         />
       )}
+      <Modal
+        title="修改矿池"
+        className="editModal"
+        closable={{ "aria-label": "Custom Close Button" }}
+        open={isModalOpen}
+        onOk={handleOk}
+        onCancel={handleCancel}
+      >
+        <Form
+          name="basic"
+          form={form}
+          labelCol={{ span: 8 }}
+          wrapperCol={{ span: 16 }}
+          style={{ maxWidth: 600 }}
+          initialValues={{ remember: true }}
+          // onFinish={onFinish}
+          // onFinishFailed={onFinishFailed}
+          autoComplete="off"
+        >
+          {/* <Form.Item<FieldType>
+            label="ID"
+            name="id"
+          >
+            <Input />
+          </Form.Item> */}
+          <Form.Item<FieldType>
+            label="Pool Name"
+            name="pool_name"
+            rules={[{ required: true, message: "Please input your pool pool_name!" }]}
+          >
+            <Input />
+          </Form.Item>
+
+          <Form.Item<FieldType>
+            label="Pool Type"
+            name="pool_type"
+            rules={[{ required: true, message: "Please input your pool_type!" }]}
+          >
+            <Input />
+          </Form.Item>
+
+          <Form.Item<FieldType>
+            label="Pool Category"
+            name="pool_category"
+            rules={[{ required: true, message: "Please input your pool_category!" }]}
+          >
+            <Input />
+          </Form.Item>
+
+          <Form.Item<FieldType>
+            label="Country"
+            name="country"
+            rules={[{ required: true, message: "Please input your country!" }]}
+          >
+            <Input />
+          </Form.Item>
+          <Form.Item<FieldType>
+            label="Theoretical Hashrate"
+            name="theoretical_hashrate"
+            rules={[{ required: true, message: "Please input your theoretical_hashrate!" }]}
+          >
+            <Input />
+          </Form.Item>
+
+          <Form.Item<FieldType>
+            label="Energy Ratio"
+            name="energy_ratio"
+            rules={[{ required: true, message: "Please input your energy_ratio!" }]}
+          >
+            <Input />
+          </Form.Item>
+
+          <Form.Item<FieldType>
+            label="Basic Hosting Fee"
+            name="basic_hosting_fee"
+            rules={[{ required: true, message: "Please input your basic_hosting_fee!" }]}
+          >
+            <Input />
+          </Form.Item>
+
+          <Form.Item<FieldType>
+            label="Link"
+            name="link"
+            rules={[{ required: true, message: "Please input your link!" }]}
+          >
+            <Input />
+          </Form.Item>
+        </Form>
+      </Modal>
     </div>
   );
 }

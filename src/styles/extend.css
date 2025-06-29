@@ -274,3 +274,15 @@
     font-weight: 500;
     font-size: 13px
 }
+
+/*表单*/
+.ant-form-large .ant-form-item .ant-form-item-label>label{
+    font-size: 12px;
+}
+.editModal  .ant-input-outlined{
+    font-size: 12px;
+    padding: 7px;
+}
+.editModal .ant-form-item{
+    margin-bottom: 7px;
+}

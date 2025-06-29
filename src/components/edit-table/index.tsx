@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { DeleteOutlined, FormOutlined } from "@ant-design/icons";
 import { EditableProTable } from "@ant-design/pro-components";
 import { message, Pagination, Popconfirm } from "antd";
 
@@ -24,7 +25,9 @@ export default function EditTable({ tableData, columns, handleDelete, handleSave
   // 渲染操作列的函数
   const renderActions = (record: { key: number }, action: { startEditable: (arg0: any) => void }) => [
     <a key={`edit-${record.key}`} onClick={() => action?.startEditable?.(record.key)}>
-      编辑
+      {/* // <a key={`edit-${record.key}`} onClick={() => showModal(record.key)}> */}
+      {/* 编辑 */}
+      <FormOutlined />
     </a>,
     <Popconfirm
       title="确认删除此记录吗？"
@@ -32,7 +35,10 @@ export default function EditTable({ tableData, columns, handleDelete, handleSave
       okText="是"
       cancelText="否"
     >
-      <a key={`delete-${record.key}`}>删除</a>
+      <a key={`delete-${record.key}`}>
+        {/* 删除 */}
+        <DeleteOutlined style={{ color: "red" }} />
+      </a>
     </Popconfirm>,
   ];
 

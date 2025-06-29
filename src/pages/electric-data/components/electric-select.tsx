@@ -1,6 +1,6 @@
 // ElectricDataComponent.tsx
 import { forwardRef, useEffect, useImperativeHandle, useState } from "react";
-import { ExportOutlined, SearchOutlined } from "@ant-design/icons";
+import { ExportOutlined } from "@ant-design/icons";
 import { Button, Cascader, CascaderProps, Col, DatePicker, Radio, Row, Spin } from "antd";
 import dayjs, { Dayjs } from "dayjs";
 
@@ -185,7 +185,7 @@ const ElectricSelectComponent = forwardRef((props: ElectricSelectComponentProps,
         <Col span={3}>
           <Button
             type="primary"
-            icon={<SearchOutlined style={{ color: "rgba(0, 0, 0, 0.25)", fontSize: 18 }} />}
+            // icon={<SearchOutlined style={{ color: "rgba(0, 0, 0, 0.25)", fontSize: 18 }} />}
             onClick={() =>
               handleSearch({
                 type: selectedType,
