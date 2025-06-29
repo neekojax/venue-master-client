@@ -44,7 +44,7 @@ export default function ProfitDetailPage() {
     try {
       const start = dateRange[0]
         ? dateRange[0].format("YYYY-MM-DD")
-        : dayjs().subtract(1, "day").format("YYYY-MM-DD");
+        : dayjs().subtract(30, "day").format("YYYY-MM-DD");
       const end = dateRange[1] ? dateRange[1].format("YYYY-MM-DD") : dayjs().format("YYYY-MM-DD");
       const hashCompletionRateResult = await fetchIncomeStatisticsHistory(poolType, start, end);
 
@@ -215,6 +215,28 @@ export default function ProfitDetailPage() {
         new Date(a.date).getTime() - new Date(b.date).getTime(),
     ); // 按日期升序排序
 
+  const formatNumberCN = (value) => {
+    if (value >= 1e8) {
+      return (value / 1e8).toFixed(2) + "亿";
+    } else if (value >= 1e6) {
+      return (value / 1e6).toFixed(2) + "百万";
+    } else if (value >= 1e4) {
+      return (value / 1e4).toFixed(2) + "万";
+    } else if (value >= 1e3) {
+      return (value / 1e3).toFixed(2) + "千";
+    } else if (value >= 1e2) {
+      return (value / 1e2).toFixed(2) + "百";
+    } else {
+      const retValue = value.toFixed(2);
+      // return value.toFixed(2);
+      if (Number(retValue) === parseInt(retValue)) {
+        // value = parseInt(value);
+        return parseInt(retValue);
+      } else {
+        return retValue;
+      }
+    }
+  };
   const option = {
     tooltip: {
       trigger: "axis",
@@ -228,9 +250,9 @@ export default function ProfitDetailPage() {
     },
     grid: {
       top: "25%", // 调整为 0% 或更小的值
-      right: "12%",
+      right: "15%",
       bottom: "12%",
-      left: "12%",
+      left: "10%",
     },
     legend: {
       data: ["收入 (BTC)", "收入 (USD)", "托管费用"],
@@ -258,7 +280,9 @@ export default function ProfitDetailPage() {
       axisLabel: {
         show: true, // 是否显示文字
         // 字体颜色
-        color: "#464646",
+        // color: "#464646",
+        color: "#99a1b7", // 字体颜色
+        fontSize: 10,
         formatter: function (value) {
           // 只保留月-日
           return value.substr(5);
@@ -273,6 +297,8 @@ export default function ProfitDetailPage() {
         position: "left",
         axisLabel: {
           formatter: "{value}",
+          fontSize: 10,
+          color: "#99a1b7", // 字体颜色
         },
       },
       {
@@ -283,16 +309,22 @@ export default function ProfitDetailPage() {
           show: false, // ✅ 关闭背景横线
         },
         axisLabel: {
-          formatter: "${value}",
+          fontSize: 10,
+          color: "#99a1b7", // 字体颜色
+          formatter: function (value: number) {
+            return formatNumberCN(value);
+          },
+          // formatter: "${value}",
         },
       },
     ],
     series: [
       {
         name: "收入 (BTC)",
-        // type: "line",
-        type: "bar",
-        barWidth: 10,
+        type: "line",
+        symbol: "none",
+        // type: "bar",
+        // barWidth: 10,
         data: totalData?.map((item: { income_btc: any }) => item.income_btc), // 使用过滤后的收入数据
         itemStyle: {
           color: "#58D9F9",
@@ -302,28 +334,30 @@ export default function ProfitDetailPage() {
       },
       {
         name: "收入 (USD)",
-        // type: "line",
-        type: "bar",
+        type: "line",
+        symbol: "none",
+        // type: "bar",
         data: totalData?.map((item: { income_usd: any }) => item.income_usd), // 使用过滤后的收入数据
         itemStyle: {
           color: "#FDDD60",
         },
         yAxisIndex: 1,
-        barWidth: 10,
-        // smooth: true, // 使用平滑曲线
+        // barWidth: 10,
+        smooth: true, // 使用平滑曲线
       },
       {
         name: "托管费用",
-        // type: "line",
-        type: "bar",
-        barWidth: 10,
+        type: "line",
+        symbol: "none",
+        // type: "bar",
+        // barWidth: 10,
         data: totalData?.map((item: { hosting_fee: any }) => item.hosting_fee), // 使用过滤后的托管费用数据
         itemStyle: {
           color: "#FF6E76",
           barWidth: 2,
         },
         yAxisIndex: 1,
-        // smooth: true, // 使用平滑曲线
+        smooth: true, // 使用平滑曲线
       },
     ],
   };
