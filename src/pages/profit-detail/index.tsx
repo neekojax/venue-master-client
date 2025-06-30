@@ -28,7 +28,7 @@ export default function ProfitDetailPage() {
 
   const [dateRange, setDateRange] = useState<[Dayjs | null, Dayjs | null]>(
     (() => {
-      const yesterday = dayjs().subtract(1, "day").startOf("day"); // 昨天的开始时间
+      const yesterday = dayjs().subtract(10, "day").startOf("day"); // 昨天的开始时间
       const today = dayjs().startOf("day"); // 今天的开始时间
       return [yesterday, today];
     })(),
@@ -44,7 +44,7 @@ export default function ProfitDetailPage() {
     try {
       const start = dateRange[0]
         ? dateRange[0].format("YYYY-MM-DD")
-        : dayjs().subtract(30, "day").format("YYYY-MM-DD");
+        : dayjs().subtract(1, "day").format("YYYY-MM-DD");
       const end = dateRange[1] ? dateRange[1].format("YYYY-MM-DD") : dayjs().format("YYYY-MM-DD");
       const hashCompletionRateResult = await fetchIncomeStatisticsHistory(poolType, start, end);
 

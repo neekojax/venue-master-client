@@ -1,7 +1,19 @@
 import { useEffect, useState } from "react";
 import { FaAdn, FaFish } from "react-icons/fa6";
 import { DeleteOutlined, ExportOutlined, FormOutlined, SearchOutlined } from "@ant-design/icons";
-import { Button, Form, Input, message, Modal, Popconfirm, Radio, Spin, Tooltip } from "antd";
+import {
+  Button,
+  Form,
+  Input,
+  InputNumber,
+  message,
+  Modal,
+  Popconfirm,
+  Radio,
+  Select,
+  Spin,
+  Tooltip,
+} from "antd";
 import ActionButton, { ActionButtonMode } from "@/components/action-button";
 import EditTable from "@/components/edit-table";
 import useAuthRedirect from "@/hooks/useAuthRedirect.ts";
@@ -9,6 +21,7 @@ import { useSelector, useSettingsStore } from "@/stores";
 import { exportMiningPoolListToExcel } from "@/utils/excel.ts";
 import { getShortenedLink } from "@/utils/short-link.ts";
 
+const { Option } = Select;
 import EditForm from "@/pages/mining/components/edit-form.tsx";
 import {
   useMiningPoolDelete,
@@ -72,6 +85,7 @@ export default function MiningSettingPage() {
     id?: number;
     pool_name?: string;
     pool_type?: string;
+    status?: number;
     country?: string;
     pool_category?: string;
     theoretical_hashrate?: number;
@@ -244,6 +258,10 @@ export default function MiningSettingPage() {
         dataIndex: "status",
         key: "status",
         width: 75,
+        sorter: (a: any) => {
+          // 直接比较数值
+          return a.status; // 返回值用于升序排序
+        },
         render: (_text: any, record: { status: unknown }) => <StatusColumn status={record.status} />,
       },
       {
@@ -508,58 +526,106 @@ export default function MiningSettingPage() {
             <Input />
           </Form.Item> */}
           <Form.Item<FieldType>
-            label="Pool Name"
+            label="矿池名称"
             name="pool_name"
             rules={[{ required: true, message: "Please input your pool pool_name!" }]}
           >
             <Input />
           </Form.Item>
 
-          <Form.Item<FieldType>
-            label="Pool Type"
+          {/* <Form.Item<FieldType>
+            label="矿池类型"
             name="pool_type"
             rules={[{ required: true, message: "Please input your pool_type!" }]}
           >
             <Input />
-          </Form.Item>
+          </Form.Item> */}
 
           <Form.Item<FieldType>
-            label="Pool Category"
+            label="场地类型"
             name="pool_category"
             rules={[{ required: true, message: "Please input your pool_category!" }]}
           >
-            <Input />
+            <Select
+              placeholder="请选择场地类型"
+              // onChange={onGenderChange}
+              allowClear
+              style={{ backgroundColor: "white" }}
+            >
+              <Option value="主矿池">主矿池</Option>
+              <Option value="备用矿池">备用矿池</Option>
+            </Select>
           </Form.Item>
 
           <Form.Item<FieldType>
-            label="Country"
+            label="所属国家"
             name="country"
             rules={[{ required: true, message: "Please input your country!" }]}
           >
             <Input />
           </Form.Item>
+
           <Form.Item<FieldType>
-            label="Theoretical Hashrate"
+            label="状态"
+            name="status"
+            rules={[{ required: true, message: "Please input your country!" }]}
+          >
+            <Radio.Group
+              name="radiogroup"
+              defaultValue={1}
+              options={[
+                { value: 0, label: "暂停" },
+                { value: 1, label: "活跃" },
+              ]}
+            />
+          </Form.Item>
+
+          <Form.Item<FieldType>
+            label="理论算力"
             name="theoretical_hashrate"
             rules={[{ required: true, message: "Please input your theoretical_hashrate!" }]}
           >
-            <Input />
+            {/* <Input /> */}
+            <InputNumber<string>
+              style={{ width: 200 }}
+              // defaultValue="1"
+              min="0"
+              max="100000"
+              step="0.01"
+              stringMode
+            />
           </Form.Item>
 
           <Form.Item<FieldType>
-            label="Energy Ratio"
+            label="能耗比"
             name="energy_ratio"
             rules={[{ required: true, message: "Please input your energy_ratio!" }]}
           >
-            <Input />
+            {/* <Input /> */}
+            <InputNumber<string>
+              style={{ width: 200 }}
+              // defaultValue="1"
+              min="0"
+              max="100000"
+              step="0.01"
+              stringMode
+            />
           </Form.Item>
 
           <Form.Item<FieldType>
-            label="Basic Hosting Fee"
+            label="基础托管费"
             name="basic_hosting_fee"
             rules={[{ required: true, message: "Please input your basic_hosting_fee!" }]}
           >
-            <Input />
+            {/* <Input /> */}
+            <InputNumber<string>
+              style={{ width: 200 }}
+              // defaultValue="1"
+              min="0"
+              max="100000"
+              step="0.01"
+              stringMode
+            />
           </Form.Item>
 
           <Form.Item<FieldType>

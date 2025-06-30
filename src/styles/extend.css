@@ -79,7 +79,8 @@
 /*选中状态的菜单*/
 .ant-menu-light .ant-menu-submenu-selected >.ant-menu-submenu-title,
 .ant-menu .ant-menu-item.ant-menu-item-selected .ant-menu-item-icon svg,
-.ant-menu-submenu-selected .ant-menu-submenu-title .ant-menu-item-icon svg
+.ant-menu-submenu-selected .ant-menu-submenu-title .ant-menu-item-icon svg,
+.ant-menu-submenu-open.ant-menu-submenu-selected .ant-menu-submenu-title .ant-menu-item-icon
 {
     color: #fff;
 }
@@ -173,6 +174,15 @@
     font-size: 13px;
     /* color: #99A1B7; */
 }
+.ant-menu-inline.ant-menu-root .ant-menu-submenu-title > .ant-menu-item-icon{
+    color: #4a4b68;
+}
+.ant-menu-submenu.ant-menu-inline.ant-menu-submenu-open.ant-menu-submenu-selected > .ant-menu-submenu-title > .ant-menu-item-icon{
+    color: #fff !important;
+}
+/* .ant-menu-inline.ant-menu-root .ant-menu-submenu-title > .ant-menu-item-icon{
+
+} */
 .ant-table-wrapper .ant-table.ant-table-middle .ant-table-tbody>tr>td{
     /* font-size: 14px; */
      font-size: 13px;
