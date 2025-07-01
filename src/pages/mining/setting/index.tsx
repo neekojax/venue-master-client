@@ -35,6 +35,7 @@ const emptyData = {
   name: "",
   pool_type: "",
   country: "",
+  status: 0, // 状态：0 暂停，1 活跃
   // pool_category: "",
   theoretical_hashrate: 0,
   energy_ratio: 0,
