@@ -24,6 +24,8 @@ export const ROUTE_PATHS = {
 
   venue: "/venue",
   miningSiteData: "/venue/running-kpi",
+  eventLog: "/venue/event-log",
+  venueSetting: "/venue/setting",
 
   hashDetail: "/hash-detail",
   profitDetail: "/profit-detail",

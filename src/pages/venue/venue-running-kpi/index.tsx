@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { DownloadOutlined, SearchOutlined } from "@ant-design/icons";
-import { Button, Input, Spin, Table, Tooltip } from "antd";
-import * as echarts from "echarts";
+import { Button, Input, Spin, Table } from "antd";
 import { ReactEcharts } from "@/components/react-echarts"; // 导入自定义的 ReactEcharts 组件
 import useAuthRedirect from "@/hooks/useAuthRedirect.ts";
 import { useSelector, useSettingsStore } from "@/stores";

@@ -69,6 +69,14 @@ const items: MenuProps["items"] = [
         key: ROUTE_PATHS.miningSiteData,
         label: <Link to={ROUTE_PATHS.miningSiteData}>运行指标</Link>,
       },
+      {
+        key: ROUTE_PATHS.eventLog,
+        label: <Link to={ROUTE_PATHS.eventLog}>事件日志</Link>,
+      },
+      {
+        key: ROUTE_PATHS.venueSetting,
+        label: <Link to={ROUTE_PATHS.venueSetting}>场地设置</Link>,
+      },
     ],
   },
   {
