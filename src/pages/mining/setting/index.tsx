@@ -130,7 +130,6 @@ export default function MiningSettingPage() {
 
   useEffect(() => {
     if (poolsData && poolsData.data) {
-      console.log(poolsData.data);
       const newData = poolsData.data.map(
         (
           item: {
@@ -149,7 +148,8 @@ export default function MiningSettingPage() {
         ) => ({
           serialNumber: index + 1,
           key: item.id, // 使用 ID 作为唯一 key
-          venue_name: item.venue_name,
+          // @ts-ignore
+          venue_name: item.venue_info.venue_name,
           pool_name: item.pool_name,
           country: item.country,
           status: item.status,

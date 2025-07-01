@@ -24,5 +24,27 @@ export const venueRoute: RouteObject = {
         crumb: () => <Link to={ROUTE_PATHS.miningSiteData}>运行指标</Link>,
       },
     },
+    {
+      path: ROUTE_PATHS.eventLog,
+      lazy: async () => ({
+        Component: (await import("@/pages/venue/event-log")).default,
+      }),
+      HydrateFallback: ProgressBar,
+      handle: {
+        title: "事件日志",
+        crumb: () => <Link to={ROUTE_PATHS.eventLog}>事件日志</Link>,
+      },
+    },
+    {
+      path: ROUTE_PATHS.venueSetting,
+      lazy: async () => ({
+        Component: (await import("@/pages/venue/venue-setting")).default,
+      }),
+      HydrateFallback: ProgressBar,
+      handle: {
+        title: "场地设置",
+        crumb: () => <Link to={ROUTE_PATHS.venueSetting}>场地设置</Link>,
+      },
+    },
   ],
 };
