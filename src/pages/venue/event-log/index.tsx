@@ -1,92 +1,133 @@
-// 代码已包含 CSS：使用 TailwindCSS , 安装 TailwindCSS 后方可看到布局样式效果
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   DeleteOutlined,
   DownloadOutlined,
   EditOutlined,
-  FilterOutlined,
   PlusOutlined,
   SearchOutlined,
 } from "@ant-design/icons";
 import { Button, DatePicker, Form, Input, message, Modal, Popconfirm, Select, Space, Table, Tag } from "antd";
 import type { ColumnsType } from "antd/es/table";
 import dayjs from "dayjs";
-interface LogData {
-  id: number;
-  location: string;
-  date: string;
-  timeSlot: string;
-  eventType: string;
-  affectedMachines: number;
-  cause: string;
-  solution: string;
-  recorder: string;
-  recordTime: string;
-}
+import isBetween from "dayjs/plugin/isBetween"; // 引入 isBetween 插件
+import { useSelector, useSettingsStore } from "@/stores"; // 根据实际路径调整
+
+import {
+  useDeleteUpdate,
+  useEventList,
+  useEventNew,
+  useEventUpdate,
+  useVenueList,
+} from "@/pages/venue/hook/hook.ts";
+import { EventLogParam } from "@/pages/venue/type.tsx"; // 根据实际路径调整
+
+dayjs.extend(isBetween); // 使用插件
 const { RangePicker } = DatePicker;
-const { RangePicker: TimeRangePicker } = DatePicker;
 const { Option } = Select;
 const { TextArea } = Input;
+
+interface EventLog {
+  id: number;
+  venue_id: number;
+  venue_name: string; // 直接在 EventLog 中使用 venue_name
+  log_date: string;
+  start_time: string;
+  end_time: string;
+  log_type: string;
+  impact_count: number;
+  event_reason: string;
+  resolution_measures: string;
+  created_at: string; // 这里使用 created_at 而不是 update_at
+}
+
 const App: React.FC = () => {
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([]);
   const [form] = Form.useForm();
-  const locations = ["生产车间A", "生产车间B", "组装车间", "包装车间", "仓储区域"];
-  const eventTypes = ["设备故障", "系统异常", "人员事故", "质量问题", "其他"];
-  const timeSlots = ["早班", "中班", "晚班"];
-  const mockData: LogData[] = Array(15)
-    .fill(null)
-    .map((_, index) => ({
-      id: index + 1,
-      location: locations[Math.floor(Math.random() * locations.length)],
-      date: dayjs()
-        .subtract(Math.floor(Math.random() * 30), "day")
-        .format("YYYY-MM-DD"),
-      timeRange: [
-        dayjs().format("HH:mm"),
-        dayjs()
-          .add(Math.floor(Math.random() * 5), "hour")
-          .format("HH:mm"),
-      ],
-      eventType: eventTypes[Math.floor(Math.random() * eventTypes.length)],
-      affectedMachines: Math.floor(Math.random() * 10) + 1,
-      cause: "设备运行参数异常导致生产线暂停",
-      solution: "重新校准设备参数，更换损耗部件，恢复正常运行",
-      recorder: ["张明远", "李思琪", "王浩宇", "陈雨婷", "刘德华"][Math.floor(Math.random() * 5)],
-      recordTime: dayjs()
-        .subtract(Math.floor(Math.random() * 24), "hour")
-        .format("YYYY-MM-DD HH:mm:ss"),
-    }));
-  const columns: ColumnsType<LogData> = [
+  const { poolType } = useSettingsStore(useSelector(["poolType"]));
+  const { data, isLoading } = useEventList(poolType);
+  const { data: venueList } = useVenueList(poolType);
+  const newMutation = useEventNew();
+  const updateMutation = useEventUpdate();
+  const deleteMutation = useDeleteUpdate();
+
+  // 新增筛选状态
+  const [selectedLocation, setSelectedLocation] = useState<string[]>([]);
+  const [selectedEventType, setSelectedEventType] = useState<string[]>([]);
+  const [searchText, setSearchText] = useState("");
+  const [dateRange, setDateRange] = useState<[dayjs.Dayjs | null, dayjs.Dayjs | null]>([null, null]);
+
+  // 数据转换
+  const logData: EventLog[] =
+    data?.data?.map((item) => ({
+      id: item.id,
+      venue_id: item.venue_id,
+      venue_name: item.venue_info.venue_name,
+      log_date: item.log_date,
+      start_time: item.start_time,
+      end_time: item.end_time,
+      log_type: item.log_type,
+      impact_count: item.impact_count,
+      event_reason: item.event_reason,
+      resolution_measures: item.resolution_measures,
+      created_at: item.created_at,
+    })) || [];
+
+  // 过滤后的数据
+  const filteredData = logData.filter((log) => {
+    const matchesLocation = selectedLocation.length ? selectedLocation.includes(log.venue_name) : true;
+    const matchesEventType = selectedEventType.length ? selectedEventType.includes(log.log_type) : true;
+    const matchesSearchText =
+      log.event_reason.includes(searchText) || log.resolution_measures.includes(searchText);
+
+    const isValidDateRange = Array.isArray(dateRange) && dateRange.length === 2;
+    const matchesDateRange =
+      isValidDateRange && dateRange[0] && dateRange[1]
+        ? dayjs(log.log_date).isBetween(dateRange[0], dateRange[1], null, "[]")
+        : true;
+    return matchesLocation && matchesEventType && matchesSearchText && matchesDateRange;
+  });
+
+  const columns: ColumnsType<EventLog> = [
     {
       title: "场地",
-      dataIndex: "location",
+      dataIndex: "venue_name",
       width: 120,
-      filters: locations.map((loc) => ({ text: loc, value: loc })),
-      onFilter: (value, record) => record.location === value,
+      filters: venueList?.data?.map((venue) => ({ text: venue.venue_name, value: venue.venue_name })),
+      onFilter: (value, record) => record.venue_name === value,
     },
     {
       title: "日期",
-      dataIndex: "date",
+      dataIndex: "log_date",
       width: 120,
-      sorter: (a, b) => dayjs(a.date).unix() - dayjs(b.date).unix(),
+      sorter: (a, b) => dayjs(a.log_date).unix() - dayjs(b.log_date).unix(),
     },
     {
       title: "时间范围",
-      dataIndex: "timeRange",
+      dataIndex: "start_time",
       width: 180,
-      render: (timeRange: [string, string]) => `${timeRange[0]} - ${timeRange[1]}`,
+      render: (_text, record) => `${record.start_time} - ${record.end_time}`,
     },
     {
       title: "事件类型",
-      dataIndex: "eventType",
+      dataIndex: "log_type",
       width: 120,
+      filters: [
+        { text: "限电", value: "限电" },
+        { text: "设备故障", value: "设备故障" },
+        { text: "系统异常", value: "系统异常" },
+        { text: "高温", value: "高温" },
+        { text: "雷电", value: "雷电" },
+        { text: "其他", value: "其他" },
+      ],
+      onFilter: (value, record) => record.log_type === value,
       render: (text) => {
         const colors = {
-          设备故障: "red",
-          系统异常: "orange",
-          人员事故: "purple",
-          质量问题: "blue",
+          限电: "red",
+          设备故障: "orange",
+          系统异常: "purple",
+          人员事故: "blue",
+          质量问题: "green",
           其他: "default",
         };
         return <Tag color={colors[text as keyof typeof colors]}>{text}</Tag>;
@@ -94,31 +135,27 @@ const App: React.FC = () => {
     },
     {
       title: "影响台数",
-      dataIndex: "affectedMachines",
+      dataIndex: "impact_count",
       width: 100,
-      sorter: (a, b) => a.affectedMachines - b.affectedMachines,
+      sorter: (a, b) => a.impact_count - b.impact_count,
     },
     {
       title: "事件原因",
-      dataIndex: "cause",
+      dataIndex: "event_reason",
       width: 200,
       ellipsis: true,
     },
     {
       title: "解决措施",
-      dataIndex: "solution",
+      dataIndex: "resolution_measures",
       width: 200,
       ellipsis: true,
     },
     {
-      title: "记录人",
-      dataIndex: "recorder",
-      width: 100,
-    },
-    {
       title: "记录时间",
-      dataIndex: "recordTime",
+      dataIndex: "created_at",
       width: 160,
+      render: (text) => dayjs(text).format("YYYY-MM-DD HH:mm:ss"),
     },
     {
       title: "操作",
@@ -145,31 +182,88 @@ const App: React.FC = () => {
       ),
     },
   ];
+
+  useEffect(() => {
+    if (isLoading) {
+      // message.loading("加载中...");
+    }
+  }, [isLoading]);
+
   const handleAdd = () => {
     form.resetFields();
     setIsModalVisible(true);
   };
-  const handleEdit = (record: LogData) => {
-    form.setFieldsValue(record);
+
+  const handleEdit = (record: EventLog) => {
+    form.setFieldsValue({
+      ...record,
+      log_date: dayjs(record.log_date),
+      start_time: dayjs(`1970-01-01T${record.start_time}:00`),
+      end_time: dayjs(`1970-01-01T${record.end_time}:00`),
+    });
     setIsModalVisible(true);
   };
+
   const handleDelete = (id: number) => {
-    message.success("删除成功");
-  };
-  const handleOk = () => {
-    form.validateFields().then((values) => {
-      console.log(values);
-      setIsModalVisible(false);
-      message.success("保存成功");
+    deleteMutation.mutate(id, {
+      onSuccess: () => {
+        message.success("删除成功");
+      },
+      onError: (error) => {
+        message.error(`删除失败: ${error.message}`);
+      },
     });
   };
+
+  const handleOk = () => {
+    form.validateFields().then((values) => {
+      const eventUpdate: EventLogParam = {
+        id: values.id,
+        venue_id: values.venue_id,
+        log_date: dayjs(values.log_date).format("YYYY-MM-DD"),
+        start_time: dayjs(values.start_time).format("HH:mm"),
+        end_time: dayjs(values.end_time).format("HH:mm"),
+        log_type: values.log_type,
+        impact_count: parseInt(values.impact_count, 10),
+        event_reason: values.event_reason,
+        resolution_measures: values.resolution_measures,
+      };
+
+      if (values.id !== undefined) {
+        updateMutation.mutate(eventUpdate, {
+          onSuccess: () => {
+            message.success("更新成功");
+          },
+          onError: (error) => {
+            message.error(`更新失败: ${error.message}`);
+          },
+        });
+      } else {
+        newMutation.mutate(
+          { poolType, data: eventUpdate },
+          {
+            onSuccess: () => {
+              message.success("添加成功");
+            },
+            onError: (error) => {
+              message.error(`添加失败: ${error.message}`);
+            },
+          },
+        );
+      }
+      setIsModalVisible(false);
+    });
+  };
+
   const onSelectChange = (newSelectedRowKeys: React.Key[]) => {
     setSelectedRowKeys(newSelectedRowKeys);
   };
+
   const rowSelection = {
     selectedRowKeys,
     onChange: onSelectChange,
   };
+
   return (
     <div className="bg-gray-50 p-6">
       <div className="mx-auto bg-white rounded-lg shadow-sm">
@@ -190,31 +284,39 @@ const App: React.FC = () => {
                 prefix={<SearchOutlined />}
                 size="large"
                 className="max-w-xs !rounded-lg"
+                value={searchText}
+                onChange={(e) => setSearchText(e.target.value)} // 更新搜索文本
               />
-              <RangePicker size="large" className="!rounded-lg" placeholder={["开始日期", "结束日期"]} />
+              <RangePicker
+                size="large"
+                className="!rounded-lg"
+                placeholder={["开始日期", "结束日期"]}
+                value={dateRange}
+                onChange={setDateRange} // 更新日期范围
+              />
               <Select
                 mode="multiple"
                 placeholder="选择场地"
+                value={selectedLocation}
+                onChange={setSelectedLocation}
                 style={{ width: 200 }}
-                size="large"
                 className="!rounded-lg"
-                maxTagCount={2}
               >
-                {locations.map((loc) => (
-                  <Option key={loc} value={loc}>
-                    {loc}
+                {venueList?.data?.map((venue) => (
+                  <Option key={venue.id} value={venue.venue_name}>
+                    {venue.venue_name}
                   </Option>
                 ))}
               </Select>
               <Select
                 mode="multiple"
-                placeholder="事件类型"
+                placeholder="选择事件类型"
+                value={selectedEventType}
+                onChange={setSelectedEventType}
                 style={{ width: 200 }}
-                size="large"
                 className="!rounded-lg"
-                maxTagCount={2}
               >
-                {eventTypes.map((type) => (
+                {["限电", "设备故障", "系统异常", "高温", "雷电", "其他"].map((type) => (
                   <Option key={type} value={type}>
                     {type}
                   </Option>
@@ -248,16 +350,15 @@ const App: React.FC = () => {
                     "记录人",
                     "记录时间",
                   ];
-                  const data = mockData.map((item) => [
-                    item.location,
-                    item.date,
-                    `${item.timeRange[0]} - ${item.timeRange[1]}`,
-                    item.eventType,
-                    item.affectedMachines,
-                    item.cause,
-                    item.solution,
-                    item.recorder,
-                    item.recordTime,
+                  const data = filteredData.map((item) => [
+                    item.venue_name,
+                    item.log_date,
+                    `${item.start_time} - ${item.end_time}`,
+                    item.log_type,
+                    item.impact_count,
+                    item.event_reason,
+                    item.resolution_measures,
+                    item.created_at,
                   ]);
                   const csvContent = [headers, ...data].map((row) => row.join(",")).join("\n");
                   const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
@@ -277,11 +378,11 @@ const App: React.FC = () => {
         <Table
           rowSelection={rowSelection}
           columns={columns}
-          dataSource={mockData}
+          dataSource={filteredData} // 使用过滤后的数据
           scroll={{ x: 1300 }}
           rowKey="id"
           pagination={{
-            total: mockData.length,
+            total: filteredData.length,
             pageSize: 10,
             showSizeChanger: true,
             showQuickJumper: true,
@@ -301,37 +402,43 @@ const App: React.FC = () => {
       >
         <Form form={form} layout="vertical" className="pt-4">
           <div className="grid grid-cols-2 gap-x-6">
-            <Form.Item name="location" label="场地" rules={[{ required: true, message: "请选择场地" }]}>
-              <Select placeholder="请选择场地">
-                {locations.map((loc) => (
-                  <Option key={loc} value={loc}>
-                    {loc}
+            {/* 隐藏的 ID 字段 */}
+            <Form.Item name="id" style={{ display: "none" }}>
+              <Input type="hidden" />
+            </Form.Item>
+            <Form.Item name="venue_id" label="场地" rules={[{ required: true, message: "请选择场地" }]}>
+              <Select placeholder="请选择场地" allowClear style={{ width: "100%" }}>
+                {venueList?.data?.map((venue) => (
+                  <Option key={venue.id} value={venue.id}>
+                    {venue.venue_name}
                   </Option>
                 ))}
               </Select>
             </Form.Item>
-            <Form.Item name="date" label="日期" rules={[{ required: true, message: "请选择日期" }]}>
+            <Form.Item name="log_date" label="日期" rules={[{ required: true, message: "请选择日期" }]}>
               <DatePicker className="w-full" />
             </Form.Item>
             <Form.Item
-              name="timeRange"
-              label="时间范围"
-              rules={[{ required: true, message: "请选择时间范围" }]}
+              name="start_time"
+              label="开始时间"
+              rules={[{ required: true, message: "请选择开始时间" }]}
             >
-              <TimeRangePicker
-                format="HH:mm"
-                picker="time"
-                className="w-full"
-                placeholder={["开始时间", "结束时间"]}
-              />
+              <DatePicker.TimePicker className="w-full" />
             </Form.Item>
             <Form.Item
-              name="eventType"
+              name="end_time"
+              label="结束时间"
+              rules={[{ required: true, message: "请选择结束时间" }]}
+            >
+              <DatePicker.TimePicker className="w-full" />
+            </Form.Item>
+            <Form.Item
+              name="log_type"
               label="事件类型"
               rules={[{ required: true, message: "请选择事件类型" }]}
             >
               <Select placeholder="请选择事件类型">
-                {eventTypes.map((type) => (
+                {["限电", "设备故障", "系统异常", "人员事故", "质量问题", "其他"].map((type) => (
                   <Option key={type} value={type}>
                     {type}
                   </Option>
@@ -339,17 +446,25 @@ const App: React.FC = () => {
               </Select>
             </Form.Item>
             <Form.Item
-              name="affectedMachines"
+              name="impact_count"
               label="影响台数"
               rules={[{ required: true, message: "请输入影响台数" }]}
             >
               <Input type="number" placeholder="请输入影响台数" />
             </Form.Item>
           </div>
-          <Form.Item name="cause" label="事件原因" rules={[{ required: true, message: "请输入事件原因" }]}>
+          <Form.Item
+            name="event_reason"
+            label="事件原因"
+            rules={[{ required: true, message: "请输入事件原因" }]}
+          >
             <TextArea rows={4} placeholder="请输入事件原因" />
           </Form.Item>
-          <Form.Item name="solution" label="解决措施" rules={[{ required: true, message: "请输入解决措施" }]}>
+          <Form.Item
+            name="resolution_measures"
+            label="解决措施"
+            rules={[{ required: true, message: "请输入解决措施" }]}
+          >
             <TextArea rows={4} placeholder="请输入解决措施" />
           </Form.Item>
         </Form>
@@ -357,4 +472,5 @@ const App: React.FC = () => {
     </div>
   );
 };
+
 export default App;

@@ -5,8 +5,6 @@ import useAuthRedirect from "@/hooks/useAuthRedirect.ts";
 import { useSelector, useSettingsStore } from "@/stores";
 
 import { useVenueList, useVenueNew, useVenueUpdate } from "@/pages/venue/hook/hook.ts";
-import { useMiningPoolNew, useMiningPoolUpdate } from "@/pages/mining/hook.ts";
-import { MiningPoolUpdate } from "@/pages/mining/type.tsx";
 import { VenueInfoParam } from "@/pages/venue/type.tsx";
 
 const { TextArea } = Input;
