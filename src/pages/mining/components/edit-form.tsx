@@ -1,6 +1,8 @@
-import { useEffect } from "react";
+import { JSXElementConstructor, ReactElement, ReactNode, ReactPortal, useEffect } from "react";
 import { Form, type FormInstance, Input, Select } from "antd";
 import type { MiningPool } from "../type.tsx";
+import { useSelector, useSettingsStore } from "@/stores";
+import { useVenueList } from "@/pages/venue/hook/hook.ts";
 
 const { Option } = Select;
 
@@ -10,7 +12,7 @@ interface EditFormProps {
 }
 
 const formFields = [
-  { label: "场地", name: "venue_name", component: Input },
+  { label: "场地", name: "venue_id", component: Select },
   { label: "子账户", name: "pool_name", component: Input },
   {
     label: "场地主体",
@@ -48,6 +50,9 @@ const formFields = [
 export default function EditForm({ initialValues, onFormInstanceReady }: EditFormProps) {
   const [form] = Form.useForm();
 
+  const { poolType } = useSettingsStore(useSelector(["poolType"]));
+  const { data: venueList } = useVenueList(poolType);
+
   useEffect(() => {
     onFormInstanceReady(form);
   }, [form, onFormInstanceReady]);
@@ -71,7 +76,18 @@ export default function EditForm({ initialValues, onFormInstanceReady }: EditFor
           name={field.name}
           rules={[{ required: true, message: `请输入${field.label}` }]}
         >
-          {field.component === Select ? (
+          {field.component === Select && field.name === "venue_id" ? (
+            // 使用 venueList 渲染场地选择
+            <Select placeholder={`请选择 ${field.label}`}>
+              {venueList?.data?.map((venue: { id: number; venue_name: string }) => (
+                <Option key={venue.id} value={venue.id}>
+                  {" "}
+                  {/* 使用 venue.id 和 venue.venue_name */}
+                  {venue.venue_name}
+                </Option>
+              ))}
+            </Select>
+          ) : field.component === Select ? (
             <Select placeholder={`请选择 ${field.label}`}>
               {field.options?.map((option) => (
                 <Option key={option.value} value={option.value}>
@@ -88,7 +104,7 @@ export default function EditForm({ initialValues, onFormInstanceReady }: EditFor
                 field.name === "basic_hosting_fee"
                   ? "number"
                   : "text"
-              } // 根据条件设置为数字输入框
+              }
             />
           )}
         </Form.Item>

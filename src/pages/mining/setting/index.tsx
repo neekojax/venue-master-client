@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { JSXElementConstructor, ReactElement, ReactNode, ReactPortal, useEffect, useState } from "react";
 import { FaAdn, FaFish } from "react-icons/fa6";
 import { DeleteOutlined, ExportOutlined, FormOutlined, SearchOutlined } from "@ant-design/icons";
 import {
@@ -30,6 +30,7 @@ import {
   useMiningPoolUpdate,
 } from "@/pages/mining/hook.ts";
 import { MiningPool, MiningPoolUpdate } from "@/pages/mining/type.tsx";
+import { useVenueList } from "@/pages/venue/hook/hook.ts";
 
 const emptyData = {
   name: "",
@@ -71,10 +72,11 @@ export default function MiningSettingPage() {
   const [currentRow, setCurrentRow] = useState<MiningPoolUpdate | null>(null);
   const [editableKey, setEditableRowKey] = useState<number>(0);
 
+  const { data: venueList } = useVenueList(poolType);
+
   const [form] = Form.useForm();
 
   const showModal = (record: any) => {
-    console.log("当前行 record:", record);
     setCurrentRow(record);
     setEditableRowKey(record.key);
     // form.setFieldsValue(record);
@@ -84,6 +86,7 @@ export default function MiningSettingPage() {
   type FieldType = {
     key?: number;
     id?: number;
+    venue_id: number;
     pool_name?: string;
     pool_type?: string;
     status?: number;
@@ -113,6 +116,7 @@ export default function MiningSettingPage() {
   const handleCancel = () => {
     setIsModalOpen(false);
   };
+  // @ts-ignore
   const StatusColumn = ({ status }) => {
     let statusText = "";
     let statusStyle = {};
@@ -135,6 +139,7 @@ export default function MiningSettingPage() {
           item: {
             id: any;
             venue_name: any;
+            venue_id: any;
             pool_name: any;
             country: any;
             status: any;
@@ -148,6 +153,8 @@ export default function MiningSettingPage() {
         ) => ({
           serialNumber: index + 1,
           key: item.id, // 使用 ID 作为唯一 key
+          // @ts-ignore
+          venue_id: item.venue_info.id,
           // @ts-ignore
           venue_name: item.venue_info.venue_name,
           pool_name: item.pool_name,
@@ -381,14 +388,14 @@ export default function MiningSettingPage() {
     });
   };
 
-  const handleSave = (rowKey: number, data: { [x: string]: string }): Promise<void> => {
-    console.log("rowKey", rowKey);
+  const handleSave = (rowKey: number, data: { [x: string]: any }): Promise<void> => {
     const miningPoolUpdate: MiningPoolUpdate = {
       id: rowKey as number, // 假设 rowKey 是 RecordID
-      venue_name: data.venue_name,
+      venue_id: data.venue_id,
       pool_name: data.pool_name,
-      pool_type: data.pool_type,
+      pool_type: poolType,
       country: data.country,
+      status: data.status,
       pool_category: data.pool_category,
       theoretical_hashrate: String(data.theoretical_hashrate),
       energy_ratio: String(data.energy_ratio),
@@ -527,11 +534,29 @@ export default function MiningSettingPage() {
             <Input />
           </Form.Item> */}
           <Form.Item<FieldType>
-            label="矿池名称"
+            label="子账户名称"
             name="pool_name"
             rules={[{ required: true, message: "Please input your pool pool_name!" }]}
           >
             <Input />
+          </Form.Item>
+
+          <Form.Item<FieldType>
+            label="场地"
+            name="venue_id" // 用于存储选中的场地 ID
+            rules={[{ required: true, message: "请选择场地!" }]} // 添加验证规则
+          >
+            <Select
+              placeholder="请选择场地"
+              allowClear
+              style={{ width: "100%" }} // 设置宽度为100%
+            >
+              {venueList?.data?.map((venue: { id: number; venue_name: string }) => (
+                <Option key={venue.id} value={venue.id}>
+                  {venue.venue_name} {/* 使用场地名称作为展示内容 */}
+                </Option>
+              ))}
+            </Select>
           </Form.Item>
 
           {/* <Form.Item<FieldType>

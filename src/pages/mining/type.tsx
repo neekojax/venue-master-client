@@ -1,6 +1,6 @@
 export type MiningPool = {
   id: number;
-  venue_name: string;
+  venue_id: number;
   pool_name: string;
   pool_type: string;
   country: string;
@@ -14,10 +14,11 @@ export type MiningPool = {
 
 export type MiningPoolUpdate = {
   id: number;
-  venue_name: string;
+  venue_id: number;
   pool_name: string;
   pool_type: string;
   country: string;
+  status: number;
   pool_category: string;
   theoretical_hashrate: string;
   energy_ratio: string;
