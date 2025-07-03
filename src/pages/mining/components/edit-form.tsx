@@ -1,7 +1,8 @@
-import { JSXElementConstructor, ReactElement, ReactNode, ReactPortal, useEffect } from "react";
+import { useEffect } from "react";
 import { Form, type FormInstance, Input, Select } from "antd";
 import type { MiningPool } from "../type.tsx";
 import { useSelector, useSettingsStore } from "@/stores";
+
 import { useVenueList } from "@/pages/venue/hook/hook.ts";
 
 const { Option } = Select;

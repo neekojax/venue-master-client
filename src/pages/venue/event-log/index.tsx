@@ -268,12 +268,12 @@ const App: React.FC = () => {
     <div className="bg-gray-50 p-6">
       <div className="mx-auto bg-white rounded-lg shadow-sm">
         <div className="p-6 border-b border-gray-200">
-          <div className="grid grid-cols-[auto_1fr] gap-6 mb-6">
+          <div className="grid grid-cols-[auto_1fr] gap-6 mb-6 filter-form">
             <Button
               type="primary"
               icon={<PlusOutlined />}
               onClick={handleAdd}
-              size="large"
+              size="middle"
               className="!rounded-button"
             >
               新增日志
@@ -282,13 +282,13 @@ const App: React.FC = () => {
               <Input
                 placeholder="搜索日志内容"
                 prefix={<SearchOutlined />}
-                size="large"
+                size="middle"
                 className="max-w-xs !rounded-lg"
                 value={searchText}
                 onChange={(e) => setSearchText(e.target.value)} // 更新搜索文本
               />
               <RangePicker
-                size="large"
+                size="middle"
                 className="!rounded-lg"
                 placeholder={["开始日期", "结束日期"]}
                 value={dateRange}
@@ -296,11 +296,12 @@ const App: React.FC = () => {
               />
               <Select
                 mode="multiple"
+                size="medium"
                 placeholder="选择场地"
                 value={selectedLocation}
                 onChange={setSelectedLocation}
                 style={{ width: 200 }}
-                className="!rounded-lg"
+                // className="!rounded-lg"
               >
                 {venueList?.data?.map((venue) => (
                   <Option key={venue.id} value={venue.venue_name}>
@@ -314,7 +315,8 @@ const App: React.FC = () => {
                 value={selectedEventType}
                 onChange={setSelectedEventType}
                 style={{ width: 200 }}
-                className="!rounded-lg"
+                size="meddle"
+                // className="!rounded-lg"
               >
                 {["限电", "设备故障", "系统异常", "高温", "雷电", "其他"].map((type) => (
                   <Option key={type} value={type}>
@@ -338,6 +340,7 @@ const App: React.FC = () => {
               )}
               <Button
                 icon={<DownloadOutlined />}
+                size="middle"
                 onClick={() => {
                   const headers = [
                     "场地",

@@ -197,21 +197,29 @@
 }
 /*ant-picker 日期选择器*/
 .ant-picker .ant-picker-input{
-    background-color: #F9F9F9;
-    border-color: #F9F9F9;
+    background-color: #fff;
+    border-color: #d9d9d9;
+    padding: 2px;
 }
 .ant-picker .ant-picker-input > input{
     font-size: 12px;
-    
-    background-color: #F9F9F9;
-    border-color: #F9F9F9;
+    background-color: #fff;
+    /* background-color: #F9F9F9; */
+    border-color: #d9d9d9;
     color: #4B5675;
     transition: color .2s ease;
+    
 }
-
+.ant-picker .ant-picker-input > input:hover{
+    border-color: #1E90FF;
+}
+.ant-select-multiple.ant-select-lg .ant-select-selection-overflow{
+    background-color: #fff;
+}
 .ant-select-outlined:not(.ant-select-customize-input) .ant-select-selector,.ant-select,.custom-select .ant-select-selector{
-    background-color: #F1F1F4 !important;
-    border-color: #F9F9F9 !important;
+    /* background-color: #F1F1F4 !important; */
+    background-color: #fff;
+    border-color: #d9d9d9 !important;
     color: #4B5675 !important;
     transition: color .2s ease;
 }
@@ -295,4 +303,28 @@
 }
 .editModal .ant-form-item{
     margin-bottom: 7px;
+}
+.ant-btn-variant-solid{
+    font-size: 12px;
+    background-color: #1b84ff;
+}
+.ant-btn-variant-solid :hover{
+    background-color: #3d95fb;
+}
+.ant-btn-variant-solid:not(:disabled):not(.ant-btn-disabled):hover{
+    background-color: #3d95fb;
+}
+.filter-form{
+    font-size: 12px;
+}
+.filter-form .ant-input,.ant-input-affix-wrapper >input.ant-input{
+    font-size: 12px;
+}
+.filter-form .ant-input :focus,.ant-input-affix-wrapper >input.ant-input:focus{
+    border-color: #1E90FF;
+}
+.filter-form .ant-select .ant-select-selector{
+    font-size: 12px;
+    background-color: #fff;
+    border: 1px solid #d9d9d9;
 }

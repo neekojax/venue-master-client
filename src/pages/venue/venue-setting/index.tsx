@@ -23,7 +23,7 @@ const VenueManagement: React.FC = () => {
   useAuthRedirect();
   const { poolType } = useSettingsStore(useSelector(["poolType"]));
 
-  const { data, isLoading } = useVenueList(poolType);
+  const { data } = useVenueList(poolType);
 
   const [venues, setVenues] = useState<Venue[]>([]);
   const [filteredVenues, setFilteredVenues] = useState<Venue[]>([]);
@@ -222,10 +222,11 @@ const VenueManagement: React.FC = () => {
 
   return (
     <div className="p-6 bg-white rounded-lg shadow-sm">
-      <div className="flex justify-between items-center mb-6">
+      <div className="flex justify-between items-center mb-6 filter-form">
         <div className="flex space-x-4">
           <Button
             type="primary"
+            size="middle"
             icon={<PlusOutlined />}
             onClick={handleAdd}
             className="!rounded-button whitespace-nowrap"
@@ -233,9 +234,11 @@ const VenueManagement: React.FC = () => {
             新增场地
           </Button>
           <Button
+            size="middle"
             danger
             icon={<DeleteOutlined />}
             onClick={handleBatchDelete}
+            style={{ fontSize: 12 }}
             className="!rounded-button whitespace-nowrap"
           >
             批量删除
@@ -243,12 +246,19 @@ const VenueManagement: React.FC = () => {
         </div>
         <div className="flex space-x-4">
           <Input
+            size="middle"
             placeholder="搜索场地名称、代码或地址"
             prefix={<SearchOutlined />}
             onChange={(e) => handleSearch(e.target.value)}
             className="w-64"
           />
-          <Select placeholder="按国家筛选" allowClear onChange={handleCountryFilter} className="w-40">
+          <Select
+            size="middle"
+            placeholder="按国家筛选"
+            allowClear
+            onChange={handleCountryFilter}
+            className="w-40"
+          >
             {countries?.map((country) => (
               <Option key={country} value={country}>
                 {country}
