@@ -5,7 +5,7 @@ import { ROUTE_PATHS } from "@/constants/common";
 export const custodyMenuRoute: RouteObject = {
   path: ROUTE_PATHS.custodyMenu,
   lazy: async () => ({
-    Component: (await import("@/pages/nest-menu")).default,
+    Component: (await import("@/pages/custody-statistics")).default,
   }),
   HydrateFallback: ProgressBar,
   handle: {

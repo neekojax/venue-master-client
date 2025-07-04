@@ -3,7 +3,6 @@ import { ProgressBar } from "@/components/progress-bar";
 import { baseRoute } from "./modules/base";
 import { dashboardRoute } from "./modules/dashboard";
 import { landingRoute } from "./modules/landing";
-import { nestMenuRoute } from "./modules/nest-menu";
 import { ROUTE_PATHS } from "@/constants/common";
 import { custodyMenuRoute } from "@/router/modules/custody-statistics.tsx";
 import { electricMenuRoute } from "@/router/modules/electric-data.tsx";
@@ -12,6 +11,7 @@ import { miningRoute } from "@/router/modules/mining.tsx";
 import { poolHashHistoryRoute } from "@/router/modules/pool-hash-history.tsx";
 import { poolProfitHistoryRoute } from "@/router/modules/pool-profit-history.tsx";
 import { profitDetailRoute } from "@/router/modules/profit-detail.tsx";
+import { reportRoute } from "@/router/modules/report.tsx";
 import { venueRoute } from "@/router/modules/venue.tsx";
 
 const routes: RouteObject[] = [
@@ -38,6 +38,7 @@ const routes: RouteObject[] = [
       landingRoute,
       dashboardRoute,
       venueRoute,
+      reportRoute,
       baseRoute,
       hashDetailRoute,
       profitDetailRoute,
@@ -45,7 +46,6 @@ const routes: RouteObject[] = [
       poolHashHistoryRoute,
       custodyMenuRoute,
       electricMenuRoute,
-      nestMenuRoute,
     ],
   },
   {

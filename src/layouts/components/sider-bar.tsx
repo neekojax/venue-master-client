@@ -9,6 +9,7 @@ import { useTheme } from "@/components/theme-provider";
 import logo from "../../../public/logo.svg";
 import { ROUTE_PATHS } from "@/constants/common";
 import { useSelector, useSettingsStore } from "@/stores";
+import { FaRegChartBar } from "react-icons/fa";
 
 // 递归函数，找到匹配的菜单项
 const findSelectedKeys = (items: MenuProps["items"], pathname: string, path: string[] = []) => {
@@ -76,6 +77,17 @@ const items: MenuProps["items"] = [
       {
         key: ROUTE_PATHS.venueSetting,
         label: <Link to={ROUTE_PATHS.venueSetting}>场地设置</Link>,
+      },
+    ],
+  },
+  {
+    icon: <FaRegChartBar />,
+    label: "报表",
+    key: ROUTE_PATHS.report,
+    children: [
+      {
+        key: ROUTE_PATHS.dailyReport,
+        label: <Link to={ROUTE_PATHS.dailyReport}>日报报表</Link>,
       },
     ],
   },
