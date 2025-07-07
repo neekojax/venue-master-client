@@ -272,8 +272,13 @@ const VenueManagement: React.FC = () => {
         columns={columns}
         dataSource={filteredVenues}
         rowKey="id"
-        pagination={{ pageSize: 10 }}
         scroll={{ x: "max-content" }}
+        pagination={{
+          pageSize: 20,
+          showSizeChanger: true,
+          showQuickJumper: true,
+          showTotal: (total) => `共 ${total} 条`,
+        }}
       />
 
       <Modal

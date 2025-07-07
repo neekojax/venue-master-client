@@ -56,19 +56,19 @@ const App: React.FC = () => {
       dataIndex: "siteName",
       key: "siteName",
       fixed: "left",
-      width: 140,
+      width: 200,
     },
     {
-      title: "24小时产出（BTC）",
+      title: "24小时产出(BTC)",
       dataIndex: "btcOutput24h",
       key: "btcOutput24h",
-      width: 150,
+      width: 160,
       align: "right",
       render: (value) => value.toFixed(4),
       sorter: (a, b) => a.btcOutput24h - b.btcOutput24h,
     },
     {
-      title: "理论算力（E）",
+      title: "理论算力(E)",
       dataIndex: "theoreticalPower",
       key: "theoreticalPower",
       width: 120,
@@ -77,7 +77,7 @@ const App: React.FC = () => {
       sorter: (a, b) => a.theoreticalPower - b.theoreticalPower,
     },
     {
-      title: "24小时算力（E）",
+      title: "24小时算力(E)",
       dataIndex: "power24h",
       key: "power24h",
       width: 140,
@@ -97,7 +97,7 @@ const App: React.FC = () => {
       title: "T-2日有效率",
       dataIndex: "effectiveRateT2",
       key: "effectiveRateT2",
-      width: 120,
+      width: 130,
       render: (value) => `${value.toFixed(2)}%`,
       sorter: (a, b) => a.effectiveRateT2 - b.effectiveRateT2,
     },
@@ -105,7 +105,7 @@ const App: React.FC = () => {
       title: "T-3日有效率",
       dataIndex: "effectiveRateT3",
       key: "effectiveRateT3",
-      width: 120,
+      width: 130,
       render: (value) => `${value.toFixed(2)}%`,
       sorter: (a, b) => a.effectiveRateT3 - b.effectiveRateT3,
     },
@@ -122,7 +122,7 @@ const App: React.FC = () => {
       title: "总故障台数",
       dataIndex: "totalFailures",
       key: "totalFailures",
-      width: 110,
+      width: 120,
       align: "right",
       render: (value) => value.toLocaleString(),
       sorter: (a, b) => a.totalFailures - b.totalFailures,
@@ -131,7 +131,7 @@ const App: React.FC = () => {
       title: "24小时故障数",
       dataIndex: "failures24h",
       key: "failures24h",
-      width: 120,
+      width: 130,
       align: "right",
       render: (value) => value.toLocaleString(),
       sorter: (a, b) => a.failures24h - b.failures24h,
@@ -155,7 +155,7 @@ const App: React.FC = () => {
       title: "T-2日故障率",
       dataIndex: "failureRateT2",
       key: "failureRateT2",
-      width: 120,
+      width: 130,
       render: (value) => ({
         children: `${(value * 100).toFixed(2)}%`,
         props: {
@@ -170,7 +170,7 @@ const App: React.FC = () => {
       title: "T-3日故障率",
       dataIndex: "failureRateT3",
       key: "failureRateT3",
-      width: 120,
+      width: 130,
       render: (value) => ({
         children: `${(value * 100).toFixed(2)}%`,
         props: {
@@ -182,7 +182,7 @@ const App: React.FC = () => {
       sorter: (a, b) => a.failureRateT3 - b.failureRateT3,
     },
     {
-      title: "影响算力（E）",
+      title: "影响算力(E)",
       dataIndex: "powerImpact",
       key: "powerImpact",
       width: 130,
@@ -199,7 +199,7 @@ const App: React.FC = () => {
       sorter: (a, b) => a.impactRatio - b.impactRatio,
     },
     {
-      title: "影响产出（BTC）",
+      title: "影响产出(BTC)",
       dataIndex: "outputImpact",
       key: "outputImpact",
       width: 140,
@@ -211,7 +211,7 @@ const App: React.FC = () => {
       title: "事件描述",
       dataIndex: "events",
       key: "events",
-      width: 300,
+      width: 400,
       render: (text) => (
         <Tooltip title={text}>
           <div className="line-clamp-2">{text}</div>
