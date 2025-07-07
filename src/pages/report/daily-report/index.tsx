@@ -263,10 +263,9 @@ const App: React.FC = () => {
 
           // 动态生成场地选项
           const options = formattedData.map((site) => ({
-            value: site.siteId,
+            value: site.siteName,
             label: site.siteName,
           }));
-
           // 过滤掉重复的场地选项
           const uniqueOptions = Array.from(new Map(options.map((item) => [item.value, item])).values());
           setSiteOptions(uniqueOptions);
@@ -355,7 +354,7 @@ const App: React.FC = () => {
 
     const link = document.createElement("a");
     link.href = url;
-    link.setAttribute("download", `日报报表_${selectedDate}.csv`);
+    link.setAttribute("download", `运营日报_${selectedDate}.csv`);
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
@@ -367,7 +366,7 @@ const App: React.FC = () => {
         <div className="mb-6">
           <div className="flex items-center justify-between mb-6">
             <h1 className="text-2xl font-bold text-gray-800">
-              日报报表
+              运营日报
               <span className="text-sm text-gray-500 ml-2"> ({selectedDate || formattedDate})</span>
             </h1>
             <DatePicker
@@ -430,7 +429,7 @@ const App: React.FC = () => {
               <div className="text-sm font-medium text-gray-500">总影响产出（BTC）</div>
               <div className="mt-2 flex items-baseline">
                 <span className="text-3xl font-bold text-purple-600">
-                  {(statistics.totalImpactOutput || 0).toFixed(2)}
+                  {(statistics.totalImpactOutput || 0).toFixed(4)}
                 </span>
               </div>
             </div>

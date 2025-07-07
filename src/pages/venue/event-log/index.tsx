@@ -198,8 +198,8 @@ const App: React.FC = () => {
     form.setFieldsValue({
       ...record,
       log_date: dayjs(record.log_date),
-      start_time: dayjs(`1970-01-01T${record.start_time}:00`),
-      end_time: dayjs(`1970-01-01T${record.end_time}:00`),
+      start_time: dayjs(record.start_time),
+      end_time: dayjs(record.end_time),
     });
     setIsModalVisible(true);
   };
@@ -221,8 +221,8 @@ const App: React.FC = () => {
         id: values.id,
         venue_id: values.venue_id,
         log_date: dayjs(values.log_date).format("YYYY-MM-DD"),
-        start_time: dayjs(values.start_time).format("HH:mm"),
-        end_time: dayjs(values.end_time).format("HH:mm"),
+        start_time: dayjs(values.start_time).format("YYYY-MM-DD HH:mm"),
+        end_time: dayjs(values.end_time).format("YYYY-MM-DD HH:mm"),
         log_type: values.log_type,
         impact_count: parseInt(values.impact_count, 10),
         event_reason: values.event_reason,
@@ -426,14 +426,14 @@ const App: React.FC = () => {
               label="开始时间"
               rules={[{ required: true, message: "请选择开始时间" }]}
             >
-              <DatePicker.TimePicker className="w-full" />
+              <DatePicker showTime className="w-full" />
             </Form.Item>
             <Form.Item
               name="end_time"
               label="结束时间"
               rules={[{ required: true, message: "请选择结束时间" }]}
             >
-              <DatePicker.TimePicker className="w-full" />
+              <DatePicker showTime className="w-full" />
             </Form.Item>
             <Form.Item
               name="log_type"

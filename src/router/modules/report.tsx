@@ -21,7 +21,7 @@ export const reportRoute: RouteObject = {
       HydrateFallback: ProgressBar,
       handle: {
         title: "日报",
-        crumb: () => <Link to={ROUTE_PATHS.dailyReport}>日报报表</Link>,
+        crumb: () => <Link to={ROUTE_PATHS.dailyReport}>运营日报</Link>,
       },
     },
   ],

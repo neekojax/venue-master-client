@@ -87,7 +87,7 @@ const items: MenuProps["items"] = [
     children: [
       {
         key: ROUTE_PATHS.dailyReport,
-        label: <Link to={ROUTE_PATHS.dailyReport}>日报报表</Link>,
+        label: <Link to={ROUTE_PATHS.dailyReport}>运营日报</Link>,
       },
     ],
   },
