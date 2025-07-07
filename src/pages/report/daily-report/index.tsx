@@ -457,12 +457,20 @@ const App: React.FC = () => {
           <div className="mb-6 flex items-center justify-between">
             <Select
               mode="multiple"
+              size={"middle"}
               placeholder="选择场地"
-              className="w-80"
+              // className="w-80"
+              style={{ minWidth: "300px" }}
               options={siteOptions}
               onChange={setSelectedSites}
+              maxTagCount={3}
             />
-            <Button type="primary" icon={<DownloadOutlined />} onClick={exportToCSV} className="!rounded-button">
+            <Button
+              type="primary"
+              icon={<DownloadOutlined />}
+              onClick={exportToCSV}
+              className="!rounded-button"
+            >
               导出报表
             </Button>
           </div>
