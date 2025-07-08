@@ -325,7 +325,7 @@ export default function VenueRunningKpi() {
         rowSelection={rowSelection}
         columns={columns}
         dataSource={filteredData}
-        scroll={{ x: 1800 }}
+        scroll={{ x: 1800, y: 600 }} // ✅ 固定高度，表头固定
         bordered
         className="custom-table"
         // summary={(pageData) => {

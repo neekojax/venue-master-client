@@ -477,7 +477,7 @@ const App: React.FC = () => {
           <Table
             columns={columns}
             dataSource={filteredData}
-            scroll={{ x: 1500 }}
+            scroll={{ x: 1500, y: 300 }}
             pagination={{
               pageSize: 20,
               showSizeChanger: true,
