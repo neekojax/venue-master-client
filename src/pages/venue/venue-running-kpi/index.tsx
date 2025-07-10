@@ -325,41 +325,36 @@ export default function VenueRunningKpi() {
         rowSelection={rowSelection}
         columns={columns}
         dataSource={filteredData}
-        scroll={{ x: 1800, y: 600 }} // ✅ 固定高度，表头固定
+        scroll={{ x: 1800, y: 600 }}
+        sticky
         bordered
         className="custom-table"
-        // summary={(pageData) => {
-        //   const totalTheoretical = pageData.reduce((acc, row) => acc + row.theoreticalPower, 0);
-        //   const avgPower24h = pageData.reduce((acc, row) => acc + row.power24h, 0) / pageData.length;
-        //   const avgAchievement =
-        //     pageData.reduce((acc, row) => acc + row.currentAchievement, 0) / pageData.length;
-        //   const avgFailure = pageData.reduce((acc, row) => acc + row.yesterdayFailure, 0) / pageData.length;
-        //   return (
-        //     <Table.Summary fixed>
-        //       <Table.Summary.Row className="bg-gray-50 font-medium">
-        //         <Table.Summary.Cell index={0} colSpan={2}>
-        //           总计/平均
-        //         </Table.Summary.Cell>
-        //         <Table.Summary.Cell index={2}>{totalTheoretical}</Table.Summary.Cell>
-        //         <Table.Summary.Cell index={3}>{avgPower24h.toFixed(2)}</Table.Summary.Cell>
-        //         <Table.Summary.Cell index={4}>{avgAchievement.toFixed(2)}%</Table.Summary.Cell>
-        //         <Table.Summary.Cell index={5} colSpan={4}>
-        //           -
-        //         </Table.Summary.Cell>
-        //         <Table.Summary.Cell index={9}>{avgFailure.toFixed(2)}%</Table.Summary.Cell>
-        //         <Table.Summary.Cell index={10} colSpan={5}>
-        //           -
-        //         </Table.Summary.Cell>
-        //       </Table.Summary.Row>
-        //     </Table.Summary>
-        //   );
-        // }}
         pagination={{
-          position: ["bottomCenter"], // 将分页器位置设置为底部居中
-          showSizeChanger: true, // 允许用户改变每页显示的条目数
-          pageSizeOptions: ["20", "30", "50"], // 每页显示条目的选项
-          defaultPageSize: 20, // 默认每页显示的条目数
+          position: ["bottomCenter"],
+          showSizeChanger: true,
+          pageSizeOptions: ["20", "30", "50"],
+          defaultPageSize: 20,
+          showTotal: (total) => `共 ${total} 条`,
+          total: filteredData.length,
+          onChange: () => {
+            const tableBody = document.querySelector(".ant-table-body");
+            if (tableBody) {
+              tableBody.scrollTop = 0;
+            }
+          },
         }}
+        onRow={() => ({
+          onMouseEnter: () => {
+            const tableBody = document.querySelector(".ant-table-body");
+            if (tableBody) {
+              const { scrollTop, scrollHeight, clientHeight } = tableBody;
+              if (scrollHeight - scrollTop - clientHeight < 50) {
+                // 触发加载更多的逻辑
+                console.log("触发加载更多");
+              }
+            }
+          },
+        })}
       />
     </div>
   );

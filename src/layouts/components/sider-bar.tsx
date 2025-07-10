@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { BiLoaderCircle } from "react-icons/bi";
+import { FaRegChartBar } from "react-icons/fa";
 import { MdMonitorHeart } from "react-icons/md";
 import { SiNginxproxymanager } from "react-icons/si";
 import { Link, useLocation, useNavigate } from "react-router-dom";
@@ -9,7 +10,6 @@ import { useTheme } from "@/components/theme-provider";
 import logo from "../../../public/logo.svg";
 import { ROUTE_PATHS } from "@/constants/common";
 import { useSelector, useSettingsStore } from "@/stores";
-import { FaRegChartBar } from "react-icons/fa";
 
 // 递归函数，找到匹配的菜单项
 const findSelectedKeys = (items: MenuProps["items"], pathname: string, path: string[] = []) => {

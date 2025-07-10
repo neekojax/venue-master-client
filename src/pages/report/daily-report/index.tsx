@@ -1,5 +1,5 @@
 // 代码已包含 CSS：使用 TailwindCSS , 安装 TailwindCSS 后方可看到布局样式效果
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { DownloadOutlined } from "@ant-design/icons";
 import { Button, DatePicker, Select, Table, Tooltip } from "antd";
 import type { ColumnsType } from "antd/es/table";
@@ -28,6 +28,20 @@ interface DataType {
   events: string;
 }
 const App: React.FC = () => {
+  const tableRef = useRef<HTMLDivElement>(null);
+  const [isTableFixed, setIsTableFixed] = useState(false);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      if (tableRef.current) {
+        const tableTop = tableRef.current.getBoundingClientRect().top;
+        setIsTableFixed(tableTop <= 0);
+      }
+    };
+
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
   const { poolType } = useSettingsStore(useSelector(["poolType"]));
 
   // 计算昨天的日期，格式为 'YYYY-MM-DD'
@@ -37,6 +51,9 @@ const App: React.FC = () => {
 
   const [selectedDate, setSelectedDate] = useState<string>(formattedDate);
   const [selectedSites, setSelectedSites] = useState<string[]>([]);
+  const handleSitesChange = (value: string[]) => {
+    setSelectedSites(value);
+  };
 
   const [statistics, setStatistics] = useState<any>({}); // 初始化为对象
   const [data, setData] = useState<DataType[]>([]); // 数据状态
@@ -453,7 +470,10 @@ const App: React.FC = () => {
             </div>
           </div>
         </div>
-        <div className="mb-6 rounded-lg bg-white p-6 shadow-sm">
+        <div
+          ref={tableRef}
+          className={`mb-6 rounded-lg bg-white p-6 shadow-sm transition-all duration-300 ${isTableFixed ? "sticky top-0 z-10" : ""}`}
+        >
           <div className="mb-6 flex items-center justify-between">
             <Select
               mode="multiple"
@@ -462,7 +482,7 @@ const App: React.FC = () => {
               // className="w-80"
               style={{ minWidth: "300px" }}
               options={siteOptions}
-              onChange={setSelectedSites}
+              onChange={handleSitesChange}
               maxTagCount={3}
             />
             <Button
@@ -477,7 +497,8 @@ const App: React.FC = () => {
           <Table
             columns={columns}
             dataSource={filteredData}
-            scroll={{ x: 1500, y: 300 }}
+            scroll={{ x: 1500, y: "calc(100vh - 300px)" }}
+            sticky={true}
             pagination={{
               pageSize: 20,
               showSizeChanger: true,
@@ -488,7 +509,16 @@ const App: React.FC = () => {
           />
         </div>
       </div>
-      <style jsx global>{`
+      <style>{`
+        .ant-table-wrapper {
+          height: 100%;
+          overflow: auto;
+        }
+
+        .ant-table {
+          height: 100%;
+        }
+
         .custom-table .ant-table-thead > tr > th {
           background-color: #f5f5f5;
           font-weight: 600;
