@@ -37,6 +37,8 @@ const VenueManagement: React.FC = () => {
   const newMutation = useVenueNew();
   const updateMutation = useVenueUpdate();
 
+  const [pageSize, setPageSize] = useState(20); // 新增状态管理页大小
+
   // 当获取到数据时更新 venues
   useEffect(() => {
     if (data) {
@@ -274,8 +276,11 @@ const VenueManagement: React.FC = () => {
         rowKey="id"
         scroll={{ x: "max-content" }}
         pagination={{
-          pageSize: 20,
+          pageSize: pageSize, // 使用动态 pageSize
           showSizeChanger: true,
+          onShowSizeChange: (current, size) => {
+            setPageSize(size); // 更新 pageSize 状态
+          },
           showQuickJumper: true,
           showTotal: (total) => `共 ${total} 条`,
         }}

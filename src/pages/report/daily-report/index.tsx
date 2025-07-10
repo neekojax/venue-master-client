@@ -60,6 +60,9 @@ const App: React.FC = () => {
   const [filteredData, setFilteredData] = useState<DataType[]>([]); // 筛选后的数据
   const [siteOptions, setSiteOptions] = useState<{ value: string; label: string }[]>([]);
 
+
+  const [pageSize, setPageSize] = useState(20); // 新增状态管理页大小
+
   const columns: ColumnsType<DataType> = [
     {
       title: "场地编号",
@@ -500,8 +503,11 @@ const App: React.FC = () => {
             scroll={{ x: 1500, y: "calc(100vh - 300px)" }}
             sticky={true}
             pagination={{
-              pageSize: 20,
+              pageSize: pageSize, // 使用动态 pageSize
               showSizeChanger: true,
+              onShowSizeChange: (current, size) => {
+                setPageSize(size); // 更新 pageSize 状态
+              },
               showQuickJumper: true,
               showTotal: (total) => `共 ${total} 条`,
             }}
