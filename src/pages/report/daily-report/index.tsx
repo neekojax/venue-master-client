@@ -64,19 +64,19 @@ const App: React.FC = () => {
   const [pageSize, setPageSize] = useState(20); // 新增状态管理页大小
 
   const columns: ColumnsType<DataType> = [
-    {
-      title: "场地编号",
-      dataIndex: "siteId",
-      key: "siteId",
-      fixed: "left",
-      width: 100,
-    },
+    // {
+    //   title: "场地编号",
+    //   dataIndex: "siteId",
+    //   key: "siteId",
+    //   fixed: "left",
+    //   width: 100,
+    // },
     {
       title: "场地名",
       dataIndex: "siteName",
       key: "siteName",
       fixed: "left",
-      width: 200,
+      width: 250,
     },
     {
       title: "24小时产出(BTC)",
@@ -315,9 +315,11 @@ const App: React.FC = () => {
     // 筛选数据
     if (selectedSites.length > 0) {
       const filtered = data.filter((item) => selectedSites.includes(item.siteId));
-      setFilteredData(filtered);
+      // setFilteredData(filtered);
+      setFilteredData(filtered.sort((a, b) => a.siteName.localeCompare(b.siteName))); // 按 siteName 排序
     } else {
-      setFilteredData(data); // 如果没有选择场地，显示所有数据
+      // setFilteredData(data); // 如果没有选择场地，显示所有数据
+      setFilteredData(data.sort((a, b) => a.siteName.localeCompare(b.siteName))); // 按 siteName 排序
     }
   }, [selectedSites, data]);
 

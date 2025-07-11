@@ -276,12 +276,23 @@ export default function VenueRunningKpi() {
     return <Spin tip="加载中..." />;
   }
 
-  const filteredData =
-    runningData?.filter((item: { [s: string]: unknown } | ArrayLike<unknown>) => {
+  const filteredData = runningData
+    ?.filter((item: { [s: string]: unknown } | ArrayLike<unknown>) => {
       return Object.values(item).some((value) =>
         String(value).toLowerCase().includes(searchTerm.toLowerCase()),
       );
-    }) || [];
+    })
+    .sort((a, b) => {
+      const nameA = a.venueName.toLowerCase();
+      const nameB = b.venueName.toLowerCase();
+      if (nameA < nameB) {
+        return -1;
+      }
+      if (nameA > nameB) {
+        return 1;
+      }
+      return 0;
+    });
 
   const onSelectChange = (newSelectedRowKeys: React.Key[]) => {
     setSelectedRowKeys(newSelectedRowKeys);

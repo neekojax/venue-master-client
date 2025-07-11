@@ -431,11 +431,23 @@ export default function MiningSettingPage() {
   };
 
   // 根据搜索词过滤数据
-  const filteredData = tableData.filter((item: { [s: string]: unknown } | ArrayLike<unknown>) => {
-    return Object.values(item).some((value) =>
-      String(value).toLowerCase().includes(searchTerm.toLowerCase()),
-    );
-  });
+  const filteredData = tableData
+    .filter((item: { [s: string]: unknown } | ArrayLike<unknown>) => {
+      return Object.values(item).some((value) =>
+        String(value).toLowerCase().includes(searchTerm.toLowerCase()),
+      );
+    })
+    .sort((a, b) => {
+      const nameA = a.venue_name.toLowerCase(); // 转为小写进行比较
+      const nameB = b.venue_name.toLowerCase();
+      if (nameA < nameB) {
+        return -1; // a 在 b 前
+      }
+      if (nameA > nameB) {
+        return 1; // a 在 b 后
+      }
+      return 0; // 相等
+    });
 
   // @ts-ignore
   return (
