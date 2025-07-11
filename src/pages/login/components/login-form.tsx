@@ -11,40 +11,40 @@ import { LoginField } from "@/pages/login/type.ts";
 export default function LoginForm() {
   const navigate = useNavigate();
 
-  const [captcha, setCaptcha] = useState("");
-  const [captchaId, setCaptchaId] = useState("");
+  // const [captcha, setCaptcha] = useState("");
+  // const [captchaId, setCaptchaId] = useState("");
 
   const { mutate: onLogin, isPending } = useLogin();
 
   useEffect(() => {
     // 假设你有一个函数来获取验证码数据
-    loadCaptcha();
+    // loadCaptcha();
   }, []);
 
-  const loadCaptcha = async () => {
-    try {
-      const data = await fetchCaptcha();
-      // @ts-ignore
-      if (data.success) {
-        setCaptcha(data.data.captcha); // 设置 captcha 状态
-        setCaptchaId(data.data.captchaId); // 设置 captcha Id
-      } else {
-        // 处理失败情况
-        // @ts-ignore
-        console.error("获取验证码失败:", data.message);
-      }
-    } catch (error) {
-      console.error("网络错误:", error);
-    }
-  };
-
-  const refreshCaptcha = () => {
-    loadCaptcha(); // 点击验证码图片时重新加载验证码
-  };
+  // const loadCaptcha = async () => {
+  //   try {
+  //     const data = await fetchCaptcha();
+  //     // @ts-ignore
+  //     if (data.success) {
+  //       setCaptcha(data.data.captcha); // 设置 captcha 状态
+  //       setCaptchaId(data.data.captchaId); // 设置 captcha Id
+  //     } else {
+  //       // 处理失败情况
+  //       // @ts-ignore
+  //       console.error("获取验证码失败:", data.message);
+  //     }
+  //   } catch (error) {
+  //     console.error("网络错误:", error);
+  //   }
+  // };
+  //
+  // const refreshCaptcha = () => {
+  //   loadCaptcha(); // 点击验证码图片时重新加载验证码
+  // };
 
   const onFinish: FormProps<LoginField>["onFinish"] = async (values) => {
     if (isPending) return;
-    values.captchaId = captchaId;
+    // values.captchaId = captchaId;
     values.password = CryptoJS.MD5(values.password || "").toString();
 
     try {
@@ -86,17 +86,17 @@ export default function LoginForm() {
         <Input.Password addonBefore={<LockOutlined />} placeholder="请输入密码" />
       </Form.Item>
 
-      <Form.Item name="captcha" rules={[{ required: true, message: "请输入验证码" }]}>
-        <div style={{ display: "flex", alignItems: "center" }}>
-          <Input addonBefore={<CodeOutlined />} placeholder="请输入验证码" style={{ flex: 1 }} />
-          <img
-            src={captcha}
-            alt="验证码"
-            style={{ marginLeft: "10px", height: "40px", cursor: "pointer" }}
-            onClick={refreshCaptcha}
-          />
-        </div>
-      </Form.Item>
+      {/*<Form.Item name="captcha" rules={[{ required: true, message: "请输入验证码" }]}>*/}
+      {/*  <div style={{ display: "flex", alignItems: "center" }}>*/}
+      {/*    <Input addonBefore={<CodeOutlined />} placeholder="请输入验证码" style={{ flex: 1 }} />*/}
+      {/*    <img*/}
+      {/*      src={captcha}*/}
+      {/*      alt="验证码"*/}
+      {/*      style={{ marginLeft: "10px", height: "40px", cursor: "pointer" }}*/}
+      {/*      onClick={refreshCaptcha}*/}
+      {/*    />*/}
+      {/*  </div>*/}
+      {/*</Form.Item>*/}
 
       <Form.Item>
         <Button type="primary" htmlType="submit" block loading={isPending}>
