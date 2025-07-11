@@ -73,7 +73,7 @@ export default function LoginForm() {
 
   return (
     <Form
-      initialValues={{ username: "admin", password: "12345678" }}
+      initialValues={{ username: "", password: "" }}
       onFinish={onFinish}
       onFinishFailed={onFinishFailed}
       autoComplete="off"
