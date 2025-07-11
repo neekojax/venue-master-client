@@ -101,7 +101,7 @@ export default function VenueRunningKpi() {
         title: "场地",
         dataIndex: "venueName",
         fixed: "left",
-        width: 180,
+        width: 200,
       },
       {
         title: "子账户",
@@ -333,12 +333,12 @@ export default function VenueRunningKpi() {
       {/*/>*/}
 
       <Table
-        rowSelection={rowSelection}
+        // rowSelection={rowSelection}
         columns={columns}
         dataSource={filteredData}
         scroll={{ x: 1800 }}
         sticky
-        bordered
+        // bordered
         className="custom-table"
         pagination={{
           position: ["bottomCenter"],
