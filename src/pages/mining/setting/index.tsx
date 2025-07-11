@@ -199,7 +199,7 @@ export default function MiningSettingPage() {
         title: "场地",
         dataIndex: "venue_name",
         key: "venue_name",
-        width: 100,
+        width: 200,
         // render: (text: any) => <span style={{ color: "#333" }}>{text}</span>,
         render: (text: any) => (
           <Tooltip

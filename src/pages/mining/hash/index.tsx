@@ -95,7 +95,7 @@ export default function MiningHashRatePage() {
         title: "场地",
         dataIndex: "venue_name",
         key: "venue_name",
-        width: "5%",
+        width: 200,
         // render: (text: any) => <span style={{ color: "#333" }}>{text}</span>,
         render: (text: any) => (
           <Tooltip
@@ -290,21 +290,21 @@ export default function MiningHashRatePage() {
           </span>
         ),
       },
-      {
-        title: "结算FB",
-        dataIndex: "last_settlement_profit_fb",
-        key: "last_settlement_profit_fb",
-        render: (text: any) => (
-          <Tag color="#2db7f5" v-if={text != 0}>
-            {text}
-          </Tag>
-          // <span>
-
-          //   <span style={{ color: "#24ac95" }}>{text}</span>
-          //   {/* <span style={{ fontSize: "em" }}> FB </span> */}
-          // </span>
-        ),
-      },
+      // {
+      //   title: "结算FB",
+      //   dataIndex: "last_settlement_profit_fb",
+      //   key: "last_settlement_profit_fb",
+      //   render: (text: any) => (
+      //     <Tag color="#2db7f5" v-if={text != 0}>
+      //       {text}
+      //     </Tag>
+      //     // <span>
+      //
+      //     //   <span style={{ color: "#24ac95" }}>{text}</span>
+      //     //   {/* <span style={{ fontSize: "em" }}> FB </span> */}
+      //     // </span>
+      //   ),
+      // },
       {
         title: "结算时间",
         dataIndex: "last_settlement_date",
