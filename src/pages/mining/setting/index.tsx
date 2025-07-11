@@ -266,10 +266,11 @@ export default function MiningSettingPage() {
         dataIndex: "status",
         key: "status",
         width: 75,
-        sorter: (a: any) => {
-          // 直接比较数值
-          return a.status; // 返回值用于升序排序
-        },
+        filters: [
+          { text: "活跃", value: 1 },
+          { text: "暂停", value: 0 },
+        ],
+        onFilter: (value: any, record: { status: number }) => record.status === value,
         render: (_text: any, record: { status: unknown }) => <StatusColumn status={record.status} />,
       },
       {
