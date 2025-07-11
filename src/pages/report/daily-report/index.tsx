@@ -500,7 +500,7 @@ const App: React.FC = () => {
           <Table
             columns={columns}
             dataSource={filteredData}
-            scroll={{ x: 1500, y: "calc(100vh - 300px)" }}
+            scroll={{ x: 1500 }}
             sticky={true}
             pagination={{
               pageSize: pageSize, // 使用动态 pageSize

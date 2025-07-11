@@ -17,6 +17,7 @@ interface Venue {
   venue_code: string | null;
   country: string | null;
   address: string | null;
+  agent_key: string | null;
 }
 
 const VenueManagement: React.FC = () => {
@@ -49,6 +50,7 @@ const VenueManagement: React.FC = () => {
           venue_code: item.venue_code,
           country: item.country,
           address: item.address,
+          agent_key: item.agent_key,
         }));
         setVenues(formattedData);
         setFilteredVenues(formattedData);
@@ -143,6 +145,7 @@ const VenueManagement: React.FC = () => {
           venue_code: values.venue_code,
           country: values.country,
           address: values.address,
+          agent_key: values.agent_key,
         };
 
         newMutation.mutate(
@@ -202,6 +205,11 @@ const VenueManagement: React.FC = () => {
     {
       title: "详细地址",
       dataIndex: "address",
+      width: 200,
+    },
+    {
+      title: "场地键值",
+      dataIndex: "agent_key",
       width: 300,
     },
     {
@@ -324,6 +332,9 @@ const VenueManagement: React.FC = () => {
           </Form.Item>
           <Form.Item name="address" label="详细地址">
             <TextArea rows={3} placeholder="请输入详细地址" />
+          </Form.Item>
+          <Form.Item name="agent_key" label="场地键值">
+            <Input placeholder="agent_key" />
           </Form.Item>
           {/* 添加 ID 字段 */}
           <Form.Item name="id" label="场地ID" style={{ display: "none" }}>

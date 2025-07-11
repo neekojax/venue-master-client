@@ -4,6 +4,7 @@ export type VenueInfoParam = {
   venue_code: string;
   country: string;
   address: string;
+  agent_key: string;
 };
 
 export type EventLogParam = {

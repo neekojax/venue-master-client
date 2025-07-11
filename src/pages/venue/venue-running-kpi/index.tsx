@@ -325,7 +325,7 @@ export default function VenueRunningKpi() {
         rowSelection={rowSelection}
         columns={columns}
         dataSource={filteredData}
-        scroll={{ x: 1800, y: 600 }}
+        scroll={{ x: 1800 }}
         sticky
         bordered
         className="custom-table"
