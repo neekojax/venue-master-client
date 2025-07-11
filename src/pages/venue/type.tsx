@@ -5,6 +5,7 @@ export type VenueInfoParam = {
   country: string;
   address: string;
   agent_key: string;
+  hosted_machine: number;
 };
 
 export type EventLogParam = {

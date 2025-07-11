@@ -18,6 +18,7 @@ interface Venue {
   country: string | null;
   address: string | null;
   agent_key: string | null;
+  hosted_machine: number;
 }
 
 const VenueManagement: React.FC = () => {
@@ -51,6 +52,7 @@ const VenueManagement: React.FC = () => {
           country: item.country,
           address: item.address,
           agent_key: item.agent_key,
+          hosted_machine: item.hosted_machine,
         }));
         setVenues(formattedData);
         setFilteredVenues(formattedData);
@@ -129,6 +131,12 @@ const VenueManagement: React.FC = () => {
     form.validateFields().then((values) => {
       if (currentVenue) {
         // 编辑
+        const hostedMachineValue = Number(values.hosted_machine);
+        if (isNaN(hostedMachineValue)) {
+          message.error("hosted_machine 不是有效的数字");
+          return; // 或者抛出错误，阻止继续执行
+        }
+        values.hosted_machine = hostedMachineValue;
         updateMutation.mutate(values, {
           onSuccess: () => {
             message.success("更新成功");
@@ -146,6 +154,7 @@ const VenueManagement: React.FC = () => {
           country: values.country,
           address: values.address,
           agent_key: values.agent_key,
+          hosted_machine: Number(values.hosted_machine),
         };
 
         newMutation.mutate(
@@ -203,14 +212,19 @@ const VenueManagement: React.FC = () => {
       sorter: (a: Venue, b: Venue) => (a.country || "").localeCompare(b.country || ""),
     },
     {
-      title: "详细地址",
-      dataIndex: "address",
-      width: 200,
+      title: "托管机器",
+      dataIndex: "hosted_machine",
+      width: 100,
     },
     {
       title: "场地键值",
       dataIndex: "agent_key",
       width: 300,
+    },
+    {
+      title: "详细地址",
+      dataIndex: "address",
+      width: 200,
     },
     {
       title: "操作",
@@ -330,11 +344,14 @@ const VenueManagement: React.FC = () => {
           >
             <Input placeholder="请输入国家" />
           </Form.Item>
-          <Form.Item name="address" label="详细地址">
-            <TextArea rows={3} placeholder="请输入详细地址" />
+          <Form.Item name="hosted_machine" label="托管机器">
+            <Input type="number" placeholder="托管机器" />
           </Form.Item>
           <Form.Item name="agent_key" label="场地键值">
             <Input placeholder="agent_key" />
+          </Form.Item>
+          <Form.Item name="address" label="详细地址">
+            <TextArea rows={3} placeholder="请输入详细地址" />
           </Form.Item>
           {/* 添加 ID 字段 */}
           <Form.Item name="id" label="场地ID" style={{ display: "none" }}>
