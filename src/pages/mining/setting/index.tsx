@@ -11,7 +11,7 @@ import {
   Popconfirm,
   Radio,
   Select,
-  Spin,
+  Spin, Tag,
   Tooltip,
 } from "antd";
 import ActionButton, { ActionButtonMode } from "@/components/action-button";
@@ -201,26 +201,35 @@ export default function MiningSettingPage() {
         key: "venue_name",
         width: 200,
         // render: (text: any) => <span style={{ color: "#333" }}>{text}</span>,
-        render: (text: any) => (
-          <Tooltip
-            title={text}
-            placement="top"
-            overlayInnerStyle={{ color: "white" }}
-            style={{ color: "white" }}
-          >
-            <div
-              style={{
-                width: "100%",
-                overflow: "hidden",
-                color: "#333",
-                textOverflow: "ellipsis",
-                whiteSpace: "nowrap",
-              }}
+        render: (text: any, record: any) => {
+          const isSpecialVenue = text === "Arct-HF01-J XP-AR-US"; // 判断是否为特殊场地
+          return (
+            <Tooltip
+              title={text}
+              placement="top"
+              overlayInnerStyle={{ color: "white" }}
+              style={{ color: "white" }}
             >
-              {text}
-            </div>
-          </Tooltip>
-        ),
+              <div
+                style={{
+                  width: "100%",
+                  overflow: "hidden",
+                  color: isSpecialVenue ? "red" : "#333", // 特殊场地字体颜色为红色
+                  textOverflow: "ellipsis",
+                  whiteSpace: "nowrap",
+                  fontWeight: isSpecialVenue ? "bold" : "normal", // 加粗特殊场地
+                }}
+              >
+                {text}
+                {isSpecialVenue && (
+                  <Tag color="red" style={{ marginLeft: 2 }}>
+                    补充
+                  </Tag>
+                )}
+              </div>
+            </Tooltip>
+          );
+        },
       },
       {
         title: "子账户",

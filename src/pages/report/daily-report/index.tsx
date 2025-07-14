@@ -1,7 +1,7 @@
 // 代码已包含 CSS：使用 TailwindCSS , 安装 TailwindCSS 后方可看到布局样式效果
 import React, { useEffect, useRef, useState } from "react";
 import { DownloadOutlined } from "@ant-design/icons";
-import { Button, DatePicker, Select, Table, Tooltip } from "antd";
+import { Button, DatePicker, Select, Table, Tag, Tooltip } from "antd";
 import type { ColumnsType } from "antd/es/table";
 import { useSelector, useSettingsStore } from "@/stores";
 
@@ -77,6 +77,35 @@ const App: React.FC = () => {
       key: "siteName",
       fixed: "left",
       width: 250,
+      render: (text: any, record: any) => {
+        const isSpecialVenue = text === "Arct-HF01-J XP-AR-US"; // 判断是否为特殊场地
+        return (
+          <Tooltip
+            title={text}
+            placement="top"
+            overlayInnerStyle={{ color: "white" }}
+            style={{ color: "white" }}
+          >
+            <div
+              style={{
+                width: "100%",
+                overflow: "hidden",
+                color: isSpecialVenue ? "red" : "#333", // 特殊场地字体颜色为红色
+                textOverflow: "ellipsis",
+                whiteSpace: "nowrap",
+                fontWeight: isSpecialVenue ? "bold" : "normal", // 加粗特殊场地
+              }}
+            >
+              {text}
+              {isSpecialVenue && (
+                <Tag color="red" style={{ marginLeft: 2 }}>
+                  补充
+                </Tag>
+              )}
+            </div>
+          </Tooltip>
+        );
+      },
     },
     {
       title: "24小时产出(BTC)",

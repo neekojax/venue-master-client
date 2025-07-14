@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { DownloadOutlined, SearchOutlined } from "@ant-design/icons";
-import { Button, Input, Spin, Table } from "antd";
+import { Button, Input, Spin, Table, Tag, Tooltip } from "antd";
 import { ReactEcharts } from "@/components/react-echarts"; // 导入自定义的 ReactEcharts 组件
 import useAuthRedirect from "@/hooks/useAuthRedirect.ts";
 import { useSelector, useSettingsStore } from "@/stores";
@@ -102,6 +102,35 @@ export default function VenueRunningKpi() {
         dataIndex: "venueName",
         fixed: "left",
         width: 200,
+        render: (text: any, record: any) => {
+          const isSpecialVenue = text === "Arct-HF01-J XP-AR-US"; // 判断是否为特殊场地
+          return (
+            <Tooltip
+              title={text}
+              placement="top"
+              overlayInnerStyle={{ color: "white" }}
+              style={{ color: "white" }}
+            >
+              <div
+                style={{
+                  width: "100%",
+                  overflow: "hidden",
+                  color: isSpecialVenue ? "red" : "#333", // 特殊场地字体颜色为红色
+                  textOverflow: "ellipsis",
+                  whiteSpace: "nowrap",
+                  fontWeight: isSpecialVenue ? "bold" : "normal", // 加粗特殊场地
+                }}
+              >
+                {text}
+                {isSpecialVenue && (
+                  <Tag color="red" style={{ marginLeft: 2 }}>
+                    补充
+                  </Tag>
+                )}
+              </div>
+            </Tooltip>
+          );
+        },
       },
       {
         title: "子账户",
