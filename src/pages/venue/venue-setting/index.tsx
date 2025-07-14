@@ -19,6 +19,7 @@ interface Venue {
   address: string | null;
   agent_key: string | null;
   hosted_machine: number;
+  miner_type: string | null;
 }
 
 const VenueManagement: React.FC = () => {
@@ -53,6 +54,7 @@ const VenueManagement: React.FC = () => {
           address: item.address,
           agent_key: item.agent_key,
           hosted_machine: item.hosted_machine,
+          miner_type: item.miner_type,
         }));
         setVenues(formattedData);
         setFilteredVenues(formattedData);
@@ -155,6 +157,7 @@ const VenueManagement: React.FC = () => {
           address: values.address,
           agent_key: values.agent_key,
           hosted_machine: Number(values.hosted_machine),
+          miner_type: values.miner_type,
         };
 
         newMutation.mutate(
@@ -214,6 +217,11 @@ const VenueManagement: React.FC = () => {
     {
       title: "托管机器",
       dataIndex: "hosted_machine",
+      width: 100,
+    },
+    {
+      title: "机型",
+      dataIndex: "miner_type",
       width: 100,
     },
     {
@@ -346,6 +354,9 @@ const VenueManagement: React.FC = () => {
           </Form.Item>
           <Form.Item name="hosted_machine" label="托管机器">
             <Input type="number" placeholder="托管机器" />
+          </Form.Item>
+          <Form.Item name="miner_type" label="托管机型">
+            <Input placeholder="托管机型" />
           </Form.Item>
           <Form.Item name="agent_key" label="场地键值">
             <Input placeholder="agent_key" />

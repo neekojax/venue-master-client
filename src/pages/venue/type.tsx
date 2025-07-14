@@ -6,6 +6,7 @@ export type VenueInfoParam = {
   address: string;
   agent_key: string;
   hosted_machine: number;
+  miner_type: string;
 };
 
 export type EventLogParam = {
