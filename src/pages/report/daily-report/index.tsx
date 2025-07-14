@@ -343,7 +343,8 @@ const App: React.FC = () => {
   useEffect(() => {
     // 筛选数据
     if (selectedSites.length > 0) {
-      const filtered = data.filter((item) => selectedSites.includes(item.siteId));
+      console.log(selectedSites);
+      const filtered = data.filter((item) => selectedSites.includes(item.siteName));
       // setFilteredData(filtered);
       setFilteredData(filtered.sort((a, b) => a.siteName.localeCompare(b.siteName))); // 按 siteName 排序
     } else {
