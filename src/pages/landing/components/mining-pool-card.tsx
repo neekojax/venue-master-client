@@ -178,7 +178,7 @@ const MiningPoolCard: React.FC<MiningPoolCardProps> = ({ poolType }) => {
           <Flex gap="middle" vertical>
             {[
               {
-                title: "24小时算力达成率",
+                title: "昨日算力达成率",
                 color: "red",
                 value: lastHashStatus?.last24HourEfficiency,
                 diff: lastHashStatus?.last24HourEfficiencyDiff,
