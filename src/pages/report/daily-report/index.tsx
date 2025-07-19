@@ -77,6 +77,9 @@ const App: React.FC = () => {
       console.log(res);
       if (res.success) {
         console.log(res); // 更改值
+        setData((data) =>
+          data.map((item) => (item.key === record.key ? { ...item, totalFailures: Number(text) } : item)),
+        );
       }
     } catch (errInfo) {
       console.log("Save failed:", errInfo);
