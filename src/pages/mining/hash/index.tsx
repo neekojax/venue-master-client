@@ -97,7 +97,7 @@ export default function MiningHashRatePage() {
         key: "venue_name",
         width: 200,
         // render: (text: any) => <span style={{ color: "#333" }}>{text}</span>,
-        render: (text: any, record: any) => {
+        render: (text: string) => {
           const isSpecialVenue = text === "Arct-HF01-J XP-AR-US"; // 判断是否为特殊场地
           return (
             <Tooltip

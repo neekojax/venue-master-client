@@ -11,7 +11,8 @@ import {
   Popconfirm,
   Radio,
   Select,
-  Spin, Tag,
+  Spin,
+  Tag,
   Tooltip,
 } from "antd";
 import ActionButton, { ActionButtonMode } from "@/components/action-button";
@@ -201,7 +202,7 @@ export default function MiningSettingPage() {
         key: "venue_name",
         width: 200,
         // render: (text: any) => <span style={{ color: "#333" }}>{text}</span>,
-        render: (text: any, record: any) => {
+        render: (text: string) => {
           const isSpecialVenue = text === "Arct-HF01-J XP-AR-US"; // 判断是否为特殊场地
           return (
             <Tooltip

@@ -1,7 +1,7 @@
 // 代码已包含 CSS：使用 TailwindCSS , 安装 TailwindCSS 后方可看到布局样式效果
 import React, { useEffect, useRef, useState } from "react";
 import { DownloadOutlined } from "@ant-design/icons";
-import { Button, DatePicker, Select, Table, Tag, Tooltip } from "antd";
+import { Button, DatePicker, Input, Select, Table, Tag, Tooltip } from "antd";
 import type { ColumnsType } from "antd/es/table";
 import { useSelector, useSettingsStore } from "@/stores";
 
@@ -30,6 +30,22 @@ interface DataType {
 const App: React.FC = () => {
   const tableRef = useRef<HTMLDivElement>(null);
   const [isTableFixed, setIsTableFixed] = useState(false);
+  const [hoveredRow, setHoveredRow] = useState<string | null>(null);
+
+  const save = async (record: DataType, text: string) => {
+    try {
+      console.log("save", record, text);
+
+      // 调用接口，启动数据保存
+      // const res = await fetchDailyReport({
+      //   date: selectedDate,
+      //   siteIds: selectedSites,
+      //   ...values,
+      // });
+    } catch (errInfo) {
+      console.log("Save failed:", errInfo);
+    }
+  };
 
   useEffect(() => {
     const handleScroll = () => {
@@ -60,7 +76,6 @@ const App: React.FC = () => {
   const [filteredData, setFilteredData] = useState<DataType[]>([]); // 筛选后的数据
   const [siteOptions, setSiteOptions] = useState<{ value: string; label: string }[]>([]);
 
-
   const [pageSize, setPageSize] = useState(20); // 新增状态管理页大小
 
   const columns: ColumnsType<DataType> = [
@@ -77,7 +92,7 @@ const App: React.FC = () => {
       key: "siteName",
       fixed: "left",
       width: 250,
-      render: (text: any, record: any) => {
+      render: (text: string) => {
         const isSpecialVenue = text === "Arct-HF01-J XP-AR-US"; // 判断是否为特殊场地
         return (
           <Tooltip
@@ -173,7 +188,26 @@ const App: React.FC = () => {
       key: "totalFailures",
       width: 120,
       align: "right",
-      render: (value) => value.toLocaleString(),
+      render: (text, record) => {
+        const isEditing = hoveredRow === record.key;
+        return isEditing ? (
+          <Input
+            size="small"
+            style={{ padding: "0 5px", margin: 0, height: "22px" }}
+            onChange={(e) => save(record, e.target.value)}
+            onPressEnter={(e) => save(record, e.target.value)}
+            onBlur={(e) => save(record, e.target.value)}
+            defaultValue={text}
+          />
+        ) : (
+          <span>{text}</span>
+        );
+      },
+      onCell: (record) => ({
+        onMouseEnter: () => setHoveredRow(record.key),
+        onMouseLeave: () => setHoveredRow(null),
+      }),
+      // render: (value) => value.toLocaleString(),
       sorter: (a, b) => a.totalFailures - b.totalFailures,
     },
     {

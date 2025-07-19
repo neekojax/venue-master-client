@@ -1,9 +1,9 @@
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { CodeOutlined, LockOutlined, UserOutlined } from "@ant-design/icons";
+import { LockOutlined, UserOutlined } from "@ant-design/icons";
 import { Button, Form, type FormProps, Input } from "antd";
 import CryptoJS from "crypto-js"; // 导入 crypto-js
-import { fetchCaptcha, useLogin } from "../api";
+import { useLogin } from "../api";
 import { ROUTE_PATHS } from "@/constants/common";
 
 import { LoginField } from "@/pages/login/type.ts";

@@ -17,7 +17,7 @@ export default function VenueRunningKpi() {
   const [loading, setLoading] = useState<boolean>(true); // 加载状态
   // const [error] = useState<string | null>(null); // 错误信息
 
-  const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([]);
+  // const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([]);
 
   const fetchData = async (poolType: string) => {
     try {
@@ -102,7 +102,7 @@ export default function VenueRunningKpi() {
         dataIndex: "venueName",
         fixed: "left",
         width: 200,
-        render: (text: any, record: any) => {
+        render: (text: string) => {
           const isSpecialVenue = text === "Arct-HF01-J XP-AR-US"; // 判断是否为特殊场地
           return (
             <Tooltip
@@ -323,13 +323,13 @@ export default function VenueRunningKpi() {
       return 0;
     });
 
-  const onSelectChange = (newSelectedRowKeys: React.Key[]) => {
-    setSelectedRowKeys(newSelectedRowKeys);
-  };
-  const rowSelection = {
-    selectedRowKeys,
-    onChange: onSelectChange,
-  };
+  // const onSelectChange = (newSelectedRowKeys: React.Key[]) => {
+  //   setSelectedRowKeys(newSelectedRowKeys);
+  // };
+  // const rowSelection = {
+  //   selectedRowKeys,
+  //   onChange: onSelectChange,
+  // };
 
   return (
     <div style={{ padding: "20px" }} className="longdataTable">
