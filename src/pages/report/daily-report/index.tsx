@@ -1,7 +1,7 @@
 // 代码已包含 CSS：使用 TailwindCSS , 安装 TailwindCSS 后方可看到布局样式效果
 import React, { useEffect, useRef, useState } from "react";
 import { DownloadOutlined } from "@ant-design/icons";
-import { Button, DatePicker, Input, Select, Table, Tag, Tooltip } from "antd";
+import { Button, DatePicker, Input, message, Select, Table, Tag, Tooltip } from "antd";
 import type { ColumnsType } from "antd/es/table";
 import { useSelector, useSettingsStore } from "@/stores";
 
@@ -77,6 +77,7 @@ const App: React.FC = () => {
       // console.log("success", res);
       // console.log("res.success", res.success);
       if (res.success) {
+        message.success("更新成功");
         // console.log(res); // 更改值
         setData((data) =>
           data.map((item) => (item.key === record.key ? { ...item, totalFailures: Number(text) } : item)),
@@ -203,7 +204,7 @@ const App: React.FC = () => {
           <Input
             size="small"
             style={{ padding: "0 5px", margin: 0, height: "22px" }}
-            onChange={(e) => save(record, e.target.value)}
+            // onChange={(e) => save(record, e.target.value)}
             onPressEnter={(e) => save(record, e.target.value)}
             onBlur={(e) => save(record, e.target.value)}
             defaultValue={text}
