@@ -1,5 +1,5 @@
 import { fetchGet, fetchPost } from "@/helper/fetchHelper.ts";
-import { VenueInfoParam } from "@/pages/venue/type.tsx";
+// import { VenueInfoParam } from "@/pages/venue/type.tsx";
 import { ReportUpdateParam } from "@/pages/report/type.tsx";
 
 export const fetchDailyReport = async (poolType: string, date: string) => {
