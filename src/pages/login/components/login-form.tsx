@@ -48,17 +48,35 @@ export default function LoginForm() {
     values.password = CryptoJS.MD5(values.password || "").toString();
 
     try {
-      const data = await onLogin(values);
-      localStorage.setItem("access_token", data.data.access_token);
-      localStorage.setItem("" + "refresh_token", data.data.refresh_token);
+      // const data = await onLogin(values);
+      // localStorage.setItem("access_token", data.data.access_token);
+      // localStorage.setItem("" + "refresh_token", data.data.refresh_token);
+      //
+      // navigate(ROUTE_PATHS.landing);
+      // setTimeout(() => {
+      //   window.$notification?.success({
+      //     message: "登录成功",
+      //     description: "欢迎回来",
+      //   });
+      // }, 300);
 
-      navigate(ROUTE_PATHS.landing);
-      setTimeout(() => {
+      const data = await onLogin(values); // 调用登录函数
+      if (data && data.data) {
+        // 确认返回的数据有效
+        localStorage.setItem("access_token", data.data.access_token);
+        localStorage.setItem("refresh_token", data.data.refresh_token);
+
+        navigate(ROUTE_PATHS.landing); // 进行导航
         window.$notification?.success({
           message: "登录成功",
           description: "欢迎回来",
         });
-      }, 300);
+      } else {
+        // 处理未返回 token 的情况
+        window.$notification?.error({
+          message: "登录失败，请重试",
+        });
+      }
     } catch (err) {
       window.$notification?.error({
         // @ts-ignore
