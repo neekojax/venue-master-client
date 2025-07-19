@@ -74,9 +74,10 @@ const App: React.FC = () => {
         total_failures: Number(text),
       };
       const res = await updateReport(poolType, date, updatedData);
-      console.log(res);
+      // console.log("success", res);
+      // console.log("res.success", res.success);
       if (res.success) {
-        console.log(res); // 更改值
+        // console.log(res); // 更改值
         setData((data) =>
           data.map((item) => (item.key === record.key ? { ...item, totalFailures: Number(text) } : item)),
         );
