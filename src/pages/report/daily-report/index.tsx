@@ -5,7 +5,9 @@ import { Button, DatePicker, Input, Select, Table, Tag, Tooltip } from "antd";
 import type { ColumnsType } from "antd/es/table";
 import { useSelector, useSettingsStore } from "@/stores";
 
-import { fetchDailyReport } from "@/pages/report/api.tsx";
+import { fetchDailyReport, updateReport } from "@/pages/report/api.tsx";
+import { MiningPoolUpdate } from "@/pages/mining/type.tsx";
+import { ReportUpdateParam } from "@/pages/report/type.tsx";
 interface DataType {
   key: string;
   siteId: string;
@@ -28,24 +30,11 @@ interface DataType {
   events: string;
 }
 const App: React.FC = () => {
+  const { poolType } = useSettingsStore(useSelector(["poolType"]));
+
   const tableRef = useRef<HTMLDivElement>(null);
   const [isTableFixed, setIsTableFixed] = useState(false);
   const [hoveredRow, setHoveredRow] = useState<string | null>(null);
-
-  const save = async (record: DataType, text: string) => {
-    try {
-      console.log("save", record, text);
-
-      // 调用接口，启动数据保存
-      // const res = await fetchDailyReport({
-      //   date: selectedDate,
-      //   siteIds: selectedSites,
-      //   ...values,
-      // });
-    } catch (errInfo) {
-      console.log("Save failed:", errInfo);
-    }
-  };
 
   useEffect(() => {
     const handleScroll = () => {
@@ -58,7 +47,6 @@ const App: React.FC = () => {
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
-  const { poolType } = useSettingsStore(useSelector(["poolType"]));
 
   // 计算昨天的日期，格式为 'YYYY-MM-DD'
   const yesterday = new Date();
@@ -77,6 +65,24 @@ const App: React.FC = () => {
   const [siteOptions, setSiteOptions] = useState<{ value: string; label: string }[]>([]);
 
   const [pageSize, setPageSize] = useState(20); // 新增状态管理页大小
+
+  const save = async (record: DataType, text: string) => {
+    try {
+      const date = selectedDate || formattedDate; // formattedDate 是昨天的日期
+      // 调用接口，启动数据保存
+      const updatedData: ReportUpdateParam = {
+        venue_name: record.siteName,
+        total_failures: Number(text),
+      };
+      const res = await updateReport(poolType, date, updatedData);
+      console.log(res);
+      if (res.status == 200) {
+        console.log(res);
+      }
+    } catch (errInfo) {
+      console.log("Save failed:", errInfo);
+    }
+  };
 
   const columns: ColumnsType<DataType> = [
     // {
@@ -225,10 +231,10 @@ const App: React.FC = () => {
       key: "failureRate24h",
       width: 130,
       render: (value) => ({
-        children: `${(value * 100).toFixed(2)}%`,
+        children: `${value.toFixed(2)}%`,
         props: {
           style: {
-            color: value > 0.05 ? "#ff4d4f" : "inherit",
+            color: value > 20 ? "#ff4d4f" : "inherit",
           },
         },
       }),
@@ -240,10 +246,10 @@ const App: React.FC = () => {
       key: "failureRateT2",
       width: 130,
       render: (value) => ({
-        children: `${(value * 100).toFixed(2)}%`,
+        children: `${value.toFixed(2)}%`,
         props: {
           style: {
-            color: value > 0.05 ? "#ff4d4f" : "inherit",
+            color: value > 20 ? "#ff4d4f" : "inherit",
           },
         },
       }),
@@ -255,10 +261,10 @@ const App: React.FC = () => {
       key: "failureRateT3",
       width: 130,
       render: (value) => ({
-        children: `${(value * 100).toFixed(2)}%`,
+        children: `${value.toFixed(2)}%`,
         props: {
           style: {
-            color: value > 0.05 ? "#ff4d4f" : "inherit",
+            color: value > 20 ? "#ff4d4f" : "inherit",
           },
         },
       }),
