@@ -6,7 +6,6 @@ import type { ColumnsType } from "antd/es/table";
 import { useSelector, useSettingsStore } from "@/stores";
 
 import { fetchDailyReport, updateReport } from "@/pages/report/api.tsx";
-import { MiningPoolUpdate } from "@/pages/mining/type.tsx";
 import { ReportUpdateParam } from "@/pages/report/type.tsx";
 interface DataType {
   key: string;
@@ -76,8 +75,8 @@ const App: React.FC = () => {
       };
       const res = await updateReport(poolType, date, updatedData);
       console.log(res);
-      if (res.status == 200) {
-        console.log(res);
+      if (res.success) {
+        console.log(res); // 更改值
       }
     } catch (errInfo) {
       console.log("Save failed:", errInfo);
