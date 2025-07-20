@@ -44,3 +44,24 @@ export function convertUTCToLocal(
 export function dateFormat(date: dayjs.ConfigType, format: DateFormat = "YYYY-MM-DD HH:mm:ss") {
   return dayjs(date).format(format);
 }
+
+// 工具函数：传入两个时间字符串或 Date 对象
+export function getTimeDifference(startTime: string, endTime: string) {
+  const start = new Date(startTime);
+  const end = new Date(endTime);
+  let diff = Math.max(0, end.getTime() - start.getTime()); // 毫秒
+
+  const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+  diff %= 1000 * 60 * 60 * 24;
+
+  const hours = Math.floor(diff / (1000 * 60 * 60));
+  diff %= 1000 * 60 * 60;
+
+  // const minutes = Math.floor(diff / (1000 * 60));
+  // diff %= (1000 * 60);
+  if (days) {
+    return `${days}天 ${hours}小时`;
+  } else if (hours) {
+    return `${hours}小时`;
+  }
+}

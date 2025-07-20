@@ -361,6 +361,7 @@
   .ant-dropdown .ant-dropdown-menu .ant-dropdown-menu-item-selected, .ant-dropdown-menu-submenu .ant-dropdown-menu .ant-dropdown-menu-item-selected, .ant-dropdown .ant-dropdown-menu .ant-dropdown-menu-submenu-title-selected, .ant-dropdown-menu-submenu .ant-dropdown-menu .ant-dropdown-menu-submenu-title-selected {
     color: #1E90FF !important;
     background-color: #f0f6fe !important;
+    font-size: 12px;
 }
 .ant-checkbox-checked .ant-checkbox-inner {
     background-color: #1E90FF;
@@ -368,4 +369,8 @@
 }
 .ant-select-single.ant-select-open .ant-select-selection-item,.custom-select .ant-select-arrow,.ant-select-single.ant-select-show-arrow .ant-select-selection-item,.custom-select .ant-select-selection-placeholder {
     color: #fff;
+    font-size: 12px;
+}
+.ant-btn{
+    font-size: 12px !important;
 }

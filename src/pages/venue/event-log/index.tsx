@@ -24,6 +24,7 @@ import type { ColumnsType } from "antd/es/table";
 import dayjs from "dayjs";
 import isBetween from "dayjs/plugin/isBetween"; // 引入 isBetween 插件
 import { useSelector, useSettingsStore } from "@/stores"; // 根据实际路径调整
+import { getTimeDifference } from "@/utils/date";
 
 import UploadExcel from "@/pages/venue/components/UploadExcel";
 import {
@@ -149,17 +150,24 @@ const App: React.FC = () => {
       },
     },
     {
-      title: "日期",
+      title: "影响时长",
       dataIndex: "log_date",
       width: 120,
-      sorter: (a, b) => dayjs(a.log_date).unix() - dayjs(b.log_date).unix(),
+      render: (text, record) => {
+        if (record.start_time && record.end_time) {
+          return getTimeDifference(record.start_time, record.end_time);
+        }
+        // return dayjs(text).format("YYYY-MM-DD HH:mm");
+      },
+      // sorter: (a, b) => dayjs(a.log_date).unix() - dayjs(b.log_date).unix(),
     },
     {
       title: "时间范围",
       dataIndex: "start_time",
-      width: 180,
+      width: 280,
       render: (_text, record) => `${record.start_time} - ${record.end_time}`,
     },
+
     {
       title: "事件类型",
       dataIndex: "log_type",
@@ -194,7 +202,7 @@ const App: React.FC = () => {
     {
       title: "影响算力",
       dataIndex: "impact_power_loss",
-      width: 100,
+      width: 120,
       // sorter: (a, b) => a.impact_count - b.impact_count,
       render: (text) => {
         if (text) {
@@ -205,8 +213,29 @@ const App: React.FC = () => {
     {
       title: "事件原因",
       dataIndex: "event_reason",
-      width: 200,
+      width: 250,
       ellipsis: true,
+      render: (text) => {
+        return (
+          <Tooltip
+            title={text}
+            placement="top"
+            overlayInnerStyle={{ color: "white" }}
+            style={{ color: "white" }}
+          >
+            <div
+              style={{
+                width: "100%",
+                overflow: "hidden",
+                textOverflow: "ellipsis",
+                whiteSpace: "nowrap",
+              }}
+            >
+              {text}
+            </div>
+          </Tooltip>
+        );
+      },
     },
     {
       title: "解决措施",
@@ -214,12 +243,12 @@ const App: React.FC = () => {
       width: 200,
       ellipsis: true,
     },
-    {
-      title: "记录时间",
-      dataIndex: "created_at",
-      width: 160,
-      render: (text) => dayjs(text).format("YYYY-MM-DD HH:mm:ss"),
-    },
+    // {
+    //   title: "记录时间",
+    //   dataIndex: "created_at",
+    //   width: 160,
+    //   render: (text) => dayjs(text).format("YYYY-MM-DD HH:mm:ss"),
+    // },
     {
       title: "操作",
       key: "action",
@@ -339,11 +368,11 @@ const App: React.FC = () => {
               size="middle"
               className="!rounded-button"
             >
-              新增日志
+              新增事件
             </Button>
             <div className="flex items-center justify-end gap-4">
               <Input
-                placeholder="搜索日志内容"
+                placeholder="搜索事件内容"
                 prefix={<SearchOutlined />}
                 size="middle"
                 className="max-w-xs !rounded-lg"
@@ -437,7 +466,7 @@ const App: React.FC = () => {
                 }}
                 className="!rounded-button"
               >
-                导出日志
+                导出事件
               </Button>
             </Space>
           </div>
@@ -460,7 +489,7 @@ const App: React.FC = () => {
         />
       </div>
       <Modal
-        title={form.getFieldValue("id") ? "编辑日志" : "新增日志"}
+        title={form.getFieldValue("id") ? "编辑事件" : "新增事件"}
         open={isModalVisible}
         onOk={handleOk}
         onCancel={() => setIsModalVisible(false)}
