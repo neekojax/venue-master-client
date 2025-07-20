@@ -1,6 +1,7 @@
 :root.dark {
   --text-color: var(--white-65);
   --text-hover-color: white;
+  
 }
 
 @media (prefers-color-scheme: dark) {

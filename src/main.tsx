@@ -2,9 +2,11 @@ import { createRoot } from "react-dom/client";
 import { HelmetProvider } from "react-helmet-async";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
+import { ConfigProvider } from "antd";
 import { ErrorBoundary } from "./components/error-boundary";
 import App from "./App";
 
+import "antd/dist/reset.css"; // 这是必要的重置样式
 import "./styles/index.css";
 import "./styles/light.css";
 import "./styles/dark.css";
@@ -28,7 +30,22 @@ createRoot(document.getElementById("root")!).render(
   <ErrorBoundary>
     <HelmetProvider>
       <QueryClientProvider client={queryClient}>
-        <App />
+        <ConfigProvider
+          theme={{
+            token: {
+              colorPrimary: "#1890ff", // 主色调：亮蓝
+              colorInfo: "#1890ff", // 信息色
+              colorSuccess: "#52c41a", // 成功绿
+              colorWarning: "#faad14", // 警告橙
+              colorError: "#ff4d4f", // 错误红
+              colorText: "#1f1f1f", // 主文本色
+              colorBgContainer: "#ffffff", // 主容器背景色
+              colorBorder: "#d9d9d9", // 边框色
+            },
+          }}
+        >
+          <App />
+        </ConfigProvider>
         <ReactQueryDevtools initialIsOpen={false} />
       </QueryClientProvider>
     </HelmetProvider>

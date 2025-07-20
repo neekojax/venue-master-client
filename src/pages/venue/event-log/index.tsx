@@ -6,7 +6,20 @@ import {
   PlusOutlined,
   SearchOutlined,
 } from "@ant-design/icons";
-import { Button, DatePicker, Form, Input, message, Modal, Popconfirm, Select, Space, Table, Tag } from "antd";
+import {
+  Button,
+  DatePicker,
+  Form,
+  Input,
+  message,
+  Modal,
+  Popconfirm,
+  Select,
+  Space,
+  Table,
+  Tag,
+  Tooltip,
+} from "antd";
 import type { ColumnsType } from "antd/es/table";
 import dayjs from "dayjs";
 import isBetween from "dayjs/plugin/isBetween"; // 引入 isBetween 插件
@@ -43,7 +56,7 @@ interface EventLog {
 
 const App: React.FC = () => {
   const [isModalVisible, setIsModalVisible] = useState(false);
-  const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([]);
+  const [selectedRowKeys] = useState<React.Key[]>([]);
   const [form] = Form.useForm();
   const { poolType } = useSettingsStore(useSelector(["poolType"]));
   const { data, isLoading } = useEventList(poolType);
@@ -60,7 +73,8 @@ const App: React.FC = () => {
 
   // 数据转换
   const logData: EventLog[] =
-    data?.data?.map((item) => ({
+    data?.data?.map((item, index) => ({
+      key: index + 1,
       id: item.id,
       venue_id: item.venue_id,
       venue_name: item.venue_info.venue_name,
@@ -69,6 +83,7 @@ const App: React.FC = () => {
       end_time: item.end_time,
       log_type: item.log_type,
       impact_count: item.impact_count,
+      impact_power_loss: item.impact_power_loss,
       event_reason: item.event_reason,
       resolution_measures: item.resolution_measures,
       created_at: item.created_at,
@@ -91,11 +106,47 @@ const App: React.FC = () => {
 
   const columns: ColumnsType<EventLog> = [
     {
+      title: "编号",
+      dataIndex: "key",
+      width: "60px",
+      rowScope: "row",
+    },
+    {
       title: "场地",
       dataIndex: "venue_name",
-      width: 120,
+      // width: 120,
       filters: venueList?.data?.map((venue) => ({ text: venue.venue_name, value: venue.venue_name })),
       onFilter: (value, record) => record.venue_name === value,
+      width: 200,
+      render: (text: string) => {
+        const isSpecialVenue = text === "Arct-HF01-J XP-AR-US"; // 判断是否为特殊场地
+        return (
+          <Tooltip
+            title={text}
+            placement="top"
+            overlayInnerStyle={{ color: "white" }}
+            style={{ color: "white" }}
+          >
+            <div
+              style={{
+                width: "100%",
+                overflow: "hidden",
+                color: isSpecialVenue ? "red" : "#333", // 特殊场地字体颜色为红色
+                textOverflow: "ellipsis",
+                whiteSpace: "nowrap",
+                fontWeight: isSpecialVenue ? "bold" : "normal", // 加粗特殊场地
+              }}
+            >
+              {text}
+              {isSpecialVenue && (
+                <Tag color="red" style={{ marginLeft: 2 }}>
+                  补充
+                </Tag>
+              )}
+            </div>
+          </Tooltip>
+        );
+      },
     },
     {
       title: "日期",
@@ -139,6 +190,17 @@ const App: React.FC = () => {
       dataIndex: "impact_count",
       width: 100,
       sorter: (a, b) => a.impact_count - b.impact_count,
+    },
+    {
+      title: "影响算力",
+      dataIndex: "impact_power_loss",
+      width: 100,
+      // sorter: (a, b) => a.impact_count - b.impact_count,
+      render: (text) => {
+        if (text) {
+          return `${text} T`;
+        }
+      },
     },
     {
       title: "事件原因",
@@ -256,14 +318,14 @@ const App: React.FC = () => {
     });
   };
 
-  const onSelectChange = (newSelectedRowKeys: React.Key[]) => {
-    setSelectedRowKeys(newSelectedRowKeys);
-  };
+  // const onSelectChange = (newSelectedRowKeys: React.Key[]) => {
+  //   setSelectedRowKeys(newSelectedRowKeys);
+  // };
 
-  const rowSelection = {
-    selectedRowKeys,
-    onChange: onSelectChange,
-  };
+  // const rowSelection = {
+  //   selectedRowKeys,
+  //   onChange: onSelectChange,
+  // };
 
   return (
     <div className="bg-gray-50 p-6">
@@ -381,7 +443,8 @@ const App: React.FC = () => {
           </div>
         </div>
         <Table
-          rowSelection={rowSelection}
+          // rowSelection={rowSelection}
+
           columns={columns}
           dataSource={filteredData} // 使用过滤后的数据
           scroll={{ x: 1300 }}
@@ -443,7 +506,7 @@ const App: React.FC = () => {
               rules={[{ required: true, message: "请选择事件类型" }]}
             >
               <Select placeholder="请选择事件类型">
-                {["限电", "设备故障", "系统异常", "人员事故", "质量问题", "其他"].map((type) => (
+                {["电力", "高温", "极端天气", "日常维护", "设备故障", "限电"].map((type) => (
                   <Option key={type} value={type}>
                     {type}
                   </Option>

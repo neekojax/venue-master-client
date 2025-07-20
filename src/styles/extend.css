@@ -1,4 +1,6 @@
 
+
+
 /*sider*/
 @media (min-width: 992px) {
     .aside {
@@ -327,4 +329,43 @@
     font-size: 12px;
     background-color: #fff;
     border: 1px solid #d9d9d9;
+}
+
+
+:root {
+    --ant-primary-color: #722ED1;
+    --ant-success-color: #52c41a;
+    --ant-warning-color: #faad14;
+    --ant-error-color: #ff4d4f;
+    --ant-info-color: #1890ff;
+  
+    /* --ant-border-color: #d9d9d9;
+    --ant-text-color: #000000e0; */
+    --ant-button-group-border-color: #2d86e5;/* #722ED1*/
+    --ant-button-default-hover-color: #2d86e5;
+    --ant-button-default-hover-border-color: #2d86e5;
+    --ant-button-default-active-bg: #ffffff;
+    --ant-button-default-active-color: #0c78eb;
+    --ant-button-default-active-border-color: #0c78eb;
+    
+    --ant-date-picker-active-border-color: #2d86e5;
+    --ant-date-picker-hover-border-color: #0c78eb;
+  }
+
+  .ant-input-affix-wrapper:not(.ant-input-disabled):hover,.ant-picker:hover,.ant-btn-default:hover{
+    border-color: #1E90FF !important;
+    color: #1E90FF !important;
+    background-color: #fff !important;
+  }
+
+  .ant-dropdown .ant-dropdown-menu .ant-dropdown-menu-item-selected, .ant-dropdown-menu-submenu .ant-dropdown-menu .ant-dropdown-menu-item-selected, .ant-dropdown .ant-dropdown-menu .ant-dropdown-menu-submenu-title-selected, .ant-dropdown-menu-submenu .ant-dropdown-menu .ant-dropdown-menu-submenu-title-selected {
+    color: #1E90FF !important;
+    background-color: #f0f6fe !important;
+}
+.ant-checkbox-checked .ant-checkbox-inner {
+    background-color: #1E90FF;
+    border-color: #1E90FF;
+}
+.ant-select-single.ant-select-open .ant-select-selection-item,.custom-select .ant-select-arrow,.ant-select-single.ant-select-show-arrow .ant-select-selection-item,.custom-select .ant-select-selection-placeholder {
+    color: #fff;
 }

@@ -10,7 +10,7 @@ const UploadExcel: React.FC = () => {
     accept: ".xlsx,.xls", // 限制文件类型
     showUploadList: false,
     customRequest: async (options: any) => {
-      const { file, onSuccess, onError } = options;
+      const { file } = options;
 
       const formData = new FormData();
       formData.append("file", file);
@@ -45,9 +45,11 @@ const UploadExcel: React.FC = () => {
           },
         });
 
+        message.success("上传成功");
         return response.data; // 返回服务器响应的数据
       } catch (error) {
-        console.error("上传失败:", error);
+        // console.error("上传失败:", error);
+        message.error("上传失败");
         throw error; // 抛出错误以便在调用时被捕获
       }
     },
@@ -55,7 +57,9 @@ const UploadExcel: React.FC = () => {
 
   return (
     <Upload {...uploadProps}>
-      <Button icon={<UploadOutlined />}>上传 Excel 文件</Button>
+      <Button icon={<UploadOutlined />} size="middle">
+        导入事件
+      </Button>
     </Upload>
   );
 };
