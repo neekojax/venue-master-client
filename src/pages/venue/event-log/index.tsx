@@ -157,6 +157,7 @@ const App: React.FC = () => {
         if (record.start_time && record.end_time) {
           return getTimeDifference(record.start_time, record.end_time);
         }
+        return "---";
         // return dayjs(text).format("YYYY-MM-DD HH:mm");
       },
       // sorter: (a, b) => dayjs(a.log_date).unix() - dayjs(b.log_date).unix(),
@@ -317,6 +318,7 @@ const App: React.FC = () => {
         end_time: dayjs(values.end_time).format("YYYY-MM-DD HH:mm"),
         log_type: values.log_type,
         impact_count: parseInt(values.impact_count, 10),
+        impact_power_loss: Number(values.impact_power_loss), //数字，包含整数和小数
         event_reason: values.event_reason,
         resolution_measures: values.resolution_measures,
       };
@@ -504,9 +506,9 @@ const App: React.FC = () => {
               <Input type="hidden" />
             </Form.Item>
             <Form.Item name="venue_id" label="场地" rules={[{ required: true, message: "请选择场地" }]}>
-              <Select placeholder="请选择场地" allowClear style={{ width: "100%" }}>
+              <Select placeholder="请选择场地" allowClear style={{ width: "100%", fontSize: "12px" }}>
                 {venueList?.data?.map((venue) => (
-                  <Option key={venue.id} value={venue.id}>
+                  <Option key={venue.id} value={venue.id} style={{ fontSize: "12px" }}>
                     {venue.venue_name}
                   </Option>
                 ))}
@@ -545,24 +547,36 @@ const App: React.FC = () => {
             <Form.Item
               name="impact_count"
               label="影响台数"
+              style={{ fontSize: "12px" }}
               rules={[{ required: true, message: "请输入影响台数" }]}
             >
-              <Input type="number" placeholder="请输入影响台数" />
+              <Input type="number" placeholder="请输入影响台数" style={{ fontSize: "12px" }} />
+            </Form.Item>
+
+            <Form.Item
+              name="impact_power_loss"
+              label="影响算力"
+              style={{ fontSize: "12px" }}
+              rules={[{ required: true, message: "请输入影响算力" }]}
+            >
+              <Input type="number" placeholder="请输入影响算力" style={{ fontSize: "12px" }} />
             </Form.Item>
           </div>
           <Form.Item
             name="event_reason"
             label="事件原因"
+            style={{ fontSize: "12px" }}
             rules={[{ required: true, message: "请输入事件原因" }]}
           >
-            <TextArea rows={4} placeholder="请输入事件原因" />
+            <TextArea rows={4} placeholder="请输入事件原因" style={{ fontSize: "12px" }} />
           </Form.Item>
           <Form.Item
             name="resolution_measures"
             label="解决措施"
+            style={{ fontSize: "12px" }}
             rules={[{ required: true, message: "请输入解决措施" }]}
           >
-            <TextArea rows={4} placeholder="请输入解决措施" />
+            <TextArea rows={4} placeholder="请输入解决措施" style={{ fontSize: "12px" }} />
           </Form.Item>
         </Form>
       </Modal>

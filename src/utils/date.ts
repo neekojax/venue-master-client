@@ -47,8 +47,13 @@ export function dateFormat(date: dayjs.ConfigType, format: DateFormat = "YYYY-MM
 
 // 工具函数：传入两个时间字符串或 Date 对象
 export function getTimeDifference(startTime: string, endTime: string) {
+  console.log("startTime", startTime, "endTime", endTime);
+  if (!startTime || !endTime) {
+    return "---";
+  }
   const start = new Date(startTime);
   const end = new Date(endTime);
+
   let diff = Math.max(0, end.getTime() - start.getTime()); // 毫秒
 
   const days = Math.floor(diff / (1000 * 60 * 60 * 24));
@@ -57,11 +62,14 @@ export function getTimeDifference(startTime: string, endTime: string) {
   const hours = Math.floor(diff / (1000 * 60 * 60));
   diff %= 1000 * 60 * 60;
 
-  // const minutes = Math.floor(diff / (1000 * 60));
-  // diff %= (1000 * 60);
+  const minutes = Math.floor(diff / (1000 * 60));
+  diff %= 1000 * 60;
   if (days) {
-    return `${days}天 ${hours}小时`;
+    return `${days}天 ` + (hours ? hours + "小时 " : "") + (minutes ? minutes + "分钟" : "");
   } else if (hours) {
-    return `${hours}小时`;
+    return `${hours}小时 ` + (minutes ? minutes + "分钟" : "");
+  } else if (minutes) {
+    return `${minutes}分钟`;
   }
+  return "---";
 }

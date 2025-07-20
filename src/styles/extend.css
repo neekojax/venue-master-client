@@ -367,10 +367,13 @@
     background-color: #1E90FF;
     border-color: #1E90FF;
 }
-.ant-select-single.ant-select-open .ant-select-selection-item,.custom-select .ant-select-arrow,.ant-select-single.ant-select-show-arrow .ant-select-selection-item,.custom-select .ant-select-selection-placeholder {
+.custom-select .ant-select-arrow,.custom-select .ant-select-selection-placeholder {
     color: #fff;
     font-size: 12px;
 }
 .ant-btn{
+    font-size: 12px !important;
+}
+.ant-select-selection-item{
     font-size: 12px !important;
 }

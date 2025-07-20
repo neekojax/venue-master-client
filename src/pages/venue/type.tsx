@@ -18,6 +18,7 @@ export type EventLogParam = {
 
   log_type: string;
   impact_count: number;
+  impact_power_loss: number;
   event_reason: string;
   resolution_measures: string;
 };
