@@ -12,6 +12,7 @@ import dayjs from "dayjs";
 import isBetween from "dayjs/plugin/isBetween"; // 引入 isBetween 插件
 import { useSelector, useSettingsStore } from "@/stores"; // 根据实际路径调整
 
+import UploadExcel from "@/pages/venue/components/UploadExcel";
 import {
   useDeleteUpdate,
   useEventList,
@@ -338,6 +339,7 @@ const App: React.FC = () => {
                   批量删除
                 </Button>
               )}
+              <UploadExcel />
               <Button
                 icon={<DownloadOutlined />}
                 size="middle"
