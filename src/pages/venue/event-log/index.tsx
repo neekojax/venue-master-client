@@ -180,7 +180,7 @@ const App: React.FC = () => {
         // { text: "高温", value: "高温" },
         // { text: "雷电", value: "雷电" },
         // { text: "其他", value: "其他" },
-                { text: "电力", value: "电力" },
+        { text: "电力", value: "电力" },
         { text: "高温", value: "高温" },
         { text: "极端天气", value: "极端天气" },
         { text: "日常维护", value: "日常维护" },
@@ -193,9 +193,11 @@ const App: React.FC = () => {
         const colors = {
           限电: "red",
           设备故障: "orange",
-          系统异常: "purple",
-          人员事故: "blue",
-          质量问题: "green",
+          电力: "cyan", // 为电力指定颜色
+          高温: "blue", // 为高温指定颜色
+          极端天气: "magenta", // 为极端天气指定颜色
+          日常维护: "green", // 为日常维护指定颜色
+          网络: "geekblue", // 为网络指定颜色
           其他: "default",
         };
         return <Tag color={colors[text as keyof typeof colors]}>{text}</Tag>;
@@ -498,7 +500,6 @@ const App: React.FC = () => {
             showQuickJumper: true,
             showTotal: (total) => `共 ${total} 条记录`,
           }}
-        
         />
       </div>
       <Modal
