@@ -399,6 +399,8 @@ const App: React.FC = () => {
               />
               <Select
                 mode="multiple"
+                maxTagCount="responsive"
+                maxTagTextLength={4} // 可选：限制每个标签显示文字长度
                 size="medium"
                 maxTagCount="responsive"
                 maxTagTextLength={4} // 可选：限制每个标签显示文字长度
@@ -422,6 +424,8 @@ const App: React.FC = () => {
                 value={selectedEventType}
                 onChange={setSelectedEventType}
                 style={{ width: 200 }}
+                maxTagCount="responsive"
+                maxTagTextLength={4} // 可选：限制每个标签显示文字长度
                 size="meddle"
                 // className="!rounded-lg"
               >
@@ -500,6 +504,7 @@ const App: React.FC = () => {
             showQuickJumper: true,
             showTotal: (total) => `共 ${total} 条记录`,
           }}
+          // className="px-6"
         />
       </div>
       <Modal
