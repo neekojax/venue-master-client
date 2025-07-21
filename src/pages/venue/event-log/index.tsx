@@ -398,6 +398,8 @@ const App: React.FC = () => {
               <Select
                 mode="multiple"
                 size="medium"
+                maxTagCount="responsive"
+                maxTagTextLength={4} // 可选：限制每个标签显示文字长度
                 placeholder="选择场地"
                 value={selectedLocation}
                 onChange={setSelectedLocation}
@@ -412,6 +414,8 @@ const App: React.FC = () => {
               </Select>
               <Select
                 mode="multiple"
+                maxTagCount="responsive"
+                maxTagTextLength={4} // 可选：限制每个标签显示文字长度
                 placeholder="选择事件类型"
                 value={selectedEventType}
                 onChange={setSelectedEventType}
