@@ -559,7 +559,7 @@ const App: React.FC = () => {
             </div>
 
             <div className="rounded-lg bg-gradient-to-br from-amber-50 to-amber-100 p-6 shadow-sm">
-              <div className="text-sm font-medium text-gray-500">24小时总故障数</div>
+              <div className="text-sm font-medium text-gray-500">总故障数</div>
               <div className="mt-2 flex items-baseline">
                 <span className="text-3xl font-bold text-amber-600">
                   {(statistics.totalFailures24h || 0).toLocaleString()}
