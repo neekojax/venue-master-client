@@ -174,12 +174,19 @@ const App: React.FC = () => {
       dataIndex: "log_type",
       width: 120,
       filters: [
-        { text: "限电", value: "限电" },
-        { text: "设备故障", value: "设备故障" },
-        { text: "系统异常", value: "系统异常" },
+        // { text: "限电", value: "限电" },
+        // { text: "设备故障", value: "设备故障" },
+        // { text: "系统异常", value: "系统异常" },
+        // { text: "高温", value: "高温" },
+        // { text: "雷电", value: "雷电" },
+        // { text: "其他", value: "其他" },
+                { text: "电力", value: "电力" },
         { text: "高温", value: "高温" },
-        { text: "雷电", value: "雷电" },
-        { text: "其他", value: "其他" },
+        { text: "极端天气", value: "极端天气" },
+        { text: "日常维护", value: "日常维护" },
+        { text: "设备故障", value: "设备故障" },
+        { text: "网络", value: "网络" },
+        { text: "限电", value: "限电" },
       ],
       onFilter: (value, record) => record.log_type === value,
       render: (text) => {
@@ -412,7 +419,7 @@ const App: React.FC = () => {
                 size="meddle"
                 // className="!rounded-lg"
               >
-                {["限电", "设备故障", "系统异常", "高温", "雷电", "其他"].map((type) => (
+                {["电力", "高温", "极端天气", "日常维护", "设备故障", "网络", "限电"].map((type) => (
                   <Option key={type} value={type}>
                     {type}
                   </Option>
@@ -487,7 +494,7 @@ const App: React.FC = () => {
             showQuickJumper: true,
             showTotal: (total) => `共 ${total} 条记录`,
           }}
-          className="px-6"
+        
         />
       </div>
       <Modal
