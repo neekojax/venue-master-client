@@ -4,6 +4,7 @@ import { DownloadOutlined } from "@ant-design/icons";
 import { Button, DatePicker, Input, message, Select, Table, Tag, Tooltip } from "antd";
 import type { ColumnsType } from "antd/es/table";
 import { useSelector, useSettingsStore } from "@/stores";
+import * as XLSX from "xlsx";
 
 import { fetchDailyReport, updateReport } from "@/pages/report/api.tsx";
 import { ReportUpdateParam } from "@/pages/report/type.tsx";
@@ -399,61 +400,79 @@ const App: React.FC = () => {
 
   // 导出数据为 CSV 的函数
   const exportToCSV = () => {
-    const csvHeader =
-      [
-        "场地编号",
-        "场地名",
-        "24小时产出（BTC）",
-        "理论算力（E）",
-        "24小时算力（E）",
-        "24小时有效率",
-        "T-2日有效率",
-        "T-3日有效率",
-        "托管台数",
-        "总故障台数",
-        "24小时故障数",
-        "24小时故障率",
-        "T-2日故障率",
-        "T-3日故障率",
-        "影响算力（E）",
-        "影响占比",
-        "影响产出（BTC）",
-        "事件描述",
-      ].join(",") + "\n";
+    const data = filteredData.map((item) => ({
+      // "场地编号": item.siteId,
+      "场地名": item.siteName,
+      "24小时产出（BTC）": item.btcOutput24h.toFixed(4),
+      "理论算力（E）": item.theoreticalPower.toFixed(2),
+      "24小时算力（E）": item.power24h.toFixed(2),
+      "24小时有效率": item.effectiveRate24h.toFixed(2) + "%",
+      "T-2日有效率": item.effectiveRateT2.toFixed(2) + "%",
+      "T-3日有效率": item.effectiveRateT3.toFixed(2) + "%",
+      "托管台数": item.totalMachines.toLocaleString(),
+      "总故障台数": item.totalFailures.toLocaleString(),
+      "24小时故障数": item.failures24h.toLocaleString(),
+      "24小时故障率": item.failureRate24h.toFixed(2) + "%",
+      "T-2日故障率": item.failureRateT2.toFixed(2) + "%",
+      "T-3日故障率": item.failureRateT3.toFixed(2) + "%",
+      "影响算力（E）": item.powerImpact.toFixed(2),
+      "影响占比": item.impactRatio.toFixed(2) + "%",
+      "影响产出（BTC）": item.outputImpact.toFixed(4),
+      "事件描述": item.events,
+    }));
 
-    const csvRows = filteredData.map((item) =>
-      [
-        item.siteId,
-        item.siteName,
-        item.btcOutput24h.toFixed(4),
-        item.theoreticalPower.toFixed(2),
-        item.power24h.toFixed(2),
-        item.effectiveRate24h.toFixed(2) + "%",
-        item.effectiveRateT2.toFixed(2) + "%",
-        item.effectiveRateT3.toFixed(2) + "%",
-        item.totalMachines.toLocaleString(),
-        item.totalFailures.toLocaleString(),
-        item.failures24h.toLocaleString(),
-        item.failureRate24h.toFixed(2) + "%",
-        item.failureRateT2.toFixed(2) + "%",
-        item.failureRateT3.toFixed(2) + "%",
-        item.powerImpact.toFixed(2),
-        item.impactRatio.toFixed(2) + "%",
-        item.outputImpact.toFixed(4),
-        item.events,
-      ].join(","),
-    );
+    const worksheet = XLSX.utils.json_to_sheet(data);
+    const workbook = XLSX.utils.book_new();
 
-    const csvString = csvHeader + csvRows.join("\n");
-    const blob = new Blob([csvString], { type: "text/csv;charset=utf-8;" });
-    const url = URL.createObjectURL(blob);
+    // 设置表头样式
+    const headerStyle = {
+      fill: {
+        fgColor: { rgb: "00BFFF" }, // 背景色：亮蓝色
+      },
+      font: {
+        color: { rgb: "FFFFFF" }, // 字体颜色：白色
+        bold: true, // 粗体
+      },
+    };
 
-    const link = document.createElement("a");
-    link.href = url;
-    link.setAttribute("download", `运营日报_${selectedDate}.csv`);
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+    // 应用样式到表头
+    const ref = worksheet["!ref"];
+    if (ref) {
+      // 确保 ref 是有效的
+      const range = XLSX.utils.decode_range(ref);
+      for (let col = range.s.c; col <= range.e.c; col++) {
+        const cellAddress = XLSX.utils.encode_cell({ r: 0, c: col });
+        if (!worksheet[cellAddress]) continue;
+        worksheet[cellAddress].s = headerStyle;
+      }
+    }
+
+    // 设置列宽
+    const columnWidths = [
+      // { wch: 10 }, // 场地编号
+      { wch: 30 }, // 场地名
+      { wch: 20 }, // 24小时产出（BTC）
+      { wch: 20 }, // 理论算力（E）
+      { wch: 20 }, // 24小时算力（E）
+      { wch: 15 }, // 24小时有效率
+      { wch: 15 }, // T-2日有效率
+      { wch: 15 }, // T-3日有效率
+      { wch: 15 }, // 托管台数
+      { wch: 15 }, // 总故障台数
+      { wch: 15 }, // 24小时故障数
+      { wch: 15 }, // 24小时故障率
+      { wch: 15 }, // T-2日故障率
+      { wch: 15 }, // T-3日故障率
+      { wch: 20 }, // 影响算力（E）
+      { wch: 15 }, // 影响占比
+      { wch: 20 }, // 影响产出（BTC）
+      { wch: 50 }, // 事件描述
+    ];
+
+    worksheet["!cols"] = columnWidths;
+
+    XLSX.utils.book_append_sheet(workbook, worksheet, "运营日报");
+    XLSX.writeFile(workbook, `运营日报_${selectedDate}.xlsx`);
   };
 
   return (
