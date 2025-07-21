@@ -101,7 +101,7 @@ export default function VenueRunningKpi() {
         title: "场地",
         dataIndex: "venueName",
         fixed: "left",
-        width: 200,
+        width: 300,
         render: (text: string) => {
           const isSpecialVenue = text === "Arct-HF01-J XP-AR-US"; // 判断是否为特殊场地
           return (
