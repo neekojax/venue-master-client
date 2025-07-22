@@ -1,10 +1,12 @@
 // UploadExcel.tsx
-import React from "react";
+import React, { useState } from "react";
 import { UploadOutlined } from "@ant-design/icons";
 import { Button, message, Upload } from "antd";
 import axios from "axios";
 
 const UploadExcel: React.FC = () => {
+  const [loading, setLoading] = useState(false);
+
   const uploadProps = {
     name: "file", // 后端接收的字段名
     accept: ".xlsx,.xls", // 限制文件类型
@@ -37,7 +39,7 @@ const UploadExcel: React.FC = () => {
 
       try {
         const token = localStorage.getItem("access_token");
-
+        setLoading(true); // 开始 loading
         const response = await axios.post("https://datastring.cc/admin-api/event/import", formData, {
           headers: {
             "Content-Type": "multipart/form-data", // 确保设置了正确的内容类型
@@ -51,13 +53,15 @@ const UploadExcel: React.FC = () => {
         // console.error("上传失败:", error);
         message.error("上传失败");
         throw error; // 抛出错误以便在调用时被捕获
+      } finally {
+        setLoading(false); // 结束 loading
       }
     },
   };
 
   return (
     <Upload {...uploadProps}>
-      <Button icon={<UploadOutlined />} size="middle">
+      <Button icon={<UploadOutlined />} size="middle" loading={loading}>
         导入事件
       </Button>
     </Upload>
