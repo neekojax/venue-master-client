@@ -104,8 +104,7 @@ const App: React.FC = () => {
       fixed: "left",
       width: 250,
       render: (text: string) => {
-        const isSpecialVenue =
-          text === "Arct-HF01-J XP-AR-US" || text === "ARCT Technologies-HF02-AR-US";
+        const isSpecialVenue = text === "Arct-HF01-J XP-AR-US" || text === "ARCT Technologies-HF02-AR-US";
         return (
           <Tooltip
             title={text}
@@ -123,12 +122,12 @@ const App: React.FC = () => {
                 fontWeight: isSpecialVenue ? "bold" : "normal", // 加粗特殊场地
               }}
             >
-              {text}
               {isSpecialVenue && (
                 <Tag color="red" style={{ marginLeft: 2 }}>
                   补充
                 </Tag>
               )}
+              {text}
             </div>
           </Tooltip>
         );
