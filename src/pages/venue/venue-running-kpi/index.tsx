@@ -103,7 +103,8 @@ export default function VenueRunningKpi() {
         fixed: "left",
         width: 300,
         render: (text: string) => {
-          const isSpecialVenue = text === "Arct-HF01-J XP-AR-US"; // 判断是否为特殊场地
+          const isSpecialVenue =
+            text === "Arct-HF01-J XP-AR-US" || text === "ARCT Technologies-HF02-AR-US";
           return (
             <Tooltip
               title={text}

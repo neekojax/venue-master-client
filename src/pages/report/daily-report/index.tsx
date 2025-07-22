@@ -104,7 +104,8 @@ const App: React.FC = () => {
       fixed: "left",
       width: 250,
       render: (text: string) => {
-        const isSpecialVenue = text === "Arct-HF01-J XP-AR-US"; // 判断是否为特殊场地
+        const isSpecialVenue =
+          text === "Arct-HF01-J XP-AR-US" || text === "ARCT Technologies-HF02-AR-US";
         return (
           <Tooltip
             title={text}
