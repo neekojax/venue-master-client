@@ -3,8 +3,8 @@ import React, { useEffect, useRef, useState } from "react";
 import { DownloadOutlined } from "@ant-design/icons";
 import { Button, DatePicker, Input, message, Select, Table, Tag, Tooltip } from "antd";
 import type { ColumnsType } from "antd/es/table";
-import { useSelector, useSettingsStore } from "@/stores";
 import * as XLSX from "xlsx";
+import { useSelector, useSettingsStore } from "@/stores";
 
 import { fetchDailyReport, updateReport } from "@/pages/report/api.tsx";
 import { ReportUpdateParam } from "@/pages/report/type.tsx";
@@ -402,23 +402,23 @@ const App: React.FC = () => {
   const exportToCSV = () => {
     const data = filteredData.map((item) => ({
       // "场地编号": item.siteId,
-      "场地名": item.siteName,
+      场地名: item.siteName,
       "24小时产出（BTC）": item.btcOutput24h.toFixed(4),
       "理论算力（E）": item.theoreticalPower.toFixed(2),
       "24小时算力（E）": item.power24h.toFixed(2),
       "24小时有效率": item.effectiveRate24h.toFixed(2) + "%",
       "T-2日有效率": item.effectiveRateT2.toFixed(2) + "%",
       "T-3日有效率": item.effectiveRateT3.toFixed(2) + "%",
-      "托管台数": item.totalMachines.toLocaleString(),
-      "总故障台数": item.totalFailures.toLocaleString(),
+      托管台数: item.totalMachines.toLocaleString(),
+      总故障台数: item.totalFailures.toLocaleString(),
       "24小时故障数": item.failures24h.toLocaleString(),
       "24小时故障率": item.failureRate24h.toFixed(2) + "%",
       "T-2日故障率": item.failureRateT2.toFixed(2) + "%",
       "T-3日故障率": item.failureRateT3.toFixed(2) + "%",
       "影响算力（E）": item.powerImpact.toFixed(2),
-      "影响占比": item.impactRatio.toFixed(2) + "%",
+      影响占比: item.impactRatio.toFixed(2) + "%",
       "影响产出（BTC）": item.outputImpact.toFixed(4),
-      "事件描述": item.events,
+      事件描述: item.events,
     }));
 
     const worksheet = XLSX.utils.json_to_sheet(data);

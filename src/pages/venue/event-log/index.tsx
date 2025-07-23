@@ -167,6 +167,7 @@ const App: React.FC = () => {
       dataIndex: "start_time",
       width: 280,
       render: (_text, record) => `${record.start_time} - ${record.end_time}`,
+      sorter: (a, b) => dayjs(a.log_date).unix() - dayjs(b.log_date).unix(),
     },
 
     {

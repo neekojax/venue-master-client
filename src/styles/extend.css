@@ -377,3 +377,10 @@
 .ant-select-selection-item{
     font-size: 12px !important;
 }
+/* 固定 */
+.sticky-header .ant-table-thead {
+    position: fixed;
+    top: 60px;
+    z-index: 100;
+    background: #fff;
+  }

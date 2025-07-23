@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { DownloadOutlined, SearchOutlined } from "@ant-design/icons";
 import { Button, Input, Spin, Table, Tag, Tooltip } from "antd";
 import { ReactEcharts } from "@/components/react-echarts"; // 导入自定义的 ReactEcharts 组件
@@ -9,6 +9,9 @@ import { fetchMiningPoolRunningData } from "@/pages/venue/api.tsx";
 
 export default function VenueRunningKpi() {
   useAuthRedirect();
+  const [isSticky, setIsSticky] = useState(false);
+  // const tableRef = useRef(null);
+  const tableRef = useRef<HTMLDivElement>(null);
   const { poolType } = useSettingsStore(useSelector(["poolType"]));
 
   const [runningData, setRunningData] = useState<any>(null); // 状态数据
@@ -18,6 +21,28 @@ export default function VenueRunningKpi() {
   // const [error] = useState<string | null>(null); // 错误信息
 
   // const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([]);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      const offsetTop = tableRef.current?.getBoundingClientRect().top;
+      setIsSticky(true);
+      // console.log("offsetTop", offsetTop)
+      // setIsSticky(offsetTop <= 0);
+      // if (offsetTop < 60) {
+      //   setIsSticky(true)
+      // } else {
+      //   setIsSticky(false)
+      // }
+      console.log("offsetTop", offsetTop, "isSticky", isSticky);
+      // if (offsetTop <= 0) {
+      //   setIsSticky(true)
+      // }
+      // setIsSticky(offsetTop <= 0);
+    };
+
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
 
   const fetchData = async (poolType: string) => {
     try {
@@ -360,42 +385,48 @@ export default function VenueRunningKpi() {
       {/*    defaultPageSize: 20, // 默认每页显示的条目数*/}
       {/*  }}*/}
       {/*/>*/}
+      <div
+        ref={tableRef}
+        className={"sticky-header"}
 
-      <Table
-        // rowSelection={rowSelection}
-        columns={columns}
-        dataSource={filteredData}
-        scroll={{ x: 1800 }}
-        sticky
-        // bordered
-        className="custom-table"
-        pagination={{
-          position: ["bottomCenter"],
-          showSizeChanger: true,
-          pageSizeOptions: ["20", "30", "50"],
-          defaultPageSize: 20,
-          showTotal: (total) => `共 ${total} 条`,
-          total: filteredData.length,
-          onChange: () => {
-            const tableBody = document.querySelector(".ant-table-body");
-            if (tableBody) {
-              tableBody.scrollTop = 0;
-            }
-          },
-        }}
-        onRow={() => ({
-          onMouseEnter: () => {
-            const tableBody = document.querySelector(".ant-table-body");
-            if (tableBody) {
-              const { scrollTop, scrollHeight, clientHeight } = tableBody;
-              if (scrollHeight - scrollTop - clientHeight < 50) {
-                // 触发加载更多的逻辑
-                console.log("触发加载更多");
+        // className={isSticky ? 'sticky-header' : ''}
+      >
+        <Table
+          // rowSelection={rowSelection}
+          columns={columns}
+          dataSource={filteredData}
+          scroll={{ x: 1800 }}
+          // sticky
+          // bordered
+          className="custom-table"
+          pagination={{
+            position: ["bottomCenter"],
+            showSizeChanger: true,
+            pageSizeOptions: ["20", "30", "50"],
+            defaultPageSize: 20,
+            showTotal: (total) => `共 ${total} 条`,
+            total: filteredData.length,
+            onChange: () => {
+              const tableBody = document.querySelector(".ant-table-body");
+              if (tableBody) {
+                tableBody.scrollTop = 0;
               }
-            }
-          },
-        })}
-      />
+            },
+          }}
+          onRow={() => ({
+            onMouseEnter: () => {
+              const tableBody = document.querySelector(".ant-table-body");
+              if (tableBody) {
+                const { scrollTop, scrollHeight, clientHeight } = tableBody;
+                if (scrollHeight - scrollTop - clientHeight < 50) {
+                  // 触发加载更多的逻辑
+                  console.log("触发加载更多");
+                }
+              }
+            },
+          })}
+        />
+      </div>
     </div>
   );
 }
