@@ -1,5 +1,5 @@
 import { useNavigate } from "react-router-dom";
-import { LogoutOutlined, UserOutlined } from "@ant-design/icons";
+import { EditFilled, LogoutOutlined, UserOutlined } from "@ant-design/icons";
 import { Avatar, Dropdown, type MenuProps } from "antd";
 import { ROUTE_PATHS } from "@/constants/common";
 
@@ -9,6 +9,20 @@ export default function UserAvatar() {
   const navigate = useNavigate();
 
   const items: MenuProps["items"] = [
+    {
+      key: "loginOut",
+      label: (
+        <>
+          <EditFilled className="mr-2" /> 修改密码
+        </>
+      ),
+      onClick: () => {
+        navigate("/user");
+        // const token = localStorage.getItem("refresh_token");
+        // loginOut({ refresh_token: token });
+        // navigate(ROUTE_PATHS.login);
+      },
+    },
     {
       key: "loginOut",
       label: (

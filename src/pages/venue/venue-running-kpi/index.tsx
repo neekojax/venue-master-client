@@ -25,14 +25,11 @@ export default function VenueRunningKpi() {
   useEffect(() => {
     const handleScroll = () => {
       const offsetTop = tableRef.current?.getBoundingClientRect().top;
-      setIsSticky(true);
-      // console.log("offsetTop", offsetTop)
-      // setIsSticky(offsetTop <= 0);
-      // if (offsetTop < 60) {
-      //   setIsSticky(true)
-      // } else {
-      //   setIsSticky(false)
-      // }
+      if (offsetTop < 80) {
+        setIsSticky(true);
+      } else {
+        setIsSticky(false);
+      }
       console.log("offsetTop", offsetTop, "isSticky", isSticky);
       // if (offsetTop <= 0) {
       //   setIsSticky(true)
@@ -387,16 +384,16 @@ export default function VenueRunningKpi() {
       {/*/>*/}
       <div
         ref={tableRef}
-        className={"sticky-header"}
+        // className={"sticky-header"}
 
-        // className={isSticky ? 'sticky-header' : ''}
+        className={isSticky ? "sticky-header" : ""}
       >
         <Table
           // rowSelection={rowSelection}
           columns={columns}
           dataSource={filteredData}
-          scroll={{ x: 1800 }}
-          // sticky
+          scroll={{ x: 1800, y: 800 }}
+          sticky
           // bordered
           className="custom-table"
           pagination={{

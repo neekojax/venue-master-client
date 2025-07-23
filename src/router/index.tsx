@@ -3,6 +3,7 @@ import { ProgressBar } from "@/components/progress-bar";
 import { baseRoute } from "./modules/base";
 import { dashboardRoute } from "./modules/dashboard";
 import { landingRoute } from "./modules/landing";
+import { userRoute } from "./modules/user";
 import { ROUTE_PATHS } from "@/constants/common";
 import { custodyMenuRoute } from "@/router/modules/custody-statistics.tsx";
 import { electricMenuRoute } from "@/router/modules/electric-data.tsx";
@@ -33,7 +34,7 @@ const routes: RouteObject[] = [
         index: true,
         element: <Navigate replace to={ROUTE_PATHS.landing} />,
       },
-
+      userRoute,
       miningRoute,
       landingRoute,
       dashboardRoute,
