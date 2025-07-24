@@ -25,11 +25,12 @@ const PoolTypeSelector = () => {
       // }}
       onChange={handleChange}
       suffixIcon={<GlobalOutlined />} // 添加图标
-      className="custom-select"
+      className="custom-select header-custom-select"
       style={{
         backgroundColor: "transparent",
         border: "none",
         boxShadow: "none",
+        color: "#fff",
       }}
       size={"middle"}
     >

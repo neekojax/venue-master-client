@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { FaAdn, FaFish } from "react-icons/fa6";
 import { WiDirectionUpRight } from "react-icons/wi";
 import { ExportOutlined, SearchOutlined } from "@ant-design/icons";
-import { Button, Input, Radio, Spin, Tag, Tooltip } from "antd";
+import { Button, Col, Input, Radio, Row, Spin, Tag, Tooltip } from "antd";
 import EditTable from "@/components/edit-table";
 import useAuthRedirect from "@/hooks/useAuthRedirect.ts";
 import { useSelector, useSettingsStore } from "@/stores";
@@ -131,6 +131,7 @@ export default function MiningHashRatePage() {
         title: "子账户",
         dataIndex: "pool_name",
         key: "pool_name",
+        responsive: ["xs", "sm", "md"], // 适配所有屏幕
         width: "10%",
         // render: (text: any) => <span style={{ color: "#333" }}>{text}</span>,
         render: (text: any) => (
@@ -242,7 +243,21 @@ export default function MiningHashRatePage() {
         ),
       },
       {
-        title: "昨日算力达成率",
+        title: () => (
+          <Tooltip title="昨日算力达成率">
+            <span
+              style={{
+                display: "inline-block",
+                maxWidth: 100,
+                overflow: "hidden",
+                textOverflow: "ellipsis",
+                whiteSpace: "nowrap",
+              }}
+            >
+              达成率
+            </span>
+          </Tooltip>
+        ),
         dataIndex: "last_hash_rate_effective",
         key: "last_hash_rate_effective",
         width: "5%",
@@ -258,13 +273,6 @@ export default function MiningHashRatePage() {
           return valueA - valueB; // 返回值用于排序
         },
       },
-      // {
-      //   title: "结算",
-      //   className: "border-bottom",
-      //   style: {
-      //     borderBottom: "1px solid #e0e0e0",
-      //   },
-      //   children: [
       {
         title: "结算算力",
         width: "10%",
@@ -294,8 +302,6 @@ export default function MiningHashRatePage() {
         render: (text: any) => (
           <span>
             <Tag color="#f50">{text}</Tag>
-            {/* <span style={{ color: "#24ac95" }}>{text}</span> */}
-            {/* <span style={{ fontSize: "em" }}> </span> */}
           </span>
         ),
       },
@@ -334,6 +340,7 @@ export default function MiningHashRatePage() {
         dataIndex: "update_time",
         key: "update_time",
         width: 80,
+        align: "right",
         render: (text: any) => {
           const date = new Date(text);
           // const month = (date.getMonth() + 1).toString().padStart(2, '0');
@@ -349,6 +356,7 @@ export default function MiningHashRatePage() {
         dataIndex: "link",
         key: "link",
         width: 50,
+
         render: (link: string) => (
           <a
             href={link}
@@ -411,7 +419,7 @@ export default function MiningHashRatePage() {
 
   return (
     <div style={{ padding: "20px 0px" }} className="longdataTable">
-      <div
+      {/* <div
         style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}
       >
         <div className={"flex"}>
@@ -439,13 +447,30 @@ export default function MiningHashRatePage() {
           >
             导出
           </Button>
-          {/* <UploadOutlined /> */}
-          {/* <Button onClick={onDownload} style={{ marginLeft: 8 }}>
-            <img src={exportIcon} alt="导出" style={{ width: 30, height: 20 }} />
-            导出
-          </Button> */}
         </div>
-      </div>
+      </div> */}
+      <Row gutter={[16, 16]} justify="space-between" align="middle">
+        <Col xs={24} sm={24} md={12}>
+          <Radio.Group className="filterRadio" onChange={handlePoolCategoryChange} value={poolCategory}>
+            <Radio.Button value="主矿池">主矿池</Radio.Button>
+            <Radio.Button value="备用矿池">备用矿池</Radio.Button>
+          </Radio.Group>
+        </Col>
+        <Col xs={24} sm={24} md={12}>
+          <div style={{ display: "flex", flexWrap: "wrap", gap: "8px", justifyContent: "flex-end" }}>
+            <Input
+              prefix={<SearchOutlined />}
+              placeholder="搜索"
+              value={searchTerm}
+              onChange={handleSearch}
+              style={{ width: "200px" }}
+            />
+            <Button icon={<ExportOutlined />} onClick={onDownload}>
+              导出
+            </Button>
+          </div>
+        </Col>
+      </Row>
 
       {isLoadingPools ? (
         <Spin style={{ marginTop: 20 }} />

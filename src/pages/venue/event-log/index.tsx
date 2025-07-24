@@ -109,7 +109,7 @@ const App: React.FC = () => {
     {
       title: "编号",
       dataIndex: "key",
-      width: "60px",
+      width: "70px",
       rowScope: "row",
     },
     {
@@ -153,6 +153,16 @@ const App: React.FC = () => {
       title: "影响时长",
       dataIndex: "log_date",
       width: 120,
+      filters: [
+        { text: "未结束事件", value: "valid" },
+        { text: "已结束事件", value: "empty" },
+      ],
+      onFilter: (value, record) => {
+        const hasDuration = record.start_time && record.end_time;
+        if (value === "valid") return hasDuration;
+        if (value === "empty") return !hasDuration;
+        return true;
+      },
       render: (text, record) => {
         if (record.start_time && record.end_time) {
           return getTimeDifference(record.start_time, record.end_time);
@@ -160,7 +170,15 @@ const App: React.FC = () => {
         return "---";
         // return dayjs(text).format("YYYY-MM-DD HH:mm");
       },
-      // sorter: (a, b) => dayjs(a.log_date).unix() - dayjs(b.log_date).unix(),
+      sorter: (a, b) => {
+        const durationA =
+          a.start_time && a.end_time ? dayjs(a.end_time).diff(dayjs(a.start_time), "second") : 0;
+
+        const durationB =
+          b.start_time && b.end_time ? dayjs(b.end_time).diff(dayjs(b.start_time), "second") : 0;
+
+        return durationA - durationB;
+      },
     },
     {
       title: "时间范围",
@@ -168,8 +186,8 @@ const App: React.FC = () => {
       width: 280,
       render: (_text, record) => `${record.start_time} - ${record.end_time}`,
       sorter: (a, b) => dayjs(a.log_date).unix() - dayjs(b.log_date).unix(),
+      defaultSortOrder: "descend", // 👈 默认按影响时长从大到小排序
     },
-
     {
       title: "事件类型",
       dataIndex: "log_type",
@@ -300,9 +318,12 @@ const App: React.FC = () => {
   const handleEdit = (record: EventLog) => {
     form.setFieldsValue({
       ...record,
-      log_date: dayjs(record.log_date),
-      start_time: dayjs(record.start_time),
-      end_time: dayjs(record.end_time),
+      // log_date: dayjs(record.log_date),
+      // start_time: dayjs(record.start_time),
+      log_date: record.log_date ? dayjs(record.log_date) : undefined,
+      start_time: record.start_time ? dayjs(record.start_time) : undefined, //dayjs(record.start_time),
+      end_time: record.end_time ? dayjs(record.end_time) : undefined, // 如果为 null/undefined，就不传入初始值
+      // end_time: dayjs(record.end_time),
     });
     setIsModalVisible(true);
   };
@@ -570,7 +591,6 @@ const App: React.FC = () => {
             >
               <Input type="number" placeholder="请输入影响台数" style={{ fontSize: "12px" }} />
             </Form.Item>
-
             <Form.Item
               name="impact_power_loss"
               label="影响算力"

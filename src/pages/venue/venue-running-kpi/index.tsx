@@ -1,50 +1,74 @@
-import React, { useEffect, useRef, useState } from "react";
-import { DownloadOutlined, SearchOutlined } from "@ant-design/icons";
-import { Button, Input, Spin, Table, Tag, Tooltip } from "antd";
+import React, { useEffect, useState } from "react";
+import { DownloadOutlined } from "@ant-design/icons";
+import { Button, Spin, Table, Tag, Tooltip } from "antd";
+import { number } from "echarts";
 import { ReactEcharts } from "@/components/react-echarts"; // 导入自定义的 ReactEcharts 组件
+import HeaderSection from "./components/HeaderSection";
 import useAuthRedirect from "@/hooks/useAuthRedirect.ts";
 import { useSelector, useSettingsStore } from "@/stores";
+
+import "./components/HeaderSection.css";
 
 import { fetchMiningPoolRunningData } from "@/pages/venue/api.tsx";
 
 export default function VenueRunningKpi() {
   useAuthRedirect();
-  const [isSticky, setIsSticky] = useState(false);
+  // const [isSticky, setIsSticky] = useState(false);
   // const tableRef = useRef(null);
-  const tableRef = useRef<HTMLDivElement>(null);
+  // const tableRef = useRef<HTMLDivElement>(null);
   const { poolType } = useSettingsStore(useSelector(["poolType"]));
 
   const [runningData, setRunningData] = useState<any>(null); // 状态数据
   const [columns, setColumns] = useState<any>([]);
   const [searchTerm, setSearchTerm] = useState(""); // 新增搜索状态
-  const [loading, setLoading] = useState<boolean>(true); // 加载状态
+  const [loading, setLoading] = useState<boolean>(true); //
+  const [venueNums, setVenueNum] = useState(number);
+  const [subAccountNum, setSubAccountNum] = useState(number);
   // const [error] = useState<string | null>(null); // 错误信息
 
   // const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([]);
 
-  useEffect(() => {
-    const handleScroll = () => {
-      const offsetTop = tableRef.current?.getBoundingClientRect().top;
-      if (offsetTop < 80) {
-        setIsSticky(true);
-      } else {
-        setIsSticky(false);
-      }
-      console.log("offsetTop", offsetTop, "isSticky", isSticky);
-      // if (offsetTop <= 0) {
-      //   setIsSticky(true)
-      // }
-      // setIsSticky(offsetTop <= 0);
-    };
+  // useEffect(() => {
+  //   const handleScroll = () => {
+  //     const offsetTop = tableRef.current?.getBoundingClientRect().top;
+  //     if (offsetTop < 80) {
+  //       setIsSticky(true);
+  //     } else {
+  //       setIsSticky(false);
+  //     }
+  //     // console.log("offsetTop", offsetTop, "isSticky", isSticky);
+  //     // if (offsetTop <= 0) {
+  //     //   setIsSticky(true)
+  //     // }
+  //     // setIsSticky(offsetTop <= 0);
+  //   };
 
-    window.addEventListener("scroll", handleScroll);
-    return () => window.removeEventListener("scroll", handleScroll);
-  }, []);
+  //   window.addEventListener("scroll", handleScroll);
+  //   return () => window.removeEventListener("scroll", handleScroll);
+  // }, []);
 
   const fetchData = async (poolType: string) => {
     try {
+      setLoading(true);
       const runningDataResult = await fetchMiningPoolRunningData(poolType);
       setRunningData(runningDataResult.data); // 假设返回数据在 result.data 中
+
+      const rawData = runningDataResult.data || [];
+      const venueNumMap = {}; // 场地遍历
+
+      // 遍历数据并覆盖重复值
+      rawData.forEach((item: any) => {
+        const key = item.venueName; // 用某字段作为唯一 key
+        if (key) {
+          (venueNumMap as Record<string, any>)[key] = item; // 后出现的会覆盖前面的
+        }
+      });
+
+      // 转换成数组（可选）
+      const venueArray = Object.values(venueNumMap);
+      setVenueNum(venueArray?.length ?? 0);
+      setSubAccountNum(rawData?.length ?? 0);
+      // console.log(nameArray.length)
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (err) {
       // 处理错误
@@ -162,7 +186,7 @@ export default function VenueRunningKpi() {
       {
         title: "理论算力 (PH/s)",
         dataIndex: "theoreticalHashRate",
-        width: 120,
+        width: 125,
         sorter: (a: { theoreticalHashRate: number }, b: { theoreticalHashRate: number }) =>
           a.theoreticalHashRate - b.theoreticalHashRate,
       },
@@ -320,29 +344,53 @@ export default function VenueRunningKpi() {
   // 搜索处理函数
   const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchTerm(e.target.value);
+    // setSearchText(selectedKeys[0]);
+    // setSearchedColumn(dataIndex);
   };
 
   // Loading 状态
   if (loading) {
-    return <Spin tip="加载中..." />;
+    return (
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          height: "100vh", // 或具体高度
+        }}
+      >
+        <Spin tip="加载中..." />
+      </div>
+    );
   }
 
+  // const filteredData = runningData
+  //   ?.filter((item: { [s: string]: unknown } | ArrayLike<unknown>) => {
+  //     return Object.values(item).some((value) =>
+  //       String(value).toLowerCase().includes(searchTerm.toLowerCase()),
+  //     );
+  //   })
+  //   .sort((a: any, b: any) => {
+  //     const nameA = a.venueName.toLowerCase();
+  //     const nameB = b.venueName.toLowerCase();
+  //     if (nameA < nameB) {
+  //       return -1;
+  //     }
+  //     if (nameA > nameB) {
+  //       return 1;
+  //     }
+  //     return 0;
+  //   });
+
   const filteredData = runningData
-    ?.filter((item: { [s: string]: unknown } | ArrayLike<unknown>) => {
-      return Object.values(item).some((value) =>
-        String(value).toLowerCase().includes(searchTerm.toLowerCase()),
-      );
+    ?.filter((item: any) => {
+      const fieldsToSearch = [item.venueName, item.name]; // 👈 你想模糊搜索的字段
+      return fieldsToSearch.some((field) => String(field).toLowerCase().includes(searchTerm.toLowerCase()));
     })
-    .sort((a, b) => {
+    .sort((a: any, b: any) => {
       const nameA = a.venueName.toLowerCase();
       const nameB = b.venueName.toLowerCase();
-      if (nameA < nameB) {
-        return -1;
-      }
-      if (nameA > nameB) {
-        return 1;
-      }
-      return 0;
+      return nameA.localeCompare(nameB);
     });
 
   // const onSelectChange = (newSelectedRowKeys: React.Key[]) => {
@@ -355,7 +403,14 @@ export default function VenueRunningKpi() {
 
   return (
     <div style={{ padding: "20px" }} className="longdataTable">
-      <div
+      <HeaderSection
+        onChange={handleSearch}
+        venueNum={venueNums}
+        SubAccountNum={subAccountNum}
+        // onChange={handleSearch} venueNum={venueNum} SubAccountNum={SubAccountNum}
+      />
+
+      {/* <div
         style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}
       >
         <div style={{ display: "flex", justifyContent: "space-between" }}>
@@ -368,7 +423,7 @@ export default function VenueRunningKpi() {
             className="text-sm mr-10"
           />
         </div>
-      </div>
+      </div> */}
 
       {/*<Table*/}
       {/*  dataSource={filteredData}*/}
@@ -382,48 +437,49 @@ export default function VenueRunningKpi() {
       {/*    defaultPageSize: 20, // 默认每页显示的条目数*/}
       {/*  }}*/}
       {/*/>*/}
-      <div
+      {/* <div
         ref={tableRef}
         // className={"sticky-header"}
 
         className={isSticky ? "sticky-header" : ""}
-      >
-        <Table
-          // rowSelection={rowSelection}
-          columns={columns}
-          dataSource={filteredData}
-          scroll={{ x: 1800, y: 800 }}
-          sticky
-          // bordered
-          className="custom-table"
-          pagination={{
-            position: ["bottomCenter"],
-            showSizeChanger: true,
-            pageSizeOptions: ["20", "30", "50"],
-            defaultPageSize: 20,
-            showTotal: (total) => `共 ${total} 条`,
-            total: filteredData.length,
-            onChange: () => {
-              const tableBody = document.querySelector(".ant-table-body");
-              if (tableBody) {
-                tableBody.scrollTop = 0;
+      > */}
+      <Table
+        // rowSelection={rowSelection}
+        loading={loading}
+        columns={columns}
+        dataSource={filteredData}
+        scroll={{ x: 1800, y: 800 }}
+        sticky
+        // bordered
+        className="custom-table"
+        pagination={{
+          position: ["bottomCenter"],
+          showSizeChanger: true,
+          pageSizeOptions: ["20", "30", "50"],
+          defaultPageSize: 20,
+          showTotal: (total) => `共 ${total} 条`,
+          total: filteredData.length,
+          onChange: () => {
+            const tableBody = document.querySelector(".ant-table-body");
+            if (tableBody) {
+              tableBody.scrollTop = 0;
+            }
+          },
+        }}
+        onRow={() => ({
+          onMouseEnter: () => {
+            const tableBody = document.querySelector(".ant-table-body");
+            if (tableBody) {
+              const { scrollTop, scrollHeight, clientHeight } = tableBody;
+              if (scrollHeight - scrollTop - clientHeight < 50) {
+                // 触发加载更多的逻辑
+                console.log("触发加载更多");
               }
-            },
-          }}
-          onRow={() => ({
-            onMouseEnter: () => {
-              const tableBody = document.querySelector(".ant-table-body");
-              if (tableBody) {
-                const { scrollTop, scrollHeight, clientHeight } = tableBody;
-                if (scrollHeight - scrollTop - clientHeight < 50) {
-                  // 触发加载更多的逻辑
-                  console.log("触发加载更多");
-                }
-              }
-            },
-          })}
-        />
-      </div>
+            }
+          },
+        })}
+      />
     </div>
+    // </div>
   );
 }

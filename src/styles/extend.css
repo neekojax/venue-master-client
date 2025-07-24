@@ -384,3 +384,29 @@
     z-index: 100;
     background: #fff;
   }
+
+  .custom-ant-input {
+    border: 1px solid #ccc !important;
+    transition: border 0.3s ease;
+  }
+  
+  .custom-ant-input:hover {
+    border: 1px solid #4096ff !important;
+  }
+  
+  .custom-ant-input:focus,
+  .custom-ant-input-focused {
+    border: 1px solid #1677ff !important;
+    box-shadow: none !important;
+  }
+
+
+  /* 头部选中项的字体颜色 */
+.header-custom-select .ant-select-selection-item {
+    color: #fff; /* 修改为你想要的颜色 */
+  }
+  
+  /* 头部鼠标 hover 时的颜色 */
+  .header-custom-select .ant-select-selector:hover .ant-select-selection-item {
+    color: #fff;
+  }
