@@ -415,7 +415,7 @@ const App: React.FC = () => {
       "24小时故障率": item.failureRate24h.toFixed(2) + "%",
       "T-2日故障率": item.failureRateT2.toFixed(2) + "%",
       "T-3日故障率": item.failureRateT3.toFixed(2) + "%",
-      "影响算力（E）": item.powerImpact.toFixed(6),
+      "影响算力（E）": item.powerImpact.toFixed(8),
       影响占比: item.impactRatio.toFixed(2) + "%",
       "影响产出（BTC）": item.outputImpact.toFixed(8),
       事件描述: item.events,
