@@ -139,7 +139,7 @@ const App: React.FC = () => {
       key: "btcOutput24h",
       width: 160,
       align: "right",
-      render: (value) => value.toFixed(4),
+      render: (value) => value.toFixed(8),
       sorter: (a, b) => a.btcOutput24h - b.btcOutput24h,
     },
     {
@@ -148,7 +148,7 @@ const App: React.FC = () => {
       key: "theoreticalPower",
       width: 120,
       align: "right",
-      render: (value) => value.toFixed(2),
+      render: (value) => value.toFixed(6),
       sorter: (a, b) => a.theoreticalPower - b.theoreticalPower,
     },
     {
@@ -157,7 +157,7 @@ const App: React.FC = () => {
       key: "power24h",
       width: 140,
       align: "right",
-      render: (value) => value.toFixed(2),
+      render: (value) => value.toFixed(6),
       sorter: (a, b) => a.power24h - b.power24h,
     },
     {
@@ -281,7 +281,7 @@ const App: React.FC = () => {
       key: "powerImpact",
       width: 130,
       align: "right",
-      render: (value) => value.toFixed(2),
+      render: (value) => value.toFixed(6),
       sorter: (a, b) => a.powerImpact - b.powerImpact,
     },
     {
@@ -298,7 +298,7 @@ const App: React.FC = () => {
       key: "outputImpact",
       width: 140,
       align: "right",
-      render: (value) => value.toFixed(4),
+      render: (value) => value.toFixed(8),
       sorter: (a, b) => a.outputImpact - b.outputImpact,
     },
     {
@@ -403,9 +403,9 @@ const App: React.FC = () => {
     const data = filteredData.map((item) => ({
       // "场地编号": item.siteId,
       场地名: item.siteName,
-      "24小时产出（BTC）": item.btcOutput24h.toFixed(4),
-      "理论算力（E）": item.theoreticalPower.toFixed(2),
-      "24小时算力（E）": item.power24h.toFixed(2),
+      "24小时产出（BTC）": item.btcOutput24h.toFixed(8),
+      "理论算力（E）": item.theoreticalPower.toFixed(6),
+      "24小时算力（E）": item.power24h.toFixed(8),
       "24小时有效率": item.effectiveRate24h.toFixed(2) + "%",
       "T-2日有效率": item.effectiveRateT2.toFixed(2) + "%",
       "T-3日有效率": item.effectiveRateT3.toFixed(2) + "%",
@@ -415,9 +415,9 @@ const App: React.FC = () => {
       "24小时故障率": item.failureRate24h.toFixed(2) + "%",
       "T-2日故障率": item.failureRateT2.toFixed(2) + "%",
       "T-3日故障率": item.failureRateT3.toFixed(2) + "%",
-      "影响算力（E）": item.powerImpact.toFixed(2),
+      "影响算力（E）": item.powerImpact.toFixed(8),
       影响占比: item.impactRatio.toFixed(2) + "%",
-      "影响产出（BTC）": item.outputImpact.toFixed(4),
+      "影响产出（BTC）": item.outputImpact.toFixed(8),
       事件描述: item.events,
     }));
 
