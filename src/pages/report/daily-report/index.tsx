@@ -405,7 +405,7 @@ const App: React.FC = () => {
       场地名: item.siteName,
       "24小时产出（BTC）": item.btcOutput24h.toFixed(8),
       "理论算力（E）": item.theoreticalPower.toFixed(6),
-      "24小时算力（E）": item.power24h.toFixed(6),
+      "24小时算力（E）": item.power24h.toFixed(8),
       "24小时有效率": item.effectiveRate24h.toFixed(2) + "%",
       "T-2日有效率": item.effectiveRateT2.toFixed(2) + "%",
       "T-3日有效率": item.effectiveRateT3.toFixed(2) + "%",
