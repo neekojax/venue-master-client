@@ -403,9 +403,9 @@ const App: React.FC = () => {
     const data = filteredData.map((item) => ({
       // "场地编号": item.siteId,
       场地名: item.siteName,
-      "24小时产出（BTC）": item.btcOutput24h.toFixed(4),
-      "理论算力（E）": item.theoreticalPower.toFixed(2),
-      "24小时算力（E）": item.power24h.toFixed(2),
+      "24小时产出（BTC）": item.btcOutput24h.toFixed(8),
+      "理论算力（E）": item.theoreticalPower.toFixed(6),
+      "24小时算力（E）": item.power24h.toFixed(6),
       "24小时有效率": item.effectiveRate24h.toFixed(2) + "%",
       "T-2日有效率": item.effectiveRateT2.toFixed(2) + "%",
       "T-3日有效率": item.effectiveRateT3.toFixed(2) + "%",
@@ -415,9 +415,9 @@ const App: React.FC = () => {
       "24小时故障率": item.failureRate24h.toFixed(2) + "%",
       "T-2日故障率": item.failureRateT2.toFixed(2) + "%",
       "T-3日故障率": item.failureRateT3.toFixed(2) + "%",
-      "影响算力（E）": item.powerImpact.toFixed(2),
+      "影响算力（E）": item.powerImpact.toFixed(6),
       影响占比: item.impactRatio.toFixed(2) + "%",
-      "影响产出（BTC）": item.outputImpact.toFixed(4),
+      "影响产出（BTC）": item.outputImpact.toFixed(8),
       事件描述: item.events,
     }));
 
