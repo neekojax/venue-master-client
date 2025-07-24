@@ -139,7 +139,7 @@ const App: React.FC = () => {
       key: "btcOutput24h",
       width: 160,
       align: "right",
-      render: (value) => value.toFixed(4),
+      render: (value) => value.toFixed(8),
       sorter: (a, b) => a.btcOutput24h - b.btcOutput24h,
     },
     {
@@ -148,7 +148,7 @@ const App: React.FC = () => {
       key: "theoreticalPower",
       width: 120,
       align: "right",
-      render: (value) => value.toFixed(2),
+      render: (value) => value.toFixed(6),
       sorter: (a, b) => a.theoreticalPower - b.theoreticalPower,
     },
     {
@@ -157,7 +157,7 @@ const App: React.FC = () => {
       key: "power24h",
       width: 140,
       align: "right",
-      render: (value) => value.toFixed(2),
+      render: (value) => value.toFixed(6),
       sorter: (a, b) => a.power24h - b.power24h,
     },
     {
@@ -281,7 +281,7 @@ const App: React.FC = () => {
       key: "powerImpact",
       width: 130,
       align: "right",
-      render: (value) => value.toFixed(2),
+      render: (value) => value.toFixed(6),
       sorter: (a, b) => a.powerImpact - b.powerImpact,
     },
     {
@@ -298,7 +298,7 @@ const App: React.FC = () => {
       key: "outputImpact",
       width: 140,
       align: "right",
-      render: (value) => value.toFixed(4),
+      render: (value) => value.toFixed(8),
       sorter: (a, b) => a.outputImpact - b.outputImpact,
     },
     {
