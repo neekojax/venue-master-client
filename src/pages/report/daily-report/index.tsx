@@ -367,8 +367,8 @@ const App: React.FC = () => {
               powerImpact: venue.powerImpact || 0,
               impactRatio: venue.impactRatio || 0, // 转换为小数形式
               outputImpact: venue.outputImpact || 0,
-              limitImpactRate: venue.outputImpact || 0,
-              highTemperatureRate: venue.outputImpact || 0,
+              limitImpactRate: venue.limitImpactRate || 0,
+              highTemperatureRate: venue.highTemperatureRate || 0,
               // "限电影响": item.limitImpactRate,
               // "高温影响": item.highTemperatureRate,
               events: venue.events || "",
