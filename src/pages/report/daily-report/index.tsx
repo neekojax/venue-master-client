@@ -27,6 +27,8 @@ interface DataType {
   powerImpact: number;
   impactRatio: number;
   outputImpact: number;
+  limitImpactRate: number;
+  highTemperatureRate: number;
   events: string;
 }
 const App: React.FC = () => {
@@ -302,6 +304,24 @@ const App: React.FC = () => {
       sorter: (a, b) => a.outputImpact - b.outputImpact,
     },
     {
+      title: "限电影响",
+      dataIndex: "limitImpactRate",
+      key: "limitImpactRate",
+      width: 140,
+      align: "right",
+      render: (value) => value.toFixed(8),
+      sorter: (a, b) => a.limitImpactRate - b.limitImpactRate,
+    },
+    {
+      title: "高温影响",
+      dataIndex: "highTemperatureRate",
+      key: "highTemperatureRate",
+      width: 140,
+      align: "right",
+      render: (value) => value.toFixed(8),
+      sorter: (a, b) => a.highTemperatureRate - b.highTemperatureRate,
+    },
+    {
       title: "事件描述",
       dataIndex: "events",
       key: "events",
@@ -347,6 +367,10 @@ const App: React.FC = () => {
               powerImpact: venue.powerImpact || 0,
               impactRatio: venue.impactRatio || 0, // 转换为小数形式
               outputImpact: venue.outputImpact || 0,
+              limitImpactRate: venue.outputImpact || 0,
+              highTemperatureRate: venue.outputImpact || 0,
+              // "限电影响": item.limitImpactRate,
+              // "高温影响": item.highTemperatureRate,
               events: venue.events || "",
             };
           });
@@ -418,6 +442,8 @@ const App: React.FC = () => {
       "影响算力（E）": item.powerImpact.toFixed(8),
       影响占比: item.impactRatio.toFixed(2) + "%",
       "影响产出（BTC）": item.outputImpact.toFixed(8),
+      限电影响: item.limitImpactRate,
+      高温影响: item.highTemperatureRate,
       事件描述: item.events,
     }));
 

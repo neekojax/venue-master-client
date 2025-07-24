@@ -154,8 +154,8 @@ const App: React.FC = () => {
       dataIndex: "log_date",
       width: 120,
       filters: [
-        { text: "未结束事件", value: "valid" },
-        { text: "已结束事件", value: "empty" },
+        { text: "未结束事件", value: "empty" },
+        { text: "已结束事件", value: "valid" },
       ],
       onFilter: (value, record) => {
         const hasDuration = record.start_time && record.end_time;
