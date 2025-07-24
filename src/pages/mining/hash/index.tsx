@@ -299,9 +299,21 @@ export default function MiningHashRatePage() {
         title: "结算BTC",
         dataIndex: "last_settlement_profit_btc",
         key: "last_settlement_profit_btc",
+        // onCell: (record: any) => ({
+        //   let value = Number(record.last_settlement_profit_btc) || 0;
+        //   // 计算透明度，范围 0.1 ~ 1（根据实际数据调整 min/max）
+        //   const opacity = Math.min(1, Math.max(0.1, value / 0.01)); // 假设最大值为 0.01 BTC
+
+        //   style: {
+        //     backgroundColor: `rgba(24, 144, 255, ${opacity})`,
+        //     // backgroundColor: '#e6f7ff', // 所有单元格统一设置背景色
+        //   },
+        // }),
         render: (text: any) => (
           <span>
-            <Tag color="#f50">{text}</Tag>
+            <Tag color="#f50" style={{ padding: 0 }}>
+              {text}
+            </Tag>
           </span>
         ),
       },

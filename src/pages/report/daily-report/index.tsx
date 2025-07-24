@@ -309,7 +309,8 @@ const App: React.FC = () => {
       key: "limitImpactRate",
       width: 140,
       align: "right",
-      render: (value) => value.toFixed(8),
+      // render: (value) => value.toFixed(8),
+      render: (value) => `${value.toFixed(2)}%`,
       sorter: (a, b) => a.limitImpactRate - b.limitImpactRate,
     },
     {
@@ -318,7 +319,8 @@ const App: React.FC = () => {
       key: "highTemperatureRate",
       width: 140,
       align: "right",
-      render: (value) => value.toFixed(8),
+      // render: (value) => value.toFixed(8),
+      render: (value) => `${value.toFixed(2)}%`,
       sorter: (a, b) => a.highTemperatureRate - b.highTemperatureRate,
     },
     {
