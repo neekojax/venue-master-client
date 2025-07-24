@@ -6,6 +6,39 @@
 @tailwind components;
 @tailwind utilities;
 
+/* 移动端基础样式 */
+@layer base {
+  html {
+    -webkit-tap-highlight-color: transparent;
+    -webkit-text-size-adjust: 100%;
+  }
+  body {
+    @apply text-base antialiased;
+  }
+}
+
+/* 响应式布局工具类 */
+@layer components {
+  .container-fluid {
+    @apply w-full px-4 mx-auto;
+    @screen sm { @apply px-6; }
+    @screen lg { @apply px-8; }
+  }
+  
+  .mobile-only {
+    @apply block md:hidden;
+  }
+  
+  .desktop-only {
+    @apply hidden md:block;
+  }
+  
+  .responsive-table {
+    @apply w-full overflow-x-auto;
+    -webkit-overflow-scrolling: touch;
+  }
+}
+
 @keyframes rippleGradient {
   0% {
     background-position: 0% 50%;

@@ -245,7 +245,7 @@ export default function MiningHashRatePage() {
         title: "昨日算力达成率",
         dataIndex: "last_hash_rate_effective",
         key: "last_hash_rate_effective",
-        width: "10%",
+        width: "5%",
         render: (text: any) => {
           const value = parseFloat(text.replace("%", "")); // 去掉 '%' 并解析为数字
           return <span style={{ color: value < 90 ? "red" : "green" }}>{text}</span>;
@@ -318,9 +318,8 @@ export default function MiningHashRatePage() {
         title: "结算时间",
         dataIndex: "last_settlement_date",
         key: "last_settlement_date",
-        style: {
-          textAlign: "right",
-        },
+        align: "right",
+
         render: (text: any) => {
           const date = new Date(text);
           const month = (date.getMonth() + 1).toString().padStart(2, "0");
@@ -398,7 +397,7 @@ export default function MiningHashRatePage() {
         String(value).toLowerCase().includes(searchTerm.toLowerCase()),
       );
     })
-    .sort((a, b) => {
+    .sort((a: any, b: any) => {
       const nameA = a.venue_name.toLowerCase(); // 转为小写进行比较
       const nameB = b.venue_name.toLowerCase();
       if (nameA < nameB) {
