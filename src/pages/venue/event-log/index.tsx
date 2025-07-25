@@ -65,7 +65,7 @@ const App: React.FC = () => {
   const newMutation = useEventNew();
   const updateMutation = useEventUpdate();
   const deleteMutation = useDeleteUpdate();
-
+  const [selectedDurationType, setSelectedDurationType] = useState<string>("");
   // 新增筛选状态
   const [selectedLocation, setSelectedLocation] = useState<string[]>([]);
   const [selectedEventType, setSelectedEventType] = useState<string[]>([]);
@@ -102,7 +102,12 @@ const App: React.FC = () => {
       isValidDateRange && dateRange[0] && dateRange[1]
         ? dayjs(log.log_date).isBetween(dateRange[0], dateRange[1], null, "[]")
         : true;
-    return matchesLocation && matchesEventType && matchesSearchText && matchesDateRange;
+
+    const hasDuration = log.start_time && log.end_time;
+    const matchesDuration =
+      selectedDurationType === "valid" ? hasDuration : selectedDurationType === "empty" ? !hasDuration : true;
+
+    return matchesLocation && matchesEventType && matchesSearchText && matchesDateRange && matchesDuration;
   });
 
   const columns: ColumnsType<EventLog> = [
@@ -111,13 +116,16 @@ const App: React.FC = () => {
       dataIndex: "key",
       width: "70px",
       rowScope: "row",
+      render(value, record, index) {
+        return index + 1;
+      },
     },
     {
       title: "场地",
       dataIndex: "venue_name",
       // width: 120,
-      filters: venueList?.data?.map((venue) => ({ text: venue.venue_name, value: venue.venue_name })),
-      onFilter: (value, record) => record.venue_name === value,
+      // filters: venueList?.data?.map((venue) => ({ text: venue.venue_name, value: venue.venue_name })),
+      // onFilter: (value, record) => record.venue_name === value,
       width: 200,
       render: (text: string) => {
         const isSpecialVenue = text === "Arct-HF01-J XP-AR-US"; // 判断是否为特殊场地
@@ -158,11 +166,21 @@ const App: React.FC = () => {
         { text: "已结束事件", value: "valid" },
       ],
       onFilter: (value, record) => {
+        setSelectedDurationType(value);
         const hasDuration = record.start_time && record.end_time;
         if (value === "valid") return hasDuration;
         if (value === "empty") return !hasDuration;
         return true;
       },
+      // filteredData()
+      // if (value === "valid") return setSelectedDurationType('valid');
+      // if (value === "empty") return !hasDuration;
+
+      // const hasDuration = record.start_time && record.end_time;
+      // if (value === "valid") return hasDuration;
+      // if (value === "empty") return !hasDuration;
+      // return true;
+      // },
       render: (text, record) => {
         if (record.start_time && record.end_time) {
           return getTimeDifference(record.start_time, record.end_time);
@@ -193,12 +211,6 @@ const App: React.FC = () => {
       dataIndex: "log_type",
       width: 120,
       filters: [
-        // { text: "限电", value: "限电" },
-        // { text: "设备故障", value: "设备故障" },
-        // { text: "系统异常", value: "系统异常" },
-        // { text: "高温", value: "高温" },
-        // { text: "雷电", value: "雷电" },
-        // { text: "其他", value: "其他" },
         { text: "电力", value: "电力" },
         { text: "高温", value: "高温" },
         { text: "极端天气", value: "极端天气" },
@@ -207,7 +219,11 @@ const App: React.FC = () => {
         { text: "网络", value: "网络" },
         { text: "限电", value: "限电" },
       ],
-      onFilter: (value, record) => record.log_type === value,
+      onFilter: (value, record) => {
+        setSelectedEventType(value);
+        return record.log_type === value;
+      },
+      // onFilter: (value, record) => record.log_type === value,
       render: (text) => {
         const colors = {
           限电: "red",
@@ -272,12 +288,6 @@ const App: React.FC = () => {
       width: 200,
       ellipsis: true,
     },
-    // {
-    //   title: "记录时间",
-    //   dataIndex: "created_at",
-    //   width: 160,
-    //   render: (text) => dayjs(text).format("YYYY-MM-DD HH:mm:ss"),
-    // },
     {
       title: "操作",
       key: "action",
@@ -314,7 +324,6 @@ const App: React.FC = () => {
     form.resetFields();
     setIsModalVisible(true);
   };
-
   const handleEdit = (record: EventLog) => {
     form.setFieldsValue({
       ...record,
@@ -380,15 +389,6 @@ const App: React.FC = () => {
     });
   };
 
-  // const onSelectChange = (newSelectedRowKeys: React.Key[]) => {
-  //   setSelectedRowKeys(newSelectedRowKeys);
-  // };
-
-  // const rowSelection = {
-  //   selectedRowKeys,
-  //   onChange: onSelectChange,
-  // };
-
   return (
     <div className="bg-gray-50 p-6">
       <div className="mx-auto bg-white rounded-lg shadow-sm">
@@ -429,7 +429,7 @@ const App: React.FC = () => {
                 placeholder="选择场地"
                 value={selectedLocation}
                 onChange={setSelectedLocation}
-                style={{ width: 200 }}
+                style={{ width: 150 }}
                 // className="!rounded-lg"
               >
                 {venueList?.data?.map((venue) => (
@@ -438,27 +438,40 @@ const App: React.FC = () => {
                   </Option>
                 ))}
               </Select>
-              <Select
+              {/* <Select
                 mode="multiple"
                 maxTagCount="responsive"
                 maxTagTextLength={4} // 可选：限制每个标签显示文字长度
                 placeholder="选择事件类型"
                 value={selectedEventType}
                 onChange={setSelectedEventType}
-                style={{ width: 200 }}
+                style={{ width: 150 }}
                 maxTagCount="responsive"
                 maxTagTextLength={4} // 可选：限制每个标签显示文字长度
                 size="meddle"
-                // className="!rounded-lg"
+              // className="!rounded-lg"
               >
                 {["电力", "高温", "极端天气", "日常维护", "设备故障", "网络", "限电"].map((type) => (
                   <Option key={type} value={type}>
                     {type}
                   </Option>
                 ))}
-              </Select>
+              </Select> */}
+
+              {/* <Select
+                placeholder="选择影响时长类型"
+                value={selectedDurationType}
+                onChange={setSelectedDurationType}
+                style={{ width: 100 }}
+                size="middle"
+                allowClear
+              >
+                <Option value="valid">已结束事件</Option>
+                <Option value="empty">未结束事件</Option>
+              </Select> */}
             </div>
           </div>
+
           <div className="flex items-center gap-4 mb-6">
             <Space>
               {selectedRowKeys.length > 0 && (
@@ -519,6 +532,7 @@ const App: React.FC = () => {
           dataSource={filteredData} // 使用过滤后的数据
           scroll={{ x: 1300 }}
           rowKey="id"
+          // onChange={handleTableChange}
           pagination={{
             total: filteredData.length,
             pageSize: 10,

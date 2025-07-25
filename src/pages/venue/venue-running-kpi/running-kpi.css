@@ -44,5 +44,22 @@
 }
 
 .longdataTable  .custom-table .ant-table-container{
-    font-size: 0.75rem;
+    font-size: 0.875rem;
 }
+  
+  @media (min-width: 768px) {
+    .text-responsive{
+        /* font-size: 0.75rem; */
+        font-size: 0.75rem;
+    }
+  }
+  @media (min-width: 1200px) {
+    .text-responsive {
+      font-size: 0.875rem;
+    }
+  }
+  @media (min-width: 1400px) {
+    .text-responsive {
+      font-size: 1rem;
+    }
+  }

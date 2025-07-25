@@ -65,13 +65,14 @@ export default function VenueRunningKpi() {
       return <div>数据不足</div>; // 如果数据少于两个，返回提示
     }
 
-    const minEfficiency = Math.min(...efficiencies); // 获取最低值
+    // const minEfficiency = Math.min(...efficiencies); // 获取最低值
     // const lastEfficiency = efficiencies[efficiencies.length - 1]; // 获取最后一个数据
     // const secondLastEfficiency = efficiencies[efficiencies.length - 2]; // 获取倒数第二个数据
 
     // 根据最后两个数据点的值设置颜色
     // const lineColor = lastEfficiency > secondLastEfficiency ? "#4CAF50" : "#ff4d4f"; // 绿色或红色
-
+    console.log("monthEfficiencys", monthEfficiencys);
+    console.log("efficiencies", efficiencies);
     return (
       <ReactEcharts
         option={{
@@ -85,33 +86,27 @@ export default function VenueRunningKpi() {
           },
           yAxis: {
             type: "value",
-            min: minEfficiency, // 设置最小值为数据中的最低点
             show: false, // 隐藏 Y 轴
           },
           series: [
             {
               name: "效率",
               type: "bar",
-              barWidth: 10, // 设置柱子宽度（单位：像素）
+              barWidth: 8, // 设置柱子宽度（单位：像素）
               data: efficiencies, // 提取效率数据
               barGap: "1", // 同类柱子之间的间距
               itemStyle: {
                 color: "#4e81ee", // #5470C6所有柱子统一使用这个颜色
               },
-              smooth: true,
-              // lineStyle: {
-              //   color: lineColor, // 动态设置曲线颜色
-              //   width: 1, // 曲线宽度
-              // },
               symbol: "none", // 去掉圆点
             },
           ],
           grid: {
             left: "0%",
             right: "0%",
-            bottom: "10%",
-            top: "10%",
-            containLabel: false,
+            bottom: "0%",
+            top: "0%",
+            // containLabel: false,
           },
         }}
         style={{ height: "40px", width: "100px" }} // 设置图表的样式
@@ -355,6 +350,7 @@ export default function VenueRunningKpi() {
         scroll={{ x: 1800, y: 800 }}
         sticky
         // bordered
+        style={{ fontSize: "clamp(0.75rem, 2vw, 1rem)" }}
         className="custom-table"
         pagination={{
           position: ["bottomCenter"],
