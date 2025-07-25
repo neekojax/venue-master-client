@@ -1,21 +1,18 @@
 import React, { useEffect, useState } from "react";
 import { DownloadOutlined } from "@ant-design/icons";
-import { Button, Spin, Table, Tag, Tooltip } from "antd";
+import { Button, message, Spin, Table, Tag, Tooltip } from "antd";
 import { number } from "echarts";
 import { ReactEcharts } from "@/components/react-echarts"; // 导入自定义的 ReactEcharts 组件
 import HeaderSection from "./components/HeaderSection";
 import useAuthRedirect from "@/hooks/useAuthRedirect.ts";
 import { useSelector, useSettingsStore } from "@/stores";
 
-import "./components/HeaderSection.css";
+import "./running-kpi.css";
 
 import { fetchMiningPoolRunningData } from "@/pages/venue/api.tsx";
 
 export default function VenueRunningKpi() {
   useAuthRedirect();
-  // const [isSticky, setIsSticky] = useState(false);
-  // const tableRef = useRef(null);
-  // const tableRef = useRef<HTMLDivElement>(null);
   const { poolType } = useSettingsStore(useSelector(["poolType"]));
 
   const [runningData, setRunningData] = useState<any>(null); // 状态数据
@@ -24,28 +21,6 @@ export default function VenueRunningKpi() {
   const [loading, setLoading] = useState<boolean>(true); //
   const [venueNums, setVenueNum] = useState(number);
   const [subAccountNum, setSubAccountNum] = useState(number);
-  // const [error] = useState<string | null>(null); // 错误信息
-
-  // const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([]);
-
-  // useEffect(() => {
-  //   const handleScroll = () => {
-  //     const offsetTop = tableRef.current?.getBoundingClientRect().top;
-  //     if (offsetTop < 80) {
-  //       setIsSticky(true);
-  //     } else {
-  //       setIsSticky(false);
-  //     }
-  //     // console.log("offsetTop", offsetTop, "isSticky", isSticky);
-  //     // if (offsetTop <= 0) {
-  //     //   setIsSticky(true)
-  //     // }
-  //     // setIsSticky(offsetTop <= 0);
-  //   };
-
-  //   window.addEventListener("scroll", handleScroll);
-  //   return () => window.removeEventListener("scroll", handleScroll);
-  // }, []);
 
   const fetchData = async (poolType: string) => {
     try {
@@ -63,15 +38,14 @@ export default function VenueRunningKpi() {
           (venueNumMap as Record<string, any>)[key] = item; // 后出现的会覆盖前面的
         }
       });
-
       // 转换成数组（可选）
-      const venueArray = Object.values(venueNumMap);
+      const venueArray = Object.values(venueNumMap || {});
       setVenueNum(venueArray?.length ?? 0);
       setSubAccountNum(rawData?.length ?? 0);
-      // console.log(nameArray.length)
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (err) {
       // 处理错误
+      console.log("服务异常，请稍后重试", err);
+      message.error("服务异常，请稍后重试");
     } finally {
       setLoading(false);
     }
@@ -92,11 +66,11 @@ export default function VenueRunningKpi() {
     }
 
     const minEfficiency = Math.min(...efficiencies); // 获取最低值
-    const lastEfficiency = efficiencies[efficiencies.length - 1]; // 获取最后一个数据
-    const secondLastEfficiency = efficiencies[efficiencies.length - 2]; // 获取倒数第二个数据
+    // const lastEfficiency = efficiencies[efficiencies.length - 1]; // 获取最后一个数据
+    // const secondLastEfficiency = efficiencies[efficiencies.length - 2]; // 获取倒数第二个数据
 
     // 根据最后两个数据点的值设置颜色
-    const lineColor = lastEfficiency > secondLastEfficiency ? "#4CAF50" : "#ff4d4f"; // 绿色或红色
+    // const lineColor = lastEfficiency > secondLastEfficiency ? "#4CAF50" : "#ff4d4f"; // 绿色或红色
 
     return (
       <ReactEcharts
@@ -117,13 +91,18 @@ export default function VenueRunningKpi() {
           series: [
             {
               name: "效率",
-              type: "line",
+              type: "bar",
+              barWidth: 10, // 设置柱子宽度（单位：像素）
               data: efficiencies, // 提取效率数据
-              smooth: true,
-              lineStyle: {
-                color: lineColor, // 动态设置曲线颜色
-                width: 2, // 曲线宽度
+              barGap: "1", // 同类柱子之间的间距
+              itemStyle: {
+                color: "#4e81ee", // #5470C6所有柱子统一使用这个颜色
               },
+              smooth: true,
+              // lineStyle: {
+              //   color: lineColor, // 动态设置曲线颜色
+              //   width: 1, // 曲线宽度
+              // },
               symbol: "none", // 去掉圆点
             },
           ],
@@ -135,7 +114,7 @@ export default function VenueRunningKpi() {
             containLabel: false,
           },
         }}
-        style={{ height: "20px", width: "120px" }} // 设置图表的样式
+        style={{ height: "40px", width: "100px" }} // 设置图表的样式
       />
     );
   };
@@ -147,7 +126,7 @@ export default function VenueRunningKpi() {
         title: "场地",
         dataIndex: "venueName",
         fixed: "left",
-        width: 300,
+        width: 250,
         render: (text: string) => {
           const isSpecialVenue = text === "Arct-HF01-J XP-AR-US" || text === "ARCT Technologies-HF02-AR-US";
           return (
@@ -268,13 +247,6 @@ export default function VenueRunningKpi() {
         render: () => {
           return `-`;
         },
-        // render: (value) => (
-        //   <span
-        //     className={`${value <= 5 ? "text-green-600" : value <= 8 ? "text-yellow-600" : "text-red-600"}`}
-        //   >
-        //   {value.toFixed(2)}%
-        // </span>
-        // ),
       },
       {
         title: "上周故障率",
@@ -297,14 +269,14 @@ export default function VenueRunningKpi() {
         render: () => "-",
       },
       {
-        title: "月达成率曲线",
+        title: "月达成率趋势",
         dataIndex: "monthEfficiencys",
-        width: 180,
+        width: 120,
         render: (_text: any, record: { monthEfficiencys: any[] }) =>
           renderEfficiencyChart(record.monthEfficiencys),
       },
       {
-        title: "月故障率曲线",
+        title: "月故障率趋势",
         dataIndex: "historyMonthFault",
         width: 120,
         // render: (data) => renderMiniChart(data, "failure"),
@@ -344,8 +316,6 @@ export default function VenueRunningKpi() {
   // 搜索处理函数
   const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchTerm(e.target.value);
-    // setSearchText(selectedKeys[0]);
-    // setSearchedColumn(dataIndex);
   };
 
   // Loading 状态
@@ -364,24 +334,6 @@ export default function VenueRunningKpi() {
     );
   }
 
-  // const filteredData = runningData
-  //   ?.filter((item: { [s: string]: unknown } | ArrayLike<unknown>) => {
-  //     return Object.values(item).some((value) =>
-  //       String(value).toLowerCase().includes(searchTerm.toLowerCase()),
-  //     );
-  //   })
-  //   .sort((a: any, b: any) => {
-  //     const nameA = a.venueName.toLowerCase();
-  //     const nameB = b.venueName.toLowerCase();
-  //     if (nameA < nameB) {
-  //       return -1;
-  //     }
-  //     if (nameA > nameB) {
-  //       return 1;
-  //     }
-  //     return 0;
-  //   });
-
   const filteredData = runningData
     ?.filter((item: any) => {
       const fieldsToSearch = [item.venueName, item.name]; // 👈 你想模糊搜索的字段
@@ -393,58 +345,10 @@ export default function VenueRunningKpi() {
       return nameA.localeCompare(nameB);
     });
 
-  // const onSelectChange = (newSelectedRowKeys: React.Key[]) => {
-  //   setSelectedRowKeys(newSelectedRowKeys);
-  // };
-  // const rowSelection = {
-  //   selectedRowKeys,
-  //   onChange: onSelectChange,
-  // };
-
   return (
     <div style={{ padding: "20px" }} className="longdataTable">
-      <HeaderSection
-        onChange={handleSearch}
-        venueNum={venueNums}
-        SubAccountNum={subAccountNum}
-        // onChange={handleSearch} venueNum={venueNum} SubAccountNum={SubAccountNum}
-      />
-
-      {/* <div
-        style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}
-      >
-        <div style={{ display: "flex", justifyContent: "space-between" }}>
-          <Input
-            prefix={<SearchOutlined style={{ color: "rgba(0, 0, 0, 0.25)", fontSize: 18 }} />}
-            placeholder="请输入搜索字段"
-            value={searchTerm}
-            onChange={handleSearch}
-            style={{ width: 250 }} // 设定宽度
-            className="text-sm mr-10"
-          />
-        </div>
-      </div> */}
-
-      {/*<Table*/}
-      {/*  dataSource={filteredData}*/}
-      {/*  columns={columns}*/}
-      {/*  rowKey="name"*/}
-      {/*  scroll={{ x: true }}*/}
-      {/*  pagination={{*/}
-      {/*    position: ["bottomCenter"], // 将分页器位置设置为底部居中*/}
-      {/*    showSizeChanger: true, // 允许用户改变每页显示的条目数*/}
-      {/*    pageSizeOptions: ["20", "30", "50"], // 每页显示条目的选项*/}
-      {/*    defaultPageSize: 20, // 默认每页显示的条目数*/}
-      {/*  }}*/}
-      {/*/>*/}
-      {/* <div
-        ref={tableRef}
-        // className={"sticky-header"}
-
-        className={isSticky ? "sticky-header" : ""}
-      > */}
+      <HeaderSection onChange={handleSearch} venueNum={venueNums} SubAccountNum={subAccountNum} />
       <Table
-        // rowSelection={rowSelection}
         loading={loading}
         columns={columns}
         dataSource={filteredData}
@@ -480,6 +384,5 @@ export default function VenueRunningKpi() {
         })}
       />
     </div>
-    // </div>
   );
 }
