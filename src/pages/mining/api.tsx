@@ -42,3 +42,7 @@ export const fetchLastestHashRateEfficiency = async (poolType: string, day: stri
 export const fetchLastestHashRate = async (poolType: string, day: string) => {
   return await fetchGet(`miningPool/getLastestHashRate/${poolType}/${day}`);
 };
+// 获取算力率
+export const fetchHomesuanli = async (poolType: string, day: string) => {
+  return await fetchGet(`network/stat/${poolType}/${day}`);
+};
