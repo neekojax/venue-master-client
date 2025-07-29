@@ -114,7 +114,7 @@ const MiningBenefitCard: React.FC<MiningPoolCardProps> = ({ poolType }) => {
           <Statistic
             title={`昨日产出效率`}
             value={`${suanlilv?.BTCOutputPerEPower}`} // 假设昨日总收益在状态中
-            valueStyle={{ fontSize: "20px", fontWeight: "bold" }}
+            valueStyle={{ fontSize: "16px", fontWeight: "600" }}
             // prefix={<BiLogoBitcoin style={{ fontSize: "20px", color: "gold" }} />}
             suffix={"BTC/EH"}
           />
@@ -123,7 +123,7 @@ const MiningBenefitCard: React.FC<MiningPoolCardProps> = ({ poolType }) => {
           <Statistic
             title={`昨日全网产出效率`}
             value={`${suanlilv?.BTCNetworkPerEPower}`} // 假设昨日总收益在状态中
-            valueStyle={{ fontSize: "20px", fontWeight: "bold" }}
+            valueStyle={{ fontSize: "16px", fontWeight: "600" }}
             // prefix={<BiLogoBitcoin style={{ fontSize: "20px", color: "gold" }} />}
             suffix={"BTC/EH"}
           />

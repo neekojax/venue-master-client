@@ -219,9 +219,8 @@ const App: React.FC = () => {
         { text: "网络", value: "网络" },
         { text: "限电", value: "限电" },
       ],
-      onFilter: (value, record) => {
-        setSelectedEventType(value);
-        return record.log_type === value;
+      onFilter: () => {
+        return true;
       },
       // onFilter: (value, record) => record.log_type === value,
       render: (text) => {
@@ -318,7 +317,8 @@ const App: React.FC = () => {
     if (isLoading) {
       // message.loading("加载中...");
     }
-  }, [isLoading]);
+    console.log(selectedEventType);
+  }, [isLoading, selectedEventType]);
 
   const handleAdd = () => {
     form.resetFields();
@@ -533,6 +533,10 @@ const App: React.FC = () => {
           scroll={{ x: 1300 }}
           rowKey="id"
           // onChange={handleTableChange}
+          onChange={(pagination, filters) => {
+            // console.log("选中的事件类型：", filters.log_type); // 是数组
+            setSelectedEventType(filters.log_type || []); // 设置选中的事件类型数组
+          }}
           pagination={{
             total: filteredData.length,
             pageSize: 10,

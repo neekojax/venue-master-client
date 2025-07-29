@@ -169,6 +169,7 @@ export default function MiningHashRatePage() {
         // width: 95,
         render: (text: any) => {
           const parts = text.split(" "); // 根据空格分割
+
           return (
             <span>
               {parts[0]} <span className="text-sm text-gray-500">{parts[1]}</span>
@@ -184,6 +185,9 @@ export default function MiningHashRatePage() {
         key: "theoretical",
         render: (text: any) => {
           const parts = text.split(" "); // 根据空格分割
+          if (parts[0] == "0.00") {
+            return "--";
+          }
           return (
             <span>
               {parts[0]} <span className="text-sm text-gray-500">{parts[1]}</span>
@@ -281,6 +285,7 @@ export default function MiningHashRatePage() {
         // width: 120,
         render: (text: any) => {
           const parts = text.split(" "); // 根据空格分割
+
           return (
             <span>
               {parts[0]} <span className="text-sm text-gray-500">{parts[1]}</span>
@@ -309,13 +314,15 @@ export default function MiningHashRatePage() {
         //     // backgroundColor: '#e6f7ff', // 所有单元格统一设置背景色
         //   },
         // }),
-        render: (text: any) => (
-          <span>
-            <Tag color="#f50" style={{ padding: 0 }}>
-              {text}
-            </Tag>
-          </span>
-        ),
+        render: (text: any) => {
+          return (
+            <span>
+              <Tag color="#f50" style={{ padding: 0 }}>
+                {text}
+              </Tag>
+            </span>
+          );
+        },
       },
       // {
       //   title: "结算FB",
