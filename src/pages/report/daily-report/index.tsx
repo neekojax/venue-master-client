@@ -228,6 +228,17 @@ const App: React.FC = () => {
       sorter: (a, b) => a.totalFailures - b.totalFailures,
     },
     {
+      title: "总故障率",
+      dataIndex: "totalFailures",
+      key: "totalMachines",
+      width: 100,
+      align: "right",
+      render: (val, record) => {
+        const total_gzl = ((val / record.totalMachines) * 100).toFixed(2);
+        return <span>{`${total_gzl}%`}</span>;
+      },
+    },
+    {
       title: "24小时故障数",
       dataIndex: "failures24h",
       key: "failures24h",
@@ -327,6 +338,32 @@ const App: React.FC = () => {
       render: (value) => `${value.toFixed(2)}%`,
       sorter: (a, b) => a.highTemperatureRate - b.highTemperatureRate,
     },
+    // {
+    //   title: "限电算力",
+    //   dataIndex: "limitImpactRate",
+    //   key: "limitImpactRate",
+    //   width: 140,
+    //   align: "right",
+    //   // render: (value) => value.toFixed(8),
+    //   render: (value, record) => {
+    //     const result = record.theoreticalPower * 1e6 * value / 100;
+    //     return result.toFixed(2) + "TH/s";
+    //     //`${value.toFixed(2)}%`,
+    //   }
+    // },
+    // {
+    //   title: "高温算力",
+    //   dataIndex: "highTemperatureRate",
+    //   key: "highTemperatureRate",
+    //   width: 140,
+    //   align: "right",
+    //   // render: (value) => value.toFixed(8),
+    //   render: (value, record) => {
+    //     const result = record.theoreticalPower * 1e6 * value / 100;
+    //     return result.toFixed(2) + "TH/s";
+    //     //`${value.toFixed(2)}%`,
+    //   }
+    // },
     {
       title: "事件描述",
       dataIndex: "events",
@@ -441,6 +478,7 @@ const App: React.FC = () => {
       "T-3日有效率": item.effectiveRateT3.toFixed(2) + "%",
       托管台数: item.totalMachines.toLocaleString(),
       总故障台数: item.totalFailures.toLocaleString(),
+      总故障率: ((item.totalFailures / item.totalMachines) * 100).toFixed(2) + "%",
       "24小时故障数": item.failures24h.toLocaleString(),
       "24小时故障率": item.failureRate24h.toFixed(2) + "%",
       "T-2日故障率": item.failureRateT2.toFixed(2) + "%",
@@ -448,8 +486,10 @@ const App: React.FC = () => {
       "影响算力（E）": item.powerImpact.toFixed(8),
       影响占比: item.impactRatio.toFixed(2) + "%",
       "影响产出（BTC）": item.outputImpact.toFixed(8),
-      限电影响: item.limitImpactRate,
-      高温影响: item.highTemperatureRate,
+      限电影响: item.limitImpactRate + "%",
+      高温影响: item.highTemperatureRate + "%",
+      限电算力: ((item.theoreticalPower * 1e6 * item.limitImpactRate) / 100).toFixed(2) + "Th/s", //record.theoreticalPower * 1e6 * value / 100
+      高温算力: ((item.theoreticalPower * 1e6 * item.highTemperatureRate) / 100).toFixed(2) + "Th/s", //item.highTemperatureRate,
       事件描述: item.events,
     }));
 
