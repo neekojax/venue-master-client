@@ -112,7 +112,7 @@ const App: React.FC = () => {
 
   const columns: ColumnsType<EventLog> = [
     {
-      title: "编号",
+      title: "序号",
       dataIndex: "key",
       width: "70px",
       rowScope: "row",

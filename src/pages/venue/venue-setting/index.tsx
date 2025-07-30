@@ -183,7 +183,7 @@ const VenueManagement: React.FC = () => {
   // 表格列定义
   const columns = [
     {
-      title: "选择",
+      title: "序号",
       dataIndex: "id",
       width: 60,
       render(value, record, index) {
