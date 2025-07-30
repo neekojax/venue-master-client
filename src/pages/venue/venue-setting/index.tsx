@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { DeleteOutlined, EditOutlined, PlusOutlined, SearchOutlined } from "@ant-design/icons";
-import { Button, Checkbox, Form, Input, message, Modal, Select, Space, Table } from "antd";
+import { Button, Form, Input, message, Modal, Select, Space, Table } from "antd";
 import useAuthRedirect from "@/hooks/useAuthRedirect.ts";
 import { useSelector, useSettingsStore } from "@/stores";
 
@@ -30,7 +30,7 @@ const VenueManagement: React.FC = () => {
 
   const [venues, setVenues] = useState<Venue[]>([]);
   const [filteredVenues, setFilteredVenues] = useState<Venue[]>([]);
-  const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([]);
+  // const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([]);
   const [searchText, setSearchText] = useState("");
   const [countryFilter, setCountryFilter] = useState<string | null>(null);
   const [isModalVisible, setIsModalVisible] = useState(false);
@@ -112,22 +112,22 @@ const VenueManagement: React.FC = () => {
     });
   };
 
-  const handleBatchDelete = () => {
-    if (selectedRowKeys.length === 0) {
-      message.warning("请至少选择一项");
-      return;
-    }
+  // const handleBatchDelete = () => {
+  //   if (selectedRowKeys.length === 0) {
+  //     message.warning("请至少选择一项");
+  //     return;
+  //   }
 
-    Modal.confirm({
-      title: "确认批量删除",
-      content: `确定要删除选中的 ${selectedRowKeys.length} 个场地吗？`,
-      onOk: () => {
-        setVenues(venues.filter((item) => !selectedRowKeys.includes(item.id)));
-        setSelectedRowKeys([]);
-        message.success("批量删除成功");
-      },
-    });
-  };
+  //   Modal.confirm({
+  //     title: "确认批量删除",
+  //     content: `确定要删除选中的 ${selectedRowKeys.length} 个场地吗？`,
+  //     onOk: () => {
+  //       setVenues(venues.filter((item) => !selectedRowKeys.includes(item.id)));
+  //       setSelectedRowKeys([]);
+  //       message.success("批量删除成功");
+  //     },
+  //   });
+  // };
 
   const handleModalOk = () => {
     form.validateFields().then((values) => {
@@ -186,18 +186,21 @@ const VenueManagement: React.FC = () => {
       title: "选择",
       dataIndex: "id",
       width: 60,
-      render: (id: number) => (
-        <Checkbox
-          checked={selectedRowKeys.includes(id)}
-          onChange={(e) => {
-            if (e.target.checked) {
-              setSelectedRowKeys([...selectedRowKeys, id]);
-            } else {
-              setSelectedRowKeys(selectedRowKeys.filter((k) => k !== id));
-            }
-          }}
-        />
-      ),
+      render(value, record, index) {
+        return index + 1;
+      },
+      // render: (id: number) => (
+      //   <Checkbox
+      //     checked={selectedRowKeys.includes(id)}
+      //     onChange={(e) => {
+      //       if (e.target.checked) {
+      //         setSelectedRowKeys([...selectedRowKeys, id]);
+      //       } else {
+      //         setSelectedRowKeys(selectedRowKeys.filter((k) => k !== id));
+      //       }
+      //     }}
+      //   />
+      // ),
     },
     {
       title: "场地名称",
@@ -265,7 +268,7 @@ const VenueManagement: React.FC = () => {
           >
             新增场地
           </Button>
-          <Button
+          {/* <Button
             size="middle"
             danger
             icon={<DeleteOutlined />}
@@ -274,7 +277,7 @@ const VenueManagement: React.FC = () => {
             className="!rounded-button whitespace-nowrap"
           >
             批量删除
-          </Button>
+          </Button> */}
         </div>
         <div className="flex space-x-4">
           <Input
