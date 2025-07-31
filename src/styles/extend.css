@@ -80,11 +80,14 @@
 .ant-menu .ant-menu-submenu-expand-icon, .ant-menu .ant-menu-submenu-arrow，.ant-menu .ant-menu-submenu-title .ant-menu-item-icon svg {
     /* color: #4a4b68; */
     color: #bbb;
+    font-size: 20px;
+    
 }
 .ant-menu .ant-menu-item .ant-menu-item-icon svg, .ant-menu .ant-menu-submenu-title .ant-menu-item-icon svg,
 .ant-menu-ant-menu-submenu.ant-menu-submenu-inline .ant-menu-submenu-title .ant-menu-item-icon svg
  {
     display: inline-block;
+    font-size: 20px;
     /* color: #4a4b68; */
     color: #bbb;
 }
@@ -191,6 +194,7 @@
 .ant-menu-inline.ant-menu-root .ant-menu-submenu-title > .ant-menu-item-icon{
     /* color: #4a4b68; */
     color: #bbb;
+    font-size: 20px;
 }
 .ant-menu-submenu.ant-menu-inline.ant-menu-submenu-open.ant-menu-submenu-selected > .ant-menu-submenu-title > .ant-menu-item-icon{
     color: #fff !important;
