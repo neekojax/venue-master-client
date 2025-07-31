@@ -47,9 +47,9 @@ export default function UserAvatar() {
       <Avatar
         size={25}
         style={{ backgroundColor: "#E9F3FF" }}
-        icon={<UserOutlined style={{ color: "#1B84FF", fontWeight: "bold" }} />}
+        icon={<UserOutlined style={{ color: "#2d8cf0", fontWeight: "bold" }} />}
       />
-      {/* <UserOutlined className="cursor-pointer" style={{ fontSize: 50, color: "#1B84FF" }} /> */}
+      {/* <UserOutlined className="cursor-pointer" style={{ fontSize: 50, color: "#2d8cf0" }} /> */}
       {/* <Avatar size={50} src={<UserOutlined />} className="cursor-pointer" /> */}
       {/* <Avatar size={50} src={apiUrl} className="cursor-pointer" /> */}
     </Dropdown>

@@ -41,7 +41,7 @@
 }
 .ant-app .ant-menu-light .ant-menu-item-selected{
     transition: color .2s ease;
-    background-color: #1b84ff;
+    background-color: #2d8cf0;
     border-radius: 0.2rem;
     color: #fff !important;
 }
@@ -123,7 +123,7 @@
     border: none !important;
 }
 .filter-button .radio-button.active{
-   color: #1b84ff;
+   color: #2d8cf0;
 }
 
 
@@ -321,7 +321,7 @@
 }
 .ant-btn-variant-solid{
     font-size: 12px;
-    background-color: #1b84ff;
+    background-color: #2d8cf0;
 }
 .ant-btn-variant-solid :hover{
     background-color: #3d95fb;

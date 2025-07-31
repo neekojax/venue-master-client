@@ -196,10 +196,15 @@ export default function SiderBar() {
         to="/"
       >
         {/*<PandaIcon className="size-9" />*/}
-        <img src={logo} alt="Logo" className="size-9" style={{ borderRadius: "0.5rem" }} />{" "}
+        <img
+          src={logo}
+          alt="Logo"
+          className="size-9"
+          style={{ width: "2rem", height: "2rem", borderRadius: "0.5rem" }}
+        />{" "}
         {/* 替换为 logo */}
         {collapsed ? null : (
-          <span className="text-gradient-ripple" style={{ fontSize: "13px" }}>
+          <span className="text-gradient-ripple" style={{ fontSize: "0.875rem" }}>
             运营管理系统
           </span>
         )}
