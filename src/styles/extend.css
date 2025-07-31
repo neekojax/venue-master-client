@@ -30,8 +30,8 @@
     /* color: #b6b9c8; */
     color: #bbb;
     font-size: 14px !important;
-    font-weight: 400;
-    font-family: Inter, Helvetica, sans-serif;
+    font-weight: 600;
+    /* font-family: Inter, Helvetica, sans-serif; */
     line-height: 1.75;
     
     /* padding-left: 24px; */
@@ -68,8 +68,9 @@
 .ant-menu-light .ant-menu-submenu-title{
     color: #bbb;
     font-size: 14px !important;
-    font-weight: 400;
-    font-family: Inter, Helvetica, sans-serif;
+    font-weight: 600;
+    /* font-family: Inter, Helvetica, sans-serif; */
+
 }
 .ant-menu .ant-menu-item a:hover::before{
     color: #fff;
@@ -77,17 +78,21 @@
 .ant-menu-light .ant-menu-submenu-title:hover{
     color: #fff;
 }
-.ant-menu .ant-menu-submenu-expand-icon, .ant-menu .ant-menu-submenu-arrow，.ant-menu .ant-menu-submenu-title .ant-menu-item-icon svg {
+.ant-menu .ant-menu-submenu-expand-icon, .ant-menu .ant-menu-submenu-arrow, .ant-menu .ant-menu-submenu-title .ant-menu-item-icon svg {
     /* color: #4a4b68; */
     color: #bbb;
-    font-size: 20px;
+    font-size: 24px;
     
+}
+.ant-menu .ant-menu-submenu-arrow::before, .ant-menu .ant-menu-submenu-arrow::after{
+    width: calc(calc(18px / 7 * 5) * 0.6) !important;
+    height: calc(calc(18px / 7 * 5) * 0.15) !important;
 }
 .ant-menu .ant-menu-item .ant-menu-item-icon svg, .ant-menu .ant-menu-submenu-title .ant-menu-item-icon svg,
 .ant-menu-ant-menu-submenu.ant-menu-submenu-inline .ant-menu-submenu-title .ant-menu-item-icon svg
  {
     display: inline-block;
-    font-size: 20px;
+    font-size: 18px;
     /* color: #4a4b68; */
     color: #bbb;
 }
@@ -194,7 +199,7 @@
 .ant-menu-inline.ant-menu-root .ant-menu-submenu-title > .ant-menu-item-icon{
     /* color: #4a4b68; */
     color: #bbb;
-    font-size: 20px;
+    font-size: 18px;
 }
 .ant-menu-submenu.ant-menu-inline.ant-menu-submenu-open.ant-menu-submenu-selected > .ant-menu-submenu-title > .ant-menu-item-icon{
     color: #fff !important;
