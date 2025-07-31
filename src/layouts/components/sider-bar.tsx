@@ -4,7 +4,7 @@ import { FaRegChartBar } from "react-icons/fa";
 import { MdMonitorHeart } from "react-icons/md";
 import { SiNginxproxymanager } from "react-icons/si";
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { HomeOutlined, ProductOutlined, RadiusSettingOutlined } from "@ant-design/icons"; //<RadiusSettingOutlined />
+import { HomeOutlined, ProductOutlined } from "@ant-design/icons"; //<RadiusSettingOutlined />
 import { Layout, Menu, type MenuProps } from "antd";
 import { useTheme } from "@/components/theme-provider";
 import logo from "../../../public/logo.svg";
@@ -146,11 +146,11 @@ const items: MenuProps["items"] = [
   //     },
   //   ],
   // },
-  {
-    icon: <RadiusSettingOutlined />,
-    label: <Link to={ROUTE_PATHS.base}>模版管理</Link>,
-    key: ROUTE_PATHS.base,
-  },
+  // {
+  //   icon: <RadiusSettingOutlined />,
+  //   label: <Link to={ROUTE_PATHS.base}>模版管理</Link>,
+  //   key: ROUTE_PATHS.base,
+  // },
 ];
 
 export default function SiderBar() {

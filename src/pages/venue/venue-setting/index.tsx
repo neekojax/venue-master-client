@@ -179,7 +179,6 @@ const VenueManagement: React.FC = () => {
   const handleModalCancel = () => {
     setIsModalVisible(false);
   };
-
   // 表格列定义
   const columns = [
     {
@@ -189,18 +188,6 @@ const VenueManagement: React.FC = () => {
       render(value, record, index) {
         return index + 1;
       },
-      // render: (id: number) => (
-      //   <Checkbox
-      //     checked={selectedRowKeys.includes(id)}
-      //     onChange={(e) => {
-      //       if (e.target.checked) {
-      //         setSelectedRowKeys([...selectedRowKeys, id]);
-      //       } else {
-      //         setSelectedRowKeys(selectedRowKeys.filter((k) => k !== id));
-      //       }
-      //     }}
-      //   />
-      // ),
     },
     {
       title: "场地名称",
