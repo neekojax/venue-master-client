@@ -16,17 +16,25 @@
     }
 }
 .ant-app .ant-layout-sider {
-  background-color: #0d0e12;
+  /* background-color: #0d0e12; */
+  background-color: rgb(0, 20, 40);
 }
 .ant-app .ant-menu-light{
-    background-color: #0d0e12;
+    /* background-color: #0d0e12; */
+    background-color: rgb(0, 20, 40);
+    margin-top: 6px;
+    height: 42px;
 }
 
 .ant-menu-light .ant-menu-item a{
-    color: #b6b9c8;
-    font-size: 13px !important;
+    /* color: #b6b9c8; */
+    color: #bbb;
+    font-size: 14px !important;
     font-weight: 400;
     font-family: Inter, Helvetica, sans-serif;
+    line-height: 1.75;
+    
+    /* padding-left: 24px; */
 }
 .ant-menu-light .ant-menu-item a:hover{
     color: #fff;
@@ -34,6 +42,7 @@
 .ant-app .ant-menu-light .ant-menu-item-selected{
     transition: color .2s ease;
     background-color: #1b84ff;
+    border-radius: 0.2rem;
     color: #fff !important;
 }
 .ant-app .ant-menu-light .ant-menu-item-selected a{
@@ -42,13 +51,14 @@
 .ant-menu .ant-menu-submenu .ant-menu a::before{
 /* .ant-menu .ant-menu-item a::before{ */
     position:relative;
-    content: "•";           /* 使用中点字符 */
-    color: #4a4b68;          /* 可自定义颜色 */
+    /* content: "•";           /使用中点字符 */
+     /* color: #4a4b68;         可自定义颜色 */
+     color: #bbb;
     margin-right: 0.625rem;      /* 点和文字之间的间距 */
     font-size: 16px;
 }
 .ant-app .ant-menu-light .ant-menu-submenu  .ant-menu-item-selected a::before{
-    content: "•";           /* 使用中点字符 */
+    /* content: "•";           使用中点字符 */
     color: #fff;             /* 可自定义颜色 */
     margin-right: 0.625rem;      /* 点和文字之间的间距 */
     font-size: 16px;
@@ -56,8 +66,8 @@
 
 /*子菜单*/
 .ant-menu-light .ant-menu-submenu-title{
-    color: #b6b9c8;
-    font-size: 13px !important;
+    color: #bbb;
+    font-size: 14px !important;
     font-weight: 400;
     font-family: Inter, Helvetica, sans-serif;
 }
@@ -68,13 +78,15 @@
     color: #fff;
 }
 .ant-menu .ant-menu-submenu-expand-icon, .ant-menu .ant-menu-submenu-arrow，.ant-menu .ant-menu-submenu-title .ant-menu-item-icon svg {
-    color: #4a4b68;
+    /* color: #4a4b68; */
+    color: #bbb;
 }
 .ant-menu .ant-menu-item .ant-menu-item-icon svg, .ant-menu .ant-menu-submenu-title .ant-menu-item-icon svg,
 .ant-menu-ant-menu-submenu.ant-menu-submenu-inline .ant-menu-submenu-title .ant-menu-item-icon svg
  {
     display: inline-block;
-    color: #4a4b68;
+    /* color: #4a4b68; */
+    color: #bbb;
 }
 
 
@@ -168,16 +180,17 @@
     font-size: .725rem !important;
 }
 .ant-statistic .ant-statistic-title{
-    font-size: 12px !important;
+    font-size: 13px !important;
 }
 
 /*表格样式*/
 .css-dev-only-do-not-override-yta69t.ant-table-wrapper .ant-table-thead >tr>th,.ant-table-wrapper .ant-table-thead >tr>th{
-    font-size: 13px;
+    font-size: 14px;
     /* color: #99A1B7; */
 }
 .ant-menu-inline.ant-menu-root .ant-menu-submenu-title > .ant-menu-item-icon{
-    color: #4a4b68;
+    /* color: #4a4b68; */
+    color: #bbb;
 }
 .ant-menu-submenu.ant-menu-inline.ant-menu-submenu-open.ant-menu-submenu-selected > .ant-menu-submenu-title > .ant-menu-item-icon{
     color: #fff !important;

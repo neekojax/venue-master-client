@@ -7,7 +7,8 @@ import { Link, useLocation, useNavigate } from "react-router-dom";
 import { HomeOutlined, ProductOutlined } from "@ant-design/icons"; //<RadiusSettingOutlined />
 import { Layout, Menu, type MenuProps } from "antd";
 import { useTheme } from "@/components/theme-provider";
-import logo from "../../../public/logo.svg";
+// import logo from "../../../public/logo.svg";
+import logo from "../../../public/logo_middle.png";
 import { ROUTE_PATHS } from "@/constants/common";
 import { useSelector, useSettingsStore } from "@/stores";
 
@@ -195,8 +196,13 @@ export default function SiderBar() {
         to="/"
       >
         {/*<PandaIcon className="size-9" />*/}
-        <img src={logo} alt="Logo" className="size-9" /> {/* 替换为 logo */}
-        {collapsed ? null : <span className="text-gradient-ripple">运营管理系统</span>}
+        <img src={logo} alt="Logo" className="size-9" style={{ borderRadius: "0.5rem" }} />{" "}
+        {/* 替换为 logo */}
+        {collapsed ? null : (
+          <span className="text-gradient-ripple" style={{ fontSize: "13px" }}>
+            运营管理系统
+          </span>
+        )}
       </Link>
       {/* <div className="aside"> */}
       <Menu

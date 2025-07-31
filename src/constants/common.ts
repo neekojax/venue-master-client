@@ -2,7 +2,7 @@ export const ROUTE_PATHS = {
   login: "/login",
   user: "/user", // 用户中心～修改密码
   notFound: "/not-found",
-  landing: "/landing",
+  landing: "/index",
   // base: "/base",
   userManagement: "/user-management",
   echartsDemo: "/echarts-demo",
