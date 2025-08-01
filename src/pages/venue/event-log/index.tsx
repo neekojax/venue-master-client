@@ -116,7 +116,8 @@ const App: React.FC = () => {
       dataIndex: "key",
       width: "70px",
       rowScope: "row",
-      render(index) {
+      render(text: string, record: any, index: number) {
+        console.log(text, record.key);
         return index + 1;
       },
     },
@@ -181,7 +182,8 @@ const App: React.FC = () => {
       // if (value === "empty") return !hasDuration;
       // return true;
       // },
-      render: (record: any) => {
+      render: (text: string, record: any) => {
+        console.log(text);
         if (record.start_time && record.end_time) {
           return getTimeDifference(record.start_time, record.end_time);
         }

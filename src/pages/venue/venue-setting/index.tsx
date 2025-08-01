@@ -27,7 +27,7 @@ const VenueManagement: React.FC = () => {
   const { poolType } = useSettingsStore(useSelector(["poolType"]));
 
   const { data } = useVenueList(poolType);
-
+  // const [data] = useState<any>();
   const [venues, setVenues] = useState<Venue[]>([]);
   const [filteredVenues, setFilteredVenues] = useState<Venue[]>([]);
   // const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([]);
@@ -187,7 +187,8 @@ const VenueManagement: React.FC = () => {
       title: "序号",
       dataIndex: "id",
       width: 60,
-      render(index: number) {
+      render(text: string, record: any, index: number) {
+        console.log(text, record.id);
         return index + 1;
       },
     },
