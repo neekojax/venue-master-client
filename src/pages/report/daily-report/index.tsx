@@ -567,7 +567,7 @@ const App: React.FC = () => {
             <DatePicker
               className="w-40"
               placeholder="选择日期"
-              onChange={(date, dateString) => {
+              onChange={(dateString: string) => {
                 setSelectedDate(dateString);
               }}
             />
@@ -680,7 +680,7 @@ const App: React.FC = () => {
             pagination={{
               pageSize: pageSize, // 使用动态 pageSize
               showSizeChanger: true,
-              onShowSizeChange: (current, size) => {
+              onShowSizeChange: (size) => {
                 setPageSize(size); // 更新 pageSize 状态
               },
               showQuickJumper: true,

@@ -25,3 +25,13 @@
 .custom-table .ant-table-tbody > tr > td {
   white-space: nowrap;
 }
+
+.edit-sets .ant-table-thead > tr > th {
+  background: #f7f9fc;
+  color: #1f2937;
+  font-weight: 600;
+}
+
+.edit-sets .ant-table-tbody > tr > td {
+  background: #fff;
+}

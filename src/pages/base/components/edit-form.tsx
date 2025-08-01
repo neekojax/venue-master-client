@@ -23,6 +23,7 @@ export default function EditForm({ initialValues, onFormInstanceReady }: EditFor
       ...fields,
       {
         value: "",
+        FieldName: "",
         status: "new",
         ID: 0,
       },
@@ -31,7 +32,12 @@ export default function EditForm({ initialValues, onFormInstanceReady }: EditFor
 
   const updateField = (index: number, value: string) => {
     const newFields = [...fields];
-    newFields[index] = { ID: newFields[index].ID, value: value, status: "modified" }; // 标记为修改
+    newFields[index] = {
+      ID: newFields[index].ID,
+      FieldName: newFields[index].FieldName,
+      value: value,
+      status: "modified",
+    }; // 标记为修改
     setFields(newFields);
     form.setFieldsValue({ fields: newFields }); // 仅更新值
   };

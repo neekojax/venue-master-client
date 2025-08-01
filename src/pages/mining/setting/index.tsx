@@ -448,7 +448,7 @@ export default function MiningSettingPage() {
         String(value).toLowerCase().includes(searchTerm.toLowerCase()),
       );
     })
-    .sort((a, b) => {
+    .sort((a: any, b: any) => {
       const nameA = a.venue_name.toLowerCase(); // 转为小写进行比较
       const nameB = b.venue_name.toLowerCase();
       if (nameA < nameB) {

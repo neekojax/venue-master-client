@@ -7,10 +7,10 @@ const { Title, Paragraph } = Typography;
 interface HeaderSectionProps {
   onChange: (value: any) => void;
   venueNum: number;
-  SubAccountNum: number;
+  subAccountNum: number;
 }
 
-const HeaderSection = ({ onChange, venueNum, SubAccountNum }: HeaderSectionProps) => {
+const HeaderSection = ({ onChange, venueNum, subAccountNum }: HeaderSectionProps) => {
   return (
     // <div className='headerSection' style={{ background: '#fff', padding: '24px', borderRadius: 8, marginBottom: 24 }}>
     <div className="headerSection">
@@ -50,7 +50,7 @@ const HeaderSection = ({ onChange, venueNum, SubAccountNum }: HeaderSectionProps
             <Statistic
               // title="子账户数"
               title={<span className="title">子账户数</span>}
-              value={SubAccountNum}
+              value={subAccountNum}
               formatter={(value) => <span className="stat-value stat-value-green">{value}</span>}
             />
           </Flex>

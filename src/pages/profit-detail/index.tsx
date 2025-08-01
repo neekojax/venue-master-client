@@ -23,7 +23,7 @@ export default function ProfitDetailPage() {
 
   const [statisticsHistory, setStatisticsHistory] = useState<any>(null); // 状态数据
 
-  const [setLoading] = useState<boolean>(true); // 加载状态
+  // const [setLoading] = useState<boolean>(true); // 加载状态
   // const [error, setError] = useState<string | null>(null); // 错误信息
 
   const [dateRange, setDateRange] = useState<[Dayjs | null, Dayjs | null]>(
@@ -52,9 +52,10 @@ export default function ProfitDetailPage() {
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (err) {
       /* empty */
-    } finally {
-      setLoading(false);
     }
+    // finally {
+    // setLoading(false);
+    // }
   };
 
   useEffect(() => {
@@ -215,7 +216,7 @@ export default function ProfitDetailPage() {
         new Date(a.date).getTime() - new Date(b.date).getTime(),
     ); // 按日期升序排序
 
-  const formatNumberCN = (value) => {
+  const formatNumberCN = (value: any) => {
     if (value >= 1e8) {
       return (value / 1e8).toFixed(2) + "亿";
     } else if (value >= 1e6) {
@@ -283,7 +284,7 @@ export default function ProfitDetailPage() {
         // color: "#464646",
         color: "#99a1b7", // 字体颜色
         fontSize: 10,
-        formatter: function (value) {
+        formatter: function (value: any) {
           // 只保留月-日
           return value.substr(5);
         },

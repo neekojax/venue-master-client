@@ -45,9 +45,10 @@ const VenueManagement: React.FC = () => {
   // 当获取到数据时更新 venues
   useEffect(() => {
     if (data) {
-      if (data.success && Array.isArray(data.data)) {
-        const formattedData = data.data.map((item: any) => ({
+      if (data?.data?.success && Array.isArray(data.data.data)) {
+        const formattedData = data.data.data.map((item: any) => ({
           id: item.id,
+          venue_type: item.venue_type,
           venue_name: item.venue_name,
           venue_code: item.venue_code,
           country: item.country,
@@ -185,7 +186,7 @@ const VenueManagement: React.FC = () => {
       title: "序号",
       dataIndex: "id",
       width: 60,
-      render(value, record, index) {
+      render(index: number) {
         return index + 1;
       },
     },
@@ -298,7 +299,7 @@ const VenueManagement: React.FC = () => {
         pagination={{
           pageSize: pageSize, // 使用动态 pageSize
           showSizeChanger: true,
-          onShowSizeChange: (current, size) => {
+          onShowSizeChange: (size) => {
             setPageSize(size); // 更新 pageSize 状态
           },
           showQuickJumper: true,

@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { DownloadOutlined } from "@ant-design/icons";
 import { Button, message, Spin, Table, Tag, Tooltip } from "antd";
-import { number } from "echarts";
 import { ReactEcharts } from "@/components/react-echarts"; // 导入自定义的 ReactEcharts 组件
 import HeaderSection from "./components/HeaderSection";
 import useAuthRedirect from "@/hooks/useAuthRedirect.ts";
@@ -19,8 +18,8 @@ export default function VenueRunningKpi() {
   const [columns, setColumns] = useState<any>([]);
   const [searchTerm, setSearchTerm] = useState(""); // 新增搜索状态
   const [loading, setLoading] = useState<boolean>(true); //
-  const [venueNums, setVenueNum] = useState(number);
-  const [subAccountNum, setSubAccountNum] = useState(number);
+  const [venueNums, setVenueNum] = useState<number>(0);
+  const [subAccountNum, setSubAccountNum] = useState<number>(0);
 
   const fetchData = async (poolType: string) => {
     try {
@@ -40,7 +39,7 @@ export default function VenueRunningKpi() {
       });
       // 转换成数组（可选）
       const venueArray = Object.values(venueNumMap || {});
-      setVenueNum(venueArray?.length ?? 0);
+      setVenueNum(venueArray.length);
       setSubAccountNum(rawData?.length ?? 0);
     } catch (err) {
       // 处理错误
@@ -342,7 +341,7 @@ export default function VenueRunningKpi() {
 
   return (
     <div style={{ padding: "20px" }} className="longdataTable">
-      <HeaderSection onChange={handleSearch} venueNum={venueNums} SubAccountNum={subAccountNum} />
+      <HeaderSection onChange={handleSearch} venueNum={venueNums} subAccountNum={subAccountNum} />
       <Table
         loading={loading}
         columns={columns}

@@ -223,7 +223,7 @@ const MiningPoolCard: React.FC<MiningPoolCardProps> = ({ poolType }) => {
                       status="active"
                       strokeColor={item.color}
                       style={{ flex: 1 }}
-                      percentPosition={{ align: "left", type: "outer" }}
+                      percentPosition={{ align: "start", type: "outer" }}
                       size="small"
                     />
                   </Col>
@@ -272,7 +272,7 @@ const MiningPoolCard: React.FC<MiningPoolCardProps> = ({ poolType }) => {
                       status="active"
                       strokeColor={item.color}
                       style={{ flex: 1 }}
-                      percentPosition={{ align: "left", type: "outer" }}
+                      percentPosition={{ align: "start", type: "outer" }}
                       size="small"
                     />
                   </Col>

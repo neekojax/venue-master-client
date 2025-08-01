@@ -16,7 +16,7 @@ const MiningBenefitCard: React.FC<MiningPoolCardProps> = ({ poolType }) => {
   const [error] = useState<string | null>(null); // 错误信息
   const [suanlilv, setSuanlilv] = useState<any>(null); // 状态数据
 
-  const formatNumber = (value) => {
+  const formatNumber = (value: any) => {
     const num = Number(value);
     if (isNaN(num)) return ""; // 非法值返回空字符串
 

@@ -178,7 +178,7 @@ export default function StatisticsPage() {
         // width: 280,
         width: "33.33%",
         sorter: (a: any, b: any) => a.total_income_btc - b.total_income_btc, // 添加排序逻辑
-        render: (text: any, record: any) => (
+        render: (record: any) => (
           <span>
             <Tag color="#f50">{record.total_income_btc}</Tag>
             <Tag color="#2db7f5">{record.total_income_usd}</Tag>
@@ -219,7 +219,7 @@ export default function StatisticsPage() {
         key: "hosting_fee_ratio",
         // width: 200,
         width: "15%",
-        render: (text: any, record: any) => (
+        render: (record: any) => (
           <span>
             {/* <span style={{ color: "#3498DB" }}> {record.basic_hosting_fee}</span>{" "}
             <span className="text-sm text-gray-500">$/kwh</span> /{" "} */}

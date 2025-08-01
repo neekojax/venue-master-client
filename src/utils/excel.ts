@@ -438,7 +438,7 @@ export const exportMiningPoolMonthRecordToExcel = (data: any) => {
   ];
 
   // 生成动态列标题和对应数据
-  const monthRows = data.monthEfficiencys.map((month) => [
+  const monthRows = data.monthEfficiencys.map((month: any) => [
     `${new Date(month.time).getMonth() + 1}月算力达成率`, // 动态列标题
     month.efficiency, // 对应的数据
   ]);

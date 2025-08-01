@@ -74,7 +74,7 @@ const App: React.FC = () => {
 
   // 数据转换
   const logData: EventLog[] =
-    data?.data?.map((item, index) => ({
+    data?.data?.map((item: any, index: any) => ({
       key: index + 1,
       id: item.id,
       venue_id: item.venue_id,
@@ -116,7 +116,7 @@ const App: React.FC = () => {
       dataIndex: "key",
       width: "70px",
       rowScope: "row",
-      render(value, record, index) {
+      render(index) {
         return index + 1;
       },
     },
@@ -165,7 +165,7 @@ const App: React.FC = () => {
         { text: "未结束事件", value: "empty" },
         { text: "已结束事件", value: "valid" },
       ],
-      onFilter: (value, record) => {
+      onFilter: (value: any, record: any) => {
         setSelectedDurationType(value);
         const hasDuration = record.start_time && record.end_time;
         if (value === "valid") return hasDuration;
@@ -181,7 +181,7 @@ const App: React.FC = () => {
       // if (value === "empty") return !hasDuration;
       // return true;
       // },
-      render: (text, record) => {
+      render: (record: any) => {
         if (record.start_time && record.end_time) {
           return getTimeDifference(record.start_time, record.end_time);
         }
@@ -417,22 +417,20 @@ const App: React.FC = () => {
                 className="!rounded-lg"
                 placeholder={["开始日期", "结束日期"]}
                 value={dateRange}
-                onChange={setDateRange} // 更新日期范围
+                onChange={() => setDateRange} // 更新日期范围
               />
               <Select
                 mode="multiple"
                 maxTagCount="responsive"
                 maxTagTextLength={4} // 可选：限制每个标签显示文字长度
-                size="medium"
-                maxTagCount="responsive"
-                maxTagTextLength={4} // 可选：限制每个标签显示文字长度
+                size="middle"
                 placeholder="选择场地"
                 value={selectedLocation}
                 onChange={setSelectedLocation}
                 style={{ width: 150 }}
                 // className="!rounded-lg"
               >
-                {venueList?.data?.map((venue) => (
+                {venueList?.data?.map((venue: any) => (
                   <Option key={venue.id} value={venue.venue_name}>
                     {venue.venue_name}
                   </Option>
@@ -533,7 +531,7 @@ const App: React.FC = () => {
           scroll={{ x: 1300 }}
           rowKey="id"
           // onChange={handleTableChange}
-          onChange={(pagination, filters) => {
+          onChange={(filters: any) => {
             // console.log("选中的事件类型：", filters.log_type); // 是数组
             setSelectedEventType(filters.log_type || []); // 设置选中的事件类型数组
           }}
@@ -564,7 +562,7 @@ const App: React.FC = () => {
             </Form.Item>
             <Form.Item name="venue_id" label="场地" rules={[{ required: true, message: "请选择场地" }]}>
               <Select placeholder="请选择场地" allowClear style={{ width: "100%", fontSize: "12px" }}>
-                {venueList?.data?.map((venue) => (
+                {venueList?.data?.map((venue: any) => (
                   <Option key={venue.id} value={venue.id} style={{ fontSize: "12px" }}>
                     {venue.venue_name}
                   </Option>

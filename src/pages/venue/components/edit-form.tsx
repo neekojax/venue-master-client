@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Form, type FormInstance, Input } from "antd";
-import type { Field, Values } from "../venue-order/type.ts";
+
+import type { Field, Values } from "@/pages/base/type.ts";
 
 interface EditFormProps {
   initialValues: Values;
@@ -17,7 +18,12 @@ export default function EditForm({ initialValues, onFormInstanceReady }: EditFor
 
   const updateField = (index: number, value: string) => {
     const newFields = [...fields];
-    newFields[index] = { ID: newFields[index].ID, FieldName: newFields[index].FieldName, Value: value }; // 标记为修改
+    newFields[index] = {
+      ID: newFields[index].ID,
+      FieldName: newFields[index].FieldName,
+      value: value,
+      status: "modified",
+    }; // 标记为修改
     setFields(newFields);
     form.setFieldsValue({ fields: newFields }); // 仅更新值
   };

@@ -9,6 +9,7 @@ export type Values = {
 export type Field = {
   ID: number;
   value: string;
+  FieldName: string;
   status: "default" | "new" | "modified" | "deleted";
 };
 

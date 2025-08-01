@@ -3,7 +3,7 @@ import { DeleteOutlined, FormOutlined } from "@ant-design/icons";
 import { EditableProTable } from "@ant-design/pro-components";
 import { message, Pagination, Popconfirm } from "antd";
 
-// import "../styles.css";
+import "./styles.css";
 
 type EditTableProps = {
   tableData: any[];
@@ -97,19 +97,19 @@ export default function EditTable({ tableData, columns, handleDelete, handleSave
           borderRadius: "8px",
           overflow: "hidden",
         }}
-        tableClassName="custom-table"
-        headerStyle={{
-          background: "#f7f9fc",
-          fontWeight: 600,
-          color: "#1f2937",
-          padding: "12px 16px",
-          borderBottom: "1px solid #e5e7eb",
-        }}
-        rowStyle={{
-          padding: "12px 16px",
-          borderBottom: "1px solid #f0f0f0",
-          transition: "background-color 0.3s ease",
-        }}
+        tableClassName="custom-table edit-sets"
+        // headerStyle={{
+        //   background: "#f7f9fc",
+        //   fontWeight: 600,
+        //   color: "#1f2937",
+        //   padding: "12px 16px",
+        //   borderBottom: "1px solid #e5e7eb",
+        // }}
+        // rowStyle={{
+        //   padding: "12px 16px",
+        //   borderBottom: "1px solid #f0f0f0",
+        //   transition: "background-color 0.3s ease",
+        // }}
         // rowClassName={getRowClassName} // 为主表添加行样式
       />
       {/* 分页组件 */}

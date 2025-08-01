@@ -132,7 +132,7 @@ export default function StatisticsPage() {
         left: "15%",
       },
       axisLabel: {
-        formatter: function (value) {
+        formatter: function (value: any) {
           // 提取月-日
           return value.substr(5); // 或者用 value.slice(5)
         },

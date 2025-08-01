@@ -56,7 +56,7 @@ const MiningBenefitCard = ({ poolType }) => {
     // @ts-ignore
     const fee_percentage = data.map((item) => item.fee_percentage);
 
-    const formatNumberCN = (value) => {
+    const formatNumberCN = (value: number) => {
       if (value >= 1e8) {
         return (value / 1e8).toFixed(2) + "亿";
       } else if (value >= 1e6) {
@@ -86,7 +86,7 @@ const MiningBenefitCard = ({ poolType }) => {
           color: "#99a1b7", // 字体颜色
           fontSize: 12, // 字体大小
           rotate: 0, //不旋转
-          formatter: function (value) {
+          formatter: function (value: any) {
             // 只保留月-日
             return value.substr(5);
           },
@@ -97,7 +97,6 @@ const MiningBenefitCard = ({ poolType }) => {
           },
         },
       },
-
       yAxis: [
         {
           type: "value",
@@ -106,7 +105,7 @@ const MiningBenefitCard = ({ poolType }) => {
           axisLabel: {
             color: "#99a1b7", // 字体颜色
             fontSize: 12, // 字体大小
-            formatter: function (value) {
+            formatter: function (value: any) {
               return formatNumberCN(value);
             },
           },

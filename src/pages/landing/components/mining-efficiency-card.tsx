@@ -64,7 +64,7 @@ const MiningEfficiencyCard = ({ poolType }) => {
           color: "#99a1b7", // 字体颜色
           fontSize: 12, // 字体大小
           rotate: 0, //不旋转
-          formatter: function (value) {
+          formatter: function (value: any) {
             // 只保留月-日
             return value.substr(5);
           },
