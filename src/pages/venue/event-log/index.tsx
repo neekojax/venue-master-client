@@ -240,7 +240,7 @@ const App: React.FC = () => {
     {
       title: "影响台数",
       dataIndex: "impact_count",
-      width: 100,
+      width: 105,
       sorter: (a, b) => a.impact_count - b.impact_count,
     },
     {
