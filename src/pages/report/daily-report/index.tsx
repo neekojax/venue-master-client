@@ -567,7 +567,7 @@ const App: React.FC = () => {
             <DatePicker
               className="w-40"
               placeholder="选择日期"
-              onChange={(dateString: string) => {
+              onChange={(_: any, dateString: string) => {
                 setSelectedDate(dateString);
               }}
             />
