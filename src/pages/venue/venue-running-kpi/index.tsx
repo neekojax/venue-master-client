@@ -25,9 +25,9 @@ export default function VenueRunningKpi() {
     try {
       setLoading(true);
       const runningDataResult = await fetchMiningPoolRunningData(poolType);
-      setRunningData(runningDataResult.data); // 假设返回数据在 result.data 中
+      setRunningData(runningDataResult?.data); // 假设返回数据在 result.data 中
 
-      const rawData = runningDataResult.data || [];
+      const rawData = runningDataResult?.data || [];
       const venueNumMap = {}; // 场地遍历
 
       // 遍历数据并覆盖重复值

@@ -20,8 +20,10 @@ const formFields = [
     name: "pool_type",
     component: Select,
     options: [
-      { value: "NS", label: "NS" },
       { value: "CANG", label: "CANG" },
+      { value: "NS", label: "NS" },
+      { value: "ND", label: "ND" },
+      { value: "KZ", label: "KZ" },
     ],
   },
   {
