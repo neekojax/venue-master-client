@@ -224,7 +224,10 @@ const App: React.FC = () => {
       onFilter: () => {
         return true;
       },
-      // onFilter: (value, record) => record.log_type === value,
+      // onFilter: (value, record) => {
+      //   console.log(value);
+      //   return record.log_type === value
+      // },
       render: (text) => {
         const colors = {
           限电: "red",
@@ -319,7 +322,7 @@ const App: React.FC = () => {
     if (isLoading) {
       // message.loading("加载中...");
     }
-    console.log(selectedEventType);
+    // console.log(selectedEventType);
   }, [isLoading, selectedEventType]);
 
   const handleAdd = () => {
@@ -446,9 +449,8 @@ const App: React.FC = () => {
                 value={selectedEventType}
                 onChange={setSelectedEventType}
                 style={{ width: 150 }}
-                maxTagCount="responsive"
-                maxTagTextLength={4} // 可选：限制每个标签显示文字长度
-                size="meddle"
+                // maxTagTextLength={4} // 可选：限制每个标签显示文字长度
+                size="middle"
               // className="!rounded-lg"
               >
                 {["电力", "高温", "极端天气", "日常维护", "设备故障", "网络", "限电"].map((type) => (
@@ -527,14 +529,13 @@ const App: React.FC = () => {
         </div>
         <Table
           // rowSelection={rowSelection}
-
           columns={columns}
           dataSource={filteredData} // 使用过滤后的数据
           scroll={{ x: 1300 }}
           rowKey="id"
           // onChange={handleTableChange}
-          onChange={(filters: any) => {
-            // console.log("选中的事件类型：", filters.log_type); // 是数组
+          onChange={(pagination: any, filters: any) => {
+            // console.log("Table >>选中的事件类型：", filters.log_type); // 是数组
             setSelectedEventType(filters.log_type || []); // 设置选中的事件类型数组
           }}
           pagination={{
