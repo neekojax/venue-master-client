@@ -6,6 +6,7 @@ import react from "@vitejs/plugin-react-swc";
 
 // https://vitejs.dev/config/
 export default defineConfig({
+  base: '/', // 或者 '/子目录/'，根据你的部署路径
   plugins: [
     react(),
     { ...compression(), apply: "build" },

@@ -11,7 +11,7 @@ const MiningEfficiencyCard = ({ poolType }) => {
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState<boolean>(true); // 加载状态
   // const [dataCang, setDataCang] = useState([]);
-  const [timeFrame, setTimeFrame] = useState("90");
+  const [timeFrame, setTimeFrame] = useState("30");
 
   const fetchData = async (timeFrame: string) => {
     try {
@@ -77,7 +77,7 @@ const MiningEfficiencyCard = ({ poolType }) => {
       },
       yAxis: {
         type: "value",
-        min: 70,
+        min: 0,
         axisLabel: {
           color: "#99a1b7", // 字体颜色
           fontSize: 12, // 字体大小

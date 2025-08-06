@@ -6,7 +6,7 @@ import { AppHelmet } from "@/components/helmet";
 import Breadcrumb from "./components/bread-crumb";
 import Content from "./components/main-content";
 import SiderBar from "./components/sider-bar";
-import UserAvatar from "./components/user-avatar";
+// import UserAvatar from "./components/user-avatar";
 import useAuthRedirect from "@/hooks/useAuthRedirect.ts";
 import { setCollapsed, useSelector, useSettingsStore } from "@/stores";
 
@@ -78,7 +78,7 @@ export default function MainLayout() {
               {/*<CustomSkin />*/}
               {/*<ThemeSwitch />*/}
               <PoolTypeSelect />
-              <UserAvatar />
+              {/* <UserAvatar /> */}
             </Flex>
           </Layout.Header>
           <Content />

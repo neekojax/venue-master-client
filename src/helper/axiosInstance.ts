@@ -40,12 +40,12 @@ const refreshToken = async () => {
 axiosInstance.interceptors.request.use(
   (config) => {
     // 在请求中添加自定义逻辑，比如添加 token
-    const token = localStorage.getItem("access_token");
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
-    } else {
-      eventBus.emit("redirect", ROUTE_PATHS.login); // Emit the redirect event
-    }
+    // const token = localStorage.getItem("access_token");
+    // if (token) {
+    //   config.headers.Authorization = `Bearer ${token}`;
+    // } else {
+    //   eventBus.emit("redirect", ROUTE_PATHS.login); // Emit the redirect event
+    // }
     return config;
   },
   (error) => {
