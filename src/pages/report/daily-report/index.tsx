@@ -56,7 +56,7 @@ const App: React.FC = () => {
   yesterday.setDate(yesterday.getDate() - 1);
   const formattedDate = yesterday.toISOString().split("T")[0]; // 格式化为 'YYYY-MM-DD'
 
-  const [selectedDate, setSelectedDate] = useState<string>(formattedDate);
+  const [selectedDate, setSelectedDate] = useState<string | string[]>(formattedDate);
   const [selectedSites, setSelectedSites] = useState<string[]>([]);
   const handleSitesChange = (value: string[]) => {
     setSelectedSites(value);
@@ -339,32 +339,6 @@ const App: React.FC = () => {
       render: (value) => `${value.toFixed(2)}%`,
       sorter: (a, b) => a.highTemperatureRate - b.highTemperatureRate,
     },
-    // {
-    //   title: "限电算力",
-    //   dataIndex: "limitImpactRate",
-    //   key: "limitImpactRate",
-    //   width: 140,
-    //   align: "right",
-    //   // render: (value) => value.toFixed(8),
-    //   render: (value, record) => {
-    //     const result = record.theoreticalPower * 1e6 * value / 100;
-    //     return result.toFixed(2) + "TH/s";
-    //     //`${value.toFixed(2)}%`,
-    //   }
-    // },
-    // {
-    //   title: "高温算力",
-    //   dataIndex: "highTemperatureRate",
-    //   key: "highTemperatureRate",
-    //   width: 140,
-    //   align: "right",
-    //   // render: (value) => value.toFixed(8),
-    //   render: (value, record) => {
-    //     const result = record.theoreticalPower * 1e6 * value / 100;
-    //     return result.toFixed(2) + "TH/s";
-    //     //`${value.toFixed(2)}%`,
-    //   }
-    // },
     {
       title: "事件描述",
       dataIndex: "events",
@@ -380,7 +354,7 @@ const App: React.FC = () => {
 
   useEffect(() => {
     const fetchReportData = async () => {
-      const dateToFetch = selectedDate || formattedDate; // formattedDate 是昨天的日期
+      const dateToFetch = Array.isArray(selectedDate) ? selectedDate[0] : selectedDate; // formattedDate 是昨天的日期
       try {
         const reportData = await fetchDailyReport(poolType, dateToFetch);
 
@@ -567,7 +541,8 @@ const App: React.FC = () => {
             <DatePicker
               className="w-40"
               placeholder="选择日期"
-              onChange={(_: any, dateString: string) => {
+              onChange={(_: any, dateString: string | string[]) => {
+                console.log(dateString);
                 setSelectedDate(dateString);
               }}
             />

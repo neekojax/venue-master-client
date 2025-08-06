@@ -1,10 +1,9 @@
 import { useEffect, useRef, useState } from "react";
-import { BiLoaderCircle } from "react-icons/bi";
 import { FaRegChartBar } from "react-icons/fa";
 import { MdMonitorHeart } from "react-icons/md";
 import { SiNginxproxymanager } from "react-icons/si";
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { HomeOutlined, ProductOutlined } from "@ant-design/icons"; //<RadiusSettingOutlined />
+import { HomeOutlined } from "@ant-design/icons"; //<RadiusSettingOutlined />
 import { Layout, Menu, type MenuProps } from "antd";
 import { useTheme } from "@/components/theme-provider";
 // import logo from "../../../public/logo.svg";
@@ -37,11 +36,6 @@ const findSelectedKeys = (items: MenuProps["items"], pathname: string, path: str
 };
 
 const items: MenuProps["items"] = [
-  // {
-  //   icon: <HomeOutlined />,
-  //   label: <Link to={ROUTE_PATHS.dashboard}>首页改版</Link>,
-  //   key: ROUTE_PATHS.dashboard,
-  // },
   {
     icon: <HomeOutlined />,
     label: <Link to={ROUTE_PATHS.landing}>首页</Link>,
@@ -55,10 +49,6 @@ const items: MenuProps["items"] = [
       {
         key: ROUTE_PATHS.miningHashRate,
         label: <Link to={ROUTE_PATHS.miningHashRate}>实时算力</Link>,
-      },
-      {
-        key: ROUTE_PATHS.miningSetting,
-        label: <Link to={ROUTE_PATHS.miningSetting}>矿池设置</Link>,
       },
     ],
   },
@@ -75,10 +65,6 @@ const items: MenuProps["items"] = [
         key: ROUTE_PATHS.eventLog,
         label: <Link to={ROUTE_PATHS.eventLog}>事件日志</Link>,
       },
-      {
-        key: ROUTE_PATHS.venueSetting,
-        label: <Link to={ROUTE_PATHS.venueSetting}>场地设置</Link>,
-      },
     ],
   },
   {
@@ -92,66 +78,6 @@ const items: MenuProps["items"] = [
       },
     ],
   },
-  {
-    icon: <ProductOutlined />,
-    label: "电费监控",
-    key: ROUTE_PATHS.custodyMenu,
-    children: [
-      // {
-      //   key: ROUTE_PATHS.setting,
-      //   label: <Link to={ROUTE_PATHS.setting}>基础设置</Link>,
-      // },
-      {
-        key: ROUTE_PATHS.statistics,
-        // label: "信息统计"
-        label: <Link to={ROUTE_PATHS.statistics}>费用统计</Link>,
-      },
-      {
-        key: ROUTE_PATHS.dailyAveragePrice,
-        // label: "BTC均价"
-        label: <Link to={ROUTE_PATHS.dailyAveragePrice}>BTC均价</Link>,
-      },
-    ],
-  },
-  {
-    icon: <BiLoaderCircle />,
-    label: "电网数据",
-    key: ROUTE_PATHS.electric,
-    children: [
-      {
-        key: ROUTE_PATHS.electricLimit,
-        label: <Link to={ROUTE_PATHS.electricLimit}>限电记录</Link>,
-      },
-      {
-        key: ROUTE_PATHS.electricAverage,
-        label: <Link to={ROUTE_PATHS.electricAverage}>平均电价</Link>,
-      },
-      {
-        key: ROUTE_PATHS.electricBasic,
-        label: <Link to={ROUTE_PATHS.electricBasic}>基础数据</Link>,
-      },
-    ],
-  },
-  // {
-  //   icon: <MenuOutlined />,
-  //   label: "收益管理",
-  //   key: ROUTE_PATHS.nestMenu,
-  //   children: [
-  //     {
-  //       key: ROUTE_PATHS.link,
-  //       label: <Link to={ROUTE_PATHS.link}>观察者链接</Link>,
-  //     },
-  //     {
-  //       key: ROUTE_PATHS.report,
-  //       label: <Link to={ROUTE_PATHS.report}>收益记录</Link>,
-  //     },
-  //   ],
-  // },
-  // {
-  //   icon: <RadiusSettingOutlined />,
-  //   label: <Link to={ROUTE_PATHS.base}>模版管理</Link>,
-  //   key: ROUTE_PATHS.base,
-  // },
 ];
 
 export default function SiderBar() {

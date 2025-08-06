@@ -46,7 +46,7 @@ const VenueManagement: React.FC = () => {
   useEffect(() => {
     if (data) {
       console.log(data);
-      if (data.success && Array.isArray(data.data)) {
+      if (Array.isArray(data.data)) {
         const formattedData = data.data.map((item: any) => ({
           id: item.id,
           venue_type: item.venue_type,

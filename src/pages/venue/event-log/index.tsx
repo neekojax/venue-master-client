@@ -534,7 +534,7 @@ const App: React.FC = () => {
           scroll={{ x: 1300 }}
           rowKey="id"
           // onChange={handleTableChange}
-          onChange={(pagination: any, filters: any) => {
+          onChange={(_: any, filters: any) => {
             // console.log("Table >>选中的事件类型：", filters.log_type); // 是数组
             setSelectedEventType(filters.log_type || []); // 设置选中的事件类型数组
           }}

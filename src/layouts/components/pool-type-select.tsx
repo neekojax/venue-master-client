@@ -34,9 +34,9 @@ const PoolTypeSelector = () => {
       }}
       size={"middle"}
     >
-      <Option value="CANG">CANGO</Option>
+      {/* <Option value="CANG">CANGO</Option>
       <Option value="NS">NS</Option>
-      <Option value="ND">ND</Option>
+      <Option value="ND">ND</Option> */}
       <Option value="KZ">KZ</Option>
     </Select>
   );

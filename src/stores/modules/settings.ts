@@ -4,7 +4,7 @@ import { persist } from "zustand/middleware";
 const initialState = {
   colorPrimary: "#1DA57A",
   collapsed: false,
-  poolType: "CANG",
+  poolType: "KZ",
 };
 
 export const useSettingsStore = create<typeof initialState>()(

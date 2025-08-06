@@ -14,7 +14,7 @@ import {
 import { EventLogParam, VenueInfoParam } from "@/pages/venue/type.tsx";
 
 // 自定义 Hook: 使用场地列表
-export const useVenueList = (poolType: string) => {
+export const useVenueList = (poolType: any) => {
   return useQuery({
     queryKey: ["venue-list", poolType], // 添加 poolType 到 queryKey
     queryFn: () => fetchVenueList(poolType), // 传递 poolType 参数
