@@ -28,7 +28,7 @@ import { getTimeDifference } from "@/utils/date";
 
 import UploadExcel from "@/pages/venue/components/UploadExcel";
 import {
-  useDeleteUpdate,
+  // useDeleteUpdate,
   useEventList,
   useEventNew,
   useEventUpdate,
@@ -64,7 +64,7 @@ const App: React.FC = () => {
   const { data: venueList } = useVenueList(poolType);
   const newMutation = useEventNew();
   const updateMutation = useEventUpdate();
-  const deleteMutation = useDeleteUpdate();
+  // const deleteMutation = useDeleteUpdate();
   const [selectedDurationType, setSelectedDurationType] = useState<string>("");
   // 新增筛选状态
   const [selectedLocation, setSelectedLocation] = useState<string[]>([]);
@@ -326,10 +326,20 @@ const App: React.FC = () => {
   }, [isLoading, selectedEventType]);
 
   const handleAdd = () => {
-    form.resetFields();
-    setIsModalVisible(true);
+    Modal.error({
+      // centered: true,
+      title: "操作失败",
+      content: "请联系管理员。",
+    });
+    // form.resetFields();
+    // setIsModalVisible(true);
   };
   const handleEdit = (record: EventLog) => {
+    Modal.error({
+      title: "操作失败",
+      content: "请联系管理员。",
+    });
+
     form.setFieldsValue({
       ...record,
       // log_date: dayjs(record.log_date),
@@ -339,18 +349,23 @@ const App: React.FC = () => {
       end_time: record.end_time ? dayjs(record.end_time) : undefined, // 如果为 null/undefined，就不传入初始值
       // end_time: dayjs(record.end_time),
     });
-    setIsModalVisible(true);
+    setIsModalVisible(false);
   };
 
   const handleDelete = (id: number) => {
-    deleteMutation.mutate(id, {
-      onSuccess: () => {
-        message.success("删除成功");
-      },
-      onError: (error) => {
-        message.error(`删除失败: ${error.message}`);
-      },
+    Modal.error({
+      title: "操作失败",
+      content: "请联系管理员。",
     });
+    console.log(id);
+    // deleteMutation.mutate(id, {
+    //   onSuccess: () => {
+    //     message.success("删除成功");
+    //   },
+    //   onError: (error) => {
+    //     message.error(`删除失败: ${error.message}`);
+    //   },
+    // });
   };
 
   const handleOk = () => {
@@ -535,7 +550,6 @@ const App: React.FC = () => {
           rowKey="id"
           // onChange={handleTableChange}
           onChange={(_: any, filters: any) => {
-            // console.log("Table >>选中的事件类型：", filters.log_type); // 是数组
             setSelectedEventType(filters.log_type || []); // 设置选中的事件类型数组
           }}
           pagination={{
