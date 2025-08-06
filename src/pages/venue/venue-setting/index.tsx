@@ -45,8 +45,8 @@ const VenueManagement: React.FC = () => {
   // 当获取到数据时更新 venues
   useEffect(() => {
     if (data) {
-      console.log(data);
-      if (data.success && Array.isArray(data.data)) {
+      // console.log(data);
+      if (Array.isArray(data.data)) {
         const formattedData = data.data.map((item: any) => ({
           id: item.id,
           venue_type: item.venue_type,

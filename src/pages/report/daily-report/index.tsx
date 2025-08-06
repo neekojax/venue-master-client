@@ -56,7 +56,7 @@ const App: React.FC = () => {
   yesterday.setDate(yesterday.getDate() - 1);
   const formattedDate = yesterday.toISOString().split("T")[0]; // 格式化为 'YYYY-MM-DD'
 
-  const [selectedDate, setSelectedDate] = useState<string>(formattedDate);
+  const [selectedDate, setSelectedDate] = useState<string | string[]>(formattedDate);
   const [selectedSites, setSelectedSites] = useState<string[]>([]);
   const handleSitesChange = (value: string[]) => {
     setSelectedSites(value);
@@ -380,7 +380,7 @@ const App: React.FC = () => {
 
   useEffect(() => {
     const fetchReportData = async () => {
-      const dateToFetch = selectedDate || formattedDate; // formattedDate 是昨天的日期
+      const dateToFetch = Array.isArray(selectedDate) ? selectedDate[0] : selectedDate; // formattedDate 是昨天的日期
       try {
         const reportData = await fetchDailyReport(poolType, dateToFetch);
 
@@ -567,7 +567,7 @@ const App: React.FC = () => {
             <DatePicker
               className="w-40"
               placeholder="选择日期"
-              onChange={(_: any, dateString: string) => {
+              onChange={(_: any, dateString: string | string[]) => {
                 setSelectedDate(dateString);
               }}
             />

@@ -5,6 +5,7 @@ import { Button, Flex, Layout } from "antd";
 import { AppHelmet } from "@/components/helmet";
 import Breadcrumb from "./components/bread-crumb";
 import Content from "./components/main-content";
+import NetworkEfficiencyCard from "./components/NetworkEfficiencyCard.tsx";
 import SiderBar from "./components/sider-bar";
 import UserAvatar from "./components/user-avatar";
 import useAuthRedirect from "@/hooks/useAuthRedirect.ts";
@@ -14,7 +15,8 @@ import PoolTypeSelect from "@/layouts/components/pool-type-select.tsx";
 
 export default function MainLayout() {
   useAuthRedirect();
-
+  // const [suanlilv, setSuanlilv] = useState<number>(0);
+  const [suanlilv, setSuanlilv] = useState<any>({});
   const { collapsed } = useSettingsStore(useSelector(["collapsed"]));
   const [isSidebarVisible, setIsSidebarVisible] = useState(false); // 状态管理 SiderBar 显示与否
   const isMobile = useMediaQuery({ query: "(max-width: 768px)" });
@@ -29,6 +31,12 @@ export default function MainLayout() {
 
   // 设置header阴影
   useEffect(() => {
+    // 初始从 localStorage 读取
+    const localData = localStorage.getItem("suanlilv");
+    if (localData) {
+      setSuanlilv(JSON.parse(localData));
+    }
+
     const handleScroll = () => {
       const scrollTop = document.scrollingElement?.scrollTop || document.body.scrollTop;
       const className = "shadow-[0_6px_10px_-10px_rgba(0,0,0,0.3)]";
@@ -77,6 +85,12 @@ export default function MainLayout() {
             <Flex gap={12} className="ml-auto items-center">
               {/*<CustomSkin />*/}
               {/*<ThemeSwitch />*/}
+              {/* <NetworkEfficiencyCard value={12345} /> */}
+              <NetworkEfficiencyCard
+                title="昨日全网产出效率："
+                value={suanlilv?.BTCNetworkPerEPower}
+                unit="BTC/EH"
+              />
               <PoolTypeSelect />
               <UserAvatar />
             </Flex>

@@ -225,7 +225,7 @@ export default function VenueRunningKpi() {
         dataIndex: "weekGrowth",
         width: 160,
         render: (_text: any, record: { last2WeekHashEfficiency: number; lastWeekHashEfficiency: number }) => {
-          const increase = record.last2WeekHashEfficiency - record.lastWeekHashEfficiency; // 计算增幅
+          const increase = record.lastWeekHashEfficiency - record.last2WeekHashEfficiency; // 计算增幅
           const formattedIncrease = increase.toFixed(2); // 保留两位小数
 
           // 根据正负值设置类名

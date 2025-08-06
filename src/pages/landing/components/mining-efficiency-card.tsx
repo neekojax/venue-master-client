@@ -77,7 +77,7 @@ const MiningEfficiencyCard = ({ poolType }) => {
       },
       yAxis: {
         type: "value",
-        min: 70,
+        min: 0,
         axisLabel: {
           color: "#99a1b7", // 字体颜色
           fontSize: 12, // 字体大小
