@@ -7,11 +7,9 @@ import { Link, useLocation, useNavigate } from "react-router-dom";
 import { HomeOutlined, ProductOutlined } from "@ant-design/icons"; //<RadiusSettingOutlined />
 import { Layout, Menu, type MenuProps } from "antd";
 import { useTheme } from "@/components/theme-provider";
-// import logo from "../../../public/logo.svg";
 import logo from "../../../public/logo_middle.png";
 import { ROUTE_PATHS } from "@/constants/common";
 import { useSelector, useSettingsStore } from "@/stores";
-// import { poolType } from "@/stores/settings";
 
 // 递归函数，找到匹配的菜单项
 const findSelectedKeys = (items: MenuProps["items"], pathname: string, path: string[] = []) => {
@@ -37,138 +35,131 @@ const findSelectedKeys = (items: MenuProps["items"], pathname: string, path: str
   return { selectedKeys, openKeys };
 };
 
-const items: MenuProps["items"] = [
-  // {
-  //   icon: <HomeOutlined />,
-  //   label: <Link to={ROUTE_PATHS.dashboard}>首页改版</Link>,
-  //   key: ROUTE_PATHS.dashboard,
-  // },
-  {
-    icon: <HomeOutlined />,
-    label: <Link to={ROUTE_PATHS.landing}>首页</Link>,
-    key: ROUTE_PATHS.landing,
-  },
-  {
-    icon: <MdMonitorHeart />,
-    label: "算力监控",
-    key: ROUTE_PATHS.mining,
-    children: [
-      {
-        key: ROUTE_PATHS.miningHashRate,
-        label: <Link to={ROUTE_PATHS.miningHashRate}>实时算力</Link>,
-      },
-      {
-        key: ROUTE_PATHS.miningSetting,
-        label: <Link to={ROUTE_PATHS.miningSetting}>矿池设置</Link>,
-      },
-    ],
-  },
-  {
-    icon: <SiNginxproxymanager />,
-    label: "场地管理",
-    key: ROUTE_PATHS.venue,
-    children: [
-      {
-        key: ROUTE_PATHS.miningSiteData,
-        label: <Link to={ROUTE_PATHS.miningSiteData}>运行指标</Link>,
-      },
-      {
-        key: ROUTE_PATHS.eventLog,
-        label: <Link to={ROUTE_PATHS.eventLog}>事件日志</Link>,
-      },
-      {
-        key: ROUTE_PATHS.venueSetting,
-        label: <Link to={ROUTE_PATHS.venueSetting}>场地设置</Link>,
-      },
-    ],
-  },
-  {
-    icon: <FaRegChartBar />,
-    label: "报表",
-    key: ROUTE_PATHS.report,
-    children: [
-      {
-        key: ROUTE_PATHS.dailyReport,
-        label: <Link to={ROUTE_PATHS.dailyReport}>运营日报</Link>,
-      },
-      {
-        key: ROUTE_PATHS.subAccountDailyReport,
-        label: <Link to={ROUTE_PATHS.subAccountDailyReport}>账户日报</Link>,
-      },
-    ],
-  },
-  {
-    icon: <ProductOutlined />,
-    label: "电费监控",
-    key: ROUTE_PATHS.custodyMenu,
-    children: [
-      // {
-      //   key: ROUTE_PATHS.setting,
-      //   label: <Link to={ROUTE_PATHS.setting}>基础设置</Link>,
-      // },
-      {
-        key: ROUTE_PATHS.statistics,
-        // label: "信息统计"
-        label: <Link to={ROUTE_PATHS.statistics}>费用统计</Link>,
-      },
-      {
-        key: ROUTE_PATHS.dailyAveragePrice,
-        // label: "BTC均价"
-        label: <Link to={ROUTE_PATHS.dailyAveragePrice}>BTC均价</Link>,
-      },
-    ],
-  },
-  {
-    icon: <BiLoaderCircle />,
-    label: "电网数据",
-    key: ROUTE_PATHS.electric,
-    children: [
-      {
-        key: ROUTE_PATHS.electricLimit,
-        label: <Link to={ROUTE_PATHS.electricLimit}>限电记录</Link>,
-      },
-      {
-        key: ROUTE_PATHS.electricAverage,
-        label: <Link to={ROUTE_PATHS.electricAverage}>平均电价</Link>,
-      },
-      // poolType === "ND"
-      {
-        key: ROUTE_PATHS.electricBasic,
-        label: <Link to={ROUTE_PATHS.electricBasic}>基础数据</Link>,
-      },
-      // : null,
-      // {
-      //   key: ROUTE_PATHS.electricBasic,
-      //   label: <Link to={ROUTE_PATHS.electricBasic}>基础数据</Link>,
-      // },
-    ].filter(Boolean), // 移除 null 值，避免报错,
-  },
-  // {
-  //   icon: <MenuOutlined />,
-  //   label: "收益管理",
-  //   key: ROUTE_PATHS.nestMenu,
-  //   children: [
-  //     {
-  //       key: ROUTE_PATHS.link,
-  //       label: <Link to={ROUTE_PATHS.link}>观察者链接</Link>,
-  //     },
-  //     {
-  //       key: ROUTE_PATHS.report,
-  //       label: <Link to={ROUTE_PATHS.report}>收益记录</Link>,
-  //     },
-  //   ],
-  // },
-  // {
-  //   icon: <RadiusSettingOutlined />,
-  //   label: <Link to={ROUTE_PATHS.base}>模版管理</Link>,
-  //   key: ROUTE_PATHS.base,
-  // },
-];
+const SiderItems = () => {
+  const showNDPoolType = useSettingsStore((state) => state.poolType);
+  return [
+    {
+      icon: <HomeOutlined />,
+      label: <Link to={ROUTE_PATHS.landing}>首页</Link>,
+      key: ROUTE_PATHS.landing,
+    },
+    {
+      icon: <MdMonitorHeart />,
+      label: "算力监控",
+      key: ROUTE_PATHS.mining,
+      children: [
+        {
+          key: ROUTE_PATHS.miningHashRate,
+          label: <Link to={ROUTE_PATHS.miningHashRate}>实时算力</Link>,
+        },
+        {
+          key: ROUTE_PATHS.miningSetting,
+          label: <Link to={ROUTE_PATHS.miningSetting}>矿池设置</Link>,
+        },
+      ],
+    },
+    {
+      icon: <SiNginxproxymanager />,
+      label: "场地管理",
+      key: ROUTE_PATHS.venue,
+      children: [
+        {
+          key: ROUTE_PATHS.miningSiteData,
+          label: <Link to={ROUTE_PATHS.miningSiteData}>运行指标</Link>,
+        },
+        {
+          key: ROUTE_PATHS.eventLog,
+          label: <Link to={ROUTE_PATHS.eventLog}>事件日志</Link>,
+        },
+        {
+          key: ROUTE_PATHS.venueSetting,
+          label: <Link to={ROUTE_PATHS.venueSetting}>场地设置</Link>,
+        },
+      ],
+    },
+    {
+      icon: <FaRegChartBar />,
+      label: "报表",
+      key: ROUTE_PATHS.report,
+      children: [
+        {
+          key: ROUTE_PATHS.dailyReport,
+          label: <Link to={ROUTE_PATHS.dailyReport}>运营日报</Link>,
+        },
+        ...(showNDPoolType === "ND" // 日报菜单项，仅在 type === 'ND' 时显示
+          ? [
+              {
+                key: ROUTE_PATHS.subAccountDailyReport,
+                label: <Link to={ROUTE_PATHS.subAccountDailyReport}>账户日报</Link>,
+              },
+            ]
+          : []),
+      ].filter(Boolean),
+    },
+    {
+      icon: <ProductOutlined />,
+      label: "电费监控",
+      key: ROUTE_PATHS.custodyMenu,
+      children: [
+        // {
+        //   key: ROUTE_PATHS.setting,
+        //   label: <Link to={ROUTE_PATHS.setting}>基础设置</Link>,
+        // },
+        {
+          key: ROUTE_PATHS.statistics,
+          label: <Link to={ROUTE_PATHS.statistics}>费用统计</Link>,
+        },
+        {
+          key: ROUTE_PATHS.dailyAveragePrice,
+          label: <Link to={ROUTE_PATHS.dailyAveragePrice}>BTC均价</Link>,
+        },
+      ],
+    },
+    {
+      icon: <BiLoaderCircle />,
+      label: "电网数据",
+      key: ROUTE_PATHS.electric,
+      children: [
+        {
+          key: ROUTE_PATHS.electricLimit,
+          label: <Link to={ROUTE_PATHS.electricLimit}>限电记录</Link>,
+        },
+        {
+          key: ROUTE_PATHS.electricAverage,
+          label: <Link to={ROUTE_PATHS.electricAverage}>平均电价</Link>,
+        },
+        {
+          key: ROUTE_PATHS.electricBasic,
+          label: <Link to={ROUTE_PATHS.electricBasic}>基础数据</Link>,
+        },
+      ].filter(Boolean), // 移除 null 值，避免报错,
+    },
+    // {
+    //   icon: <MenuOutlined />,
+    //   label: "收益管理",
+    //   key: ROUTE_PATHS.nestMenu,
+    //   children: [
+    //     {
+    //       key: ROUTE_PATHS.link,
+    //       label: <Link to={ROUTE_PATHS.link}>观察者链接</Link>,
+    //     },
+    //     {
+    //       key: ROUTE_PATHS.report,
+    //       label: <Link to={ROUTE_PATHS.report}>收益记录</Link>,
+    //     },
+    //   ],
+    // },
+    // {
+    //   icon: <RadiusSettingOutlined />,
+    //   label: <Link to={ROUTE_PATHS.base}>模版管理</Link>,
+    //   key: ROUTE_PATHS.base,
+    // },
+  ];
+};
 
 export default function SiderBar() {
   const location = useLocation();
   const navigate = useNavigate();
-  // const poolType = useSettingsStore(useSelector(["poolType"]));
 
   const firstRenderRef = useRef(true);
 
@@ -179,10 +170,11 @@ export default function SiderBar() {
 
   const { isDarkMode } = useTheme();
 
+  const itemList: any = SiderItems();
+
   useEffect(() => {
     if (location.pathname === "/") return;
-
-    const { selectedKeys, openKeys } = findSelectedKeys(items, location.pathname);
+    const { selectedKeys, openKeys } = findSelectedKeys(itemList, location.pathname);
     setSelectedKeys(selectedKeys);
     // 首次渲染时，设置默认值
     if (firstRenderRef.current) {
@@ -225,7 +217,7 @@ export default function SiderBar() {
       <Menu
         theme={isDarkMode ? "dark" : "light"}
         mode="inline"
-        items={items}
+        items={itemList}
         selectedKeys={selectedKeys}
         onSelect={({ selectedKeys }) => {
           setSelectedKeys(selectedKeys);
