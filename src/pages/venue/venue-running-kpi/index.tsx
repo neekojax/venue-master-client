@@ -70,8 +70,6 @@ export default function VenueRunningKpi() {
 
     // 根据最后两个数据点的值设置颜色
     // const lineColor = lastEfficiency > secondLastEfficiency ? "#4CAF50" : "#ff4d4f"; // 绿色或红色
-    console.log("monthEfficiencys", monthEfficiencys);
-    console.log("efficiencies", efficiencies);
     return (
       <ReactEcharts
         option={{

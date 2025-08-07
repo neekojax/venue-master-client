@@ -188,7 +188,9 @@ const VenueManagement: React.FC = () => {
       dataIndex: "id",
       width: 60,
       render(text: string, record: any, index: number) {
-        console.log(text, record.id);
+        if (record.id == -1) {
+          console.log(text, record.id);
+        }
         return index + 1;
       },
     },

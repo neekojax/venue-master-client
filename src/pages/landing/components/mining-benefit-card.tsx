@@ -33,7 +33,7 @@ const MiningBenefitCard: React.FC<MiningPoolCardProps> = ({ poolType }) => {
     try {
       const lastProfitStatusResult = await fetchTotalLastProfitStatus(poolType);
       setLastProfitStatus(lastProfitStatusResult.data); // 假设返回数据在 result.data 中
-      console.log(lastProfitStatusResult.data);
+
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (err) {
       /* empty */
@@ -48,7 +48,6 @@ const MiningBenefitCard: React.FC<MiningPoolCardProps> = ({ poolType }) => {
       const suanlilv = await fetchHomesuanli(poolType, currentDate);
       setSuanlilv(suanlilv.data); // 假设返回数据在 result.data 中
       localStorage.setItem("suanlilv", JSON.stringify(suanlilv.data));
-      console.log(suanlilv.data);
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (err) {
       /* empty */

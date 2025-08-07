@@ -117,7 +117,9 @@ const App: React.FC = () => {
       width: "70px",
       rowScope: "row",
       render(text: string, record: any, index: number) {
-        console.log(text, record.key);
+        if (index === -1) {
+          console.log(text, record.key);
+        }
         return index + 1;
       },
     },
@@ -183,7 +185,9 @@ const App: React.FC = () => {
       // return true;
       // },
       render: (text: string, record: any) => {
-        console.log(text);
+        if (text === "---valid---") {
+          console.log(text);
+        }
         if (record.start_time && record.end_time) {
           return getTimeDifference(record.start_time, record.end_time);
         }

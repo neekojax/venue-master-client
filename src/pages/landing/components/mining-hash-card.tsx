@@ -38,7 +38,7 @@ const MiningHashCard = () => {
       setDataNs(sortedNsData);
       setDataCang(sortedCangData);
 
-      console.log(sortedNsData);
+      // console.log(sortedNsData);
     } catch (error) {
       console.error("Error fetching hash rate efficiency:", error);
     }
