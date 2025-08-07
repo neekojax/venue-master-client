@@ -41,16 +41,16 @@ const NetworkEfficiencyCard: React.FC<NetworkEfficiencyCardProps> = ({
   return (
     <Card
       className="my-card"
-      style={{ padding: 0, borderRadius: 5, minWidth: 280, boxShadow: "0 2px 8px rgba(0,0,0,0.05)" }}
+      style={{ padding: 0, borderRadius: 5, minWidth: 250, boxShadow: "0 2px 8px rgba(0,0,0,0.05)" }}
     >
       <Row justify="space-between" align="middle" style={{ padding: 0 }}>
         <Col>
           <Text style={{ fontSize: 14 }}>{title}</Text>
         </Col>
         <Col>
-          <Text strong style={{ fontSize: 16, color: "#1890ff", fontWeight: 700 }}>
+          <Text strong style={{ fontSize: 14, color: "#1890ff", fontWeight: 700 }}>
             {displayValue.toLocaleString()}
-            {unit && <span style={{ fontSize: 16, marginLeft: 4 }}>{unit}</span>}
+            {unit && <span style={{ fontSize: 14, marginLeft: 4 }}>{unit}</span>}
           </Text>
         </Col>
       </Row>

@@ -11,6 +11,7 @@ import { useTheme } from "@/components/theme-provider";
 import logo from "../../../public/logo_middle.png";
 import { ROUTE_PATHS } from "@/constants/common";
 import { useSelector, useSettingsStore } from "@/stores";
+// import { poolType } from "@/stores/settings";
 
 // 递归函数，找到匹配的菜单项
 const findSelectedKeys = (items: MenuProps["items"], pathname: string, path: string[] = []) => {
@@ -130,11 +131,17 @@ const items: MenuProps["items"] = [
         key: ROUTE_PATHS.electricAverage,
         label: <Link to={ROUTE_PATHS.electricAverage}>平均电价</Link>,
       },
+      // poolType === "ND"
       {
         key: ROUTE_PATHS.electricBasic,
         label: <Link to={ROUTE_PATHS.electricBasic}>基础数据</Link>,
       },
-    ],
+      // : null,
+      // {
+      //   key: ROUTE_PATHS.electricBasic,
+      //   label: <Link to={ROUTE_PATHS.electricBasic}>基础数据</Link>,
+      // },
+    ].filter(Boolean), // 移除 null 值，避免报错,
   },
   // {
   //   icon: <MenuOutlined />,
@@ -161,6 +168,7 @@ const items: MenuProps["items"] = [
 export default function SiderBar() {
   const location = useLocation();
   const navigate = useNavigate();
+  // const poolType = useSettingsStore(useSelector(["poolType"]));
 
   const firstRenderRef = useRef(true);
 

@@ -11,6 +11,7 @@ const PoolTypeSelector = () => {
 
   const handleChange = (value: string) => {
     setPoolType(value); // 更新语言
+    // localStorage.setItem("poolType", value);
   };
 
   return (
