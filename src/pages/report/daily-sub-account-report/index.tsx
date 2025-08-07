@@ -1,13 +1,13 @@
 // 代码已包含 CSS：使用 TailwindCSS , 安装 TailwindCSS 后方可看到布局样式效果
 import React, { useEffect, useRef, useState } from "react";
 import { DownloadOutlined } from "@ant-design/icons";
-import { Button, DatePicker, Input, message, Select, Table, Tag, Tooltip } from "antd";
+import { Button, DatePicker, Select, Table, Tag, Tooltip } from "antd";
 import type { ColumnsType } from "antd/es/table";
 import * as XLSX from "xlsx";
 import { useSelector, useSettingsStore } from "@/stores";
 
-import { fetchDailyReport, updateReport } from "@/pages/report/api.tsx";
-import { ReportUpdateParam } from "@/pages/report/type.tsx";
+import { fetchDailyReport } from "@/pages/report/api.tsx";
+// import { ReportUpdateParam } from "@/pages/report/type.tsx";
 
 interface DataType {
   key: string;
@@ -37,7 +37,7 @@ const App: React.FC = () => {
 
   const tableRef = useRef<HTMLDivElement>(null);
   const [isTableFixed, setIsTableFixed] = useState(false);
-  const [hoveredRow, setHoveredRow] = useState<string | null>(null);
+  // const [hoveredRow, setHoveredRow] = useState<string | null>(null);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -69,30 +69,28 @@ const App: React.FC = () => {
 
   const [pageSize, setPageSize] = useState(20); // 新增状态管理页大小
 
-  const save = async (record: DataType, text: string) => {
-    try {
-      const date = selectedDate || formattedDate; // formattedDate 是昨天的日期
-      // 调用接口，启动数据保存
-      const updatedData: ReportUpdateParam = {
-        venue_name: record.siteName,
-        total_failures: Number(text),
-      };
-
-      const res = await updateReport(poolType, date, updatedData);
-      // console.log("success", res, res.data);
-      // console.log("res.success", res.success);
-      const status = res?.status || 0;
-      if (status) {
-        message.success("更新成功");
-        // console.log(res); // 更改值
-        setData((data) =>
-          data.map((item) => (item.key === record.key ? { ...item, totalFailures: Number(text) } : item)),
-        );
-      }
-    } catch (errInfo) {
-      console.log("Save failed:", errInfo);
-    }
-  };
+  // const save = async (record: DataType, text: string) => {
+  //   try {
+  //     const date = selectedDate || formattedDate; // formattedDate 是昨天的日期
+  //     // 调用接口，启动数据保存
+  //     const updatedData: ReportUpdateParam = {
+  //       venue_name: record.siteName,
+  //       total_failures: Number(text),
+  //     };
+  //     const res = await updateReport(poolType, date, updatedData);
+  //     // console.log("success", res);
+  //     // console.log("res.success", res.success);
+  //     if (res.success) {
+  //       message.success("更新成功");
+  //       // console.log(res); // 更改值
+  //       setData((data) =>
+  //         data.map((item) => (item.key === record.key ? { ...item, totalFailures: Number(text) } : item)),
+  //       );
+  //     }
+  //   } catch (errInfo) {
+  //     console.log("Save failed:", errInfo);
+  //   }
+  // };
 
   const columns: ColumnsType<DataType> = [
     // {
@@ -205,34 +203,28 @@ const App: React.FC = () => {
       key: "totalFailures",
       width: 120,
       align: "right",
-      // render: (text) => {
-      //   return <span>{text}</span>;
-      // },
-      render: (text, record) => {
-        const account = localStorage.getItem("user");
-        console.log("account", account);
-        if (account != "admin") {
-          return <span>{text}</span>;
-        } else {
-          const isEditing = hoveredRow === record.key;
-          return isEditing ? (
-            <Input
-              size="small"
-              style={{ padding: "0 5px", margin: 0, height: "22px" }}
-              // onChange={(e) => save(record, e.target.value)}
-              onPressEnter={(e) => save(record, e.target.value || "")}
-              onBlur={(e) => save(record, e.target?.value || "")}
-              defaultValue={text}
-            />
-          ) : (
-            <span>{text}</span>
-          );
-        }
+      render: (text) => {
+        return <span>{text}</span>;
       },
-      onCell: (record) => ({
-        onMouseEnter: () => setHoveredRow(record.key),
-        onMouseLeave: () => setHoveredRow(null),
-      }),
+      // render: (text, record) => {
+      //   const isEditing = hoveredRow === record.key;
+      //   return isEditing ? (
+      //     <Input
+      //       size="small"
+      //       style={{ padding: "0 5px", margin: 0, height: "22px" }}
+      //       // onChange={(e) => save(record, e.target.value)}
+      //       onPressEnter={(e) => save(record, e.target.value)}
+      //       onBlur={(e) => save(record, e.target.value)}
+      //       defaultValue={text}
+      //     />
+      //   ) : (
+      //     <span>{text}</span>
+      //   );
+      // },
+      // onCell: (record) => ({
+      //   onMouseEnter: () => setHoveredRow(record.key),
+      //   onMouseLeave: () => setHoveredRow(null),
+      // }),
       // render: (value) => value.toLocaleString(),
       sorter: (a, b) => a.totalFailures - b.totalFailures,
     },

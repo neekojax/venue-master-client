@@ -63,6 +63,9 @@ export default function LoginForm() {
       const data = await onLogin(values); // 调用登录函数
       if (data && data.data) {
         // 确认返回的数据有效
+        // console.log("data", data);
+        // console.log("values", values);
+        localStorage.setItem("user", values?.name || "");
         localStorage.setItem("access_token", data.data.access_token);
         localStorage.setItem("refresh_token", data.data.refresh_token);
 

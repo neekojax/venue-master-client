@@ -90,6 +90,10 @@ const items: MenuProps["items"] = [
         key: ROUTE_PATHS.dailyReport,
         label: <Link to={ROUTE_PATHS.dailyReport}>运营日报</Link>,
       },
+      {
+        key: ROUTE_PATHS.subAccountDailyReport,
+        label: <Link to={ROUTE_PATHS.subAccountDailyReport}>账户日报</Link>,
+      },
     ],
   },
   {

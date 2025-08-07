@@ -23,13 +23,14 @@
     /* background-color: #0d0e12; */
     background-color: rgb(0, 20, 40);
     margin-top: 6px;
-    height: 42px;
+    /* height: 42px; */
+    height: clamp(2.625rem, 5vw, 3.75rem);
 }
 
 .ant-menu-light .ant-menu-item a{
     /* color: #b6b9c8; */
     color: #bbb;
-    font-size: 14px !important;
+    font-size: clamp(0.875rem, 1.2vw, 1rem) !important;
     font-weight: 500;
     font-family: v-sans, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
     /* font-family: Inter, Helvetica, sans-serif; */
@@ -56,19 +57,20 @@
      /* color: #4a4b68;         可自定义颜色 */
      color: #bbb;
     margin-right: 0.625rem;      /* 点和文字之间的间距 */
-    font-size: 16px;
+    font-size: 1rem;
 }
 .ant-app .ant-menu-light .ant-menu-submenu  .ant-menu-item-selected a::before{
     /* content: "•";           使用中点字符 */
     color: #fff;             /* 可自定义颜色 */
     margin-right: 0.625rem;      /* 点和文字之间的间距 */
-    font-size: 16px;
+    font-size: 1rem;
 }
 
 /*子菜单*/
 .ant-menu-light .ant-menu-submenu-title{
     color: #bbb;
-    font-size: 14px !important;
+    /* font-size: 14px !important; */
+    font-size: clamp(0.875rem, 1.2vw, 1rem) !important;
     font-weight: 500;
     font-family: v-sans, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
     /* font-family: Inter, Helvetica, sans-serif; */
