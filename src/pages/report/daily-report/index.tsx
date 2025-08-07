@@ -79,12 +79,9 @@ const App: React.FC = () => {
       };
 
       const res = await updateReport(poolType, date, updatedData);
-      // console.log("success", res, res.data);
-      // console.log("res.success", res.success);
-      const status = res?.status || 0;
-      if (status) {
+
+      if (res?.data) {
         message.success("更新成功");
-        // console.log(res); // 更改值
         setData((data) =>
           data.map((item) => (item.key === record.key ? { ...item, totalFailures: Number(text) } : item)),
         );
@@ -210,17 +207,18 @@ const App: React.FC = () => {
       // },
       render: (text, record) => {
         const account = localStorage.getItem("user");
-        console.log("account", account);
+        // console.log("account", account);
         if (account != "admin") {
           return <span>{text}</span>;
         } else {
           const isEditing = hoveredRow === record.key;
+          // console.log("isEditing", isEditing);
           return isEditing ? (
             <Input
               size="small"
               style={{ padding: "0 5px", margin: 0, height: "22px" }}
-              // onChange={(e) => save(record, e.target.value)}
-              onPressEnter={(e) => save(record, e.target.value || "")}
+              onChange={(e) => save(record, e.target.value)}
+              onPressEnter={(e) => save(record, e.currentTarget.value || "")}
               onBlur={(e) => save(record, e.target?.value || "")}
               defaultValue={text}
             />
