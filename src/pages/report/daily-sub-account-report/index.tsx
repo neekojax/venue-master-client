@@ -6,25 +6,22 @@ import type { ColumnsType } from "antd/es/table";
 import * as XLSX from "xlsx";
 import { useSelector, useSettingsStore } from "@/stores";
 
-import { fetchDailyReport } from "@/pages/report/api.tsx";
+import { fetchSubAccountDailyReport } from "@/pages/report/api.tsx";
 // import { ReportUpdateParam } from "@/pages/report/type.tsx";
 
 interface DataType {
   key: string;
-  siteId: string;
-  siteName: string;
+  accountId: string;
+  venueName: string;
+  accountName: string;
   btcOutput24h: number;
   theoreticalPower: number;
   power24h: number;
   effectiveRate24h: number;
-  effectiveRateT2: number;
-  effectiveRateT3: number;
   totalMachines: number;
   totalFailures: number;
   failures24h: number;
   failureRate24h: number;
-  failureRateT2: number;
-  failureRateT3: number;
   powerImpact: number;
   impactRatio: number;
   outputImpact: number;
@@ -101,11 +98,11 @@ const App: React.FC = () => {
     //   width: 100,
     // },
     {
-      title: "场地名",
-      dataIndex: "siteName",
-      key: "siteName",
+      title: "账户名",
+      dataIndex: "accountName",
+      key: "accountName",
       fixed: "left",
-      width: 250,
+      width: 200,
       render: (text: string) => {
         const isSpecialVenue = text === "Arct-HF01-J XP-AR-US" || text === "ARCT Technologies-HF02-AR-US";
         return (
@@ -173,22 +170,6 @@ const App: React.FC = () => {
       sorter: (a, b) => a.effectiveRate24h - b.effectiveRate24h,
     },
     {
-      title: "T-2日有效率",
-      dataIndex: "effectiveRateT2",
-      key: "effectiveRateT2",
-      width: 130,
-      render: (value) => `${value.toFixed(2)}%`,
-      sorter: (a, b) => a.effectiveRateT2 - b.effectiveRateT2,
-    },
-    {
-      title: "T-3日有效率",
-      dataIndex: "effectiveRateT3",
-      key: "effectiveRateT3",
-      width: 130,
-      render: (value) => `${value.toFixed(2)}%`,
-      sorter: (a, b) => a.effectiveRateT3 - b.effectiveRateT3,
-    },
-    {
       title: "托管台数",
       dataIndex: "totalMachines",
       key: "totalMachines",
@@ -235,6 +216,9 @@ const App: React.FC = () => {
       width: 100,
       align: "right",
       render: (val, record) => {
+        if (Number(record.totalMachines) === 0) {
+          return <span>0%</span>;
+        }
         const total_gzl = ((val / record.totalMachines) * 100).toFixed(2);
         return <span>{`${total_gzl}%`}</span>;
       },
@@ -262,36 +246,6 @@ const App: React.FC = () => {
         },
       }),
       sorter: (a, b) => a.failureRate24h - b.failureRate24h,
-    },
-    {
-      title: "T-2日故障率",
-      dataIndex: "failureRateT2",
-      key: "failureRateT2",
-      width: 130,
-      render: (value) => ({
-        children: `${value.toFixed(2)}%`,
-        props: {
-          style: {
-            color: value > 20 ? "#ff4d4f" : "inherit",
-          },
-        },
-      }),
-      sorter: (a, b) => a.failureRateT2 - b.failureRateT2,
-    },
-    {
-      title: "T-3日故障率",
-      dataIndex: "failureRateT3",
-      key: "failureRateT3",
-      width: 130,
-      render: (value) => ({
-        children: `${value.toFixed(2)}%`,
-        props: {
-          style: {
-            color: value > 20 ? "#ff4d4f" : "inherit",
-          },
-        },
-      }),
-      sorter: (a, b) => a.failureRateT3 - b.failureRateT3,
     },
     {
       title: "影响算力(E)",
@@ -382,7 +336,7 @@ const App: React.FC = () => {
     const fetchReportData = async () => {
       const dateToFetch = Array.isArray(selectedDate) ? selectedDate[0] : selectedDate; // formattedDate 是昨天的日期
       try {
-        const reportData = await fetchDailyReport(poolType, dateToFetch);
+        const reportData = await fetchSubAccountDailyReport(poolType, dateToFetch);
 
         // 检查 reportData 中的 data 属性是否有效
         if (reportData && reportData.data && reportData.data.dailyReportStatistics) {
@@ -392,22 +346,19 @@ const App: React.FC = () => {
           // 转换 dailyReportStatistics 为适合的格式
           const formattedData: DataType[] = Object.keys(dailyReportStatistics).map((key) => {
             const venue = dailyReportStatistics[key];
+            console.log(venue);
             return {
               key: key,
-              siteId: venue.venue_code,
-              siteName: venue.venue_name,
+              accountId: venue.account_id,
+              accountName: venue.account_name,
               btcOutput24h: venue.btcOutput24h || 0,
               theoreticalPower: venue.theoreticalPower || 0,
               power24h: venue.power24h || 0,
               effectiveRate24h: venue.effectiveRate24h || 0, // 转换为小数形式
-              effectiveRateT2: venue.effectiveRateT2 || 0,
-              effectiveRateT3: venue.effectiveRateT3 || 0,
               totalMachines: venue.totalMachines || 0,
               totalFailures: venue.totalFailures || 0,
               failures24h: venue.failures24h || 0,
               failureRate24h: venue.failureRate24h || 0,
-              failureRateT2: venue.failureRateT2 || 0,
-              failureRateT3: venue.failureRateT3 || 0,
               powerImpact: venue.powerImpact || 0,
               impactRatio: venue.impactRatio || 0, // 转换为小数形式
               outputImpact: venue.outputImpact || 0,
@@ -425,8 +376,8 @@ const App: React.FC = () => {
 
           // 动态生成场地选项
           const options = formattedData.map((site) => ({
-            value: site.siteName,
-            label: site.siteName,
+            value: site.accountName,
+            label: site.accountName,
           }));
           // 过滤掉重复的场地选项
           const uniqueOptions = Array.from(new Map(options.map((item) => [item.value, item])).values());
@@ -457,12 +408,12 @@ const App: React.FC = () => {
     // 筛选数据
     if (selectedSites.length > 0) {
       console.log(selectedSites);
-      const filtered = data.filter((item) => selectedSites.includes(item.siteName));
+      const filtered = data.filter((item) => selectedSites.includes(item.accountName));
       // setFilteredData(filtered);
-      setFilteredData(filtered.sort((a, b) => a.siteName.localeCompare(b.siteName))); // 按 siteName 排序
+      setFilteredData(filtered.sort((a, b) => a.accountName.localeCompare(b.accountName))); // 按 accountName 排序
     } else {
       // setFilteredData(data); // 如果没有选择场地，显示所有数据
-      setFilteredData(data.sort((a, b) => a.siteName.localeCompare(b.siteName))); // 按 siteName 排序
+      setFilteredData(data.sort((a, b) => a.accountName.localeCompare(b.accountName))); // 按 siteName 排序
     }
   }, [selectedSites, data]);
 
@@ -470,20 +421,20 @@ const App: React.FC = () => {
   const exportToCSV = () => {
     const data = filteredData.map((item) => ({
       // "场地编号": item.siteId,
-      场地名: item.siteName,
+      账户名: item.accountName,
       "24小时产出（BTC）": item.btcOutput24h.toFixed(8),
       "理论算力（E）": item.theoreticalPower.toFixed(6),
       "24小时算力（E）": item.power24h.toFixed(8),
       "24小时有效率": item.effectiveRate24h.toFixed(2) + "%",
-      "T-2日有效率": item.effectiveRateT2.toFixed(2) + "%",
-      "T-3日有效率": item.effectiveRateT3.toFixed(2) + "%",
       托管台数: item.totalMachines.toLocaleString(),
       总故障台数: item.totalFailures.toLocaleString(),
-      总故障率: ((item.totalFailures / item.totalMachines) * 100).toFixed(2) + "%",
+      总故障率:
+        Number(item.totalFailures) > 0 && Number(item.totalMachines) > 0
+          ? ((Number(item.totalFailures) / Number(item.totalMachines)) * 100).toFixed(2) + "%"
+          : "0%",
+      // 总故障率: ((item.totalFailures / item.totalMachines) * 100).toFixed(2) + "%",
       "24小时故障数": item.failures24h.toLocaleString(),
       "24小时故障率": item.failureRate24h.toFixed(2) + "%",
-      "T-2日故障率": item.failureRateT2.toFixed(2) + "%",
-      "T-3日故障率": item.failureRateT3.toFixed(2) + "%",
       "影响算力（E）": item.powerImpact.toFixed(8),
       影响占比: item.impactRatio.toFixed(2) + "%",
       "影响产出（BTC）": item.outputImpact.toFixed(8),
@@ -656,7 +607,7 @@ const App: React.FC = () => {
             <Select
               mode="multiple"
               size={"middle"}
-              placeholder="选择场地"
+              placeholder="选择账户"
               // className="w-80"
               style={{ minWidth: "300px" }}
               options={siteOptions}

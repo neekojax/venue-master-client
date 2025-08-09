@@ -6,6 +6,10 @@ export const fetchDailyReport = async (poolType: string, date: string) => {
   return await fetchGet(`/report/daily/${poolType}/${date}`);
 };
 
+export const fetchSubAccountDailyReport = async (poolType: string, date: string) => {
+  return await fetchGet(`/account-report/daily/${poolType}/${date}`);
+};
+
 export const updateReport = async (poolType: string, date: string | string[], data: ReportUpdateParam) => {
   return await fetchPost(`/report/daily/update/${poolType}/${date}`, data);
 };
