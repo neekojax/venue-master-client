@@ -346,9 +346,10 @@ const App: React.FC = () => {
           // 转换 dailyReportStatistics 为适合的格式
           const formattedData: DataType[] = Object.keys(dailyReportStatistics).map((key) => {
             const venue = dailyReportStatistics[key];
-            console.log(venue);
+            // console.log(venue);
             return {
               key: key,
+              venueName: venue.venue_name,
               accountId: venue.account_id,
               accountName: venue.account_name,
               btcOutput24h: venue.btcOutput24h || 0,
