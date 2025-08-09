@@ -63,7 +63,7 @@ const App: React.FC = () => {
   const [data, setData] = useState<DataType[]>([]); // 数据状态
   const [filteredData, setFilteredData] = useState<DataType[]>([]); // 筛选后的数据
   const [siteOptions, setSiteOptions] = useState<{ value: string; label: string }[]>([]);
-
+  // const [accountOptions, setAccountOptions] = useState<{ value: string; label: string }[]>([]);
   const [pageSize, setPageSize] = useState(20); // 新增状态管理页大小
 
   // const save = async (record: DataType, text: string) => {
@@ -98,9 +98,9 @@ const App: React.FC = () => {
     //   width: 100,
     // },
     {
-      title: "账户名",
-      dataIndex: "accountName",
-      key: "accountName",
+      title: "场地名",
+      dataIndex: "venueName",
+      key: "venueName",
       fixed: "left",
       width: 200,
       render: (text: string) => {
@@ -132,6 +132,13 @@ const App: React.FC = () => {
           </Tooltip>
         );
       },
+    },
+    {
+      title: "账户名",
+      dataIndex: "accountName",
+      key: "accountName",
+      fixed: "left",
+      width: 120,
     },
     {
       title: "24小时产出(BTC)",
@@ -376,12 +383,19 @@ const App: React.FC = () => {
           setFilteredData(formattedData); // 初始化筛选后的数据
 
           // 动态生成场地选项
-          const options = formattedData.map((site) => ({
+          // const options = formattedData.map((site) => ({
+          //   value: site.venueName,
+          //   label: site.venueName,
+          // }));
+
+          const accountOptions = formattedData.map((site) => ({
             value: site.accountName,
             label: site.accountName,
           }));
           // 过滤掉重复的场地选项
-          const uniqueOptions = Array.from(new Map(options.map((item) => [item.value, item])).values());
+          const uniqueOptions = Array.from(
+            new Map(accountOptions.map((item) => [item.value, item])).values(),
+          );
           setSiteOptions(uniqueOptions);
 
           setStatistics({
@@ -421,7 +435,7 @@ const App: React.FC = () => {
   // 导出数据为 CSV 的函数
   const exportToCSV = () => {
     const data = filteredData.map((item) => ({
-      // "场地编号": item.siteId,
+      场地名: item.venueName,
       账户名: item.accountName,
       "24小时产出（BTC）": item.btcOutput24h.toFixed(8),
       "理论算力（E）": item.theoreticalPower.toFixed(6),
@@ -605,12 +619,23 @@ const App: React.FC = () => {
           className={`mb-6 rounded-lg bg-white p-6 shadow-sm transition-all duration-300 ${isTableFixed ? "sticky top-0 z-10" : ""}`}
         >
           <div className="mb-6 flex items-center justify-between">
+            {/* <Select
+              mode="multiple"
+              size={"middle"}
+              placeholder="选择场地"
+              // className="w-80"
+              style={{ minWidth: "200px" }}
+              options={siteOptions}
+              onChange={handleSitesChange}
+              maxTagCount={3}
+            />
+            &nbsp;&nbsp; */}
             <Select
               mode="multiple"
               size={"middle"}
               placeholder="选择账户"
               // className="w-80"
-              style={{ minWidth: "300px" }}
+              style={{ minWidth: "200px" }}
               options={siteOptions}
               onChange={handleSitesChange}
               maxTagCount={3}
