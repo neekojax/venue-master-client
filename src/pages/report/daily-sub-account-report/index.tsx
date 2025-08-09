@@ -132,6 +132,8 @@ const App: React.FC = () => {
           </Tooltip>
         );
       },
+      sorter: (a, b) => a.venueName.localeCompare(b.venueName),
+      defaultSortOrder: "ascend", // 默认升序
     },
     {
       title: "账户名",
