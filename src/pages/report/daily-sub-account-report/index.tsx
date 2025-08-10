@@ -189,6 +189,28 @@ const App: React.FC = () => {
       render: (value) => value.toLocaleString(),
       sorter: (a, b) => a.totalMachines - b.totalMachines,
     },
+
+    {
+      title: "在线数",
+      dataIndex: "onlineMachines",
+      key: "onlineMachines",
+      width: 100,
+      align: "right",
+    },
+    {
+      title: "在线率",
+      dataIndex: "onlineRatio",
+      key: "onlineRatio",
+      width: 100,
+      align: "right",
+      render: (val) => {
+        // if (Number(record.onlineRatio) === 0) {
+        //   return <span>0%</span>;
+        // }
+        // const total_gzl = ((val / record.onlineRatio) * 100).toFixed(2);
+        return <span>{`${val}%`}</span>;
+      },
+    },
     {
       title: "总故障台数",
       dataIndex: "totalFailures",
@@ -219,27 +241,6 @@ const App: React.FC = () => {
       // }),
       // render: (value) => value.toLocaleString(),
       sorter: (a, b) => a.totalFailures - b.totalFailures,
-    },
-    {
-      title: "在线数",
-      dataIndex: "onlineMachines",
-      key: "onlineMachines",
-      width: 100,
-      align: "right",
-    },
-    {
-      title: "在线率",
-      dataIndex: "onlineRatio",
-      key: "onlineRatio",
-      width: 100,
-      align: "right",
-      render: (val) => {
-        // if (Number(record.onlineRatio) === 0) {
-        //   return <span>0%</span>;
-        // }
-        // const total_gzl = ((val / record.onlineRatio) * 100).toFixed(2);
-        return <span>{`${val}%`}</span>;
-      },
     },
     {
       title: "总故障率",
@@ -469,6 +470,8 @@ const App: React.FC = () => {
       "24小时算力（E）": item.power24h.toFixed(8),
       "24小时有效率": item.effectiveRate24h.toFixed(2) + "%",
       托管台数: item.totalMachines.toLocaleString(),
+      在线数: item.onlineMachines.toLocaleString(),
+      在线率: item.onlineRatio + "%",
       总故障台数: item.totalFailures.toLocaleString(),
       总故障率:
         Number(item.totalFailures) > 0 && Number(item.totalMachines) > 0
