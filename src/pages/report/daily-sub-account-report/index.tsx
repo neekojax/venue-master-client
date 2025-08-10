@@ -20,6 +20,8 @@ interface DataType {
   effectiveRate24h: number;
   totalMachines: number;
   totalFailures: number;
+  onlineMachines: number;
+  onlineRatio: number;
   failures24h: number;
   failureRate24h: number;
   powerImpact: number;
@@ -219,6 +221,27 @@ const App: React.FC = () => {
       sorter: (a, b) => a.totalFailures - b.totalFailures,
     },
     {
+      title: "在线数",
+      dataIndex: "onlineMachines",
+      key: "onlineMachines",
+      width: 100,
+      align: "right",
+    },
+    {
+      title: "在线率",
+      dataIndex: "onlineRatio",
+      key: "onlineRatio",
+      width: 100,
+      align: "right",
+      render: (val, record) => {
+        if (Number(record.onlineRatio) === 0) {
+          return <span>0%</span>;
+        }
+        const total_gzl = ((val / record.onlineRatio) * 100).toFixed(2);
+        return <span>{`${total_gzl}%`}</span>;
+      },
+    },
+    {
       title: "总故障率",
       dataIndex: "totalFailures",
       key: "totalMachines",
@@ -367,6 +390,8 @@ const App: React.FC = () => {
               effectiveRate24h: venue.effectiveRate24h || 0, // 转换为小数形式
               totalMachines: venue.totalMachines || 0,
               totalFailures: venue.totalFailures || 0,
+              onlineMachines: venue.onlineMachines || 0,
+              onlineRatio: venue.onlineRatio || 0,
               failures24h: venue.failures24h || 0,
               failureRate24h: venue.failureRate24h || 0,
               powerImpact: venue.powerImpact || 0,
