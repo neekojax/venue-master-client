@@ -233,12 +233,12 @@ const App: React.FC = () => {
       key: "onlineRatio",
       width: 100,
       align: "right",
-      render: (val, record) => {
-        if (Number(record.onlineRatio) === 0) {
-          return <span>0%</span>;
-        }
-        const total_gzl = ((val / record.onlineRatio) * 100).toFixed(2);
-        return <span>{`${total_gzl}%`}</span>;
+      render: (val) => {
+        // if (Number(record.onlineRatio) === 0) {
+        //   return <span>0%</span>;
+        // }
+        // const total_gzl = ((val / record.onlineRatio) * 100).toFixed(2);
+        return <span>{`${val}%`}</span>;
       },
     },
     {
