@@ -14,6 +14,7 @@ interface DataType {
   accountId: string;
   venueName: string;
   accountName: string;
+  ownerType: number;
   btcOutput24h: number;
   theoreticalPower: number;
   power24h: number;
@@ -142,7 +143,25 @@ const App: React.FC = () => {
       dataIndex: "accountName",
       key: "accountName",
       fixed: "left",
-      width: 120,
+      width: 130,
+      render: (text, record) => {
+        const ownname =
+          record.ownerType === 0 ? (
+            <Tag color="blue" style={{ padding: 2 }}>
+              自营
+            </Tag>
+          ) : (
+            <Tag color="green" style={{ padding: 2 }}>
+              客户
+            </Tag>
+          );
+        // return { text, ownname };
+        return (
+          <span>
+            {`${text}`}&nbsp;{ownname}
+          </span>
+        );
+      },
     },
     {
       title: "24小时产出(BTC)",
@@ -385,6 +404,7 @@ const App: React.FC = () => {
               venueName: venue.venue_name,
               accountId: venue.account_id,
               accountName: venue.account_name,
+              ownerType: venue.owner_type,
               btcOutput24h: venue.btcOutput24h || 0,
               theoreticalPower: venue.theoreticalPower || 0,
               power24h: venue.power24h || 0,
@@ -465,6 +485,7 @@ const App: React.FC = () => {
     const data = filteredData.map((item) => ({
       场地名: item.venueName,
       账户名: item.accountName,
+      账户类型: item.ownerType === 0 ? "自营" : "客户",
       "24小时产出（BTC）": item.btcOutput24h.toFixed(8),
       "理论算力（E）": item.theoreticalPower.toFixed(6),
       "24小时算力（E）": item.power24h.toFixed(8),
