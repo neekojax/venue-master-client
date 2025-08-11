@@ -143,23 +143,23 @@ const App: React.FC = () => {
       dataIndex: "accountName",
       key: "accountName",
       fixed: "left",
-      width: 130,
+      width: 150,
       render: (text, record) => {
         const ownname =
           record.ownerType === 0 ? (
-            <Tag color="blue" style={{ padding: 2 }}>
+            <Tag color="blue" style={{ padding: "0px 2px" }}>
               自营
             </Tag>
           ) : (
-            <Tag color="green" style={{ padding: 2 }}>
+            <Tag color="green" style={{ padding: "0px 2px" }}>
               客户
             </Tag>
           );
         // return { text, ownname };
         return (
-          <span>
+          <>
             {`${text}`}&nbsp;{ownname}
-          </span>
+          </>
         );
       },
     },
