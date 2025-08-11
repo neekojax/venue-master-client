@@ -143,7 +143,7 @@ const App: React.FC = () => {
       dataIndex: "accountName",
       key: "accountName",
       fixed: "left",
-      width: 150,
+      width: 170,
       render: (text, record) => {
         const ownname =
           record.ownerType === 0 ? (
@@ -158,7 +158,7 @@ const App: React.FC = () => {
         // return { text, ownname };
         return (
           <>
-            {`${text}`}&nbsp;{ownname}
+            {`${text}`}&nbsp;&nbsp;{ownname}
           </>
         );
       },
