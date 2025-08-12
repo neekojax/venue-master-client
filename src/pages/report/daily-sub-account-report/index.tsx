@@ -370,8 +370,8 @@ const App: React.FC = () => {
         if (reportData && reportData.data && reportData.data.dailyReportStatistics) {
           const dailyReportStatistics = reportData.data.dailyReportStatistics;
           const summary = reportData.data.summary;
-          const guzhanglv = summary.totalFailures24h / summary.totalMachines;
-          const yingxiangZhanbi = (summary.totalPowerImpact = summary.totalTheoreticalPower);
+          const guzhanglv = (summary.totalFailures24h / summary.totalMachines) * 100;
+          const yingxiangZhanbi = (summary.totalPowerImpact / summary.totalTheoreticalPower) * 100;
           const dashboardData = [
             {
               title: "平均有效率",

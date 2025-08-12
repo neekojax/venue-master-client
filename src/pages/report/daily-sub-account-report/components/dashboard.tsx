@@ -26,6 +26,7 @@ const DashboardCards = ({ data }: { data: any[] }) => {
                   separator="," // 千分位分隔符
                   decimals={item.decimals} // 保留?位小数
                 />
+                &nbsp;&nbsp;
                 {item.unit}
               </div>
               {/* <div
