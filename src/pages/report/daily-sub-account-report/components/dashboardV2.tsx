@@ -192,20 +192,75 @@ import EfficiencyGauge from "./gauge";
 //   );
 // };
 
+// const MultiProgress = (props: { values: number[]; colors: string[] }) => {
+//   const { values, colors } = props;
+//   const total = props.values.reduce((a: number, b: number) => a + b, 0);
+
+//   const percents = props.values.map((v: number) => (v / total) * 100);
+
+//   // // 假设4个数据，对应文字对齐方式（多了默认center）
+//   // const textAligns = ['left', 'center', 'right'];
+
+//   return (
+//     <div style={{ width: "100%" }}>
+//       {/* 文字部分 */}
+//       <div style={{ display: "flex", marginBottom: 4, width: "100%" }}>
+//         {values.map((v, i) => {
+//           return (
+//             <div
+//               key={i}
+//               style={{
+//                 width: `${percents[i]}%`,
+//                 fontWeight: "bold",
+//                 fontSize: 14,
+//                 color: "#000",
+//                 whiteSpace: "nowrap",
+//                 textAlign: i == 0 ? "left" : i == 1 ? "center" : i == 2 ? "right" : "center",
+//                 paddingLeft: i === 0 ? 4 : 0,
+//                 paddingRight: i === values.length - 1 ? 4 : 0,
+//                 boxSizing: "border-box",
+//                 visibility: i === 3 ? "hidden" : "visible", // 第4个隐藏
+//               }}
+//               title={`${percents[i].toFixed(2)}%`}
+//             >
+//               {v}%
+//             </div>
+//           );
+//         })}
+//       </div>
+
+//       {/* 进度条部分 */}
+//       <div style={{ display: "flex", width: "100%", height: 20, borderRadius: 4, overflow: "hidden" }}>
+//         {percents.map((p, i) => (
+//           <div
+//             key={i}
+//             style={{
+//               width: `${p}%`,
+//               backgroundColor: colors[i],
+//               borderTopLeftRadius: i === 0 ? 4 : 0,
+//               borderBottomLeftRadius: i === 0 ? 4 : 0,
+//               borderTopRightRadius: i === percents.length - 1 ? 4 : 0,
+//               borderBottomRightRadius: i === percents.length - 1 ? 4 : 0,
+//               transition: "width 0.3s ease",
+//             }}
+//           />
+//         ))}
+//       </div>
+//     </div>
+//   );
+// };
+
 const MultiProgress = (props: { values: number[]; colors: string[] }) => {
   const { values, colors } = props;
-  const total = props.values.reduce((a: number, b: number) => a + b, 0);
-
-  const percents = props.values.map((v: number) => (v / total) * 100);
-
-  // // 假设4个数据，对应文字对齐方式（多了默认center）
-  // const textAligns = ['left', 'center', 'right'];
+  const total = values.reduce((a, b) => a + b, 0);
+  const percents = values.map((v) => (v / total) * 100);
 
   return (
     <div style={{ width: "100%" }}>
-      {/* 文字部分 */}
+      {/* 上方文字行：第1、2、4个数字 */}
       <div style={{ display: "flex", marginBottom: 4, width: "100%" }}>
         {values.map((v, i) => {
+          if (i === 2) return null; // 第3个数字这里不显示
           return (
             <div
               key={i}
@@ -215,7 +270,7 @@ const MultiProgress = (props: { values: number[]; colors: string[] }) => {
                 fontSize: 14,
                 color: "#000",
                 whiteSpace: "nowrap",
-                textAlign: i == 0 ? "left" : i == 1 ? "center" : i == 2 ? "right" : "center",
+                textAlign: i === 0 ? "left" : i === 1 ? "center" : "right",
                 paddingLeft: i === 0 ? 4 : 0,
                 paddingRight: i === values.length - 1 ? 4 : 0,
                 boxSizing: "border-box",
@@ -223,14 +278,22 @@ const MultiProgress = (props: { values: number[]; colors: string[] }) => {
               }}
               title={`${percents[i].toFixed(2)}%`}
             >
-              {v}%
+              {v != 0 && <div>{v}%</div>}
             </div>
           );
         })}
       </div>
 
-      {/* 进度条部分 */}
-      <div style={{ display: "flex", width: "100%", height: 20, borderRadius: 4, overflow: "hidden" }}>
+      {/* 进度条 */}
+      <div
+        style={{
+          display: "flex",
+          width: "100%",
+          height: 20,
+          borderRadius: 4,
+          overflow: "hidden",
+        }}
+      >
         {percents.map((p, i) => (
           <div
             key={i}
@@ -245,6 +308,25 @@ const MultiProgress = (props: { values: number[]; colors: string[] }) => {
             }}
           />
         ))}
+      </div>
+
+      {/* 下方文字：第3个数字，居中 */}
+      <div
+        style={{
+          marginTop: 4,
+          width: `${percents[2]}%`,
+          fontWeight: "bold",
+          fontSize: 14,
+          color: "#000",
+          textAlign: "center",
+          marginLeft: `calc(${percents.slice(0, 2).reduce((a, b) => a + b, 0)}%)`, // 让它水平居中对应第三段进度条的位置
+          boxSizing: "border-box",
+          whiteSpace: "nowrap",
+          visibility: values.length === 1 ? "hidden" : "visible", // 第4个隐藏
+        }}
+        title={`${percents[2]?.toFixed(2)}%`}
+      >
+        {values[2]}%
       </div>
     </div>
   );
@@ -564,7 +646,7 @@ const App: React.FC<{ data: any }> = ({ data }) => {
             colors={["#52c41a", "#ff4d4f", "#faad14"]} // 绿色、红色、黄色
           />
 
-          <div style={{ height: "50px" }}></div>
+          <div style={{ height: "30px" }}></div>
           <MultiProgress
             values={[
               Number(guzhanglv?.toFixed(2)),
@@ -580,7 +662,7 @@ const App: React.FC<{ data: any }> = ({ data }) => {
 
           <div
             style={{
-              marginTop: 60,
+              marginTop: 25,
               marginBottom: -20,
               display: "flex",
               flexWrap: "wrap", // 允许换行

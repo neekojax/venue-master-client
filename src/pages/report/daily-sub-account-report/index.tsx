@@ -36,6 +36,7 @@ interface DataType {
 }
 const App: React.FC = () => {
   const { poolType } = useSettingsStore(useSelector(["poolType"]));
+  const [loading, setLoading] = useState(false);
 
   const tableRef = useRef<HTMLDivElement>(null);
   const [isTableFixed, setIsTableFixed] = useState(false);
@@ -362,6 +363,7 @@ const App: React.FC = () => {
   ];
 
   useEffect(() => {
+    setLoading(true);
     const fetchReportData = async () => {
       const dateToFetch = Array.isArray(selectedDate) ? selectedDate[0] : selectedDate; // formattedDate 是昨天的日期
       try {
@@ -482,7 +484,9 @@ const App: React.FC = () => {
         } else {
           console.error("API 返回的 dailyReportStatistics 无效:", reportData);
         }
+        setLoading(false);
       } catch (error) {
+        setLoading(false);
         console.error("获取日报数据失败:", error);
       }
     };
@@ -590,8 +594,8 @@ const App: React.FC = () => {
 
     worksheet["!cols"] = columnWidths;
 
-    XLSX.utils.book_append_sheet(workbook, worksheet, "运营日报");
-    XLSX.writeFile(workbook, `运营日报_${selectedDate}.xlsx`);
+    XLSX.utils.book_append_sheet(workbook, worksheet, "账户日报");
+    XLSX.writeFile(workbook, `账户日报_${selectedDate}.xlsx`);
   };
   // const [dashboardData, setDashboardData] =
 
@@ -612,7 +616,7 @@ const App: React.FC = () => {
         <div className="mb-6">
           <div className="flex items-center justify-between mb-6">
             <h1 className="text-2xl font-bold text-gray-800">
-              运营日报
+              账户日报
               <span className="text-sm text-gray-500 ml-2"> ({selectedDate || formattedDate})</span>
             </h1>
             <DatePicker
@@ -741,6 +745,7 @@ const App: React.FC = () => {
           </div>
           <Table
             columns={columns}
+            loading={loading}
             dataSource={filteredData}
             scroll={{ x: 1500 }}
             sticky={true}
