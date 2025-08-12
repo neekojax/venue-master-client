@@ -1,0 +1,1 @@
+import{u as o,r as a}from"./react-BIszHAjf.js";import{e as r}from"./fetchHelper-BYcr7rCw.js";const n=()=>{const e=o();a.useEffect(()=>{const t=s=>{e(s)};return r.on("redirect",t),()=>{r.off("redirect",t)}},[e])};export{n as u};
