@@ -562,7 +562,7 @@ const App: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 p-6">
+    <div className="min-h-screen">
       <div className="mx-auto">
         <div className="mb-6">
           <div className="flex items-center justify-between mb-6">
@@ -707,17 +707,17 @@ const App: React.FC = () => {
         }
 
         .custom-table .ant-table-thead > tr > th {
-          background-color: #f5f5f5;
+          background-color: rgba(250, 250, 252, 1);
           font-weight: 600;
         }
 
-        .custom-table .ant-table-tbody > tr:hover > td {
-          background-color: #f0f7ff;
-        }
+        // .custom-table .ant-table-tbody > tr:hover > td {
+        //   background-color: #f0f7ff;
+        // }
 
-        .custom-table .ant-table-tbody > tr:nth-child(even) {
-          background-color: #fafafa;
-        }
+        // .custom-table .ant-table-tbody > tr:nth-child(even) {
+        //   background-color: #fafafa;
+        // }
 
         .line-clamp-2 {
           display: -webkit-box;

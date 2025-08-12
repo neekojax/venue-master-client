@@ -18,6 +18,7 @@ import {
 import ActionButton, { ActionButtonMode } from "@/components/action-button";
 import EditTable from "@/components/edit-table";
 import useAuthRedirect from "@/hooks/useAuthRedirect.ts";
+// import PoolSwitcher from "./components/select.tsx";
 import { useSelector, useSettingsStore } from "@/stores";
 import { exportMiningPoolListToExcel } from "@/utils/excel.ts";
 import { getShortenedLink } from "@/utils/short-link.ts";
@@ -462,12 +463,13 @@ export default function MiningSettingPage() {
 
   // @ts-ignore
   return (
-    <div style={{ padding: "20px" }}>
+    <div style={{ padding: "10px" }}>
       <div
         style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}
       >
         <div className={"flex"}>
           <div className={"mr-4"}>
+            {/* <PoolSwitcher onChange={handlePoolCategoryChange} value={poolCategory} /> */}
             <Radio.Group className="filterRadio" onChange={handlePoolCategoryChange} value={poolCategory}>
               <Radio.Button value="主矿池">主矿池</Radio.Button>
               <Radio.Button value="备用矿池">备用矿池</Radio.Button>

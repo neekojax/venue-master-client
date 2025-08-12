@@ -4,10 +4,11 @@ import { DownloadOutlined } from "@ant-design/icons";
 import { Button, DatePicker, Select, Table, Tag, Tooltip } from "antd";
 import type { ColumnsType } from "antd/es/table";
 import * as XLSX from "xlsx";
+// import { ReportUpdateParam } from "@/pages/report/type.tsx";
+import DashboardCards from "./components/dashboard";
 import { useSelector, useSettingsStore } from "@/stores";
 
 import { fetchSubAccountDailyReport } from "@/pages/report/api.tsx";
-// import { ReportUpdateParam } from "@/pages/report/type.tsx";
 
 interface DataType {
   key: string;
@@ -55,42 +56,17 @@ const App: React.FC = () => {
   const yesterday = new Date();
   yesterday.setDate(yesterday.getDate() - 1);
   const formattedDate = yesterday.toISOString().split("T")[0]; // 格式化为 'YYYY-MM-DD'
-
+  const [dashboardData, setDashboardData] = useState<any[]>([]);
   const [selectedDate, setSelectedDate] = useState<string | string[]>(formattedDate);
   const [selectedSites, setSelectedSites] = useState<string[]>([]);
   const handleSitesChange = (value: string[]) => {
     setSelectedSites(value);
   };
-
-  const [statistics, setStatistics] = useState<any>({}); // 初始化为对象
+  // const [statistics, setStatistics] = useState<any>({}); // 初始化为对象
   const [data, setData] = useState<DataType[]>([]); // 数据状态
   const [filteredData, setFilteredData] = useState<DataType[]>([]); // 筛选后的数据
   const [siteOptions, setSiteOptions] = useState<{ value: string; label: string }[]>([]);
-  // const [accountOptions, setAccountOptions] = useState<{ value: string; label: string }[]>([]);
   const [pageSize, setPageSize] = useState(20); // 新增状态管理页大小
-
-  // const save = async (record: DataType, text: string) => {
-  //   try {
-  //     const date = selectedDate || formattedDate; // formattedDate 是昨天的日期
-  //     // 调用接口，启动数据保存
-  //     const updatedData: ReportUpdateParam = {
-  //       venue_name: record.siteName,
-  //       total_failures: Number(text),
-  //     };
-  //     const res = await updateReport(poolType, date, updatedData);
-  //     // console.log("success", res);
-  //     // console.log("res.success", res.success);
-  //     if (res.success) {
-  //       message.success("更新成功");
-  //       // console.log(res); // 更改值
-  //       setData((data) =>
-  //         data.map((item) => (item.key === record.key ? { ...item, totalFailures: Number(text) } : item)),
-  //       );
-  //     }
-  //   } catch (errInfo) {
-  //     console.log("Save failed:", errInfo);
-  //   }
-  // };
 
   const columns: ColumnsType<DataType> = [
     // {
@@ -394,6 +370,61 @@ const App: React.FC = () => {
         if (reportData && reportData.data && reportData.data.dailyReportStatistics) {
           const dailyReportStatistics = reportData.data.dailyReportStatistics;
           const summary = reportData.data.summary;
+          const guzhanglv = summary.totalFailures24h / summary.totalMachines;
+          const yingxiangZhanbi = (summary.totalPowerImpact = summary.totalTheoreticalPower);
+          const dashboardData = [
+            {
+              title: "平均有效率",
+              value: `${summary.averageEffectiveRate.toFixed(2)}`,
+              unit: "%",
+              decimals: 2,
+              change: "+1.5%",
+            },
+            {
+              title: "理论算力",
+              value: `${summary.totalTheoreticalPower.toFixed(2)}`,
+              unit: "PH/s",
+              decimals: 2,
+              change: "+3.2%",
+            },
+            {
+              title: "托管台数",
+              value: `${summary.totalMachines}`,
+              unit: "台",
+              decimals: 0,
+              change: "+2.3%",
+            },
+            {
+              title: "在线率",
+              value: `${summary.totalOnlineRatio.toFixed(2)}`,
+              unit: "%",
+              decimals: 2,
+              change: "+0.8%",
+            },
+            {
+              title: "影响占比",
+              value: `${yingxiangZhanbi.toFixed(2)}`,
+              unit: "%",
+              decimals: 2,
+              change: "-0.6%",
+            },
+            { title: "总故障率", value: `${guzhanglv.toFixed(2)}`, unit: "%", decimals: 2, change: "+0.2%" },
+            {
+              title: "限电占比",
+              value: `${summary.totalLimitImpactRatio.toFixed(2)}`,
+              unit: "%",
+              decimals: 2,
+              change: "+0.8%",
+            },
+            {
+              title: "高温占比",
+              value: `${summary.totalHighTemperatureImpactRatio.toFixed(2)}`,
+              unit: "%",
+              decimals: 2,
+              change: "+0.3%",
+            },
+          ];
+          setDashboardData(dashboardData);
 
           // 转换 dailyReportStatistics 为适合的格式
           const formattedData: DataType[] = Object.keys(dailyReportStatistics).map((key) => {
@@ -446,16 +477,16 @@ const App: React.FC = () => {
           );
           setSiteOptions(uniqueOptions);
 
-          setStatistics({
-            averageEfficiency: summary.averageEffectiveRate || 0,
-            totalBtcOutput: summary.totalBtcOutput || 0,
-            totalFailures24h: summary.totalFailures24h || 0,
-            totalImpactOutput: summary.totalImpactOutput || 0,
-            totalMachines: summary.totalMachines || 0,
-            totalPower24h: summary.totalPower24h || 0,
-            totalPowerImpact: summary.totalPowerImpact || 0,
-            totalTheoreticalPower: summary.totalTheoreticalPower || 0,
-          });
+          // setStatistics({
+          //   averageEfficiency: summary.averageEffectiveRate || 0,
+          //   totalBtcOutput: summary.totalBtcOutput || 0,
+          //   totalFailures24h: summary.totalFailures24h || 0,
+          //   totalImpactOutput: summary.totalImpactOutput || 0,
+          //   totalMachines: summary.totalMachines || 0,
+          //   totalPower24h: summary.totalPower24h || 0,
+          //   totalPowerImpact: summary.totalPowerImpact || 0,
+          //   totalTheoreticalPower: summary.totalTheoreticalPower || 0,
+          // });
         } else {
           console.error("API 返回的 dailyReportStatistics 无效:", reportData);
         }
@@ -463,7 +494,6 @@ const App: React.FC = () => {
         console.error("获取日报数据失败:", error);
       }
     };
-
     fetchReportData();
   }, [selectedDate, poolType]);
 
@@ -571,9 +601,21 @@ const App: React.FC = () => {
     XLSX.utils.book_append_sheet(workbook, worksheet, "运营日报");
     XLSX.writeFile(workbook, `运营日报_${selectedDate}.xlsx`);
   };
+  // const [dashboardData, setDashboardData] =
+
+  // const dashboardData = [
+  //   { title: "平均有效率", value: "85.3%", change: "+1.5%" },
+  //   { title: "理论算力", value: "78.6 PH/s", change: "+3.2%" },
+  //   { title: "托管台数", value: "1,248", change: "+2.3%" },
+  //   { title: "在线率", value: "99.1%", change: "+0.8%" },
+  //   { title: "影响占比", value: "12.5%", change: "-0.6%" },
+  //   { title: "总故障率", value: "3.8%", change: "+0.2%" },
+  //   { title: "限电占比", value: "7.3%", change: "+0.8%" },
+  //   { title: "高温占比", value: "5.1%", change: "+0.3%" },
+  // ];
 
   return (
-    <div className="min-h-screen bg-gray-50 p-6">
+    <div className="min-h-screen">
       <div className="mx-auto">
         <div className="mb-6">
           <div className="flex items-center justify-between mb-6">
@@ -589,7 +631,10 @@ const App: React.FC = () => {
               }}
             />
           </div>
-          <div className="mt-6 grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-4">
+
+          <DashboardCards data={dashboardData} />
+
+          {/* <div className="mt-6 grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-4">
             <div className="rounded-lg bg-gradient-to-br from-blue-50 to-blue-100 p-6 shadow-sm">
               <div className="text-sm font-medium text-gray-500">平均有效率</div>
               <div className="mt-2 flex items-baseline">
@@ -663,11 +708,12 @@ const App: React.FC = () => {
                 </span>
               </div>
             </div>
-          </div>
+          </div> */}
         </div>
         <div
           ref={tableRef}
-          className={`mb-6 rounded-lg bg-white p-6 shadow-sm transition-all duration-300 ${isTableFixed ? "sticky top-0 z-10" : ""}`}
+          style={{ borderRadius: "3px" }}
+          className={`mb-6 border-radius-3  rounded-lg bg-white p-6 shadow-sm transition-all duration-300 ${isTableFixed ? "sticky top-0 z-10" : ""}`}
         >
           <div className="mb-6 flex items-center justify-between">
             {/* <Select
@@ -729,17 +775,17 @@ const App: React.FC = () => {
         }
 
         .custom-table .ant-table-thead > tr > th {
-          background-color: #f5f5f5;
+          background-color: rgba(250, 250, 252, 1);
           font-weight: 600;
         }
 
-        .custom-table .ant-table-tbody > tr:hover > td {
-          background-color: #f0f7ff;
-        }
+        /* .custom-table .ant-table-tbody > tr:hover > td {
+        //   background-color: #f0f7ff;
+        // }
 
-        .custom-table .ant-table-tbody > tr:nth-child(even) {
-          background-color: #fafafa;
-        }
+        // .custom-table .ant-table-tbody > tr:nth-child(even) {
+        //   background-color: #fafafa;
+        // }*/
 
         .line-clamp-2 {
           display: -webkit-box;

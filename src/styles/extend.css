@@ -15,6 +15,19 @@
         border-right: var(--bs-aside-border);
     }
 }
+/*全局头部*/
+#app-header-bar{
+        height: 64px;
+    box-shadow: 0 1px 4px rgba(0, 21, 41, 0.08);
+}
+.ant-layout-content{
+    /* margin-top: 64px; */
+     --ant-table-body-sort-bg: rgba(250, 250, 252, 1); /* 你想要的背景色 */
+    background-color: #f4f6f8 !important;
+}
+.border-radius-3 {
+    border-radius: 3px;
+}
 .ant-app .ant-layout-sider {
   /* background-color: #0d0e12; */
   background-color: rgb(0, 20, 40);
@@ -238,6 +251,9 @@
     color: #4B5675;
     transition: color .2s ease;
     
+}
+.ant-table-wrapper .ant-table-thead th.ant-table-column-sort{
+    background: rgba(250, 250, 252, 1) !important;
 }
 .ant-picker .ant-picker-input > input:hover{
     border-color: #1E90FF;

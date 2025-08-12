@@ -11,7 +11,7 @@ const MiningEfficiencyCard = ({ poolType }) => {
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState<boolean>(true); // 加载状态
   // const [dataCang, setDataCang] = useState([]);
-  const [timeFrame, setTimeFrame] = useState("90");
+  const [timeFrame, setTimeFrame] = useState("30");
 
   const fetchData = async (timeFrame: string) => {
     try {
