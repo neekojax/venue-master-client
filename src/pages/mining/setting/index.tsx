@@ -463,7 +463,7 @@ export default function MiningSettingPage() {
 
   // @ts-ignore
   return (
-    <div style={{ padding: "10px" }}>
+    <div>
       <div
         style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}
       >

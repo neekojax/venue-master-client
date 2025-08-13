@@ -399,7 +399,7 @@ const App: React.FC = () => {
   };
 
   return (
-    <div className="bg-gray-50 p-6">
+    <div className="">
       <div className="mx-auto bg-white rounded-lg shadow-sm">
         <div className="p-6 border-b border-gray-200">
           <div className="grid grid-cols-[auto_1fr] gap-6 mb-6 filter-form">

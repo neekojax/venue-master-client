@@ -338,7 +338,7 @@ export default function VenueRunningKpi() {
     });
 
   return (
-    <div style={{ padding: "20px" }} className="longdataTable">
+    <div className="longdataTable">
       <HeaderSection onChange={handleSearch} venueNum={venueNums} subAccountNum={subAccountNum} />
       <Table
         loading={loading}

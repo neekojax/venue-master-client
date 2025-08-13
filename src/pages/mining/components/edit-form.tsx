@@ -15,17 +15,17 @@ interface EditFormProps {
 const formFields = [
   { label: "场地", name: "venue_id", component: Select },
   { label: "子账户", name: "pool_name", component: Input },
-  {
-    label: "场地主体",
-    name: "pool_type",
-    component: Select,
-    options: [
-      { value: "CANG", label: "CANG" },
-      { value: "NS", label: "NS" },
-      { value: "ND", label: "ND" },
-      { value: "KZ", label: "KZ" },
-    ],
-  },
+  // {
+  //   label: "场地主体",
+  //   name: "pool_type",
+  //   component: Select,
+  //   options: [
+  //     { value: "CANG", label: "CANG" },
+  //     { value: "NS", label: "NS" },
+  //     { value: "ND", label: "ND" },
+  //     { value: "KZ", label: "KZ" },
+  //   ],
+  // },
   {
     label: "所属国家",
     name: "country",
@@ -90,15 +90,16 @@ export default function EditForm({ initialValues, onFormInstanceReady }: EditFor
                 </Option>
               ))}
             </Select>
-          ) : field.component === Select ? (
-            <Select placeholder={`请选择 ${field.label}`}>
-              {field.options?.map((option) => (
-                <Option key={option.value} value={option.value}>
-                  {option.label}
-                </Option>
-              ))}
-            </Select>
           ) : (
+            // : field.component === Select ? (
+            //   <Select placeholder={`请选择 ${field.label}`}>
+            //     {field.options?.map((option) => (
+            //       <Option key={option.value} value={option.value}>
+            //         {option.label}
+            //       </Option>
+            //     ))}
+            //   </Select>
+            // )
             <Input
               placeholder={`请输入${field.label}`}
               type={
