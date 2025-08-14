@@ -86,7 +86,7 @@ const SiderItems = () => {
           key: ROUTE_PATHS.dailyReport,
           label: <Link to={ROUTE_PATHS.dailyReport}>运营日报</Link>,
         },
-        ...(showNDPoolType === "ND" // 日报菜单项，仅在 type === 'ND' 时显示
+        ...(showNDPoolType === "ND" || showNDPoolType === "LN" // 日报菜单项，仅在 type === 'ND' 时显示
           ? [
               {
                 key: ROUTE_PATHS.subAccountDailyReport,

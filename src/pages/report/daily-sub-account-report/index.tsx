@@ -373,61 +373,6 @@ const App: React.FC = () => {
         if (reportData && reportData.data && reportData.data.dailyReportStatistics) {
           const dailyReportStatistics = reportData.data.dailyReportStatistics;
           const summary = reportData.data.summary;
-          // const guzhanglv = (summary.totalFailures24h / summary.totalMachines) * 100;
-          // const yingxiangZhanbi = (summary.totalPowerImpact / summary.totalTheoreticalPower) * 100;
-          // const dashboardData = [
-          //   {
-          //     title: "平均有效率",
-          //     value: `${summary.averageEffectiveRate.toFixed(2)}`,
-          //     unit: "%",
-          //     decimals: 2,
-          //     change: "+1.5%",
-          //   },
-          //   {
-          //     title: "理论算力",
-          //     value: `${summary.totalTheoreticalPower.toFixed(2)}`,
-          //     unit: "PH/s",
-          //     decimals: 2,
-          //     change: "+3.2%",
-          //   },
-          //   {
-          //     title: "托管台数",
-          //     value: `${summary.totalMachines}`,
-          //     unit: "台",
-          //     decimals: 0,
-          //     change: "+2.3%",
-          //   },
-          //   {
-          //     title: "在线率",
-          //     value: `${summary.totalOnlineRatio.toFixed(2)}`,
-          //     unit: "%",
-          //     decimals: 2,
-          //     change: "+0.8%",
-          //   },
-          //   {
-          //     title: "影响占比",
-          //     value: `${yingxiangZhanbi.toFixed(2)}`,
-          //     unit: "%",
-          //     decimals: 2,
-          //     change: "-0.6%",
-          //   },
-          //   { title: "总故障率", value: `${guzhanglv.toFixed(2)}`, unit: "%", decimals: 2, change: "+0.2%" },
-          //   {
-          //     title: "限电占比",
-          //     value: `${summary.totalLimitImpactRatio.toFixed(2)}`,
-          //     unit: "%",
-          //     decimals: 2,
-          //     change: "+0.8%",
-          //   },
-          //   {
-          //     title: "高温占比",
-          //     value: `${summary.totalHighTemperatureImpactRatio.toFixed(2)}`,
-          //     unit: "%",
-          //     decimals: 2,
-          //     change: "+0.3%",
-          //   },
-          // ];
-          // setDashboardData(dashboardData);
 
           // 转换 dailyReportStatistics 为适合的格式
           const formattedData: DataType[] = Object.keys(dailyReportStatistics).map((key) => {
@@ -482,10 +427,18 @@ const App: React.FC = () => {
 
           setStatistics(summary);
         } else {
+          setSiteOptions([]);
+          setFilteredData([]);
+          setData([]);
+          setStatistics({});
           console.error("API 返回的 dailyReportStatistics 无效:", reportData);
         }
         setLoading(false);
       } catch (error) {
+        setSiteOptions([]);
+        setFilteredData([]);
+        setData([]);
+        setStatistics({});
         setLoading(false);
         console.error("获取日报数据失败:", error);
       }
@@ -629,83 +582,7 @@ const App: React.FC = () => {
           </div>
 
           {/* <DashboardCards data={dashboardData} /> */}
-          <DashboardCardsV2 data={statistics} />
-
-          {/* <div className="mt-6 grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-4">
-            <div className="rounded-lg bg-gradient-to-br from-blue-50 to-blue-100 p-6 shadow-sm">
-              <div className="text-sm font-medium text-gray-500">平均有效率</div>
-              <div className="mt-2 flex items-baseline">
-                <span className="text-3xl font-bold text-blue-600">
-                  {" "}
-                  {(statistics.averageEfficiency || 0).toFixed(2)}%
-                </span>
-              </div>
-            </div>
-
-            <div className="rounded-lg bg-gradient-to-br from-blue-50 to-blue-100 p-6 shadow-sm">
-              <div className="text-sm font-medium text-gray-500">24小时产出（BTC）</div>
-              <div className="mt-2 flex items-baseline">
-                <span className="text-3xl font-bold text-blue-600">
-                  {" "}
-                  {(statistics.totalBtcOutput || 0).toFixed(4)}
-                </span>
-              </div>
-            </div>
-
-            <div className="rounded-lg bg-gradient-to-br from-green-50 to-green-100 p-6 shadow-sm">
-              <div className="text-sm font-medium text-gray-500">总理论算力（E）</div>
-              <div className="mt-2 flex items-baseline">
-                <span className="text-3xl font-bold text-green-600">
-                  {(statistics.totalTheoreticalPower || 0).toFixed(2)}
-                </span>
-              </div>
-            </div>
-
-            <div className="rounded-lg bg-gradient-to-br from-green-50 to-green-100 p-6 shadow-sm">
-              <div className="text-sm font-medium text-gray-500">24小时总算力（E）</div>
-              <div className="mt-2 flex items-baseline">
-                <span className="text-3xl font-bold text-green-600">
-                  {(statistics.totalPower24h || 0).toFixed(2)}
-                </span>
-              </div>
-            </div>
-
-            <div className="rounded-lg bg-gradient-to-br from-purple-50 to-purple-100 p-6 shadow-sm">
-              <div className="text-sm font-medium text-gray-500">总影响算力（E）</div>
-              <div className="mt-2 flex items-baseline">
-                <span className="text-3xl font-bold text-purple-600">
-                  {(statistics.totalPowerImpact || 0).toFixed(2)}
-                </span>
-              </div>
-            </div>
-
-            <div className="rounded-lg bg-gradient-to-br from-purple-50 to-purple-100 p-6 shadow-sm">
-              <div className="text-sm font-medium text-gray-500">总影响产出（BTC）</div>
-              <div className="mt-2 flex items-baseline">
-                <span className="text-3xl font-bold text-purple-600">
-                  {(statistics.totalImpactOutput || 0).toFixed(4)}
-                </span>
-              </div>
-            </div>
-
-            <div className="rounded-lg bg-gradient-to-br from-amber-50 to-amber-100 p-6 shadow-sm">
-              <div className="text-sm font-medium text-gray-500">托管台数</div>
-              <div className="mt-2 flex items-baseline">
-                <span className="text-3xl font-bold text-amber-600">
-                  {(statistics.totalMachines || 0).toLocaleString()}
-                </span>
-              </div>
-            </div>
-
-            <div className="rounded-lg bg-gradient-to-br from-amber-50 to-amber-100 p-6 shadow-sm">
-              <div className="text-sm font-medium text-gray-500">总故障数</div>
-              <div className="mt-2 flex items-baseline">
-                <span className="text-3xl font-bold text-amber-600">
-                  {(statistics.totalFailures24h || 0).toLocaleString()}
-                </span>
-              </div>
-            </div>
-          </div> */}
+          <DashboardCardsV2 data={statistics} loading={loading} />
         </div>
         <div
           ref={tableRef}

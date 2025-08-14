@@ -32,6 +32,7 @@ createRoot(document.getElementById("root")!).render(
       <QueryClientProvider client={queryClient}>
         <ConfigProvider
           theme={{
+            // algorithm: MappingAlgorithm.Light,
             token: {
               colorPrimary: "#1890ff", // 主色调：亮蓝
               colorInfo: "#1890ff", // 信息色

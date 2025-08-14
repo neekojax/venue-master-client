@@ -12,36 +12,6 @@ const EfficiencyGauge = (props: { effective: number; theoretical: number }) => {
   useEffect(() => {
     const chart = echarts.init(chartRef.current);
 
-    // const option = {
-    //     series: [
-    //         {
-    //             type: 'gauge',
-    //             startAngle: 210,
-    //             endAngle: -30,
-    //             min: 0,
-    //             max: 100,
-    //             splitNumber: 5,
-    //             axisLine: {
-    //                 lineStyle: {
-    //                     width: 10,
-    //                     color: [
-    //                         [0.6, '#ff4d4f'], // <60% 红色
-    //                         [0.8, '#fa8c16'], // 60%-85% 橙色
-    //                         [1, '#52c41a']     // >85% 绿色
-    //                     ]
-    //                 }
-    //             },
-    //             pointer: { width: 5 },
-    //             detail: {
-    //                 valueAnimation: true,
-    //                 formatter: '{value}%',
-    //                 fontSize: 16
-    //             },
-    //             data: [{ value: efficiency.toFixed(2) }]
-    //         }
-    //     ]
-    // };
-
     const option = {
       series: [
         {

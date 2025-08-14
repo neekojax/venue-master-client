@@ -12,9 +12,11 @@ interface EditFormProps {
   onFormInstanceReady: (instance: FormInstance<MiningPool>) => void;
 }
 
+//
 const formFields = [
   { label: "场地", name: "venue_id", component: Select },
   { label: "子账户", name: "pool_name", component: Input },
+  { label: "场地主体", name: "pool_type", component: Input },
   // {
   //   label: "场地主体",
   //   name: "pool_type",
@@ -52,6 +54,13 @@ const formFields = [
 
 export default function EditForm({ initialValues, onFormInstanceReady }: EditFormProps) {
   const [form] = Form.useForm();
+  const showNDPoolType = useSettingsStore((state) => state.poolType);
+  useEffect(() => {
+    form.setFieldsValue({ pool_type: showNDPoolType });
+    // if (showNDPoolType == "CANG") {
+    //   form.setFieldsValue({ pool_type: 'CANGO' });
+    // }
+  }, [showNDPoolType]);
 
   const { poolType } = useSettingsStore(useSelector(["poolType"]));
   const { data: venueList } = useVenueList(poolType);
@@ -102,6 +111,8 @@ export default function EditForm({ initialValues, onFormInstanceReady }: EditFor
             // )
             <Input
               placeholder={`请输入${field.label}`}
+              disabled={field.name === "pool_type"}
+              // value={field.value}
               type={
                 field.name === "theoretical_hashrate" ||
                 field.name === "energy_ratio" ||
