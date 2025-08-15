@@ -1,8 +1,12 @@
 // NetworkEfficiencyCard.tsx
 import React, { useEffect, useState } from "react";
 import { Card, Col, Row, Typography } from "antd";
+import dayjs from "dayjs";
+import { useSelector, useSettingsStore } from "@/stores";
 
 import "./index.css";
+
+import { fetchHomesuanli } from "@/pages/mining/api.tsx";
 
 const { Text } = Typography;
 
@@ -20,23 +24,40 @@ const NetworkEfficiencyCard: React.FC<NetworkEfficiencyCardProps> = ({
   unit = "",
 }) => {
   const [displayValue, setDisplayValue] = useState(0);
+  const { poolType } = useSettingsStore(useSelector(["poolType"]));
+
+  const fetchSuanlilvData = async (poolType: string) => {
+    try {
+      // const currentDate = dayjs().subtract(1, 'day').format('YYYY-MM-DD');
+      // 获取昨天的日期
+      const yesterday = dayjs().subtract(1, "day").format("YYYY-MM-DD");
+      const suanlilv = await fetchHomesuanli(poolType, yesterday);
+
+      value = suanlilv.data.BTCNetworkPerEPower;
+      // console.log(value);
+      const startTime = performance.now();
+
+      const animate = (currentTime: number) => {
+        const elapsed = currentTime - startTime;
+        const progress = Math.min(elapsed / duration, 1);
+        // const currentVal = Math.floor(progress * value);
+        // const currentVal = parseFloat((progress * new_value).toFixed(5));
+        const currentVal = parseFloat((progress * value).toFixed(5));
+        setDisplayValue(currentVal);
+        if (progress < 1) {
+          requestAnimationFrame(animate);
+        }
+      };
+      requestAnimationFrame(animate);
+    } catch (err) {
+      /* empty */
+      console.log(err);
+    }
+  };
 
   useEffect(() => {
-    const startTime = performance.now();
-
-    const animate = (currentTime: number) => {
-      const elapsed = currentTime - startTime;
-      const progress = Math.min(elapsed / duration, 1);
-      // const currentVal = Math.floor(progress * value);
-      const currentVal = parseFloat((progress * value).toFixed(5));
-      setDisplayValue(currentVal);
-      if (progress < 1) {
-        requestAnimationFrame(animate);
-      }
-    };
-
-    requestAnimationFrame(animate);
-  }, [value, duration]);
+    fetchSuanlilvData(poolType);
+  }, []);
 
   return (
     <Card
