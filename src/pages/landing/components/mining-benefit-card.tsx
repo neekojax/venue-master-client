@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { BsChevronRight, BsCurrencyDollar } from "react-icons/bs";
 import { useNavigate } from "react-router-dom";
 import { Card, Col, Row, Statistic } from "antd";
+import dayjs from "dayjs";
 import { ROUTE_PATHS } from "@/constants/common.ts";
 
 import { fetchHomesuanli, fetchTotalLastProfitStatus } from "@/pages/mining/api.tsx";
@@ -44,8 +45,10 @@ const MiningBenefitCard: React.FC<MiningPoolCardProps> = ({ poolType }) => {
 
   const fetchSuanlilvData = async (poolType: string) => {
     try {
-      const currentDate = "2025-07-26";
-      const suanlilv = await fetchHomesuanli(poolType, currentDate);
+      // const currentDate = dayjs().subtract(1, 'day').format('YYYY-MM-DD');
+      // 获取昨天的日期
+      const yesterday = dayjs().subtract(1, "day").format("YYYY-MM-DD");
+      const suanlilv = await fetchHomesuanli(poolType, yesterday);
       setSuanlilv(suanlilv.data); // 假设返回数据在 result.data 中
       localStorage.setItem("suanlilv", JSON.stringify(suanlilv.data));
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
