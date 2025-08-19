@@ -1,0 +1,391 @@
+import React, { useEffect, useRef } from "react";
+import {
+  CheckCircleOutlined,
+  CloseCircleOutlined,
+  FireOutlined,
+  SettingOutlined,
+  ThunderboltOutlined,
+  WarningOutlined,
+} from "@ant-design/icons";
+import { Card, Col, Row, Skeleton, Typography } from "antd";
+import type { EChartsType } from "echarts";
+import * as echarts from "echarts";
+import EfficiencyGauge from "./gauge";
+
+const MultiProgress = (props: { values: number[]; colors: string[] }) => {
+  const { values, colors } = props;
+  const total = values.reduce((a, b) => a + b, 0);
+  const percents = values.map((v) => (v / total) * 100);
+
+  return (
+    <div style={{ width: "100%" }}>
+      {/* 上方文字行：第1、2、4个数字 */}
+      <div style={{ display: "flex", marginBottom: 4, width: "100%" }}>
+        {values.map((v, i) => {
+          if (i === 2) return null; // 第3个数字这里不显示
+          return (
+            <div
+              key={i}
+              style={{
+                width: `${percents[i]}%`,
+                fontWeight: "bold",
+                fontSize: 14,
+                color: "#000",
+                whiteSpace: "nowrap",
+                textAlign: i === 0 ? "left" : i === 1 ? "center" : "right",
+                paddingLeft: i === 0 ? 4 : 0,
+                paddingRight: i === values.length - 1 ? 4 : 0,
+                boxSizing: "border-box",
+                visibility: i === 3 ? "hidden" : "visible", // 第4个隐藏
+              }}
+              title={`${percents[i].toFixed(2)}%`}
+            >
+              {v != 0 && <div>{v}%</div>}
+            </div>
+          );
+        })}
+      </div>
+
+      {/* 进度条 */}
+      <div
+        style={{
+          display: "flex",
+          width: "100%",
+          height: 20,
+          borderRadius: 4,
+          overflow: "hidden",
+        }}
+      >
+        {percents.map((p, i) => (
+          <div
+            key={i}
+            style={{
+              width: `${p}%`,
+              backgroundColor: colors[i],
+              borderTopLeftRadius: i === 0 ? 4 : 0,
+              borderBottomLeftRadius: i === 0 ? 4 : 0,
+              borderTopRightRadius: i === percents.length - 1 ? 4 : 0,
+              borderBottomRightRadius: i === percents.length - 1 ? 4 : 0,
+              transition: "width 0.3s ease",
+            }}
+          />
+        ))}
+      </div>
+
+      {/* 下方文字：第3个数字，居中 */}
+      <div
+        style={{
+          marginTop: 4,
+          width: `${percents[2]}%`,
+          fontWeight: "bold",
+          fontSize: 14,
+          color: "#000",
+          textAlign: "center",
+          marginLeft: `calc(${percents.slice(0, 2).reduce((a, b) => a + b, 0)}%)`, // 让它水平居中对应第三段进度条的位置
+          boxSizing: "border-box",
+          whiteSpace: "nowrap",
+          visibility: values.length === 1 ? "hidden" : "visible", // 第4个隐藏
+        }}
+        title={`${percents[2]?.toFixed(2)}%`}
+      >
+        {values[2]}%
+      </div>
+    </div>
+  );
+};
+
+const App: React.FC<{ data: any; loading: boolean }> = ({ data, loading }) => {
+  // const chartRef = useRef(null);
+  const chartRef = useRef<HTMLDivElement | null>(null);
+  const chartInstance = useRef<EChartsType | null>(null);
+  // const chartRef = useRef<EChartsType | null>(null);
+
+  const guzhanglv = (data.totalFailures24h / data.totalMachines) * 100;
+  const yingxiangZhanbi = (data.totalPowerImpact / data.totalTheoreticalPower) * 100;
+  // let youxiaosuanli = 0
+  useEffect(() => {
+    if (chartRef.current) {
+      // 初始化echarts实例
+      chartInstance.current = echarts.init(chartRef.current);
+
+      const shangjia = data.totalEstimateOnRackMachines; // 估计在线机器数
+      const zaixian = data.totalEstimateOnlineMachines; // 估计离线机器数
+      const total = data.totalMachines; //其他机器数
+
+      const option = {
+        tooltip: { trigger: "item" },
+        grid: {
+          top: -10,
+          bottom: 0,
+          left: 0,
+          right: 0,
+        },
+        series: [
+          {
+            name: "总数",
+            type: "pie",
+            radius: ["80%", "100%"],
+            // label: { },
+            label: { show: false, position: "center", formatter: "{b}\n{c}" },
+            data: [{ value: total, name: "总数", itemStyle: { color: "#fa8c16" } }],
+          },
+          {
+            name: "在架数",
+            type: "pie",
+            radius: ["55%", "75%"],
+            label: { show: false },
+            data: [
+              { value: shangjia, name: "在架", itemStyle: { color: "#1890ff" } },
+              { value: total - shangjia, name: "未在架", itemStyle: { color: "transparent" } },
+            ],
+          },
+          {
+            name: "在线数",
+            type: "pie",
+            radius: ["30%", "50%"],
+            label: { show: false },
+            data: [
+              { value: zaixian, name: "在线", itemStyle: { color: "#52c41a" } },
+              { value: shangjia - zaixian, name: "不在线", itemStyle: { color: "transparent" } },
+            ],
+          },
+        ],
+      };
+      chartInstance.current.setOption(option);
+
+      // 图表响应式
+      const handleResize = () => chartInstance.current && chartInstance.current.resize();
+      window.addEventListener("resize", handleResize);
+
+      // return () => {
+      // window.removeEventListener('resize', handleResize);
+      // chartInstance.current && chartInstance.current.dispose();
+      // };
+    }
+    // youxiaosuanli = (data?.totalTheoreticalPower * data?.averageEffectiveRate / 100)?.toFixed(2);
+  }, [data]);
+
+  return (
+    <>
+      <Row gutter={16} v-else>
+        <Col span={8}>
+          <Skeleton loading={loading} active>
+            <Card
+              title="机器汇总"
+              bordered={false}
+              actions={[
+                <span key="setting">
+                  <CloseCircleOutlined style={{ color: "red", fontSize: 16, marginRight: "10px" }} />
+                  <span>故障率：{((data.totalFailures24h / data.totalMachines) * 100)?.toFixed(2)}%</span>
+                </span>,
+                <span key="setting">
+                  {/* <SettingOutlined /> */}
+                  <CheckCircleOutlined style={{ color: "green", fontSize: 16, marginRight: "10px" }} />
+                  <span>在线率：{data.totalOnlineRatio?.toFixed(2)}%</span>
+                </span>,
+              ]}
+            >
+              <Row justify="space-between" align="middle">
+                <Col span={12} style={{ textAlign: "left" }}>
+                  <Typography.Text
+                    style={{
+                      width: 80,
+                      display: "inline-block", // 必须加，才能让宽度生效
+                      textAlign: "center",
+                      whiteSpace: "nowrap",
+                      overflow: "hidden",
+                      textOverflow: "ellipsis",
+                    }}
+                  >
+                    托管台数：
+                  </Typography.Text>
+                  <Typography.Text
+                    style={{
+                      width: 80,
+                      display: "inline-block", // 必须加，才能让宽度生效
+                      textAlign: "left",
+                      whiteSpace: "nowrap",
+                      overflow: "hidden",
+                      textOverflow: "ellipsis",
+                    }}
+                  >
+                    {data?.totalMachines}
+                  </Typography.Text>
+                </Col>
+                <Col span={12} style={{ textAlign: "right" }}>
+                  <Typography.Text
+                    style={{
+                      width: 80,
+                      display: "inline-block", // 必须加，才能让宽度生效
+                      textAlign: "center",
+                      whiteSpace: "nowrap",
+                      overflow: "hidden",
+                      textOverflow: "ellipsis",
+                    }}
+                  >
+                    在架台数：
+                  </Typography.Text>
+                  <Typography.Text
+                    style={{
+                      width: 80,
+                      display: "inline-block", // 必须加，才能让宽度生效
+                      textAlign: "left",
+                      whiteSpace: "nowrap",
+                      overflow: "hidden",
+                      textOverflow: "ellipsis",
+                    }}
+                  >
+                    {data?.totalEstimateOnRackMachines}
+                  </Typography.Text>
+                </Col>
+                <Col span={12} style={{ textAlign: "left" }}>
+                  <Typography.Text
+                    style={{
+                      width: 80,
+                      display: "inline-block", // 必须加，才能让宽度生效
+                      textAlign: "center",
+                      whiteSpace: "nowrap",
+                      overflow: "hidden",
+                      textOverflow: "ellipsis",
+                    }}
+                  >
+                    故障台数：
+                  </Typography.Text>
+                  <Typography.Text
+                    style={{
+                      width: 80,
+                      display: "inline-block", // 必须加，才能让宽度生效
+                      textAlign: "left",
+                      whiteSpace: "nowrap",
+                      overflow: "hidden",
+                      textOverflow: "ellipsis",
+                    }}
+                  >
+                    {data?.totalFailures24h}
+                  </Typography.Text>
+                </Col>
+                <Col span={12} style={{ textAlign: "right" }}>
+                  <Typography.Text
+                    style={{
+                      width: 80,
+                      display: "inline-block", // 必须加，才能让宽度生效
+                      textAlign: "center",
+                      whiteSpace: "nowrap",
+                      overflow: "hidden",
+                      textOverflow: "ellipsis",
+                    }}
+                  >
+                    在线台数：
+                  </Typography.Text>
+                  <Typography.Text
+                    style={{
+                      width: 80,
+                      display: "inline-block", // 必须加，才能让宽度生效
+                      textAlign: "left",
+                      whiteSpace: "nowrap",
+                      overflow: "hidden",
+                      textOverflow: "ellipsis",
+                    }}
+                  >
+                    {(data?.totalEstimateOnlineMachines || 0).toFixed(0)}
+                  </Typography.Text>
+                </Col>
+              </Row>
+              <div ref={chartRef} style={{ width: "100%", height: 168, marginTop: 0, marginBottom: 0 }} />
+            </Card>
+          </Skeleton>
+        </Col>
+        <Col span={8}>
+          <Skeleton loading={loading} active>
+            <Card
+              title="算力汇总"
+              bordered={false}
+              actions={[
+                <span key="setting">
+                  <SettingOutlined style={{ fontSize: 16, color: "#1890ff", marginRight: "10px" }} />
+                  {/* <ThunderboltOutlined style={{ color: 'orange', fontSize: 16, marginRight: '10px' }} /> */}
+                  <span>算力有效率：{(data?.averageEffectiveRate || 0)?.toFixed(2)}%</span>
+                </span>,
+              ]}
+            >
+              <Row justify="space-between" align="middle">
+                <Col span={12} style={{ textAlign: "left" }}>
+                  有效算力：{((data?.totalTheoreticalPower * data?.averageEffectiveRate) / 100)?.toFixed(2)}
+                  &nbsp;&nbsp;EH/S
+                </Col>
+                <Col span={12} style={{ textAlign: "right" }}>
+                  理论算力：{data?.totalTheoreticalPower?.toFixed(2)}
+                  &nbsp;&nbsp;EH/S
+                </Col>
+              </Row>
+              <EfficiencyGauge
+                effective={(data?.totalTheoreticalPower * data?.averageEffectiveRate) / 100}
+                theoretical={data?.totalTheoreticalPower}
+              />
+            </Card>
+          </Skeleton>
+        </Col>
+        <Col span={8}>
+          <Skeleton loading={loading} active>
+            <Card title="影响占比">
+              <div style={{ height: "20px" }}></div>
+              <MultiProgress
+                values={[Number(yingxiangZhanbi?.toFixed(2))]} // 三个值
+                colors={["#52c41a", "#ff4d4f", "#faad14"]} // 绿色、红色、黄色
+              />
+
+              <div style={{ height: "30px" }}></div>
+              <MultiProgress
+                values={[
+                  Number(guzhanglv?.toFixed(2)),
+                  Number(data.totalLimitImpactRatio?.toFixed(2)),
+                  Number(data.totalHighTemperatureImpactRatio?.toFixed(2)),
+                  yingxiangZhanbi -
+                    Number(guzhanglv?.toFixed(2)) -
+                    Number(data.totalLimitImpactRatio?.toFixed(2)) -
+                    Number(data.totalHighTemperatureImpactRatio?.toFixed(2)),
+                ]} // 三个值
+                colors={["#1890ff", "#ff4d4f", "#faad14"]} // 绿色、红色、黄色
+              />
+
+              <div
+                style={{
+                  marginTop: 25,
+                  marginBottom: -20,
+                  display: "flex",
+                  flexWrap: "wrap", // 允许换行
+                  // gap: 12,          // 子元素间距
+                  borderTop: "1px solid #e8e8e8",
+                }}
+              >
+                <Row justify="space-between" align="middle" style={{ padding: 12 }}>
+                  <Col span={12} style={{ textAlign: "left" }}>
+                    <WarningOutlined style={{ color: "#faad14", marginRight: 8 }} />
+                    {/* <CheckCircleOutlined style={{ color: 'green', fontSize: 16, marginRight: 8 }} /> */}
+                    影响占比：{yingxiangZhanbi?.toFixed(2)}%
+                  </Col>
+                  <Col span={12} style={{ textAlign: "right" }}>
+                    <CloseCircleOutlined style={{ color: "#ff4d4f", marginRight: 8 }} />
+                    总故障率：{guzhanglv?.toFixed(2)}%
+                  </Col>
+                  <Col span={12} style={{ textAlign: "left" }}>
+                    <ThunderboltOutlined style={{ color: "#faad14", marginRight: 8 }} />
+                    {/* <CheckCircleOutlined style={{ color: 'green', fontSize: 16, marginRight: 8 }} /> */}
+                    限电占比：{data.totalLimitImpactRatio?.toFixed(2)}%
+                  </Col>
+                  <Col span={12} style={{ textAlign: "right" }}>
+                    <FireOutlined style={{ color: "#ff4d4f", marginRight: 8 }} />
+                    高温占比：{data.totalHighTemperatureImpactRatio?.toFixed(2)}%
+                  </Col>
+                </Row>
+                <div></div>
+              </div>
+            </Card>
+          </Skeleton>
+        </Col>
+      </Row>
+    </>
+  );
+};
+
+export default App;

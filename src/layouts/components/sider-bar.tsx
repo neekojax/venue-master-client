@@ -35,50 +35,62 @@ const findSelectedKeys = (items: MenuProps["items"], pathname: string, path: str
   return { selectedKeys, openKeys };
 };
 
-const items: MenuProps["items"] = [
-  {
-    icon: <HomeOutlined />,
-    label: <Link to={ROUTE_PATHS.landing}>首页</Link>,
-    key: ROUTE_PATHS.landing,
-  },
-  {
-    icon: <MdMonitorHeart />,
-    label: "算力监控",
-    key: ROUTE_PATHS.mining,
-    children: [
-      {
-        key: ROUTE_PATHS.miningHashRate,
-        label: <Link to={ROUTE_PATHS.miningHashRate}>实时算力</Link>,
-      },
-    ],
-  },
-  {
-    icon: <SiNginxproxymanager />,
-    label: "场地管理",
-    key: ROUTE_PATHS.venue,
-    children: [
-      {
-        key: ROUTE_PATHS.miningSiteData,
-        label: <Link to={ROUTE_PATHS.miningSiteData}>运行指标</Link>,
-      },
-      {
-        key: ROUTE_PATHS.eventLog,
-        label: <Link to={ROUTE_PATHS.eventLog}>事件日志</Link>,
-      },
-    ],
-  },
-  {
-    icon: <FaRegChartBar />,
-    label: "报表",
-    key: ROUTE_PATHS.report,
-    children: [
-      {
-        key: ROUTE_PATHS.dailyReport,
-        label: <Link to={ROUTE_PATHS.dailyReport}>运营日报</Link>,
-      },
-    ],
-  },
-];
+// const items: MenuProps["items"] = [
+const SiderItems = () => {
+  const showNDPoolType = useSettingsStore((state) => state.poolType);
+  return [
+    {
+      icon: <HomeOutlined />,
+      label: <Link to={ROUTE_PATHS.landing}>首页</Link>,
+      key: ROUTE_PATHS.landing,
+    },
+    {
+      icon: <MdMonitorHeart />,
+      label: "算力监控",
+      key: ROUTE_PATHS.mining,
+      children: [
+        {
+          key: ROUTE_PATHS.miningHashRate,
+          label: <Link to={ROUTE_PATHS.miningHashRate}>实时算力</Link>,
+        },
+      ],
+    },
+    {
+      icon: <SiNginxproxymanager />,
+      label: "场地管理",
+      key: ROUTE_PATHS.venue,
+      children: [
+        {
+          key: ROUTE_PATHS.miningSiteData,
+          label: <Link to={ROUTE_PATHS.miningSiteData}>运行指标</Link>,
+        },
+        {
+          key: ROUTE_PATHS.eventLog,
+          label: <Link to={ROUTE_PATHS.eventLog}>事件日志</Link>,
+        },
+      ],
+    },
+    {
+      icon: <FaRegChartBar />,
+      label: "报表",
+      key: ROUTE_PATHS.report,
+      children: [
+        {
+          key: ROUTE_PATHS.dailyReport,
+          label: <Link to={ROUTE_PATHS.dailyReport}>运营日报</Link>,
+        },
+        ...(showNDPoolType !== "CANG" && showNDPoolType !== "NS" // 日报菜单项，仅在 type === 'ND' 时显示
+          ? [
+              {
+                key: ROUTE_PATHS.subAccountDailyReport,
+                label: <Link to={ROUTE_PATHS.subAccountDailyReport}>账户日报</Link>,
+              },
+            ]
+          : []),
+      ].filter(Boolean),
+    },
+  ];
+};
 
 export default function SiderBar() {
   const location = useLocation();
@@ -92,11 +104,12 @@ export default function SiderBar() {
   const { collapsed } = useSettingsStore(useSelector(["collapsed"]));
 
   const { isDarkMode } = useTheme();
+  const itemList: any = SiderItems();
 
   useEffect(() => {
     if (location.pathname === "/") return;
 
-    const { selectedKeys, openKeys } = findSelectedKeys(items, location.pathname);
+    const { selectedKeys, openKeys } = findSelectedKeys(itemList, location.pathname);
     setSelectedKeys(selectedKeys);
     // 首次渲染时，设置默认值
     if (firstRenderRef.current) {
@@ -139,7 +152,7 @@ export default function SiderBar() {
       <Menu
         theme={isDarkMode ? "dark" : "light"}
         mode="inline"
-        items={items}
+        items={itemList}
         selectedKeys={selectedKeys}
         onSelect={({ selectedKeys }) => {
           setSelectedKeys(selectedKeys);

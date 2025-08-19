@@ -39,7 +39,7 @@ export default function VenueRunningKpi() {
       });
       // 转换成数组（可选）
       const venueArray = Object.values(venueNumMap || {});
-      setVenueNum(venueArray.length);
+      setVenueNum(venueArray?.length);
       setSubAccountNum(rawData?.length ?? 0);
     } catch (err) {
       // 处理错误
@@ -52,7 +52,7 @@ export default function VenueRunningKpi() {
 
   const renderEfficiencyChart = (monthEfficiencys: any[]) => {
     // 检查 monthEfficiencys 是否存在且是数组
-    if (!Array.isArray(monthEfficiencys) || monthEfficiencys.length === 0) {
+    if (!Array.isArray(monthEfficiencys) || monthEfficiencys?.length === 0) {
       return <div>数据不足</div>; // 如果没有数据，返回提示
     }
 
@@ -60,7 +60,7 @@ export default function VenueRunningKpi() {
     const efficiencies = monthEfficiencys.map((item) => item.efficiency);
 
     // 检查 efficiencies 的长度，确保有至少两个数据点
-    if (efficiencies.length < 2) {
+    if (efficiencies?.length < 2) {
       return <div>数据不足</div>; // 如果数据少于两个，返回提示
     }
 
@@ -357,7 +357,7 @@ export default function VenueRunningKpi() {
           pageSizeOptions: ["20", "30", "50"],
           defaultPageSize: 20,
           showTotal: (total) => `共 ${total} 条`,
-          total: filteredData.length,
+          total: filteredData?.length || 0,
           onChange: () => {
             const tableBody = document.querySelector(".ant-table-body");
             if (tableBody) {
