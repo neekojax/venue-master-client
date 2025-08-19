@@ -31,6 +31,8 @@ export default defineConfig({
     // （因为代码压缩总是最后一步）。
     // 由于 esbuild 最低只支持 es2015，如果需要支持更低版本浏览器，则可以改用 terser 压缩
     // minify: "terser",
+    outDir: "dist",
+    assetsDir: "assets",
     target: "es2015",
     cssTarget: "chrome61",
     rollupOptions: {

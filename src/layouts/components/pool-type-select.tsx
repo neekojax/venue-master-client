@@ -66,7 +66,8 @@ export default function PoolSelect() {
   const allOptions = [
     { value: "CANG", label: "CANGO" },
     { value: "NS", label: "NS" },
-    { value: "ND", label: "ND" },
+    { value: "ND1", label: "ND1" },
+    { value: "ND2", label: "ND2" },
     { value: "KZ", label: "KZ" },
     { value: "LN", label: "LN" },
   ];
