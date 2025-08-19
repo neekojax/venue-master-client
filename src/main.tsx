@@ -15,6 +15,15 @@ import "./styles/radio.css";
 import "./styles/custom-select.css";
 import "./styles/extend.css";
 
+// ✅ 在渲染前全局监听
+window.addEventListener("unhandledrejection", (event: PromiseRejectionEvent) => {
+  const msg = (event.reason as any)?.message || "";
+  if (msg.includes("Failed to fetch dynamically imported module")) {
+    console.warn("动态模块加载失败，刷新页面...");
+    window.location.reload();
+  }
+});
+
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
