@@ -75,7 +75,7 @@ export default function PoolSelect() {
   // 如果当前路径是 /report/daily/sub-account，只保留 LN、ND
   const filteredOptions =
     location.pathname === "/report/daily/sub-account"
-      ? allOptions.filter((opt) => ["LN", "ND"].includes(opt.value))
+      ? allOptions.filter((opt) => ["LN", "ND1", "ND2", "KZ"].includes(opt.value))
       : allOptions;
 
   return (
