@@ -46,5 +46,20 @@ export const venueRoute: RouteObject = {
         crumb: () => <Link to={ROUTE_PATHS.venueSetting}>场地设置</Link>,
       },
     },
+    {
+      path: "/venue/detail/:venueId", // 直接使用动态参数
+      lazy: async () => ({
+        Component: (await import("@/pages/venue/venue-detail")).default,
+      }),
+      HydrateFallback: ProgressBar,
+      handle: {
+        title: "场地详情",
+        crumb: (params: { venueId?: string }) => (
+          <Link to={params?.venueId ? ROUTE_PATHS.miningSiteDetail(params.venueId) : "/venue/detail"}>
+            场地详情
+          </Link>
+        ),
+      },
+    },
   ],
 };

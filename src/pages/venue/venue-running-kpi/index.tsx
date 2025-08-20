@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
 import { DownloadOutlined } from "@ant-design/icons";
 import { Button, message, Spin, Table, Tag, Tooltip } from "antd";
 import { ReactEcharts } from "@/components/react-echarts"; // 导入自定义的 ReactEcharts 组件
@@ -145,7 +146,13 @@ export default function VenueRunningKpi() {
                     补充
                   </Tag>
                 )}
-                {text}
+                {/* 这里假设数据里有 venue_code 或 venueId 字段用于跳转 */}
+                <Link
+                  to={`/venue/detail/${runningData?.find((d: any) => d.venueName === text)?.venueCode || "unknown"}`}
+                  className="text-blue-500 hover:underline"
+                >
+                  {text}
+                </Link>
               </div>
             </Tooltip>
           );
