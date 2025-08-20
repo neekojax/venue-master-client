@@ -1,21 +1,23 @@
 import React, { useEffect, useRef, useState } from "react";
 import {
   AlertOutlined,
-  ApiOutlined,
-  ArrowDownOutlined,
-  ArrowUpOutlined,
+  AreaChartOutlined,
+  // ArrowDownOutlined,
+  // ArrowUpOutlined,
   CalendarOutlined,
   CloudOutlined,
   DatabaseOutlined,
   EllipsisOutlined,
   EnvironmentOutlined,
+  ExclamationCircleOutlined,
   LineChartOutlined,
-  PieChartOutlined,
   ThunderboltOutlined,
   ToolOutlined,
 } from "@ant-design/icons";
 import type { ColumnsType } from "antd/es/table";
 import * as echarts from "echarts";
+
+import "./index.css";
 type ChartConfig = {
   id: string;
   title: string;
@@ -39,21 +41,21 @@ const VenueDetail: React.FC = () => {
       value: "18 台",
       description: "需要检修",
       textColor: "text-yellow-500",
-      icon: <AlertOutlined className="text-gray-400" />,
+      icon: <AlertOutlined className="text-gray-400 font-12" />,
     },
     {
       title: "理论算力",
       value: "1,286 PH/s",
       description: "标准水平",
-      icon: <ThunderboltOutlined className="text-gray-400" />,
+      icon: <ThunderboltOutlined className="text-gray-400 font-12" />,
     },
     {
       title: "24 小时算力",
       value: "1,265 PH/s",
       description: "较昨日下降 1.2%",
       textColor: "text-yellow-500",
-      trendIcon: <ArrowDownOutlined className="mr-1" />,
-      icon: <LineChartOutlined className="text-gray-400" />,
+      // trendIcon: <ArrowDownOutlined className="mr-1" />,
+      icon: <LineChartOutlined className="text-gray-400 font-12" />,
     },
   ];
 
@@ -62,25 +64,25 @@ const VenueDetail: React.FC = () => {
       title: "故障占比",
       value: "1.4%",
       description: "一般水平",
-      icon: <ToolOutlined className="text-gray-400" />,
+      icon: <ToolOutlined className="text-gray-400 font-12" />,
     },
     {
       title: "高温占比",
       value: "0.6%",
       description: "正常范围",
-      icon: <CloudOutlined className="text-gray-400" />,
+      icon: <CloudOutlined className="text-gray-400 font-12" style={{ fontSize: "0.95rem" }} />,
     },
     {
       title: "限电占比",
       value: "0.5%",
       description: "正常范围",
-      icon: <ThunderboltOutlined className="text-gray-400" />,
+      icon: <ThunderboltOutlined className="text-gray-500 font-12" />,
     },
     {
       title: "其他占比",
       value: "0.3%",
       description: "正常范围",
-      icon: <EllipsisOutlined className="text-gray-400" />,
+      icon: <EllipsisOutlined className="text-gray-500 font-12" />,
     },
   ];
   const [charts, setCharts] = useState<ChartConfig[]>([
@@ -186,104 +188,6 @@ const VenueDetail: React.FC = () => {
     initCharts();
   }, []);
 
-  // const [charts, setCharts] = useState([
-  //     { id: 'hashrate-chart', title: '算力有效率变化曲线', period: 'day' },
-  //     { id: 'failure-chart', title: '故障率变化曲线', period: 'day' },
-  //     { id: 'temperature-chart', title: '高温影响曲线', period: 'day' },
-  //     { id: 'power-chart', title: '限电影响曲线', period: 'day' }
-  // ]);
-
-  // const generateChartData = (period: string) => {
-  //     const length = period === 'day' ? 30 : 12;
-  //     if (period === 'day') {
-  //         return Array.from({ length }, (_, i) => {
-  //             const date = new Date();
-  //             date.setDate(date.getDate() - i);
-  //             return date.toLocaleDateString('zh-CN');
-  //         }).reverse();
-  //     } else {
-  //         return Array.from({ length }, (_, i) => {
-  //             const date = new Date();
-  //             date.setMonth(date.getMonth() - i);
-  //             return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
-  //         }).reverse();
-  //     }
-  // };
-
-  // const createChartOption = (type: string, dates: string[]) => {
-  //     const baseOption: echarts.EChartsOption = {
-  //         animation: false,
-  //         tooltip: { trigger: 'axis' },
-  //         xAxis: { type: 'category', data: dates },
-  //         yAxis: { type: 'value' },
-  //         series: [{
-  //             type: 'line',
-  //             smooth: true,
-  //             data: [],
-  //             lineStyle: { color: '#2563eb' },
-  //             areaStyle: {
-  //                 color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
-  //                     { offset: 0, color: 'rgba(37, 99, 235, 0.2)' },
-  //                     { offset: 1, color: 'rgba(37, 99, 235, 0)' }
-  //                 ])
-  //             }
-  //         }]
-  //     };
-
-  //     const series = baseOption.series[0] as echarts.SeriesOption & {
-  //         data: number[];
-  //         lineStyle: { color: string };
-  //     };
-
-  //     switch (type) {
-  //         case "hashrate-chart":
-  //             baseOption.yAxis = { min: 95, max: 100 };
-  //             series.data = dates.map(() => Number((95 + Math.random() * 5).toFixed(1)));
-  //             break;
-
-  //         case "failure-chart":
-  //             baseOption.yAxis = { min: 0, max: 3 };
-  //             series.data = dates.map(() => Number((Math.random() * 2).toFixed(1)));
-  //             series.lineStyle.color = "#dc2626";
-  //             break;
-
-  //         case "temperature-chart":
-  //             baseOption.yAxis = { min: 0, max: 1 };
-  //             series.data = dates.map(() => Number((Math.random() * 0.5).toFixed(2)));
-  //             series.lineStyle.color = "#ea580c";
-  //             break;
-
-  //         case "power-chart":
-  //             baseOption.yAxis = { min: 0, max: 2 };
-  //             series.data = dates.map(() => Number((Math.random() * 1.5).toFixed(1)));
-  //             series.lineStyle.color = "#7c3aed";
-  //             break;
-  //     }
-
-  //     return baseOption;
-  // };
-
-  // const initCharts = () => {
-  //     const chartInstances: Record<string, echarts.ECharts> = {};
-  //     charts.forEach((chart, index) => {
-  //         const el = chartRefs.current[index];
-  //         if (el) {
-  //             const instance = echarts.init(el);
-  //             const dates = generateChartData(chart.period);
-  //             instance.setOption(createChartOption(chart.id, dates));
-  //             chartInstances[chart.id] = instance;
-  //         }
-  //     });
-
-  //     window.addEventListener('resize', () => {
-  //         Object.values(chartInstances).forEach(instance => instance.resize());
-  //     });
-  // };
-
-  // useEffect(() => {
-  //     initCharts();
-  // }, [charts]);
-
   // 日报数据类型
   interface DailyRecord {
     key: string;
@@ -306,24 +210,6 @@ const VenueDetail: React.FC = () => {
     hashrateImpact: string;
     reason: string;
   }
-  // const dailyColumns: ColumnsType<DailyRecord> = [
-  //     { title: '日期', dataIndex: 'date', key: 'date' },
-  //     { title: '收益 (¥)', dataIndex: 'income', key: 'income', align: 'right' },
-  //     { title: '算力有效率', dataIndex: 'hashrateEfficiency', key: 'hashrateEfficiency', align: 'right' },
-  //     { title: '故障率', dataIndex: 'failureRate', key: 'failureRate', align: 'right' },
-  //     { title: '限电影响', dataIndex: 'powerLimit', key: 'powerLimit', align: 'right' },
-  //     { title: '高温影响', dataIndex: 'temperatureImpact', key: 'temperatureImpact', align: 'right' }
-  // ];
-
-  // const abnormalColumns: ColumnsType<DailyRecord> = [
-  //     { title: '场地', dataIndex: 'site', key: 'site' },
-  //     { title: '影响时长', dataIndex: 'duration', key: 'duration' },
-  //     { title: '时间范围', dataIndex: 'timeRange', key: 'timeRange' },
-  //     { title: '事件类型', dataIndex: 'eventType', key: 'eventType' },
-  //     { title: '影响台数', dataIndex: 'affectedMachines', key: 'affectedMachines', align: 'right' },
-  //     { title: '影响算力', dataIndex: 'hashrateImpact', key: 'hashrateImpact', align: 'right' },
-  //     { title: '时间原因', dataIndex: 'reason', key: 'reason' }
-  // ];
 
   const dailyColumns: ColumnsType<DailyRecord> = [
     { title: "日期", dataIndex: "date", key: "date" },
@@ -344,13 +230,6 @@ const VenueDetail: React.FC = () => {
     { title: "时间原因", dataIndex: "reason", key: "reason" },
   ];
 
-  // const dailyData = [
-  //     { key: '1', date: '2024-01-20', income: '286,521', hashrateEfficiency: '98.6%', failureRate: '1.4%', powerLimit: '0.8%', temperatureImpact: '0.2%' }
-  // ];
-
-  // const abnormalData = [
-  //     { key: '1', site: '杭州滨江矿场', duration: '2小时', timeRange: '2025-08-19 14:00-16:00', eventType: '电力故障', affectedMachines: '126台', hashrateImpact: '-1.8%', reason: '变电站检修时间' }
-  // ];
   const dailyData: DailyRecord[] = [
     {
       key: "1",
@@ -411,29 +290,38 @@ const VenueDetail: React.FC = () => {
       </header>
 
       {/* 算力运行状态 */}
-      <div className="bg-gray-100 rounded-xl p-8 mb-8">
-        <h3 className="text-xl font-bold mb-6 text-gray-800 pl-2">算力运行状态</h3>
-        <div className="bg-white rounded-lg shadow-sm p-6 grid grid-cols-5 gap-4">
-          <div className="bg-gray-50 p-6 rounded-lg border-2 border-primary">
+      <div
+        className="bg-gray-100 rounded-xl p-8 mb-8"
+        style={{
+          background: "#fff",
+          borderRadius: "4px",
+        }}
+      >
+        <h3 className="text-xl font-bold mb-6 text-gray-800 pl-2">
+          <AreaChartOutlined className="mr-2 text-primary" />
+          算力运行状态
+        </h3>
+        <div className="bg-white rounded-lg grid grid-cols-5 gap-4">
+          <div className=" p-6 rounded-lg bg-gradient-to-br shadow-demo from-blue-50 to-blue-50 border-2 border-blue-200">
             <div className="flex items-center justify-between mb-2">
-              <span className="text-gray-600">算力有效率</span>
-              <ApiOutlined className="text-primary text-xl" />
+              <span className="text-lg font-semibold text-primary">算力有效率</span>
+              <AreaChartOutlined className="text-primary text-xl" />
             </div>
-            <div className="text-3xl font-bold text-primary">98.6%</div>
-            <div className="text-sm text-green-500 mt-2">
-              <ArrowUpOutlined className="mr-1" /> 较昨日提升 0.3%
-            </div>
+            <div className="text-4xl font-bold text-primary">98.6%</div>
+            {/* <div className="text-sm text-primary mt-2">
+                            <ArrowUpOutlined className="mr-1" /> 较昨日提升 0.3%
+                        </div> */}
           </div>
           {statusCards.map((item, index) => (
-            <div key={index} className="bg-gray-50 p-6 rounded-lg">
+            <div key={index} className="shadow-demo p-6 rounded-lg">
               <div className="flex items-center justify-between mb-2">
-                <span className="text-gray-600">{item.title}</span>
+                <span className="text-gray-600 font-semibold">{item.title}</span>
                 {item.icon}
               </div>
-              <div className="text-2xl font-semibold">{item.value}</div>
+              <div className="text-2xl font-bold text-gray-800 ">{item.value}</div>
               <div className={`text-sm ${item.textColor || "text-gray-500"} mt-2`}>
-                {item.trendIcon}
-                {item.description}
+                {/* {item.trendIcon} */}
+                {/* {item.description} */}
               </div>
             </div>
           ))}
@@ -441,28 +329,37 @@ const VenueDetail: React.FC = () => {
       </div>
 
       {/* 算力影响分析 */}
-      <div className="bg-gray-100 rounded-xl p-8 mb-8">
-        <h3 className="text-xl font-bold mb-6 text-gray-800 pl-2">算力影响分析</h3>
-        <div className="bg-white rounded-lg shadow-sm p-6 grid grid-cols-5 gap-4">
-          <div className="bg-gray-50 p-6 rounded-lg border-2 border-primary">
+      <div
+        className="bg-gray-100 rounded-xl p-8 mb-8"
+        style={{
+          background: "#fff",
+          borderRadius: "4px",
+        }}
+      >
+        <h3 className="text-xl font-bold mb-6 text-gray-800 pl-2">
+          <ExclamationCircleOutlined className="mr-2 text-red-500" />
+          算力影响因素
+        </h3>
+        <div className="bg-white rounded-lg  grid grid-cols-5 gap-4">
+          <div className="p-6 rounded-lg  bg-gradient-to-br shadow-demo from-red-100 to-red-50 border-2 border-red-200">
             <div className="flex items-center justify-between mb-2">
-              <span className="text-gray-600">算力影响</span>
-              <PieChartOutlined className="text-primary text-xl" />
+              <span className="text-lg font-semibold text-red-600">算力影响</span>
+              <ExclamationCircleOutlined className="text-red-500 text-xl" />
             </div>
-            <div className="text-3xl font-bold text-primary">-2.8%</div>
-            <div className="text-sm text-red-500 mt-2">
-              <ArrowUpOutlined className="mr-1" />
-              影响增加 0.5%
-            </div>
+            <div className="text-4xl font-bold text-red-500">-2.8%</div>
+            {/* <div className="text-sm text-red-500 mt-2">
+                            <ArrowUpOutlined className="mr-1" />
+                            影响增加 0.5%
+                        </div> */}
           </div>
           {impactCards.map((item, index) => (
-            <div key={index} className="bg-gray-50 p-6 rounded-lg">
+            <div key={index} className="p-6 shadow-sm shadow-demo rounded-lg">
               <div className="flex items-center justify-between mb-2">
-                <span className="text-gray-600">{item.title}</span>
+                <span className="text-gray-600 font-semibold">{item.title}</span>
                 {item.icon}
               </div>
-              <div className="text-2xl font-semibold">{item.value}</div>
-              <div className="text-sm text-gray-500 mt-2">{item.description}</div>
+              <div className="text-2xl  font-bold text-gray-800 ">{item.value}</div>
+              {/* <div className="text-sm text-gray-500 mt-2">{item.description}</div> */}
             </div>
           ))}
         </div>

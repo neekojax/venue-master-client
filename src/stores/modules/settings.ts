@@ -2,7 +2,7 @@ import { create } from "zustand";
 import { persist } from "zustand/middleware";
 
 const initialState = {
-  colorPrimary: "#1DA57A",
+  colorPrimary: "#2d8cf0", // #1DA57A  #4096ff #2d8cf0
   collapsed: false,
   poolType: "KZ",
 };
