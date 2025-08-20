@@ -1,0 +1,1 @@
+import{j as t}from"./index-34DIWCpk.js";import{O as o}from"./react-BIszHAjf.js";import"./antd-Cncqk0Hi.js";function a(){return t.jsx("div",{className:"text-indigo-700",children:t.jsx(o,{})})}export{a as default};
