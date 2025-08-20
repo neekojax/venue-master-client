@@ -14,3 +14,24 @@
     <div id="root"></div>
   </body>
 </html>
+<script>
+  // 监听所有资源加载错误
+  window.addEventListener("error", function (event) {
+    if (event.message && event.message.includes("Failed to load module script")) {
+      console.warn("检测到模块加载失败，自动刷新页面...");
+      setTimeout(() => {
+        location.reload();
+      }, 1000); // 延迟 1s 避免死循环
+    }
+  });
+
+  // 兜底：全局未捕获错误
+  window.onerror = function (message, source, lineno, colno, error) {
+    if (String(message).includes("Failed to load module script")) {
+      console.warn("onerror 捕获模块加载失败，刷新页面...");
+      setTimeout(() => {
+        location.reload();
+      }, 1000);
+    }
+  };
+</script>
