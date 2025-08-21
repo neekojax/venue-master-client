@@ -284,6 +284,7 @@
 }
 .filterRadio .ant-radio-button-wrapper .ant-radio-button.ant-radio-button-checked{
     background: #f0f6fe !important;
+    border:#1E90FF solid 0.5px;
     color: #1E90FF !important;
     border-radius: 25px !important;
 }

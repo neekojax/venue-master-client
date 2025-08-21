@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { FaAdn, FaFish } from "react-icons/fa6";
+// import { Link } from "react-router-dom";
 import { DeleteOutlined, ExportOutlined, FormOutlined, SearchOutlined } from "@ant-design/icons";
 import {
   Button,
@@ -39,6 +40,7 @@ const emptyData = {
   pool_type: "",
   country: "",
   status: 0, // 状态：0 暂停，1 活跃
+  hosted_machine: 0,
   // pool_category: "",
   theoretical_hashrate: 0,
   energy_ratio: 0,
@@ -93,6 +95,7 @@ export default function MiningSettingPage() {
     pool_type?: string;
     status?: number;
     country?: string;
+    hosted_machine: number;
     pool_category?: string;
     theoretical_hashrate?: number;
     energy_ratio?: number;
@@ -144,6 +147,7 @@ export default function MiningSettingPage() {
             venue_id: any;
             pool_name: any;
             country: any;
+            hosted_machine: any;
             status: any;
             pool_category: any;
             theoretical_hashrate: any;
@@ -155,12 +159,14 @@ export default function MiningSettingPage() {
         ) => ({
           serialNumber: index + 1,
           key: item.id, // 使用 ID 作为唯一 key
+          pool_id: item.id,
           // @ts-ignore
           venue_id: item.venue_info.id,
           // @ts-ignore
           venue_name: item.venue_info.venue_name,
           pool_name: item.pool_name,
           country: item.country,
+          hosted_machine: item.hosted_machine,
           status: item.status,
           pool_category: item.pool_category,
           theoretical_hashrate: item.theoretical_hashrate,
@@ -239,6 +245,7 @@ export default function MiningSettingPage() {
         key: "pool_name",
         width: 200,
         // render: (text: any) => <span style={{ color: "#333" }}>{text}</span>,
+        // render: (text: any, record: { venue_id?: any, pool_id?: any }) => (
         render: (text: any) => (
           <Tooltip
             title={text}
@@ -255,6 +262,10 @@ export default function MiningSettingPage() {
                 whiteSpace: "nowrap",
               }}
             >
+              {/* <Link
+                to={`/mining/detail/${record.venue_id}/${record.pool_id}`}
+                className="text-blue-500 hover:underline"
+              > {text}</Link> */}
               {text}
             </div>
           </Tooltip>
@@ -270,6 +281,12 @@ export default function MiningSettingPage() {
         title: "所属国家",
         dataIndex: "country",
         key: "country",
+        width: 75,
+      },
+      {
+        title: "托管机器",
+        dataIndex: "hosted_machine",
+        key: "hosted_machine",
         width: 75,
       },
       {
@@ -407,6 +424,7 @@ export default function MiningSettingPage() {
       pool_name: data.pool_name,
       pool_type: poolType,
       country: data.country,
+      hosted_machine: data.hosted_machine,
       status: data.status,
       pool_category: data.pool_category,
       theoretical_hashrate: String(data.theoretical_hashrate),
@@ -612,6 +630,13 @@ export default function MiningSettingPage() {
             label="所属国家"
             name="country"
             rules={[{ required: true, message: "Please input your country!" }]}
+          >
+            <Input />
+          </Form.Item>
+          <Form.Item<FieldType>
+            label="托管机器"
+            name="hosted_machine"
+            rules={[{ required: true, message: "Please input your 托管机器!" }]}
           >
             <Input />
           </Form.Item>

@@ -18,6 +18,8 @@ export const ROUTE_PATHS = {
 
   mining: "/mining",
   miningSetting: "/mining/setting",
+  // miningSettingDetail: "/mining/setting/detail",
+  miningDetail: (venueId: string | number, poolId: string | number) => `/mining/detail/${venueId}/${poolId}`, // 子账户详情，需传参数
   miningHashRate: "/mining/hash",
 
   venue: "/venue",

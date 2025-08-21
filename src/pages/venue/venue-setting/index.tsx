@@ -224,11 +224,11 @@ const VenueManagement: React.FC = () => {
       dataIndex: "agent_key",
       width: 300,
     },
-    // {
-    //   title: "详细地址",
-    //   dataIndex: "address",
-    //   width: 200,
-    // },
+    {
+      title: "详细地址",
+      dataIndex: "address",
+      width: 200,
+    },
     {
       title: "操作",
       key: "action",

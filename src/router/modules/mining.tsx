@@ -35,5 +35,32 @@ export const miningRoute: RouteObject = {
         crumb: () => <Link to={ROUTE_PATHS.miningHashRate}>实时算力</Link>,
       },
     },
+    {
+      path: "/mining/detail/:venueId/:poolId", // 直接使用动态参数
+      lazy: async () => ({
+        Component: (await import("@/pages/mining/detail")).default,
+      }),
+      HydrateFallback: ProgressBar,
+      // handle: {
+      // title: "子账户详情",
+      // crumb: (params: { venueId?: string, poolId?: string }) => (
+      // <Link to={ROUTE_PATHS.miningDetail(venueId, poolId)}>查看详情</Link>
+      // <Link to={params?.poolId ? ROUTE_PATHS.miningDetail(params.venueId, params.poolId) : "/venue/detail"}>
+      // 子账户详情
+      // </Link>
+      // ),
+      // },
+    },
+    // {
+    //   path: ROUTE_PATHS.miningDetail,
+    //   lazy: async () => ({
+    //     Component: (await import("@/pages/mining/hash")).default,
+    //   }),
+    //   HydrateFallback: ProgressBar,
+    //   handle: {
+    //     title: "实时算力",
+    //     crumb: () => <Link to={ROUTE_PATHS.miningHashRate}>实时算力</Link>,
+    //   },
+    // },
   ],
 };

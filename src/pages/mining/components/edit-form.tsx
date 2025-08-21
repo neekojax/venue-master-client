@@ -34,6 +34,11 @@ const formFields = [
     component: Input,
   },
   {
+    label: "托管机器",
+    name: "hosted_machine",
+    component: Input,
+  },
+  {
     label: "理论算力",
     name: "theoretical_hashrate",
     component: Input,
