@@ -32,3 +32,7 @@ export const updateEventLog = async (data: EventLogParam) => {
 export const deleteEventLog = async (id: number) => {
   return await fetchDelete(`/event/deleteEvent/${id}`);
 };
+// 获取资产汇总数据
+export const getVenueDailyStat = async (venueID: number, data: string) => {
+  return await fetchGet(`/venue/getVenueDailyStat/${venueID}/${data}`);
+};

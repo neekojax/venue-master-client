@@ -120,7 +120,7 @@ export default function VenueRunningKpi() {
         dataIndex: "venueName",
         fixed: "left",
         width: 250,
-        render: (text: string) => {
+        render: (text: string, record: { venueID?: any }) => {
           const isSpecialVenue = text === "Arct-HF01-J XP-AR-US" || text === "ARCT Technologies-HF02-AR-US";
           return (
             <Tooltip
@@ -146,10 +146,7 @@ export default function VenueRunningKpi() {
                 )}
 
                 {/* 这里假设数据里有 venue_code 或 venueId 字段用于跳转 */}
-                <Link
-                  to={`/venue/detail/${runningData?.find((d: any) => d.venueName === text)?.venueCode || "unknown"}`}
-                  className="text-blue-500 hover:underline"
-                >
+                <Link to={`/venue/detail/${record.venueID}`} className="text-blue-500 hover:underline">
                   {text}
                 </Link>
               </div>

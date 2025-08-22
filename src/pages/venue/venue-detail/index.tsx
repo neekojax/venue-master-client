@@ -1,21 +1,9 @@
 import React, { useEffect, useRef, useState } from "react";
-import {
-  AlertOutlined,
-  AreaChartOutlined,
-  // ArrowDownOutlined,
-  // ArrowUpOutlined,
-  CalendarOutlined,
-  CloudOutlined,
-  DatabaseOutlined,
-  EllipsisOutlined,
-  EnvironmentOutlined,
-  ExclamationCircleOutlined,
-  LineChartOutlined,
-  ThunderboltOutlined,
-  ToolOutlined,
-} from "@ant-design/icons";
+import { CalendarOutlined, CloudOutlined, EnvironmentOutlined, ThunderboltOutlined } from "@ant-design/icons";
 import type { ColumnsType } from "antd/es/table";
 import * as echarts from "echarts";
+// import { useParams } from "react-router-dom";
+import BasicData from "./components/BasicData";
 
 import "./index.css";
 type ChartConfig = {
@@ -26,65 +14,12 @@ type ChartConfig = {
 import { Button, Radio, Table } from "antd";
 
 const VenueDetail: React.FC = () => {
+  // const params = useParams<{ venueId: string; }>();
+  // const venueId = params.venueId!;
+
   const [showDaily, setShowDaily] = useState(true);
   const chartRefs = useRef<(HTMLDivElement | null)[]>([]);
 
-  const statusCards = [
-    {
-      title: "理论台数",
-      value: "1,280 台",
-      description: "满负荷运行中",
-      icon: <DatabaseOutlined className="text-gray-400" />,
-    },
-    {
-      title: "故障总台数",
-      value: "18 台",
-      description: "需要检修",
-      textColor: "text-yellow-500",
-      icon: <AlertOutlined className="text-gray-400 font-12" />,
-    },
-    {
-      title: "理论算力",
-      value: "1,286 PH/s",
-      description: "标准水平",
-      icon: <ThunderboltOutlined className="text-gray-400 font-12" />,
-    },
-    {
-      title: "24 小时算力",
-      value: "1,265 PH/s",
-      description: "较昨日下降 1.2%",
-      textColor: "text-yellow-500",
-      // trendIcon: <ArrowDownOutlined className="mr-1" />,
-      icon: <LineChartOutlined className="text-gray-400 font-12" />,
-    },
-  ];
-
-  const impactCards = [
-    {
-      title: "故障占比",
-      value: "1.4%",
-      description: "一般水平",
-      icon: <ToolOutlined className="text-gray-400 font-12" />,
-    },
-    {
-      title: "高温占比",
-      value: "0.6%",
-      description: "正常范围",
-      icon: <CloudOutlined className="text-gray-400 font-12" style={{ fontSize: "0.95rem" }} />,
-    },
-    {
-      title: "限电占比",
-      value: "0.5%",
-      description: "正常范围",
-      icon: <ThunderboltOutlined className="text-gray-500 font-12" />,
-    },
-    {
-      title: "其他占比",
-      value: "0.3%",
-      description: "正常范围",
-      icon: <EllipsisOutlined className="text-gray-500 font-12" />,
-    },
-  ];
   const [charts, setCharts] = useState<ChartConfig[]>([
     { id: "hashrate-chart", title: "算力有效率变化曲线", period: "day" },
     { id: "failure-chart", title: "故障率变化曲线", period: "day" },
@@ -290,7 +225,7 @@ const VenueDetail: React.FC = () => {
       </header>
 
       {/* 算力运行状态 */}
-      <div
+      {/* <div
         className="bg-gray-100 rounded-xl p-8 mb-8"
         style={{
           background: "#fff",
@@ -308,9 +243,7 @@ const VenueDetail: React.FC = () => {
               <AreaChartOutlined className="text-primary text-xl" />
             </div>
             <div className="text-4xl font-bold text-primary">98.6%</div>
-            {/* <div className="text-sm text-primary mt-2">
-                            <ArrowUpOutlined className="mr-1" /> 较昨日提升 0.3%
-                        </div> */}
+
           </div>
           {statusCards.map((item, index) => (
             <div key={index} className="shadow-demo p-6 rounded-lg">
@@ -320,16 +253,15 @@ const VenueDetail: React.FC = () => {
               </div>
               <div className="text-2xl font-bold text-gray-800 ">{item.value}</div>
               <div className={`text-sm ${item.textColor || "text-gray-500"} mt-2`}>
-                {/* {item.trendIcon} */}
-                {/* {item.description} */}
+
               </div>
             </div>
           ))}
         </div>
-      </div>
+      </div> */}
 
       {/* 算力影响分析 */}
-      <div
+      {/* <div
         className="bg-gray-100 rounded-xl p-8 mb-8"
         style={{
           background: "#fff",
@@ -347,10 +279,7 @@ const VenueDetail: React.FC = () => {
               <ExclamationCircleOutlined className="text-red-500 text-xl" />
             </div>
             <div className="text-4xl font-bold text-red-500">-2.8%</div>
-            {/* <div className="text-sm text-red-500 mt-2">
-                            <ArrowUpOutlined className="mr-1" />
-                            影响增加 0.5%
-                        </div> */}
+
           </div>
           {impactCards.map((item, index) => (
             <div key={index} className="p-6 shadow-sm shadow-demo rounded-lg">
@@ -359,11 +288,12 @@ const VenueDetail: React.FC = () => {
                 {item.icon}
               </div>
               <div className="text-2xl  font-bold text-gray-800 ">{item.value}</div>
-              {/* <div className="text-sm text-gray-500 mt-2">{item.description}</div> */}
+
             </div>
           ))}
         </div>
-      </div>
+      </div> */}
+      <BasicData />
 
       {/* 图表区域 */}
       <div className="grid grid-cols-2 gap-4 mb-8">
