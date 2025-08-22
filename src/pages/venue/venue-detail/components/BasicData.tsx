@@ -75,7 +75,7 @@ const BasicData: React.FC = () => {
     },
     {
       title: "理论算力",
-      value: stats?.theoreticalPower + " PH/s",
+      value: stats?.theoreticalPower?.toFixed(2) + " PH/s",
       description: "标准水平",
       icon: <ThunderboltOutlined className="text-gray-400 font-12" />,
     },
@@ -104,7 +104,7 @@ const BasicData: React.FC = () => {
     },
     {
       title: "限电占比",
-      value: stats?.highTemperatureRate.toFixed(2) + " %",
+      value: stats?.limitImpactRate.toFixed(2) + " %",
       description: "正常范围",
       icon: <ThunderboltOutlined className="text-gray-500 font-12" />,
     },
@@ -161,7 +161,7 @@ const BasicData: React.FC = () => {
         }}
       >
         <h3 className="text-xl font-bold mb-6 text-gray-800 pl-2">
-          <AreaChartOutlined className="mr-2 text-primary" />
+          <AreaChartOutlined className={`mr-2 ${getCardStyles(stats?.effectiveRate24h || 0).textColor}`} />
           算力运行状态
         </h3>
         <div className="bg-white rounded-lg grid grid-cols-5 gap-4">
