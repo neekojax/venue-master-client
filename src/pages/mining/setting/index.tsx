@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { FaAdn, FaFish } from "react-icons/fa6";
-// import { Link } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { DeleteOutlined, ExportOutlined, FormOutlined, SearchOutlined } from "@ant-design/icons";
 import {
   Button,
@@ -245,8 +245,8 @@ export default function MiningSettingPage() {
         key: "pool_name",
         width: 200,
         // render: (text: any) => <span style={{ color: "#333" }}>{text}</span>,
-        // render: (text: any, record: { venue_id?: any, pool_id?: any }) => (
-        render: (text: any) => (
+        render: (text: any, record: { venue_id?: any; pool_id?: any }) => (
+          // render: (text: any) => (
           <Tooltip
             title={text}
             placement="top"
@@ -262,11 +262,14 @@ export default function MiningSettingPage() {
                 whiteSpace: "nowrap",
               }}
             >
-              {/* <Link
+              <Link
                 to={`/mining/detail/${record.venue_id}/${record.pool_id}`}
                 className="text-blue-500 hover:underline"
-              > {text}</Link> */}
-              {text}
+              >
+                {" "}
+                {text}
+              </Link>
+              {/* {text} */}
             </div>
           </Tooltip>
         ),
@@ -424,7 +427,7 @@ export default function MiningSettingPage() {
       pool_name: data.pool_name,
       pool_type: poolType,
       country: data.country,
-      hosted_machine: data.hosted_machine,
+      hosted_machine: Number(data.hosted_machine),
       status: data.status,
       pool_category: data.pool_category,
       theoretical_hashrate: String(data.theoretical_hashrate),
