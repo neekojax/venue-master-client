@@ -32,7 +32,50 @@ export const updateEventLog = async (data: EventLogParam) => {
 export const deleteEventLog = async (id: number) => {
   return await fetchDelete(`/event/deleteEvent/${id}`);
 };
+// 获取场地详情
+export const getVenueBasicInfo = async (venueID: number) => {
+  return await fetchGet(`/venue/getVenueBasicInfo/${venueID}`);
+};
+
 // 获取资产汇总数据
 export const getVenueDailyStat = async (venueID: number, data: string) => {
   return await fetchGet(`/venue/getVenueDailyStat/${venueID}/${data}`);
 };
+
+// 获取近10天经营日报数据
+export const getLast10DaysDailyStat = async (venueID: number) => {
+  return await fetchGet(`/venue/getLast10DaysDailyStat/${venueID}`);
+};
+
+// 获取近10天事件日志数据
+export const getLast10Event = async (venueID: number) => {
+  return await fetchGet(`/venue/getLast10Event/${venueID}`);
+};
+
+// 获取近30天有效率影响曲线图///venue/getLast30DaysEffectiveRate
+export const getLast30DaysEffectiveRate = async (venueID: number) => {
+  return await fetchGet(`/venue/getLast30DaysEffectiveRate/${venueID}`);
+};
+
+// 获取近30天故障影响曲线图
+export const getLast30DaysFailureRate = async (venueID: number) => {
+  return await fetchGet(`/venue/getLast30DaysFailureRate/${venueID}`);
+};
+
+// 获取近30天高温影响曲线图
+export const getLast30DaysHighTemperatureImpactRate = async (venueID: number) => {
+  return await fetchGet(`/venue/getLast30DaysHighTemperatureImpactRate/${venueID}`);
+};
+
+// 获取近30天限电影响曲线图
+export const getLast30DaysLimitImpactRate = async (venueID: number) => {
+  return await fetchGet(`/venue/getLast30DaysLimitImpactRate/${venueID}`);
+};
+
+///venue/getLast10DaysDailystat/:venueID"//
+///venue/getLast10Event/:venueID
+//
+//venue/getLast30DaysLimitImpactRate/:venueID
+///venue/getLast30DaysFailureRate/:venueID"
+///venue/getLast30DaysHighTemperatureImpactRate/:venueID"
+///venue/getLast30DaysLimitImpactRate/:venueID"
