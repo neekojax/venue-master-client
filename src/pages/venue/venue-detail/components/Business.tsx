@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { useParams } from "react-router-dom";
-import { Button, Spin, Table } from "antd";
+import { Button, Spin, Table, Tag } from "antd";
 import type { ColumnsType } from "antd/es/table";
 import { getTimeDifference } from "@/utils/date";
 
@@ -145,7 +145,24 @@ const BusinessReport: React.FC = () => {
       width: 280,
       render: (_text, record) => `${record.start_time} - ${record.end_time}`,
     },
-    { title: "事件类型", dataIndex: "log_type", key: "log_type" },
+    {
+      title: "事件类型",
+      dataIndex: "log_type",
+      key: "log_type",
+      render: (text) => {
+        const colors = {
+          限电: "red",
+          设备故障: "orange",
+          电力: "cyan", // 为电力指定颜色
+          高温: "blue", // 为高温指定颜色
+          极端天气: "magenta", // 为极端天气指定颜色
+          日常维护: "green", // 为日常维护指定颜色
+          网络: "geekblue", // 为网络指定颜色
+          其他: "default",
+        };
+        return <Tag color={colors[text as keyof typeof colors]}>{text}</Tag>;
+      },
+    },
     { title: "影响台数", dataIndex: "impact_count", key: "impact_count" },
     { title: "影响算力", dataIndex: "impact_power_loss", key: "impact_power_loss" },
     { title: "事件原因", dataIndex: "event_reason", key: "event_reason" },
@@ -156,7 +173,7 @@ const BusinessReport: React.FC = () => {
     setLoading(true);
     try {
       const response = await getLast10Event(Number(venueId));
-      console.log(response);
+      // console.log(response);
       setAbnormalData(response.data);
       setLoading(false);
 
@@ -200,11 +217,11 @@ const BusinessReport: React.FC = () => {
         </div>
 
         {showDaily ? (
-          <Link to="/report/daily">
+          <Link to={`/report/daily-list/${venueId}`}>
             <Button type="primary">查看更多日报</Button>
           </Link>
         ) : (
-          <Link to="/venue/event-log">
+          <Link to={`/venue/event-log-list/${venueId}`}>
             <Button type="primary">查看更多事件</Button>
           </Link>
         )}

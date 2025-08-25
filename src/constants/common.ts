@@ -26,6 +26,7 @@ export const ROUTE_PATHS = {
   miningSiteData: "/venue/running-kpi",
   miningSiteDetail: (venueId: string | number) => `/venue/detail/${venueId}`, // 场地详情，需传参数
   eventLog: "/venue/event-log",
+  eventLogList: (venueId: string | number) => `/venue/event-loglist/${venueId}`, // 场地详情，需传参数
   venueSetting: "/venue/setting",
 
   hashDetail: "/hash-detail",
@@ -33,6 +34,7 @@ export const ROUTE_PATHS = {
 
   report: "/report",
   dailyReport: "/report/daily",
+  dailyReportList: (venueId: string | number) => `/report/daily-list/${venueId}`, // 场地详情，需传参数
   subAccountDailyReport: "/report/daily/sub-account", // 子账户日报表
 
   poolProfitHistory: (poolName: any) => `/pool-profit/history/${encodeURIComponent(poolName)}`, // 定义为函数以接收 poolName

@@ -110,7 +110,7 @@ const BasicData: React.FC = () => {
     },
     {
       title: "其他占比",
-      value: qitaRate + " %",
+      value: (Number(qitaRate) < 0 ? 0 : qitaRate) + " %",
       description: "正常范围",
       icon: <EllipsisOutlined className="text-gray-500 font-12" />,
     },

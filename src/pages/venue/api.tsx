@@ -72,6 +72,11 @@ export const getLast30DaysLimitImpactRate = async (venueID: number) => {
   return await fetchGet(`/venue/getLast30DaysLimitImpactRate/${venueID}`);
 };
 
+///venue/getAllVEvent
+export const getAllVEvent = async (venueID: number) => {
+  return await fetchGet(`/venue/getAllVEvent/${venueID}`);
+};
+
 ///venue/getLast10DaysDailystat/:venueID"//
 ///venue/getLast10Event/:venueID
 //

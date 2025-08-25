@@ -35,5 +35,24 @@ export const reportRoute: RouteObject = {
         crumb: () => <Link to={ROUTE_PATHS.subAccountDailyReport}>账户日报</Link>,
       },
     },
+    {
+      path: "/report/daily-list/:venueId", // 直接使用动态参数
+      lazy: async () => ({
+        Component: (await import("@/pages/report/daily-report-list")).default,
+      }),
+      HydrateFallback: ProgressBar,
+      // handle: {
+      //   title: "场地日报",
+      //   crumb: (params: { venueId?: string }) => (
+      //     <Link to={params?.venueId ? ROUTE_PATHS.dailyReportList(params.venueId) : "/venue/daily-list"}>
+      //       场地详情
+      //     </Link>
+      //   ),
+      // },
+      // handle: {
+      //   title: "场地日报",
+      //   crumb: () => <Link to={ROUTE_PATHS.dailyReportList}>场地日报</Link>,
+      // },
+    },
   ],
 };

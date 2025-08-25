@@ -13,3 +13,8 @@ export const fetchSubAccountDailyReport = async (poolType: string, date: string)
 export const updateReport = async (poolType: string, date: string | string[], data: ReportUpdateParam) => {
   return await fetchPost(`/report/daily/update/${poolType}/${date}`, data);
 };
+
+// /venue/getAllDailyStat/:venueID"
+export const fetchAllDailyStat = async (venueID: number) => {
+  return await fetchGet(`/venue/getAllDailyStat/${venueID}`);
+};

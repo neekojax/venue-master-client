@@ -35,6 +35,7 @@ export const venueRoute: RouteObject = {
         crumb: () => <Link to={ROUTE_PATHS.eventLog}>事件日志</Link>,
       },
     },
+
     {
       path: ROUTE_PATHS.venueSetting,
       lazy: async () => ({
@@ -57,6 +58,21 @@ export const venueRoute: RouteObject = {
         crumb: (params: { venueId?: string }) => (
           <Link to={params?.venueId ? ROUTE_PATHS.miningSiteDetail(params.venueId) : "/venue/detail"}>
             场地详情
+          </Link>
+        ),
+      },
+    },
+    {
+      path: "/venue/event-log-list/:venueId", // 直接使用动态参数
+      lazy: async () => ({
+        Component: (await import("@/pages/venue/event-log-list")).default,
+      }),
+      HydrateFallback: ProgressBar,
+      handle: {
+        title: "场地事件日志",
+        crumb: (params: { venueId?: string }) => (
+          <Link to={params?.venueId ? ROUTE_PATHS.eventLogList(params.venueId) : "/venue/event-log-list"}>
+            场地事件日志
           </Link>
         ),
       },
