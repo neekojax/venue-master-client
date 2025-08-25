@@ -498,7 +498,7 @@ export default function MiningHashRatePage() {
       </Row>
 
       {isLoadingPools ? (
-        <Spin style={{ marginTop: 20 }} />
+        <Spin style={{ width: "100%", textAlign: "center", marginTop: "50%" }} />
       ) : (
         <EditTable
           tableData={filteredData}

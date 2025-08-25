@@ -540,6 +540,7 @@ const App: React.FC = () => {
           dataSource={filteredData} // 使用过滤后的数据
           scroll={{ x: 1300 }}
           rowKey="id"
+          loading={isLoading}
           // onChange={handleTableChange}
           onChange={(_: any, filters: any) => {
             // console.log("Table >>选中的事件类型：", filters.log_type); // 是数组

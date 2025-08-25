@@ -35,6 +35,7 @@ const App: React.FC = () => {
   const params = useParams<{ venueId: string; venueName: string }>();
   const venueId = params.venueId!;
   const venueName = params.venueName!;
+  const [loading, setLoading] = useState(false); // 👈 加载状态
 
   const tableRef = useRef<HTMLDivElement>(null);
   const [isTableFixed, setIsTableFixed] = useState(false);
@@ -169,6 +170,7 @@ const App: React.FC = () => {
   // 拉取数据
   useEffect(() => {
     const fetchReportData = async () => {
+      setLoading(true); // 👈 开始加载
       try {
         const reportData = await fetchAllDailyStat(Number(venueId));
         if (reportData && reportData.data) {
@@ -193,6 +195,8 @@ const App: React.FC = () => {
         }
       } catch (error) {
         console.error("获取日报数据失败:", error);
+      } finally {
+        setLoading(false); // 👈 请求结束，关闭加载
       }
     };
     fetchReportData();
@@ -256,6 +260,7 @@ const App: React.FC = () => {
         </div>
         <div className="mx-auto">
           <Table
+            loading={loading} // 👈 表格自带 loading 效果
             columns={columns}
             dataSource={filteredData}
             scroll={{ x: 1200 }}

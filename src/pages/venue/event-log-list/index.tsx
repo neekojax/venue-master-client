@@ -472,6 +472,7 @@ const App: React.FC = () => {
           </div>
         </div>
         <Table
+          loading={isLoading}
           // rowSelection={rowSelection}
           columns={columns}
           dataSource={filteredData} // 使用过滤后的数据
