@@ -58,7 +58,7 @@ const WaveLineCard: React.FC = () => {
 
     const option = {
       title: { text: "", left: "center", top: 6, textStyle: { fontSize: 14, fontWeight: 600 } },
-      grid: { left: 12, right: 12, top: 40, bottom: 16, containLabel: true },
+      grid: { left: 12, right: 12, top: 10, bottom: 16, containLabel: true },
       tooltip: { trigger: "axis", axisPointer: { type: "line" } },
       xAxis: {
         type: "category",

@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { useParams } from "react-router-dom";
 import {
   DeleteOutlined,
   DownloadOutlined,
@@ -29,10 +30,10 @@ import { getTimeDifference } from "@/utils/date";
 import UploadExcel from "@/pages/venue/components/UploadExcel";
 import {
   useDeleteUpdate,
-  useEventList,
+  useEventLogList,
   useEventNew,
   useEventUpdate,
-  useVenueList,
+  // useVenueList,
 } from "@/pages/venue/hook/hook.ts";
 import { EventLogParam } from "@/pages/venue/type.tsx"; // 根据实际路径调整
 
@@ -60,14 +61,17 @@ const App: React.FC = () => {
   const [selectedRowKeys] = useState<React.Key[]>([]);
   const [form] = Form.useForm();
   const { poolType } = useSettingsStore(useSelector(["poolType"]));
-  const { data, isLoading } = useEventList(poolType);
-  const { data: venueList } = useVenueList(poolType);
+  const params = useParams<{ venueId: string }>();
+  const venueId = params.venueId!;
+
+  const { data, isLoading } = useEventLogList(Number(venueId));
+  // const { data: venueList } = useVenueList(poolType);
   const newMutation = useEventNew();
   const updateMutation = useEventUpdate();
   const deleteMutation = useDeleteUpdate();
   const [selectedDurationType, setSelectedDurationType] = useState<string>("");
   // 新增筛选状态
-  const [selectedLocation, setSelectedLocation] = useState<string[]>([]);
+  // const [selectedLocation, setSelectedLocation] = useState<string[]>([]);
   const [selectedEventType, setSelectedEventType] = useState<string[]>([]);
   const [searchText, setSearchText] = useState("");
   const [dateRange, setDateRange] = useState<[dayjs.Dayjs | null, dayjs.Dayjs | null]>([null, null]);
@@ -92,7 +96,7 @@ const App: React.FC = () => {
 
   // 过滤后的数据
   const filteredData = logData.filter((log) => {
-    const matchesLocation = selectedLocation.length ? selectedLocation.includes(log.venue_name) : true;
+    // const matchesLocation = selectedLocation.length ? selectedLocation.includes(log.venue_name) : true;
     const matchesEventType = selectedEventType.length ? selectedEventType.includes(log.log_type) : true;
     const matchesSearchText =
       log.event_reason.includes(searchText) || log.resolution_measures.includes(searchText);
@@ -107,7 +111,7 @@ const App: React.FC = () => {
     const matchesDuration =
       selectedDurationType === "valid" ? hasDuration : selectedDurationType === "empty" ? !hasDuration : true;
 
-    return matchesLocation && matchesEventType && matchesSearchText && matchesDateRange && matchesDuration;
+    return matchesEventType && matchesSearchText && matchesDateRange && matchesDuration;
   });
 
   const columns: ColumnsType<EventLog> = [
@@ -124,41 +128,10 @@ const App: React.FC = () => {
       },
     },
     {
-      title: "场地",
-      dataIndex: "venue_name",
-      // width: 120,
-      // filters: venueList?.data?.map((venue) => ({ text: venue.venue_name, value: venue.venue_name })),
-      // onFilter: (value, record) => record.venue_name === value,
-      width: 200,
-      render: (text: string) => {
-        const isSpecialVenue = text === "Arct-HF01-J XP-AR-US"; // 判断是否为特殊场地
-        return (
-          <Tooltip
-            title={text}
-            placement="top"
-            overlayInnerStyle={{ color: "white" }}
-            style={{ color: "white" }}
-          >
-            <div
-              style={{
-                width: "100%",
-                overflow: "hidden",
-                color: isSpecialVenue ? "red" : "#333", // 特殊场地字体颜色为红色
-                textOverflow: "ellipsis",
-                whiteSpace: "nowrap",
-                fontWeight: isSpecialVenue ? "bold" : "normal", // 加粗特殊场地
-              }}
-            >
-              {text}
-              {isSpecialVenue && (
-                <Tag color="red" style={{ marginLeft: 2 }}>
-                  补充
-                </Tag>
-              )}
-            </div>
-          </Tooltip>
-        );
-      },
+      title: "日期",
+      dataIndex: "log_date",
+      width: "145px",
+      rowScope: "row",
     },
     {
       title: "影响时长",
@@ -322,6 +295,9 @@ const App: React.FC = () => {
 
   const handleAdd = () => {
     form.resetFields();
+    form.setFieldsValue({
+      venue_id: venueId,
+    });
     setIsModalVisible(true);
   };
   const handleEdit = (record: EventLog) => {
@@ -419,53 +395,6 @@ const App: React.FC = () => {
                 value={dateRange}
                 onChange={() => setDateRange} // 更新日期范围
               />
-              <Select
-                mode="multiple"
-                maxTagCount="responsive"
-                maxTagTextLength={4} // 可选：限制每个标签显示文字长度
-                size="middle"
-                placeholder="选择场地"
-                value={selectedLocation}
-                onChange={setSelectedLocation}
-                style={{ width: 150 }}
-                // className="!rounded-lg"
-              >
-                {venueList?.data?.map((venue: any) => (
-                  <Option key={venue.id} value={venue.venue_name}>
-                    {venue.venue_name}
-                  </Option>
-                ))}
-              </Select>
-              {/* <Select
-                mode="multiple"
-                maxTagCount="responsive"
-                maxTagTextLength={4} // 可选：限制每个标签显示文字长度
-                placeholder="选择事件类型"
-                value={selectedEventType}
-                onChange={setSelectedEventType}
-                style={{ width: 150 }}
-                // maxTagTextLength={4} // 可选：限制每个标签显示文字长度
-                size="middle"
-              // className="!rounded-lg"
-              >
-                {["电力", "高温", "极端天气", "日常维护", "设备故障", "网络", "限电"].map((type) => (
-                  <Option key={type} value={type}>
-                    {type}
-                  </Option>
-                ))}
-              </Select> */}
-
-              {/* <Select
-                placeholder="选择影响时长类型"
-                value={selectedDurationType}
-                onChange={setSelectedDurationType}
-                style={{ width: 100 }}
-                size="middle"
-                allowClear
-              >
-                <Option value="valid">已结束事件</Option>
-                <Option value="empty">未结束事件</Option>
-              </Select> */}
             </div>
           </div>
 
@@ -558,14 +487,8 @@ const App: React.FC = () => {
             <Form.Item name="id" style={{ display: "none" }}>
               <Input type="hidden" />
             </Form.Item>
-            <Form.Item name="venue_id" label="场地" rules={[{ required: true, message: "请选择场地" }]}>
-              <Select placeholder="请选择场地" allowClear style={{ width: "100%", fontSize: "12px" }}>
-                {venueList?.data?.map((venue: any) => (
-                  <Option key={venue.id} value={venue.id} style={{ fontSize: "12px" }}>
-                    {venue.venue_name}
-                  </Option>
-                ))}
-              </Select>
+            <Form.Item name="venue_id" label="场地编号" rules={[{ required: true, message: "请选择场地" }]}>
+              <Input value={venueId} disabled></Input>
             </Form.Item>
             <Form.Item name="log_date" label="日期" rules={[{ required: true, message: "请选择日期" }]}>
               <DatePicker className="w-full" />

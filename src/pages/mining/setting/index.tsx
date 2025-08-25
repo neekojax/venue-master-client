@@ -209,7 +209,7 @@ export default function MiningSettingPage() {
         key: "venue_name",
         width: 200,
         // render: (text: any) => <span style={{ color: "#333" }}>{text}</span>,
-        render: (text: string) => {
+        render: (text: string, record: { venue_id?: any }) => {
           const isSpecialVenue = text === "Arct-HF01-J XP-AR-US"; // 判断是否为特殊场地
           return (
             <Tooltip
@@ -228,7 +228,10 @@ export default function MiningSettingPage() {
                   fontWeight: isSpecialVenue ? "bold" : "normal", // 加粗特殊场地
                 }}
               >
-                {text}
+                {/* {text} */}
+                <Link to={`/venue/detail/${record.venue_id}`} className="text-blue-500 hover:underline">
+                  {text}
+                </Link>
                 {isSpecialVenue && (
                   <Tag color="red" style={{ marginLeft: 2 }}>
                     补充

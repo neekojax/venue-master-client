@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
 import { DeleteOutlined, EditOutlined, PlusOutlined, SearchOutlined } from "@ant-design/icons";
 import { Button, Form, Input, message, Modal, Select, Space, Table } from "antd";
 import useAuthRedirect from "@/hooks/useAuthRedirect.ts";
@@ -197,6 +198,13 @@ const VenueManagement: React.FC = () => {
     {
       title: "场地名称",
       dataIndex: "venue_name",
+      render: (text: string, record: { id?: any }) => {
+        return (
+          <Link to={`/venue/detail/${record.id}`} className="text-blue-500 hover:underline">
+            {text}
+          </Link>
+        );
+      },
       sorter: (a: Venue, b: Venue) => a.venue_name.localeCompare(b.venue_name),
     },
     {
