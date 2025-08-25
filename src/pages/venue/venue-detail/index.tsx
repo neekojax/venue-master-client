@@ -122,7 +122,7 @@ const VenueDetail: React.FC = () => {
       </div>
 
       {/* 数据表格 */}
-      <BusinessReport></BusinessReport>
+      <BusinessReport venueName={basicInfo?.venue_name || ""}></BusinessReport>
     </div>
   );
 };

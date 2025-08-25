@@ -59,7 +59,17 @@ const WaveLineCard: React.FC = () => {
     const option = {
       title: { text: "", left: "center", top: 6, textStyle: { fontSize: 14, fontWeight: 600 } },
       grid: { left: 12, right: 12, top: 10, bottom: 16, containLabel: true },
-      tooltip: { trigger: "axis", axisPointer: { type: "line" } },
+      tooltip: {
+        trigger: "axis",
+        axisPointer: { type: "line" },
+        formatter: (params: any) => {
+          // params 是数组，因为 trigger: "axis"
+
+          return params
+            .map((item: any) => `${item.name || ""}<br>${item.marker}故障率：${item.value.toFixed(2)}%`)
+            .join("<br/>");
+        },
+      },
       xAxis: {
         type: "category",
         boundaryGap: false,

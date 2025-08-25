@@ -22,7 +22,7 @@ import {
   Tooltip,
 } from "antd";
 import type { ColumnsType } from "antd/es/table";
-import dayjs from "dayjs";
+import dayjs, { Dayjs } from "dayjs";
 import isBetween from "dayjs/plugin/isBetween"; // 引入 isBetween 插件
 import { useSelector, useSettingsStore } from "@/stores"; // 根据实际路径调整
 import { getTimeDifference } from "@/utils/date";
@@ -61,8 +61,9 @@ const App: React.FC = () => {
   const [selectedRowKeys] = useState<React.Key[]>([]);
   const [form] = Form.useForm();
   const { poolType } = useSettingsStore(useSelector(["poolType"]));
-  const params = useParams<{ venueId: string }>();
+  const params = useParams<{ venueId: string; venueName: string }>();
   const venueId = params.venueId!;
+  const venueName = params.venueName!;
 
   const { data, isLoading } = useEventLogList(Number(venueId));
   // const { data: venueList } = useVenueList(poolType);
@@ -74,7 +75,8 @@ const App: React.FC = () => {
   // const [selectedLocation, setSelectedLocation] = useState<string[]>([]);
   const [selectedEventType, setSelectedEventType] = useState<string[]>([]);
   const [searchText, setSearchText] = useState("");
-  const [dateRange, setDateRange] = useState<[dayjs.Dayjs | null, dayjs.Dayjs | null]>([null, null]);
+  const [dateRange, setDateRange] = useState<[Dayjs, Dayjs] | null>(null);
+  // const [dateRange, setDateRange] = useState<[dayjs.Dayjs | null, dayjs.Dayjs | null]>([null, null]);
 
   // 数据转换
   const logData: EventLog[] =
@@ -107,6 +109,7 @@ const App: React.FC = () => {
         ? dayjs(log.log_date).isBetween(dateRange[0], dateRange[1], null, "[]")
         : true;
 
+    // console.log(log.start_time, log.end_time)
     const hasDuration = log.start_time && log.end_time;
     const matchesDuration =
       selectedDurationType === "valid" ? hasDuration : selectedDurationType === "empty" ? !hasDuration : true;
@@ -290,8 +293,9 @@ const App: React.FC = () => {
     if (isLoading) {
       // message.loading("加载中...");
     }
+    // filteredData(log)
     // console.log(selectedEventType);
-  }, [isLoading, selectedEventType]);
+  }, [isLoading, selectedEventType, dateRange]);
 
   const handleAdd = () => {
     form.resetFields();
@@ -365,8 +369,22 @@ const App: React.FC = () => {
     });
   };
 
+  const onDateChange = (dates: null | [Dayjs, Dayjs], dateStrings: [string, string]) => {
+    console.log("原始 Dayjs 对象:", dates); // [Dayjs, Dayjs]
+    console.log("格式化字符串:", dateStrings); // ["2025-08-01", "2025-08-24"]
+
+    setDateRange(dates);
+  };
+
   return (
     <div className="">
+      {/* Header */}
+      <header className="mb-0">
+        <div className="flex items-center gap-4 mb-3">
+          <h1 className="text-3xl font-bold text-gray-900">{venueName}</h1>
+        </div>
+      </header>
+
       <div className="mx-auto bg-white rounded-lg shadow-sm">
         <div className="p-6 border-b border-gray-200">
           <div className="grid grid-cols-[auto_1fr] gap-6 mb-6 filter-form">
@@ -393,7 +411,9 @@ const App: React.FC = () => {
                 className="!rounded-lg"
                 placeholder={["开始日期", "结束日期"]}
                 value={dateRange}
-                onChange={() => setDateRange} // 更新日期范围
+                format="YYYY-MM-DD"
+                onChange={() => onDateChange}
+                // onChange={() => setDateRange} // 更新日期范围
               />
             </div>
           </div>

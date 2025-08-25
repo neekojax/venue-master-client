@@ -1,15 +1,20 @@
 import React, { useEffect, useRef, useState } from "react";
 import { useParams } from "react-router-dom";
 import { DownloadOutlined } from "@ant-design/icons";
-import { Button, Table } from "antd";
+import { Button, DatePicker, Table } from "antd";
+import type { RangePickerProps } from "antd/es/date-picker";
 import type { ColumnsType } from "antd/es/table";
-// import type { RangePickerProps } from "antd/es/date-picker";
+import dayjs from "dayjs";
+import isSameOrAfter from "dayjs/plugin/isSameOrAfter";
+import isSameOrBefore from "dayjs/plugin/isSameOrBefore";
 import * as XLSX from "xlsx";
 
-// import dayjs from "dayjs";
 import { fetchAllDailyStat } from "@/pages/report/api.tsx";
+// 必须扩展 dayjs，否则会报 “不存在属性”
+dayjs.extend(isSameOrAfter);
+dayjs.extend(isSameOrBefore);
 
-// const { RangePicker } = DatePicker;
+const { RangePicker } = DatePicker;
 
 interface DataType {
   date: string;
@@ -27,13 +32,14 @@ interface DataType {
 }
 
 const App: React.FC = () => {
-  const params = useParams<{ venueId: string }>();
+  const params = useParams<{ venueId: string; venueName: string }>();
   const venueId = params.venueId!;
+  const venueName = params.venueName!;
 
   const tableRef = useRef<HTMLDivElement>(null);
   const [isTableFixed, setIsTableFixed] = useState(false);
 
-  // const [data, setData] = useState<DataType[]>([]);
+  const [data, setData] = useState<DataType[]>([]);
 
   const [filteredData, setFilteredData] = useState<DataType[]>([]);
   const [pageSize, setPageSize] = useState(20);
@@ -180,7 +186,7 @@ const App: React.FC = () => {
             limitImpactRate: venue.limitImpactRate || 0,
             highTemperatureRate: venue.highTemperatureRate || 0,
           }));
-          // setData(formattedData);
+          setData(formattedData);
           setFilteredData(formattedData);
         } else {
           console.error("API 返回无效:", reportData);
@@ -194,22 +200,24 @@ const App: React.FC = () => {
 
   // 日期筛选
   // 先定义日期范围 state
-  // const [dateRange, setDateRange] = useState<[dayjs.Dayjs, dayjs.Dayjs] | null>(null);
-  // const onDateChange: RangePickerProps["onChange"] = (dates) => {
-  //   setDateRange(dates as [dayjs.Dayjs, dayjs.Dayjs] | null);
-  //   console.log(dateRange, dates)
-  //   if (dates) {
-  //     const [start, end] = dates;
-  //     console.log(start, end)
-  //     const filtered = data.filter((item) => {
-  //       const d = dayjs(item.date);
-  //       // return d.isSameOrAfter(start, "day") && d.isSameOrBefore(end, "day");
-  //     });
-  //     setFilteredData(filtered);
-  //   } else {
-  //     setFilteredData(data);
-  //   }
-  // };
+  const [dateRange, setDateRange] = useState<[dayjs.Dayjs, dayjs.Dayjs] | null>(null);
+
+  const onDateChange: RangePickerProps["onChange"] = (dates) => {
+    setDateRange(dates as [dayjs.Dayjs, dayjs.Dayjs] | null);
+    console.log(dateRange, dates);
+    if (dates) {
+      const [start, end] = dates;
+      // console.log(start, end)
+      const filtered = data.filter((item) => {
+        const d = dayjs(item.date);
+        // console.log(d.isValid())
+        return d.isValid() && d.isSameOrAfter(start, "day") && d.isSameOrBefore(end, "day");
+      });
+      setFilteredData(filtered);
+    } else {
+      setFilteredData(data);
+    }
+  };
 
   // 导出 CSV
   const exportToCSV = () => {
@@ -222,24 +230,31 @@ const App: React.FC = () => {
 
   return (
     <div className="min-h-screen">
-      <div className="mx-auto">
-        <div
-          ref={tableRef}
-          className={`mb-6 rounded-lg bg-white p-6 shadow-sm transition-all duration-300 ${
-            isTableFixed ? "sticky top-0 z-10" : ""
-          }`}
-        >
-          <div className="mb-6 flex items-center justify-between gap-4">
-            {/* <RangePicker onChange={onDateChange} /> */}
-            <Button
-              type="primary"
-              icon={<DownloadOutlined />}
-              onClick={exportToCSV}
-              className="!rounded-button"
-            >
-              导出报表
-            </Button>
-          </div>
+      {/* Header */}
+      <header className="mb-0">
+        <div className="flex items-center gap-4 mb-3">
+          <h1 className="text-3xl font-bold text-gray-900">{venueName}</h1>
+        </div>
+      </header>
+
+      <div
+        ref={tableRef}
+        className={`mb-6 rounded-lg bg-white p-6 shadow-sm transition-all duration-300 ${
+          isTableFixed ? "sticky top-0 z-10" : ""
+        }`}
+      >
+        <div className="mb-6 flex items-center justify-between gap-4">
+          <RangePicker onChange={onDateChange} />
+          <Button
+            type="primary"
+            icon={<DownloadOutlined />}
+            onClick={exportToCSV}
+            className="!rounded-button"
+          >
+            导出报表
+          </Button>
+        </div>
+        <div className="mx-auto">
           <Table
             columns={columns}
             dataSource={filteredData}

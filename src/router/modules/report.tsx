@@ -36,7 +36,7 @@ export const reportRoute: RouteObject = {
       },
     },
     {
-      path: "/report/daily-list/:venueId", // 直接使用动态参数
+      path: "/report/daily-list/:venueId/:venueName", // 直接使用动态参数
       lazy: async () => ({
         Component: (await import("@/pages/report/daily-report-list")).default,
       }),

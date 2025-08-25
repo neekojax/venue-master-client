@@ -23,8 +23,11 @@ interface AbnormalRecord {
   end_time: string;
   log_type: string;
 }
+interface BusinessReportProps {
+  venueName: string;
+}
 
-const BusinessReport: React.FC = () => {
+const BusinessReport: React.FC<BusinessReportProps> = ({ venueName }) => {
   const [showDaily, setShowDaily] = useState(true);
   const [dailyData, setDailyData] = useState<DailyRecord[]>([]);
   const [abnormalData, setAbnormalData] = useState<AbnormalRecord[]>([]);
@@ -127,7 +130,7 @@ const BusinessReport: React.FC = () => {
     {
       title: "影响时长",
       dataIndex: "log_date",
-      width: 120,
+      // width: 120,
       render: (text: string, record: any) => {
         if (text === "---valid---") {
           console.log(text);
@@ -142,7 +145,7 @@ const BusinessReport: React.FC = () => {
     {
       title: "时间范围",
       dataIndex: "start_time",
-      width: 280,
+      // width: 280,
       render: (_text, record) => `${record.start_time} - ${record.end_time}`,
     },
     {
@@ -217,11 +220,11 @@ const BusinessReport: React.FC = () => {
         </div>
 
         {showDaily ? (
-          <Link to={`/report/daily-list/${venueId}`}>
+          <Link to={`/report/daily-list/${venueId}/${venueName}`}>
             <Button type="primary">查看更多日报</Button>
           </Link>
         ) : (
-          <Link to={`/venue/event-log-list/${venueId}`}>
+          <Link to={`/venue/event-log-list/${venueId}/${venueName}`}>
             <Button type="primary">查看更多事件</Button>
           </Link>
         )}
