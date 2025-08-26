@@ -33,54 +33,46 @@ export const deleteEventLog = async (id: number) => {
   return await fetchDelete(`/event/deleteEvent/${id}`);
 };
 // 获取场地详情
-export const getVenueBasicInfo = async (venueID: number) => {
-  return await fetchGet(`/venue/getVenueBasicInfo/${venueID}`);
+export const getVenueBasicInfo = async (poolType: string, venueID: number) => {
+  return await fetchGet(`/venue/getVenueBasicInfo/${poolType}/${venueID}`);
 };
 
 // 获取资产汇总数据
-export const getVenueDailyStat = async (venueID: number, data: string) => {
-  return await fetchGet(`/venue/getVenueDailyStat/${venueID}/${data}`);
+export const getVenueDailyStat = async (poolType: string, venueID: number, data: string) => {
+  return await fetchGet(`/venue/getVenueDailyStat/${poolType}/${venueID}/${data}`);
 };
 
 // 获取近10天经营日报数据
-export const getLast10DaysDailyStat = async (venueID: number) => {
-  return await fetchGet(`/venue/getLast10DaysDailyStat/${venueID}`);
+export const getLast10DaysDailyStat = async (poolType: string, venueID: number) => {
+  return await fetchGet(`/venue/getLast10DaysDailyStat/${poolType}/${venueID}`);
 };
 
 // 获取近10天事件日志数据
-export const getLast10Event = async (venueID: number) => {
-  return await fetchGet(`/venue/getLast10Event/${venueID}`);
+export const getLast10Event = async (poolType: string, venueID: number) => {
+  return await fetchGet(`/venue/getLast10Event/${poolType}/${venueID}`);
 };
 
 // 获取近30天有效率影响曲线图///venue/getLast30DaysEffectiveRate
-export const getLast30DaysEffectiveRate = async (venueID: number) => {
-  return await fetchGet(`/venue/getLast30DaysEffectiveRate/${venueID}`);
+export const getLast30DaysEffectiveRate = async (poolType: string, venueID: number) => {
+  return await fetchGet(`/venue/getLast30DaysEffectiveRate/${poolType}/${venueID}`);
 };
 
 // 获取近30天故障影响曲线图
-export const getLast30DaysFailureRate = async (venueID: number) => {
-  return await fetchGet(`/venue/getLast30DaysFailureRate/${venueID}`);
+export const getLast30DaysFailureRate = async (poolType: string, venueID: number) => {
+  return await fetchGet(`/venue/getLast30DaysFailureRate/${poolType}/${venueID}`);
 };
 
 // 获取近30天高温影响曲线图
-export const getLast30DaysHighTemperatureImpactRate = async (venueID: number) => {
-  return await fetchGet(`/venue/getLast30DaysHighTemperatureImpactRate/${venueID}`);
+export const getLast30DaysHighTemperatureImpactRate = async (poolType: string, venueID: number) => {
+  return await fetchGet(`/venue/getLast30DaysHighTemperatureImpactRate/${poolType}/${venueID}`);
 };
 
 // 获取近30天限电影响曲线图
-export const getLast30DaysLimitImpactRate = async (venueID: number) => {
-  return await fetchGet(`/venue/getLast30DaysLimitImpactRate/${venueID}`);
+export const getLast30DaysLimitImpactRate = async (poolType: string, venueID: number) => {
+  return await fetchGet(`/venue/getLast30DaysLimitImpactRate/${poolType}/${venueID}`);
 };
 
 ///venue/getAllVEvent
-export const getAllVEvent = async (venueID: number) => {
-  return await fetchGet(`/venue/getAllVEvent/${venueID}`);
+export const getAllVEvent = async (poolType: string, venueID: number) => {
+  return await fetchGet(`/venue/getAllVEvent/${poolType}/${venueID}`);
 };
-
-///venue/getLast10DaysDailystat/:venueID"//
-///venue/getLast10Event/:venueID
-//
-//venue/getLast30DaysLimitImpactRate/:venueID
-///venue/getLast30DaysFailureRate/:venueID"
-///venue/getLast30DaysHighTemperatureImpactRate/:venueID"
-///venue/getLast30DaysLimitImpactRate/:venueID"

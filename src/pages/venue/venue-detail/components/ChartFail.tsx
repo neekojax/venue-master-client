@@ -5,6 +5,7 @@ import { LineChart } from "echarts/charts";
 import { GridComponent, TitleComponent, TooltipComponent } from "echarts/components";
 import * as echarts from "echarts/core";
 import { CanvasRenderer } from "echarts/renderers";
+import { useSelector, useSettingsStore } from "@/stores";
 
 import { getLast30DaysFailureRate } from "@/pages/venue/api.tsx";
 
@@ -22,6 +23,7 @@ interface ApiResponse {
 }
 
 const WaveLineCard: React.FC = () => {
+  const { poolType } = useSettingsStore(useSelector(["poolType"]));
   const domRef = useRef<HTMLDivElement | null>(null);
   const { venueId } = useParams<{ venueId: string }>();
   const chartRef = useRef<echarts.EChartsType | null>(null);
@@ -32,7 +34,7 @@ const WaveLineCard: React.FC = () => {
   // 获取数据
   const fetchData = async () => {
     try {
-      const response: ApiResponse = await getLast30DaysFailureRate(Number(venueId));
+      const response: ApiResponse = await getLast30DaysFailureRate(poolType, Number(venueId));
 
       setDates(response.data.map((item) => item.date).reverse());
       setHashValues(response.data.map((item) => item.dayMachineFailRate).reverse());

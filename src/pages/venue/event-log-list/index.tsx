@@ -65,7 +65,7 @@ const App: React.FC = () => {
   const venueId = params.venueId!;
   const venueName = params.venueName!;
 
-  const { data, isLoading } = useEventLogList(Number(venueId));
+  const { data, isLoading } = useEventLogList(poolType, Number(venueId));
   // const { data: venueList } = useVenueList(poolType);
   const newMutation = useEventNew();
   const updateMutation = useEventUpdate();

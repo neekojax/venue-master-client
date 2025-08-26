@@ -70,10 +70,10 @@ export const useEventList = (poolType: string) => {
 };
 
 // 自定义 Hook: 使用场地列表
-export const useEventLogList = (Eventid: number) => {
+export const useEventLogList = (poolType: string, Eventid: number) => {
   return useQuery({
     queryKey: ["event-log-list", Eventid], // 添加 poolType 到 queryKey
-    queryFn: () => getAllVEvent(Number(Eventid)), // 传递 poolType 参数
+    queryFn: () => getAllVEvent(poolType, Number(Eventid)), // 传递 poolType 参数
   });
 };
 

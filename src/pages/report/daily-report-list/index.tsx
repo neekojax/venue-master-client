@@ -8,6 +8,7 @@ import dayjs from "dayjs";
 import isSameOrAfter from "dayjs/plugin/isSameOrAfter";
 import isSameOrBefore from "dayjs/plugin/isSameOrBefore";
 import * as XLSX from "xlsx";
+import { useSelector, useSettingsStore } from "@/stores";
 
 import { fetchAllDailyStat } from "@/pages/report/api.tsx";
 // 必须扩展 dayjs，否则会报 “不存在属性”
@@ -36,6 +37,7 @@ const App: React.FC = () => {
   const venueId = params.venueId!;
   const venueName = params.venueName!;
   const [loading, setLoading] = useState(false); // 👈 加载状态
+  const { poolType } = useSettingsStore(useSelector(["poolType"]));
 
   const tableRef = useRef<HTMLDivElement>(null);
   const [isTableFixed, setIsTableFixed] = useState(false);
@@ -172,7 +174,7 @@ const App: React.FC = () => {
     const fetchReportData = async () => {
       setLoading(true); // 👈 开始加载
       try {
-        const reportData = await fetchAllDailyStat(Number(venueId));
+        const reportData = await fetchAllDailyStat(poolType, Number(venueId));
         if (reportData && reportData.data) {
           const formattedData: DataType[] = reportData.data.map((venue: any) => ({
             date: venue.date || "",

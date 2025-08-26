@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { useParams } from "react-router-dom";
 import { Button, Spin, Table, Tag } from "antd";
 import type { ColumnsType } from "antd/es/table";
+import { useSelector, useSettingsStore } from "@/stores";
 import { getTimeDifference } from "@/utils/date";
 
 import { getLast10DaysDailyStat, getLast10Event } from "@/pages/venue/api.tsx";
@@ -28,6 +29,7 @@ interface BusinessReportProps {
 }
 
 const BusinessReport: React.FC<BusinessReportProps> = ({ venueName }) => {
+  const { poolType } = useSettingsStore(useSelector(["poolType"]));
   const [showDaily, setShowDaily] = useState(true);
   const [dailyData, setDailyData] = useState<DailyRecord[]>([]);
   const [abnormalData, setAbnormalData] = useState<AbnormalRecord[]>([]);
@@ -175,7 +177,7 @@ const BusinessReport: React.FC<BusinessReportProps> = ({ venueName }) => {
   const fetch10EventData = async () => {
     setLoading(true);
     try {
-      const response = await getLast10Event(Number(venueId));
+      const response = await getLast10Event(poolType, Number(venueId));
       // console.log(response);
       setAbnormalData(response.data);
       setLoading(false);
@@ -191,7 +193,7 @@ const BusinessReport: React.FC<BusinessReportProps> = ({ venueName }) => {
   // 获取数据
   const fetch10DailyData = async () => {
     try {
-      const response = await getLast10DaysDailyStat(Number(venueId));
+      const response = await getLast10DaysDailyStat(poolType, Number(venueId));
       // console.log(response)
       setDailyData(response.data);
 

@@ -11,6 +11,7 @@ import {
   ThunderboltOutlined,
   ToolOutlined,
 } from "@ant-design/icons";
+import { useSelector, useSettingsStore } from "@/stores";
 
 import { getVenueDailyStat } from "@/pages/venue/api.tsx";
 
@@ -29,6 +30,7 @@ interface VenueStats {
 }
 
 const BasicData: React.FC = () => {
+  const { poolType } = useSettingsStore(useSelector(["poolType"]));
   const { venueId } = useParams<{ venueId: string }>();
   const [stats, setStats] = useState<VenueStats | null>(null);
   const [qitaRate, setQitaRate] = useState<string>("");
@@ -40,7 +42,7 @@ const BasicData: React.FC = () => {
   // 获取数据
   const fetchData = async () => {
     try {
-      const response = await getVenueDailyStat(Number(venueId), formattedDate);
+      const response = await getVenueDailyStat(poolType, Number(venueId), formattedDate);
       // console.log(response)
       setStats(response.data);
       const { failureRate24h, impactRatio, limitImpactRate, highTemperatureRate } = response.data;

@@ -15,6 +15,6 @@ export const updateReport = async (poolType: string, date: string | string[], da
 };
 
 // /venue/getAllDailyStat/:venueID"
-export const fetchAllDailyStat = async (venueID: number) => {
-  return await fetchGet(`/venue/getAllDailyStat/${venueID}`);
+export const fetchAllDailyStat = async (poolType: string, venueID: number) => {
+  return await fetchGet(`/venue/getAllDailyStat/${poolType}/${venueID}`);
 };

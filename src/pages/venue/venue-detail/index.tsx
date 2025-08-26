@@ -7,10 +7,12 @@ import ChartFail from "./components/ChartFail";
 import ChartHighTemperatureImpact from "./components/ChartHighTemperatureImpact";
 import ChartLimitImpact from "./components/ChartLimitImpact";
 import ChartSuanli from "./components/ChartSuanli";
+import { useSelector, useSettingsStore } from "@/stores";
 
 import "./index.css";
 
 import { getVenueBasicInfo } from "@/pages/venue/api.tsx";
+
 // type ChartConfig = {
 //   id: string;
 //   title: string;
@@ -31,6 +33,7 @@ interface VenueData {
 // import { Button, Table } from "antd";
 
 const VenueDetail: React.FC = () => {
+  const { poolType } = useSettingsStore(useSelector(["poolType"]));
   const params = useParams<{ venueId: string }>();
   const venueId = params.venueId!;
   const [basicInfo, setBasicInfo] = useState<VenueData | null>(null);
@@ -38,7 +41,7 @@ const VenueDetail: React.FC = () => {
   // 获取数据
   const fetchData = async () => {
     try {
-      const response = await getVenueBasicInfo(Number(venueId));
+      const response = await getVenueBasicInfo(poolType, Number(venueId));
       // console.log(response)
       setBasicInfo(response.data);
 
