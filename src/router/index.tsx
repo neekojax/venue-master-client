@@ -15,7 +15,7 @@ import { profitDetailRoute } from "@/router/modules/profit-detail.tsx";
 import { reportRoute } from "@/router/modules/report.tsx";
 import { venueRoute } from "@/router/modules/venue.tsx";
 
-import NotFoundPage from "@/pages/not-found";
+import ErrorBoundary from "@/pages/not-found/errorElement";
 
 const routes: RouteObject[] = [
   {
@@ -31,6 +31,7 @@ const routes: RouteObject[] = [
       Component: (await import("@/layouts")).default,
     }),
     HydrateFallback: ProgressBar,
+    errorElement: <ErrorBoundary />,
     children: [
       {
         index: true,
@@ -53,11 +54,10 @@ const routes: RouteObject[] = [
   },
   {
     path: "*",
-    element: <NotFoundPage />,
-    // lazy: async () => ({
-    //   Component: (await import("@/pages/not-found")).default,
-    // }),
-    // HydrateFallback: ProgressBar,
+    lazy: async () => ({
+      Component: (await import("@/pages/not-found")).default,
+    }),
+    HydrateFallback: ProgressBar,
   },
 ];
 

@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import { RouterProvider, useLocation } from "react-router-dom";
+import { RouterProvider } from "react-router-dom";
 import { App as AntdApp } from "antd";
 import { AntdConfigProvider } from "./components/antd-config-provider";
 import { StaticAntd } from "./components/static-antd";
@@ -7,10 +7,7 @@ import { ThemeProvider } from "./components/theme-provider";
 import { router } from "./router";
 
 export default function App() {
-  const location = useLocation();
-
   useEffect(() => {
-    console.log("路由切换到:", location.pathname);
     // index.tsx 或 main.tsx
     window.addEventListener(
       "error",
@@ -44,7 +41,7 @@ export default function App() {
     });
 
     // 这里放全局执行的逻辑
-  }, [location]);
+  }, []);
   return (
     <ThemeProvider>
       <AntdConfigProvider>
