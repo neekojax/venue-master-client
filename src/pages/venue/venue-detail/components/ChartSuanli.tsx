@@ -64,7 +64,7 @@ const WaveLineCard: React.FC = () => {
         formatter: (params: any) => {
           // params 是数组，因为 trigger: "axis"
           return params
-            .map((item: any) => `${item.name || ""}<br>${item.marker}算力影响：${item.value.toFixed(2)}%`)
+            .map((item: any) => `${item.name || ""}<br>${item.marker}算力有效率：${item.value.toFixed(2)}%`)
             .join("<br/>");
         },
       },
