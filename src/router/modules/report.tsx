@@ -46,5 +46,12 @@ export const reportRoute: RouteObject = {
         crumb: () => <Link to={ROUTE_PATHS.subAccountDailyReport}>账户日报</Link>,
       },
     },
+    {
+      path: "/report/daily-list/:venueId/:venueName", // 直接使用动态参数
+      lazy: async () => ({
+        Component: (await import("@/pages/report/daily-report-list")).default,
+      }),
+      HydrateFallback: ProgressBar,
+    },
   ],
 };

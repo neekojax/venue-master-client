@@ -6,6 +6,7 @@ import {
   deleteEventLog,
   fetchEventLog,
   fetchVenueList,
+  getAllVEvent,
   newEventLog,
   newVenue,
   updateEventLog,
@@ -14,7 +15,7 @@ import {
 import { EventLogParam, VenueInfoParam } from "@/pages/venue/type.tsx";
 
 // 自定义 Hook: 使用场地列表
-export const useVenueList = (poolType: any) => {
+export const useVenueList = (poolType: string) => {
   return useQuery({
     queryKey: ["venue-list", poolType], // 添加 poolType 到 queryKey
     queryFn: () => fetchVenueList(poolType), // 传递 poolType 参数
@@ -65,6 +66,14 @@ export const useEventList = (poolType: string) => {
   return useQuery({
     queryKey: ["event-list", poolType], // 添加 poolType 到 queryKey
     queryFn: () => fetchEventLog(poolType), // 传递 poolType 参数
+  });
+};
+
+// 自定义 Hook: 使用场地列表
+export const useEventLogList = (poolType: string, Eventid: number) => {
+  return useQuery({
+    queryKey: ["event-log-list", Eventid], // 添加 poolType 到 queryKey
+    queryFn: () => getAllVEvent(poolType, Number(Eventid)), // 传递 poolType 参数
   });
 };
 
