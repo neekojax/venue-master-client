@@ -5,9 +5,9 @@
     <link rel="icon" type="image/svg+xml" href="/favicon.png" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>运营管理系统</title>
-    <script type="module" crossorigin src="/js/index-B-9wpXJx.js"></script>
-    <link rel="modulepreload" crossorigin href="/js/react-BIszHAjf.js">
-    <link rel="modulepreload" crossorigin href="/js/antd-BlFR_sXc.js">
+    <script type="module" crossorigin src="/js/index-DwDhpg0B.js"></script>
+    <link rel="modulepreload" crossorigin href="/js/react-BB_nszRd.js">
+    <link rel="modulepreload" crossorigin href="/js/antd-uOu3r8aR.js">
     <link rel="stylesheet" crossorigin href="/css/index-DEKD2B-F.css">
   </head>
   <body>
@@ -15,32 +15,3 @@
   </body>
 </html>
 
-<script>
-  // ✅ 在渲染前全局监听
-window.addEventListener("unhandledrejection", function (event)  {
-  const msg = event.message;
-  if (msg.includes("Failed to fetch dynamically imported module")) {
-    console.warn("动态模块加载失败，刷新页面...");
-    window.location.reload();
-  }
-});
-  // 监听所有资源加载错误
-  window.addEventListener("error", function (event) {
-    if (event.message && event.message.includes("Failed to load module script")) {
-      console.warn("检测到模块加载失败，自动刷新页面...");
-      setTimeout(() => {
-        location.reload();
-      }, 1000); // 延迟 1s 避免死循环
-    }
-  });
-
-  // 兜底：全局未捕获错误
-  window.onerror = function (message, source, lineno, colno, error) {
-    if (String(message).includes("Failed to load module script")) {
-      console.warn("onerror 捕获模块加载失败，刷新页面...");
-      setTimeout(() => {
-        location.reload();
-      }, 1000);
-    }
-  };
-</script>

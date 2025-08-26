@@ -15,6 +15,8 @@ import { profitDetailRoute } from "@/router/modules/profit-detail.tsx";
 import { reportRoute } from "@/router/modules/report.tsx";
 import { venueRoute } from "@/router/modules/venue.tsx";
 
+import NotFoundPage from "@/pages/not-found";
+
 const routes: RouteObject[] = [
   {
     path: ROUTE_PATHS.login,
@@ -51,10 +53,11 @@ const routes: RouteObject[] = [
   },
   {
     path: "*",
-    lazy: async () => ({
-      Component: (await import("@/pages/not-found")).default,
-    }),
-    HydrateFallback: ProgressBar,
+    element: <NotFoundPage />,
+    // lazy: async () => ({
+    //   Component: (await import("@/pages/not-found")).default,
+    // }),
+    // HydrateFallback: ProgressBar,
   },
 ];
 

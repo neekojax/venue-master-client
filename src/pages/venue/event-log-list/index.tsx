@@ -413,7 +413,6 @@ const App: React.FC = () => {
                 value={dateRange}
                 format="YYYY-MM-DD"
                 onChange={() => onDateChange}
-                // onChange={() => setDateRange} // 更新日期范围
               />
             </div>
           </div>
@@ -473,14 +472,11 @@ const App: React.FC = () => {
         </div>
         <Table
           loading={isLoading}
-          // rowSelection={rowSelection}
           columns={columns}
           dataSource={filteredData} // 使用过滤后的数据
           scroll={{ x: 1300 }}
           rowKey="id"
-          // onChange={handleTableChange}
           onChange={(_: any, filters: any) => {
-            // console.log("Table >>选中的事件类型：", filters.log_type); // 是数组
             setSelectedEventType(filters.log_type || []); // 设置选中的事件类型数组
           }}
           pagination={{
@@ -490,7 +486,6 @@ const App: React.FC = () => {
             showQuickJumper: true,
             showTotal: (total) => `共 ${total} 条记录`,
           }}
-          // className="px-6"
         />
       </div>
       <Modal
