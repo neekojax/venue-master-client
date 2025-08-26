@@ -271,17 +271,17 @@ export default function MiningHashRatePage() {
         dataIndex: "last_hash_rate_effective",
         key: "last_hash_rate_effective",
         width: "5%",
-        render: (_: any, record: { current_hash: any; theoretical: any }) => {
-          console.log(record.current_hash, record.theoretical);
-          const current_hash = record.current_hash.split(" ")[0]; // 根据空格分割
-          const theoretical = record.theoretical.split(" ")[0]; // 根据空格分割
+        render: (text: any) => {
+          // console.log(record.current_hash, record.theoretical);
+          // const current_hash = record.current_hash.split(" ")[0]; // 根据空格分割
+          // const theoretical = record.theoretical.split(" ")[0]; // 根据空格分割
 
-          const shishi_hash = ((current_hash / theoretical) * 100).toFixed(2) + "%";
-          console.log(shishi_hash);
-          const value = parseFloat(shishi_hash.replace("%", "")); // 去掉 '%' 并解析为数字
-          return <span style={{ color: value < 90 ? "red" : "green" }}>{shishi_hash}</span>;
-          // const value = parseFloat(text.replace("%", "")); // 去掉 '%' 并解析为数字
-          // return <span style={{ color: value < 90 ? "red" : "green" }}>{text}</span>;
+          // const shishi_hash = ((current_hash / theoretical) * 100).toFixed(2) + "%";
+          // console.log(shishi_hash);
+          // const value = parseFloat(shishi_hash.replace("%", "")); // 去掉 '%' 并解析为数字
+          // return <span style={{ color: value < 90 ? "red" : "green" }}>{shishi_hash}</span>;
+          const value = parseFloat(text.replace("%", "")); // 去掉 '%' 并解析为数字
+          return <span style={{ color: value < 90 ? "red" : "green" }}>{text}</span>;
         },
         sorter: (a: any, b: any) => {
           // 将带有 '%' 的字符串转换为数字进行比较
