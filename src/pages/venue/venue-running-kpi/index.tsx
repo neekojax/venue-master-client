@@ -64,15 +64,6 @@ export default function VenueRunningKpi() {
     if (efficiencies?.length < 2) {
       return <div>数据不足</div>; // 如果数据少于两个，返回提示
     }
-
-    // const minEfficiency = Math.min(...efficiencies); // 获取最低值
-    // const lastEfficiency = efficiencies[efficiencies.length - 1]; // 获取最后一个数据
-    // const secondLastEfficiency = efficiencies[efficiencies.length - 2]; // 获取倒数第二个数据
-
-    // 根据最后两个数据点的值设置颜色
-    // const lineColor = lastEfficiency > secondLastEfficiency ? "#4CAF50" : "#ff4d4f"; // 绿色或红色
-    console.log("monthEfficiencys", monthEfficiencys);
-    console.log("efficiencies", efficiencies);
     return (
       <ReactEcharts
         option={{
@@ -122,7 +113,7 @@ export default function VenueRunningKpi() {
         dataIndex: "venueName",
         fixed: "left",
         width: 250,
-        render: (text: string) => {
+        render: (text: string, record: { venueID?: any }) => {
           const isSpecialVenue = text === "Arct-HF01-J XP-AR-US" || text === "ARCT Technologies-HF02-AR-US";
           return (
             <Tooltip
@@ -147,10 +138,7 @@ export default function VenueRunningKpi() {
                   </Tag>
                 )}
                 {/* 这里假设数据里有 venue_code 或 venueId 字段用于跳转 */}
-                <Link
-                  to={`/venue/detail/${runningData?.find((d: any) => d.venueName === text)?.venueCode || "unknown"}`}
-                  className="text-blue-500 hover:underline"
-                >
+                <Link to={`/venue/detail/${record.venueID}`} className="text-blue-500 hover:underline">
                   {text}
                 </Link>
               </div>
