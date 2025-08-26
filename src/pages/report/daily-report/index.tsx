@@ -1,5 +1,6 @@
 // 代码已包含 CSS：使用 TailwindCSS , 安装 TailwindCSS 后方可看到布局样式效果
 import React, { useEffect, useRef, useState } from "react";
+import { Link } from "react-router-dom";
 import { DownloadOutlined } from "@ant-design/icons";
 import { Button, DatePicker, Select, Table, Tag, Tooltip } from "antd";
 import type { ColumnsType } from "antd/es/table";
@@ -106,7 +107,7 @@ const App: React.FC = () => {
       key: "siteName",
       fixed: "left",
       width: 250,
-      render: (text: string) => {
+      render: (text: string, record: { key?: any }) => {
         const isSpecialVenue = text === "Arct-HF01-J XP-AR-US" || text === "ARCT Technologies-HF02-AR-US";
         return (
           <Tooltip
@@ -130,7 +131,9 @@ const App: React.FC = () => {
                   补充
                 </Tag>
               )}
-              {text}
+              <Link to={`/venue/detail/${record.key}`} className="text-blue-500 hover:underline">
+                {text}
+              </Link>
             </div>
           </Tooltip>
         );

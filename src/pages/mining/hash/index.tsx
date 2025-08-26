@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { FaAdn, FaFish } from "react-icons/fa6";
 import { WiDirectionUpRight } from "react-icons/wi";
+import { Link } from "react-router-dom";
 import { ExportOutlined, SearchOutlined } from "@ant-design/icons";
 import { Button, Col, Input, Radio, Row, Spin, Tag, Tooltip } from "antd";
 import EditTable from "@/components/edit-table";
@@ -32,6 +33,7 @@ export default function MiningHashRatePage() {
         (
           item: {
             venue_name: any;
+            venue_id: any;
             pool_name: any;
             current_hash: any;
             online: any;
@@ -49,6 +51,7 @@ export default function MiningHashRatePage() {
           index: any,
         ) => ({
           serialNumber: index + 1,
+          venue_id: item.venue_id,
           venue_name: item.venue_name,
           pool_name: item.pool_name,
           current_hash: item.current_hash,
@@ -97,7 +100,7 @@ export default function MiningHashRatePage() {
         key: "venue_name",
         width: 200,
         // render: (text: any) => <span style={{ color: "#333" }}>{text}</span>,
-        render: (text: string) => {
+        render: (text: string, record: { venue_id?: any }) => {
           const isSpecialVenue = text === "Arct-HF01-J XP-AR-US" || text === "ARCT Technologies-HF02-AR-US";
           return (
             <Tooltip
@@ -116,7 +119,9 @@ export default function MiningHashRatePage() {
                   fontWeight: isSpecialVenue ? "bold" : "normal", // 加粗特殊场地
                 }}
               >
-                {text}
+                <Link to={`/venue/detail/${record.venue_id}`} className="text-blue-500 hover:underline">
+                  {text}
+                </Link>
                 {isSpecialVenue && (
                   <Tag color="red" style={{ marginLeft: 2 }}>
                     补充
