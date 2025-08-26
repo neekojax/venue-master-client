@@ -61,5 +61,12 @@ export const venueRoute: RouteObject = {
         ),
       },
     },
+    {
+      path: "/venue/event-log-list/:venueId/:venueName", // 直接使用动态参数
+      lazy: async () => ({
+        Component: (await import("@/pages/venue/event-log-list")).default,
+      }),
+      HydrateFallback: ProgressBar,
+    },
   ],
 };
