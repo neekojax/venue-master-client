@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
 import {
   DeleteOutlined,
   DownloadOutlined,
@@ -128,7 +129,7 @@ const App: React.FC = () => {
       // filters: venueList?.data?.map((venue) => ({ text: venue.venue_name, value: venue.venue_name })),
       // onFilter: (value, record) => record.venue_name === value,
       width: 200,
-      render: (text: string) => {
+      render: (text: string, record: { venue_id?: any }) => {
         const isSpecialVenue = text === "Arct-HF01-J XP-AR-US"; // 判断是否为特殊场地
         return (
           <Tooltip
@@ -147,7 +148,9 @@ const App: React.FC = () => {
                 fontWeight: isSpecialVenue ? "bold" : "normal", // 加粗特殊场地
               }}
             >
-              {text}
+              <Link to={`/venue/detail/${record.venue_id}`} className="text-blue-500 hover:underline">
+                {text}
+              </Link>
               {isSpecialVenue && (
                 <Tag color="red" style={{ marginLeft: 2 }}>
                   补充
