@@ -37,7 +37,7 @@ const PoolTypeSelector = () => {
       {/* <Option value="CANG">CANGO</Option>
       <Option value="NS">NS</Option>
       <Option value="ND">ND</Option> */}
-      <Option value="KZ">KZ</Option>
+      <Option value="LN">LN</Option>
     </Select>
   );
 };
