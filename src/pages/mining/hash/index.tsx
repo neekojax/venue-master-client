@@ -32,8 +32,8 @@ export default function MiningHashRatePage() {
       const newData = hashData.data.map(
         (
           item: {
-            venue_name: any;
             venue_id: any;
+            venue_name: any;
             pool_name: any;
             current_hash: any;
             online: any;
@@ -50,8 +50,8 @@ export default function MiningHashRatePage() {
           },
           index: any,
         ) => ({
-          serialNumber: index + 1,
           venue_id: item.venue_id,
+          serialNumber: index + 1,
           venue_name: item.venue_name,
           pool_name: item.pool_name,
           current_hash: item.current_hash,
@@ -78,7 +78,6 @@ export default function MiningHashRatePage() {
   useEffect(() => {
     setColumns([
       {
-        // title: "序号", // 使用英文标题
         dataIndex: "serialNumber",
         key: "serialNumber",
         width: 25,
@@ -98,8 +97,6 @@ export default function MiningHashRatePage() {
         title: "场地",
         dataIndex: "venue_name",
         key: "venue_name",
-        width: 200,
-        // render: (text: any) => <span style={{ color: "#333" }}>{text}</span>,
         render: (text: string, record: { venue_id?: any }) => {
           const isSpecialVenue = text === "Arct-HF01-J XP-AR-US" || text === "ARCT Technologies-HF02-AR-US";
           return (
@@ -137,8 +134,6 @@ export default function MiningHashRatePage() {
         dataIndex: "pool_name",
         key: "pool_name",
         responsive: ["xs", "sm", "md"], // 适配所有屏幕
-        width: "10%",
-        // render: (text: any) => <span style={{ color: "#333" }}>{text}</span>,
         render: (text: any) => (
           <Tooltip
             title={text}
@@ -160,18 +155,10 @@ export default function MiningHashRatePage() {
           </Tooltip>
         ),
       },
-      // {
-      //   title: "算力",
-      //   className: "border-bottom",
-      //   style: {
-      //     borderBottom: "1px solid #e0e0e0",
-      //   },
-      //   children: [
       {
         title: "实时算力",
         dataIndex: "current_hash",
         key: "current_hash",
-        // width: 95,
         render: (text: any) => {
           const parts = text.split(" "); // 根据空格分割
 
@@ -184,8 +171,6 @@ export default function MiningHashRatePage() {
       },
       {
         title: "理论算力",
-        // width: 95,
-        width: "10%",
         dataIndex: "theoretical",
         key: "theoretical",
         render: (text: any) => {
@@ -208,33 +193,8 @@ export default function MiningHashRatePage() {
         },
       },
       {
-        title: "24h算力",
-        // width: 95,
-        dataIndex: "last_hash",
-        key: "last_hash",
-        render: (text: any) => {
-          const parts = text.split(" "); // 根据空格分割
-          return (
-            <span>
-              {parts[0]} <span className="text-sm text-gray-500">{parts[1]}</span>
-            </span>
-          );
-        },
-        sorter: (a: any, b: any) => {
-          // 提取 parts[0] 并转换为数字进行比较
-          const valueA = parseFloat(a.last_hash.split(" ")[0]);
-          const valueB = parseFloat(b.last_hash.split(" ")[0]);
-
-          return valueA - valueB; // 返回值用于排序，升序
-        },
-        //   },
-        // ],
-      },
-
-      {
         title: "在线/离线",
         key: "status",
-        width: "12%",
         render: (_text: any, record: any) => (
           <span>
             <Tag color="success" v-if={record.online != 0}>
@@ -244,11 +204,6 @@ export default function MiningHashRatePage() {
               {record.offline}
             </Tag>
           </span>
-          // <span>
-          //   <span className="text-green-400">{record.online}</span>
-          //   <span> / </span>
-          //   <span className="text-red-600">{record.offline}</span>
-          // </span>
         ),
       },
       {
@@ -269,7 +224,6 @@ export default function MiningHashRatePage() {
         ),
         dataIndex: "last_hash_rate_effective",
         key: "last_hash_rate_effective",
-        width: "5%",
         render: (text: any) => {
           const value = parseFloat(text.replace("%", "")); // 去掉 '%' 并解析为数字
           return <span style={{ color: value < 90 ? "red" : "green" }}>{text}</span>;
@@ -282,93 +236,13 @@ export default function MiningHashRatePage() {
           return valueA - valueB; // 返回值用于排序
         },
       },
-      {
-        title: "结算算力",
-        width: "10%",
-        dataIndex: "last_settlement_hash",
-        key: "last_settlement_hash",
-        // width: 120,
-        render: (text: any) => {
-          const parts = text.split(" "); // 根据空格分割
 
-          return (
-            <span>
-              {parts[0]} <span className="text-sm text-gray-500">{parts[1]}</span>
-            </span>
-          );
-        },
-        sorter: (a: any, b: any) => {
-          // 提取 parts[0] 并转换为数字进行比较
-          const valueA = parseFloat(a.last_settlement_hash.split(" ")[0]);
-          const valueB = parseFloat(b.last_settlement_hash.split(" ")[0]);
-
-          return valueA - valueB; // 返回值用于排序，升序
-        },
-      },
-      {
-        title: "结算BTC",
-        dataIndex: "last_settlement_profit_btc",
-        key: "last_settlement_profit_btc",
-        // onCell: (record: any) => ({
-        //   let value = Number(record.last_settlement_profit_btc) || 0;
-        //   // 计算透明度，范围 0.1 ~ 1（根据实际数据调整 min/max）
-        //   const opacity = Math.min(1, Math.max(0.1, value / 0.01)); // 假设最大值为 0.01 BTC
-
-        //   style: {
-        //     backgroundColor: `rgba(24, 144, 255, ${opacity})`,
-        //     // backgroundColor: '#e6f7ff', // 所有单元格统一设置背景色
-        //   },
-        // }),
-        render: (text: any) => {
-          return (
-            <span>
-              <Tag color="#f50" style={{ padding: 0 }}>
-                {text}
-              </Tag>
-            </span>
-          );
-        },
-      },
-      // {
-      //   title: "结算FB",
-      //   dataIndex: "last_settlement_profit_fb",
-      //   key: "last_settlement_profit_fb",
-      //   render: (text: any) => (
-      //     <Tag color="#2db7f5" v-if={text != 0}>
-      //       {text}
-      //     </Tag>
-      //     // <span>
-      //
-      //     //   <span style={{ color: "#24ac95" }}>{text}</span>
-      //     //   {/* <span style={{ fontSize: "em" }}> FB </span> */}
-      //     // </span>
-      //   ),
-      // },
-      {
-        title: "结算时间",
-        dataIndex: "last_settlement_date",
-        key: "last_settlement_date",
-        align: "right",
-
-        render: (text: any) => {
-          const date = new Date(text);
-          const month = (date.getMonth() + 1).toString().padStart(2, "0");
-          const day = date.getDate().toString().padStart(2, "0");
-          return `${month}-${day}`;
-        },
-        //   },
-        // ],
-      },
       {
         title: "刷新时间",
         dataIndex: "update_time",
         key: "update_time",
-        width: 80,
-        align: "right",
         render: (text: any) => {
           const date = new Date(text);
-          // const month = (date.getMonth() + 1).toString().padStart(2, '0');
-          // const day = date.getDate().toString().padStart(2, '0');
           const hours = date.getHours().toString().padStart(2, "0");
           const minutes = date.getMinutes().toString().padStart(2, "0");
           const seconds = date.getSeconds().toString().padStart(2, "0");
@@ -380,6 +254,7 @@ export default function MiningHashRatePage() {
         dataIndex: "link",
         key: "link",
         width: 50,
+        align: "right",
 
         render: (link: string) => (
           <a
@@ -443,36 +318,6 @@ export default function MiningHashRatePage() {
 
   return (
     <div style={{ padding: "20px 0px" }} className="longdataTable">
-      {/* <div
-        style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}
-      >
-        <div className={"flex"}>
-          <div className={"mr-4"}>
-            <Radio.Group className="filterRadio" onChange={handlePoolCategoryChange} value={poolCategory}>
-              <Radio.Button value="主矿池">主矿池</Radio.Button>
-              <Radio.Button value="备用矿池">备用矿池</Radio.Button>
-            </Radio.Group>
-          </div>
-        </div>
-        <div style={{ display: "flex", justifyContent: "space-between" }}>
-          <Input
-            prefix={<SearchOutlined style={{ color: "rgba(0, 0, 0, 0.25)", fontSize: 18 }} />}
-            placeholder="请输入搜索字段"
-            value={searchTerm}
-            onChange={handleSearch}
-            style={{ width: 220 }} // 设定宽度
-            className="text-sm mr-10"
-          />
-          <Button
-            icon={<ExportOutlined className="exportIcon" />}
-            size="middle"
-            className={"text-blue-500 exportButton"}
-            onClick={onDownload}
-          >
-            导出
-          </Button>
-        </div>
-      </div> */}
       <Row gutter={[16, 16]} justify="space-between" align="middle">
         <Col xs={24} sm={24} md={12}>
           <Radio.Group className="filterRadio" onChange={handlePoolCategoryChange} value={poolCategory}>
@@ -497,7 +342,7 @@ export default function MiningHashRatePage() {
       </Row>
 
       {isLoadingPools ? (
-        <Spin style={{ marginTop: 20 }} />
+        <Spin style={{ width: "100%", textAlign: "center", marginTop: "50%" }} />
       ) : (
         <EditTable
           tableData={filteredData}
