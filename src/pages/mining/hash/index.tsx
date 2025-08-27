@@ -98,7 +98,7 @@ export default function MiningHashRatePage() {
         title: "场地",
         dataIndex: "venue_name",
         key: "venue_name",
-        width: 200,
+        // width: 200,
         // render: (text: any) => <span style={{ color: "#333" }}>{text}</span>,
         render: (text: string, record: { venue_id?: any }) => {
           const isSpecialVenue = text === "Arct-HF01-J XP-AR-US" || text === "ARCT Technologies-HF02-AR-US";
@@ -161,18 +161,10 @@ export default function MiningHashRatePage() {
           </Tooltip>
         ),
       },
-      // {
-      //   title: "算力",
-      //   className: "border-bottom",
-      //   style: {
-      //     borderBottom: "1px solid #e0e0e0",
-      //   },
-      //   children: [
       {
         title: "实时算力",
         dataIndex: "current_hash",
         key: "current_hash",
-        // width: 95,
         render: (text: any) => {
           const parts = text.split(" "); // 根据空格分割
 
@@ -185,8 +177,6 @@ export default function MiningHashRatePage() {
       },
       {
         title: "理论算力",
-        // width: 95,
-        // width: "10%",
         dataIndex: "theoretical",
         key: "theoretical",
         render: (text: any) => {
@@ -231,11 +221,9 @@ export default function MiningHashRatePage() {
       //   //   },
       //   // ],
       // },
-
       {
         title: "在线/离线",
         key: "status",
-        width: "12%",
         render: (_text: any, record: any) => (
           <span>
             <Tag color="success" v-if={record.online != 0}>
@@ -245,11 +233,6 @@ export default function MiningHashRatePage() {
               {record.offline}
             </Tag>
           </span>
-          // <span>
-          //   <span className="text-green-400">{record.online}</span>
-          //   <span> / </span>
-          //   <span className="text-red-600">{record.offline}</span>
-          // </span>
         ),
       },
       {
@@ -270,16 +253,7 @@ export default function MiningHashRatePage() {
         ),
         dataIndex: "last_hash_rate_effective",
         key: "last_hash_rate_effective",
-        width: "5%",
         render: (text: any) => {
-          // console.log(record.current_hash, record.theoretical);
-          // const current_hash = record.current_hash.split(" ")[0]; // 根据空格分割
-          // const theoretical = record.theoretical.split(" ")[0]; // 根据空格分割
-
-          // const shishi_hash = ((current_hash / theoretical) * 100).toFixed(2) + "%";
-          // console.log(shishi_hash);
-          // const value = parseFloat(shishi_hash.replace("%", "")); // 去掉 '%' 并解析为数字
-          // return <span style={{ color: value < 90 ? "red" : "green" }}>{shishi_hash}</span>;
           const value = parseFloat(text.replace("%", "")); // 去掉 '%' 并解析为数字
           return <span style={{ color: value < 90 ? "red" : "green" }}>{text}</span>;
         },
@@ -372,12 +346,8 @@ export default function MiningHashRatePage() {
         title: "刷新时间",
         dataIndex: "update_time",
         key: "update_time",
-        width: 80,
-        align: "right",
         render: (text: any) => {
           const date = new Date(text);
-          // const month = (date.getMonth() + 1).toString().padStart(2, '0');
-          // const day = date.getDate().toString().padStart(2, '0');
           const hours = date.getHours().toString().padStart(2, "0");
           const minutes = date.getMinutes().toString().padStart(2, "0");
           const seconds = date.getSeconds().toString().padStart(2, "0");
@@ -389,6 +359,7 @@ export default function MiningHashRatePage() {
         dataIndex: "link",
         key: "link",
         width: 50,
+        align: "right",
 
         render: (link: string) => (
           <a
