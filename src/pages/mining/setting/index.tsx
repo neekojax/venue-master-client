@@ -596,13 +596,14 @@ export default function MiningSettingPage() {
             rules={[{ required: true, message: "请选择场地!" }]} // 添加验证规则
           >
             <Select
+              disabled
               placeholder="请选择场地"
               allowClear
               style={{ width: "100%" }} // 设置宽度为100%
             >
               {venueList?.data?.map((venue: { id: number; venue_name: string }) => (
                 <Option key={venue.id} value={venue.id}>
-                  {venue.venue_name} {/* 使用场地名称作为展示内容 */}
+                  {venue.venue_name}
                 </Option>
               ))}
             </Select>
