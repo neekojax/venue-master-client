@@ -203,7 +203,7 @@ const App: React.FC = () => {
       key: "totalMachines",
       width: 105,
       align: "right",
-      render: (value) => value.toLocaleString(),
+      render: (value) => value.toLocaleString() + " 台",
       sorter: (a, b) => a.totalMachines - b.totalMachines,
     },
     {
@@ -339,7 +339,7 @@ const App: React.FC = () => {
       render: (value) => value.toLocaleString() + " 台",
     },
     {
-      title: "在修数",
+      title: "待修数",
       dataIndex: "pendingRepair",
       key: "pendingRepair",
       width: 138,
@@ -347,7 +347,7 @@ const App: React.FC = () => {
       render: (value) => value.toLocaleString() + " 台",
     },
     {
-      title: "在修数率",
+      title: "待修率",
       dataIndex: "pendingRepair",
       key: "pendingRepair",
       width: 138,
@@ -557,8 +557,8 @@ const App: React.FC = () => {
       "T-2日故障率": item.failureRateT2.toFixed(2) + "%",
       "T-3日故障率": item.failureRateT3.toFixed(2) + "%",
       "24小时上架数": item.shelved,
-      在修数: item.pendingRepair,
-      在修率: ((Number(item.pendingRepair) / item.totalMachines) * 100).toFixed(2) + "%",
+      待修数: item.pendingRepair,
+      待修率: ((Number(item.pendingRepair) / item.totalMachines) * 100).toFixed(2) + "%",
       "影响算力（E）": item.powerImpact.toFixed(8),
       影响占比: item.impactRatio.toFixed(2) + "%",
       "影响产出（BTC）": item.outputImpact.toFixed(8),
