@@ -29,6 +29,8 @@ interface VenueData {
   venue_name: string;
   address: string;
   sub_accounts: SubAccount[];
+  humidity: number;
+  temperature: number;
 }
 // import { Button, Table } from "antd";
 
@@ -93,11 +95,11 @@ const VenueDetail: React.FC = () => {
           <div className="flex items-center gap-4">
             <div className="flex items-center gap-2">
               <CloudOutlined className="text-primary" />
-              <span className="text-gray-600">当前温度: --</span>
+              <span className="text-gray-600">当前温度: {basicInfo?.temperature + " ℃" || "--"}</span>
             </div>
             <div className="flex items-center gap-2">
               <ThunderboltOutlined className="text-primary" />
-              <span className="text-gray-600">当前湿度: --</span>
+              <span className="text-gray-600">当前湿度: {basicInfo?.humidity + " %" || "--"}</span>
             </div>
           </div>
         </div>
