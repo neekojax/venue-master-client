@@ -13,6 +13,7 @@ interface DailyRecord {
   date: string;
   revenue: number;
   orders: number;
+  totalMachines: number;
 }
 
 interface AbnormalRecord {
@@ -75,6 +76,20 @@ const BusinessReport: React.FC<BusinessReportProps> = ({ venueName }) => {
     { title: "托管台数", dataIndex: "totalMachines", key: "totalMachines", width: 105 },
     { title: "总故障数", dataIndex: "totalFailures", key: "totalFailures", width: 120 },
     {
+      title: "总故障率",
+      dataIndex: "totalFailures",
+      key: "totalFailures",
+      width: 120,
+      render: (value, record: { totalMachines: number }) => ({
+        children: `${((value / record.totalMachines) * 100).toFixed(2)}%`,
+        props: {
+          style: {
+            color: (value / record.totalMachines) * 100 > 20 ? "#ff4d4f" : "inherit",
+          },
+        },
+      }),
+    },
+    {
       title: "24小时故障数",
       dataIndex: "failures24h",
       key: "failures24h",
@@ -85,14 +100,14 @@ const BusinessReport: React.FC<BusinessReportProps> = ({ venueName }) => {
     },
     {
       title: "24小时故障率",
-      dataIndex: "failureRate24h",
-      key: "failureRate24h",
+      dataIndex: "failures24h",
+      key: "failures24h",
       width: 138,
-      render: (value) => ({
-        children: `${value.toFixed(2)}%`,
+      render: (value, record: { totalMachines: number }) => ({
+        children: `${((value / record.totalMachines) * 100).toFixed(2)}%`,
         props: {
           style: {
-            color: value > 20 ? "#ff4d4f" : "inherit",
+            color: (value / record.totalMachines) * 100 > 20 ? "#ff4d4f" : "inherit",
           },
         },
       }),
