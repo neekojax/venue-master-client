@@ -2,13 +2,15 @@
 import React, { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import { DownloadOutlined } from "@ant-design/icons";
-import { Button, DatePicker, Input, message, Select, Table, Tag, Tooltip } from "antd";
+// import { Button, DatePicker, Input, message, Select, Table, Tag, Tooltip } from "antd";
+import { Button, DatePicker, Select, Table, Tag, Tooltip } from "antd";
 import type { ColumnsType } from "antd/es/table";
 import * as XLSX from "xlsx";
 import { useSelector, useSettingsStore } from "@/stores";
 
-import { fetchDailyReport, updateReport } from "@/pages/report/api.tsx";
-import { ReportUpdateParam } from "@/pages/report/type.tsx";
+// import { fetchDailyReport, updateReport } from "@/pages/report/api.tsx";
+import { fetchDailyReport } from "@/pages/report/api.tsx";
+// import { ReportUpdateParam } from "@/pages/report/type.tsx";
 
 interface DataType {
   key: string;
@@ -19,6 +21,8 @@ interface DataType {
   power24h: number;
   effectiveRate24h: number;
   effectiveRateT2: number;
+  totalFailuresT1: number;
+  totalFailuresT2: number;
   effectiveRateT3: number;
   totalMachines: number;
   totalFailures: number;
@@ -32,13 +36,15 @@ interface DataType {
   limitImpactRate: number;
   highTemperatureRate: number;
   events: string;
+  shelved: string;
+  pendingRepair: string;
 }
 const App: React.FC = () => {
   const { poolType } = useSettingsStore(useSelector(["poolType"]));
 
   const tableRef = useRef<HTMLDivElement>(null);
   const [isTableFixed, setIsTableFixed] = useState(false);
-  const [hoveredRow, setHoveredRow] = useState<string | null>(null);
+  // const [hoveredRow, setHoveredRow] = useState<string | null>(null);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -70,27 +76,27 @@ const App: React.FC = () => {
 
   const [pageSize, setPageSize] = useState(20); // 新增状态管理页大小
 
-  const save = async (record: DataType, text: string) => {
-    try {
-      const date = selectedDate || formattedDate; // formattedDate 是昨天的日期
-      // 调用接口，启动数据保存
-      const updatedData: ReportUpdateParam = {
-        venue_name: record.siteName,
-        total_failures: Number(text),
-      };
+  // const save = async (record: DataType, text: string) => {
+  //   try {
+  //     const date = selectedDate || formattedDate; // formattedDate 是昨天的日期
+  //     // 调用接口，启动数据保存
+  //     const updatedData: ReportUpdateParam = {
+  //       venue_name: record.siteName,
+  //       total_failures: Number(text),
+  //     };
 
-      const res = await updateReport(poolType, date, updatedData);
+  //     const res = await updateReport(poolType, date, updatedData);
 
-      if (res?.data) {
-        message.success("更新成功");
-        setData((data) =>
-          data.map((item) => (item.key === record.key ? { ...item, totalFailures: Number(text) } : item)),
-        );
-      }
-    } catch (errInfo) {
-      console.log("Save failed:", errInfo);
-    }
-  };
+  //     if (res?.data) {
+  //       message.success("更新成功");
+  //       setData((data) =>
+  //         data.map((item) => (item.key === record.key ? { ...item, totalFailures: Number(text) } : item)),
+  //       );
+  //     }
+  //   } catch (errInfo) {
+  //     console.log("Save failed:", errInfo);
+  //   }
+  // };
 
   const columns: ColumnsType<DataType> = [
     // {
@@ -201,47 +207,67 @@ const App: React.FC = () => {
       sorter: (a, b) => a.totalMachines - b.totalMachines,
     },
     {
-      title: "总故障台数",
-      dataIndex: "totalFailures",
-      key: "totalFailures",
+      title: "T-1总故障数",
+      dataIndex: "totalFailuresT1",
+      key: "totalFailuresT1",
       width: 120,
       align: "right",
-      // render: (text) => {
-      //   return <span>{text}</span>;
-      // },
-      render: (text, record) => {
-        const account = localStorage.getItem("user");
-        // console.log("account", account);
-        if (account != "admin") {
-          return <span>{text}</span>;
-        } else {
-          const isEditing = hoveredRow === record.key;
-          // console.log("isEditing", isEditing);
-          return isEditing ? (
-            <Input
-              size="small"
-              style={{ padding: "0 5px", margin: 0, height: "22px" }}
-              onChange={(e) => save(record, e.target.value)}
-              onPressEnter={(e) => save(record, e.currentTarget.value || "")}
-              onBlur={(e) => save(record, e.target?.value || "")}
-              defaultValue={text}
-            />
-          ) : (
-            <span>{text}</span>
-          );
-        }
+      render: (text) => {
+        return <span>{text} 台</span>;
       },
-      onCell: (record) => ({
-        onMouseEnter: () => setHoveredRow(record.key),
-        onMouseLeave: () => setHoveredRow(null),
-      }),
-      // render: (value) => value.toLocaleString(),
-      sorter: (a, b) => a.totalFailures - b.totalFailures,
     },
     {
+      title: "总故障数",
+      dataIndex: "totalFailuresT2",
+      key: "totalFailuresT2",
+      width: 120,
+      align: "right",
+      render: (text) => {
+        return <span>{text} 台</span>;
+      },
+    },
+    // {
+    //   title: "总故障台数",
+    //   dataIndex: "totalFailures",
+    //   key: "totalFailures",
+    //   width: 120,
+    //   align: "right",
+    //   // render: (text) => {
+    //   //   return <span>{text}</span>;
+    //   // },
+    //   render: (text, record) => {
+    //     const account = localStorage.getItem("user");
+    //     // console.log("account", account);
+    //     if (account != "admin") {
+    //       return <span>{text}</span>;
+    //     } else {
+    //       const isEditing = hoveredRow === record.key;
+    //       // console.log("isEditing", isEditing);
+    //       return isEditing ? (
+    //         <Input
+    //           size="small"
+    //           style={{ padding: "0 5px", margin: 0, height: "22px" }}
+    //           onChange={(e) => save(record, e.target.value)}
+    //           onPressEnter={(e) => save(record, e.currentTarget.value || "")}
+    //           onBlur={(e) => save(record, e.target?.value || "")}
+    //           defaultValue={text}
+    //         />
+    //       ) : (
+    //         <span>{text}</span>
+    //       );
+    //     }
+    //   },
+    //   onCell: (record) => ({
+    //     onMouseEnter: () => setHoveredRow(record.key),
+    //     onMouseLeave: () => setHoveredRow(null),
+    //   }),
+    //   // render: (value) => value.toLocaleString(),
+    //   sorter: (a, b) => a.totalFailures - b.totalFailures,
+    // },
+    {
       title: "总故障率",
-      dataIndex: "totalFailures",
-      key: "totalMachines",
+      dataIndex: "totalFailuresT2",
+      key: "totalFailuresT2",
       width: 100,
       align: "right",
       render: (val, record) => {
@@ -249,13 +275,14 @@ const App: React.FC = () => {
         return <span>{`${total_gzl}%`}</span>;
       },
     },
+
     {
       title: "24小时故障数",
       dataIndex: "failures24h",
       key: "failures24h",
       width: 138,
       align: "right",
-      render: (value) => value.toLocaleString(),
+      render: (value) => value.toLocaleString() + " 台",
       sorter: (a, b) => a.failures24h - b.failures24h,
     },
     {
@@ -302,6 +329,34 @@ const App: React.FC = () => {
         },
       }),
       sorter: (a, b) => a.failureRateT3 - b.failureRateT3,
+    },
+    {
+      title: "24小时上架数",
+      dataIndex: "shelved",
+      key: "shelved",
+      width: 138,
+      align: "right",
+      render: (value) => value.toLocaleString() + " 台",
+    },
+    {
+      title: "在修数",
+      dataIndex: "pendingRepair",
+      key: "pendingRepair",
+      width: 138,
+      align: "right",
+      render: (value) => value.toLocaleString() + " 台",
+    },
+    {
+      title: "在修数率",
+      dataIndex: "pendingRepair",
+      key: "pendingRepair",
+      width: 138,
+      align: "right",
+      render: (val, record) => {
+        const zaixiuRate = ((val / record.totalMachines) * 100).toFixed(2);
+        return <span>{`${zaixiuRate}%`}</span>;
+      },
+      // render: (value) => value.toLocaleString() + " 台",
     },
     {
       title: "影响算力(E)",
@@ -412,6 +467,8 @@ const App: React.FC = () => {
               effectiveRate24h: venue.effectiveRate24h || 0, // 转换为小数形式
               effectiveRateT2: venue.effectiveRateT2 || 0,
               effectiveRateT3: venue.effectiveRateT3 || 0,
+              totalFailuresT1: venue.totalFailuresT1 || 0,
+              totalFailuresT2: venue.totalFailuresT2 || 0,
               totalMachines: venue.totalMachines || 0,
               totalFailures: venue.totalFailures || 0,
               failures24h: venue.failures24h || 0,
@@ -426,6 +483,8 @@ const App: React.FC = () => {
               // "限电影响": item.limitImpactRate,
               // "高温影响": item.highTemperatureRate,
               events: venue.events || "",
+              shelved: venue.shelved || 0,
+              pendingRepair: venue.pendingRepair || 0,
             };
           });
 
@@ -490,8 +549,12 @@ const App: React.FC = () => {
       托管台数: item.totalMachines.toLocaleString(),
       总故障台数: item.totalFailures.toLocaleString(),
       总故障率: ((item.totalFailures / item.totalMachines) * 100).toFixed(2) + "%",
+      "24小时上架数": item.shelved,
+      在修数: item.pendingRepair,
       "24小时故障数": item.failures24h.toLocaleString(),
       "24小时故障率": item.failureRate24h.toFixed(2) + "%",
+      "T-1总故障数": item.totalFailuresT1,
+      "T-2总故障数": item.totalFailuresT2,
       "T-2日故障率": item.failureRateT2.toFixed(2) + "%",
       "T-3日故障率": item.failureRateT3.toFixed(2) + "%",
       "影响算力（E）": item.powerImpact.toFixed(8),
