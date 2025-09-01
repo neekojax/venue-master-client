@@ -7,6 +7,7 @@ import { Button, DatePicker, Select, Table, Tag, Tooltip } from "antd";
 import type { ColumnsType } from "antd/es/table";
 import * as XLSX from "xlsx";
 import antIcon from "@/assets/ant-icon.png";
+import emptyAntIcon from "@/assets/empty-ant.png";
 import { useSelector, useSettingsStore } from "@/stores";
 
 // import { fetchDailyReport, updateReport } from "@/pages/report/api.tsx";
@@ -223,7 +224,12 @@ const App: React.FC = () => {
             </div>
           );
         } else {
-          return <div>{text} 台</div>;
+          return (
+            <div style={{ display: "flex", alignItems: "center" }}>
+              <img src={emptyAntIcon} alt="antIcon" style={{ width: 16, height: 16, marginRight: 4 }} />
+              {text} 台{" "}
+            </div>
+          );
         }
         // return <span>{text} 台 {record.totalFailuresT2}</span>;
       },
@@ -243,7 +249,12 @@ const App: React.FC = () => {
             </div>
           );
         } else {
-          return <div>{text} 台</div>;
+          return (
+            <div style={{ display: "flex", alignItems: "center" }}>
+              <img src={emptyAntIcon} alt="antIcon" style={{ width: 16, height: 16, marginRight: 4 }} />
+              {text} 台{" "}
+            </div>
+          );
         }
         // return <span>{text} 台</span>;
       },
