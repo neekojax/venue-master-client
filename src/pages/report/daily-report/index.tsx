@@ -6,6 +6,7 @@ import { DownloadOutlined } from "@ant-design/icons";
 import { Button, DatePicker, Select, Table, Tag, Tooltip } from "antd";
 import type { ColumnsType } from "antd/es/table";
 import * as XLSX from "xlsx";
+import antIcon from "@/assets/ant-icon.png";
 import { useSelector, useSettingsStore } from "@/stores";
 
 // import { fetchDailyReport, updateReport } from "@/pages/report/api.tsx";
@@ -38,6 +39,7 @@ interface DataType {
   events: string;
   shelved: string;
   pendingRepair: string;
+  anget_key: string;
 }
 const App: React.FC = () => {
   const { poolType } = useSettingsStore(useSelector(["poolType"]));
@@ -212,8 +214,18 @@ const App: React.FC = () => {
       key: "totalFailuresT1",
       width: 120,
       align: "right",
-      render: (text) => {
-        return <span>{text} 台</span>;
+      render: (text, record) => {
+        if (record.anget_key != "") {
+          return (
+            <div style={{ display: "flex", alignItems: "center" }}>
+              <img src={antIcon} alt="antIcon" style={{ width: 16, height: 16, marginRight: 4 }} />
+              {text} 台{" "}
+            </div>
+          );
+        } else {
+          return <div>{text} 台</div>;
+        }
+        // return <span>{text} 台 {record.totalFailuresT2}</span>;
       },
     },
     {
@@ -222,8 +234,18 @@ const App: React.FC = () => {
       key: "totalFailuresT2",
       width: 120,
       align: "right",
-      render: (text) => {
-        return <span>{text} 台</span>;
+      render: (text, record) => {
+        if (record.anget_key != "") {
+          return (
+            <div style={{ display: "flex", alignItems: "center" }}>
+              <img src={antIcon} alt="antIcon" style={{ width: 16, height: 16, marginRight: 4 }} />
+              {text} 台{" "}
+            </div>
+          );
+        } else {
+          return <div>{text} 台</div>;
+        }
+        // return <span>{text} 台</span>;
       },
     },
     // {
@@ -485,6 +507,7 @@ const App: React.FC = () => {
               events: venue.events || "",
               shelved: venue.shelved || 0,
               pendingRepair: venue.pendingRepair || 0,
+              anget_key: venue.anget_key || "",
             };
           });
 
