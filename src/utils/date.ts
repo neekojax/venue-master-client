@@ -73,3 +73,12 @@ export function getTimeDifference(startTime: string, endTime: string) {
   }
   return "---";
 }
+
+export function getBuildTime() {
+  // dayjs.extend(utc);
+  // dayjs.extend(timezone);
+
+  const buildTime = dayjs.tz(Date.now(), "Asia/Shanghai").format("YYYY-MM-DD HH:mm:ss");
+
+  return buildTime;
+}

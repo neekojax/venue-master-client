@@ -58,11 +58,3 @@ export default function App() {
     </ThemeProvider>
   );
 }
-
-// 在入口文件 index.tsx 或 App.tsx 中设置
-// const resizeFont = () => {
-//   const baseSize = window.innerWidth / 100;
-//   document.documentElement.style.fontSize = baseSize / 16 + 'rem';
-// };
-// window.addEventListener('resize', resizeFont);
-// resizeFont(); // 初始化

@@ -18,6 +18,7 @@ import {
 } from "antd";
 import ActionButton, { ActionButtonMode } from "@/components/action-button";
 import EditTable from "@/components/edit-table";
+import { FavoriteButton } from "@/components/FavoriteButton";
 import useAuthRedirect from "@/hooks/useAuthRedirect.ts";
 // import PoolSwitcher from "./components/select.tsx";
 import { useSelector, useSettingsStore } from "@/stores";
@@ -154,6 +155,7 @@ export default function MiningSettingPage() {
             energy_ratio: any;
             basic_hosting_fee: any;
             link: any;
+            collection: any;
           },
           index: any,
         ) => ({
@@ -173,6 +175,7 @@ export default function MiningSettingPage() {
           energy_ratio: item.energy_ratio,
           basic_hosting_fee: item.basic_hosting_fee,
           link: item.link,
+          collection: item.collection,
         }),
       );
       setTableData(newData); // 设置表格数据源
@@ -209,7 +212,7 @@ export default function MiningSettingPage() {
         key: "venue_name",
         width: 200,
         // render: (text: any) => <span style={{ color: "#333" }}>{text}</span>,
-        render: (text: string, record: { venue_id?: any }) => {
+        render: (text: string, record: { venue_id?: any; collection?: any }) => {
           const isSpecialVenue = text === "Arct-HF01-J XP-AR-US"; // 判断是否为特殊场地
           return (
             <Tooltip
@@ -218,7 +221,7 @@ export default function MiningSettingPage() {
               overlayInnerStyle={{ color: "white" }}
               style={{ color: "white" }}
             >
-              <div
+              {/* <div
                 style={{
                   width: "100%",
                   overflow: "hidden",
@@ -227,13 +230,48 @@ export default function MiningSettingPage() {
                   whiteSpace: "nowrap",
                   fontWeight: isSpecialVenue ? "bold" : "normal", // 加粗特殊场地
                 }}
-              >
-                {/* {text} */}
-                <Link to={`/venue/detail/${record.venue_id}`} className="text-blue-500 hover:underline">
-                  {text}
+              > */}
+              {/* {text} */}
+              {/* <Link to={`/venue/detail/${record.venue_id}`} className="text-blue-500 hover:underline"> */}
+              {/* {text}
                 </Link>
                 {isSpecialVenue && (
                   <Tag color="red" style={{ marginLeft: 2 }}>
+                    补充
+                  </Tag>
+                )} */}
+              {/* </div> */}
+
+              <div
+                style={{
+                  width: "90%",
+                  display: "flex", // ✅ 改成 flex 布局
+                  alignItems: "center",
+                  overflow: "hidden",
+                  color: isSpecialVenue ? "red" : "#333",
+                  fontWeight: isSpecialVenue ? "bold" : "normal",
+                }}
+              >
+                {/* 场地名 + 跳转 */}
+                <Link
+                  to={`/venue/detail/${record.venue_id}`}
+                  className="text-blue-500 hover:underline"
+                  style={{
+                    flex: 1, // ✅ 占满剩余空间
+                    overflow: "hidden",
+                    textOverflow: "ellipsis",
+                    whiteSpace: "nowrap",
+                  }}
+                >
+                  {text}
+                </Link>
+
+                {/* 收藏按钮 */}
+                <FavoriteButton venueId={record.venue_id} defaultFavorite={record.collection} />
+
+                {/* 特殊场地标记 */}
+                {isSpecialVenue && (
+                  <Tag color="red" style={{ marginLeft: 4 }}>
                     补充
                   </Tag>
                 )}

@@ -66,6 +66,7 @@ export default function LoginForm() {
         // console.log("data", data);
         // console.log("values", values);
         localStorage.setItem("user", values?.name || "");
+        localStorage.setItem("user_id", data.data.id); //保存用户id
         localStorage.setItem("access_token", data.data.access_token);
         localStorage.setItem("refresh_token", data.data.refresh_token);
 

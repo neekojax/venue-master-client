@@ -96,6 +96,16 @@ export default function MainLayout() {
             </Flex>
           </Layout.Header>
           <Content />
+          {/* {BUILD_TIME}  */}
+          检测到系统有新版本发布，请立即刷新页面！
+          <Button
+            type="primary"
+            onClick={() => {
+              location.reload();
+            }}
+          >
+            立即刷新
+          </Button>
         </Layout>
       </Layout>
     </>

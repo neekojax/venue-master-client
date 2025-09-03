@@ -8,6 +8,7 @@ import type { ColumnsType } from "antd/es/table";
 import * as XLSX from "xlsx";
 import antIcon from "@/assets/ant-icon.png";
 import emptyAntIcon from "@/assets/empty-ant.png";
+import { FavoriteButton } from "@/components/FavoriteButton";
 import { useSelector, useSettingsStore } from "@/stores";
 
 // import { fetchDailyReport, updateReport } from "@/pages/report/api.tsx";
@@ -41,6 +42,7 @@ interface DataType {
   shelved: string;
   pendingRepair: string;
   anget_key: string;
+  collection: number;
 }
 const App: React.FC = () => {
   const { poolType } = useSettingsStore(useSelector(["poolType"]));
@@ -115,7 +117,39 @@ const App: React.FC = () => {
       key: "siteName",
       fixed: "left",
       width: 250,
-      render: (text: string, record: { key?: any }) => {
+      // render: (text: string, record: { key?: any }) => {
+      //   const isSpecialVenue = text === "Arct-HF01-J XP-AR-US" || text === "ARCT Technologies-HF02-AR-US";
+      //   return (
+      //     <Tooltip
+      //       title={text}
+      //       placement="top"
+      //       overlayInnerStyle={{ color: "white" }}
+      //       style={{ color: "white" }}
+      //     >
+      //       <div
+      //         style={{
+      //           width: "100%",
+      //           overflow: "hidden",
+      //           color: isSpecialVenue ? "red" : "#333", // 特殊场地字体颜色为红色
+      //           textOverflow: "ellipsis",
+      //           whiteSpace: "nowrap",
+      //           fontWeight: isSpecialVenue ? "bold" : "normal", // 加粗特殊场地
+      //         }}
+      //       >
+      //         {isSpecialVenue && (
+      //           <Tag color="red" style={{ marginLeft: 2 }}>
+      //             补充
+      //           </Tag>
+      //         )}
+      //         {/* {text} */}
+      //         <Link to={`/venue/detail/${record.key}`} className="text-blue-500 hover:underline">
+      //           {text}
+      //         </Link>
+      //       </div>
+      //     </Tooltip>
+      //   );
+      // },
+      render: (text: string, record: { key?: any; collection?: any }) => {
         const isSpecialVenue = text === "Arct-HF01-J XP-AR-US" || text === "ARCT Technologies-HF02-AR-US";
         return (
           <Tooltip
@@ -127,22 +161,36 @@ const App: React.FC = () => {
             <div
               style={{
                 width: "100%",
+                display: "flex", // ✅ 改成 flex 布局
+                alignItems: "center",
                 overflow: "hidden",
-                color: isSpecialVenue ? "red" : "#333", // 特殊场地字体颜色为红色
-                textOverflow: "ellipsis",
-                whiteSpace: "nowrap",
-                fontWeight: isSpecialVenue ? "bold" : "normal", // 加粗特殊场地
+                color: isSpecialVenue ? "red" : "#333",
+                fontWeight: isSpecialVenue ? "bold" : "normal",
               }}
             >
+              {/* 场地名 + 跳转 */}
+              <Link
+                to={`/venue/detail/${record.key}`}
+                className="text-blue-500 hover:underline"
+                style={{
+                  flex: 1, // ✅ 占满剩余空间
+                  overflow: "hidden",
+                  textOverflow: "ellipsis",
+                  whiteSpace: "nowrap",
+                }}
+              >
+                {text}
+              </Link>
+
+              {/* 收藏按钮 */}
+              <FavoriteButton venueId={record.key} defaultFavorite={record.collection} />
+
+              {/* 特殊场地标记 */}
               {isSpecialVenue && (
-                <Tag color="red" style={{ marginLeft: 2 }}>
+                <Tag color="red" style={{ marginLeft: 4 }}>
                   补充
                 </Tag>
               )}
-              {/* {text} */}
-              <Link to={`/venue/detail/${record.key}`} className="text-blue-500 hover:underline">
-                {text}
-              </Link>
             </div>
           </Tooltip>
         );
@@ -519,6 +567,7 @@ const App: React.FC = () => {
               shelved: venue.shelved || 0,
               pendingRepair: venue.pendingRepair || 0,
               anget_key: venue.anget_key || "",
+              collection: venue.collection || 0,
             };
           });
 

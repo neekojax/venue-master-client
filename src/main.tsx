@@ -4,6 +4,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import { ConfigProvider } from "antd";
 import { ErrorBoundary } from "./components/error-boundary";
+import { setupAppVersionNotification } from "./plugins/app";
 import App from "./App";
 
 // import { setupGlobalErrorHandler } from "./utils/errorHandler";
@@ -29,40 +30,8 @@ const queryClient = new QueryClient({
   },
 });
 
-// 假设你的当前版本号
-// const CURRENT_VERSION = "1.0.4";
-
-// // 获取 localStorage 中的版本号
-// const storedVersion = localStorage.getItem("APP_VERSION");
-
-// // 获取所有 cookies 的函数
-// function getAllCookies(): string[] {
-//   return document.cookie.split(";").map((c) => c.trim());
-// }
-
-// // 删除所有 cookies
-// function clearAllCookies() {
-//   const cookies = getAllCookies();
-//   for (const cookie of cookies) {
-//     const eqPos = cookie.indexOf("=");
-//     const name = eqPos > -1 ? cookie.substr(0, eqPos) : cookie;
-//     document.cookie = `${name}=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/;`;
-//   }
-// }
-
-// // 判断是否有版本号
-// if (!storedVersion) {
-//   // 没有版本号，第一次访问，写入版本号
-//   localStorage.setItem("APP_VERSION", CURRENT_VERSION);
-// } else if (storedVersion !== CURRENT_VERSION) {
-//   // 版本号不同，说明是新版本
-//   clearAllCookies(); // 清除所有 cookies
-//   localStorage.setItem("APP_VERSION", CURRENT_VERSION); // 更新版本号
-//   window.location.reload(); // 刷新页面
-// } else {
-//   // 版本号一致，无操作
-//   console.log("版本号一致，无需处理");
-// }
+// ✅ 在应用渲染前执行版本检查
+setupAppVersionNotification();
 
 createRoot(document.getElementById("root")!).render(
   <ErrorBoundary>

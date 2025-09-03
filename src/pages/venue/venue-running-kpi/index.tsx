@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { DownloadOutlined } from "@ant-design/icons";
 import { Button, message, Spin, Table, Tag, Tooltip } from "antd";
+import { FavoriteButton } from "@/components/FavoriteButton";
 import { ReactEcharts } from "@/components/react-echarts"; // 导入自定义的 ReactEcharts 组件
 import HeaderSection from "./components/HeaderSection";
 import useAuthRedirect from "@/hooks/useAuthRedirect.ts";
@@ -44,8 +45,8 @@ export default function VenueRunningKpi() {
       setSubAccountNum(rawData?.length ?? 0);
     } catch (err) {
       // 处理错误
-      console.log("服务异常，请稍后重试", err);
-      message.error("服务异常，请稍后重试");
+      // console.log("服务异常，请稍后重试", err);
+      message.error("服务异常，请稍后重试" + err);
     } finally {
       setLoading(false);
     }
@@ -120,7 +121,7 @@ export default function VenueRunningKpi() {
         dataIndex: "venueName",
         fixed: "left",
         width: 250,
-        render: (text: string, record: { venueID?: any }) => {
+        render: (text: string, record: { venue_id?: any; collection?: any }) => {
           const isSpecialVenue = text === "Arct-HF01-J XP-AR-US" || text === "ARCT Technologies-HF02-AR-US";
           return (
             <Tooltip
@@ -131,28 +132,74 @@ export default function VenueRunningKpi() {
             >
               <div
                 style={{
-                  width: "100%",
+                  width: "90%",
+                  display: "flex", // ✅ 改成 flex 布局
+                  alignItems: "center",
                   overflow: "hidden",
-                  color: isSpecialVenue ? "red" : "#333", // 特殊场地字体颜色为红色
-                  textOverflow: "ellipsis",
-                  whiteSpace: "nowrap",
-                  fontWeight: isSpecialVenue ? "bold" : "normal", // 加粗特殊场地
+                  color: isSpecialVenue ? "red" : "#333",
+                  fontWeight: isSpecialVenue ? "bold" : "normal",
                 }}
               >
+                {/* 场地名 + 跳转 */}
+                <Link
+                  to={`/venue/detail/${record.venue_id}`}
+                  className="text-blue-500 hover:underline"
+                  style={{
+                    flex: 1, // ✅ 占满剩余空间
+                    overflow: "hidden",
+                    textOverflow: "ellipsis",
+                    whiteSpace: "nowrap",
+                  }}
+                >
+                  {text}
+                </Link>
+
+                {/* 收藏按钮 */}
+                <FavoriteButton venueId={record.venue_id} defaultFavorite={record.collection} />
+
+                {/* 特殊场地标记 */}
                 {isSpecialVenue && (
-                  <Tag color="red" style={{ marginLeft: 2 }}>
+                  <Tag color="red" style={{ marginLeft: 4 }}>
                     补充
                   </Tag>
                 )}
-
-                {/* 这里假设数据里有 venue_code 或 venueId 字段用于跳转 */}
-                <Link to={`/venue/detail/${record.venueID}`} className="text-blue-500 hover:underline">
-                  {text}
-                </Link>
               </div>
             </Tooltip>
           );
         },
+        // render: (text: string, record: { venueID?: any }) => {
+        //   const isSpecialVenue = text === "Arct-HF01-J XP-AR-US" || text === "ARCT Technologies-HF02-AR-US";
+        //   return (
+        //     <Tooltip
+        //       title={text}
+        //       placement="top"
+        //       overlayInnerStyle={{ color: "white" }}
+        //       style={{ color: "white" }}
+        //     >
+        //       <div
+        //         style={{
+        //           width: "100%",
+        //           overflow: "hidden",
+        //           color: isSpecialVenue ? "red" : "#333", // 特殊场地字体颜色为红色
+        //           textOverflow: "ellipsis",
+        //           whiteSpace: "nowrap",
+        //           fontWeight: isSpecialVenue ? "bold" : "normal", // 加粗特殊场地
+        //         }}
+        //       >
+        //         {isSpecialVenue && (
+        //           <Tag color="red" style={{ marginLeft: 2 }}>
+        //             补充
+        //           </Tag>
+        //         )}
+
+        //         {/* 这里假设数据里有 venue_code 或 venueId 字段用于跳转 */}
+        //         <Link to={`/venue/detail/${record.venueID}`} className="text-blue-500 hover:underline">
+        //           {text}
+        //         </Link>
+        //       </div>
+        //     </Tooltip>
+        //   );
+        // },
       },
       {
         title: "子账户",
