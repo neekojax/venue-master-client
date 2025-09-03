@@ -1,4 +1,5 @@
 import path from "node:path";
+import type { Plugin } from "vite";
 import { defineConfig } from "vite";
 import { compression } from "vite-plugin-compression2";
 import svgr from "vite-plugin-svgr";
@@ -7,17 +8,12 @@ import dayjs from "dayjs";
 import timezone from "dayjs/plugin/timezone";
 import utc from "dayjs/plugin/utc";
 
-import type { Plugin } from "vite";
-
 export function setupHtmlPlugin(buildTime: string) {
   const plugin: Plugin = {
     name: "html-plugin",
     apply: "build",
     transformIndexHtml(html) {
-      return html.replace(
-        "<head>",
-        `<head>\n    <meta name="buildTime" content="${buildTime}">`
-      );
+      return html.replace("<head>", `<head>\n    <meta name="buildTime" content="${buildTime}">`);
     },
   };
 
@@ -25,9 +21,7 @@ export function setupHtmlPlugin(buildTime: string) {
 }
 dayjs.extend(utc);
 dayjs.extend(timezone);
-const buildTime = dayjs
-  .tz(Date.now(), "Asia/Shanghai")
-  .format("YYYY-MM-DD HH:mm:ss");
+const buildTime = dayjs.tz(Date.now(), "Asia/Shanghai").format("YYYY-MM-DD HH:mm:ss");
 
 // https://vitejs.dev/config/
 export default defineConfig({

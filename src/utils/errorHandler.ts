@@ -1,7 +1,7 @@
 // src/utils/errorHandler.ts
 const APP_VERSION = "1.0.2"; // 每次发版修改
 
-function clearCacheAndReload() {
+export function clearCacheAndReload() {
   console.warn("清理缓存并刷新页面...");
 
   try {

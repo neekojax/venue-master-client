@@ -19,7 +19,6 @@ export function useFavorite() {
         venue_id: Number(venueId), // 对应 Go 的 venue_id
       };
       await fetchPost(url, param_data);
-
       message.success(isFavorite == 1 ? "已取消收藏" : "收藏成功");
       return isFavorite == 1 ? 0 : 1; // 返回更新后的收藏状态
     } catch (error) {

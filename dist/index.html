@@ -1,18 +1,55 @@
 <!doctype html>
 <html lang="en">
   <head>
-    <meta name="buildTime" content="2025-09-03 10:17:53">
+    <meta name="buildTime" content="2025-09-03 15:47:35">
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/favicon.png" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>运营管理系统</title>
-    <script type="module" crossorigin src="/js/index-LrNzJEZ6.js"></script>
+    <script type="module" crossorigin src="/js/index-DuG48cfA.js"></script>
     <link rel="modulepreload" crossorigin href="/js/react-BIszHAjf.js">
-    <link rel="modulepreload" crossorigin href="/js/antd-Dkbt67Ig.js">
-    <link rel="stylesheet" crossorigin href="/css/index-_DJqRqlC.css">
+    <link rel="modulepreload" crossorigin href="/js/antd-Bs5MzF3K.js">
+    <link rel="stylesheet" crossorigin href="/css/index-DhiD1UOm.css">
   </head>
   <body>
-    <div id="root"></div>
+    <!-- <div id="root"></div> -->
+    <div id="root">
+      <div style="padding:20px; text-align:center; font-size:16px; color:#333;">
+        检测到系统有新版本发布，请立即刷新页面！
+        <button
+          style="margin-left: 12px; padding: 6px 16px; background:#1677ff; color:#fff; border:none; border-radius:4px; cursor:pointer;"
+          onclick="clearCacheAndReload()"
+        >
+          立即刷新
+        </button>
+      </div>
+    </div>
+    <script>
+      function clearCacheAndReload() {
+        console.warn("清理缓存并刷新页面...");
+    
+        try {
+          // 清空 localStorage & sessionStorage
+          localStorage.clear();
+          sessionStorage.clear();
+    
+          // 清理 Service Worker 缓存（PWA、vite 打包可能会用到）
+          if ('caches' in window) {
+            caches.keys().then((keys) => {
+              keys.forEach((key) => caches.delete(key));
+            });
+          }
+        } catch (e) {
+          console.error("清理缓存失败:", e);
+        }
+    
+        // 设置一个刷新标记，避免死循环
+        sessionStorage.setItem("reloaded", "true");
+    
+        // 强制刷新页面
+        location.reload(true);
+      }
+    </script>
   </body>
 </html>
 

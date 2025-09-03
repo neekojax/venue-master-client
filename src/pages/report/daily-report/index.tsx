@@ -8,7 +8,6 @@ import type { ColumnsType } from "antd/es/table";
 import * as XLSX from "xlsx";
 import antIcon from "@/assets/ant-icon.png";
 import emptyAntIcon from "@/assets/empty-ant.png";
-import { FavoriteButton } from "@/components/FavoriteButton";
 import { useSelector, useSettingsStore } from "@/stores";
 
 // import { fetchDailyReport, updateReport } from "@/pages/report/api.tsx";
@@ -79,8 +78,6 @@ const App: React.FC = () => {
   const [filteredData, setFilteredData] = useState<DataType[]>([]); // 筛选后的数据
   const [siteOptions, setSiteOptions] = useState<{ value: string; label: string }[]>([]);
 
-  const [pageSize, setPageSize] = useState(20); // 新增状态管理页大小
-
   // const save = async (record: DataType, text: string) => {
   //   try {
   //     const date = selectedDate || formattedDate; // formattedDate 是昨天的日期
@@ -117,39 +114,7 @@ const App: React.FC = () => {
       key: "siteName",
       fixed: "left",
       width: 250,
-      // render: (text: string, record: { key?: any }) => {
-      //   const isSpecialVenue = text === "Arct-HF01-J XP-AR-US" || text === "ARCT Technologies-HF02-AR-US";
-      //   return (
-      //     <Tooltip
-      //       title={text}
-      //       placement="top"
-      //       overlayInnerStyle={{ color: "white" }}
-      //       style={{ color: "white" }}
-      //     >
-      //       <div
-      //         style={{
-      //           width: "100%",
-      //           overflow: "hidden",
-      //           color: isSpecialVenue ? "red" : "#333", // 特殊场地字体颜色为红色
-      //           textOverflow: "ellipsis",
-      //           whiteSpace: "nowrap",
-      //           fontWeight: isSpecialVenue ? "bold" : "normal", // 加粗特殊场地
-      //         }}
-      //       >
-      //         {isSpecialVenue && (
-      //           <Tag color="red" style={{ marginLeft: 2 }}>
-      //             补充
-      //           </Tag>
-      //         )}
-      //         {/* {text} */}
-      //         <Link to={`/venue/detail/${record.key}`} className="text-blue-500 hover:underline">
-      //           {text}
-      //         </Link>
-      //       </div>
-      //     </Tooltip>
-      //   );
-      // },
-      render: (text: string, record: { key?: any; collection?: any }) => {
+      render: (text: string, record: { key?: any }) => {
         const isSpecialVenue = text === "Arct-HF01-J XP-AR-US" || text === "ARCT Technologies-HF02-AR-US";
         return (
           <Tooltip
@@ -161,36 +126,22 @@ const App: React.FC = () => {
             <div
               style={{
                 width: "100%",
-                display: "flex", // ✅ 改成 flex 布局
-                alignItems: "center",
                 overflow: "hidden",
-                color: isSpecialVenue ? "red" : "#333",
-                fontWeight: isSpecialVenue ? "bold" : "normal",
+                color: isSpecialVenue ? "red" : "#333", // 特殊场地字体颜色为红色
+                textOverflow: "ellipsis",
+                whiteSpace: "nowrap",
+                fontWeight: isSpecialVenue ? "bold" : "normal", // 加粗特殊场地
               }}
             >
-              {/* 场地名 + 跳转 */}
-              <Link
-                to={`/venue/detail/${record.key}`}
-                className="text-blue-500 hover:underline"
-                style={{
-                  flex: 1, // ✅ 占满剩余空间
-                  overflow: "hidden",
-                  textOverflow: "ellipsis",
-                  whiteSpace: "nowrap",
-                }}
-              >
-                {text}
-              </Link>
-
-              {/* 收藏按钮 */}
-              <FavoriteButton venueId={record.key} defaultFavorite={record.collection} />
-
-              {/* 特殊场地标记 */}
               {isSpecialVenue && (
-                <Tag color="red" style={{ marginLeft: 4 }}>
+                <Tag color="red" style={{ marginLeft: 2 }}>
                   补充
                 </Tag>
               )}
+              {/* {text} */}
+              <Link to={`/venue/detail/${record.key}`} className="text-blue-500 hover:underline">
+                {text}
+              </Link>
             </div>
           </Tooltip>
         );
@@ -834,16 +785,31 @@ const App: React.FC = () => {
             columns={columns}
             dataSource={filteredData}
             scroll={{ x: 1500 }}
-            sticky={true}
+            // sticky={true}
             pagination={{
-              pageSize: pageSize, // 使用动态 pageSize
+              position: ["bottomCenter"],
               showSizeChanger: true,
-              onShowSizeChange: (size) => {
-                setPageSize(size); // 更新 pageSize 状态
-              },
-              showQuickJumper: true,
+              pageSizeOptions: ["20", "30", "50"],
+              defaultPageSize: 20,
               showTotal: (total) => `共 ${total} 条`,
+              total: filteredData?.length,
+              onChange: () => {
+                const tableBody = document.querySelector(".ant-table-body");
+                if (tableBody) {
+                  tableBody.scrollTop = 0;
+                }
+              },
             }}
+            // pagination={{
+            //   pageSize: pageSize, // 使用动态 pageSize
+            //   showSizeChanger: true,
+            //   pageSizeOptions: ["20", "30", "50"],
+            //   onShowSizeChange: (size) => {
+            //     setPageSize(size); // 更新 pageSize 状态
+            //   },
+            //   showQuickJumper: true,
+            //   showTotal: (total) => `共 ${total} 条`,
+            // }}
             className="custom-table"
           />
         </div>
@@ -863,14 +829,7 @@ const App: React.FC = () => {
           font-weight: 600;
         }
 
-        // .custom-table .ant-table-tbody > tr:hover > td {
-        //   background-color: #f0f7ff;
-        // }
-
-        // .custom-table .ant-table-tbody > tr:nth-child(even) {
-        //   background-color: #fafafa;
-        // }
-
+     
         .line-clamp-2 {
           display: -webkit-box;
           -webkit-line-clamp: 2;
