@@ -4,6 +4,7 @@ import { Link } from "react-router-dom";
 import { DeleteOutlined, ExportOutlined, FormOutlined, SearchOutlined } from "@ant-design/icons";
 import {
   Button,
+  Col,
   Form,
   Input,
   InputNumber,
@@ -11,8 +12,10 @@ import {
   Modal,
   Popconfirm,
   Radio,
+  Row,
   Select,
   Spin,
+  Switch,
   Tag,
   Tooltip,
 } from "antd";
@@ -64,6 +67,7 @@ export default function MiningSettingPage() {
 
   const [columns, setColumns] = useState<any>([]);
   const [tableData, setTableData] = useState<any>([]);
+  const [showCollectionOnly, setShowCollectionOnly] = useState(true);
 
   const newMutation = useMiningPoolNew();
   const updateMutation = useMiningPoolUpdate();
@@ -267,7 +271,17 @@ export default function MiningSettingPage() {
                 </Link>
 
                 {/* 收藏按钮 */}
-                <FavoriteButton venueId={record.venue_id} defaultFavorite={record.collection} />
+                <FavoriteButton
+                  venueId={record.venue_id}
+                  defaultFavorite={record.collection}
+                  onChange={(newCollection: 0 | 1) => {
+                    setTableData((prev: any) =>
+                      prev.map((item: any) =>
+                        item.venue_id === record.venue_id ? { ...item, collection: newCollection } : item,
+                      ),
+                    );
+                  }}
+                />
 
                 {/* 特殊场地标记 */}
                 {isSpecialVenue && (
@@ -504,61 +518,74 @@ export default function MiningSettingPage() {
     setSearchTerm(e.target.value);
   };
 
+  // // 根据搜索词过滤数据
+  // const filteredData = tableData
+  //   .filter((item: { [s: string]: unknown } | ArrayLike<unknown>) => {
+  //     return Object.values(item).some((value) =>
+  //       String(value).toLowerCase().includes(searchTerm.toLowerCase()),
+  //     );
+  //   })
+  //   .sort((a: any, b: any) => {
+  //     const nameA = a.venue_name.toLowerCase(); // 转为小写进行比较
+  //     const nameB = b.venue_name.toLowerCase();
+  //     if (nameA < nameB) {
+  //       return -1; // a 在 b 前
+  //     }
+  //     if (nameA > nameB) {
+  //       return 1; // a 在 b 后
+  //     }
+  //     return 0; // 相等
+  //   });
+
   // 根据搜索词过滤数据
   const filteredData = tableData
-    .filter((item: { [s: string]: unknown } | ArrayLike<unknown>) => {
-      return Object.values(item).some((value) =>
+    .filter((item: { [key: string]: any }) => {
+      // 1️⃣ 搜索词过滤
+      const matchesSearch = Object.values(item).some((value) =>
         String(value).toLowerCase().includes(searchTerm.toLowerCase()),
       );
+
+      // 2️⃣ 收藏过滤
+      const matchesCollection = !showCollectionOnly || item.collection === 1;
+
+      return matchesSearch && matchesCollection;
     })
     .sort((a: any, b: any) => {
-      const nameA = a.venue_name.toLowerCase(); // 转为小写进行比较
+      const nameA = a.venue_name.toLowerCase();
       const nameB = b.venue_name.toLowerCase();
-      if (nameA < nameB) {
-        return -1; // a 在 b 前
-      }
-      if (nameA > nameB) {
-        return 1; // a 在 b 后
-      }
-      return 0; // 相等
+      return nameA.localeCompare(nameB);
     });
 
   // @ts-ignore
   return (
     <div>
-      <div
-        style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}
-      >
-        <div className={"flex"}>
-          <div className={"mr-4"}>
-            {/* <PoolSwitcher onChange={handlePoolCategoryChange} value={poolCategory} /> */}
-            <Radio.Group className="filterRadio" onChange={handlePoolCategoryChange} value={poolCategory}>
+      <div style={{ width: "100%", background: "#fff", padding: "12px 12px", marginBottom: 16 }}>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+          {/* <div className={"flex"}>
+          <div className={"mr-4"}> */}
+          {/* <PoolSwitcher onChange={handlePoolCategoryChange} value={poolCategory} /> */}
+          {/* <Radio.Group className="filterRadio" onChange={handlePoolCategoryChange} value={poolCategory}>
               <Radio.Button value="主矿池">主矿池</Radio.Button>
               <Radio.Button value="备用矿池">备用矿池</Radio.Button>
-            </Radio.Group>
-          </div>
-        </div>
-        <div>
+            </Radio.Group> */}
+          {/* </div>
+        </div> */}
+
           <Input
             prefix={<SearchOutlined style={{ color: "rgba(0, 0, 0, 0.25)" }} size={18} />}
             placeholder="请输入搜索字段"
             value={searchTerm}
+            size="middle"
             onChange={handleSearch}
-            style={{ width: 250 }} // 设定宽度
+            style={{ width: 450 }} // 设定宽度
             className="text-sm mr-10"
           />
-          <ActionButton
-            label={"添加矿池"}
-            // @ts-ignore
-            initialValues={emptyData}
-            onSubmit={handleNewMiningPool}
-            FormComponent={EditForm}
-            mode={ActionButtonMode.ADD}
-          />
+
           <Button
             // type="primary"
             // icon={<DownloadOutlined />}
             icon={<ExportOutlined className="exportIcon" />}
+            // size="middle"
             size="middle"
             className={"text-blue-500 exportButton"}
             style={{ marginLeft: "10px" }}
@@ -569,85 +596,121 @@ export default function MiningSettingPage() {
         </div>
       </div>
 
-      {/* 覆盖在 EditTable 上方的 Spin */}
-      {isLoadingNewPool && (
-        <Spin
-          tip="正在添加矿池..."
-          size="large"
-          style={{
-            position: "absolute", // 绝对定位
-            top: "30%", // 垂直居中
-            left: "50%", // 水平居中
-            transform: "translate(-50%, -50%)", // 使用 transform 进行中心对齐
-            zIndex: 1000, // 确保在最上层
-          }}
-        />
-      )}
-
-      {isLoadingPools ? (
-        <Spin style={{ marginTop: 20 }} />
-      ) : (
-        <EditTable
-          tableData={filteredData}
-          setTableData={setTableData}
-          columns={columns}
-          handleDelete={handleDelete}
-          handleSave={handleSave}
-        />
-      )}
-      <Modal
-        title="修改矿池"
-        className="editModal"
-        closable={{ "aria-label": "Custom Close Button" }}
-        open={isModalOpen}
-        onOk={handleOk}
-        onCancel={handleCancel}
+      <div
+        style={{ background: "#fff", color: "grey", borderRadius: "0.5rem", padding: "20px 0px" }}
+        className="longdataTable"
       >
-        <Form
-          name="basic"
-          form={form}
-          labelCol={{ span: 8 }}
-          wrapperCol={{ span: 16 }}
-          style={{ maxWidth: 600 }}
-          initialValues={{ remember: true }}
-          // onFinish={onFinish}
-          // onFinishFailed={onFinishFailed}
-          autoComplete="off"
+        <Row gutter={[16, 16]} justify="space-between" align="middle">
+          <Col xs={24} sm={24} md={12}>
+            <Radio.Group
+              size="small"
+              onChange={handlePoolCategoryChange}
+              value={poolCategory}
+              style={{ marginLeft: "10px", fontSize: "13px" }}
+            >
+              <Radio.Button value="主矿池" style={{ fontSize: "12px" }}>
+                主矿池
+              </Radio.Button>
+              <Radio.Button value="备用矿池" style={{ fontSize: "12px" }}>
+                备用矿池
+              </Radio.Button>
+            </Radio.Group>
+          </Col>
+          <Col xs={24} sm={24} md={12} style={{ textAlign: "right" }}>
+            <div style={{ marginBottom: 16, marginRight: "10px", color: "#000" }}>
+              <Switch size="small" checked={showCollectionOnly} onChange={setShowCollectionOnly} /> 我的自选{" "}
+              <ActionButton
+                label={"添加矿池"}
+                size="small"
+                // @ts-ignore
+                initialValues={emptyData}
+                onSubmit={handleNewMiningPool}
+                FormComponent={EditForm}
+                mode={ActionButtonMode.ADD}
+              />
+            </div>
+          </Col>
+        </Row>
+
+        {/* 覆盖在 EditTable 上方的 Spin */}
+        {isLoadingNewPool && (
+          <Spin
+            tip="正在添加矿池..."
+            size="large"
+            style={{
+              position: "absolute", // 绝对定位
+              top: "30%", // 垂直居中
+              left: "50%", // 水平居中
+              transform: "translate(-50%, -50%)", // 使用 transform 进行中心对齐
+              zIndex: 1000, // 确保在最上层
+            }}
+          />
+        )}
+
+        {isLoadingPools ? (
+          <Spin style={{ marginTop: 20 }} />
+        ) : (
+          <EditTable
+            tableData={filteredData}
+            setTableData={setTableData}
+            columns={columns}
+            handleDelete={handleDelete}
+            handleSave={handleSave}
+          />
+        )}
+        <Modal
+          title="修改矿池"
+          className="editModal"
+          closable={{ "aria-label": "Custom Close Button" }}
+          open={isModalOpen}
+          onOk={handleOk}
+          onCancel={handleCancel}
         >
-          {/* <Form.Item<FieldType>
+          <Form
+            name="basic"
+            form={form}
+            labelCol={{ span: 8 }}
+            wrapperCol={{ span: 16 }}
+            style={{ maxWidth: 600 }}
+            initialValues={{ remember: true }}
+            // onFinish={onFinish}
+            // onFinishFailed={onFinishFailed}
+            autoComplete="off"
+          >
+            {/* <Form.Item<FieldType>
             label="ID"
             name="id"
           >
             <Input />
           </Form.Item> */}
-          <Form.Item<FieldType>
-            label="子账户名称"
-            name="pool_name"
-            rules={[{ required: true, message: "Please input your pool pool_name!" }]}
-          >
-            <Input />
-          </Form.Item>
-
-          <Form.Item<FieldType>
-            label="场地"
-            name="venue_id" // 用于存储选中的场地 ID
-            rules={[{ required: true, message: "请选择场地!" }]} // 添加验证规则
-          >
-            <Select
-              disabled
-              placeholder="请选择场地"
-              allowClear
-              style={{ width: "100%" }} // 设置宽度为100%
+            <Form.Item<FieldType>
+              label="子账户名称"
+              name="pool_name"
+              rules={[{ required: true, message: "Please input your pool pool_name!" }]}
             >
-              {venueList?.data?.map((venue: { id: number; venue_name: string }) => (
-                <Option key={venue.id} value={venue.id}>
-                  {venue.venue_name}
-                </Option>
-              ))}
-            </Select>
-          </Form.Item>
+              <Input />
+            </Form.Item>
 
-          {/* <Form.Item<FieldType>
+            <Form.Item<FieldType>
+              label="场地"
+              name="venue_id" // 用于存储选中的场地 ID
+              rules={[{ required: true, message: "请选择场地!" }]} // 添加验证规则
+            >
+              <Select
+                disabled
+                placeholder="请选择场地"
+                allowClear
+                style={{ width: "100%" }} // 设置宽度为100%
+              >
+                {venueList?.data?.map((venue: { id: number; venue_name: string }) => (
+                  <Option key={venue.id} value={venue.id}>
+                    {venue.venue_name}
+                  </Option>
+                ))}
+              </Select>
+            </Form.Item>
+
+            {/* <Form.Item<FieldType>
             label="矿池类型"
             name="pool_type"
             rules={[{ required: true, message: "Please input your pool_type!" }]}
@@ -655,109 +718,110 @@ export default function MiningSettingPage() {
             <Input />
           </Form.Item> */}
 
-          <Form.Item<FieldType>
-            label="场地类型"
-            name="pool_category"
-            rules={[{ required: true, message: "Please input your pool_category!" }]}
-          >
-            <Select
-              placeholder="请选择场地类型"
-              // onChange={onGenderChange}
-              allowClear
-              style={{ backgroundColor: "white" }}
+            <Form.Item<FieldType>
+              label="场地类型"
+              name="pool_category"
+              rules={[{ required: true, message: "Please input your pool_category!" }]}
             >
-              <Option value="主矿池">主矿池</Option>
-              <Option value="备用矿池">备用矿池</Option>
-            </Select>
-          </Form.Item>
+              <Select
+                placeholder="请选择场地类型"
+                // onChange={onGenderChange}
+                allowClear
+                style={{ backgroundColor: "white" }}
+              >
+                <Option value="主矿池">主矿池</Option>
+                <Option value="备用矿池">备用矿池</Option>
+              </Select>
+            </Form.Item>
 
-          <Form.Item<FieldType>
-            label="所属国家"
-            name="country"
-            rules={[{ required: true, message: "Please input your country!" }]}
-          >
-            <Input />
-          </Form.Item>
-          <Form.Item<FieldType>
-            label="托管机器"
-            name="hosted_machine"
-            rules={[{ required: true, message: "Please input your 托管机器!" }]}
-          >
-            <Input />
-          </Form.Item>
+            <Form.Item<FieldType>
+              label="所属国家"
+              name="country"
+              rules={[{ required: true, message: "Please input your country!" }]}
+            >
+              <Input />
+            </Form.Item>
+            <Form.Item<FieldType>
+              label="托管机器"
+              name="hosted_machine"
+              rules={[{ required: true, message: "Please input your 托管机器!" }]}
+            >
+              <Input />
+            </Form.Item>
 
-          <Form.Item<FieldType>
-            label="状态"
-            name="status"
-            rules={[{ required: true, message: "Please input your country!" }]}
-          >
-            <Radio.Group
-              name="radiogroup"
-              defaultValue={1}
-              options={[
-                { value: 0, label: "暂停" },
-                { value: 1, label: "活跃" },
-              ]}
-            />
-          </Form.Item>
+            <Form.Item<FieldType>
+              label="状态"
+              name="status"
+              rules={[{ required: true, message: "Please input your country!" }]}
+            >
+              <Radio.Group
+                name="radiogroup"
+                defaultValue={1}
+                options={[
+                  { value: 0, label: "暂停" },
+                  { value: 1, label: "活跃" },
+                ]}
+              />
+            </Form.Item>
 
-          <Form.Item<FieldType>
-            label="理论算力"
-            name="theoretical_hashrate"
-            rules={[{ required: true, message: "Please input your theoretical_hashrate!" }]}
-          >
-            {/* <Input /> */}
-            <InputNumber<string>
-              style={{ width: 200 }}
-              // defaultValue="1"
-              min="0"
-              max="100000"
-              step="0.01"
-              stringMode
-            />
-          </Form.Item>
+            <Form.Item<FieldType>
+              label="理论算力"
+              name="theoretical_hashrate"
+              rules={[{ required: true, message: "Please input your theoretical_hashrate!" }]}
+            >
+              {/* <Input /> */}
+              <InputNumber<string>
+                style={{ width: 200 }}
+                // defaultValue="1"
+                min="0"
+                max="100000"
+                step="0.01"
+                stringMode
+              />
+            </Form.Item>
 
-          <Form.Item<FieldType>
-            label="能耗比"
-            name="energy_ratio"
-            rules={[{ required: true, message: "Please input your energy_ratio!" }]}
-          >
-            {/* <Input /> */}
-            <InputNumber<string>
-              style={{ width: 200 }}
-              // defaultValue="1"
-              min="0"
-              max="100000"
-              step="0.01"
-              stringMode
-            />
-          </Form.Item>
+            <Form.Item<FieldType>
+              label="能耗比"
+              name="energy_ratio"
+              rules={[{ required: true, message: "Please input your energy_ratio!" }]}
+            >
+              {/* <Input /> */}
+              <InputNumber<string>
+                style={{ width: 200 }}
+                // defaultValue="1"
+                min="0"
+                max="100000"
+                step="0.01"
+                stringMode
+              />
+            </Form.Item>
 
-          <Form.Item<FieldType>
-            label="基础托管费"
-            name="basic_hosting_fee"
-            rules={[{ required: true, message: "Please input your basic_hosting_fee!" }]}
-          >
-            {/* <Input /> */}
-            <InputNumber<string>
-              style={{ width: 200 }}
-              // defaultValue="1"
-              min="0"
-              max="100000"
-              step="0.01"
-              stringMode
-            />
-          </Form.Item>
+            <Form.Item<FieldType>
+              label="基础托管费"
+              name="basic_hosting_fee"
+              rules={[{ required: true, message: "Please input your basic_hosting_fee!" }]}
+            >
+              {/* <Input /> */}
+              <InputNumber<string>
+                style={{ width: 200 }}
+                // defaultValue="1"
+                min="0"
+                max="100000"
+                step="0.01"
+                stringMode
+              />
+            </Form.Item>
 
-          <Form.Item<FieldType>
-            label="Link"
-            name="link"
-            rules={[{ required: true, message: "Please input your link!" }]}
-          >
-            <Input />
-          </Form.Item>
-        </Form>
-      </Modal>
+            <Form.Item<FieldType>
+              label="Link"
+              name="link"
+              rules={[{ required: true, message: "Please input your link!" }]}
+            >
+              <Input />
+            </Form.Item>
+          </Form>
+        </Modal>
+      </div>
     </div>
   );
 }

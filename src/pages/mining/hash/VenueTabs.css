@@ -1,0 +1,11 @@
+.venue-row-all:hover {
+    background-color: #e6f7ff; /* 蓝色 hover */
+    transition: background-color 0.3s;
+    cursor: pointer;
+  }
+  
+  .venue-row-favorite:hover {
+    background-color: #fff7e6; /* 金色 hover */
+    transition: background-color 0.3s;
+    cursor: pointer;
+  }

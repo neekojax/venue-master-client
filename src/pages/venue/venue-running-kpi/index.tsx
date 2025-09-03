@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { DownloadOutlined } from "@ant-design/icons";
-import { Button, message, Spin, Table, Tag, Tooltip } from "antd";
+import { Button, message, Spin, Switch, Table, Tag, Tooltip } from "antd";
 import { ReactEcharts } from "@/components/react-echarts"; // 导入自定义的 ReactEcharts 组件
 import HeaderSection from "./components/HeaderSection";
 import useAuthRedirect from "@/hooks/useAuthRedirect.ts";
@@ -14,7 +14,7 @@ import { fetchMiningPoolRunningData } from "@/pages/venue/api.tsx";
 export default function VenueRunningKpi() {
   useAuthRedirect();
   const { poolType } = useSettingsStore(useSelector(["poolType"]));
-
+  const [showCollectionOnly, setShowCollectionOnly] = useState(true);
   const [runningData, setRunningData] = useState<any>(null); // 状态数据
   const [columns, setColumns] = useState<any>([]);
   const [searchTerm, setSearchTerm] = useState(""); // 新增搜索状态
@@ -331,10 +331,29 @@ export default function VenueRunningKpi() {
     );
   }
 
+  // const filteredData = runningData
+  //   ?.filter((item: any) => {
+  //     const fieldsToSearch = [item.venueName, item.name]; // 👈 你想模糊搜索的字段
+  //     return fieldsToSearch.some((field) => String(field).toLowerCase().includes(searchTerm.toLowerCase()));
+  //   })
+  //   .sort((a: any, b: any) => {
+  //     const nameA = a.venueName.toLowerCase();
+  //     const nameB = b.venueName.toLowerCase();
+  //     return nameA.localeCompare(nameB);
+  //   });
+
+  // 根据搜索词过滤数据
   const filteredData = runningData
-    ?.filter((item: any) => {
-      const fieldsToSearch = [item.venueName, item.name]; // 👈 你想模糊搜索的字段
-      return fieldsToSearch.some((field) => String(field).toLowerCase().includes(searchTerm.toLowerCase()));
+    .filter((item: { [key: string]: any }) => {
+      // 1️⃣ 搜索词过滤
+      const matchesSearch = Object.values(item).some((value) =>
+        String(value).toLowerCase().includes(searchTerm.toLowerCase()),
+      );
+
+      // 2️⃣ 收藏过滤
+      const matchesCollection = !showCollectionOnly || item.collection === 1;
+
+      return matchesSearch && matchesCollection;
     })
     .sort((a: any, b: any) => {
       const nameA = a.venueName.toLowerCase();
@@ -345,42 +364,52 @@ export default function VenueRunningKpi() {
   return (
     <div className="longdataTable">
       <HeaderSection onChange={handleSearch} venueNum={venueNums} subAccountNum={subAccountNum} />
-      <Table
-        loading={loading}
-        columns={columns}
-        dataSource={filteredData}
-        scroll={{ x: 1800, y: 800 }}
-        sticky
-        // bordered
-        style={{ fontSize: "clamp(0.75rem, 2vw, 1rem)" }}
-        className="custom-table"
-        pagination={{
-          position: ["bottomCenter"],
-          showSizeChanger: true,
-          pageSizeOptions: ["20", "30", "50"],
-          defaultPageSize: 20,
-          showTotal: (total) => `共 ${total} 条`,
-          total: filteredData?.length,
-          onChange: () => {
-            const tableBody = document.querySelector(".ant-table-body");
-            if (tableBody) {
-              tableBody.scrollTop = 0;
-            }
-          },
-        }}
-        onRow={() => ({
-          onMouseEnter: () => {
-            const tableBody = document.querySelector(".ant-table-body");
-            if (tableBody) {
-              const { scrollTop, scrollHeight, clientHeight } = tableBody;
-              if (scrollHeight - scrollTop - clientHeight < 50) {
-                // 触发加载更多的逻辑
-                console.log("触发加载更多");
+
+      <div
+        style={{ background: "#fff", color: "grey", borderRadius: "0.5rem", padding: "20px 0px" }}
+        className="longdataTable"
+      >
+        <div style={{ marginBottom: 16, marginRight: "10px", color: "#000", textAlign: "right" }}>
+          <Switch size="small" checked={showCollectionOnly} onChange={setShowCollectionOnly} /> 我的自选
+        </div>
+
+        <Table
+          loading={loading}
+          columns={columns}
+          dataSource={filteredData}
+          scroll={{ x: 1800, y: 800 }}
+          sticky
+          // bordered
+          style={{ fontSize: "clamp(0.75rem, 2vw, 1rem)" }}
+          className="custom-table"
+          pagination={{
+            position: ["bottomCenter"],
+            showSizeChanger: true,
+            pageSizeOptions: ["20", "30", "50"],
+            defaultPageSize: 20,
+            showTotal: (total) => `共 ${total} 条`,
+            total: filteredData?.length,
+            onChange: () => {
+              const tableBody = document.querySelector(".ant-table-body");
+              if (tableBody) {
+                tableBody.scrollTop = 0;
               }
-            }
-          },
-        })}
-      />
+            },
+          }}
+          onRow={() => ({
+            onMouseEnter: () => {
+              const tableBody = document.querySelector(".ant-table-body");
+              if (tableBody) {
+                const { scrollTop, scrollHeight, clientHeight } = tableBody;
+                if (scrollHeight - scrollTop - clientHeight < 50) {
+                  // 触发加载更多的逻辑
+                  console.log("触发加载更多");
+                }
+              }
+            },
+          })}
+        />
+      </div>
     </div>
   );
 }

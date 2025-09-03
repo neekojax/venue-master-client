@@ -3,12 +3,15 @@ import { FaAdn, FaFish } from "react-icons/fa6";
 import { WiDirectionUpRight } from "react-icons/wi";
 import { Link } from "react-router-dom";
 import { ExportOutlined, SearchOutlined } from "@ant-design/icons";
-import { Button, Col, Input, Radio, Row, Spin, Tag, Tooltip } from "antd";
+import { Button, Col, Input, Radio, Row, Spin, Switch, Tag, Tooltip } from "antd";
+import {} from "antd";
 import EditTable from "@/components/edit-table";
 import { FavoriteButton } from "@/components/FavoriteButton";
 import useAuthRedirect from "@/hooks/useAuthRedirect.ts";
 import { useSelector, useSettingsStore } from "@/stores";
 import { exportHashRateToExcel } from "@/utils/excel";
+
+import "./VenueTabs.css";
 
 import { useMiningHashRateList } from "@/pages/mining/hook.ts";
 
@@ -25,6 +28,7 @@ export default function MiningHashRatePage() {
   const { data: hashData, isLoading: isLoadingPools } = useMiningHashRateList(poolType, poolCategory);
 
   const [columns, setColumns] = useState<any>([]);
+  const [showCollectionOnly, setShowCollectionOnly] = useState(true);
   const [tableData, setTableData] = useState<any>([]);
   const [searchTerm, setSearchTerm] = useState(""); // 新增搜索状态
 
@@ -137,7 +141,17 @@ export default function MiningHashRatePage() {
                 </Link>
 
                 {/* 收藏按钮 */}
-                <FavoriteButton venueId={record.venue_id} defaultFavorite={record.collection} />
+                <FavoriteButton
+                  venueId={record.venue_id}
+                  defaultFavorite={record.collection}
+                  onChange={(newCollection: 0 | 1) => {
+                    setTableData((prev: any) =>
+                      prev.map((item: any) =>
+                        item.venue_id === record.venue_id ? { ...item, collection: newCollection } : item,
+                      ),
+                    );
+                  }}
+                />
 
                 {/* 特殊场地标记 */}
                 {isSpecialVenue && (
@@ -282,83 +296,6 @@ export default function MiningHashRatePage() {
           return valueA - valueB; // 返回值用于排序
         },
       },
-      // {
-      //   title: "结算算力",
-      //   width: "10%",
-      //   dataIndex: "last_settlement_hash",
-      //   key: "last_settlement_hash",
-      //   // width: 120,
-      //   render: (text: any) => {
-      //     const parts = text.split(" "); // 根据空格分割
-
-      //     return (
-      //       <span>
-      //         {parts[0]} <span className="text-sm text-gray-500">{parts[1]}</span>
-      //       </span>
-      //     );
-      //   },
-      //   sorter: (a: any, b: any) => {
-      //     // 提取 parts[0] 并转换为数字进行比较
-      //     const valueA = parseFloat(a.last_settlement_hash.split(" ")[0]);
-      //     const valueB = parseFloat(b.last_settlement_hash.split(" ")[0]);
-
-      //     return valueA - valueB; // 返回值用于排序，升序
-      //   },
-      // },
-      // {
-      //   title: "结算BTC",
-      //   dataIndex: "last_settlement_profit_btc",
-      //   key: "last_settlement_profit_btc",
-      //   // onCell: (record: any) => ({
-      //   //   let value = Number(record.last_settlement_profit_btc) || 0;
-      //   //   // 计算透明度，范围 0.1 ~ 1（根据实际数据调整 min/max）
-      //   //   const opacity = Math.min(1, Math.max(0.1, value / 0.01)); // 假设最大值为 0.01 BTC
-
-      //   //   style: {
-      //   //     backgroundColor: `rgba(24, 144, 255, ${opacity})`,
-      //   //     // backgroundColor: '#e6f7ff', // 所有单元格统一设置背景色
-      //   //   },
-      //   // }),
-      //   render: (text: any) => {
-      //     return (
-      //       <span>
-      //         <Tag color="#f50" style={{ padding: 0 }}>
-      //           {text}
-      //         </Tag>
-      //       </span>
-      //     );
-      //   },
-      // },
-      // {
-      //   title: "结算FB",
-      //   dataIndex: "last_settlement_profit_fb",
-      //   key: "last_settlement_profit_fb",
-      //   render: (text: any) => (
-      //     <Tag color="#2db7f5" v-if={text != 0}>
-      //       {text}
-      //     </Tag>
-      //     // <span>
-      //
-      //     //   <span style={{ color: "#24ac95" }}>{text}</span>
-      //     //   {/* <span style={{ fontSize: "em" }}> FB </span> */}
-      //     // </span>
-      //   ),
-      // },
-      // {
-      //   title: "结算时间",
-      //   dataIndex: "last_settlement_date",
-      //   key: "last_settlement_date",
-      //   align: "right",
-
-      //   render: (text: any) => {
-      //     const date = new Date(text);
-      //     const month = (date.getMonth() + 1).toString().padStart(2, "0");
-      //     const day = date.getDate().toString().padStart(2, "0");
-      //     return `${month}-${day}`;
-      //   },
-      //   //   },
-      //   // ],
-      // },
       {
         title: "刷新时间",
         dataIndex: "update_time",
@@ -421,59 +358,95 @@ export default function MiningHashRatePage() {
 
   // 根据搜索词过滤数据
   const filteredData = tableData
-    .filter((item: { [s: string]: unknown } | ArrayLike<unknown>) => {
-      return Object.values(item).some((value) =>
+    .filter((item: { [key: string]: any }) => {
+      // 1️⃣ 搜索词过滤
+      const matchesSearch = Object.values(item).some((value) =>
         String(value).toLowerCase().includes(searchTerm.toLowerCase()),
       );
+
+      // 2️⃣ 收藏过滤
+      const matchesCollection = !showCollectionOnly || item.collection === 1;
+
+      return matchesSearch && matchesCollection;
     })
     .sort((a: any, b: any) => {
-      const nameA = a.venue_name.toLowerCase(); // 转为小写进行比较
+      const nameA = a.venue_name.toLowerCase();
       const nameB = b.venue_name.toLowerCase();
-      if (nameA < nameB) {
-        return -1; // a 在 b 前
-      }
-      if (nameA > nameB) {
-        return 1; // a 在 b 后
-      }
-      return 0; // 相等
+      return nameA.localeCompare(nameB);
     });
 
   return (
-    <div style={{ padding: "20px 0px" }} className="longdataTable">
-      <Row gutter={[16, 16]} justify="space-between" align="middle">
-        <Col xs={24} sm={24} md={12}>
-          <Radio.Group className="filterRadio" onChange={handlePoolCategoryChange} value={poolCategory}>
-            <Radio.Button value="主矿池">主矿池</Radio.Button>
-            <Radio.Button value="备用矿池">备用矿池</Radio.Button>
-          </Radio.Group>
-        </Col>
-        <Col xs={24} sm={24} md={12}>
-          <div style={{ display: "flex", flexWrap: "wrap", gap: "8px", justifyContent: "flex-end" }}>
-            <Input
-              prefix={<SearchOutlined />}
-              placeholder="搜索"
-              value={searchTerm}
-              onChange={handleSearch}
-              style={{ width: "200px" }}
-            />
-            <Button icon={<ExportOutlined />} onClick={onDownload}>
-              导出
-            </Button>
-          </div>
-        </Col>
-      </Row>
-
-      {isLoadingPools ? (
-        <Spin style={{ width: "100%", textAlign: "center", marginTop: "50%" }} />
-      ) : (
-        <EditTable
-          tableData={filteredData}
-          setTableData={setTableData}
-          columns={columns}
-          handleDelete={handleDelete}
-          handleSave={handleSave}
+    <div>
+      <div
+        style={{
+          padding: "20px 32px",
+          background: "#fff",
+          borderRadius: 8,
+          boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between", // ✅ 修正拼写
+          gap: 8,
+          marginBottom: 16,
+        }}
+      >
+        <Input
+          prefix={<SearchOutlined />}
+          placeholder="搜索"
+          size="small"
+          value={searchTerm}
+          onChange={handleSearch}
+          style={{ width: "600px" }}
         />
-      )}
+        <div>
+          <Button size="small" type="primary" onClick={() => handleSearch} style={{ marginRight: "10px" }}>
+            搜索
+          </Button>
+          <Button size="small" icon={<ExportOutlined />} onClick={onDownload}>
+            导出
+          </Button>
+        </div>
+      </div>
+
+      <div
+        style={{ background: "#fff", color: "grey", borderRadius: "0.5rem", padding: "20px 0px" }}
+        className="longdataTable"
+      >
+        <Row gutter={[16, 16]} justify="space-between" align="middle">
+          <Col xs={24} sm={24} md={12}>
+            <Radio.Group
+              size="small"
+              onChange={handlePoolCategoryChange}
+              value={poolCategory}
+              style={{ marginLeft: "10px", fontSize: "13px" }}
+            >
+              <Radio.Button value="主矿池" style={{ fontSize: "12px" }}>
+                主矿池
+              </Radio.Button>
+              <Radio.Button value="备用矿池" style={{ fontSize: "12px" }}>
+                备用矿池
+              </Radio.Button>
+            </Radio.Group>
+          </Col>
+          <Col xs={24} sm={24} md={12} style={{ textAlign: "right" }}>
+            <div style={{ marginBottom: 16, marginRight: "10px", color: "#000" }}>
+              <Switch size="small" checked={showCollectionOnly} onChange={setShowCollectionOnly} /> 我的自选
+            </div>
+          </Col>
+        </Row>
+
+        {isLoadingPools ? (
+          <Spin style={{ width: "100%", textAlign: "center", marginTop: "50%" }} />
+        ) : (
+          <EditTable
+            tableData={filteredData}
+            setTableData={setTableData}
+            columns={columns}
+            handleDelete={handleDelete}
+            handleSave={handleSave}
+          />
+        )}
+      </div>
     </div>
   );
 }

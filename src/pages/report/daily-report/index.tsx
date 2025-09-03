@@ -3,7 +3,7 @@ import React, { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import { DownloadOutlined } from "@ant-design/icons";
 // import { Button, DatePicker, Input, message, Select, Table, Tag, Tooltip } from "antd";
-import { Button, DatePicker, Select, Table, Tag, Tooltip } from "antd";
+import { Button, DatePicker, Select, Switch, Table, Tag, Tooltip } from "antd";
 import type { ColumnsType } from "antd/es/table";
 import * as XLSX from "xlsx";
 import antIcon from "@/assets/ant-icon.png";
@@ -45,7 +45,7 @@ interface DataType {
 }
 const App: React.FC = () => {
   const { poolType } = useSettingsStore(useSelector(["poolType"]));
-
+  const [showCollectionOnly, setShowCollectionOnly] = useState(true);
   const tableRef = useRef<HTMLDivElement>(null);
   const [isTableFixed, setIsTableFixed] = useState(false);
   // const [hoveredRow, setHoveredRow] = useState<string | null>(null);
@@ -556,18 +556,39 @@ const App: React.FC = () => {
     fetchReportData();
   }, [selectedDate, poolType]);
 
+  // useEffect(() => {
+  //   // 筛选数据
+  //     // 2️⃣ 收藏过滤
+  //   const matchesCollection = !showCollectionOnly || item.collection === 1;)
+
+  //   if (selectedSites.length > 0) {
+  //     console.log(selectedSites);
+  //     const filtered = data.filter((item) => selectedSites.includes(item.siteName));
+  //     // setFilteredData(filtered);
+  //     setFilteredData(filtered.sort((a, b) => a.siteName.localeCompare(b.siteName))); // 按 siteName 排序
+  //   } else {
+  //     // setFilteredData(data); // 如果没有选择场地，显示所有数据
+  //     setFilteredData(data.sort((a, b) => a.siteName.localeCompare(b.siteName))); // 按 siteName 排序
+  //   }
+  // }, [selectedSites, data, showCollectionOnly]);
   useEffect(() => {
-    // 筛选数据
+    let filtered = data;
+
+    // 1️⃣ 按场地筛选
     if (selectedSites.length > 0) {
-      console.log(selectedSites);
-      const filtered = data.filter((item) => selectedSites.includes(item.siteName));
-      // setFilteredData(filtered);
-      setFilteredData(filtered.sort((a, b) => a.siteName.localeCompare(b.siteName))); // 按 siteName 排序
-    } else {
-      // setFilteredData(data); // 如果没有选择场地，显示所有数据
-      setFilteredData(data.sort((a, b) => a.siteName.localeCompare(b.siteName))); // 按 siteName 排序
+      filtered = filtered.filter((item) => selectedSites.includes(item.siteName));
     }
-  }, [selectedSites, data]);
+
+    // 2️⃣ 按收藏筛选
+    if (showCollectionOnly) {
+      filtered = filtered.filter((item) => item.collection === 1);
+    }
+
+    // 3️⃣ 排序
+    filtered = filtered.sort((a, b) => a.siteName.localeCompare(b.siteName));
+
+    setFilteredData(filtered);
+  }, [selectedSites, data, showCollectionOnly]);
 
   // 导出数据为 CSV 的函数
   const exportToCSV = () => {
@@ -772,14 +793,21 @@ const App: React.FC = () => {
               onChange={handleSitesChange}
               maxTagCount={3}
             />
-            <Button
-              type="primary"
-              icon={<DownloadOutlined />}
-              onClick={exportToCSV}
-              className="!rounded-button"
-            >
-              导出报表
-            </Button>
+            <div style={{ color: "#000" }}>
+              <Switch size="small" checked={showCollectionOnly} onChange={setShowCollectionOnly} />
+              {"  "}
+              <span style={{ marginRight: "10px" }}>我的自选</span>
+
+              <Button
+                type="primary"
+                size="small"
+                icon={<DownloadOutlined />}
+                onClick={exportToCSV}
+                className="!rounded-button"
+              >
+                导出报表
+              </Button>
+            </div>
           </div>
           <Table
             columns={columns}

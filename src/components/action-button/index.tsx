@@ -46,7 +46,7 @@ export const ActionButton = <T,>({
         <Button
           type="primary"
           danger
-          size="middle"
+          size="small"
           icon={<PlusOutlined style={{ color: "white" }} />}
           style={{
             backgroundColor: "#40A9FF",

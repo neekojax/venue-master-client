@@ -20,6 +20,7 @@ import {
   Table,
   Tag,
   Tooltip,
+  // Switch
 } from "antd";
 import type { ColumnsType } from "antd/es/table";
 import dayjs from "dayjs";
@@ -53,10 +54,12 @@ interface EventLog {
   impact_count: number;
   event_reason: string;
   resolution_measures: string;
+  collection: number;
   created_at: string; // 这里使用 created_at 而不是 update_at
 }
 
 const App: React.FC = () => {
+  // const [showCollectionOnly, setShowCollectionOnly] = useState(true)
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [selectedRowKeys] = useState<React.Key[]>([]);
   const [form] = Form.useForm();
@@ -89,6 +92,7 @@ const App: React.FC = () => {
       event_reason: item.event_reason,
       resolution_measures: item.resolution_measures,
       created_at: item.created_at,
+      collection: item.collection,
     })) || [];
 
   // 过滤后的数据
@@ -107,7 +111,8 @@ const App: React.FC = () => {
     const hasDuration = log.start_time && log.end_time;
     const matchesDuration =
       selectedDurationType === "valid" ? hasDuration : selectedDurationType === "empty" ? !hasDuration : true;
-
+    // 2️⃣ 收藏过滤
+    // const matchesCollection = !showCollectionOnly || log.collection === 1;
     return matchesLocation && matchesEventType && matchesSearchText && matchesDateRange && matchesDuration;
   });
 
@@ -534,27 +539,42 @@ const App: React.FC = () => {
             </Space>
           </div>
         </div>
-        <Table
-          // rowSelection={rowSelection}
-          columns={columns}
-          dataSource={filteredData} // 使用过滤后的数据
-          scroll={{ x: 1300 }}
-          rowKey="id"
-          loading={isLoading}
-          // onChange={handleTableChange}
-          onChange={(_: any, filters: any) => {
-            // console.log("Table >>选中的事件类型：", filters.log_type); // 是数组
-            setSelectedEventType(filters.log_type || []); // 设置选中的事件类型数组
-          }}
-          pagination={{
-            total: filteredData.length,
-            pageSize: 10,
-            showSizeChanger: true,
-            showQuickJumper: true,
-            showTotal: (total) => `共 ${total} 条记录`,
-          }}
-          // className="px-6"
-        />
+
+        <div
+          style={{ background: "#fff", color: "grey", borderRadius: "0.5rem", padding: "20px 0px" }}
+          className="longdataTable"
+        >
+          {/* <div style={{ marginBottom: 16, marginRight: '10px', color: '#000', textAlign: 'right' }}>
+            <Switch
+              size="small"
+              checked={showCollectionOnly}
+              onChange={setShowCollectionOnly}
+            />
+            {" "}
+            我的自选
+          </div> */}
+          <Table
+            // rowSelection={rowSelection}
+            columns={columns}
+            dataSource={filteredData} // 使用过滤后的数据
+            scroll={{ x: 1300 }}
+            rowKey="id"
+            loading={isLoading}
+            // onChange={handleTableChange}
+            onChange={(_: any, filters: any) => {
+              // console.log("Table >>选中的事件类型：", filters.log_type); // 是数组
+              setSelectedEventType(filters.log_type || []); // 设置选中的事件类型数组
+            }}
+            pagination={{
+              total: filteredData.length,
+              pageSize: 10,
+              showSizeChanger: true,
+              showQuickJumper: true,
+              showTotal: (total) => `共 ${total} 条记录`,
+            }}
+            // className="px-6"
+          />
+        </div>
       </div>
       <Modal
         title={form.getFieldValue("id") ? "编辑事件" : "新增事件"}
