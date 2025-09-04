@@ -388,42 +388,20 @@ export default function MiningHashRatePage() {
   return (
     <div>
       <div
-        style={{
-          padding: "20px 32px",
-          background: "#fff",
-          borderRadius: 8,
-          boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "space-between", // ✅ 修正拼写
-          gap: 8,
-          marginBottom: 16,
-        }}
-      >
-        <Input
-          prefix={<SearchOutlined />}
-          placeholder="搜索"
-          size="small"
-          value={searchTerm}
-          onChange={handleSearch}
-          style={{ width: "600px" }}
-        />
-        <div>
-          <Button size="small" type="primary" onClick={() => handleSearch} style={{ marginRight: "10px" }}>
-            搜索
-          </Button>
-          <Button size="small" icon={<ExportOutlined />} onClick={onDownload}>
-            导出
-          </Button>
-        </div>
-      </div>
-
-      <div
         style={{ background: "#fff", color: "grey", borderRadius: "0.5rem", padding: "20px 0px" }}
         className="longdataTable"
       >
         <Row gutter={[16, 16]} justify="space-between" align="middle">
           <Col xs={24} sm={24} md={12}>
+            <span style={{ marginBottom: 16, marginLeft: "10px", marginRight: "15px", color: "#000" }}>
+              <Switch
+                size="small"
+                checked={showCollectionOnly}
+                onChange={(checked) => setShowCollectionOnly(checked)}
+              />{" "}
+              我的自选
+            </span>
+
             <Radio.Group
               size="small"
               onChange={handlePoolCategoryChange}
@@ -438,15 +416,20 @@ export default function MiningHashRatePage() {
               </Radio.Button>
             </Radio.Group>
           </Col>
+
           <Col xs={24} sm={24} md={12} style={{ textAlign: "right" }}>
-            <div style={{ marginBottom: 16, marginRight: "10px", color: "#000" }}>
-              <Switch
-                size="small"
-                checked={showCollectionOnly}
-                onChange={(checked) => setShowCollectionOnly(checked)}
-              />{" "}
-              我的自选
-            </div>
+            <Input
+              prefix={<SearchOutlined />}
+              placeholder="搜索"
+              size="middle"
+              value={searchTerm}
+              onChange={handleSearch}
+              style={{ width: "250px", marginRight: "20px" }}
+            />
+
+            <Button size="middle" icon={<ExportOutlined />} onClick={onDownload}>
+              导出
+            </Button>
           </Col>
         </Row>
 

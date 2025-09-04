@@ -1,5 +1,5 @@
 import { BarChartOutlined, DownloadOutlined, SearchOutlined } from "@ant-design/icons";
-import { Button, Flex, Input, Row, Space, Statistic, Typography } from "antd";
+import { Button, Flex, Input, Row, Space, Statistic, Switch, Typography } from "antd";
 // import './HeaderSection.css'
 
 const { Title, Paragraph } = Typography;
@@ -8,9 +8,17 @@ interface HeaderSectionProps {
   onChange: (value: any) => void;
   venueNum: number;
   subAccountNum: number;
+  showCollectionOnly: boolean;
+  setShowCollectionOnly: (value: any) => void;
 }
 
-const HeaderSection = ({ onChange, venueNum, subAccountNum }: HeaderSectionProps) => {
+const HeaderSection = ({
+  onChange,
+  venueNum,
+  subAccountNum,
+  showCollectionOnly,
+  setShowCollectionOnly,
+}: HeaderSectionProps) => {
   return (
     // <div className='headerSection' style={{ background: '#fff', padding: '24px', borderRadius: 8, marginBottom: 24 }}>
     <div className="headerSection">
@@ -64,6 +72,9 @@ const HeaderSection = ({ onChange, venueNum, subAccountNum }: HeaderSectionProps
         style={{ flexWrap: "wrap", marginBottom: 16 }}
         className="border"
       >
+        <div style={{ marginRight: "10px", color: "#000", textAlign: "right" }}>
+          <Switch size="small" checked={showCollectionOnly} onChange={setShowCollectionOnly} /> 我的自选
+        </div>
         <Space wrap>
           <Input
             className="custom-input"

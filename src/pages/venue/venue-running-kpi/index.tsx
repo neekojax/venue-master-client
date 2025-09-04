@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { DownloadOutlined } from "@ant-design/icons";
-import { Button, message, Spin, Switch, Table, Tag, Tooltip } from "antd";
+import { Button, message, Spin, Table, Tag, Tooltip } from "antd";
 import { ReactEcharts } from "@/components/react-echarts"; // 导入自定义的 ReactEcharts 组件
 import HeaderSection from "./components/HeaderSection";
 import useAuthRedirect from "@/hooks/useAuthRedirect.ts";
@@ -372,16 +372,18 @@ export default function VenueRunningKpi() {
 
   return (
     <div className="longdataTable">
-      <HeaderSection onChange={handleSearch} venueNum={venueNums} subAccountNum={subAccountNum} />
+      <HeaderSection
+        onChange={handleSearch}
+        venueNum={venueNums}
+        subAccountNum={subAccountNum}
+        showCollectionOnly={showCollectionOnly}
+        setShowCollectionOnly={setShowCollectionOnly}
+      />
 
       <div
         style={{ background: "#fff", color: "grey", borderRadius: "0.5rem", padding: "20px 0px" }}
         className="longdataTable"
       >
-        <div style={{ marginBottom: 16, marginRight: "10px", color: "#000", textAlign: "right" }}>
-          <Switch size="small" checked={showCollectionOnly} onChange={setShowCollectionOnly} /> 我的自选
-        </div>
-
         <Table
           loading={loading}
           columns={columns}

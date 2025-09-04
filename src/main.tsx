@@ -18,6 +18,8 @@ import "./styles/custom-select.css";
 import "./styles/extend.css";
 
 // setupGlobalErrorHandler();
+// ✅ 在应用渲染前执行版本检查
+setupAppVersionNotification();
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -29,9 +31,6 @@ const queryClient = new QueryClient({
     },
   },
 });
-
-// ✅ 在应用渲染前执行版本检查
-setupAppVersionNotification();
 
 createRoot(document.getElementById("root")!).render(
   <ErrorBoundary>

@@ -4,6 +4,7 @@ import { App as AntdApp } from "antd";
 import { AntdConfigProvider } from "./components/antd-config-provider";
 import { StaticAntd } from "./components/static-antd";
 import { ThemeProvider } from "./components/theme-provider";
+import { checkLogin } from "./utils/auth";
 import { router } from "./router";
 
 export default function App() {
@@ -39,6 +40,16 @@ export default function App() {
         }
       }
     });
+
+    // 页面加载时检查一次
+    checkLogin();
+
+    // 每隔一定时间检查一次（可选）
+    const interval = setInterval(() => {
+      checkLogin();
+    }, 5000); // 每 5 秒检查一次
+
+    return () => clearInterval(interval);
 
     // 这里放全局执行的逻辑
   }, []);

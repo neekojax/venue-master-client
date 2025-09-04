@@ -792,20 +792,23 @@ const App: React.FC = () => {
           className={`mb-6 rounded-lg bg-white p-6 shadow-sm transition-all duration-300 ${isTableFixed ? "sticky top-0 z-10" : ""}`}
         >
           <div className="mb-6 flex items-center justify-between">
-            <Select
-              mode="multiple"
-              size={"middle"}
-              placeholder="选择场地"
-              // className="w-80"
-              style={{ minWidth: "300px" }}
-              options={siteOptions}
-              onChange={handleSitesChange}
-              maxTagCount={3}
-            />
-            <div style={{ color: "#000" }}>
+            <span>
               <Switch size="small" checked={showCollectionOnly} onChange={setShowCollectionOnly} />
               {"  "}
               <span style={{ marginRight: "10px" }}>我的自选</span>
+            </span>
+
+            <div style={{ color: "#000" }}>
+              <Select
+                mode="multiple"
+                size={"middle"}
+                placeholder="选择场地"
+                // className="w-80"
+                style={{ minWidth: "300px", marginRight: "15px" }}
+                options={siteOptions}
+                onChange={handleSitesChange}
+                maxTagCount={3}
+              />
 
               <Button
                 type="primary"

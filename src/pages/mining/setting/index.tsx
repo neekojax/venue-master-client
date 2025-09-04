@@ -567,49 +567,15 @@ export default function MiningSettingPage() {
   // @ts-ignore
   return (
     <div>
-      <div style={{ width: "100%", background: "#fff", padding: "12px 12px", marginBottom: 16 }}>
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-          {/* <div className={"flex"}>
-          <div className={"mr-4"}> */}
-          {/* <PoolSwitcher onChange={handlePoolCategoryChange} value={poolCategory} /> */}
-          {/* <Radio.Group className="filterRadio" onChange={handlePoolCategoryChange} value={poolCategory}>
-              <Radio.Button value="主矿池">主矿池</Radio.Button>
-              <Radio.Button value="备用矿池">备用矿池</Radio.Button>
-            </Radio.Group> */}
-          {/* </div>
-        </div> */}
-
-          <Input
-            prefix={<SearchOutlined style={{ color: "rgba(0, 0, 0, 0.25)" }} size={18} />}
-            placeholder="请输入搜索字段"
-            value={searchTerm}
-            size="middle"
-            onChange={handleSearch}
-            style={{ width: 450 }} // 设定宽度
-            className="text-sm mr-10"
-          />
-
-          <Button
-            // type="primary"
-            // icon={<DownloadOutlined />}
-            icon={<ExportOutlined className="exportIcon" />}
-            // size="middle"
-            size="middle"
-            className={"text-blue-500 exportButton"}
-            style={{ marginLeft: "10px" }}
-            onClick={onDownload}
-          >
-            导出
-          </Button>
-        </div>
-      </div>
-
       <div
         style={{ background: "#fff", color: "grey", borderRadius: "0.5rem", padding: "20px 0px" }}
         className="longdataTable"
       >
         <Row gutter={[16, 16]} justify="space-between" align="middle">
           <Col xs={24} sm={24} md={12}>
+            <span style={{ marginRight: "15px", marginLeft: "10px" }}>
+              <Switch size="small" checked={showCollectionOnly} onChange={setShowCollectionOnly} /> 我的自选{" "}
+            </span>
             <Radio.Group
               size="small"
               onChange={handlePoolCategoryChange}
@@ -625,8 +591,29 @@ export default function MiningSettingPage() {
             </Radio.Group>
           </Col>
           <Col xs={24} sm={24} md={12} style={{ textAlign: "right" }}>
-            <div style={{ marginBottom: 16, marginRight: "10px", color: "#000" }}>
-              <Switch size="small" checked={showCollectionOnly} onChange={setShowCollectionOnly} /> 我的自选{" "}
+            <div style={{ marginBottom: 16, marginRight: "0px", color: "#000" }}>
+              <Input
+                prefix={<SearchOutlined style={{ color: "rgba(0, 0, 0, 0.25)" }} size={18} />}
+                placeholder="请输入搜索字段"
+                value={searchTerm}
+                size="middle"
+                onChange={handleSearch}
+                style={{ width: 250, marginRight: "15px" }} // 设定宽度
+                className="text-sm"
+              />
+
+              <Button
+                // type="primary"
+                // icon={<DownloadOutlined />}
+                icon={<ExportOutlined className="exportIcon" />}
+                // size="middle"
+                size="middle"
+                className={"text-blue-500 exportButton"}
+                style={{ marginLeft: "0px", marginRight: "15px" }}
+                onClick={onDownload}
+              >
+                导出
+              </Button>
               <ActionButton
                 label={"添加矿池"}
                 size="small"
