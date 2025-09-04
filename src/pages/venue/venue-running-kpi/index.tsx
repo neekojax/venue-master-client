@@ -14,13 +14,22 @@ import { fetchMiningPoolRunningData } from "@/pages/venue/api.tsx";
 export default function VenueRunningKpi() {
   useAuthRedirect();
   const { poolType } = useSettingsStore(useSelector(["poolType"]));
-  const [showCollectionOnly, setShowCollectionOnly] = useState(true);
   const [runningData, setRunningData] = useState<any>(null); // 状态数据
   const [columns, setColumns] = useState<any>([]);
   const [searchTerm, setSearchTerm] = useState(""); // 新增搜索状态
   const [loading, setLoading] = useState<boolean>(true); //
   const [venueNums, setVenueNum] = useState<number>(0);
   const [subAccountNum, setSubAccountNum] = useState<number>(0);
+
+  const [showCollectionOnly, setShowCollectionOnly] = useState(() => {
+    // 初始化时从 localStorage 取值
+    return localStorage.getItem("showCollectionOnly") === "true";
+  });
+
+  // 当值变化时写入 localStorage
+  useEffect(() => {
+    localStorage.setItem("showCollectionOnly", String(showCollectionOnly));
+  }, [showCollectionOnly]);
 
   const fetchData = async (poolType: string) => {
     try {

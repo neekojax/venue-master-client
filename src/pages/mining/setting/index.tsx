@@ -67,7 +67,15 @@ export default function MiningSettingPage() {
 
   const [columns, setColumns] = useState<any>([]);
   const [tableData, setTableData] = useState<any>([]);
-  const [showCollectionOnly, setShowCollectionOnly] = useState(true);
+  const [showCollectionOnly, setShowCollectionOnly] = useState(() => {
+    // 初始化时从 localStorage 取值
+    return localStorage.getItem("showCollectionOnly") === "true";
+  });
+
+  // 当值变化时写入 localStorage
+  useEffect(() => {
+    localStorage.setItem("showCollectionOnly", String(showCollectionOnly));
+  }, [showCollectionOnly]);
 
   const newMutation = useMiningPoolNew();
   const updateMutation = useMiningPoolUpdate();

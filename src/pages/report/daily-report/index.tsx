@@ -45,7 +45,16 @@ interface DataType {
 }
 const App: React.FC = () => {
   const { poolType } = useSettingsStore(useSelector(["poolType"]));
-  const [showCollectionOnly, setShowCollectionOnly] = useState(true);
+  const [showCollectionOnly, setShowCollectionOnly] = useState(() => {
+    // 初始化时从 localStorage 取值
+    return localStorage.getItem("showCollectionOnly") === "true";
+  });
+
+  // 当值变化时写入 localStorage
+  useEffect(() => {
+    localStorage.setItem("showCollectionOnly", String(showCollectionOnly));
+  }, [showCollectionOnly]);
+
   const tableRef = useRef<HTMLDivElement>(null);
   const [isTableFixed, setIsTableFixed] = useState(false);
   // const [hoveredRow, setHoveredRow] = useState<string | null>(null);

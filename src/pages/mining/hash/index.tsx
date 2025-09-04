@@ -28,7 +28,17 @@ export default function MiningHashRatePage() {
   const { data: hashData, isLoading: isLoadingPools } = useMiningHashRateList(poolType, poolCategory);
 
   const [columns, setColumns] = useState<any>([]);
-  const [showCollectionOnly, setShowCollectionOnly] = useState(true);
+
+  const [showCollectionOnly, setShowCollectionOnly] = useState(() => {
+    // 初始化时从 localStorage 取值
+    return localStorage.getItem("showCollectionOnly") === "true";
+  });
+
+  // 当值变化时写入 localStorage
+  useEffect(() => {
+    localStorage.setItem("showCollectionOnly", String(showCollectionOnly));
+  }, [showCollectionOnly]);
+
   const [tableData, setTableData] = useState<any>([]);
   const [searchTerm, setSearchTerm] = useState(""); // 新增搜索状态
 
@@ -430,7 +440,12 @@ export default function MiningHashRatePage() {
           </Col>
           <Col xs={24} sm={24} md={12} style={{ textAlign: "right" }}>
             <div style={{ marginBottom: 16, marginRight: "10px", color: "#000" }}>
-              <Switch size="small" checked={showCollectionOnly} onChange={setShowCollectionOnly} /> 我的自选
+              <Switch
+                size="small"
+                checked={showCollectionOnly}
+                onChange={(checked) => setShowCollectionOnly(checked)}
+              />{" "}
+              我的自选
             </div>
           </Col>
         </Row>
