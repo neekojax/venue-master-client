@@ -2,12 +2,16 @@
 import React, { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import { DownloadOutlined } from "@ant-design/icons";
+import { InfoCircleOutlined } from "@ant-design/icons";
 // import { Button, DatePicker, Input, message, Select, Table, Tag, Tooltip } from "antd";
 import { Button, DatePicker, Select, Switch, Table, Tag, Tooltip } from "antd";
 import type { ColumnsType } from "antd/es/table";
 import * as XLSX from "xlsx";
 import antIcon from "@/assets/ant-icon.png";
 import emptyAntIcon from "@/assets/empty-ant.png";
+// @ts-ignore
+import FormulaTooltip from "@/components/tooltip/FormulaTooltip";
+// import zaixianIcon from "@/assets/zaixianlv.jpg";
 import { useSelector, useSettingsStore } from "@/stores";
 
 // import { fetchDailyReport, updateReport } from "@/pages/report/api.tsx";
@@ -27,6 +31,7 @@ interface DataType {
   totalFailuresT2: number;
   effectiveRateT3: number;
   totalMachines: number;
+  onlineRatio: number;
   totalFailures: number;
   failures24h: number;
   failureRate24h: number;
@@ -42,6 +47,7 @@ interface DataType {
   pendingRepair: string;
   anget_key: string;
   collection: number;
+  impactMachine: number;
 }
 const App: React.FC = () => {
   const { poolType } = useSettingsStore(useSelector(["poolType"]));
@@ -216,6 +222,59 @@ const App: React.FC = () => {
       align: "right",
       render: (value) => value.toLocaleString() + " 台",
       sorter: (a, b) => a.totalMachines - b.totalMachines,
+    },
+    {
+      title: (
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "flex-end" }}>
+          <span>在线率</span>
+          <FormulaTooltip />
+        </div>
+      ),
+      dataIndex: "onlineRatio",
+      key: "onlineRatio",
+      width: 125,
+      align: "right",
+      render: (value: number, record) => (
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "flex-end" }}>
+          <span>{value.toFixed(2)}%</span>
+
+          {record.anget_key === "" && (
+            <Tooltip
+              styles={{ body: { maxWidth: "none", padding: 8 } }}
+              placement="top"
+              title={
+                <div style={{ maxWidth: 250 }}>
+                  <div style={{ fontSize: "14px", lineHeight: 1.6 }}>
+                    <div>
+                      <b>24小时算力：</b>
+                      {record.power24h}
+                    </div>
+                    <div>
+                      <b>托管台数：</b>
+                      {record.totalMachines}
+                    </div>
+                    <div>
+                      <b>理论算力：</b>
+                      {record.theoreticalPower}
+                    </div>
+                    <div>
+                      <b>总故障数：</b>
+                      {record.totalFailuresT2}
+                    </div>
+                    <div>
+                      <b>不可抗力影响台数：</b>
+                      {record.impactMachine}
+                    </div>
+                  </div>
+                </div>
+              }
+            >
+              <InfoCircleOutlined style={{ marginLeft: 4, color: "#999" }} />
+            </Tooltip>
+          )}
+        </div>
+      ),
+      // render: (value) => `${value.toFixed(2)}%`,
     },
     {
       title: "T-1总故障数",
@@ -511,6 +570,7 @@ const App: React.FC = () => {
               totalFailuresT1: venue.totalFailuresT1 || 0,
               totalFailuresT2: venue.totalFailuresT2 || 0,
               totalMachines: venue.totalMachines || 0,
+              onlineRatio: venue.onlineRatio || 0,
               totalFailures: venue.totalFailures || 0,
               failures24h: venue.failures24h || 0,
               failureRate24h: venue.failureRate24h || 0,
@@ -528,6 +588,7 @@ const App: React.FC = () => {
               pendingRepair: venue.pendingRepair || 0,
               anget_key: venue.anget_key || "",
               collection: venue.collection || 0,
+              impactMachine: venue.impactMachine || 0,
             };
           });
 
@@ -611,6 +672,7 @@ const App: React.FC = () => {
       "T-2日有效率": item.effectiveRateT2.toFixed(2) + "%",
       "T-3日有效率": item.effectiveRateT3.toFixed(2) + "%",
       托管台数: item.totalMachines.toLocaleString(),
+      在线率: item.onlineRatio.toFixed(2) + "%",
       // 总故障台数: item.totalFailures.toLocaleString(),
 
       "24小时故障数": item.failures24h.toLocaleString(),

@@ -15,6 +15,14 @@
         border-right: var(--bs-aside-border);
     }
 }
+
+.ant-tooltip-inner {
+    max-width: 600px !important; /* 默认是 250px */
+    white-space: normal; /* 允许换行 */
+  }
+  .formula-tooltip .ant-tooltip-inner {
+    max-width: 600px !important;
+  }
 /*全局头部*/
 #app-header-bar{
         height: 64px;

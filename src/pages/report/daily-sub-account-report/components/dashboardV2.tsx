@@ -10,6 +10,10 @@ import {
 import { Card, Col, Row, Skeleton, Typography } from "antd";
 import type { EChartsType } from "echarts";
 import * as echarts from "echarts";
+// @ts-ignore
+import SiteOnlineNote from "@/components/tooltip/SiteOnlineNote.jsx";
+// @ts-ignore
+import SiteStockWithNote from "@/components/tooltip/SiteStockWithNote.jsx";
 import EfficiencyGauge from "./gauge";
 
 const MultiProgress = (props: { values: number[]; colors: string[] }) => {
@@ -215,7 +219,7 @@ const App: React.FC<{ data: any; loading: boolean }> = ({ data, loading }) => {
                 <Col span={12} style={{ textAlign: "right" }}>
                   <Typography.Text
                     style={{
-                      width: 80,
+                      width: 95,
                       display: "inline-block", // 必须加，才能让宽度生效
                       textAlign: "center",
                       whiteSpace: "nowrap",
@@ -223,7 +227,7 @@ const App: React.FC<{ data: any; loading: boolean }> = ({ data, loading }) => {
                       textOverflow: "ellipsis",
                     }}
                   >
-                    在架台数：
+                    <SiteOnlineNote />
                   </Typography.Text>
                   <Typography.Text
                     style={{
@@ -267,7 +271,7 @@ const App: React.FC<{ data: any; loading: boolean }> = ({ data, loading }) => {
                 <Col span={12} style={{ textAlign: "right" }}>
                   <Typography.Text
                     style={{
-                      width: 80,
+                      width: 95,
                       display: "inline-block", // 必须加，才能让宽度生效
                       textAlign: "center",
                       whiteSpace: "nowrap",
@@ -275,7 +279,8 @@ const App: React.FC<{ data: any; loading: boolean }> = ({ data, loading }) => {
                       textOverflow: "ellipsis",
                     }}
                   >
-                    在线台数：
+                    {/* 在线台数： */}
+                    <SiteStockWithNote />
                   </Typography.Text>
                   <Typography.Text
                     style={{

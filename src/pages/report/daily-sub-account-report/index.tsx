@@ -2,9 +2,12 @@
 import React, { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import { DownloadOutlined } from "@ant-design/icons";
+import { InfoCircleOutlined } from "@ant-design/icons";
 import { Button, DatePicker, Select, Table, Tag, Tooltip } from "antd";
 import type { ColumnsType } from "antd/es/table";
 import * as XLSX from "xlsx";
+// @ts-ignore
+import FormulaTooltip from "@/components/tooltip/FormulaTooltip";
 import DashboardCardsV2 from "./components/dashboardV2";
 // import { ReportUpdateParam } from "@/pages/report/type.tsx";
 // import DashboardCards from "./components/dashboard";
@@ -25,6 +28,7 @@ interface DataType {
   totalMachines: number;
   totalFailures: number;
   onlineMachines: number;
+  impactMachine: number;
   onlineRatio: number;
   failures24h: number;
   failureRate24h: number;
@@ -89,12 +93,7 @@ const App: React.FC = () => {
         const venue_id = record?.key.split("-")[0] || 0;
         const isSpecialVenue = text === "Arct-HF01-J XP-AR-US" || text === "ARCT Technologies-HF02-AR-US";
         return (
-          <Tooltip
-            title={text}
-            placement="top"
-            overlayInnerStyle={{ color: "white" }}
-            style={{ color: "white" }}
-          >
+          <Tooltip title={text} placement="top" style={{ color: "white" }}>
             <div
               style={{
                 width: "100%",
@@ -200,18 +199,61 @@ const App: React.FC = () => {
       align: "right",
     },
     {
-      title: "在线率",
+      title: (
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "flex-end" }}>
+          <span>在线率</span>
+          <FormulaTooltip />
+        </div>
+      ),
       dataIndex: "onlineRatio",
       key: "onlineRatio",
       width: 100,
       align: "right",
-      render: (val) => {
-        // if (Number(record.onlineRatio) === 0) {
-        //   return <span>0%</span>;
-        // }
-        // const total_gzl = ((val / record.onlineRatio) * 100).toFixed(2);
-        return <span>{`${val}%`}</span>;
-      },
+      render: (value: number, record) => (
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "flex-end" }}>
+          <span>{value.toFixed(2)}%</span>
+          <Tooltip
+            // overlayInnerStyle={{ maxWidth: "none" }} // 🚀 不限制最大宽度
+            styles={{ body: { maxWidth: "none", padding: 8 } }}
+            placement="top"
+            title={
+              <div style={{ maxWidth: 250 }}>
+                <div style={{ fontSize: "13px", lineHeight: 1.6 }}>
+                  <div>
+                    <b>24小时算力：</b>
+                    {record.power24h}
+                  </div>
+                  <div>
+                    <b>托管台数：</b>
+                    {record.totalMachines}
+                  </div>
+                  <div>
+                    <b>理论算力：</b>
+                    {record.theoreticalPower}
+                  </div>
+                  <div>
+                    <b>总故障数：</b>
+                    {record.totalFailures}
+                  </div>
+                  <div>
+                    <b>不可抗力影响台数：</b>
+                    {record.impactMachine}
+                  </div>
+                </div>
+              </div>
+            }
+          >
+            <InfoCircleOutlined style={{ marginLeft: 4, color: "#999" }} />
+          </Tooltip>
+        </div>
+      ),
+      // render: (val) => {
+      //   // if (Number(record.onlineRatio) === 0) {
+      //   //   return <span>0%</span>;
+      //   // }
+      //   // const total_gzl = ((val / record.onlineRatio) * 100).toFixed(2);
+      //   return <span>{`${val}%`}</span>;
+      // },
     },
     {
       title: "总故障台数",
@@ -395,6 +437,7 @@ const App: React.FC = () => {
               effectiveRate24h: venue.effectiveRate24h || 0, // 转换为小数形式
               totalMachines: venue.totalMachines || 0,
               totalFailures: venue.totalFailures || 0,
+              impactMachine: venue.impactMachine || 0,
               onlineMachines: venue.onlineMachines || 0,
               onlineRatio: venue.onlineRatio || 0,
               failures24h: venue.failures24h || 0,
