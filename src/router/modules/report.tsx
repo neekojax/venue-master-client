@@ -36,6 +36,17 @@ export const reportRoute: RouteObject = {
       },
     },
     {
+      path: ROUTE_PATHS.weekReport,
+      lazy: async () => ({
+        Component: (await import("@/pages/report/week-report/index.tsx")).default,
+      }),
+      HydrateFallback: ProgressBar,
+      handle: {
+        title: "周报",
+        crumb: () => <Link to={ROUTE_PATHS.weekReport}>周报</Link>,
+      },
+    },
+    {
       path: "/report/daily-list/:venueId/:venueName", // 直接使用动态参数
       lazy: async () => ({
         Component: (await import("@/pages/report/daily-report-list")).default,

@@ -7,6 +7,7 @@ import { ErrorBoundary } from "./components/error-boundary";
 import { setupAppVersionNotification } from "./plugins/app";
 import App from "./App";
 
+import "@fortawesome/fontawesome-free/css/all.min.css";
 // import { setupGlobalErrorHandler } from "./utils/errorHandler";
 import "antd/dist/reset.css"; // 这是必要的重置样式
 import "./styles/index.css";

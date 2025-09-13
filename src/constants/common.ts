@@ -36,6 +36,7 @@ export const ROUTE_PATHS = {
   dailyReport: "/report/daily",
   dailyReportList: (venueId: string | number) => `/report/daily-list/${venueId}`, // 场地详情，需传参数
   subAccountDailyReport: "/report/daily/sub-account", // 子账户日报表
+  weekReport: "/report/week", // 子账户日报表
 
   poolProfitHistory: (poolName: any) => `/pool-profit/history/${encodeURIComponent(poolName)}`, // 定义为函数以接收 poolName
   poolHashHistory: (poolName: any) => `/pool-hash/history/${encodeURIComponent(poolName)}`,

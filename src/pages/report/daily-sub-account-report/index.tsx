@@ -497,7 +497,7 @@ const App: React.FC = () => {
   useEffect(() => {
     // 筛选数据
     if (selectedSites.length > 0) {
-      console.log(selectedSites);
+      // console.log(selectedSites);
       const filtered = data.filter((item) => selectedSites.includes(item.accountName));
       // setFilteredData(filtered);
       setFilteredData(filtered.sort((a, b) => a.accountName.localeCompare(b.accountName))); // 按 accountName 排序
