@@ -17,6 +17,7 @@ import ChartFail from "@/pages/report/week-report/components/ChartFail";
 import ChartSuanli from "@/pages/report/week-report/components/ChartSuanli";
 // 扩展 weekOfYear 插件
 dayjs.extend(weekOfYear);
+dayjs.locale("zh-cn");
 
 const { WeekPicker } = DatePicker;
 
@@ -51,8 +52,8 @@ const App: React.FC = () => {
   // 默认选中上周
   // 默认上周
   // const lastWeek = dayjs().subtract(1, "week").startOf("week");;
-  const lastWeek = dayjs().subtract(1, "week").startOf("week");
-  const [selectedWeek, setSelectedWeek] = useState<dayjs.Dayjs>(lastWeek);
+  // const lastWeek = dayjs().subtract(1, "week").startOf("week");
+  // const [selectedWeek, setSelectedWeek] = useState<dayjs.Dayjs>(lastWeek);
 
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
@@ -107,35 +108,39 @@ const App: React.FC = () => {
     },
   ];
   // 初始化开始和结束时间
+
+  const lastWeek = dayjs().subtract(1, "week").startOf("week");
+  const [selectedWeek, setSelectedWeek] = useState<dayjs.Dayjs>(lastWeek);
   useEffect(() => {
-    const startOfWeek = selectedWeek.startOf("week"); // 周日
-    const endOfWeek = selectedWeek.endOf("week"); // 周六
-    setStartDate(startOfWeek.format("YYYY-MM-DD"));
-    setEndDate(endOfWeek.format("YYYY-MM-DD"));
-    // renderLabel(selectedWeek);
+    const sunday = selectedWeek.startOf("week").subtract(1, "day"); // 上周日
+    const saturday = sunday.add(6, "day"); // 本周六
+
+    setStartDate(sunday.format("YYYY-MM-DD"));
+    setEndDate(saturday.format("YYYY-MM-DD"));
+
     onWeekChange(selectedWeek);
     renderLabel(selectedWeek);
   }, [selectedWeek]);
 
   // 禁止选择未结束的周（本周及未来）
-  // 禁止选择本周及未来的周（未结束的周）
   const disabledDate = (current: dayjs.Dayjs) => {
-    const endOfCurrentWeek = current.endOf("week"); // 周六 23:59:59
-    return endOfCurrentWeek.isAfter(dayjs()); // 如果周六还没到，则禁用
+    const sunday = current.startOf("week").subtract(1, "day"); // 上周日
+    const saturday = sunday.add(6, "day"); // 本周六 23:59:59
+    return saturday.isAfter(dayjs()); // 如果本周六还没到，则禁用
   };
+
   const renderLabel = (date: dayjs.Dayjs | null) => {
     if (!date) return null;
 
-    const year = date.year(); // 年份
-    const month = date.month() + 1; // 月份 1-12
-    const week = date.week(); // ISO 周数（全年第几周）
+    const year = date.year();
+    const month = date.month() + 1;
+    const week = date.week();
 
-    // 计算月份第几周
-    const firstDayOfMonth = date.startOf("month"); // 本月第一天
+    const firstDayOfMonth = date.startOf("month");
     const monthWeek = date.week() - firstDayOfMonth.week() + 1;
 
-    const sunday = date.startOf("week"); // 本周周日
-    const saturday = sunday.add(6, "day"); // 本周周六
+    const sunday = date.startOf("week").subtract(1, "day"); // 上周日
+    const saturday = sunday.add(6, "day"); // 本周六
 
     return (
       <div className="flex items-center gap-2">
@@ -154,6 +159,11 @@ const App: React.FC = () => {
   const onWeekChange = (date: dayjs.Dayjs | null) => {
     if (date) setSelectedWeek(date);
   };
+
+  useEffect(() => {
+    onWeekChange(lastWeek); // ✅ 初始化时触发
+  }, []);
+
   const fetchReportData = async () => {
     setLoading(true);
     try {
@@ -180,10 +190,6 @@ const App: React.FC = () => {
       fetchReportData();
     }
   }, [startDate, endDate, poolType]);
-
-  useEffect(() => {
-    onWeekChange(lastWeek); // ✅ 初始化时触发
-  }, []);
 
   const handleReload = () => {
     fetchReportData();
