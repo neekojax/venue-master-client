@@ -49,7 +49,7 @@ const SitePerformanceCard: React.FC<SitePerformanceCardProps> = ({
   // onFilterBottom,
 }) => {
   // 过滤后的数据
-
+  const [expandedRowKeys, setExpandedRowKeys] = useState<React.Key[]>([]);
   const [searchText, setSearchText] = useState(""); // 根据标题搜索
   const [selected, setSelected] = useState("all");
 
@@ -199,6 +199,10 @@ const SitePerformanceCard: React.FC<SitePerformanceCardProps> = ({
                 <Table columns={dailyColumns} dataSource={record.daily_items} pagination={false} />
               </div>
             );
+          },
+          expandedRowKeys, // 受控展开行
+          onExpand: (expanded, record) => {
+            setExpandedRowKeys(expanded ? [record.venue_id] : []); // 只展开当前行
           },
         }}
       />
