@@ -51,7 +51,10 @@ const ImpactCard: React.FC<HeatImpactCardProps> = ({ title, data, onReload }) =>
                   <span className={`text-${color}`}>{item.rate}%</span>
                 </div>
                 <div className="w-full bg-gray-100 rounded-full h-1">
-                  <div className={`bg-${color} h-1 rounded-full `} style={{ width: `${item.rate}%` }}></div>
+                  <div
+                    className={`bg-${color} h-1 rounded-full `}
+                    style={{ width: `${item.rate > 100 ? 100 : item.rate}%` }}
+                  ></div>
                 </div>
               </div>
             </div>

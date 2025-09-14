@@ -47,7 +47,7 @@ interface Top5Rate {
 
 const App: React.FC = () => {
   const { poolType } = useSettingsStore(useSelector(["poolType"]));
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   // 默认选中上周
   // 默认上周
   // const lastWeek = dayjs().subtract(1, "week").startOf("week");;
@@ -167,17 +167,18 @@ const App: React.FC = () => {
         setTop5HighTempImpactRate(reportData.data.top_5_high_temp_impact_rate);
         setTop5LimitImpactRate(reportData.data.top_5_limit_impact_rate);
         setData(reportData.data.detail);
+        setLoading(false);
       }
     } catch (error) {
       console.error("获取日报数据失败:", error);
-    } finally {
-      setLoading(false);
     }
   };
 
   useEffect(() => {
     setLoading(true);
-    fetchReportData();
+    if (startDate != "" && endDate != "") {
+      fetchReportData();
+    }
   }, [startDate, endDate, poolType]);
 
   useEffect(() => {
