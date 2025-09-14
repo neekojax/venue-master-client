@@ -48,7 +48,7 @@ export function setupAppVersionNotification() {
         type="primary"
         size="small"
         onClick={() => {
-          clearCacheAndReload();
+          // clearCacheAndReload();
           window.location.reload(); // 刷新页面
         }}
       >

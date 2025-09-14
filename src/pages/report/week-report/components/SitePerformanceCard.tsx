@@ -116,6 +116,7 @@ const SitePerformanceCard: React.FC<SitePerformanceCardProps> = ({
       <Table
         columns={columns}
         dataSource={filteredData}
+        rowKey="venue_id" // ⚠ 关键：Table 用 venue_id 作为唯一 key
         pagination={{
           total: filteredData.length,
           pageSize: 10,
