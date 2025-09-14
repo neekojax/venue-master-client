@@ -202,7 +202,7 @@ const App: React.FC = () => {
           <WeekPicker
             value={selectedWeek}
             onChange={onWeekChange}
-            format="YYYY-wo周"
+            format="YYYY-wo"
             disabledDate={disabledDate}
           />
           <Button

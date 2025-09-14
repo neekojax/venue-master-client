@@ -96,7 +96,7 @@ const SiderItems = () => {
           : []),
         {
           key: ROUTE_PATHS.weekReport,
-          label: <Link to={ROUTE_PATHS.weekReport}>周报</Link>,
+          label: <Link to={ROUTE_PATHS.weekReport}>运营周报</Link>,
         },
       ].filter(Boolean),
     },
