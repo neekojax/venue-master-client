@@ -1,45 +1,7 @@
-import React from "react";
+import React, { useState } from "react";
 import { SearchOutlined } from "@ant-design/icons";
 import { Button, Input, Table } from "antd";
 import type { ColumnsType } from "antd/es/table";
-
-// interface DailyData {
-//     date: string;
-//     theoretical: number;
-//     actual: number;
-//     efficiency: number;
-//     faultRate: number;
-// }
-
-// interface SiteRecord {
-//     key: string;
-//     name: string;
-//     efficiency: number;
-//     faultRate: number;
-//     dailyData: DailyData[];
-// }
-
-// interface DailyData {
-//     date: string;
-//     theoretical: number;
-//     actual: number;
-//     efficiency: number;
-//     faultRate: number;
-//     heatImpact: number;
-//     powerRestriction: number;
-// }
-// interface DataItem {
-//     key: string;
-//     name: string;
-//     theoretical: number;
-//     actual: number;
-//     efficiency: number;
-//     faultRate: number;
-//     heatImpact: number;
-//     powerRestriction: number;
-//     location: string;
-//     dailyData: DailyData[];
-// }
 
 interface DailyData {
   Date: string; // 日期
@@ -86,6 +48,25 @@ const SitePerformanceCard: React.FC<SitePerformanceCardProps> = ({
   onFilterTop,
   onFilterBottom,
 }) => {
+  // 过滤后的数据
+
+  const [searchText, setSearchText] = useState("");
+  const filteredData = data.filter((item) => {
+    const matchesSearchText = item.venue_name.includes(searchText);
+
+    // const isValidDateRange = Array.isArray(dateRange) && dateRange.length === 2;
+    // const matchesDateRange =
+    //   isValidDateRange && dateRange[0] && dateRange[1]
+    //     ? dayjs(log.log_date).isBetween(dateRange[0], dateRange[1], null, "[]")
+    //     : true;
+
+    // console.log(log.start_time, log.end_time)
+    // const hasDuration = log.start_time && log.end_time;
+    // const matchesDuration =
+    //   selectedDurationType === "valid" ? hasDuration : selectedDurationType === "empty" ? !hasDuration : true;
+
+    return matchesSearchText;
+  });
   return (
     <div className="bg-white p-4 rounded-[4px] border border-[#F0F2F5] shadow-sm">
       {/* 标题 + 操作栏 */}
@@ -97,6 +78,8 @@ const SitePerformanceCard: React.FC<SitePerformanceCardProps> = ({
             prefix={<SearchOutlined className="text-gray-400" />}
             className="!rounded-button"
             onPressEnter={(e) => onSearch?.((e.target as HTMLInputElement).value)}
+            value={searchText}
+            onChange={(e) => setSearchText(e.target.value)} // 更新搜索文本
           />
           <Button type="primary" className="!rounded-button whitespace-nowrap" onClick={onFilterAll}>
             全部场地
@@ -113,7 +96,7 @@ const SitePerformanceCard: React.FC<SitePerformanceCardProps> = ({
       {/* 主表格 */}
       <Table
         columns={columns}
-        dataSource={data}
+        dataSource={filteredData}
         pagination={{
           total: data.length,
           pageSize: 10,

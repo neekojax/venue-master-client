@@ -10,6 +10,8 @@ import VenueTable from "./components/venueTable";
 import { useSelector, useSettingsStore } from "@/stores";
 import { formatPercent, getNumberColor } from "@/utils/format.ts";
 
+import "./report.css";
+
 import { fetchWeeklyReport } from "@/pages/report/api.tsx";
 import ChartFail from "@/pages/report/week-report/components/ChartFail";
 import ChartSuanli from "@/pages/report/week-report/components/ChartSuanli";
@@ -169,7 +171,7 @@ const App: React.FC = () => {
   return (
     // <div className="min-h-[1024px] mx-auto max-w-[1440px] p-6 bg-[#FAFBFC]">
     <Spin spinning={loading} tip="加载中..." size="large">
-      <div>
+      <div style={{ color: "#000" }}>
         <div className="flex justify-between items-center mb-6">
           <div>
             <h1 className="text-2xl font-bold mb-2">矿池周报</h1>

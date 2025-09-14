@@ -40,7 +40,7 @@ const VenuePage: React.FC<VenueTableProps> = ({ data }) => {
       title: "日期",
       dataIndex: "venue_name",
       key: "venue_name",
-      align: "center",
+      align: "left",
       render: (text: string, record: { venue_name?: any }) => {
         const venue_id = record?.venue_name.split("-")[0] || 0;
         const isSpecialVenue = text === "Arct-HF01-J XP-AR-US" || text === "ARCT Technologies-HF02-AR-US";
