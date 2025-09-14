@@ -137,9 +137,9 @@ const VenuePage: React.FC<VenueTableProps> = ({ data }) => {
       columns={columns}
       data={data}
       onSearch={(val) => console.log("搜索:", val)}
-      onFilterAll={() => console.log("全部场地")}
-      onFilterTop={() => console.log("Top 5")}
-      onFilterBottom={() => console.log("Bottom 5")}
+      // onFilterAll={() => console.log("全部场地")}
+      // onFilterTop={() => console.log("Top 5")}
+      // onFilterBottom={() => console.log("Bottom 5")}
     />
   );
 };

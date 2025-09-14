@@ -8,7 +8,7 @@ import ImpactCard from "./components/ImpactCard";
 import StatCard from "./components/StatCard";
 import VenueTable from "./components/venueTable";
 import { useSelector, useSettingsStore } from "@/stores";
-import { formatPercent, getNumberColor } from "@/utils/format.ts";
+import { formatPercent, getIconColor, getNumberColor } from "@/utils/format.ts";
 
 import "./report.css";
 
@@ -50,8 +50,10 @@ const App: React.FC = () => {
   const [loading, setLoading] = useState(false);
   // 默认选中上周
   // 默认上周
-  const lastWeek = dayjs().subtract(1, "week");
+  // const lastWeek = dayjs().subtract(1, "week").startOf("week");;
+  const lastWeek = dayjs().subtract(1, "week").startOf("week");
   const [selectedWeek, setSelectedWeek] = useState<dayjs.Dayjs>(lastWeek);
+
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
   const [statistics, setStatistics] = useState<StatisticData | null>(null); // 初始化为对象
@@ -67,7 +69,7 @@ const App: React.FC = () => {
       title: "总算力有效率",
       value: formatPercent(statistics?.TotalHashEffectiveRate),
       icon: "chart-line",
-      iconColor: getNumberColor(statistics?.WeeklyLimitImpactRateChange ?? 0),
+      iconColor: getIconColor("总算力有效率"),
       trend: (statistics?.WeeklyHashEffectiveRateChange ?? 0) > 0 ? "up" : "down",
       trendValue: formatPercent(statistics?.WeeklyHashEffectiveRateChange),
       trendText: "较上周",
@@ -77,7 +79,7 @@ const App: React.FC = () => {
       title: "总故障率",
       value: formatPercent(statistics?.TotalFailureRate),
       icon: "exclamation-triangle",
-      iconColor: getNumberColor(statistics?.WeeklyLimitImpactRateChange ?? 0),
+      iconColor: getIconColor("总故障率"),
       trend: (statistics?.WeeklyFailureRateChange ?? 0) > 0 ? "up" : "down",
       trendValue: formatPercent(statistics?.WeeklyFailureRateChange),
       trendText: "较上周",
@@ -87,7 +89,7 @@ const App: React.FC = () => {
       title: "高温影响率",
       value: formatPercent(statistics?.TotalHighTemperatureImpactRate),
       icon: "temperature-high",
-      iconColor: getNumberColor(statistics?.WeeklyLimitImpactRateChange ?? 0),
+      iconColor: getIconColor("高温影响率"),
       trend: (statistics?.WeeklyHighTemperatureImpactRateChange ?? 0) > 0 ? "up" : "down",
       trendValue: formatPercent(Math.abs(statistics?.WeeklyHighTemperatureImpactRateChange ?? 0)),
       trendText: "较上周",
@@ -97,7 +99,7 @@ const App: React.FC = () => {
       title: "限电影响率",
       value: formatPercent(statistics?.TotalLimitImpactRate),
       icon: "bolt",
-      iconColor: getNumberColor(statistics?.WeeklyLimitImpactRateChange ?? 0),
+      iconColor: getIconColor("限电影响率"),
       trend: (statistics?.WeeklyLimitImpactRateChange ?? 0) > 0 ? "up" : "down",
       trendValue: formatPercent(Math.abs(statistics?.WeeklyLimitImpactRateChange ?? 0)),
       trendText: "较上周",
@@ -110,6 +112,9 @@ const App: React.FC = () => {
     const endOfWeek = selectedWeek.endOf("week"); // 周六
     setStartDate(startOfWeek.format("YYYY-MM-DD"));
     setEndDate(endOfWeek.format("YYYY-MM-DD"));
+    // renderLabel(selectedWeek);
+    onWeekChange(selectedWeek);
+    renderLabel(selectedWeek);
   }, [selectedWeek]);
 
   // 禁止选择未结束的周（本周及未来）
@@ -118,13 +123,19 @@ const App: React.FC = () => {
     const endOfCurrentWeek = current.endOf("week"); // 周六 23:59:59
     return endOfCurrentWeek.isAfter(dayjs()); // 如果周六还没到，则禁用
   };
-  // 格式化显示文本
-  const renderLabel = (date: dayjs.Dayjs) => {
+  const renderLabel = (date: dayjs.Dayjs | null) => {
     if (!date) return null;
-    const year = date.year();
-    const week = date.week(); // 第几周
-    const month = date.month() + 1;
-    const monthWeek = Math.ceil(date.date() / 7); // 第几周（按日数粗略算）
+
+    const year = date.year(); // 年份
+    const month = date.month() + 1; // 月份 1-12
+    const week = date.week(); // ISO 周数（全年第几周）
+
+    // 计算月份第几周
+    const firstDayOfMonth = date.startOf("month"); // 本月第一天
+    const monthWeek = date.week() - firstDayOfMonth.week() + 1;
+
+    const sunday = date.startOf("week"); // 本周周日
+    const saturday = sunday.add(6, "day"); // 本周周六
 
     return (
       <div className="flex items-center gap-2">
@@ -132,6 +143,9 @@ const App: React.FC = () => {
         <span className="text-gray-400">|</span>
         <span className="text-gray-500">
           {year}年{month}月第{monthWeek}周
+        </span>
+        <span className="text-gray-500">
+          {sunday.format("YYYY-MM-DD")}~~{saturday.format("YYYY-MM-DD")}
         </span>
       </div>
     );
@@ -141,6 +155,7 @@ const App: React.FC = () => {
     if (date) setSelectedWeek(date);
   };
   const fetchReportData = async () => {
+    setLoading(true);
     try {
       const reportData = await fetchWeeklyReport(poolType, startDate, endDate);
       console.log(reportData);
@@ -165,41 +180,41 @@ const App: React.FC = () => {
     fetchReportData();
   }, [startDate, endDate, poolType]);
 
+  useEffect(() => {
+    onWeekChange(lastWeek); // ✅ 初始化时触发
+  }, []);
+
   const handleReload = () => {
     fetchReportData();
   };
   return (
     // <div className="min-h-[1024px] mx-auto max-w-[1440px] p-6 bg-[#FAFBFC]">
-    <Spin spinning={loading} tip="加载中..." size="large">
-      <div style={{ color: "#000" }}>
-        <div className="flex justify-between items-center mb-6">
-          <div>
-            <h1 className="text-2xl font-bold mb-2">矿池周报</h1>
-            {renderLabel(selectedWeek)}
-            {/* <div className="flex items-center gap-2 mb-1">
-                        <span className="text-blue-500 font-semibold">第37周</span>
-                        <span className="text-gray-400">|</span>
-                        <span className="text-gray-500">2025年9月第2周</span>
-                    </div> */}
-            <p className="text-gray-500">全面监控和分析矿池算力表现</p>
-          </div>
-          <div className="flex items-center gap-4">
-            <WeekPicker
-              value={selectedWeek}
-              onChange={onWeekChange}
-              format="YYYY-wo周"
-              disabledDate={disabledDate}
-            />
-            <Button
-              onClick={handleReload}
-              type="primary"
-              icon={<ReloadOutlined />}
-              className="!rounded-button whitespace-nowrap"
-            >
-              刷新
-            </Button>
-          </div>
+
+    <div style={{ color: "#000" }}>
+      <div className="flex justify-between items-center mb-6">
+        <div>
+          <h1 className="text-2xl font-bold mb-2">矿池周报</h1>
+          {renderLabel(selectedWeek)}
+          <p className="text-gray-500">全面监控和分析矿池算力表现</p>
         </div>
+        <div className="flex items-center gap-4">
+          <WeekPicker
+            value={selectedWeek}
+            onChange={onWeekChange}
+            format="YYYY-wo周"
+            disabledDate={disabledDate}
+          />
+          <Button
+            onClick={handleReload}
+            type="primary"
+            icon={<ReloadOutlined />}
+            className="!rounded-button whitespace-nowrap"
+          >
+            刷新
+          </Button>
+        </div>
+      </div>
+      <Spin spinning={loading} tip="加载中..." size="large">
         <div className="grid grid-cols-4 gap-4 mb-6">
           {stats.map((s, i) => (
             <StatCard key={i} {...s} />
@@ -243,8 +258,8 @@ const App: React.FC = () => {
         </div>
 
         <VenueTable data={data} />
-      </div>
-    </Spin>
+      </Spin>
+    </div>
   );
 };
 export default App;

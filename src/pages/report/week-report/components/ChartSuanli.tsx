@@ -132,7 +132,7 @@ const WaveLineCard: React.FC<Props> = ({ hashEffectiveRate }) => {
                     <Radio.Button value="month">月</Radio.Button>
                 </Radio.Group> */}
       </div>
-      <div ref={domRef} style={{ width: "100%", height: 320 }} />
+      <div ref={domRef} style={{ width: "100%", height: 255 }} />
     </>
   );
 };

@@ -1,6 +1,6 @@
-import React, { useState } from "react";
+import React, { useMemo, useState } from "react";
 import { SearchOutlined } from "@ant-design/icons";
-import { Button, Input, Table } from "antd";
+import { Input, Segmented, Table } from "antd";
 import type { ColumnsType } from "antd/es/table";
 
 interface DailyData {
@@ -34,9 +34,9 @@ interface SitePerformanceCardProps {
   columns: ColumnsType<DataItem>;
   data: DataItem[];
   onSearch?: (value: string) => void;
-  onFilterAll?: () => void;
-  onFilterTop?: () => void;
-  onFilterBottom?: () => void;
+  // onFilterAll?: () => void;
+  // onFilterTop?: () => void;
+  // onFilterBottom?: () => void;
 }
 
 const SitePerformanceCard: React.FC<SitePerformanceCardProps> = ({
@@ -44,29 +44,30 @@ const SitePerformanceCard: React.FC<SitePerformanceCardProps> = ({
   columns,
   data,
   onSearch,
-  onFilterAll,
-  onFilterTop,
-  onFilterBottom,
+  // onFilterAll,
+  // onFilterTop,
+  // onFilterBottom,
 }) => {
   // 过滤后的数据
 
-  const [searchText, setSearchText] = useState("");
-  const filteredData = data.filter((item) => {
-    const matchesSearchText = item.venue_name.includes(searchText);
+  const [searchText, setSearchText] = useState(""); // 根据标题搜索
+  const [selected, setSelected] = useState("all");
 
-    // const isValidDateRange = Array.isArray(dateRange) && dateRange.length === 2;
-    // const matchesDateRange =
-    //   isValidDateRange && dateRange[0] && dateRange[1]
-    //     ? dayjs(log.log_date).isBetween(dateRange[0], dateRange[1], null, "[]")
-    //     : true;
+  const filteredData = useMemo(() => {
+    // 先做搜索过滤
+    const result = data.filter((item) => item.venue_name.toLowerCase().includes(searchText.toLowerCase()));
 
-    // console.log(log.start_time, log.end_time)
-    // const hasDuration = log.start_time && log.end_time;
-    // const matchesDuration =
-    //   selectedDurationType === "valid" ? hasDuration : selectedDurationType === "empty" ? !hasDuration : true;
+    // 按有效率排序
+    const sorted = [...result].sort((a, b) => b.average_hash_effective_rate - a.average_hash_effective_rate);
 
-    return matchesSearchText;
-  });
+    if (selected == "top5") {
+      return sorted.slice(0, 5); // Top5
+    } else if (selected == "bottom5") {
+      return sorted.slice(-5); // Bottom5
+    } else {
+      return result; // 全部
+    }
+  }, [data, searchText, selected]);
   return (
     <div className="bg-white p-4 rounded-[4px] border border-[#F0F2F5] shadow-sm">
       {/* 标题 + 操作栏 */}
@@ -81,7 +82,7 @@ const SitePerformanceCard: React.FC<SitePerformanceCardProps> = ({
             value={searchText}
             onChange={(e) => setSearchText(e.target.value)} // 更新搜索文本
           />
-          <Button type="primary" className="!rounded-button whitespace-nowrap" onClick={onFilterAll}>
+          {/* <Button type="primary" className="!rounded-button whitespace-nowrap" onClick={onFilterAll}>
             全部场地
           </Button>
           <Button className="!rounded-button whitespace-nowrap" onClick={onFilterTop}>
@@ -89,7 +90,25 @@ const SitePerformanceCard: React.FC<SitePerformanceCardProps> = ({
           </Button>
           <Button className="!rounded-button whitespace-nowrap" onClick={onFilterBottom}>
             有效率 Bottom 5
+          </Button> */}
+          {/* <Button onClick={() => { setAll(true); setTop5(false); setBottom5(false); }}>
+            全部
           </Button>
+          <Button onClick={() => { setTop5(true); setAll(false); setBottom5(false); }}>
+            Top5
+          </Button>
+          <Button onClick={() => { setBottom5(true); setAll(false); setTop5(false); }}>
+            Bottom5
+          </Button> */}
+          <Segmented
+            options={[
+              { label: "全部", value: "all" },
+              { label: "Top5", value: "top5" },
+              { label: "Bottom5", value: "bottom5" },
+            ]}
+            value={selected}
+            onChange={(val) => setSelected(val)}
+          />
         </div>
       </div>
 
@@ -98,7 +117,7 @@ const SitePerformanceCard: React.FC<SitePerformanceCardProps> = ({
         columns={columns}
         dataSource={filteredData}
         pagination={{
-          total: data.length,
+          total: filteredData.length,
           pageSize: 10,
           showTotal: (total) => `共 ${total} 个场地`,
           showSizeChanger: true,

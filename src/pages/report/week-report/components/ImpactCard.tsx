@@ -2,8 +2,6 @@ import React from "react";
 import { ReloadOutlined } from "@ant-design/icons";
 import { Button } from "antd";
 
-import "../report.css";
-
 interface DataItem {
   venue_name: string;
   rate: number;
