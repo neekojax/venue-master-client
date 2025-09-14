@@ -191,7 +191,7 @@ const App: React.FC = () => {
   return (
     // <div className="min-h-[1024px] mx-auto max-w-[1440px] p-6 bg-[#FAFBFC]">
 
-    <div style={{ color: "#000" }}>
+    <div className="weekReport">
       <div className="flex justify-between items-center mb-6">
         <div>
           <h1 className="text-2xl font-bold mb-2">矿池周报</h1>
@@ -200,6 +200,7 @@ const App: React.FC = () => {
         </div>
         <div className="flex items-center gap-4">
           <WeekPicker
+            size="middle"
             value={selectedWeek}
             onChange={onWeekChange}
             format="YYYY-wo"
@@ -208,6 +209,7 @@ const App: React.FC = () => {
           <Button
             onClick={handleReload}
             type="primary"
+            size="middle"
             icon={<ReloadOutlined />}
             className="!rounded-button whitespace-nowrap"
           >

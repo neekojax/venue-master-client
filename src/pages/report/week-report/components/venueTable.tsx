@@ -37,10 +37,11 @@ interface VenueTableProps {
 const VenuePage: React.FC<VenueTableProps> = ({ data }) => {
   const columns: ColumnsType<DataItem> = [
     {
-      title: "日期",
+      title: "场地名称",
       dataIndex: "venue_name",
       key: "venue_name",
       align: "left",
+      sorter: (a: DataItem, b: DataItem) => a.venue_name.localeCompare(b.venue_name),
       render: (text: string, record: { venue_name?: any }) => {
         const venue_id = record?.venue_name.split("-")[0] || 0;
         const isSpecialVenue = text === "Arct-HF01-J XP-AR-US" || text === "ARCT Technologies-HF02-AR-US";

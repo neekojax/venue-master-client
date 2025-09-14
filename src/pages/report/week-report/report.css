@@ -8,3 +8,17 @@
 
 .bg-yellow-500{background-color: #e1b53f !important;}
 .text-yellow-500{color: #e1b53f !important;}
+
+
+.weekReport {
+    color: #000;
+}
+.weekReport h3{
+    font-size: 16px;
+    /* color: #585858; */
+}
+
+.weekReport .custom-table .ant-table-column-title,.weekReport .custom-table .ant-table-cell{
+    font-size: 13px;
+}
+

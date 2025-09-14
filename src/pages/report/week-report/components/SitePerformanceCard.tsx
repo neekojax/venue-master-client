@@ -1,6 +1,6 @@
 import React, { useMemo, useState } from "react";
 import { SearchOutlined } from "@ant-design/icons";
-import { Input, Segmented, Table } from "antd";
+import { Button, Input, Table } from "antd";
 import type { ColumnsType } from "antd/es/table";
 
 interface DailyData {
@@ -72,9 +72,10 @@ const SitePerformanceCard: React.FC<SitePerformanceCardProps> = ({
     <div className="bg-white p-4 rounded-[4px] border border-[#F0F2F5] shadow-sm">
       {/* 标题 + 操作栏 */}
       <div className="flex justify-between items-center mb-4">
-        <div className="text-lg font-bold">{title}</div>
+        <h3 className="text-lg font-bold">{title}</h3>
         <div className="flex items-center gap-4">
           <Input
+            size="small"
             placeholder="搜索场地..."
             prefix={<SearchOutlined className="text-gray-400" />}
             className="!rounded-button"
@@ -91,16 +92,29 @@ const SitePerformanceCard: React.FC<SitePerformanceCardProps> = ({
           <Button className="!rounded-button whitespace-nowrap" onClick={onFilterBottom}>
             有效率 Bottom 5
           </Button> */}
-          {/* <Button onClick={() => { setAll(true); setTop5(false); setBottom5(false); }}>
-            全部
+          <Button
+            size="small"
+            type={selected === "all" ? "primary" : "default"}
+            onClick={() => setSelected("all")}
+          >
+            全部场地
           </Button>
-          <Button onClick={() => { setTop5(true); setAll(false); setBottom5(false); }}>
-            Top5
+          <Button
+            size="small"
+            type={selected === "top5" ? "primary" : "default"}
+            onClick={() => setSelected("top5")}
+          >
+            有效率 Top 5
           </Button>
-          <Button onClick={() => { setBottom5(true); setAll(false); setTop5(false); }}>
-            Bottom5
-          </Button> */}
-          <Segmented
+          <Button
+            size="small"
+            type={selected === "bottom5" ? "primary" : "default"}
+            onClick={() => setSelected("bottom5")}
+          >
+            有效率 Bottom 5
+          </Button>
+          {/* <Segmented
+            size="middle"
             options={[
               { label: "全部", value: "all" },
               { label: "Top5", value: "top5" },
@@ -108,7 +122,7 @@ const SitePerformanceCard: React.FC<SitePerformanceCardProps> = ({
             ]}
             value={selected}
             onChange={(val) => setSelected(val)}
-          />
+          /> */}
         </div>
       </div>
 
@@ -124,7 +138,7 @@ const SitePerformanceCard: React.FC<SitePerformanceCardProps> = ({
           showSizeChanger: true,
           showQuickJumper: true,
         }}
-        className="w-full"
+        className="custom-table w-full"
         expandable={{
           expandedRowRender: (record) => {
             const dailyColumns: ColumnsType<DailyData> = [

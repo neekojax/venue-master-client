@@ -118,7 +118,7 @@ const WaveLineCard: React.FC<Props> = ({ hashEffectiveRate }) => {
   return (
     <>
       <div className="flex justify-between items-center mb-4">
-        <h3 className="text-lg font-semibold">算力有效率变化曲线</h3>
+        <h3 className="text-lg font-semibold">算力有效率</h3>
         {/* <Radio.Group
                     value={chart.period}
                     onChange={(e) => {
