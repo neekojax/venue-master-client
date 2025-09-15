@@ -22,3 +22,33 @@
     font-size: 13px;
 }
 
+/* 子表格整体边框 */
+.custom-inner-table .ant-table-container {
+   /* border: 1px solid #d1d5db; /* 灰色边框 (Tailwind 的 gray-300) */
+    /* border-radius: 6px; 圆角可选 */
+    border: 0.5px solid #d1d5db !important; 
+
+  }
+  
+  /* 表头单元格边框 */
+  .custom-inner-table .ant-table-thead > tr > th {
+    /* border-right: 1px solid #d1d5db !important; */
+    border-bottom: 0.5px solid #d1d5db !important;
+  }
+
+/* 表头样式 */
+.custom-inner-table .ant-table-thead > tr > th {
+    background-color: #f5f7fa !important; /* 浅灰背景 */
+    font-weight: bold;
+    color: #333;
+    font-size: 14px;
+  }
+  
+  /* 斑马纹效果（如果不用 rowClassName） */
+  .custom-inner-table .ant-table-tbody > tr:nth-child(odd) {
+    background-color: #fff;
+  }
+  .custom-inner-table .ant-table-tbody > tr:nth-child(even) {
+    background-color: #f9fafb;
+  }
+

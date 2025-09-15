@@ -2,6 +2,7 @@ import React, { useMemo, useState } from "react";
 import { SearchOutlined } from "@ant-design/icons";
 import { Button, Input, Table } from "antd";
 import type { ColumnsType } from "antd/es/table";
+import { formatDivide1000 } from "@/utils/format";
 
 interface DailyData {
   Date: string; // 日期
@@ -177,7 +178,7 @@ const SitePerformanceCard: React.FC<SitePerformanceCardProps> = ({
                 dataIndex: "Power24h",
                 key: "Power24h",
                 align: "center",
-                render: (value: number) => value?.toFixed(3),
+                render: (value: number) => formatDivide1000(value),
               },
               {
                 title: "算力有效率",
@@ -228,7 +229,14 @@ const SitePerformanceCard: React.FC<SitePerformanceCardProps> = ({
             ];
             return (
               <div className="p-4 bg-[#FAFBFC]">
-                <Table columns={dailyColumns} dataSource={record.daily_items} pagination={false} />
+                <Table
+                  columns={dailyColumns}
+                  dataSource={record.daily_items}
+                  pagination={false}
+                  size="small"
+                  // rowClassName={(_, index) => (index % 2 === 0 ? "bg-gray-50" : "bg-white")} // ✅ 斑马纹
+                  className="custom-inner-table"
+                />
               </div>
             );
           },
