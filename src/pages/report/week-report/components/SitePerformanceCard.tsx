@@ -53,6 +53,12 @@ const SitePerformanceCard: React.FC<SitePerformanceCardProps> = ({
   const [searchText, setSearchText] = useState(""); // 根据标题搜索
   const [selected, setSelected] = useState("all");
 
+  // 1. 定义分页 state
+  const [pagination, setPagination] = useState({
+    current: 1,
+    pageSize: 10,
+  });
+
   const filteredData = useMemo(() => {
     // 先做搜索过滤
     const result = data.filter((item) => item.venue_name.toLowerCase().includes(searchText.toLowerCase()));
@@ -65,9 +71,15 @@ const SitePerformanceCard: React.FC<SitePerformanceCardProps> = ({
     } else if (selected == "bottom5") {
       return sorted.slice(-5); // Bottom5
     } else {
-      return result; // 全部
+      // return result; // 全部
+      // 默认按场地名字母排序
+      return [...result].sort((a, b) => a.venue_name.localeCompare(b.venue_name));
     }
   }, [data, searchText, selected]);
+
+  // 3️⃣ 排序
+  // filtered = filtered.sort((a, b) => a.siteName.localeCompare(b.siteName));
+
   return (
     <div className="bg-white p-4 rounded-[4px] border border-[#F0F2F5] shadow-sm">
       {/* 标题 + 操作栏 */}
@@ -129,14 +141,19 @@ const SitePerformanceCard: React.FC<SitePerformanceCardProps> = ({
       {/* 主表格 */}
       <Table
         columns={columns}
+        tableLayout="fixed"
         dataSource={filteredData}
         rowKey="venue_id" // ⚠ 关键：Table 用 venue_id 作为唯一 key
         pagination={{
+          ...pagination,
           total: filteredData.length,
-          pageSize: 10,
+          // pageSize: 10,
           showTotal: (total) => `共 ${total} 个场地`,
           showSizeChanger: true,
           showQuickJumper: true,
+          onChange: (page, pageSize) => {
+            setPagination({ current: page, pageSize });
+          },
         }}
         className="custom-table w-full"
         expandable={{

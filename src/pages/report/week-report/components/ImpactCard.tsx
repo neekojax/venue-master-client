@@ -29,15 +29,15 @@ const ImpactCard: React.FC<HeatImpactCardProps> = ({ title, data, onReload }) =>
       </div>
 
       {/* 排行内容 */}
-      <div className="space-y-4">
+      <div className="space-y-4 p-4" style={{ padding: "1.1rem", paddingTop: "0px", paddingLeft: "0.8rem" }}>
         {data
           .sort((a, b) => b.rate - a.rate)
           .slice(0, 5)
           .map((item, index) => (
-            <div key={item.venue_name} className="flex items-center">
+            <div key={item.venue_name} className="flex items-center ">
               {/* 排名序号 */}
               <div
-                className={`w-6 h-6 rounded-full flex items-center justify-center mr-3 ${
+                className={`w-5 h-5  rounded-full text-sm flex items-center justify-center mr-3 ${
                   index < 3 ? `bg-${color} text-white ` : "bg-gray-100 text-gray-500"
                 }`}
               >
@@ -46,7 +46,7 @@ const ImpactCard: React.FC<HeatImpactCardProps> = ({ title, data, onReload }) =>
 
               {/* 名称 + 百分比 + 进度条 */}
               <div className="flex-1">
-                <div className="flex justify-between mb-1">
+                <div className="flex justify-between mb-1" style={{ fontSize: "13px" }}>
                   <span className="font-medium">{item.venue_name}</span>
                   <span className={`text-${color}`}>{item.rate}%</span>
                 </div>

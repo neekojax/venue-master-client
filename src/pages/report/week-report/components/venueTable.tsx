@@ -41,10 +41,10 @@ const VenuePage: React.FC<VenueTableProps> = ({ data }) => {
       dataIndex: "venue_name",
       key: "venue_name",
       align: "left",
+      width: 250,
       sorter: (a: DataItem, b: DataItem) => a.venue_name.localeCompare(b.venue_name),
-      defaultSortOrder: "ascend", // ✅ 默认升序
-      render: (text: string, record: { venue_name?: any }) => {
-        const venue_id = record?.venue_name.split("-")[0] || 0;
+      // defaultSortOrder: "ascend", // ✅ 默认升序
+      render: (text: string, record: { venue_name?: any; venue_id?: any }) => {
         const isSpecialVenue = text === "Arct-HF01-J XP-AR-US" || text === "ARCT Technologies-HF02-AR-US";
         return (
           <Tooltip title={text} placement="top" style={{ color: "white" }}>
@@ -64,7 +64,7 @@ const VenuePage: React.FC<VenueTableProps> = ({ data }) => {
                 </Tag>
               )}
 
-              <Link to={`/venue/detail/${venue_id}`} className="text-blue-500 hover:underline">
+              <Link to={`/venue/detail/${record.venue_id}`} className="text-blue-500 hover:underline">
                 {text}
               </Link>
             </div>

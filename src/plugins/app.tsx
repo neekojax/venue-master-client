@@ -35,11 +35,11 @@ export function setupAppVersionNotification() {
       return;
     }
     const clearCacheAndReload = () => {
-      localStorage.clear();
-      sessionStorage.clear();
-      if ("caches" in window) {
-        caches.keys().then((keys) => keys.forEach((key) => caches.delete(key)));
-      }
+      // localStorage.clear();
+      // sessionStorage.clear();
+      // if ("caches" in window) {
+      //   caches.keys().then((keys) => keys.forEach((key) => caches.delete(key)));
+      // }
       location.reload();
     };
 
