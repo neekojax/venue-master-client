@@ -1,6 +1,6 @@
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { SearchOutlined } from "@ant-design/icons";
-import { Button, Input, Table } from "antd";
+import { Button, Input, Switch, Table } from "antd";
 import type { ColumnsType } from "antd/es/table";
 import { formatDivide1000 } from "@/utils/format";
 
@@ -21,6 +21,7 @@ interface DailyData {
 interface DataItem {
   venue_id: number; // 场馆 ID
   venue_name: string; // 场馆名称
+  collection: number; // 是否收藏
   average_thermal_power: number; // 平均理论算力
   average_power_24h: number; // 平均24小时算力
   average_hash_effective_rate: number; // 平均算力有效率（%）
@@ -53,6 +54,14 @@ const SitePerformanceCard: React.FC<SitePerformanceCardProps> = ({
   const [expandedRowKeys, setExpandedRowKeys] = useState<React.Key[]>([]);
   const [searchText, setSearchText] = useState(""); // 根据标题搜索
   const [selected, setSelected] = useState("all");
+  const [showCollectionOnly, setShowCollectionOnly] = useState(() => {
+    // 初始化时从 localStorage 取值
+    return localStorage.getItem("showCollectionOnly") === "true";
+  });
+  // 当值变化时写入 localStorage
+  useEffect(() => {
+    localStorage.setItem("showCollectionOnly", String(showCollectionOnly));
+  }, [showCollectionOnly]);
 
   // 1. 定义分页 state
   const [pagination, setPagination] = useState({
@@ -62,7 +71,12 @@ const SitePerformanceCard: React.FC<SitePerformanceCardProps> = ({
 
   const filteredData = useMemo(() => {
     // 先做搜索过滤
-    const result = data.filter((item) => item.venue_name.toLowerCase().includes(searchText.toLowerCase()));
+    let result = data.filter((item) => item.venue_name.toLowerCase().includes(searchText.toLowerCase()));
+
+    // 如果只显示 collection 数据
+    if (showCollectionOnly) {
+      result = result.filter((item) => item.collection);
+    }
 
     // 按有效率排序
     const sorted = [...result].sort((a, b) => b.average_hash_effective_rate - a.average_hash_effective_rate);
@@ -76,7 +90,7 @@ const SitePerformanceCard: React.FC<SitePerformanceCardProps> = ({
       // 默认按场地名字母排序
       return [...result].sort((a, b) => a.venue_name.localeCompare(b.venue_name));
     }
-  }, [data, searchText, selected]);
+  }, [data, searchText, selected, showCollectionOnly]);
 
   // 3️⃣ 排序
   // filtered = filtered.sort((a, b) => a.siteName.localeCompare(b.siteName));
@@ -84,19 +98,26 @@ const SitePerformanceCard: React.FC<SitePerformanceCardProps> = ({
   return (
     <div className="bg-white p-4 rounded-[4px] border border-[#F0F2F5] shadow-sm">
       {/* 标题 + 操作栏 */}
-      <div className="flex justify-between items-center mb-4">
+      <div className="items-center mb-4">
         <h3 className="text-lg font-bold">{title}</h3>
-        <div className="flex items-center gap-4">
-          <Input
-            size="small"
-            placeholder="搜索场地..."
-            prefix={<SearchOutlined className="text-gray-400" />}
-            className="!rounded-button"
-            onPressEnter={(e) => onSearch?.((e.target as HTMLInputElement).value)}
-            value={searchText}
-            onChange={(e) => setSearchText(e.target.value)} // 更新搜索文本
-          />
-          {/* <Button type="primary" className="!rounded-button whitespace-nowrap" onClick={onFilterAll}>
+        <div className="flex items-center gap-4  justify-between">
+          <span>
+            <Switch size="small" checked={showCollectionOnly} onChange={setShowCollectionOnly} />
+            {"  "}
+            <span style={{ marginRight: "10px" }}>我的自选</span>
+          </span>
+
+          <div className="flex items-center gap-4">
+            <Input
+              size="small"
+              placeholder="搜索场地..."
+              prefix={<SearchOutlined className="text-gray-400" />}
+              className="!rounded-button"
+              onPressEnter={(e) => onSearch?.((e.target as HTMLInputElement).value)}
+              value={searchText}
+              onChange={(e) => setSearchText(e.target.value)} // 更新搜索文本
+            />
+            {/* <Button type="primary" className="!rounded-button whitespace-nowrap" onClick={onFilterAll}>
             全部场地
           </Button>
           <Button className="!rounded-button whitespace-nowrap" onClick={onFilterTop}>
@@ -105,28 +126,28 @@ const SitePerformanceCard: React.FC<SitePerformanceCardProps> = ({
           <Button className="!rounded-button whitespace-nowrap" onClick={onFilterBottom}>
             有效率 Bottom 5
           </Button> */}
-          <Button
-            size="small"
-            type={selected === "all" ? "primary" : "default"}
-            onClick={() => setSelected("all")}
-          >
-            全部场地
-          </Button>
-          <Button
-            size="small"
-            type={selected === "top5" ? "primary" : "default"}
-            onClick={() => setSelected("top5")}
-          >
-            有效率 Top 5
-          </Button>
-          <Button
-            size="small"
-            type={selected === "bottom5" ? "primary" : "default"}
-            onClick={() => setSelected("bottom5")}
-          >
-            有效率 Bottom 5
-          </Button>
-          {/* <Segmented
+            <Button
+              size="small"
+              type={selected === "all" ? "primary" : "default"}
+              onClick={() => setSelected("all")}
+            >
+              全部场地
+            </Button>
+            <Button
+              size="small"
+              type={selected === "top5" ? "primary" : "default"}
+              onClick={() => setSelected("top5")}
+            >
+              有效率 Top 5
+            </Button>
+            <Button
+              size="small"
+              type={selected === "bottom5" ? "primary" : "default"}
+              onClick={() => setSelected("bottom5")}
+            >
+              有效率 Bottom 5
+            </Button>
+            {/* <Segmented
             size="middle"
             options={[
               { label: "全部", value: "all" },
@@ -136,6 +157,7 @@ const SitePerformanceCard: React.FC<SitePerformanceCardProps> = ({
             value={selected}
             onChange={(val) => setSelected(val)}
           /> */}
+          </div>
         </div>
       </div>
 

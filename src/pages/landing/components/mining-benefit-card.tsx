@@ -47,8 +47,13 @@ const MiningBenefitCard: React.FC<MiningPoolCardProps> = ({ poolType }) => {
     try {
       // const currentDate = dayjs().subtract(1, 'day').format('YYYY-MM-DD');
       // 获取昨天的日期
-      const yesterday = dayjs().subtract(1, "day").format("YYYY-MM-DD");
-      const suanlilv = await fetchHomesuanli(poolType, yesterday);
+      // const yesterday = dayjs().subtract(1, "day").format("YYYY-MM-DD");
+
+      const targetDate = dayjs()
+        .subtract(dayjs().hour() < 10 ? 2 : 1, "day")
+        .format("YYYY-MM-DD");
+
+      const suanlilv = await fetchHomesuanli(poolType, targetDate);
       setSuanlilv(suanlilv.data); // 假设返回数据在 result.data 中
       localStorage.setItem("suanlilv", JSON.stringify(suanlilv.data));
       // eslint-disable-next-line @typescript-eslint/no-unused-vars

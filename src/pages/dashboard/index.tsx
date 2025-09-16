@@ -47,6 +47,7 @@ export default function LandingPage() {
           <MiningBenefitLine poolType={poolType} />
         </Col>
       </Row>
+
       <Row gutter={16} justify="space-between">
         <Col span={6}>
           {" "}

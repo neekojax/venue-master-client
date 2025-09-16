@@ -302,7 +302,7 @@ const App: React.FC = () => {
       },
     },
     {
-      title: "总故障数",
+      title: "T-2总故障数",
       dataIndex: "totalFailuresT2",
       key: "totalFailuresT2",
       width: 120,
@@ -366,8 +366,8 @@ const App: React.FC = () => {
     // },
     {
       title: "总故障率",
-      dataIndex: "totalFailuresT2",
-      key: "totalFailuresT2",
+      dataIndex: "totalFailuresT1",
+      key: "totalFailuresT1",
       width: 100,
       align: "right",
       render: (val, record) => {

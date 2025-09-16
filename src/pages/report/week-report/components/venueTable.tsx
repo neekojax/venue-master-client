@@ -21,6 +21,7 @@ interface DailyData {
 interface DataItem {
   venue_id: number; // 场馆 ID
   venue_name: string; // 场馆名称
+  collection: number;
   average_thermal_power: number; // 平均理论算力
   average_power_24h: number; // 平均24小时算力
   average_hash_effective_rate: number; // 平均算力有效率（%）
