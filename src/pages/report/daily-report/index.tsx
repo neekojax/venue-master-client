@@ -47,6 +47,7 @@ interface DataType {
   pendingRepair: string;
   anget_key: string;
   collection: number;
+  status_of_filling: number;
   impactMachine: number;
 }
 const App: React.FC = () => {
@@ -280,7 +281,7 @@ const App: React.FC = () => {
       title: "T-1总故障数",
       dataIndex: "totalFailuresT1",
       key: "totalFailuresT1",
-      width: 120,
+      width: 150,
       align: "right",
       render: (text, record) => {
         if (record.anget_key != "") {
@@ -293,7 +294,22 @@ const App: React.FC = () => {
         } else {
           return (
             <div style={{ display: "flex", alignItems: "center" }}>
-              <img src={emptyAntIcon} alt="antIcon" style={{ width: 16, height: 16, marginRight: 4 }} />
+              {record.status_of_filling === 0 ? (
+                <span
+                  style={{
+                    backgroundColor: "#f5222d", // 红色Tag背景
+                    color: "#fff",
+                    borderRadius: 4,
+                    padding: "0 6px",
+                    fontSize: 10,
+                    marginRight: 4,
+                  }}
+                >
+                  NoFill
+                </span>
+              ) : (
+                <img src={emptyAntIcon} alt="antIcon" style={{ width: 16, height: 16, marginRight: 4 }} />
+              )}
               {text} 台{" "}
             </div>
           );
@@ -589,6 +605,7 @@ const App: React.FC = () => {
               anget_key: venue.anget_key || "",
               collection: venue.collection || 0,
               impactMachine: venue.impactMachine || 0,
+              status_of_filling: venue.status_of_filling || 0,
             };
           });
 
