@@ -281,8 +281,8 @@ const App: React.FC = () => {
       title: "T-1总故障数",
       dataIndex: "totalFailuresT1",
       key: "totalFailuresT1",
-      width: 150,
-      align: "right",
+      width: 120,
+      align: "left",
       render: (text, record) => {
         if (record.anget_key != "") {
           return (
