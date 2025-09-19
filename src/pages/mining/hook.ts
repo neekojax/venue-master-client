@@ -1,14 +1,18 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 import {
+  createHostRecord,
   createPoolRecord,
+  deleteHostRecord,
   deletePoolRecord,
+  fetchHostRecordList,
   fetchMiningHashRateList,
   fetchMiningPoolList,
   fetchPoolRecordList,
   submitMiningPoolDelete,
   submitMiningPoolNew,
   submitMiningPoolUpdate,
+  updateHostRecord,
   updatePoolRecord,
 } from "@/pages/mining/api.tsx";
 
@@ -80,7 +84,7 @@ export const useMiningHashRateList = (poolType: string, poolCategory: string) =>
 // 获取操作日志
 export const usePoolRecordList = (poolId: string) => {
   return useQuery({
-    queryKey: ["pool-list", poolId],
+    queryKey: ["pool-list", poolId], // 缓存标识
     queryFn: () => fetchPoolRecordList(poolId),
   });
 };
@@ -128,6 +132,65 @@ export const usePoolRecordDelete = () => {
       // 在成功提交后，可能需要刷新 venue-templates 数据
       // @ts-ignore
       queryClient.invalidateQueries(["pool-list"]);
+    },
+    onError: (error) => {
+      // 错误处理
+      console.error("删除出错:", error);
+    },
+  });
+};
+
+// 获取操作日志
+export const useHostRecordList = (poolId: string) => {
+  return useQuery({
+    queryKey: ["host-list", poolId], // 缓存标识
+    queryFn: () => fetchHostRecordList(poolId),
+  });
+};
+
+export const useHostRecordCreate = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: createHostRecord,
+    onSuccess: () => {
+      // 在成功提交后，可能需要刷新 venue-templates 数据
+      // @ts-ignore
+      queryClient.invalidateQueries(["host-list"]);
+    },
+    onError: (error) => {
+      // 错误处理
+      console.error("新增出错:", error);
+    },
+  });
+};
+
+export const useHostRecordUpdate = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: updateHostRecord,
+    onSuccess: () => {
+      // 在成功提交后，可能需要刷新 venue-templates 数据
+      // @ts-ignore
+      queryClient.invalidateQueries(["host-list"]);
+    },
+    onError: (error) => {
+      // 错误处理
+      console.error("更新出错:", error);
+    },
+  });
+};
+
+export const useHostRecordDelete = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: deleteHostRecord,
+    onSuccess: () => {
+      // 在成功提交后，可能需要刷新 venue-templates 数据
+      // @ts-ignore
+      queryClient.invalidateQueries(["host-list"]);
     },
     onError: (error) => {
       // 错误处理

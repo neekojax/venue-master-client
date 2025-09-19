@@ -1,6 +1,13 @@
 // 增加矿池
 import { fetchDelete, fetchGet, fetchPost } from "@/helper/fetchHelper.ts";
-import { MiningPool, MiningPoolUpdate, PoolRecordCreate, PoolRecordUpdate } from "@/pages/mining/type.tsx";
+import {
+  HostRecordCreate,
+  HostRecordUpdate,
+  MiningPool,
+  MiningPoolUpdate,
+  PoolRecordCreate,
+  PoolRecordUpdate,
+} from "@/pages/mining/type.tsx";
 
 export const fetchMiningPoolList = async (poolType: string, poolCategory: string) => {
   return await fetchGet(`miningPool/listBtcMiningPool/${poolType}/${poolCategory}`);
@@ -62,4 +69,21 @@ export const updatePoolRecord = async (data: PoolRecordUpdate) => {
 // 删除操作日志
 export const deletePoolRecord = async (id: number) => {
   return await fetchDelete(`pool/record/delete/${id}`);
+};
+
+// 获取操作日志
+export const fetchHostRecordList = async (poolId: string) => {
+  return await fetchGet(`hosting/record/list/${poolId}`);
+};
+//添加操作日志
+export const createHostRecord = async (data: HostRecordCreate) => {
+  return await fetchPost("hosting/record/create", data);
+};
+//更新操作日志
+export const updateHostRecord = async (data: HostRecordUpdate) => {
+  return await fetchPost("hosting/record/update", data);
+};
+// 删除操作日志
+export const deleteHostRecord = async (id: number) => {
+  return await fetchDelete(`hosting/record/delete/${id}`);
 };

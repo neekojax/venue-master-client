@@ -1,7 +1,13 @@
 import { useEffect, useState } from "react";
 import { FaAdn, FaFish } from "react-icons/fa6";
 import { Link } from "react-router-dom";
-import { DeleteOutlined, ExportOutlined, FormOutlined, SearchOutlined } from "@ant-design/icons";
+import {
+  CopyOutlined,
+  DeleteOutlined,
+  ExportOutlined,
+  FormOutlined,
+  SearchOutlined,
+} from "@ant-design/icons";
 import {
   Button,
   Col,
@@ -384,26 +390,54 @@ export default function MiningSettingPage() {
         width: 120,
       },
       {
-        title: "基础托管费($/kwh)",
+        title: "托管费($/kwh)",
         dataIndex: "basic_hosting_fee",
         key: "basic_hosting_fee",
-        width: 150,
+        width: 120,
       },
       {
         title: "链接",
         dataIndex: "link",
         key: "link",
-        width: 200,
+        width: 160,
         render: (link: string) => (
-          <a
-            href={link}
-            target="_blank"
-            rel="noopener noreferrer"
-            style={{ color: "#1E90FF", fontSize: 12 }}
-            title={link} // 悬停显示完整链接
-          >
-            {link.length > 40 ? getShortenedLink(link) : link}
-          </a>
+          <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+            <a
+              href={link}
+              target="_blank"
+              rel="noopener noreferrer"
+              style={{ color: "#1E90FF", fontSize: 12 }}
+              title={link}
+            >
+              {link.length > 40 ? getShortenedLink(link) : link}
+            </a>
+            <Tooltip title="复制链接" placement="top">
+              <a
+                onClick={async (e) => {
+                  e.preventDefault();
+                  try {
+                    if (navigator.clipboard && navigator.clipboard.writeText) {
+                      await navigator.clipboard.writeText(link);
+                    } else {
+                      const textarea = document.createElement("textarea");
+                      textarea.value = link;
+                      document.body.appendChild(textarea);
+                      textarea.select();
+                      document.execCommand("copy");
+                      document.body.removeChild(textarea);
+                    }
+                    message.success("已复制");
+                  } catch (err) {
+                    console.log(err);
+                    message.error("复制失败");
+                  }
+                }}
+                style={{ color: "#555" }}
+              >
+                <CopyOutlined />
+              </a>
+            </Tooltip>
+          </div>
         ),
       },
       {
@@ -792,7 +826,7 @@ export default function MiningSettingPage() {
             </Form.Item>
 
             <Form.Item<FieldType>
-              label="基础托管费"
+              label="托管费"
               name="basic_hosting_fee"
               rules={[{ required: true, message: "Please input your basic_hosting_fee!" }]}
             >

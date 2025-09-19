@@ -45,3 +45,28 @@ export type PoolRecordUpdate = {
   theoretical_hashrate: number;
   hosted_machine: number;
 };
+
+export type HostRecordCreate = {
+  venue_id: number; // 场馆ID
+  pool_id: number; // 矿池ID
+  start_time: string; // 开始时间
+  end_time: string; // 结束时间
+  hosting_price: number; // 托管单价
+  hosting_expiry_date: string; // 托管到期日
+  maintenance_price: number; // 运维单价
+  power_consumption: number; // 功耗
+  is_in_consignment: boolean; // 是否在寄售期
+};
+
+export type HostRecordUpdate = {
+  id: number; // ID
+  venue_id: number; // 场馆ID
+  pool_id: number; // 矿池ID
+  start_time: string; // 开始时间
+  end_time: string; // 结束时间
+  hosting_price: number; // 托管单价
+  hosting_expiry_date: string; // 托管到期日
+  maintenance_price: number; // 运维单价
+  power_consumption: number; // 功耗
+  is_in_consignment: boolean; // 是否在寄售期
+};
