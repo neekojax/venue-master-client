@@ -172,6 +172,7 @@ export default function MiningSettingPage() {
             theoretical_hashrate: any;
             energy_ratio: any;
             basic_hosting_fee: any;
+            heat_diss_mode: any;
             link: any;
             collection: any;
           },
@@ -192,6 +193,7 @@ export default function MiningSettingPage() {
           theoretical_hashrate: item.theoretical_hashrate,
           energy_ratio: item.energy_ratio,
           basic_hosting_fee: item.basic_hosting_fee,
+          heat_diss_mode: item.heat_diss_mode,
           link: item.link,
           collection: item.collection,
         }),
@@ -394,6 +396,21 @@ export default function MiningSettingPage() {
         dataIndex: "basic_hosting_fee",
         key: "basic_hosting_fee",
         width: 120,
+      },
+      {
+        title: "散热模式",
+        dataIndex: "heat_diss_mode",
+        key: "heat_diss_mode",
+        width: 120,
+        render: (value: number) => {
+          if (value === 1) {
+            return <Tag color="green">风冷</Tag>;
+          }
+          if (value === 2) {
+            return <Tag color="geekblue">水冷</Tag>;
+          }
+          return <Tag color="default">未知</Tag>;
+        },
       },
       {
         title: "链接",
