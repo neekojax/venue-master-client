@@ -20,6 +20,25 @@ body,html{
   }
 }
 
+.ant-tooltip-inner {
+  max-width: 600px !important; /* 默认是 250px */
+  white-space: normal; /* 允许换行 */
+}
+.formula-tooltip.ant-tooltip-inner,.formula-tooltip-root .ant-tooltip-inner {
+  max-width: 530px;
+  width: 530px !important;
+  font-size: 13px;
+  white-space: normal;
+} 
+.formula-tooltip-root-300 .ant-tooltip-inner{
+  width: 300px !important;
+  display: inline-block;
+}
+.formula-tooltip-root-350 .ant-tooltip-inner{
+  width: 350px !important;
+  display: inline-block;
+}
+
 /* 响应式布局工具类 */
 @layer components {
   .container-fluid {
