@@ -2,11 +2,19 @@
 import React, { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import { DownloadOutlined } from "@ant-design/icons";
-import { Button, DatePicker, Select, Table, Tag, Tooltip } from "antd";
+import { InfoCircleOutlined } from "@ant-design/icons";
+// import { Button, DatePicker, Input, message, Select, Table, Tag, Tooltip } from "antd";
+import { Button, DatePicker, Select, Switch, Table, Tag, Tooltip } from "antd";
 import type { ColumnsType } from "antd/es/table";
 import * as XLSX from "xlsx";
+import antIcon from "@/assets/ant-icon.png";
+import emptyAntIcon from "@/assets/empty-ant.png";
+// @ts-ignore
+import FormulaTooltip from "@/components/tooltip/FormulaTooltip";
+// import zaixianIcon from "@/assets/zaixianlv.jpg";
 import { useSelector, useSettingsStore } from "@/stores";
 
+// import { fetchDailyReport, updateReport } from "@/pages/report/api.tsx";
 import { fetchDailyReport } from "@/pages/report/api.tsx";
 // import { ReportUpdateParam } from "@/pages/report/type.tsx";
 
@@ -19,8 +27,11 @@ interface DataType {
   power24h: number;
   effectiveRate24h: number;
   effectiveRateT2: number;
+  totalFailuresT1: number;
+  totalFailuresT2: number;
   effectiveRateT3: number;
   totalMachines: number;
+  onlineRatio: number;
   totalFailures: number;
   failures24h: number;
   failureRate24h: number;
@@ -32,9 +43,24 @@ interface DataType {
   limitImpactRate: number;
   highTemperatureRate: number;
   events: string;
+  shelved: string;
+  pendingRepair: string;
+  anget_key: string;
+  collection: number;
+  status_of_filling: number;
+  impactMachine: number;
 }
 const App: React.FC = () => {
   const { poolType } = useSettingsStore(useSelector(["poolType"]));
+  const [showCollectionOnly, setShowCollectionOnly] = useState(() => {
+    // 初始化时从 localStorage 取值
+    return localStorage.getItem("showCollectionOnly") === "true";
+  });
+
+  // 当值变化时写入 localStorage
+  useEffect(() => {
+    localStorage.setItem("showCollectionOnly", String(showCollectionOnly));
+  }, [showCollectionOnly]);
 
   const tableRef = useRef<HTMLDivElement>(null);
   const [isTableFixed, setIsTableFixed] = useState(false);
@@ -68,8 +94,6 @@ const App: React.FC = () => {
   const [filteredData, setFilteredData] = useState<DataType[]>([]); // 筛选后的数据
   const [siteOptions, setSiteOptions] = useState<{ value: string; label: string }[]>([]);
 
-  const [pageSize, setPageSize] = useState(20); // 新增状态管理页大小
-
   // const save = async (record: DataType, text: string) => {
   //   try {
   //     const date = selectedDate || formattedDate; // formattedDate 是昨天的日期
@@ -78,12 +102,11 @@ const App: React.FC = () => {
   //       venue_name: record.siteName,
   //       total_failures: Number(text),
   //     };
+
   //     const res = await updateReport(poolType, date, updatedData);
-  //     // console.log("success", res);
-  //     // console.log("res.success", res.success);
-  //     if (res.success) {
+
+  //     if (res?.data) {
   //       message.success("更新成功");
-  //       // console.log(res); // 更改值
   //       setData((data) =>
   //         data.map((item) => (item.key === record.key ? { ...item, totalFailures: Number(text) } : item)),
   //       );
@@ -131,6 +154,7 @@ const App: React.FC = () => {
                   补充
                 </Tag>
               )}
+              {/* {text} */}
               <Link to={`/venue/detail/${record.key}`} className="text-blue-500 hover:underline">
                 {text}
               </Link>
@@ -140,11 +164,11 @@ const App: React.FC = () => {
       },
     },
     {
-      title: "24小时产出(BTC)",
+      title: "24H产出(BTC)",
       dataIndex: "btcOutput24h",
       key: "btcOutput24h",
       width: 165,
-      align: "right",
+      align: "left",
       render: (value) => value.toFixed(8),
       sorter: (a, b) => a.btcOutput24h - b.btcOutput24h,
     },
@@ -153,25 +177,25 @@ const App: React.FC = () => {
       dataIndex: "theoreticalPower",
       key: "theoreticalPower",
       width: 125,
-      align: "right",
+      align: "left",
       render: (value) => value.toFixed(6),
       sorter: (a, b) => a.theoreticalPower - b.theoreticalPower,
     },
     {
-      title: "24小时算力(E)",
+      title: "24H算力(E)",
       dataIndex: "power24h",
       key: "power24h",
       width: 145,
-      align: "right",
+      align: "left",
       render: (value) => value.toFixed(6),
       sorter: (a, b) => a.power24h - b.power24h,
     },
     {
-      title: "24小时有效率",
+      title: "24H有效率",
       dataIndex: "effectiveRate24h",
       key: "effectiveRate24h",
       width: 140,
-      align: "right",
+      align: "left",
       render: (value) => `${value.toFixed(2)}%`,
       sorter: (a, b) => a.effectiveRate24h - b.effectiveRate24h,
     },
@@ -180,6 +204,7 @@ const App: React.FC = () => {
       dataIndex: "effectiveRateT2",
       key: "effectiveRateT2",
       width: 130,
+      align: "left",
       render: (value) => `${value.toFixed(2)}%`,
       sorter: (a, b) => a.effectiveRateT2 - b.effectiveRateT2,
     },
@@ -188,6 +213,7 @@ const App: React.FC = () => {
       dataIndex: "effectiveRateT3",
       key: "effectiveRateT3",
       width: 130,
+      align: "left",
       render: (value) => `${value.toFixed(2)}%`,
       sorter: (a, b) => a.effectiveRateT3 - b.effectiveRateT3,
     },
@@ -196,112 +222,360 @@ const App: React.FC = () => {
       dataIndex: "totalMachines",
       key: "totalMachines",
       width: 105,
-      align: "right",
+      align: "left",
       render: (value) => value.toLocaleString(),
       sorter: (a, b) => a.totalMachines - b.totalMachines,
     },
     {
-      title: "总故障台数",
-      dataIndex: "totalFailures",
-      key: "totalFailures",
-      width: 120,
-      align: "right",
-      render: (text) => {
-        return <span>{text}</span>;
-      },
-      // render: (text, record) => {
-      //   const isEditing = hoveredRow === record.key;
-      //   return isEditing ? (
-      //     <Input
-      //       size="small"
-      //       style={{ padding: "0 5px", margin: 0, height: "22px" }}
-      //       // onChange={(e) => save(record, e.target.value)}
-      //       onPressEnter={(e) => save(record, e.target.value)}
-      //       onBlur={(e) => save(record, e.target.value)}
-      //       defaultValue={text}
-      //     />
-      //   ) : (
-      //     <span>{text}</span>
-      //   );
-      // },
-      // onCell: (record) => ({
-      //   onMouseEnter: () => setHoveredRow(record.key),
-      //   onMouseLeave: () => setHoveredRow(null),
-      // }),
-      // render: (value) => value.toLocaleString(),
-      sorter: (a, b) => a.totalFailures - b.totalFailures,
+      title: (
+        <div style={{ display: "flex" }}>
+          <span>在线率</span>
+          <FormulaTooltip />
+        </div>
+      ),
+      dataIndex: "onlineRatio",
+      key: "onlineRatio",
+      width: 125,
+      align: "left",
+      render: (value: number, record) => (
+        <div style={{ display: "flex", alignItems: "left", justifyContent: "flex-start" }}>
+          <span>{value.toFixed(2)}%</span>
+
+          {record.anget_key === "" && (
+            <Tooltip
+              styles={{ body: { maxWidth: "none", padding: 8 } }}
+              placement="top"
+              title={
+                <div style={{ maxWidth: 250 }}>
+                  <div style={{ fontSize: "14px", lineHeight: 1.6 }}>
+                    <div>
+                      <b>24小时算力：</b>
+                      {record.power24h}
+                    </div>
+                    <div>
+                      <b>托管台数：</b>
+                      {record.totalMachines}
+                    </div>
+                    <div>
+                      <b>理论算力：</b>
+                      {record.theoreticalPower}
+                    </div>
+                    <div>
+                      <b>总故障数：</b>
+                      {record.totalFailuresT2}
+                    </div>
+                    <div>
+                      <b>不可抗力影响台数：</b>
+                      {record.impactMachine}
+                    </div>
+                  </div>
+                </div>
+              }
+            >
+              <InfoCircleOutlined style={{ marginLeft: 4, color: "#999" }} />
+            </Tooltip>
+          )}
+        </div>
+      ),
+      // render: (value) => `${value.toFixed(2)}%`,
     },
     {
-      title: "总故障率",
-      dataIndex: "totalFailures",
-      key: "totalMachines",
-      width: 100,
-      align: "right",
-      render: (val, record) => {
-        const total_gzl = ((val / record.totalMachines) * 100).toFixed(2);
-        return <span>{`${total_gzl}%`}</span>;
+      title: "T-1总故障数/占比",
+      dataIndex: "totalFailuresT1",
+      key: "totalFailuresT1",
+      width: 170,
+      align: "center",
+      render: (text, record) => {
+        const total_gzl = ((text / record.totalMachines) * 100).toFixed(2);
+        const isHighRate = parseFloat(total_gzl) > 10; // T-1故障率超过5%标红
+
+        return (
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: "8px" }}>
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                backgroundColor: "#f6f6f6",
+                padding: "2px 6px",
+                borderRadius: "4px",
+                flex: "1",
+              }}
+            >
+              {record.anget_key !== "" ? (
+                <img src={antIcon} alt="antIcon" style={{ width: 12, height: 12, marginRight: 4 }} />
+              ) : record.status_of_filling === 0 ? (
+                <span
+                  style={{
+                    backgroundColor: "#f5222d",
+                    color: "#fff",
+                    borderRadius: 2,
+                    padding: "0 4px",
+                    fontSize: 8,
+                    marginRight: 4,
+                  }}
+                >
+                  NoFill
+                </span>
+              ) : (
+                <img src={emptyAntIcon} alt="antIcon" style={{ width: 12, height: 12, marginRight: 4 }} />
+              )}
+              <span style={{ fontWeight: "bold", fontSize: "12px" }}>{text}</span>
+            </div>
+            <div
+              style={{
+                backgroundColor: isHighRate ? "#fff2f0" : "#f0f8ff",
+                border: `1px solid ${isHighRate ? "#ffccc7" : "#91caff"}`,
+                color: isHighRate ? "#cf1322" : "#1677ff",
+                padding: "1px 6px",
+                borderRadius: "8px",
+                fontSize: "11px",
+                fontWeight: "bold",
+                whiteSpace: "nowrap",
+              }}
+            >
+              {total_gzl}%
+            </div>
+          </div>
+        );
       },
+      sorter: (a, b) => a.totalFailuresT1 - b.totalFailuresT1,
     },
+    // {
+    //   title: "总故障率",
+    //   dataIndex: "totalFailuresT1",
+    //   key: "totalFailuresT1",
+    //   width: 100,
+    //   align: "right",
+    //   render: (val, record) => {
+    //     const total_gzl = ((val / record.totalMachines) * 100).toFixed(2);
+    //     return <span>{`${total_gzl}%`}</span>;
+    //   },
+    // },
+
+    // {
+    //   title: "总故障台数",
+    //   dataIndex: "totalFailures",
+    //   key: "totalFailures",
+    //   width: 120,
+    //   align: "right",
+    //   // render: (text) => {
+    //   //   return <span>{text}</span>;
+    //   // },
+    //   render: (text, record) => {
+    //     const account = localStorage.getItem("user");
+    //     // console.log("account", account);
+    //     if (account != "admin") {
+    //       return <span>{text}</span>;
+    //     } else {
+    //       const isEditing = hoveredRow === record.key;
+    //       // console.log("isEditing", isEditing);
+    //       return isEditing ? (
+    //         <Input
+    //           size="small"
+    //           style={{ padding: "0 5px", margin: 0, height: "22px" }}
+    //           onChange={(e) => save(record, e.target.value)}
+    //           onPressEnter={(e) => save(record, e.currentTarget.value || "")}
+    //           onBlur={(e) => save(record, e.target?.value || "")}
+    //           defaultValue={text}
+    //         />
+    //       ) : (
+    //         <span>{text}</span>
+    //       );
+    //     }
+    //   },
+    //   onCell: (record) => ({
+    //     onMouseEnter: () => setHoveredRow(record.key),
+    //     onMouseLeave: () => setHoveredRow(null),
+    //   }),
+    //   // render: (value) => value.toLocaleString(),
+    //   sorter: (a, b) => a.totalFailures - b.totalFailures,
+    // },
+
     {
-      title: "24小时故障数",
+      title: "24H故障数/占比",
       dataIndex: "failures24h",
       key: "failures24h",
-      width: 138,
-      align: "right",
-      render: (value) => value.toLocaleString(),
+      width: 170,
+      align: "center",
+      render: (value, record) => {
+        const failureRate = record.failureRate24h;
+        const isHighRate = failureRate > 10; // 24小时故障率超过5%标红
+
+        return (
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: "8px" }}>
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                backgroundColor: "#f6f6f6",
+                padding: "2px 6px",
+                borderRadius: "4px",
+                flex: "1",
+              }}
+            >
+              <span style={{ fontWeight: "bold", fontSize: "12px" }}>{value.toLocaleString()}</span>
+            </div>
+            <div
+              style={{
+                backgroundColor: isHighRate ? "#fff2f0" : "#f0f8ff",
+                border: `1px solid ${isHighRate ? "#ffccc7" : "#91caff"}`,
+                color: isHighRate ? "#cf1322" : "#1677ff",
+                padding: "1px 6px",
+                borderRadius: "8px",
+                fontSize: "11px",
+                fontWeight: "bold",
+                whiteSpace: "nowrap",
+              }}
+            >
+              {failureRate.toFixed(2)}%
+            </div>
+          </div>
+        );
+      },
       sorter: (a, b) => a.failures24h - b.failures24h,
     },
     {
-      title: "24小时故障率",
-      dataIndex: "failureRate24h",
-      key: "failureRate24h",
-      width: 138,
-      render: (value) => ({
-        children: `${value.toFixed(2)}%`,
-        props: {
-          style: {
-            color: value > 20 ? "#ff4d4f" : "inherit",
-          },
-        },
-      }),
-      sorter: (a, b) => a.failureRate24h - b.failureRate24h,
-    },
-    {
-      title: "T-2日故障率",
-      dataIndex: "failureRateT2",
-      key: "failureRateT2",
-      width: 130,
-      render: (value) => ({
-        children: `${value.toFixed(2)}%`,
-        props: {
-          style: {
-            color: value > 20 ? "#ff4d4f" : "inherit",
-          },
-        },
-      }),
+      title: "T-2故障数/占比",
+      dataIndex: "totalFailuresT2",
+      key: "totalFailuresT2",
+      width: 150,
+      align: "center",
+      render: (text, record) => {
+        const failureRate = record.failureRateT2;
+        const isHighRate = failureRate > 10; // 故障率超过20%标红
+
+        return (
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: "8px" }}>
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                backgroundColor: "#f6f6f6",
+                padding: "2px 6px",
+                borderRadius: "4px",
+                flex: "1",
+              }}
+            >
+              {record.anget_key !== "" ? (
+                <img src={antIcon} alt="antIcon" style={{ width: 14, height: 14, marginRight: 3 }} />
+              ) : (
+                <img src={emptyAntIcon} alt="antIcon" style={{ width: 14, height: 14, marginRight: 3 }} />
+              )}
+              <span style={{ fontWeight: "bold", fontSize: "12px" }}>{text}</span>
+            </div>
+            <div
+              style={{
+                backgroundColor: isHighRate ? "#fff2f0" : "#f0f8ff",
+                border: `1px solid ${isHighRate ? "#ffccc7" : "#91caff"}`,
+                color: isHighRate ? "#cf1322" : "#1677ff",
+                padding: "1px 6px",
+                borderRadius: "8px",
+                fontSize: "11px",
+                fontWeight: "bold",
+                whiteSpace: "nowrap",
+              }}
+            >
+              {failureRate.toFixed(2)}%
+            </div>
+          </div>
+        );
+      },
       sorter: (a, b) => a.failureRateT2 - b.failureRateT2,
     },
+    // {
+    //   title: "24小时故障率",
+    //   dataIndex: "failureRate24h",
+    //   key: "failureRate24h",
+    //   width: 138,
+    //   render: (value) => ({
+    //     children: `${value.toFixed(2)}%`,
+    //     props: {
+    //       style: {
+    //         color: value > 20 ? "#ff4d4f" : "inherit",
+    //       },
+    //     },
+    //   }),
+    //   sorter: (a, b) => a.failureRate24h - b.failureRate24h,
+    // },
+
+    // {
+    //   title: "T-3日故障率",
+    //   dataIndex: "failureRateT3",
+    //   key: "failureRateT3",
+
+    //   width: 130,
+    //   render: (value) => ({
+    //     children: `${value.toFixed(2)}%`,
+    //     props: {
+    //       style: {
+    //         color: value > 20 ? "#ff4d4f" : "inherit",
+    //       },
+    //     },
+    //   }),
+    //   sorter: (a, b) => a.failureRateT3 - b.failureRateT3,
+    // },
+
     {
-      title: "T-3日故障率",
-      dataIndex: "failureRateT3",
-      key: "failureRateT3",
-      width: 130,
-      render: (value) => ({
-        children: `${value.toFixed(2)}%`,
-        props: {
-          style: {
-            color: value > 20 ? "#ff4d4f" : "inherit",
-          },
-        },
-      }),
-      sorter: (a, b) => a.failureRateT3 - b.failureRateT3,
+      title: "待修数/占比",
+      dataIndex: "pendingRepair",
+      key: "pendingRepair",
+      width: 150,
+      align: "center",
+      render: (value, record) => {
+        const repairRate = ((value / record.totalMachines) * 100).toFixed(2);
+        const isHighRate = parseFloat(repairRate) > 10; // 待修率超过5%标红
+
+        return (
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: "8px" }}>
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                backgroundColor: "#f6f6f6",
+                padding: "2px 6px",
+                borderRadius: "4px",
+                flex: "1",
+              }}
+            >
+              <span style={{ fontWeight: "bold", fontSize: "12px" }}>{value.toLocaleString()}</span>
+            </div>
+            <div
+              style={{
+                backgroundColor: isHighRate ? "#fff2f0" : "#f0f8ff",
+                border: `1px solid ${isHighRate ? "#ffccc7" : "#91caff"}`,
+                color: isHighRate ? "#cf1322" : "#1677ff",
+                padding: "1px 6px",
+                borderRadius: "8px",
+                fontSize: "11px",
+                fontWeight: "bold",
+                whiteSpace: "nowrap",
+              }}
+            >
+              {repairRate}%
+            </div>
+          </div>
+        );
+      },
+      sorter: (a, b) => {
+        const rateA = (Number(a.pendingRepair) / Number(a.totalMachines)) * 100;
+        const rateB = (Number(b.pendingRepair) / Number(b.totalMachines)) * 100;
+        return rateA - rateB;
+      },
+    },
+    {
+      title: "24H上架数",
+      dataIndex: "shelved",
+      key: "shelved",
+      width: 138,
+      align: "left",
+      render: (value) => value.toLocaleString(),
     },
     {
       title: "影响算力(E)",
       dataIndex: "powerImpact",
       key: "powerImpact",
       width: 130,
-      align: "right",
+      align: "left",
       render: (value) => value.toFixed(6),
       sorter: (a, b) => a.powerImpact - b.powerImpact,
     },
@@ -310,6 +584,7 @@ const App: React.FC = () => {
       dataIndex: "impactRatio",
       key: "impactRatio",
       width: 105,
+      align: "left",
       render: (value) => `${value.toFixed(2)}%`,
       sorter: (a, b) => a.impactRatio - b.impactRatio,
     },
@@ -318,7 +593,7 @@ const App: React.FC = () => {
       dataIndex: "outputImpact",
       key: "outputImpact",
       width: 145,
-      align: "right",
+      align: "left",
       render: (value) => value.toFixed(8),
       sorter: (a, b) => a.outputImpact - b.outputImpact,
     },
@@ -327,7 +602,7 @@ const App: React.FC = () => {
       dataIndex: "limitImpactRate",
       key: "limitImpactRate",
       width: 140,
-      align: "right",
+      align: "left",
       // render: (value) => value.toFixed(8),
       render: (value) => `${value.toFixed(2)}%`,
       sorter: (a, b) => a.limitImpactRate - b.limitImpactRate,
@@ -337,16 +612,43 @@ const App: React.FC = () => {
       dataIndex: "highTemperatureRate",
       key: "highTemperatureRate",
       width: 140,
-      align: "right",
+      align: "left",
       // render: (value) => value.toFixed(8),
       render: (value) => `${value.toFixed(2)}%`,
       sorter: (a, b) => a.highTemperatureRate - b.highTemperatureRate,
     },
+    // {
+    //   title: "限电算力",
+    //   dataIndex: "limitImpactRate",
+    //   key: "limitImpactRate",
+    //   width: 140,
+    //   align: "right",
+    //   // render: (value) => value.toFixed(8),
+    //   render: (value, record) => {
+    //     const result = record.theoreticalPower * 1e6 * value / 100;
+    //     return result.toFixed(2) + "TH/s";
+    //     //`${value.toFixed(2)}%`,
+    //   }
+    // },
+    // {
+    //   title: "高温算力",
+    //   dataIndex: "highTemperatureRate",
+    //   key: "highTemperatureRate",
+    //   width: 140,
+    //   align: "right",
+    //   // render: (value) => value.toFixed(8),
+    //   render: (value, record) => {
+    //     const result = record.theoreticalPower * 1e6 * value / 100;
+    //     return result.toFixed(2) + "TH/s";
+    //     //`${value.toFixed(2)}%`,
+    //   }
+    // },
     {
       title: "事件描述",
       dataIndex: "events",
       key: "events",
       width: 400,
+      align: "left",
       render: (text) => (
         <Tooltip title={text}>
           <div className="line-clamp-2">{text}</div>
@@ -379,7 +681,10 @@ const App: React.FC = () => {
               effectiveRate24h: venue.effectiveRate24h || 0, // 转换为小数形式
               effectiveRateT2: venue.effectiveRateT2 || 0,
               effectiveRateT3: venue.effectiveRateT3 || 0,
+              totalFailuresT1: venue.totalFailuresT1 || 0,
+              totalFailuresT2: venue.totalFailuresT2 || 0,
               totalMachines: venue.totalMachines || 0,
+              onlineRatio: venue.onlineRatio || 0,
               totalFailures: venue.totalFailures || 0,
               failures24h: venue.failures24h || 0,
               failureRate24h: venue.failureRate24h || 0,
@@ -393,6 +698,12 @@ const App: React.FC = () => {
               // "限电影响": item.limitImpactRate,
               // "高温影响": item.highTemperatureRate,
               events: venue.events || "",
+              shelved: venue.shelved || 0,
+              pendingRepair: venue.pendingRepair || 0,
+              anget_key: venue.anget_key || "",
+              collection: venue.collection || 0,
+              impactMachine: venue.impactMachine || 0,
+              status_of_filling: venue.status_of_filling || 0,
             };
           });
 
@@ -430,18 +741,39 @@ const App: React.FC = () => {
     fetchReportData();
   }, [selectedDate, poolType]);
 
+  // useEffect(() => {
+  //   // 筛选数据
+  //     // 2️⃣ 收藏过滤
+  //   const matchesCollection = !showCollectionOnly || item.collection === 1;)
+
+  //   if (selectedSites.length > 0) {
+  //     console.log(selectedSites);
+  //     const filtered = data.filter((item) => selectedSites.includes(item.siteName));
+  //     // setFilteredData(filtered);
+  //     setFilteredData(filtered.sort((a, b) => a.siteName.localeCompare(b.siteName))); // 按 siteName 排序
+  //   } else {
+  //     // setFilteredData(data); // 如果没有选择场地，显示所有数据
+  //     setFilteredData(data.sort((a, b) => a.siteName.localeCompare(b.siteName))); // 按 siteName 排序
+  //   }
+  // }, [selectedSites, data, showCollectionOnly]);
   useEffect(() => {
-    // 筛选数据
+    let filtered = data;
+
+    // 1️⃣ 按场地筛选
     if (selectedSites.length > 0) {
-      console.log(selectedSites);
-      const filtered = data.filter((item) => selectedSites.includes(item.siteName));
-      // setFilteredData(filtered);
-      setFilteredData(filtered.sort((a, b) => a.siteName.localeCompare(b.siteName))); // 按 siteName 排序
-    } else {
-      // setFilteredData(data); // 如果没有选择场地，显示所有数据
-      setFilteredData(data.sort((a, b) => a.siteName.localeCompare(b.siteName))); // 按 siteName 排序
+      filtered = filtered.filter((item) => selectedSites.includes(item.siteName));
     }
-  }, [selectedSites, data]);
+
+    // 2️⃣ 按收藏筛选
+    if (showCollectionOnly) {
+      filtered = filtered.filter((item) => item.collection === 1);
+    }
+
+    // 3️⃣ 排序
+    filtered = filtered.sort((a, b) => a.siteName.localeCompare(b.siteName));
+
+    setFilteredData(filtered);
+  }, [selectedSites, data, showCollectionOnly]);
 
   // 导出数据为 CSV 的函数
   const exportToCSV = () => {
@@ -452,15 +784,21 @@ const App: React.FC = () => {
       "理论算力（E）": item.theoreticalPower.toFixed(6),
       "24小时算力（E）": item.power24h.toFixed(8),
       "24小时有效率": item.effectiveRate24h.toFixed(2) + "%",
-      "T-2日有效率": item.effectiveRateT2.toFixed(2) + "%",
-      "T-3日有效率": item.effectiveRateT3.toFixed(2) + "%",
+      // "T-2日有效率": item.effectiveRateT2.toFixed(2) + "%",
+      // "T-3日有效率": item.effectiveRateT3.toFixed(2) + "%",
       托管台数: item.totalMachines.toLocaleString(),
-      总故障台数: item.totalFailures.toLocaleString(),
-      总故障率: ((item.totalFailures / item.totalMachines) * 100).toFixed(2) + "%",
+      在线率: item.onlineRatio.toFixed(2) + "%",
+      // 总故障台数: item.totalFailures.toLocaleString(),
+
       "24小时故障数": item.failures24h.toLocaleString(),
       "24小时故障率": item.failureRate24h.toFixed(2) + "%",
-      "T-2日故障率": item.failureRateT2.toFixed(2) + "%",
-      "T-3日故障率": item.failureRateT3.toFixed(2) + "%",
+      "T-1故障情况": `${item.totalFailuresT1.toLocaleString()} 台 (${((item.totalFailuresT1 / item.totalMachines) * 100).toFixed(2)}%)`,
+      总故障数: item.totalFailuresT2,
+      总故障率: ((item.totalFailuresT2 / item.totalMachines) * 100).toFixed(2) + "%",
+      "T-2故障情况": `${item.totalFailuresT2.toLocaleString()} 台 (${item.failureRateT2.toFixed(2)}%)`,
+      // "T-3日故障率": item.failureRateT3.toFixed(2) + "%",
+      "24小时上架数": item.shelved,
+      待修情况: `${item.pendingRepair.toLocaleString()} 台 (${((Number(item.pendingRepair) / item.totalMachines) * 100).toFixed(2)}%)`,
       "影响算力（E）": item.powerImpact.toFixed(8),
       影响占比: item.impactRatio.toFixed(2) + "%",
       "影响产出（BTC）": item.outputImpact.toFixed(8),
@@ -533,7 +871,7 @@ const App: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 p-6">
+    <div className="min-h-screen">
       <div className="mx-auto">
         <div className="mb-6">
           <div className="flex items-center justify-between mb-6">
@@ -545,7 +883,6 @@ const App: React.FC = () => {
               className="w-40"
               placeholder="选择日期"
               onChange={(_: any, dateString: string | string[]) => {
-                console.log(dateString);
                 setSelectedDate(dateString);
               }}
             />
@@ -631,39 +968,64 @@ const App: React.FC = () => {
           className={`mb-6 rounded-lg bg-white p-6 shadow-sm transition-all duration-300 ${isTableFixed ? "sticky top-0 z-10" : ""}`}
         >
           <div className="mb-6 flex items-center justify-between">
-            <Select
-              mode="multiple"
-              size={"middle"}
-              placeholder="选择场地"
-              // className="w-80"
-              style={{ minWidth: "300px" }}
-              options={siteOptions}
-              onChange={handleSitesChange}
-              maxTagCount={3}
-            />
-            <Button
-              type="primary"
-              icon={<DownloadOutlined />}
-              onClick={exportToCSV}
-              className="!rounded-button"
-            >
-              导出报表
-            </Button>
+            <span>
+              <Switch size="small" checked={showCollectionOnly} onChange={setShowCollectionOnly} />
+              {"  "}
+              <span style={{ marginRight: "10px" }}>我的自选</span>
+            </span>
+
+            <div style={{ color: "#000" }}>
+              <Select
+                mode="multiple"
+                size={"middle"}
+                placeholder="选择场地"
+                // className="w-80"
+                style={{ minWidth: "300px", marginRight: "15px" }}
+                options={siteOptions}
+                onChange={handleSitesChange}
+                maxTagCount={3}
+              />
+
+              <Button
+                type="primary"
+                size="small"
+                icon={<DownloadOutlined />}
+                onClick={exportToCSV}
+                className="!rounded-button"
+              >
+                导出报表
+              </Button>
+            </div>
           </div>
           <Table
             columns={columns}
             dataSource={filteredData}
             scroll={{ x: 1500 }}
-            sticky={true}
+            // sticky={true}
             pagination={{
-              pageSize: pageSize, // 使用动态 pageSize
+              position: ["bottomCenter"],
               showSizeChanger: true,
-              onShowSizeChange: (size) => {
-                setPageSize(size); // 更新 pageSize 状态
-              },
-              showQuickJumper: true,
+              pageSizeOptions: ["10", "20", "30", "50"],
+              defaultPageSize: 10,
               showTotal: (total) => `共 ${total} 条`,
+              total: filteredData?.length,
+              onChange: () => {
+                const tableBody = document.querySelector(".ant-table-body");
+                if (tableBody) {
+                  tableBody.scrollTop = 0;
+                }
+              },
             }}
+            // pagination={{
+            //   pageSize: pageSize, // 使用动态 pageSize
+            //   showSizeChanger: true,
+            //   pageSizeOptions: ["20", "30", "50"],
+            //   onShowSizeChange: (size) => {
+            //     setPageSize(size); // 更新 pageSize 状态
+            //   },
+            //   showQuickJumper: true,
+            //   showTotal: (total) => `共 ${total} 条`,
+            // }}
             className="custom-table"
           />
         </div>
@@ -679,18 +1041,11 @@ const App: React.FC = () => {
         }
 
         .custom-table .ant-table-thead > tr > th {
-          background-color: #f5f5f5;
+          background-color: rgba(250, 250, 252, 1);
           font-weight: 600;
         }
 
-        .custom-table .ant-table-tbody > tr:hover > td {
-          background-color: #f0f7ff;
-        }
-
-        .custom-table .ant-table-tbody > tr:nth-child(even) {
-          background-color: #fafafa;
-        }
-
+     
         .line-clamp-2 {
           display: -webkit-box;
           -webkit-line-clamp: 2;

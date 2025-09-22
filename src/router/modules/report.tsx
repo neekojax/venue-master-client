@@ -24,28 +24,28 @@ export const reportRoute: RouteObject = {
         crumb: () => <Link to={ROUTE_PATHS.dailyReport}>运营日报</Link>,
       },
     },
-    {
-      path: ROUTE_PATHS.subAccountDailyReport,
-      lazy: async () => ({
-        Component: (await import("@/pages/report/daily-sub-account-report")).default,
-      }),
-      HydrateFallback: ProgressBar,
-      handle: {
-        title: "账户日报",
-        crumb: () => <Link to={ROUTE_PATHS.subAccountDailyReport}>账户日报</Link>,
-      },
-    },
-    {
-      path: ROUTE_PATHS.subAccountDailyReport,
-      lazy: async () => ({
-        Component: (await import("@/pages/report/daily-sub-account-report")).default,
-      }),
-      HydrateFallback: ProgressBar,
-      handle: {
-        title: "账户日报",
-        crumb: () => <Link to={ROUTE_PATHS.subAccountDailyReport}>账户日报</Link>,
-      },
-    },
+    // {
+    //   path: ROUTE_PATHS.subAccountDailyReport,
+    //   lazy: async () => ({
+    //     Component: (await import("@/pages/report/daily-sub-account-report")).default,
+    //   }),
+    //   HydrateFallback: ProgressBar,
+    //   handle: {
+    //     title: "账户日报",
+    //     crumb: () => <Link to={ROUTE_PATHS.subAccountDailyReport}>账户日报</Link>,
+    //   },
+    // },
+    // {
+    //   path: ROUTE_PATHS.subAccountDailyReport,
+    //   lazy: async () => ({
+    //     Component: (await import("@/pages/report/daily-sub-account-report")).default,
+    //   }),
+    //   HydrateFallback: ProgressBar,
+    //   handle: {
+    //     title: "账户日报",
+    //     crumb: () => <Link to={ROUTE_PATHS.subAccountDailyReport}>账户日报</Link>,
+    //   },
+    // },
     {
       path: "/report/daily-list/:venueId/:venueName", // 直接使用动态参数
       lazy: async () => ({
