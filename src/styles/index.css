@@ -19,7 +19,6 @@ body,html{
     @apply text-base antialiased;
   }
 }
-
 .ant-tooltip-inner {
   max-width: 600px !important; /* 默认是 250px */
   white-space: normal; /* 允许换行 */

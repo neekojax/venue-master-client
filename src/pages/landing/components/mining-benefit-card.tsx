@@ -14,7 +14,7 @@ const MiningBenefitCard: React.FC<MiningPoolCardProps> = ({ poolType }) => {
   const [lastProfitStatus, setLastProfitStatus] = useState<any>(null); // 状态数据
   const [loading, setLoading] = useState<boolean>(true); // 加载状态
   const [error] = useState<string | null>(null); // 错误信息
-  const [suanlilv, setSuanlilv] = useState<any>(null); // 状态数据
+  // const [suanlilv, setSuanlilv] = useState<any>(null); // 状态数据
 
   const formatNumber = (value: any) => {
     const num = Number(value);
@@ -46,7 +46,7 @@ const MiningBenefitCard: React.FC<MiningPoolCardProps> = ({ poolType }) => {
     try {
       const currentDate = "2025-07-26";
       const suanlilv = await fetchHomesuanli(poolType, currentDate);
-      setSuanlilv(suanlilv.data); // 假设返回数据在 result.data 中
+      // setSuanlilv(suanlilv.data); // 假设返回数据在 result.data 中
       console.log(suanlilv.data);
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (err) {
@@ -101,7 +101,7 @@ const MiningBenefitCard: React.FC<MiningPoolCardProps> = ({ poolType }) => {
       }
     >
       <Row gutter={24}>
-        <Col span={8}>
+        <Col span={24}>
           <Statistic
             title={`昨日总收益`}
             value={`${formatNumber(lastProfitStatus?.last_day_income_statistics.income_btc)}`} // 假设昨日总收益在状态中
@@ -110,7 +110,7 @@ const MiningBenefitCard: React.FC<MiningPoolCardProps> = ({ poolType }) => {
             suffix={"BTC"}
           />
         </Col>
-        <Col span={8}>
+        {/* <Col span={8}>
           <Statistic
             title={`昨日产出效率`}
             value={`${suanlilv?.BTCOutputPerEPower}`} // 假设昨日总收益在状态中
@@ -118,8 +118,8 @@ const MiningBenefitCard: React.FC<MiningPoolCardProps> = ({ poolType }) => {
             // prefix={<BiLogoBitcoin style={{ fontSize: "20px", color: "gold" }} />}
             suffix={"BTC/EH"}
           />
-        </Col>
-        <Col span={8}>
+        </Col> */}
+        {/* <Col span={8}>
           <Statistic
             title={`昨日全网产出效率`}
             value={`${suanlilv?.BTCNetworkPerEPower}`} // 假设昨日总收益在状态中
@@ -127,8 +127,8 @@ const MiningBenefitCard: React.FC<MiningPoolCardProps> = ({ poolType }) => {
             // prefix={<BiLogoBitcoin style={{ fontSize: "20px", color: "gold" }} />}
             suffix={"BTC/EH"}
           />
-        </Col>
-        <Col span={12} style={{ marginTop: "25px" }}>
+        </Col> */}
+        <Col span={8} style={{ marginTop: "50px" }}>
           <Statistic
             title={`${lastProfitStatus?.month}月产出数量`}
             value={`${formatNumber(lastProfitStatus?.month_statistics.income_btc)} BTC`} // 假设昨日总收益在状态中
@@ -136,7 +136,7 @@ const MiningBenefitCard: React.FC<MiningPoolCardProps> = ({ poolType }) => {
             // prefix={<BiLogoBitcoin style={{ fontSize: "20px", color: "gold" }} />}
           />
         </Col>
-        <Col span={12} style={{ marginTop: "25px" }}>
+        <Col span={8} style={{ marginTop: "50px" }}>
           <Statistic
             title={`${lastProfitStatus?.month}月产出价值`}
             value={`${formatNumber(lastProfitStatus?.month_statistics.income_usd)} $`} // 假设昨日总收益在状态中
@@ -144,7 +144,7 @@ const MiningBenefitCard: React.FC<MiningPoolCardProps> = ({ poolType }) => {
           />
         </Col>
 
-        <Col span={12} style={{ marginTop: "25px" }}>
+        <Col span={8} style={{ marginTop: "50px" }}>
           <Statistic
             title={`${lastProfitStatus?.month}月托管+运维`}
             value={`${formatNumber(lastProfitStatus?.month_statistics.hosting_fee)} $`} // 假设昨日总收益在状态中
@@ -152,7 +152,7 @@ const MiningBenefitCard: React.FC<MiningPoolCardProps> = ({ poolType }) => {
           />
         </Col>
       </Row>
-      <Row style={{ marginTop: "25px" }} gutter={24}>
+      <Row style={{ marginTop: "60px" }} gutter={24}>
         <Col span={6} style={{ paddingLeft: "10px" }}>
           <Statistic
             title={`昨日平均托管费占比`}
