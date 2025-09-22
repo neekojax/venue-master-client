@@ -164,11 +164,11 @@ const App: React.FC = () => {
       },
     },
     {
-      title: "24小时产出(BTC)",
+      title: "24H产出(BTC)",
       dataIndex: "btcOutput24h",
       key: "btcOutput24h",
       width: 165,
-      align: "right",
+      align: "left",
       render: (value) => value.toFixed(8),
       sorter: (a, b) => a.btcOutput24h - b.btcOutput24h,
     },
@@ -177,25 +177,25 @@ const App: React.FC = () => {
       dataIndex: "theoreticalPower",
       key: "theoreticalPower",
       width: 125,
-      align: "right",
+      align: "left",
       render: (value) => value.toFixed(6),
       sorter: (a, b) => a.theoreticalPower - b.theoreticalPower,
     },
     {
-      title: "24小时算力(E)",
+      title: "24H算力(E)",
       dataIndex: "power24h",
       key: "power24h",
       width: 145,
-      align: "right",
+      align: "left",
       render: (value) => value.toFixed(6),
       sorter: (a, b) => a.power24h - b.power24h,
     },
     {
-      title: "24小时有效率",
+      title: "24H有效率",
       dataIndex: "effectiveRate24h",
       key: "effectiveRate24h",
       width: 140,
-      align: "right",
+      align: "left",
       render: (value) => `${value.toFixed(2)}%`,
       sorter: (a, b) => a.effectiveRate24h - b.effectiveRate24h,
     },
@@ -204,6 +204,7 @@ const App: React.FC = () => {
       dataIndex: "effectiveRateT2",
       key: "effectiveRateT2",
       width: 130,
+      align: "left",
       render: (value) => `${value.toFixed(2)}%`,
       sorter: (a, b) => a.effectiveRateT2 - b.effectiveRateT2,
     },
@@ -212,6 +213,7 @@ const App: React.FC = () => {
       dataIndex: "effectiveRateT3",
       key: "effectiveRateT3",
       width: 130,
+      align: "left",
       render: (value) => `${value.toFixed(2)}%`,
       sorter: (a, b) => a.effectiveRateT3 - b.effectiveRateT3,
     },
@@ -220,13 +222,13 @@ const App: React.FC = () => {
       dataIndex: "totalMachines",
       key: "totalMachines",
       width: 105,
-      align: "right",
-      render: (value) => value.toLocaleString() + " 台",
+      align: "left",
+      render: (value) => value.toLocaleString(),
       sorter: (a, b) => a.totalMachines - b.totalMachines,
     },
     {
       title: (
-        <div style={{ display: "flex", alignItems: "center", justifyContent: "flex-end" }}>
+        <div style={{ display: "flex" }}>
           <span>在线率</span>
           <FormulaTooltip />
         </div>
@@ -234,9 +236,9 @@ const App: React.FC = () => {
       dataIndex: "onlineRatio",
       key: "onlineRatio",
       width: 125,
-      align: "right",
+      align: "left",
       render: (value: number, record) => (
-        <div style={{ display: "flex", alignItems: "center", justifyContent: "flex-end" }}>
+        <div style={{ display: "flex", alignItems: "left", justifyContent: "flex-start" }}>
           <span>{value.toFixed(2)}%</span>
 
           {record.anget_key === "" && (
@@ -278,70 +280,78 @@ const App: React.FC = () => {
       // render: (value) => `${value.toFixed(2)}%`,
     },
     {
-      title: "T-1总故障数",
+      title: "T-1总故障数/占比",
       dataIndex: "totalFailuresT1",
       key: "totalFailuresT1",
-      width: 120,
-      align: "left",
+      width: 170,
+      align: "center",
       render: (text, record) => {
-        if (record.anget_key != "") {
-          return (
-            <div style={{ display: "flex", alignItems: "center" }}>
-              <img src={antIcon} alt="antIcon" style={{ width: 16, height: 16, marginRight: 4 }} />
-              {text} 台{" "}
-            </div>
-          );
-        } else {
-          return (
-            <div style={{ display: "flex", alignItems: "center" }}>
-              {record.status_of_filling === 0 ? (
+        const total_gzl = ((text / record.totalMachines) * 100).toFixed(2);
+        const isHighRate = parseFloat(total_gzl) > 10; // T-1故障率超过5%标红
+
+        return (
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: "8px" }}>
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                backgroundColor: "#f6f6f6",
+                padding: "2px 6px",
+                borderRadius: "4px",
+                flex: "1",
+              }}
+            >
+              {record.anget_key !== "" ? (
+                <img src={antIcon} alt="antIcon" style={{ width: 12, height: 12, marginRight: 4 }} />
+              ) : record.status_of_filling === 0 ? (
                 <span
                   style={{
-                    backgroundColor: "#f5222d", // 红色Tag背景
+                    backgroundColor: "#f5222d",
                     color: "#fff",
-                    borderRadius: 4,
-                    padding: "0 6px",
-                    fontSize: 10,
+                    borderRadius: 2,
+                    padding: "0 4px",
+                    fontSize: 8,
                     marginRight: 4,
                   }}
                 >
                   NoFill
                 </span>
               ) : (
-                <img src={emptyAntIcon} alt="antIcon" style={{ width: 16, height: 16, marginRight: 4 }} />
+                <img src={emptyAntIcon} alt="antIcon" style={{ width: 12, height: 12, marginRight: 4 }} />
               )}
-              {text} 台{" "}
+              <span style={{ fontWeight: "bold", fontSize: "12px" }}>{text}</span>
             </div>
-          );
-        }
-        // return <span>{text} 台 {record.totalFailuresT2}</span>;
+            <div
+              style={{
+                backgroundColor: isHighRate ? "#fff2f0" : "#f0f8ff",
+                border: `1px solid ${isHighRate ? "#ffccc7" : "#91caff"}`,
+                color: isHighRate ? "#cf1322" : "#1677ff",
+                padding: "1px 6px",
+                borderRadius: "8px",
+                fontSize: "11px",
+                fontWeight: "bold",
+                whiteSpace: "nowrap",
+              }}
+            >
+              {total_gzl}%
+            </div>
+          </div>
+        );
       },
+      sorter: (a, b) => a.totalFailuresT1 - b.totalFailuresT1,
     },
-    {
-      title: "T-2总故障数",
-      dataIndex: "totalFailuresT2",
-      key: "totalFailuresT2",
-      width: 120,
-      align: "right",
-      render: (text, record) => {
-        if (record.anget_key != "") {
-          return (
-            <div style={{ display: "flex", alignItems: "center" }}>
-              <img src={antIcon} alt="antIcon" style={{ width: 16, height: 16, marginRight: 4 }} />
-              {text} 台{" "}
-            </div>
-          );
-        } else {
-          return (
-            <div style={{ display: "flex", alignItems: "center" }}>
-              <img src={emptyAntIcon} alt="antIcon" style={{ width: 16, height: 16, marginRight: 4 }} />
-              {text} 台{" "}
-            </div>
-          );
-        }
-        // return <span>{text} 台</span>;
-      },
-    },
+    // {
+    //   title: "总故障率",
+    //   dataIndex: "totalFailuresT1",
+    //   key: "totalFailuresT1",
+    //   width: 100,
+    //   align: "right",
+    //   render: (val, record) => {
+    //     const total_gzl = ((val / record.totalMachines) * 100).toFixed(2);
+    //     return <span>{`${total_gzl}%`}</span>;
+    //   },
+    // },
+
     // {
     //   title: "总故障台数",
     //   dataIndex: "totalFailures",
@@ -380,106 +390,192 @@ const App: React.FC = () => {
     //   // render: (value) => value.toLocaleString(),
     //   sorter: (a, b) => a.totalFailures - b.totalFailures,
     // },
-    {
-      title: "总故障率",
-      dataIndex: "totalFailuresT1",
-      key: "totalFailuresT1",
-      width: 100,
-      align: "right",
-      render: (val, record) => {
-        const total_gzl = ((val / record.totalMachines) * 100).toFixed(2);
-        return <span>{`${total_gzl}%`}</span>;
-      },
-    },
 
     {
-      title: "24小时故障数",
+      title: "24H故障数/占比",
       dataIndex: "failures24h",
       key: "failures24h",
-      width: 138,
-      align: "right",
-      render: (value) => value.toLocaleString() + " 台",
+      width: 170,
+      align: "center",
+      render: (value, record) => {
+        const failureRate = record.failureRate24h;
+        const isHighRate = failureRate > 10; // 24小时故障率超过5%标红
+
+        return (
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: "8px" }}>
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                backgroundColor: "#f6f6f6",
+                padding: "2px 6px",
+                borderRadius: "4px",
+                flex: "1",
+              }}
+            >
+              <span style={{ fontWeight: "bold", fontSize: "12px" }}>{value.toLocaleString()}</span>
+            </div>
+            <div
+              style={{
+                backgroundColor: isHighRate ? "#fff2f0" : "#f0f8ff",
+                border: `1px solid ${isHighRate ? "#ffccc7" : "#91caff"}`,
+                color: isHighRate ? "#cf1322" : "#1677ff",
+                padding: "1px 6px",
+                borderRadius: "8px",
+                fontSize: "11px",
+                fontWeight: "bold",
+                whiteSpace: "nowrap",
+              }}
+            >
+              {failureRate.toFixed(2)}%
+            </div>
+          </div>
+        );
+      },
       sorter: (a, b) => a.failures24h - b.failures24h,
     },
     {
-      title: "24小时故障率",
-      dataIndex: "failureRate24h",
-      key: "failureRate24h",
-      width: 138,
-      render: (value) => ({
-        children: `${value.toFixed(2)}%`,
-        props: {
-          style: {
-            color: value > 20 ? "#ff4d4f" : "inherit",
-          },
-        },
-      }),
-      sorter: (a, b) => a.failureRate24h - b.failureRate24h,
-    },
-    {
-      title: "T-2日故障率",
-      dataIndex: "failureRateT2",
-      key: "failureRateT2",
-      width: 130,
-      render: (value) => ({
-        children: `${value.toFixed(2)}%`,
-        props: {
-          style: {
-            color: value > 20 ? "#ff4d4f" : "inherit",
-          },
-        },
-      }),
+      title: "T-2故障数/占比",
+      dataIndex: "totalFailuresT2",
+      key: "totalFailuresT2",
+      width: 150,
+      align: "center",
+      render: (text, record) => {
+        const failureRate = record.failureRateT2;
+        const isHighRate = failureRate > 10; // 故障率超过20%标红
+
+        return (
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: "8px" }}>
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                backgroundColor: "#f6f6f6",
+                padding: "2px 6px",
+                borderRadius: "4px",
+                flex: "1",
+              }}
+            >
+              {record.anget_key !== "" ? (
+                <img src={antIcon} alt="antIcon" style={{ width: 14, height: 14, marginRight: 3 }} />
+              ) : (
+                <img src={emptyAntIcon} alt="antIcon" style={{ width: 14, height: 14, marginRight: 3 }} />
+              )}
+              <span style={{ fontWeight: "bold", fontSize: "12px" }}>{text}</span>
+            </div>
+            <div
+              style={{
+                backgroundColor: isHighRate ? "#fff2f0" : "#f0f8ff",
+                border: `1px solid ${isHighRate ? "#ffccc7" : "#91caff"}`,
+                color: isHighRate ? "#cf1322" : "#1677ff",
+                padding: "1px 6px",
+                borderRadius: "8px",
+                fontSize: "11px",
+                fontWeight: "bold",
+                whiteSpace: "nowrap",
+              }}
+            >
+              {failureRate.toFixed(2)}%
+            </div>
+          </div>
+        );
+      },
       sorter: (a, b) => a.failureRateT2 - b.failureRateT2,
     },
+    // {
+    //   title: "24小时故障率",
+    //   dataIndex: "failureRate24h",
+    //   key: "failureRate24h",
+    //   width: 138,
+    //   render: (value) => ({
+    //     children: `${value.toFixed(2)}%`,
+    //     props: {
+    //       style: {
+    //         color: value > 20 ? "#ff4d4f" : "inherit",
+    //       },
+    //     },
+    //   }),
+    //   sorter: (a, b) => a.failureRate24h - b.failureRate24h,
+    // },
+
+    // {
+    //   title: "T-3日故障率",
+    //   dataIndex: "failureRateT3",
+    //   key: "failureRateT3",
+
+    //   width: 130,
+    //   render: (value) => ({
+    //     children: `${value.toFixed(2)}%`,
+    //     props: {
+    //       style: {
+    //         color: value > 20 ? "#ff4d4f" : "inherit",
+    //       },
+    //     },
+    //   }),
+    //   sorter: (a, b) => a.failureRateT3 - b.failureRateT3,
+    // },
+
     {
-      title: "T-3日故障率",
-      dataIndex: "failureRateT3",
-      key: "failureRateT3",
-      width: 130,
-      render: (value) => ({
-        children: `${value.toFixed(2)}%`,
-        props: {
-          style: {
-            color: value > 20 ? "#ff4d4f" : "inherit",
-          },
-        },
-      }),
-      sorter: (a, b) => a.failureRateT3 - b.failureRateT3,
+      title: "待修数/占比",
+      dataIndex: "pendingRepair",
+      key: "pendingRepair",
+      width: 150,
+      align: "center",
+      render: (value, record) => {
+        const repairRate = ((value / record.totalMachines) * 100).toFixed(2);
+        const isHighRate = parseFloat(repairRate) > 10; // 待修率超过5%标红
+
+        return (
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: "8px" }}>
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                backgroundColor: "#f6f6f6",
+                padding: "2px 6px",
+                borderRadius: "4px",
+                flex: "1",
+              }}
+            >
+              <span style={{ fontWeight: "bold", fontSize: "12px" }}>{value.toLocaleString()}</span>
+            </div>
+            <div
+              style={{
+                backgroundColor: isHighRate ? "#fff2f0" : "#f0f8ff",
+                border: `1px solid ${isHighRate ? "#ffccc7" : "#91caff"}`,
+                color: isHighRate ? "#cf1322" : "#1677ff",
+                padding: "1px 6px",
+                borderRadius: "8px",
+                fontSize: "11px",
+                fontWeight: "bold",
+                whiteSpace: "nowrap",
+              }}
+            >
+              {repairRate}%
+            </div>
+          </div>
+        );
+      },
+      sorter: (a, b) => {
+        const rateA = (Number(a.pendingRepair) / Number(a.totalMachines)) * 100;
+        const rateB = (Number(b.pendingRepair) / Number(b.totalMachines)) * 100;
+        return rateA - rateB;
+      },
     },
     {
-      title: "24小时上架数",
+      title: "24H上架数",
       dataIndex: "shelved",
       key: "shelved",
       width: 138,
-      align: "right",
-      render: (value) => value.toLocaleString() + " 台",
-    },
-    {
-      title: "待修数",
-      dataIndex: "pendingRepair",
-      key: "pendingRepair",
-      width: 138,
-      align: "right",
-      render: (value) => value.toLocaleString() + " 台",
-    },
-    {
-      title: "待修率",
-      dataIndex: "pendingRepair",
-      key: "pendingRepair",
-      width: 138,
-      align: "right",
-      render: (val, record) => {
-        const zaixiuRate = ((val / record.totalMachines) * 100).toFixed(2);
-        return <span>{`${zaixiuRate}%`}</span>;
-      },
-      // render: (value) => value.toLocaleString() + " 台",
+      align: "left",
+      render: (value) => value.toLocaleString(),
     },
     {
       title: "影响算力(E)",
       dataIndex: "powerImpact",
       key: "powerImpact",
       width: 130,
-      align: "right",
+      align: "left",
       render: (value) => value.toFixed(6),
       sorter: (a, b) => a.powerImpact - b.powerImpact,
     },
@@ -488,6 +584,7 @@ const App: React.FC = () => {
       dataIndex: "impactRatio",
       key: "impactRatio",
       width: 105,
+      align: "left",
       render: (value) => `${value.toFixed(2)}%`,
       sorter: (a, b) => a.impactRatio - b.impactRatio,
     },
@@ -496,7 +593,7 @@ const App: React.FC = () => {
       dataIndex: "outputImpact",
       key: "outputImpact",
       width: 145,
-      align: "right",
+      align: "left",
       render: (value) => value.toFixed(8),
       sorter: (a, b) => a.outputImpact - b.outputImpact,
     },
@@ -505,7 +602,7 @@ const App: React.FC = () => {
       dataIndex: "limitImpactRate",
       key: "limitImpactRate",
       width: 140,
-      align: "right",
+      align: "left",
       // render: (value) => value.toFixed(8),
       render: (value) => `${value.toFixed(2)}%`,
       sorter: (a, b) => a.limitImpactRate - b.limitImpactRate,
@@ -515,7 +612,7 @@ const App: React.FC = () => {
       dataIndex: "highTemperatureRate",
       key: "highTemperatureRate",
       width: 140,
-      align: "right",
+      align: "left",
       // render: (value) => value.toFixed(8),
       render: (value) => `${value.toFixed(2)}%`,
       sorter: (a, b) => a.highTemperatureRate - b.highTemperatureRate,
@@ -551,6 +648,7 @@ const App: React.FC = () => {
       dataIndex: "events",
       key: "events",
       width: 400,
+      align: "left",
       render: (text) => (
         <Tooltip title={text}>
           <div className="line-clamp-2">{text}</div>
@@ -686,22 +784,21 @@ const App: React.FC = () => {
       "理论算力（E）": item.theoreticalPower.toFixed(6),
       "24小时算力（E）": item.power24h.toFixed(8),
       "24小时有效率": item.effectiveRate24h.toFixed(2) + "%",
-      "T-2日有效率": item.effectiveRateT2.toFixed(2) + "%",
-      "T-3日有效率": item.effectiveRateT3.toFixed(2) + "%",
+      // "T-2日有效率": item.effectiveRateT2.toFixed(2) + "%",
+      // "T-3日有效率": item.effectiveRateT3.toFixed(2) + "%",
       托管台数: item.totalMachines.toLocaleString(),
       在线率: item.onlineRatio.toFixed(2) + "%",
       // 总故障台数: item.totalFailures.toLocaleString(),
 
       "24小时故障数": item.failures24h.toLocaleString(),
       "24小时故障率": item.failureRate24h.toFixed(2) + "%",
-      "T-1总故障数": item.totalFailuresT1,
+      "T-1故障情况": `${item.totalFailuresT1.toLocaleString()} 台 (${((item.totalFailuresT1 / item.totalMachines) * 100).toFixed(2)}%)`,
       总故障数: item.totalFailuresT2,
       总故障率: ((item.totalFailuresT2 / item.totalMachines) * 100).toFixed(2) + "%",
-      "T-2日故障率": item.failureRateT2.toFixed(2) + "%",
-      "T-3日故障率": item.failureRateT3.toFixed(2) + "%",
+      "T-2故障情况": `${item.totalFailuresT2.toLocaleString()} 台 (${item.failureRateT2.toFixed(2)}%)`,
+      // "T-3日故障率": item.failureRateT3.toFixed(2) + "%",
       "24小时上架数": item.shelved,
-      待修数: item.pendingRepair,
-      待修率: ((Number(item.pendingRepair) / item.totalMachines) * 100).toFixed(2) + "%",
+      待修情况: `${item.pendingRepair.toLocaleString()} 台 (${((Number(item.pendingRepair) / item.totalMachines) * 100).toFixed(2)}%)`,
       "影响算力（E）": item.powerImpact.toFixed(8),
       影响占比: item.impactRatio.toFixed(2) + "%",
       "影响产出（BTC）": item.outputImpact.toFixed(8),
@@ -908,8 +1005,8 @@ const App: React.FC = () => {
             pagination={{
               position: ["bottomCenter"],
               showSizeChanger: true,
-              pageSizeOptions: ["20", "30", "50"],
-              defaultPageSize: 20,
+              pageSizeOptions: ["10", "20", "30", "50"],
+              defaultPageSize: 10,
               showTotal: (total) => `共 ${total} 条`,
               total: filteredData?.length,
               onChange: () => {

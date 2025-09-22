@@ -24,6 +24,7 @@ export type MiningPoolUpdate = {
   theoretical_hashrate: string;
   energy_ratio: string;
   basic_hosting_fee: string;
+  heat_diss_mode: number;
   link: string;
 };
 

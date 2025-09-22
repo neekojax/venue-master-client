@@ -119,7 +119,7 @@ export default function MiningSettingPage() {
     theoretical_hashrate?: number;
     energy_ratio?: number;
     basic_hosting_fee?: number;
-
+    heat_diss_mode?: number;
     link?: string;
   };
 
@@ -547,6 +547,7 @@ export default function MiningSettingPage() {
       theoretical_hashrate: String(data.theoretical_hashrate),
       energy_ratio: String(data.energy_ratio),
       basic_hosting_fee: String(data.basic_hosting_fee),
+      heat_diss_mode: Number(data.heat_diss_mode),
       link: data.link,
     };
 
@@ -806,6 +807,22 @@ export default function MiningSettingPage() {
                 options={[
                   { value: 0, label: "暂停" },
                   { value: 1, label: "活跃" },
+                ]}
+              />
+            </Form.Item>
+
+            <Form.Item<FieldType>
+              label="散热模式"
+              name="heat_diss_mode"
+              rules={[{ required: true, message: "Please input your heat_diss_mode!" }]}
+            >
+              <Radio.Group
+                name="heat_diss_mode"
+                defaultValue={1}
+                options={[
+                  { value: 1, label: "风冷" },
+                  { value: 2, label: "水冷" },
+                  { value: 0, label: "其他" },
                 ]}
               />
             </Form.Item>

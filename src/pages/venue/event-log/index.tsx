@@ -74,7 +74,22 @@ const App: React.FC = () => {
   const [selectedLocation, setSelectedLocation] = useState<string[]>([]);
   const [selectedEventType, setSelectedEventType] = useState<string[]>([]);
   const [searchText, setSearchText] = useState("");
+  // 防抖后的搜索文本
+  const [debouncedSearchText, setDebouncedSearchText] = useState<string>("");
+
+  // 搜索防抖处理
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearchText(searchText);
+    }, 300); // 300ms延迟
+
+    return () => {
+      clearTimeout(timer);
+    };
+  }, [searchText]);
   const [dateRange, setDateRange] = useState<[dayjs.Dayjs | null, dayjs.Dayjs | null]>([null, null]);
+  // 添加分页大小状态
+  const [pageSize, setPageSize] = useState<number>(10);
 
   // 数据转换
   const logData: EventLog[] =
@@ -99,8 +114,13 @@ const App: React.FC = () => {
   const filteredData = logData.filter((log) => {
     const matchesLocation = selectedLocation.length ? selectedLocation.includes(log.venue_name) : true;
     const matchesEventType = selectedEventType.length ? selectedEventType.includes(log.log_type) : true;
+    // 改进搜索逻辑：使用防抖后的搜索文本，不区分大小写，并搜索更多字段
+    const searchTextLower = debouncedSearchText.toLowerCase();
     const matchesSearchText =
-      log.event_reason.includes(searchText) || log.resolution_measures.includes(searchText);
+      debouncedSearchText === "" ||
+      [log.venue_name, log.event_reason, log.resolution_measures, log.log_type].some(
+        (field) => field && field.toLowerCase().includes(searchTextLower),
+      );
 
     const isValidDateRange = Array.isArray(dateRange) && dateRange.length === 2;
     const matchesDateRange =
@@ -422,19 +442,24 @@ const App: React.FC = () => {
             </Button>
             <div className="flex items-center justify-end gap-4">
               <Input
-                placeholder="搜索事件内容"
+                placeholder="搜索场地、事件类型或内容"
                 prefix={<SearchOutlined />}
                 size="middle"
                 className="max-w-xs !rounded-lg"
                 value={searchText}
                 onChange={(e) => setSearchText(e.target.value)} // 更新搜索文本
+                allowClear // 添加清除按钮
               />
               <RangePicker
                 size="middle"
                 className="!rounded-lg"
                 placeholder={["开始日期", "结束日期"]}
                 value={dateRange}
-                onChange={() => setDateRange} // 更新日期范围
+                onChange={(dates) => {
+                  // 类型转换，确保类型兼容
+                  const rangeValue = dates as [dayjs.Dayjs | null, dayjs.Dayjs | null];
+                  setDateRange(rangeValue);
+                }} // 更新日期范围
               />
               <Select
                 mode="multiple"
@@ -567,9 +592,19 @@ const App: React.FC = () => {
             }}
             pagination={{
               total: filteredData.length,
-              pageSize: 10,
+              pageSize: pageSize,
               showSizeChanger: true,
-              showQuickJumper: true,
+              pageSizeOptions: ["10", "20", "30", "50"],
+              onChange: (page, size) => {
+                // 页码或页面大小变化时都会触发此回调
+                setPageSize(size);
+                console.log(page, size);
+                const tableBody = document.querySelector(".ant-table-body");
+                if (tableBody) {
+                  tableBody.scrollTop = 0;
+                }
+              },
+              // showQuickJumper: true,
               showTotal: (total) => `共 ${total} 条记录`,
             }}
             // className="px-6"
