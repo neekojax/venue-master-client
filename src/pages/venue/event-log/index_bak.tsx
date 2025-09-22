@@ -20,7 +20,6 @@ import {
   Table,
   Tag,
   Tooltip,
-  // Switch
 } from "antd";
 import type { ColumnsType } from "antd/es/table";
 import dayjs from "dayjs";
@@ -30,7 +29,7 @@ import { getTimeDifference } from "@/utils/date";
 
 import UploadExcel from "@/pages/venue/components/UploadExcel";
 import {
-  useDeleteUpdate,
+  // useDeleteUpdate,
   useEventList,
   useEventNew,
   useEventUpdate,
@@ -54,12 +53,10 @@ interface EventLog {
   impact_count: number;
   event_reason: string;
   resolution_measures: string;
-  collection: number;
   created_at: string; // 这里使用 created_at 而不是 update_at
 }
 
 const App: React.FC = () => {
-  // const [showCollectionOnly, setShowCollectionOnly] = useState(true)
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [selectedRowKeys] = useState<React.Key[]>([]);
   const [form] = Form.useForm();
@@ -68,28 +65,13 @@ const App: React.FC = () => {
   const { data: venueList } = useVenueList(poolType);
   const newMutation = useEventNew();
   const updateMutation = useEventUpdate();
-  const deleteMutation = useDeleteUpdate();
+  // const deleteMutation = useDeleteUpdate();
   const [selectedDurationType, setSelectedDurationType] = useState<string>("");
   // 新增筛选状态
   const [selectedLocation, setSelectedLocation] = useState<string[]>([]);
   const [selectedEventType, setSelectedEventType] = useState<string[]>([]);
   const [searchText, setSearchText] = useState("");
-  // 防抖后的搜索文本
-  const [debouncedSearchText, setDebouncedSearchText] = useState<string>("");
-
-  // 搜索防抖处理
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setDebouncedSearchText(searchText);
-    }, 300); // 300ms延迟
-
-    return () => {
-      clearTimeout(timer);
-    };
-  }, [searchText]);
   const [dateRange, setDateRange] = useState<[dayjs.Dayjs | null, dayjs.Dayjs | null]>([null, null]);
-  // 添加分页大小状态
-  const [pageSize, setPageSize] = useState<number>(10);
 
   // 数据转换
   const logData: EventLog[] =
@@ -107,20 +89,14 @@ const App: React.FC = () => {
       event_reason: item.event_reason,
       resolution_measures: item.resolution_measures,
       created_at: item.created_at,
-      collection: item.collection,
     })) || [];
 
   // 过滤后的数据
   const filteredData = logData.filter((log) => {
     const matchesLocation = selectedLocation.length ? selectedLocation.includes(log.venue_name) : true;
     const matchesEventType = selectedEventType.length ? selectedEventType.includes(log.log_type) : true;
-    // 改进搜索逻辑：使用防抖后的搜索文本，不区分大小写，并搜索更多字段
-    const searchTextLower = debouncedSearchText.toLowerCase();
     const matchesSearchText =
-      debouncedSearchText === "" ||
-      [log.venue_name, log.event_reason, log.resolution_measures, log.log_type].some(
-        (field) => field && field.toLowerCase().includes(searchTextLower),
-      );
+      log.event_reason.includes(searchText) || log.resolution_measures.includes(searchText);
 
     const isValidDateRange = Array.isArray(dateRange) && dateRange.length === 2;
     const matchesDateRange =
@@ -131,8 +107,7 @@ const App: React.FC = () => {
     const hasDuration = log.start_time && log.end_time;
     const matchesDuration =
       selectedDurationType === "valid" ? hasDuration : selectedDurationType === "empty" ? !hasDuration : true;
-    // 2️⃣ 收藏过滤
-    // const matchesCollection = !showCollectionOnly || log.collection === 1;
+
     return matchesLocation && matchesEventType && matchesSearchText && matchesDateRange && matchesDuration;
   });
 
@@ -143,9 +118,7 @@ const App: React.FC = () => {
       width: "70px",
       rowScope: "row",
       render(text: string, record: any, index: number) {
-        if (index === -1) {
-          console.log(text, record.key);
-        }
+        console.log(text, record.key);
         return index + 1;
       },
     },
@@ -212,10 +185,8 @@ const App: React.FC = () => {
       // if (value === "empty") return !hasDuration;
       // return true;
       // },
-      render: (_: string, record: any) => {
-        // if (text === "---valid---") {
-        //   console.log(text);
-        // }
+      render: (text: string, record: any) => {
+        console.log(text);
         if (record.start_time && record.end_time) {
           return getTimeDifference(record.start_time, record.end_time);
         }
@@ -358,10 +329,20 @@ const App: React.FC = () => {
   }, [isLoading, selectedEventType]);
 
   const handleAdd = () => {
-    form.resetFields();
-    setIsModalVisible(true);
+    Modal.error({
+      // centered: true,
+      title: "操作失败",
+      content: "请联系管理员。",
+    });
+    // form.resetFields();
+    // setIsModalVisible(true);
   };
   const handleEdit = (record: EventLog) => {
+    Modal.error({
+      title: "操作失败",
+      content: "请联系管理员。",
+    });
+
     form.setFieldsValue({
       ...record,
       // log_date: dayjs(record.log_date),
@@ -371,18 +352,23 @@ const App: React.FC = () => {
       end_time: record.end_time ? dayjs(record.end_time) : undefined, // 如果为 null/undefined，就不传入初始值
       // end_time: dayjs(record.end_time),
     });
-    setIsModalVisible(true);
+    setIsModalVisible(false);
   };
 
   const handleDelete = (id: number) => {
-    deleteMutation.mutate(id, {
-      onSuccess: () => {
-        message.success("删除成功");
-      },
-      onError: (error) => {
-        message.error(`删除失败: ${error.message}`);
-      },
+    Modal.error({
+      title: "操作失败",
+      content: "请联系管理员。",
     });
+    console.log(id);
+    // deleteMutation.mutate(id, {
+    //   onSuccess: () => {
+    //     message.success("删除成功");
+    //   },
+    //   onError: (error) => {
+    //     message.error(`删除失败: ${error.message}`);
+    //   },
+    // });
   };
 
   const handleOk = () => {
@@ -427,7 +413,7 @@ const App: React.FC = () => {
   };
 
   return (
-    <div className="">
+    <div className="bg-gray-50 p-6">
       <div className="mx-auto bg-white rounded-lg shadow-sm">
         <div className="p-6 border-b border-gray-200">
           <div className="grid grid-cols-[auto_1fr] gap-6 mb-6 filter-form">
@@ -442,24 +428,19 @@ const App: React.FC = () => {
             </Button>
             <div className="flex items-center justify-end gap-4">
               <Input
-                placeholder="搜索场地、事件类型或内容"
+                placeholder="搜索事件内容"
                 prefix={<SearchOutlined />}
                 size="middle"
                 className="max-w-xs !rounded-lg"
                 value={searchText}
                 onChange={(e) => setSearchText(e.target.value)} // 更新搜索文本
-                allowClear // 添加清除按钮
               />
               <RangePicker
                 size="middle"
                 className="!rounded-lg"
                 placeholder={["开始日期", "结束日期"]}
                 value={dateRange}
-                onChange={(dates) => {
-                  // 类型转换，确保类型兼容
-                  const rangeValue = dates as [dayjs.Dayjs | null, dayjs.Dayjs | null];
-                  setDateRange(rangeValue);
-                }} // 更新日期范围
+                onChange={() => setDateRange} // 更新日期范围
               />
               <Select
                 mode="multiple"
@@ -564,52 +545,25 @@ const App: React.FC = () => {
             </Space>
           </div>
         </div>
-
-        <div
-          style={{ background: "#fff", color: "grey", borderRadius: "0.5rem", padding: "20px 0px" }}
-          className="longdataTable"
-        >
-          {/* <div style={{ marginBottom: 16, marginRight: '10px', color: '#000', textAlign: 'right' }}>
-            <Switch
-              size="small"
-              checked={showCollectionOnly}
-              onChange={setShowCollectionOnly}
-            />
-            {" "}
-            我的自选
-          </div> */}
-          <Table
-            // rowSelection={rowSelection}
-            columns={columns}
-            dataSource={filteredData} // 使用过滤后的数据
-            scroll={{ x: 1300 }}
-            rowKey="id"
-            loading={isLoading}
-            // onChange={handleTableChange}
-            onChange={(_: any, filters: any) => {
-              // console.log("Table >>选中的事件类型：", filters.log_type); // 是数组
-              setSelectedEventType(filters.log_type || []); // 设置选中的事件类型数组
-            }}
-            pagination={{
-              total: filteredData.length,
-              pageSize: pageSize,
-              showSizeChanger: true,
-              pageSizeOptions: ["10", "20", "30", "50"],
-              onChange: (page, size) => {
-                // 页码或页面大小变化时都会触发此回调
-                setPageSize(size);
-                console.log(page, size);
-                const tableBody = document.querySelector(".ant-table-body");
-                if (tableBody) {
-                  tableBody.scrollTop = 0;
-                }
-              },
-              // showQuickJumper: true,
-              showTotal: (total) => `共 ${total} 条记录`,
-            }}
-            // className="px-6"
-          />
-        </div>
+        <Table
+          // rowSelection={rowSelection}
+          columns={columns}
+          dataSource={filteredData} // 使用过滤后的数据
+          scroll={{ x: 1300 }}
+          rowKey="id"
+          // onChange={handleTableChange}
+          onChange={(_: any, filters: any) => {
+            setSelectedEventType(filters.log_type || []); // 设置选中的事件类型数组
+          }}
+          pagination={{
+            total: filteredData.length,
+            pageSize: 10,
+            showSizeChanger: true,
+            showQuickJumper: true,
+            showTotal: (total) => `共 ${total} 条记录`,
+          }}
+          // className="px-6"
+        />
       </div>
       <Modal
         title={form.getFieldValue("id") ? "编辑事件" : "新增事件"}

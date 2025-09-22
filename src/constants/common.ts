@@ -32,6 +32,7 @@ export const ROUTE_PATHS = {
   report: "/report",
   dailyReport: "/report/daily",
   subAccountDailyReport: "/report/daily/sub-account", // 子账户日报表
+  weekReport: "/report/week", // 运营周报
 
   poolProfitHistory: (poolName: any) => `/pool-profit/history/${encodeURIComponent(poolName)}`, // 定义为函数以接收 poolName
   poolHashHistory: (poolName: any) => `/pool-hash/history/${encodeURIComponent(poolName)}`,

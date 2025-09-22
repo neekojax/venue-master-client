@@ -79,6 +79,10 @@ const SiderItems = () => {
           key: ROUTE_PATHS.dailyReport,
           label: <Link to={ROUTE_PATHS.dailyReport}>运营日报</Link>,
         },
+        {
+          key: ROUTE_PATHS.weekReport,
+          label: <Link to={ROUTE_PATHS.weekReport}>运营周报</Link>,
+        },
         // ...(showNDPoolType !== "CANG" && showNDPoolType !== "NS" // 日报菜单项，仅在 type === 'ND' 时显示
         //   ? [
         //       {

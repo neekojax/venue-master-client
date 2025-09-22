@@ -199,24 +199,24 @@ const App: React.FC = () => {
       render: (value) => `${value.toFixed(2)}%`,
       sorter: (a, b) => a.effectiveRate24h - b.effectiveRate24h,
     },
-    {
-      title: "T-2日有效率",
-      dataIndex: "effectiveRateT2",
-      key: "effectiveRateT2",
-      width: 130,
-      align: "left",
-      render: (value) => `${value.toFixed(2)}%`,
-      sorter: (a, b) => a.effectiveRateT2 - b.effectiveRateT2,
-    },
-    {
-      title: "T-3日有效率",
-      dataIndex: "effectiveRateT3",
-      key: "effectiveRateT3",
-      width: 130,
-      align: "left",
-      render: (value) => `${value.toFixed(2)}%`,
-      sorter: (a, b) => a.effectiveRateT3 - b.effectiveRateT3,
-    },
+    // {
+    //   title: "T-2日有效率",
+    //   dataIndex: "effectiveRateT2",
+    //   key: "effectiveRateT2",
+    //   width: 130,
+    //   align: "left",
+    //   render: (value) => `${value.toFixed(2)}%`,
+    //   sorter: (a, b) => a.effectiveRateT2 - b.effectiveRateT2,
+    // },
+    // {
+    //   title: "T-3日有效率",
+    //   dataIndex: "effectiveRateT3",
+    //   key: "effectiveRateT3",
+    //   width: 130,
+    //   align: "left",
+    //   render: (value) => `${value.toFixed(2)}%`,
+    //   sorter: (a, b) => a.effectiveRateT3 - b.effectiveRateT3,
+    // },
     {
       title: "托管台数",
       dataIndex: "totalMachines",
@@ -968,7 +968,8 @@ const App: React.FC = () => {
           className={`mb-6 rounded-lg bg-white p-6 shadow-sm transition-all duration-300 ${isTableFixed ? "sticky top-0 z-10" : ""}`}
         >
           <div className="mb-6 flex items-center justify-between">
-            <span>
+            <div></div>
+            <span style={{ display: "none" }}>
               <Switch size="small" checked={showCollectionOnly} onChange={setShowCollectionOnly} />
               {"  "}
               <span style={{ marginRight: "10px" }}>我的自选</span>

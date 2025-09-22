@@ -24,6 +24,17 @@ export const reportRoute: RouteObject = {
         crumb: () => <Link to={ROUTE_PATHS.dailyReport}>运营日报</Link>,
       },
     },
+    {
+      path: ROUTE_PATHS.weekReport,
+      lazy: async () => ({
+        Component: (await import("@/pages/report/week-report/index.tsx")).default,
+      }),
+      HydrateFallback: ProgressBar,
+      handle: {
+        title: "运营周报",
+        crumb: () => <Link to={ROUTE_PATHS.weekReport}>运营周报</Link>,
+      },
+    },
     // {
     //   path: ROUTE_PATHS.subAccountDailyReport,
     //   lazy: async () => ({

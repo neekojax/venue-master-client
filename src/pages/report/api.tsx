@@ -18,3 +18,12 @@ export const updateReport = async (poolType: string, date: string, data: ReportU
 export const fetchAllDailyStat = async (poolType: string, venueID: number) => {
   return await fetchGet(`/venue/getAllDailyStat/${poolType}/${venueID}`);
 };
+
+/* 周报内容
+ * param：poolType：矿机类型，
+ * param：start：周日，
+ * param：end：周六
+ */
+export const fetchWeeklyReport = async (poolType: string, start: string, end: string) => {
+  return await fetchGet(`/report/weekly/${poolType}/${start}/${end}`);
+};
