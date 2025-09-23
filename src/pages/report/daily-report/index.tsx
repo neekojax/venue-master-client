@@ -441,7 +441,7 @@ const App: React.FC = () => {
       width: 150,
       align: "center",
       render: (text, record) => {
-        const failureRate = record.failureRateT2;
+        const failureRate = (record.totalFailuresT2 / record.totalMachines) * 100;
         const isHighRate = failureRate > 10; // 故障率超过20%标红
 
         return (
