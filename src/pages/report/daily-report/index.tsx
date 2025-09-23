@@ -200,24 +200,6 @@ const App: React.FC = () => {
       sorter: (a, b) => a.effectiveRate24h - b.effectiveRate24h,
     },
     {
-      title: "T-2日有效率",
-      dataIndex: "effectiveRateT2",
-      key: "effectiveRateT2",
-      width: 130,
-      align: "left",
-      render: (value) => `${value.toFixed(2)}%`,
-      sorter: (a, b) => a.effectiveRateT2 - b.effectiveRateT2,
-    },
-    {
-      title: "T-3日有效率",
-      dataIndex: "effectiveRateT3",
-      key: "effectiveRateT3",
-      width: 130,
-      align: "left",
-      render: (value) => `${value.toFixed(2)}%`,
-      sorter: (a, b) => a.effectiveRateT3 - b.effectiveRateT3,
-    },
-    {
       title: "托管台数",
       dataIndex: "totalMachines",
       key: "totalMachines",
@@ -340,57 +322,6 @@ const App: React.FC = () => {
       },
       sorter: (a, b) => a.totalFailuresT1 - b.totalFailuresT1,
     },
-    // {
-    //   title: "总故障率",
-    //   dataIndex: "totalFailuresT1",
-    //   key: "totalFailuresT1",
-    //   width: 100,
-    //   align: "right",
-    //   render: (val, record) => {
-    //     const total_gzl = ((val / record.totalMachines) * 100).toFixed(2);
-    //     return <span>{`${total_gzl}%`}</span>;
-    //   },
-    // },
-
-    // {
-    //   title: "总故障台数",
-    //   dataIndex: "totalFailures",
-    //   key: "totalFailures",
-    //   width: 120,
-    //   align: "right",
-    //   // render: (text) => {
-    //   //   return <span>{text}</span>;
-    //   // },
-    //   render: (text, record) => {
-    //     const account = localStorage.getItem("user");
-    //     // console.log("account", account);
-    //     if (account != "admin") {
-    //       return <span>{text}</span>;
-    //     } else {
-    //       const isEditing = hoveredRow === record.key;
-    //       // console.log("isEditing", isEditing);
-    //       return isEditing ? (
-    //         <Input
-    //           size="small"
-    //           style={{ padding: "0 5px", margin: 0, height: "22px" }}
-    //           onChange={(e) => save(record, e.target.value)}
-    //           onPressEnter={(e) => save(record, e.currentTarget.value || "")}
-    //           onBlur={(e) => save(record, e.target?.value || "")}
-    //           defaultValue={text}
-    //         />
-    //       ) : (
-    //         <span>{text}</span>
-    //       );
-    //     }
-    //   },
-    //   onCell: (record) => ({
-    //     onMouseEnter: () => setHoveredRow(record.key),
-    //     onMouseLeave: () => setHoveredRow(null),
-    //   }),
-    //   // render: (value) => value.toLocaleString(),
-    //   sorter: (a, b) => a.totalFailures - b.totalFailures,
-    // },
-
     {
       title: "24H故障数/占比",
       dataIndex: "failures24h",
@@ -441,7 +372,7 @@ const App: React.FC = () => {
       width: 150,
       align: "center",
       render: (text, record) => {
-        const failureRate = record.failureRateT2;
+        const failureRate = (record.totalFailuresT2 / record.totalMachines) * 100;
         const isHighRate = failureRate > 10; // 故障率超过20%标红
 
         return (
@@ -482,39 +413,6 @@ const App: React.FC = () => {
       },
       sorter: (a, b) => a.failureRateT2 - b.failureRateT2,
     },
-    // {
-    //   title: "24小时故障率",
-    //   dataIndex: "failureRate24h",
-    //   key: "failureRate24h",
-    //   width: 138,
-    //   render: (value) => ({
-    //     children: `${value.toFixed(2)}%`,
-    //     props: {
-    //       style: {
-    //         color: value > 20 ? "#ff4d4f" : "inherit",
-    //       },
-    //     },
-    //   }),
-    //   sorter: (a, b) => a.failureRate24h - b.failureRate24h,
-    // },
-
-    // {
-    //   title: "T-3日故障率",
-    //   dataIndex: "failureRateT3",
-    //   key: "failureRateT3",
-
-    //   width: 130,
-    //   render: (value) => ({
-    //     children: `${value.toFixed(2)}%`,
-    //     props: {
-    //       style: {
-    //         color: value > 20 ? "#ff4d4f" : "inherit",
-    //       },
-    //     },
-    //   }),
-    //   sorter: (a, b) => a.failureRateT3 - b.failureRateT3,
-    // },
-
     {
       title: "待修数/占比",
       dataIndex: "pendingRepair",
@@ -617,32 +515,6 @@ const App: React.FC = () => {
       render: (value) => `${value.toFixed(2)}%`,
       sorter: (a, b) => a.highTemperatureRate - b.highTemperatureRate,
     },
-    // {
-    //   title: "限电算力",
-    //   dataIndex: "limitImpactRate",
-    //   key: "limitImpactRate",
-    //   width: 140,
-    //   align: "right",
-    //   // render: (value) => value.toFixed(8),
-    //   render: (value, record) => {
-    //     const result = record.theoreticalPower * 1e6 * value / 100;
-    //     return result.toFixed(2) + "TH/s";
-    //     //`${value.toFixed(2)}%`,
-    //   }
-    // },
-    // {
-    //   title: "高温算力",
-    //   dataIndex: "highTemperatureRate",
-    //   key: "highTemperatureRate",
-    //   width: 140,
-    //   align: "right",
-    //   // render: (value) => value.toFixed(8),
-    //   render: (value, record) => {
-    //     const result = record.theoreticalPower * 1e6 * value / 100;
-    //     return result.toFixed(2) + "TH/s";
-    //     //`${value.toFixed(2)}%`,
-    //   }
-    // },
     {
       title: "事件描述",
       dataIndex: "events",
