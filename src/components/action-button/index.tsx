@@ -45,7 +45,7 @@ export const ActionButton = <T,>({
       {mode === ActionButtonMode.ADD ? (
         <Button
           type="primary"
-          danger
+          ghost
           size="small"
           icon={<PlusOutlined style={{ color: "white" }} />}
           style={{

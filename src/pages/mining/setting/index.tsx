@@ -6,6 +6,7 @@ import {
   DeleteOutlined,
   ExportOutlined,
   FormOutlined,
+  ImportOutlined,
   SearchOutlined,
 } from "@ant-design/icons";
 import {
@@ -35,6 +36,9 @@ import { exportMiningPoolListToExcel } from "@/utils/excel.ts";
 import { getShortenedLink } from "@/utils/short-link.ts";
 
 const { Option } = Select;
+import ExcelUpload from "@/components/excel-upload";
+
+import { uploadMiningPoolExcel } from "@/pages/mining/api.tsx";
 import EditForm from "@/pages/mining/components/edit-form.tsx";
 import {
   useMiningPoolDelete,
@@ -92,6 +96,7 @@ export default function MiningSettingPage() {
   const [searchTerm, setSearchTerm] = useState(""); // 新增搜索状态;
 
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [excelUploadModalVisible, setExcelUploadModalVisible] = useState(false);
   const [currentRow, setCurrentRow] = useState<MiningPoolUpdate | null>(null);
   const [editableKey, setEditableRowKey] = useState<number>(0);
 
@@ -219,8 +224,10 @@ export default function MiningSettingPage() {
           // 根据 observer_link 内容返回不同的图标
           if (link.includes("antpool")) {
             return <FaAdn style={{ color: "green", fontSize: 16 }} />;
+            // return <DatabaseOutlined style={{ color: "green", fontSize: 16 }} />;
           } else if (link.includes("f2pool")) {
             return <FaFish style={{ color: "orange", fontSize: 16 }} />;
+            // return <CloudOutlined style={{ color: "orange", fontSize: 16 }} />;
           } else {
             return <span>{record.serialNumber}</span>; // 如果没有匹配，则返回序号
           }
@@ -578,6 +585,33 @@ export default function MiningSettingPage() {
     setSearchTerm(e.target.value);
   };
 
+  // Excel上传处理函数
+  const handleExcelUpload = async (file: File) => {
+    // try {
+    const result = await uploadMiningPoolExcel(file);
+
+    // 如果有成功导入的数据，刷新页面
+    if (result.success && result.data?.success_count > 0) {
+      setTimeout(() => {
+        window.location.reload();
+      }, 2000); // 延迟2秒刷新，让用户看到结果
+    }
+
+    return result;
+    // } catch (error: any) {
+    //   // 不在这里显示错误消息，让Excel组件处理
+    //   throw error;
+    // }
+  };
+
+  const showExcelUploadModal = () => {
+    setExcelUploadModalVisible(true);
+  };
+
+  const hideExcelUploadModal = () => {
+    setExcelUploadModalVisible(false);
+  };
+
   // // 根据搜索词过滤数据
   // const filteredData = tableData
   //   .filter((item: { [s: string]: unknown } | ArrayLike<unknown>) => {
@@ -623,7 +657,7 @@ export default function MiningSettingPage() {
         style={{ background: "#fff", color: "grey", borderRadius: "0.5rem", padding: "20px 0px" }}
         className="longdataTable"
       >
-        <Row gutter={[16, 16]} justify="space-between" align="middle">
+        <Row gutter={[16, 16]} justify="space-between" align="middle" style={{ marginLeft: "8px" }}>
           <Col xs={24} sm={24} md={12}>
             <span style={{ marginRight: "15px", marginLeft: "10px" }}>
               <Switch size="small" checked={showCollectionOnly} onChange={setShowCollectionOnly} /> 我的自选{" "}
@@ -632,7 +666,7 @@ export default function MiningSettingPage() {
               size="small"
               onChange={handlePoolCategoryChange}
               value={poolCategory}
-              style={{ marginLeft: "10px", fontSize: "13px" }}
+              style={{ marginLeft: "10px", marginRight: "15px", fontSize: "13px" }}
             >
               <Radio.Button value="主矿池" style={{ fontSize: "12px" }}>
                 主矿池
@@ -641,6 +675,16 @@ export default function MiningSettingPage() {
                 备用矿池
               </Radio.Button>
             </Radio.Group>
+
+            <ActionButton
+              label={"添加矿池"}
+              size="small"
+              // @ts-ignore
+              initialValues={emptyData}
+              onSubmit={handleNewMiningPool}
+              FormComponent={EditForm}
+              mode={ActionButtonMode.ADD}
+            />
           </Col>
           <Col xs={24} sm={24} md={12} style={{ textAlign: "right" }}>
             <div style={{ marginBottom: 16, marginRight: "0px", color: "#000" }}>
@@ -655,26 +699,29 @@ export default function MiningSettingPage() {
               />
 
               <Button
-                // type="primary"
+                type="primary"
+                size="small"
+                // ghost
+                icon={<ImportOutlined />}
+                style={{ marginRight: "15px" }}
+                onClick={showExcelUploadModal}
+              >
+                导入托管信息
+              </Button>
+
+              <Button
+                type="primary"
                 // icon={<DownloadOutlined />}
-                icon={<ExportOutlined className="exportIcon" />}
+                icon={<ExportOutlined />}
                 // size="middle"
-                size="middle"
-                className={"text-blue-500 exportButton"}
-                style={{ marginLeft: "0px", marginRight: "15px" }}
+                // ghost
+                size="small"
+                className={"exportButton"}
+                style={{ marginLeft: "0px", color: "#fff", marginRight: "8px" }}
                 onClick={onDownload}
               >
                 导出
               </Button>
-              <ActionButton
-                label={"添加矿池"}
-                size="small"
-                // @ts-ignore
-                initialValues={emptyData}
-                onSubmit={handleNewMiningPool}
-                FormComponent={EditForm}
-                mode={ActionButtonMode.ADD}
-              />
             </div>
           </Col>
         </Row>
@@ -883,6 +930,23 @@ export default function MiningSettingPage() {
               <Input />
             </Form.Item>
           </Form>
+        </Modal>
+
+        {/* Excel上传Modal */}
+        <Modal
+          title="Excel文件导入"
+          open={excelUploadModalVisible}
+          onCancel={hideExcelUploadModal}
+          footer={null}
+          width={600}
+        >
+          <ExcelUpload
+            onUpload={handleExcelUpload}
+            accept=".xlsx,.xls"
+            maxSize={10}
+            title="点击或拖拽Excel文件到此区域上传"
+            description="支持.xlsx和.xls格式，文件大小不超过10MB"
+          />
         </Modal>
       </div>
     </div>

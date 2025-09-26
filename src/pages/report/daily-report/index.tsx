@@ -661,7 +661,6 @@ const App: React.FC = () => {
       托管台数: item.totalMachines.toLocaleString(),
       在线率: item.onlineRatio.toFixed(2) + "%",
       // 总故障台数: item.totalFailures.toLocaleString(),
-
       "24小时故障数": item.failures24h.toLocaleString(),
       "24小时故障率": item.failureRate24h.toFixed(2) + "%",
       "T-1故障数": item.totalFailuresT1.toLocaleString(),

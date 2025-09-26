@@ -1,5 +1,5 @@
 // 增加矿池
-import { fetchDelete, fetchGet, fetchPost } from "@/helper/fetchHelper.ts";
+import { fetchDelete, fetchGet, fetchPost, fetchPostFile } from "@/helper/fetchHelper.ts";
 import {
   HostRecordCreate,
   HostRecordUpdate,
@@ -85,5 +85,20 @@ export const updateHostRecord = async (data: HostRecordUpdate) => {
 };
 // 删除操作日志
 export const deleteHostRecord = async (id: number) => {
-  return await fetchDelete(`hosting/record/delete/${id}`);
+  return await fetchDelete(`miningPool/deleteHostRecord/${id}`);
+};
+
+// Excel文件上传
+export const uploadMiningPoolExcel = async (file: File) => {
+  const formData = new FormData();
+  formData.append("file", file);
+
+  return await fetchPostFile("/hosting/import", formData).then((response: any) => {
+    if (!response?.success) {
+      console.log("response?.code", response?.code);
+      console.log("response?.message", response?.message);
+      throw new Error(`API error! code: ${response?.code}, message: ${response?.message}`);
+    }
+    return response;
+  });
 };

@@ -30,6 +30,27 @@ export const fetchPost = async (endpoint: string, body: any, customHeaders?: Rec
   }
 };
 
+// POST 请求
+export const fetchPostFile = async (
+  endpoint: string,
+  body: FormData,
+  customHeaders?: Record<string, string>,
+) => {
+  const headers = {
+    "Content-Type": "multipart/form-data",
+    ...customHeaders, // 合并自定义的请求头
+  };
+
+  try {
+    const response = await axiosInstance.post(endpoint, body, { headers });
+    checkSuccess(response);
+    return response;
+  } catch (error) {
+    // @ts-ignore
+    throw new Error(error.message); // 抛出错误信息
+  }
+};
+
 // DELETE 请求
 export const fetchDelete = async (endpoint: string) => {
   try {
