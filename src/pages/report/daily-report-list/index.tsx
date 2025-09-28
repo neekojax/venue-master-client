@@ -30,6 +30,7 @@ interface SubAccountStat {
   impactRatio: number;
   limitImpactRate: number;
   highTemperatureRate: number;
+  onlineRatio: number;
 }
 interface DataType {
   date: string;
@@ -44,6 +45,7 @@ interface DataType {
   impactRatio: number;
   limitImpactRate: number;
   highTemperatureRate: number;
+  onlineRatio: number;
   subAccountStats: SubAccountStat[];
 }
 
@@ -99,12 +101,21 @@ const App: React.FC = () => {
       align: "right",
       render: (value) => value.toFixed(2),
     },
+
     {
       title: "24小时有效率",
       dataIndex: "effectiveRate24h",
       key: "effectiveRate24h",
       width: 140,
       align: "right",
+      render: (value) => `${value.toFixed(2)}%`,
+    },
+    {
+      title: "在线率",
+      dataIndex: "onlineRatio",
+      key: "onlineRatio",
+      width: 140,
+      align: "center",
       render: (value) => `${value.toFixed(2)}%`,
     },
     { title: "托管台数", dataIndex: "totalMachines", key: "totalMachines", width: 105 },
@@ -193,6 +204,14 @@ const App: React.FC = () => {
       align: "right",
       render: (value: number) => `${value.toFixed(2)}%`,
       sorter: (a, b) => a.effectiveRate24h - b.effectiveRate24h,
+    },
+    {
+      title: "在线率",
+      dataIndex: "onlineRatio",
+      key: "onlineRatio",
+      width: 140,
+      align: "center",
+      render: (value) => `${value.toFixed(2)}%`,
     },
     {
       title: "托管台数",
@@ -295,6 +314,7 @@ const App: React.FC = () => {
           failures24h: venue.failures24h || 0,
           failureRate24h: venue.failureRate24h || 0,
           impactRatio: venue.impactRatio || 0,
+          onlineRatio: venue.onlineRatio || 0,
           limitImpactRate: venue.limitImpactRate || 0,
           highTemperatureRate: venue.highTemperatureRate || 0,
           subAccountStats: venue.subAccountStats || [],

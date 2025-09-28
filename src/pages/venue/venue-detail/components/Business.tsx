@@ -19,6 +19,7 @@ interface SubAccountStat {
   totalFailuresRate: number;
   failures24h: number;
   failureRate24h: number;
+  onlineRatio: number;
   impactRatio: number;
   limitImpactRate: number;
   highTemperatureRate: number;
@@ -34,6 +35,7 @@ interface DailyRecord {
   totalMachines: number;
   totalFailures: number;
   totalFailuresRate: number;
+  onlineRatio: number;
   failures24h: number;
   failureRate24h: number;
   impactRatio: number;
@@ -96,6 +98,14 @@ const BusinessReport: React.FC<BusinessReportProps> = ({ venueName }) => {
       key: "effectiveRate24h",
       width: 140,
       align: "right",
+      render: (value) => `${value.toFixed(2)}%`,
+    },
+    {
+      title: "在线率",
+      dataIndex: "onlineRatio",
+      key: "onlineRatio",
+      width: 140,
+      align: "center",
       render: (value) => `${value.toFixed(2)}%`,
     },
     { title: "托管台数", dataIndex: "totalMachines", key: "totalMachines", width: 105 },
@@ -178,6 +188,14 @@ const BusinessReport: React.FC<BusinessReportProps> = ({ venueName }) => {
       key: "effectiveRate24h",
       width: 140,
       align: "right",
+      render: (value) => `${value.toFixed(2)}%`,
+    },
+    {
+      title: "在线率",
+      dataIndex: "onlineRatio",
+      key: "onlineRatio",
+      width: 140,
+      align: "center",
       render: (value) => `${value.toFixed(2)}%`,
     },
     { title: "托管台数", dataIndex: "totalMachines", key: "totalMachines", width: 105 },
@@ -314,86 +332,7 @@ const BusinessReport: React.FC<BusinessReportProps> = ({ venueName }) => {
   };
 
   // 模拟数据用于测试展开功能
-  const mockData: DailyRecord[] = [
-    {
-      key: "mock-1",
-      date: "2025-09-27",
-      btcOutput24h: 0.6414269599999999,
-      theoreticalPower: 1661.62,
-      power24h: 1452.06,
-      effectiveRate24h: 87.39,
-      totalMachines: 12196,
-      totalFailures: 988,
-      totalFailuresRate: 8.1,
-      failures24h: 455,
-      failureRate24h: 3.73,
-      impactRatio: 12.61,
-      limitImpactRate: 0,
-      highTemperatureRate: 0,
-      subAccountStats: [
-        {
-          pool_name: "KJDGA007",
-          btcOutput24h: 0.04760381,
-          theoreticalPower: 118.44,
-          power24h: 107.58,
-          effectiveRate24h: 90.83,
-          totalMachines: 840,
-          totalFailures: 69,
-          totalFailuresRate: 8.21,
-          failures24h: 69,
-          failureRate24h: 8.21,
-          impactRatio: 9.17,
-          limitImpactRate: 0,
-          highTemperatureRate: 0,
-        },
-        {
-          pool_name: "KJDGA006",
-          btcOutput24h: 0.43150815,
-          theoreticalPower: 1134.603,
-          power24h: 977.16,
-          effectiveRate24h: 86.12,
-          totalMachines: 8359,
-          totalFailures: 644,
-          totalFailuresRate: 7.7,
-          failures24h: 111,
-          failureRate24h: 1.33,
-          impactRatio: 13.88,
-          limitImpactRate: 0,
-          highTemperatureRate: 0,
-        },
-        {
-          pool_name: "KJDGA009",
-          btcOutput24h: 0.10914907,
-          theoreticalPower: 268,
-          power24h: 247.17,
-          effectiveRate24h: 92.23,
-          totalMachines: 2000,
-          totalFailures: 146,
-          totalFailuresRate: 7.3,
-          failures24h: 146,
-          failureRate24h: 7.3,
-          impactRatio: 7.77,
-          limitImpactRate: 0,
-          highTemperatureRate: 0,
-        },
-        {
-          pool_name: "KJDGA008",
-          btcOutput24h: 0.05316593,
-          theoreticalPower: 140.577,
-          power24h: 120.15,
-          effectiveRate24h: 85.47,
-          totalMachines: 997,
-          totalFailures: 129,
-          totalFailuresRate: 12.94,
-          failures24h: 129,
-          failureRate24h: 12.94,
-          impactRatio: 14.53,
-          limitImpactRate: 0,
-          highTemperatureRate: 0,
-        },
-      ],
-    },
-  ];
+  const mockData: DailyRecord[] = [];
 
   useEffect(() => {
     fetch10EventData();

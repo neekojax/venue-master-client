@@ -16,6 +16,7 @@ import { useSelector, useSettingsStore } from "@/stores";
 import { getVenueDailyStat } from "@/pages/venue/api.tsx";
 
 interface VenueStats {
+  onlineRatio: number;
   btcOutput24h: number;
   theoreticalPower: number;
   power24h: number;
