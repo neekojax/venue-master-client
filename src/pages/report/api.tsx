@@ -24,6 +24,6 @@ export const fetchWeeklyReport = async (poolType: string, start: string, end: st
 };
 
 // /venue/getAllDailyStat/:venueID"
-export const fetchAllDailyStat = async (poolType: string, venueID: number) => {
-  return await fetchGet(`/venue/getAllDailyStat/${poolType}/${venueID}`);
+export const fetchAllDailyStat = async (poolType: string, venueID: number, start: string, end: string) => {
+  return await fetchGet(`/venue/getAllDailyStat/${poolType}/${venueID}/${start}/${end}`);
 };
