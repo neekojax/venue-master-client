@@ -8,12 +8,38 @@ import { getTimeDifference } from "@/utils/date";
 
 import { getLast10DaysDailyStat, getLast10Event } from "@/pages/venue/api.tsx";
 
-interface DailyRecord {
-  key: string;
-  date: string;
-  revenue: number;
-  orders: number;
+interface SubAccountStat {
+  pool_name: string;
+  btcOutput24h: number;
+  theoreticalPower: number;
+  power24h: number;
+  effectiveRate24h: number;
   totalMachines: number;
+  totalFailures: number;
+  totalFailuresRate: number;
+  failures24h: number;
+  failureRate24h: number;
+  impactRatio: number;
+  limitImpactRate: number;
+  highTemperatureRate: number;
+}
+
+interface DailyRecord {
+  key?: string;
+  date: string;
+  btcOutput24h: number;
+  theoreticalPower: number;
+  power24h: number;
+  effectiveRate24h: number;
+  totalMachines: number;
+  totalFailures: number;
+  totalFailuresRate: number;
+  failures24h: number;
+  failureRate24h: number;
+  impactRatio: number;
+  limitImpactRate: number;
+  highTemperatureRate: number;
+  subAccountStats: SubAccountStat[];
 }
 
 interface AbnormalRecord {
@@ -38,6 +64,89 @@ const BusinessReport: React.FC<BusinessReportProps> = ({ venueName }) => {
   const params = useParams<{ venueId: string }>();
   const venueId = params.venueId!;
 
+  // 子账户统计表格列配置
+  const subAccountColumns: ColumnsType<SubAccountStat> = [
+    { title: "矿池名称", dataIndex: "pool_name", key: "pool_name", fixed: "left", width: 120 },
+    {
+      title: "24小时产出(BTC)",
+      dataIndex: "btcOutput24h",
+      key: "btcOutput24h",
+      width: 165,
+      render: (value) => value.toFixed(8),
+    },
+    {
+      title: "理论算力(P)",
+      dataIndex: "theoreticalPower",
+      width: 120,
+      key: "theoreticalPower",
+      align: "right",
+      render: (value) => value.toFixed(2),
+    },
+    {
+      title: "24小时算力(P)",
+      dataIndex: "power24h",
+      key: "power24h",
+      width: 145,
+      align: "right",
+      render: (value) => value.toFixed(2),
+    },
+    {
+      title: "24小时有效率",
+      dataIndex: "effectiveRate24h",
+      key: "effectiveRate24h",
+      width: 140,
+      align: "right",
+      render: (value) => `${value.toFixed(2)}%`,
+    },
+    { title: "托管台数", dataIndex: "totalMachines", key: "totalMachines", width: 105 },
+    { title: "总故障数", dataIndex: "totalFailures", key: "totalFailures", width: 120 },
+    {
+      title: "总故障率",
+      dataIndex: "totalFailuresRate",
+      key: "totalFailuresRate",
+      width: 120,
+      render: (value) => `${value.toFixed(2)}%`,
+    },
+    {
+      title: "24小时故障数",
+      dataIndex: "failures24h",
+      key: "failures24h",
+      width: 138,
+      align: "right",
+      render: (value) => value.toLocaleString(),
+    },
+    {
+      title: "24小时故障率",
+      dataIndex: "failureRate24h",
+      key: "failureRate24h",
+      width: 138,
+      render: (value) => `${value.toFixed(2)}%`,
+    },
+    {
+      title: "影响占比",
+      dataIndex: "impactRatio",
+      key: "impactRatio",
+      width: 105,
+      render: (value) => `${value.toFixed(2)}%`,
+    },
+    {
+      title: "限电影响",
+      dataIndex: "limitImpactRate",
+      key: "limitImpactRate",
+      width: 140,
+      align: "right",
+      render: (value) => `${value.toFixed(2)}%`,
+    },
+    {
+      title: "高温影响",
+      dataIndex: "highTemperatureRate",
+      key: "highTemperatureRate",
+      width: 140,
+      align: "right",
+      render: (value) => `${value.toFixed(2)}%`,
+    },
+  ];
+
   const dailyColumns: ColumnsType<DailyRecord> = [
     { title: "日期", dataIndex: "date", key: "date", fixed: "left", width: 120 },
     {
@@ -55,7 +164,6 @@ const BusinessReport: React.FC<BusinessReportProps> = ({ venueName }) => {
       align: "right",
       render: (value) => value.toFixed(2),
     },
-    // { title: "24小时算力", dataIndex: "power24h", key: "power24h", width: 180 },
     {
       title: "24小时算力(P)",
       dataIndex: "power24h",
@@ -72,22 +180,14 @@ const BusinessReport: React.FC<BusinessReportProps> = ({ venueName }) => {
       align: "right",
       render: (value) => `${value.toFixed(2)}%`,
     },
-    // { title: "理论算力", dataIndex: "effectiveRate24h", key: "effectiveRate24h", width: 180 },
     { title: "托管台数", dataIndex: "totalMachines", key: "totalMachines", width: 105 },
     { title: "总故障数", dataIndex: "totalFailures", key: "totalFailures", width: 120 },
     {
       title: "总故障率",
-      dataIndex: "totalFailures",
-      key: "totalFailures",
+      dataIndex: "totalFailuresRate",
+      key: "totalFailuresRate",
       width: 120,
-      render: (value, record: { totalMachines: number }) => ({
-        children: `${((value / record.totalMachines) * 100).toFixed(2)}%`,
-        props: {
-          style: {
-            color: (value / record.totalMachines) * 100 > 20 ? "#ff4d4f" : "inherit",
-          },
-        },
-      }),
+      render: (value) => `${value.toFixed(2)}%`,
     },
     {
       title: "24小时故障数",
@@ -96,22 +196,13 @@ const BusinessReport: React.FC<BusinessReportProps> = ({ venueName }) => {
       width: 138,
       align: "right",
       render: (value) => value.toLocaleString(),
-      // sorter: (a, b) => a.failures24h - b.failures24h,
     },
     {
       title: "24小时故障率",
-      dataIndex: "failures24h",
-      key: "failures24h",
+      dataIndex: "failureRate24h",
+      key: "failureRate24h",
       width: 138,
-      render: (value, record: { totalMachines: number }) => ({
-        children: `${((value / record.totalMachines) * 100).toFixed(2)}%`,
-        props: {
-          style: {
-            color: (value / record.totalMachines) * 100 > 20 ? "#ff4d4f" : "inherit",
-          },
-        },
-      }),
-      // sorter: (a, b) => a.failureRate24h - b.failureRate24h,
+      render: (value) => `${value.toFixed(2)}%`,
     },
     {
       title: "影响占比",
@@ -126,9 +217,7 @@ const BusinessReport: React.FC<BusinessReportProps> = ({ venueName }) => {
       key: "limitImpactRate",
       width: 140,
       align: "right",
-      // render: (value) => value.toFixed(8),
       render: (value) => `${value.toFixed(2)}%`,
-      // sorter: (a, b) => a.limitImpactRate - b.limitImpactRate,
     },
     {
       title: "高温影响",
@@ -210,7 +299,12 @@ const BusinessReport: React.FC<BusinessReportProps> = ({ venueName }) => {
     try {
       const response = await getLast10DaysDailyStat(poolType, Number(venueId));
       // console.log(response)
-      setDailyData(response.data);
+      // 为每条记录添加key属性
+      const processedData = response.data.map((item: DailyRecord, index: number) => ({
+        ...item,
+        key: item.key || `${item.date}-${index}`,
+      }));
+      setDailyData(processedData);
 
       // 处理响应数据
     } catch (error) {
@@ -219,9 +313,93 @@ const BusinessReport: React.FC<BusinessReportProps> = ({ venueName }) => {
     }
   };
 
+  // 模拟数据用于测试展开功能
+  const mockData: DailyRecord[] = [
+    {
+      key: "mock-1",
+      date: "2025-09-27",
+      btcOutput24h: 0.6414269599999999,
+      theoreticalPower: 1661.62,
+      power24h: 1452.06,
+      effectiveRate24h: 87.39,
+      totalMachines: 12196,
+      totalFailures: 988,
+      totalFailuresRate: 8.1,
+      failures24h: 455,
+      failureRate24h: 3.73,
+      impactRatio: 12.61,
+      limitImpactRate: 0,
+      highTemperatureRate: 0,
+      subAccountStats: [
+        {
+          pool_name: "KJDGA007",
+          btcOutput24h: 0.04760381,
+          theoreticalPower: 118.44,
+          power24h: 107.58,
+          effectiveRate24h: 90.83,
+          totalMachines: 840,
+          totalFailures: 69,
+          totalFailuresRate: 8.21,
+          failures24h: 69,
+          failureRate24h: 8.21,
+          impactRatio: 9.17,
+          limitImpactRate: 0,
+          highTemperatureRate: 0,
+        },
+        {
+          pool_name: "KJDGA006",
+          btcOutput24h: 0.43150815,
+          theoreticalPower: 1134.603,
+          power24h: 977.16,
+          effectiveRate24h: 86.12,
+          totalMachines: 8359,
+          totalFailures: 644,
+          totalFailuresRate: 7.7,
+          failures24h: 111,
+          failureRate24h: 1.33,
+          impactRatio: 13.88,
+          limitImpactRate: 0,
+          highTemperatureRate: 0,
+        },
+        {
+          pool_name: "KJDGA009",
+          btcOutput24h: 0.10914907,
+          theoreticalPower: 268,
+          power24h: 247.17,
+          effectiveRate24h: 92.23,
+          totalMachines: 2000,
+          totalFailures: 146,
+          totalFailuresRate: 7.3,
+          failures24h: 146,
+          failureRate24h: 7.3,
+          impactRatio: 7.77,
+          limitImpactRate: 0,
+          highTemperatureRate: 0,
+        },
+        {
+          pool_name: "KJDGA008",
+          btcOutput24h: 0.05316593,
+          theoreticalPower: 140.577,
+          power24h: 120.15,
+          effectiveRate24h: 85.47,
+          totalMachines: 997,
+          totalFailures: 129,
+          totalFailuresRate: 12.94,
+          failures24h: 129,
+          failureRate24h: 12.94,
+          impactRatio: 14.53,
+          limitImpactRate: 0,
+          highTemperatureRate: 0,
+        },
+      ],
+    },
+  ];
+
   useEffect(() => {
     fetch10EventData();
     fetch10DailyData();
+    // 临时使用模拟数据进行测试
+    setDailyData(mockData);
   }, [venueId]);
 
   return (
@@ -255,7 +433,23 @@ const BusinessReport: React.FC<BusinessReportProps> = ({ venueName }) => {
             pagination={false}
             scroll={{ x: 1500 }}
             sticky={true}
-            rowKey="key"
+            rowKey={(record) => record.key || record.date}
+            expandable={{
+              expandedRowRender: (record) => (
+                <div style={{ margin: 0 }}>
+                  <h4 style={{ marginBottom: 16 }}>子账户统计详情</h4>
+                  <Table<SubAccountStat>
+                    columns={subAccountColumns}
+                    dataSource={record.subAccountStats}
+                    pagination={false}
+                    scroll={{ x: 1500 }}
+                    rowKey="pool_name"
+                    size="small"
+                  />
+                </div>
+              ),
+              rowExpandable: (record) => record.subAccountStats && record.subAccountStats.length > 0,
+            }}
           />
         ) : (
           <Table<AbnormalRecord>

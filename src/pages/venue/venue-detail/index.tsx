@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { CalendarOutlined, CloudOutlined, EnvironmentOutlined, ThunderboltOutlined } from "@ant-design/icons";
+import { Select } from "antd";
 import BasicData from "./components/BasicData";
 import BusinessReport from "./components/Business";
 import ChartFail from "./components/ChartFail";
@@ -12,6 +13,7 @@ import { useSelector, useSettingsStore } from "@/stores";
 import "./index.css";
 
 import { getVenueBasicInfo } from "@/pages/venue/api.tsx";
+import { useVenueList } from "@/pages/venue/hook/hook";
 
 // type ChartConfig = {
 //   id: string;
@@ -38,7 +40,11 @@ const VenueDetail: React.FC = () => {
   const { poolType } = useSettingsStore(useSelector(["poolType"]));
   const params = useParams<{ venueId: string }>();
   const venueId = params.venueId!;
+  const navigate = useNavigate();
   const [basicInfo, setBasicInfo] = useState<VenueData | null>(null);
+
+  // 获取场地列表数据
+  const { data: venueListData } = useVenueList(poolType);
 
   // 获取数据
   const fetchData = async () => {
@@ -65,20 +71,44 @@ const VenueDetail: React.FC = () => {
     <div className=" mx-auto  min-h-screen">
       {/* Header */}
       <header className="mb-8">
-        <div className="flex items-center gap-4 mb-3">
-          <h1 className="text-3xl font-bold text-gray-900">{basicInfo?.venue_name}</h1>
-          <div className="flex items-center gap-2 text-sm text-gray-500">
-            <span className="px-2 py-1 bg-gray-100 rounded-md">
-              矿工号:{" "}
-              {basicInfo?.sub_accounts?.map((item, index) => (
-                <span key={item.pool_id}>
-                  <a href={item.pool_link} target="_blank" rel="noreferrer">
-                    {item.pool_name}
-                  </a>
-                  {index !== basicInfo.sub_accounts.length - 1 && " "}
-                </span>
-              ))}
-            </span>
+        <div className="flex items-center gap-4 mb-3 sm:justify-between">
+          <div>
+            <h1 className="text-3xl font-bold text-gray-900">{basicInfo?.venue_name}</h1>
+            <div className="flex items-center gap-2 text-sm text-gray-500">
+              <span className="px-2 py-1 bg-gray-100 rounded-md">
+                矿工号:{" "}
+                {basicInfo?.sub_accounts?.map((item, index) => (
+                  <span key={item.pool_id}>
+                    <a href={item.pool_link} target="_blank" rel="noreferrer">
+                      {item.pool_name}
+                    </a>
+                    {index !== basicInfo.sub_accounts.length - 1 && " "}
+                  </span>
+                ))}
+              </span>
+            </div>
+          </div>
+          <div>
+            <Select
+              placeholder="选择场地"
+              style={{ width: 200 }}
+              value={venueId}
+              showSearch
+              filterOption={(input, option) =>
+                String(option?.label ?? "")
+                  .toLowerCase()
+                  .includes(input.toLowerCase())
+              }
+              onChange={(value) => {
+                navigate(`/venue/detail/${value}`);
+              }}
+              options={
+                venueListData?.data?.map((venue: any) => ({
+                  label: venue.venue_name,
+                  value: venue.id.toString(),
+                })) || []
+              }
+            />
           </div>
         </div>
         <div className="flex flex-wrap gap-4 text-sm">
@@ -104,10 +134,8 @@ const VenueDetail: React.FC = () => {
           </div>
         </div>
       </header>
-
       <BasicData />
       {/* 图表区域 */}
-
       <div className="grid grid-cols-2 gap-4 mb-8">
         <div className="bg-white p-4 rounded-lg shadow-sm">
           <ChartSuanli></ChartSuanli>
