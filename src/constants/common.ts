@@ -6,6 +6,7 @@ export const ROUTE_PATHS = {
   // base: "/base",
   userManagement: "/user-management",
   echartsDemo: "/echarts-demo",
+  pieChartDemo: "/pie-chart-demo",
   custodyMenu: "/custody-menu",
   setting: "/custody-menu/setting",
   statistics: "/custody-menu/statistics",

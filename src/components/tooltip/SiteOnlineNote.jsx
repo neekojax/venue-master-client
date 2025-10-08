@@ -23,7 +23,7 @@ const FormulaTooltip = () => {
         >
             <Text style={{ cursor: 'help' }}>
                 {/* 在线率公式 */}
-                在线台数
+                在架台数
                 <InfoCircleOutlined style={{
                     marginLeft: 4,
                     color: "#1890ff",

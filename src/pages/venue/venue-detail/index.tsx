@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { CalendarOutlined, CloudOutlined, EnvironmentOutlined, ThunderboltOutlined } from "@ant-design/icons";
 import { Select } from "antd";
-import BasicData from "./components/BasicData";
+import BasicDataChart from "./components/BasicDataChart";
 import BusinessReport from "./components/Business";
 import ChartFail from "./components/ChartFail";
 import ChartHighTemperatureImpact from "./components/ChartHighTemperatureImpact";
@@ -39,6 +39,7 @@ interface VenueData {
 const VenueDetail: React.FC = () => {
   const { poolType } = useSettingsStore(useSelector(["poolType"]));
   const params = useParams<{ venueId: string }>();
+  const [loading, setLoading] = useState(true);
   const venueId = params.venueId!;
   const navigate = useNavigate();
   const [basicInfo, setBasicInfo] = useState<VenueData | null>(null);
@@ -57,10 +58,13 @@ const VenueDetail: React.FC = () => {
     } catch (error) {
       // 处理错误
       console.log(error);
+    } finally {
+      setLoading(false);
     }
   };
 
   useEffect(() => {
+    setLoading(true);
     fetchData();
   }, [venueId]);
 
@@ -134,7 +138,7 @@ const VenueDetail: React.FC = () => {
           </div>
         </div>
       </header>
-      <BasicData />
+      <BasicDataChart data={basicInfo} loading={loading} />
       {/* 图表区域 */}
       <div className="grid grid-cols-2 gap-4 mb-8">
         <div className="bg-white p-4 rounded-lg shadow-sm">
