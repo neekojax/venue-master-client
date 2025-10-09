@@ -25,26 +25,15 @@ import { getVenueDailyStat } from "@/pages/venue/api.tsx";
 const App: React.FC<{ data: any; loading: boolean }> = ({ data, loading }) => {
   const { poolType } = useSettingsStore(useSelector(["poolType"]));
   const { venueId } = useParams<{ venueId: string }>();
-
-  console.log("5656", poolType, venueId);
-
   const [stats, setStats] = useState<VenueStats | null>(null);
-  // const [qitaRate, setQitaRate] = useState<string>("");
-
   // 获取昨日的日期
   const yesterday = new Date(Date.now() - 864e5);
   const formattedDate = yesterday.toISOString().split("T")[0];
-
   // 获取数据
   const fetchData = async () => {
     try {
       const response = await getVenueDailyStat(poolType, Number(venueId), formattedDate);
-      // console.log(response)
       setStats(response.data);
-      // const { failureRate24h, impactRatio, limitImpactRate, highTemperatureRate } = response.data;
-      // const qitaRate_num = impactRatio - failureRate24h - limitImpactRate - highTemperatureRate;
-      // setQitaRate(qitaRate_num.toFixed(2));
-
       // 处理响应数据
     } catch (error) {
       // 处理错误
@@ -57,7 +46,6 @@ const App: React.FC<{ data: any; loading: boolean }> = ({ data, loading }) => {
     // setStats(data);
   }, [venueId]);
   // 获取当前日期
-
   const chartRef = useRef<HTMLDivElement | null>(null);
   const chartInstance = useRef<EChartsType | null>(null);
 
@@ -71,9 +59,16 @@ const App: React.FC<{ data: any; loading: boolean }> = ({ data, loading }) => {
       chartInstance.current = echarts.init(chartRef.current);
 
       // const shangjia = data.totalEstimateOnRackMachines; // 估计在线机器数
-      const shangjia = stats.onRackMachines || 0; // 故障机器数
-      const zaixian = data.onlineMachines || 0; // 估计离线机器数
+      const shangjia = stats.onRackMachines || 0; // 在架机器数
+      const zaixian = stats.onlineMachines || 0; // 在线机器数
       const total = stats.totalMachines || 0; // 总机器数
+
+      // 调试信息
+      console.log("图表数据:", { total, shangjia, zaixian, stats });
+
+      // 数据验证
+      const validZaixian = Math.min(zaixian, total); // 确保在线数不超过总数
+      const validShangjia = Math.min(shangjia, total); // 确保在架数不超过总数
 
       const option = {
         tooltip: { trigger: "item" },
@@ -98,18 +93,26 @@ const App: React.FC<{ data: any; loading: boolean }> = ({ data, loading }) => {
             radius: ["50%", "70%"],
             label: { show: false },
             data: [
-              { value: shangjia, name: "在架数", itemStyle: { color: "#1890ff" } },
-              { value: total - shangjia, name: "非在架数", itemStyle: { color: "transparent" } },
+              { value: validShangjia, name: "在架数", itemStyle: { color: "#1890ff" } },
+              {
+                value: Math.max(0, total - validShangjia),
+                name: "非在架数",
+                itemStyle: { color: "transparent" },
+              },
             ],
           },
           {
             name: "在线数",
             type: "pie",
-            radius: ["30%", "45%"],
+            radius: ["25%", "45%"],
             label: { show: false },
             data: [
-              { value: zaixian, name: "在线", itemStyle: { color: "#52c41a" } },
-              { value: shangjia - zaixian, name: "不在线", itemStyle: { color: "transparent" } },
+              { value: validZaixian, name: "在线", itemStyle: { color: "#52c41a" } },
+              {
+                value: Math.max(0, total - validZaixian),
+                name: "不在线",
+                itemStyle: { color: "transparent" },
+              },
             ],
           },
         ],
@@ -317,7 +320,7 @@ const App: React.FC<{ data: any; loading: boolean }> = ({ data, loading }) => {
                   </Col>
                   <Col span={12} style={{ textAlign: "right" }}>
                     <CloseCircleOutlined style={{ color: "#ff4d4f", marginRight: 8 }} />
-                    总故障率：{stats?.failureRate24h.toFixed(2)}%
+                    总故障率：{stats?.totalFailuresRate.toFixed(2)}%
                   </Col>
                   <Col span={12} style={{ textAlign: "left" }}>
                     <ThunderboltOutlined style={{ color: "#faad14", marginRight: 8 }} />

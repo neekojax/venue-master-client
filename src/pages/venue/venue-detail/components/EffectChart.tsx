@@ -48,8 +48,8 @@ const EffectChart: React.FC<EffectChartProps> = ({ data }) => {
         {
           name: "影响占比",
           type: "pie",
-          top: "15%",
-          radius: ["55%", "95%"],
+          top: "20%",
+          radius: ["70%", "100%"],
           avoidLabelOverlap: false,
           itemStyle: {
             borderRadius: 10,
@@ -73,14 +73,14 @@ const EffectChart: React.FC<EffectChartProps> = ({ data }) => {
           data: [
             { value: data.highTemperatureRate || 0, name: "高温占比" },
             { value: data.limitImpactRate || 0, name: "限电占比" },
-            { value: data.failureRate24h || 0, name: "故障率" },
+            { value: data.totalFailuresRate || 0, name: "故障率" },
             {
               value: Math.max(
                 0,
                 (data.impactRatio || 0) -
                   (data.limitImpactRate || 0) -
                   (data.highTemperatureRate || 0) -
-                  (data.failureRate24h || 0),
+                  (data.totalFailuresRate || 0),
               ),
               name: "其他占比",
             },
