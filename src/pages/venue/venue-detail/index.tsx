@@ -8,11 +8,12 @@ import ChartFail from "./components/ChartFail";
 import ChartHighTemperatureImpact from "./components/ChartHighTemperatureImpact";
 import ChartLimitImpact from "./components/ChartLimitImpact";
 import ChartSuanli from "./components/ChartSuanli";
+import type { VenueStats } from "./types";
 import { useSelector, useSettingsStore } from "@/stores";
 
 import "./index.css";
 
-import { getVenueBasicInfo } from "@/pages/venue/api.tsx";
+import { getVenueBasicInfo, getVenueDailyStat } from "@/pages/venue/api.tsx";
 import { useVenueList } from "@/pages/venue/hook/hook";
 
 // type ChartConfig = {
@@ -40,6 +41,7 @@ const VenueDetail: React.FC = () => {
   const { poolType } = useSettingsStore(useSelector(["poolType"]));
   const params = useParams<{ venueId: string }>();
   const [loading, setLoading] = useState(true);
+  const [stats, setStats] = useState<VenueStats | null>(null);
   const venueId = params.venueId!;
   const navigate = useNavigate();
   const [basicInfo, setBasicInfo] = useState<VenueData | null>(null);
@@ -63,9 +65,26 @@ const VenueDetail: React.FC = () => {
     }
   };
 
+  // 获取数据
+  const fetchDailyStat = async () => {
+    try {
+      const response = await getVenueDailyStat(poolType, Number(venueId), formattedDate);
+      if (response.data) {
+        console.log("response.data", response.data);
+        setStats(response.data);
+        // 不在这里直接调用 initChart，而是通过 useEffect 监听 stats 变化
+      }
+      // 处理响应数据
+    } catch (error) {
+      // 处理错误
+      console.log("error", error);
+    }
+  };
+
   useEffect(() => {
     setLoading(true);
     fetchData();
+    fetchDailyStat();
   }, [venueId]);
 
   const yesterday = new Date(Date.now() - 864e5);
@@ -138,7 +157,7 @@ const VenueDetail: React.FC = () => {
           </div>
         </div>
       </header>
-      <BasicDataChart data={basicInfo} loading={loading} />
+      {stats && <BasicDataChart stats={stats} loading={loading} />}
       {/* 图表区域 */}
       <div className="grid grid-cols-2 gap-4 mb-8">
         <div className="bg-white p-4 rounded-lg shadow-sm">

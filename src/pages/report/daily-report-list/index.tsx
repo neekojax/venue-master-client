@@ -288,6 +288,7 @@ const App: React.FC = () => {
 
   const fetchReportData = async () => {
     setLoading(true); // 👈 开始加载
+
     try {
       // 检查 dateRange 是否存在
       if (!dateRange) {
@@ -321,13 +322,13 @@ const App: React.FC = () => {
         }));
         // setData(formattedData);
         // 应用默认的日期筛选（最近1个月）
-        const defaultStart = dayjs().subtract(1, "months");
-        const defaultEnd = dayjs();
-        const defaultFiltered = formattedData.filter((item) => {
-          const d = dayjs(item.date);
-          return d.isValid() && d.isSameOrAfter(defaultStart, "day") && d.isSameOrBefore(defaultEnd, "day");
-        });
-        setFilteredData(defaultFiltered);
+        // const defaultStart = dayjs().subtract(1, "months");
+        // const defaultEnd = dayjs();
+        // const defaultFiltered = formattedData.filter((item) => {
+        //   const d = dayjs(item.date);
+        //   return d.isValid() && d.isSameOrAfter(defaultStart, "day") && d.isSameOrBefore(defaultEnd, "day");
+        // });
+        setFilteredData(formattedData);
       } else {
         console.error("API 返回无效:", reportData);
       }
@@ -359,28 +360,182 @@ const App: React.FC = () => {
     setDateRange(dates as [dayjs.Dayjs, dayjs.Dayjs] | null);
     console.log(dateRange, dates);
     fetchReportData();
-    // if (dates) {
-    //   const [start, end] = dates;
-    //   // console.log(start, end)
-    //   const filtered = data.filter((item) => {
-    //     const d = dayjs(item.date);
-    //     // console.log(d.isValid())
-    //     return d.isValid() && d.isSameOrAfter(start, "day") && d.isSameOrBefore(end, "day");
-    //   });
-    //   fetchReportData();
-    //   // setFilteredData(filtered);
-    // } else {
-    //   fetchReportData();
-    //   // setFilteredData(data);
-    // }
   };
 
-  // 导出 CSV
+  // 导出 Excel
   const exportToCSV = () => {
     if (!filteredData.length) return;
-    const worksheet = XLSX.utils.json_to_sheet(filteredData);
+
+    // 定义中文列名映射
+    const mainDataHeaders = {
+      date: "日期",
+      btcOutput24h: "24小时产出(BTC)",
+      theoreticalPower: "理论算力(P)",
+      power24h: "24小时算力(P)",
+      effectiveRate24h: "24小时有效率",
+      totalMachines: "托管台数",
+      onlineRatio: "在线率",
+      totalFailures: "总故障数",
+      failures24h: "24小时故障数",
+      failureRate24h: "24小时故障率",
+      impactRatio: "影响占比",
+      limitImpactRate: "限电影响",
+      highTemperatureRate: "高温影响",
+    };
+
+    const subAccountHeaders = {
+      date: "日期",
+      pool_name: "矿池名称",
+      btcOutput24h: "24小时产出(BTC)",
+      theoreticalPower: "理论算力(P)",
+      power24h: "24小时算力(P)",
+      effectiveRate24h: "24小时有效率",
+      totalMachines: "托管台数",
+      onlineRatio: "在线率",
+      totalFailures: "总故障数",
+      totalFailuresRate: "总故障率",
+      failures24h: "24小时故障数",
+      failureRate24h: "24小时故障率",
+      impactRatio: "影响占比",
+      limitImpactRate: "限电影响",
+      highTemperatureRate: "高温影响",
+    };
+
+    // 准备主数据（排除subAccountStats字段并转换为中文列名）
+    const mainData = filteredData.map(({ subAccountStats, ...rest }) => {
+      console.log("subAccountStats", subAccountStats);
+      const translatedData: any = {};
+      Object.keys(rest).forEach((key) => {
+        const chineseKey = mainDataHeaders[key as keyof typeof mainDataHeaders] || key;
+        let value = (rest as any)[key];
+        // 为包含rate、Rate、ratio、Ratio的字段添加百分号
+        if (key.toLowerCase().includes("rate") || key.toLowerCase().includes("ratio")) {
+          value = typeof value === "number" ? `${value.toFixed(2)}%` : value;
+        }
+        translatedData[chineseKey] = value;
+      });
+      return translatedData;
+    });
+
+    // 准备子账户数据（展开所有子账户数据并添加日期信息，转换为中文列名）
+    const subAccountData: any[] = [];
+    filteredData.forEach((item) => {
+      item.subAccountStats.forEach((subAccount) => {
+        const translatedSubAccount: any = {};
+        // 添加日期
+        translatedSubAccount[subAccountHeaders.date] = item.date;
+        // 转换其他字段
+        Object.keys(subAccount).forEach((key) => {
+          const chineseKey = subAccountHeaders[key as keyof typeof subAccountHeaders] || key;
+          let value = (subAccount as any)[key];
+          // 为包含rate、Rate、ratio、Ratio的字段添加百分号
+          console.log("key.toLowerCase()", key.toLowerCase());
+          if (key.toLowerCase().includes("rate") || key.toLowerCase().includes("ratio")) {
+            value = typeof value === "number" ? `${value.toFixed(2)}%` : value;
+          }
+          translatedSubAccount[chineseKey] = value;
+        });
+        subAccountData.push(translatedSubAccount);
+      });
+    });
+
+    // 创建工作簿
     const workbook = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(workbook, worksheet, "日报数据");
+
+    // 设置样式函数
+    const setWorksheetStyle = (worksheet: any, headers: string[]) => {
+      // 设置列宽
+      const colWidths = headers.map(() => ({ wch: 15 })); // 统一设置列宽为15字符
+      worksheet["!cols"] = colWidths;
+
+      // 获取工作表范围
+      const range = XLSX.utils.decode_range(worksheet["!ref"] || "A1");
+
+      // 设置表头样式
+      for (let col = 0; col <= range.e.c; col++) {
+        const cellAddress = XLSX.utils.encode_cell({ r: 0, c: col });
+        if (!worksheet[cellAddress]) {
+          worksheet[cellAddress] = { v: "", t: "s" };
+        }
+
+        worksheet[cellAddress].s = {
+          font: {
+            name: "微软雅黑",
+            sz: 12,
+            bold: true,
+            color: { rgb: "FFFFFF" },
+          },
+          fill: {
+            fgColor: { rgb: "4472C4" },
+          },
+          alignment: {
+            horizontal: "center",
+            vertical: "center",
+          },
+          border: {
+            top: { style: "thin", color: { rgb: "D4D4D4" } },
+            bottom: { style: "thin", color: { rgb: "D4D4D4" } },
+            left: { style: "thin", color: { rgb: "D4D4D4" } },
+            right: { style: "thin", color: { rgb: "D4D4D4" } },
+          },
+        };
+      }
+
+      // 设置数据行样式
+      for (let row = 1; row <= range.e.r; row++) {
+        for (let col = 0; col <= range.e.c; col++) {
+          const cellAddress = XLSX.utils.encode_cell({ r: row, c: col });
+          if (!worksheet[cellAddress]) {
+            worksheet[cellAddress] = { v: "", t: "s" };
+          }
+
+          worksheet[cellAddress].s = {
+            font: {
+              name: "微软雅黑",
+              sz: 10,
+            },
+            alignment: {
+              horizontal: "left",
+              vertical: "center",
+            },
+            border: {
+              top: { style: "thin", color: { rgb: "E0E0E0" } },
+              bottom: { style: "thin", color: { rgb: "E0E0E0" } },
+              left: { style: "thin", color: { rgb: "E0E0E0" } },
+              right: { style: "thin", color: { rgb: "E0E0E0" } },
+            },
+            fill: {
+              fgColor: { rgb: row % 2 === 0 ? "F8F9FA" : "FFFFFF" },
+            },
+          };
+        }
+      }
+
+      // 设置行高
+      const rowHeights = [];
+      rowHeights[0] = { hpt: 25 }; // 表头行高
+      for (let i = 1; i <= range.e.r; i++) {
+        rowHeights[i] = { hpt: 20 }; // 数据行高
+      }
+      worksheet["!rows"] = rowHeights;
+
+      // 设置冻结窗格 - 固定表头
+      worksheet["!freeze"] = { xSplit: 0, ySplit: 1, topLeftCell: "A2" };
+    };
+
+    // 添加主数据sheet
+    const mainWorksheet = XLSX.utils.json_to_sheet(mainData);
+    const mainHeaderKeys = Object.keys(mainData[0] || {});
+    setWorksheetStyle(mainWorksheet, mainHeaderKeys);
+    XLSX.utils.book_append_sheet(workbook, mainWorksheet, "日报汇总数据");
+
+    // 添加子账户数据sheet
+    const subAccountWorksheet = XLSX.utils.json_to_sheet(subAccountData);
+    const subAccountHeaderKeys = Object.keys(subAccountData[0] || {});
+    setWorksheetStyle(subAccountWorksheet, subAccountHeaderKeys);
+    XLSX.utils.book_append_sheet(workbook, subAccountWorksheet, "子账户详细数据");
+
+    // 导出文件
     XLSX.writeFile(workbook, "日报数据.xlsx");
   };
 
@@ -400,7 +555,17 @@ const App: React.FC = () => {
         }`}
       >
         <div className="mb-6 flex items-center justify-between gap-4">
-          <RangePicker onChange={onDateChange} defaultValue={[dayjs().subtract(1, "months"), dayjs()]} />
+          <RangePicker
+            onChange={onDateChange}
+            defaultValue={[dayjs().subtract(1, "months"), dayjs()]}
+            disabledDate={(current, { from }) => {
+              if (!from) return false;
+              // 限制最大选择范围为2个月
+              const maxRange = 2;
+              const diffMonths = Math.abs(current.diff(from, "month", true));
+              return diffMonths > maxRange;
+            }}
+          />
           <Button
             type="primary"
             icon={<DownloadOutlined />}

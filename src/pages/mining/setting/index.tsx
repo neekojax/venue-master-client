@@ -94,6 +94,7 @@ export default function MiningSettingPage() {
   const [isLoadingNewPool, setIsLoadingNewPool] = useState(false);
 
   const [searchTerm, setSearchTerm] = useState(""); // 新增搜索状态;
+  const [statusFilter, setStatusFilter] = useState<number | null>(null); // 状态筛选
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [excelUploadModalVisible, setExcelUploadModalVisible] = useState(false);
@@ -224,10 +225,8 @@ export default function MiningSettingPage() {
           // 根据 observer_link 内容返回不同的图标
           if (link.includes("antpool")) {
             return <FaAdn style={{ color: "green", fontSize: 16 }} />;
-            // return <DatabaseOutlined style={{ color: "green", fontSize: 16 }} />;
           } else if (link.includes("f2pool")) {
             return <FaFish style={{ color: "orange", fontSize: 16 }} />;
-            // return <CloudOutlined style={{ color: "orange", fontSize: 16 }} />;
           } else {
             return <span>{record.serialNumber}</span>; // 如果没有匹配，则返回序号
           }
@@ -375,11 +374,6 @@ export default function MiningSettingPage() {
         dataIndex: "status",
         key: "status",
         width: 75,
-        filters: [
-          { text: "活跃", value: 1 },
-          { text: "暂停", value: 0 },
-        ],
-        onFilter: (value: any, record: { status: number }) => record.status === value,
         render: (_text: any, record: { status: unknown }) => <StatusColumn status={record.status} />,
       },
       {
@@ -585,6 +579,13 @@ export default function MiningSettingPage() {
     setSearchTerm(e.target.value);
   };
 
+  // 处理状态筛选变化
+  const handleStatusFilterChange = (value: number | null) => {
+    setStatusFilter(value);
+    // 重置分页到第一页（如果使用了分页组件的话）
+    // 这里可以添加重置分页的逻辑
+  };
+
   // Excel上传处理函数
   const handleExcelUpload = async (file: File) => {
     // try {
@@ -642,7 +643,10 @@ export default function MiningSettingPage() {
       // 2️⃣ 收藏过滤
       const matchesCollection = !showCollectionOnly || item.collection === 1;
 
-      return matchesSearch && matchesCollection;
+      // 3️⃣ 状态过滤
+      const matchesStatus = statusFilter === null || item.status === statusFilter;
+
+      return matchesSearch && matchesCollection && matchesStatus;
     })
     .sort((a: any, b: any) => {
       const nameA = a.venue_name.toLowerCase();
@@ -697,6 +701,17 @@ export default function MiningSettingPage() {
                 style={{ width: 250, marginRight: "15px" }} // 设定宽度
                 className="text-sm"
               />
+              <Select
+                size="middle"
+                placeholder="筛选状态"
+                allowClear
+                value={statusFilter}
+                onChange={handleStatusFilterChange}
+                style={{ width: 80, marginRight: "15px" }}
+              >
+                <Option value={1}>活跃</Option>
+                <Option value={0}>暂停</Option>
+              </Select>
 
               <Button
                 type="primary"

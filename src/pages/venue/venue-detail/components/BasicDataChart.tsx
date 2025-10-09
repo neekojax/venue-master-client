@@ -1,5 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
-import { useParams } from "react-router-dom";
+import React, { useEffect, useRef } from "react";
 import {
   CheckCircleOutlined,
   CloseCircleOutlined,
@@ -18,42 +17,75 @@ import SiteStockWithNote from "@/components/tooltip/SiteStockWithNote.jsx";
 import type { VenueStats } from "../types";
 import EffectChart from "./EffectChart";
 import EfficiencyGauge from "./gauge";
-import { useSelector, useSettingsStore } from "@/stores";
 
-import { getVenueDailyStat } from "@/pages/venue/api.tsx";
-
-const App: React.FC<{ data: any; loading: boolean }> = ({ data, loading }) => {
-  const { poolType } = useSettingsStore(useSelector(["poolType"]));
-  const { venueId } = useParams<{ venueId: string }>();
-  const [stats, setStats] = useState<VenueStats | null>(null);
-  // 获取昨日的日期
-  const yesterday = new Date(Date.now() - 864e5);
-  const formattedDate = yesterday.toISOString().split("T")[0];
-  // 获取数据
-  const fetchData = async () => {
-    try {
-      const response = await getVenueDailyStat(poolType, Number(venueId), formattedDate);
-      setStats(response.data);
-      // 处理响应数据
-    } catch (error) {
-      // 处理错误
-      console.log(error);
-    }
-  };
-
-  useEffect(() => {
-    fetchData();
-    // setStats(data);
-  }, [venueId]);
-  // 获取当前日期
+const App: React.FC<{ stats: VenueStats; loading: boolean }> = ({ stats, loading }) => {
   const chartRef = useRef<HTMLDivElement | null>(null);
   const chartInstance = useRef<EChartsType | null>(null);
+  const isInitializing = useRef<boolean>(false);
 
+  // 监听 stats 变化，当数据更新且 DOM 已挂载时初始化图表
   useEffect(() => {
-    if (chartRef.current && stats) {
+    console.log("stats && chartRef.current", stats, chartRef.current);
+    if (stats && chartRef.current) {
+      // 使用 setTimeout 确保 DOM 已完全渲染
+      const timer = setTimeout(() => {
+        initChart();
+      }, 0);
+      return () => clearTimeout(timer);
+    }
+  }, [stats]);
+
+  // 使用 ResizeObserver 监听元素尺寸变化（只在组件挂载时设置一次）
+  useEffect(() => {
+    if (!chartRef.current) return;
+
+    const resizeObserver = new ResizeObserver(() => {
+      if (chartInstance.current) {
+        chartInstance.current.resize();
+      }
+    });
+    resizeObserver.observe(chartRef.current);
+    return () => {
+      resizeObserver.disconnect();
+    };
+  }, []);
+
+  // 组件卸载时清理图表实例
+  useEffect(() => {
+    return () => {
+      if (chartInstance.current) {
+        chartInstance.current.dispose();
+        chartInstance.current = null;
+      }
+    };
+  }, []);
+  // 获取当前日期
+  const initChart = () => {
+    // 防止重复初始化
+    if (isInitializing.current) {
+      console.log("Chart is already initializing, skipping...");
+      return;
+    }
+
+    // 确保 DOM 元素已挂载且数据已加载
+    if (!chartRef.current) {
+      console.warn("chartRef.current is null, DOM element not yet mounted");
+      return;
+    }
+
+    if (!stats) {
+      console.warn("stats is null or undefined");
+      return;
+    }
+
+    console.log("Initializing chart with valid ref and stats");
+    isInitializing.current = true;
+
+    try {
       // 销毁之前的图表实例
       if (chartInstance.current) {
         chartInstance.current.dispose();
+        chartInstance.current = null;
       }
       // 初始化echarts实例
       chartInstance.current = echarts.init(chartRef.current);
@@ -118,22 +150,13 @@ const App: React.FC<{ data: any; loading: boolean }> = ({ data, loading }) => {
         ],
       };
       chartInstance.current.setOption(option);
-
-      // 图表响应式
-      const handleResize = () => chartInstance.current && chartInstance.current.resize();
-      window.addEventListener("resize", handleResize);
-
-      // 清理函数
-      return () => {
-        window.removeEventListener("resize", handleResize);
-        if (chartInstance.current) {
-          chartInstance.current.dispose();
-          chartInstance.current = null;
-        }
-      };
+      console.log("Chart initialized successfully");
+    } catch (error) {
+      console.error("Error initializing chart:", error);
+    } finally {
+      isInitializing.current = false;
     }
-    // youxiaosuanli = (data?.totalTheoreticalPower * data?.averageEffectiveRate / 100)?.toFixed(2);
-  }, [data, venueId]);
+  };
 
   return (
     <>

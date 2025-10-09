@@ -69,7 +69,7 @@ const App: React.FC = () => {
   const newMutation = useEventNew();
   const updateMutation = useEventUpdate();
   const deleteMutation = useDeleteUpdate();
-  const [selectedDurationType, setSelectedDurationType] = useState<string>("");
+  const [selectedDurationType, setSelectedDurationType] = useState<string[]>([]);
   // 新增筛选状态
   const [selectedLocation, setSelectedLocation] = useState<string[]>([]);
   const [selectedEventType, setSelectedEventType] = useState<string[]>([]);
@@ -130,7 +130,10 @@ const App: React.FC = () => {
 
     const hasDuration = log.start_time && log.end_time;
     const matchesDuration =
-      selectedDurationType === "valid" ? hasDuration : selectedDurationType === "empty" ? !hasDuration : true;
+      selectedDurationType.length === 0 ||
+      selectedDurationType.some((type) => {
+        return type === "valid" ? hasDuration : !hasDuration;
+      });
     // 2️⃣ 收藏过滤
     // const matchesCollection = !showCollectionOnly || log.collection === 1;
     return matchesLocation && matchesEventType && matchesSearchText && matchesDateRange && matchesDuration;
@@ -192,17 +195,23 @@ const App: React.FC = () => {
       title: "影响时长",
       dataIndex: "log_date",
       width: 120,
-      filters: [
-        { text: "未结束事件", value: "empty" },
-        { text: "已结束事件", value: "valid" },
-      ],
-      onFilter: (value: any, record: any) => {
-        setSelectedDurationType(value);
-        const hasDuration = record.start_time && record.end_time;
-        if (value === "valid") return hasDuration;
-        if (value === "empty") return !hasDuration;
-        return true;
-      },
+      // filters: [
+      //   { text: "未结束事件", value: "empty" },
+      //   { text: "已结束事件", value: "valid" },
+      // ],
+      // onFilter: (value: any) => {
+      //   setSelectedDurationType([value]);
+      //   return true;
+      // },
+      // onFilter: (value: any, record: any) => {
+      //   console.log("value", value)
+      //   // console.log("filters", filters)
+      //   setSelectedDurationType(value);
+      //   const hasDuration = record.start_time && record.end_time;
+      //   if (value === "valid") return hasDuration;
+      //   if (value === "empty") return !hasDuration;
+      //   return true;
+      // },
       // filteredData()
       // if (value === "valid") return setSelectedDurationType('valid');
       // if (value === "empty") return !hasDuration;
@@ -445,16 +454,18 @@ const App: React.FC = () => {
                 placeholder="搜索场地、事件类型或内容"
                 prefix={<SearchOutlined />}
                 size="middle"
-                className="max-w-xs !rounded-lg"
+                // className="max-w-xs !rounded-lg"
                 value={searchText}
+                style={{ width: 180 }}
                 onChange={(e) => setSearchText(e.target.value)} // 更新搜索文本
                 allowClear // 添加清除按钮
               />
               <RangePicker
                 size="middle"
-                className="!rounded-lg"
+                // className="!rounded-lg"
                 placeholder={["开始日期", "结束日期"]}
                 value={dateRange}
+                style={{ width: 220 }}
                 onChange={(dates) => {
                   // 类型转换，确保类型兼容
                   const rangeValue = dates as [dayjs.Dayjs | null, dayjs.Dayjs | null];
@@ -469,7 +480,7 @@ const App: React.FC = () => {
                 placeholder="选择场地"
                 value={selectedLocation}
                 onChange={setSelectedLocation}
-                style={{ width: 150 }}
+                style={{ width: 120 }}
                 // className="!rounded-lg"
               >
                 {venueList?.data?.map((venue: any) => (
@@ -477,6 +488,17 @@ const App: React.FC = () => {
                     {venue.venue_name}
                   </Option>
                 ))}
+              </Select>
+              <Select
+                mode="multiple"
+                placeholder="选择影响时长类型"
+                value={selectedDurationType}
+                onChange={setSelectedDurationType}
+                style={{ width: 120 }}
+                allowClear
+              >
+                <Option value="valid">已结束事件</Option>
+                <Option value="empty">未结束事件</Option>
               </Select>
               {/* <Select
                 mode="multiple"
@@ -587,7 +609,8 @@ const App: React.FC = () => {
             loading={isLoading}
             // onChange={handleTableChange}
             onChange={(_: any, filters: any) => {
-              // console.log("Table >>选中的事件类型：", filters.log_type); // 是数组
+              console.log("Table >>选中的事件类型：", filters.start_time && filters.end_time); // 是数组
+              console.log("Table >>选中的事件类型：", filters.log_type); // 是数组
               setSelectedEventType(filters.log_type || []); // 设置选中的事件类型数组
             }}
             pagination={{
