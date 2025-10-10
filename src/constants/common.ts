@@ -35,6 +35,7 @@ export const ROUTE_PATHS = {
 
   report: "/report",
   dailyReport: "/report/daily",
+  dataSummary: "/report/data-summary", // 数据概览
   dailyReportList: (venueId: string | number) => `/report/daily-list/${venueId}`, // 场地详情，需传参数
   subAccountDailyReport: "/report/daily/sub-account", // 子账户日报表
   weekReport: "/report/week", // 子账户日报表

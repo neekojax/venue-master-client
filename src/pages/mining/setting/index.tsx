@@ -374,6 +374,13 @@ export default function MiningSettingPage() {
         dataIndex: "status",
         key: "status",
         width: 75,
+        filters: [
+          { text: "活跃", value: 1 },
+          { text: "暂停", value: 0 },
+        ],
+        onFilter: () => {
+          return true;
+        },
         render: (_text: any, record: { status: unknown }) => <StatusColumn status={record.status} />,
       },
       {
@@ -707,7 +714,7 @@ export default function MiningSettingPage() {
                 allowClear
                 value={statusFilter}
                 onChange={handleStatusFilterChange}
-                style={{ width: 80, marginRight: "15px" }}
+                style={{ width: 120, marginRight: "15px" }}
               >
                 <Option value={1}>活跃</Option>
                 <Option value={0}>暂停</Option>

@@ -14,6 +14,17 @@ export const reportRoute: RouteObject = {
   },
   children: [
     {
+      path: ROUTE_PATHS.dataSummary,
+      lazy: async () => ({
+        Component: (await import("@/pages/report/data-summary")).default,
+      }),
+      HydrateFallback: ProgressBar,
+      handle: {
+        title: "数据概览",
+        crumb: () => <Link to={ROUTE_PATHS.dataSummary}>数据概览</Link>,
+      },
+    },
+    {
       path: ROUTE_PATHS.dailyReport,
       lazy: async () => ({
         Component: (await import("@/pages/report/daily-report")).default,

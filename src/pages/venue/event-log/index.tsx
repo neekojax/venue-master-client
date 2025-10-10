@@ -609,7 +609,6 @@ const App: React.FC = () => {
             loading={isLoading}
             // onChange={handleTableChange}
             onChange={(_: any, filters: any) => {
-              console.log("Table >>选中的事件类型：", filters.start_time && filters.end_time); // 是数组
               console.log("Table >>选中的事件类型：", filters.log_type); // 是数组
               setSelectedEventType(filters.log_type || []); // 设置选中的事件类型数组
             }}
