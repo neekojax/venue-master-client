@@ -705,19 +705,24 @@ export default function MiningSettingPage() {
                 value={searchTerm}
                 size="middle"
                 onChange={handleSearch}
-                style={{ width: 250, marginRight: "15px" }} // 设定宽度
+                style={{ width: 250, fontSize: "12px", marginRight: "15px" }} // 设定宽度
                 className="text-sm"
               />
               <Select
                 size="middle"
+                className="small-select"
                 placeholder="筛选状态"
                 allowClear
                 value={statusFilter}
                 onChange={handleStatusFilterChange}
-                style={{ width: 120, marginRight: "15px" }}
+                style={{ width: 120, fontSize: "12px", marginRight: "15px" }}
               >
-                <Option value={1}>活跃</Option>
-                <Option value={0}>暂停</Option>
+                <Option value={1} style={{ fontSize: "12px" }}>
+                  活跃
+                </Option>
+                <Option value={0} style={{ fontSize: "12px" }}>
+                  暂停
+                </Option>
               </Select>
 
               <Button

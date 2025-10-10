@@ -140,7 +140,21 @@ const App: React.FC = () => {
         // return { text, ownname };
         return (
           <>
-            {`${text}`}&nbsp;&nbsp;{ownname}
+            <Tooltip title={text} placement="topLeft">
+              <span
+                style={{
+                  display: "inline-block",
+                  minWidth: "80px",
+                  maxWidth: "120px",
+                  overflow: "hidden",
+                  textOverflow: "ellipsis",
+                  whiteSpace: "nowrap",
+                }}
+              >
+                {text}
+              </span>
+            </Tooltip>
+            &nbsp;&nbsp;{ownname}
           </>
         );
       },
