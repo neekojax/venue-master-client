@@ -3,9 +3,9 @@ import { FaAdn, FaFish } from "react-icons/fa6";
 import { WiDirectionUpRight } from "react-icons/wi";
 import { Link } from "react-router-dom";
 import { ExportOutlined, SearchOutlined } from "@ant-design/icons";
-import { Button, Col, Input, Radio, Row, Spin, Switch, Tag, Tooltip } from "antd";
+import { Button, Col, Input, Radio, Row, Spin, Switch, Table, Tag, Tooltip } from "antd";
 import {} from "antd";
-import EditTable from "@/components/edit-table";
+// import EditTable from "@/components/edit-table";
 import { FavoriteButton } from "@/components/FavoriteButton";
 import useAuthRedirect from "@/hooks/useAuthRedirect.ts";
 import { useSelector, useSettingsStore } from "@/stores";
@@ -115,7 +115,7 @@ export default function MiningHashRatePage() {
         title: "场地",
         dataIndex: "venue_name",
         key: "venue_name",
-        // width: 200,
+        width: 160,
         // render: (text: any) => <span style={{ color: "#333" }}>{text}</span>,
         render: (text: string, record: { venue_id?: any; collection?: any }) => {
           const isSpecialVenue = text === "Arct-HF01-J XP-AR-US" || text === "ARCT Technologies-HF02-AR-US";
@@ -179,7 +179,7 @@ export default function MiningHashRatePage() {
         dataIndex: "pool_name",
         key: "pool_name",
         responsive: ["xs", "sm", "md"], // 适配所有屏幕
-        // width: "10%",
+        width: "100px",
         // render: (text: any) => <span style={{ color: "#333" }}>{text}</span>,
         render: (text: any) => (
           <Tooltip
@@ -350,13 +350,6 @@ export default function MiningHashRatePage() {
     return <Spin tip="加载中..." />;
   }
 
-  const handleDelete = (): Promise<void> => {
-    return new Promise(() => {});
-  };
-
-  const handleSave = (): Promise<void> => {
-    return new Promise(() => {});
-  };
   const onDownload = () => {
     exportHashRateToExcel(filteredData);
   };
@@ -436,13 +429,34 @@ export default function MiningHashRatePage() {
         {isLoadingPools ? (
           <Spin style={{ width: "100%", textAlign: "center", marginTop: "50%" }} />
         ) : (
-          <EditTable
-            tableData={filteredData}
-            setTableData={setTableData}
+          <Table
+            pagination={{
+              position: ["bottomCenter"],
+              showSizeChanger: true,
+              pageSizeOptions: ["10", "20", "30", "50"],
+              defaultPageSize: 10,
+              showTotal: (total) => `共 ${total} 条`,
+              total: filteredData?.length,
+              onChange: () => {
+                const tableBody = document.querySelector(".ant-table-body");
+                if (tableBody) {
+                  tableBody.scrollTop = 0;
+                }
+              },
+            }}
+            rowKey={(record: any) => record.key}
             columns={columns}
-            handleDelete={handleDelete}
-            handleSave={handleSave}
+            dataSource={filteredData}
+            scroll={{ x: "max-content" }}
+            style={{ marginTop: "15px", width: "100%" }}
           />
+          // <EditTable
+          //   tableData={filteredData}
+          //   setTableData={setTableData}
+          //   columns={columns}
+          //   handleDelete={handleDelete}
+          //   handleSave={handleSave}
+          // />
         )}
       </div>
     </div>
