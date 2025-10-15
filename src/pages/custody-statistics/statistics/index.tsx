@@ -1,11 +1,12 @@
 import { useEffect, useState } from "react";
 import { AiOutlineCalendar } from "react-icons/ai";
-import { FaAdn, FaFish, FaList } from "react-icons/fa6";
+import { FaList } from "react-icons/fa6";
 import { FcCalendar } from "react-icons/fc";
-import { GiMining } from "react-icons/gi";
+import { Link } from "react-router-dom";
+// import { GiMining } from "react-icons/gi";
 import { ExportOutlined, SearchOutlined } from "@ant-design/icons"; // 导入时钟图标
-import { Alert, Button, Input, Select, Space, Spin, Tag, Tooltip } from "antd";
-import EditTable from "@/components/edit-table";
+import { Alert, Button, Input, Select, Space, Spin, Table, Tag, Tooltip } from "antd";
+// import EditTable from "@/components/edit-table";
 import useAuthRedirect from "@/hooks/useAuthRedirect.ts";
 import { useSelector, useSettingsStore } from "@/stores";
 import { exportCustodyStatisticsToExcel } from "@/utils/excel";
@@ -16,7 +17,7 @@ import { useCustodyStatisticsList } from "@/pages/custody-statistics/hook/hook.t
 const getInitialTimeRange = () => {
   const stored = localStorage.getItem("timeRange");
   console.log("stored", stored);
-  return stored ? stored : "all"; // 默认为 'all'
+  return stored ? stored : "1days"; // 默认为 'all'
 };
 
 const getInitialPoolFilter = () => {
@@ -43,37 +44,34 @@ export default function StatisticsPage() {
       const newData = statisticsData.data.map(
         (
           item: {
-            mining_pool_info: any;
-            id: any;
+            date: any;
+            venue_id: any;
             venue_name: any;
-            sub_account_name: any;
-            observer_link: any;
-            energy_ratio: any;
-            basic_hosting_fee: any;
-            hourly_computing_power: any;
+            hash: any;
+            income_btc: any;
+            managed_unit_price: any;
+            power_consumption: any;
             total_hosting_fee: any;
-            total_income_btc: any;
             total_income_usd: any;
             net_income: any;
             hosting_fee_ratio: any;
-            report_date: any;
           },
           index: any,
         ) => ({
-          key: item.id, // 使用 ID 作为唯一 key
+          key: item.venue_id, // 使用场地ID作为唯一 key
           serialNumber: index + 1,
-          venue_name: item.mining_pool_info.pool_name,
-          sub_account_name: item.mining_pool_info.pool_name,
-          observer_link: item.mining_pool_info.link,
-          energy_ratio: item.mining_pool_info.energy_ratio,
-          basic_hosting_fee: item.mining_pool_info.basic_hosting_fee,
-          hourly_computing_power: item.hourly_computing_power,
+          venue_name: item.venue_name,
+          // sub_account_name: item.sub_account_name,
+          // observer_link: item.observer_link,
+          energy_ratio: item.power_consumption,
+          basic_hosting_fee: item.managed_unit_price,
+          hash: item.hash,
           total_hosting_fee: item.total_hosting_fee,
-          total_income_btc: item.total_income_btc,
+          total_income_btc: item.income_btc,
           total_income_usd: item.total_income_usd,
           net_income: item.net_income,
           hosting_fee_ratio: item.hosting_fee_ratio,
-          report_date: item.report_date,
+          report_date: item.date,
         }),
       );
       setTableData(newData); // 设置表格数据源
@@ -88,44 +86,67 @@ export default function StatisticsPage() {
         dataIndex: "serialNumber",
         key: "serialNumber",
         width: 35,
-        render: (_: any, record: { serialNumber?: any; observer_link?: any }) => {
-          const { observer_link } = record;
-          // 根据 observer_link 内容返回不同的图标
-          if (observer_link.includes("antpool")) {
-            return <FaAdn style={{ color: "green", fontSize: 16 }} />;
-          } else if (observer_link.includes("f2pool")) {
-            return <FaFish style={{ color: "orange", fontSize: 16 }} />;
-          } else {
-            return <span>{record.serialNumber}</span>; // 如果没有匹配，则返回序号
-          }
+        render: (_: any, record: { serialNumber?: any }) => {
+          return <span>{record.serialNumber}</span>;
         },
       },
       {
-        title: "场地",
+        title: "场地名",
         dataIndex: "venue_name",
         key: "venue_name",
-        // width: 200,
-        width: "20%",
-        render: (text: any) => (
-          <Tooltip
-            title={text}
-            placement="top"
-            overlayInnerStyle={{ color: "white" }}
-            style={{ color: "white" }}
-          >
-            <div
-              style={{
-                width: "100%",
-                overflow: "hidden",
-                color: "#333",
-                textOverflow: "ellipsis",
-                whiteSpace: "nowrap",
-              }}
+        width: 150,
+        // render: (text: any) => (
+        //   <Tooltip
+        //     title={text}
+        //     placement="top"
+        //     overlayInnerStyle={{ color: "white" }}
+        //     style={{ color: "white" }}
+        //   >
+        //     <div
+        //       style={{
+        //         width: "100%",
+        //         overflow: "hidden",
+        //         color: "#333",
+        //         textOverflow: "ellipsis",
+        //         whiteSpace: "nowrap",
+        //       }}
+        //     >
+        //       {text}
+        //     </div>
+        //   </Tooltip>
+        // ),
+        render: (text: string, record: { key?: any }) => {
+          const isSpecialVenue = text === "Arct-HF01-J XP-AR-US" || text === "ARCT Technologies-HF02-AR-US";
+          return (
+            <Tooltip
+              title={text}
+              placement="top"
+              overlayInnerStyle={{ color: "white" }}
+              style={{ color: "white" }}
             >
-              {text}
-            </div>
-          </Tooltip>
-        ),
+              <div
+                style={{
+                  width: "100%",
+                  overflow: "hidden",
+                  color: isSpecialVenue ? "red" : "#333", // 特殊场地字体颜色为红色
+                  textOverflow: "ellipsis",
+                  whiteSpace: "nowrap",
+                  fontWeight: isSpecialVenue ? "bold" : "normal", // 加粗特殊场地
+                }}
+              >
+                {isSpecialVenue && (
+                  <Tag color="red" style={{ marginLeft: 2 }}>
+                    补充
+                  </Tag>
+                )}
+                {/* {text} */}
+                <Link to={`/venue/detail/${record.key}`} className="text-blue-500 hover:underline">
+                  {text}
+                </Link>
+              </div>
+            </Tooltip>
+          );
+        },
       },
       // {
       //   title: "子账号",
@@ -145,18 +166,15 @@ export default function StatisticsPage() {
       // },
       {
         title: "24h平均算力",
-        dataIndex: "hourly_computing_power",
-        key: "hourly_computing_power",
+        dataIndex: "hash",
+        key: "hash",
         // width: 140,
-        width: "25%",
-        sorter: (a: any, b: any) => a.hourly_computing_power - b.hourly_computing_power, // 添加排序逻辑
+        width: "15%",
+        sorter: (a: any, b: any) => a.hash - b.hash, // 添加排序逻辑
         render: (text: any) => (
           <span>
-            {text}{" "}
-            <span className="text-sm text-gray-500" style={{ fontSize: "em" }}>
-              {" "}
-              TH/s
-            </span>
+            <span style={{ color: "#1677ff" }}>{text.toFixed(2)}</span>
+            <span style={{ marginLeft: 4, color: "rgba(0,0,0,0.45)" }}>TH/s</span>
           </span>
         ), // 渲染单位
       },
@@ -176,55 +194,44 @@ export default function StatisticsPage() {
         dataIndex: "total_income_btc",
         key: "total_income_btc",
         // width: 280,
-        width: "33.33%",
+        width: "30%",
         sorter: (a: any, b: any) => a.total_income_btc - b.total_income_btc, // 添加排序逻辑
         render: (text: any, record: any) => (
           <span>
-            <Tag color="#f50">{text}</Tag>
-            <Tag color="#2db7f5">{record.total_income_usd}</Tag>
-            <Tag color="#87d068">{record.net_income}</Tag>
-            {/* {record.total_income_btc} / {record.total_income_usd} / {record.net_income} */}
+            <span style={{ color: "#1677ff" }}>{text.toFixed(8)}</span>
+            <span style={{ marginLeft: 4, color: "rgba(0,0,0,0.45)" }}>BTC</span>
+            <span style={{ marginLeft: 12, color: "#1677ff" }}>{record.total_income_usd.toFixed(2)}</span>
+            <span style={{ marginLeft: 4, color: "rgba(0,0,0,0.45)" }}>USD</span>
+            <span style={{ marginLeft: 12, color: "#1677ff" }}>{record.net_income.toFixed(2)}</span>
+            <span style={{ marginLeft: 4, color: "rgba(0,0,0,0.45)" }}>USD</span>
           </span>
         ), // 渲染单位
       },
       {
-        title: "托管费(基础/能耗比)",
+        title: "托管费(单价/能耗)",
         dataIndex: "energy_ratio",
         key: "energy_ratio",
         // width: 100,
-        width: "25%",
+        width: "20%",
         render: (text: any, record: any) => (
           <span>
             <Tag color="gold">{record.basic_hosting_fee} $/kwh</Tag>
-            <Tag color="green">{text} J/T</Tag>
-            {/* <span style={{ color: "#3498DB" }}> {record.basic_hosting_fee}</span>{" "}
-            <span className="text-sm text-gray-500">$/kwh</span> /{" "}
-            <span style={{ color: "#3498DB" }}> {record.energy_ratio}</span>{" "}
-            <span className="text-sm text-gray-500">J/T</span> */}
+            <Tag color="green">{text} kW</Tag>
           </span>
         ),
-        // render: (text: any) => (
-        //   <span>
-        //     {text}{" "}
-        //     <span className="text-sm text-gray-500" style={{ fontSize: "em" }}>
-        //       {" "}
-        //       J/T
-        //     </span>
-        //   </span>
-        // ), // 渲染单位
       },
       {
         title: "总托管费",
         dataIndex: "hosting_fee_ratio",
         key: "hosting_fee_ratio",
         // width: 200,
-        width: "15%",
+        width: "10%",
         render: (text: any, record: any) => (
           <span>
             {/* <span style={{ color: "#3498DB" }}> {record.basic_hosting_fee}</span>{" "}
             <span className="text-sm text-gray-500">$/kwh</span> /{" "} */}
-            <span style={{ display: "none" }}>{text}</span>
-            <span style={{ color: "#3498DB" }}>{record.total_hosting_fee}</span>
+            <span style={{ display: "none" }}>{text.toFixed(2)}</span>
+            <span style={{ color: "#3498DB" }}>{record.total_hosting_fee.toFixed(2)}</span>
             <span className="text-sm text-gray-500"> usd</span>
           </span>
         ), // 渲染单位
@@ -258,16 +265,11 @@ export default function StatisticsPage() {
         dataIndex: "hosting_fee_ratio",
         key: "hosting_fee_ratio",
         // width: 100,
-        width: "15%",
-        sorter: (a: any, b: any) => {
-          const ratioA = parseFloat(a.hosting_fee_ratio.replace("%", "")); // 去掉 '%' 并转换为数字
-          const ratioB = parseFloat(b.hosting_fee_ratio.replace("%", ""));
-          return ratioA - ratioB; // 进行数字比较
-        },
+        width: "10%",
+        sorter: (a: any, b: any) => a.hosting_fee_ratio - b.hosting_fee_ratio,
         render: (text: any) => (
           <span style={{ color: "green" }}>
-            {text}
-            {/* <span className="text-sm text-gray-500" style={{ fontSize: "em" }}>%</span> */}
+            {typeof text === "number" ? `${text.toFixed(2)}%` : `${text}%`}
           </span>
         ), // 渲染单位
       },
@@ -275,7 +277,7 @@ export default function StatisticsPage() {
         title: "收益日期",
         dataIndex: "report_date",
         key: "report_date",
-        width: 100,
+        width: "10%",
         sorter: (a: any, b: any) => new Date(a.report_date).getTime() - new Date(b.report_date).getTime(), // 确保将日期转换为时间戳进行比较
         render: (text: any) => {
           const date = new Date(text);
@@ -313,6 +315,7 @@ export default function StatisticsPage() {
 
   // 搜索处理函数
   const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
+    handlePoolFilterChange("");
     setSearchTerm(e.target.value);
   };
 
@@ -332,7 +335,7 @@ export default function StatisticsPage() {
 
     // 根据选定的池进行过滤
     // @ts-ignore
-    const matchesPoolFilter = poolFilter ? item.observer_link.includes(poolFilter) : true;
+    const matchesPoolFilter = poolFilter ? false : true;
 
     return matchesSearchTerm && matchesPoolFilter;
   });
@@ -344,7 +347,7 @@ export default function StatisticsPage() {
         style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}
       >
         <Space size={24}>
-          <div style={{ display: "flex", alignItems: "center" }}>
+          {/* <div style={{ display: "flex", alignItems: "center" }}>
             <GiMining style={{ fontSize: "20px", color: "#1890ff", marginRight: "16px" }} />
             <Select
               placeholder="选择池"
@@ -380,7 +383,7 @@ export default function StatisticsPage() {
               ]}
               value={poolFilter} // 设置选中的值
             />
-          </div>
+          </div> */}
           <div style={{ display: "flex", alignItems: "center" }}>
             <FcCalendar style={{ fontSize: "20px", color: "#1890ff", marginRight: "16px" }} />
             <Select
@@ -475,15 +478,46 @@ export default function StatisticsPage() {
       {isLoading ? (
         <Spin style={{ marginTop: 20 }} />
       ) : (
-        <EditTable
-          tableData={filteredData}
-          setTableData={setTableData}
+        <Table
+          pagination={{
+            position: ["bottomCenter"],
+            showSizeChanger: true,
+            pageSizeOptions: ["10", "20", "30", "50"],
+            defaultPageSize: 20,
+            showTotal: (total) => `共 ${total} 条`,
+            total: filteredData?.length,
+            onChange: () => {
+              const tableBody = document.querySelector(".ant-table-body");
+              if (tableBody) {
+                tableBody.scrollTop = 0;
+              }
+            },
+          }}
+          rowKey={(record: any) => record.key}
           columns={columns}
-          // @ts-ignore
-          handleDelete={() => {}}
-          // @ts-ignore
-          handleSave={() => {}}
+          dataSource={filteredData}
+          scroll={{ x: "max-content" }}
+          style={{ marginTop: "15px", width: "100%" }}
         />
+        // <Table
+        //   columns={columns}
+        //   dataSource={filteredData}
+        // pagination={{
+        //   current: currentPage,
+        //   pageSize,
+        //   total: tableData.length,
+        //   onChange: (page) => setCurrentPage(page),
+        // }}
+        // />
+        // <EditTable
+        //   tableData={filteredData}
+        //   setTableData={setTableData}
+        //   columns={columns}
+        //   // @ts-ignore
+        //   handleDelete={() => { }}
+        //   // @ts-ignore
+        //   handleSave={() => { }}
+        // />
       )}
     </div>
   );
