@@ -17,10 +17,31 @@
 .ant-table-thead > tr > th {
   --ant-table-body-sort-bg: rgba(250, 250, 252, 1) !important; /* 你想要的背景色 */
 }
+.ant-table-wrapper table{
+    font-family: XPK, Arial, sans-serif !important;
+}
 .ant-table-wrapper td.ant-table-column-sort{
     background-color: rgba(250, 250, 252, 1) !important; /* 你想要的背景色 */
 }
 .ant-table-wrapper .ant-table-tbody >tr >th, .ant-table-wrapper .ant-table-tbody >tr >td{
     /*background-color: rgba(250, 250, 252, 1) !important; /* 你想要的背景色 */
     border-bottom: 1px solid rgba(239, 239, 245, 1);
+}
+
+/* 托管费占比高/低背景色 */
+.fee-ratio-high {
+  background-color: #fff1f0 !important; /* 浅红 */
+}
+.fee-ratio-low {
+  background-color: #f6ffed !important; /* 浅绿 */
+}
+
+/* 托管费占比列表头样式 */
+.fee-ratio-header {
+  /* 可根据需要设置表头单元格的最小宽度或对齐 */
+}
+.fee-ratio-title {
+  font-size: 0.75rem; /* 标题字号 */
+  font-weight: 500; /* 略微加粗 */
+  color:  #25252D;
 }

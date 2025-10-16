@@ -1,4 +1,4 @@
-import { fetchDelete, fetchGet, fetchPost } from "@/helper/fetchHelper.ts";
+import { fetchDelete, fetchGet, fetchPost, fetchPostFile } from "@/helper/fetchHelper.ts";
 import { EventLogParam, VenueInfoParam } from "@/pages/venue/type.tsx";
 
 export const fetchMiningPoolRunningData = async (poolType: string) => {
@@ -75,4 +75,19 @@ export const getLast30DaysLimitImpactRate = async (poolType: string, venueID: nu
 ///venue/getAllVEvent
 export const getAllVEvent = async (poolType: string, venueID: number) => {
   return await fetchGet(`/venue/getAllVEvent/${poolType}/${venueID}`);
+};
+
+// Excel文件上传
+export const uploadVenueExcel = async (file: File) => {
+  const formData = new FormData();
+  formData.append("file", file);
+
+  return await fetchPostFile("/powerConsumption/import", formData).then((response: any) => {
+    if (!response?.success) {
+      console.log("response?.code", response?.code);
+      console.log("response?.message", response?.message);
+      throw new Error(`API error! code: ${response?.code}, message: ${response?.message}`);
+    }
+    return response;
+  });
 };

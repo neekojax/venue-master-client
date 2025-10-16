@@ -1,10 +1,18 @@
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { DeleteOutlined, EditOutlined, PlusOutlined, SearchOutlined } from "@ant-design/icons";
+import {
+  DeleteOutlined,
+  EditOutlined,
+  ImportOutlined,
+  PlusOutlined,
+  SearchOutlined,
+} from "@ant-design/icons";
 import { Button, Form, Input, message, Modal, Select, Space, Table } from "antd";
+import ExcelUpload from "@/components/excel-upload";
 import useAuthRedirect from "@/hooks/useAuthRedirect.ts";
 import { useSelector, useSettingsStore } from "@/stores";
 
+import { uploadVenueExcel } from "@/pages/venue/api.tsx";
 import { useVenueList, useVenueNew, useVenueUpdate } from "@/pages/venue/hook/hook.ts";
 import { VenueInfoParam } from "@/pages/venue/type.tsx";
 
@@ -28,6 +36,7 @@ const VenueManagement: React.FC = () => {
   const { poolType } = useSettingsStore(useSelector(["poolType"]));
 
   const { data } = useVenueList(poolType);
+  const [excelUploadModalVisible, setExcelUploadModalVisible] = useState(false);
   // const [data] = useState<any>();
   const [venues, setVenues] = useState<Venue[]>([]);
   const [filteredVenues, setFilteredVenues] = useState<Venue[]>([]);
@@ -254,6 +263,31 @@ const VenueManagement: React.FC = () => {
   const countries = Array.from(
     new Set(venues.map((item) => (item?.country ? item.country : null)).filter(Boolean)),
   );
+  const showExcelUploadModal = () => {
+    setExcelUploadModalVisible(true);
+  };
+
+  const hideExcelUploadModal = () => {
+    setExcelUploadModalVisible(false);
+  };
+  // Excel上传处理函数
+  const handleExcelUpload = async (file: File) => {
+    // try {
+    const result = await uploadVenueExcel(file);
+
+    // 如果有成功导入的数据，刷新页面
+    if (result.success && result.data?.success_count > 0) {
+      setTimeout(() => {
+        window.location.reload();
+      }, 2000); // 延迟2秒刷新，让用户看到结果
+    }
+
+    return result;
+    // } catch (error: any) {
+    //   // 不在这里显示错误消息，让Excel组件处理
+    //   throw error;
+    // }
+  };
 
   return (
     <div className="p-6 bg-white rounded-lg shadow-sm">
@@ -261,7 +295,7 @@ const VenueManagement: React.FC = () => {
         <div className="flex space-x-4">
           <Button
             type="primary"
-            size="middle"
+            size="small"
             icon={<PlusOutlined />}
             onClick={handleAdd}
             className="!rounded-button whitespace-nowrap"
@@ -281,14 +315,14 @@ const VenueManagement: React.FC = () => {
         </div>
         <div className="flex space-x-4">
           <Input
-            size="middle"
+            size="small"
             placeholder="搜索场地名称、代码或地址"
             prefix={<SearchOutlined />}
             onChange={(e) => handleSearch(e.target.value)}
             className="w-64"
           />
           <Select
-            size="middle"
+            size="small"
             placeholder="按国家筛选"
             allowClear
             onChange={handleCountryFilter}
@@ -300,6 +334,17 @@ const VenueManagement: React.FC = () => {
               </Option>
             ))}
           </Select>
+
+          <Button
+            type="primary"
+            size="small"
+            // ghost
+            icon={<ImportOutlined />}
+            style={{ marginRight: "15px" }}
+            onClick={showExcelUploadModal}
+          >
+            导入功耗
+          </Button>
         </div>
       </div>
 
@@ -372,6 +417,23 @@ const VenueManagement: React.FC = () => {
             <Input type="hidden" />
           </Form.Item>
         </Form>
+      </Modal>
+
+      {/* Excel上传Modal */}
+      <Modal
+        title="Excel文件导入"
+        open={excelUploadModalVisible}
+        onCancel={hideExcelUploadModal}
+        footer={null}
+        width={600}
+      >
+        <ExcelUpload
+          onUpload={handleExcelUpload}
+          accept=".xlsx,.xls"
+          maxSize={10}
+          title="点击或拖拽Excel文件到此区域上传"
+          description="支持.xlsx和.xls格式，文件大小不超过10MB"
+        />
       </Modal>
     </div>
   );

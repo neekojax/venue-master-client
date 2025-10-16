@@ -10,6 +10,8 @@ import { Alert, Button, Input, Select, Space, Spin, Table, Tag, Tooltip } from "
 import useAuthRedirect from "@/hooks/useAuthRedirect.ts";
 import { useSelector, useSettingsStore } from "@/stores";
 import { exportCustodyStatisticsToExcel } from "@/utils/excel";
+import { formatHashrate } from "@/utils/num";
+import { formatAmount } from "@/utils/num";
 
 import { useCustodyStatisticsList } from "@/pages/custody-statistics/hook/hook.ts";
 
@@ -38,28 +40,27 @@ export default function StatisticsPage() {
   const [columns, setColumns] = useState<any>([]);
   const [tableData, setTableData] = useState<any>([]);
   const [searchTerm, setSearchTerm] = useState(""); // 新增搜索状态
+  // 全局序号需要分页信息
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(20);
 
   useEffect(() => {
     if (statisticsData && statisticsData.data) {
       const newData = statisticsData.data.map(
-        (
-          item: {
-            date: any;
-            venue_id: any;
-            venue_name: any;
-            hash: any;
-            income_btc: any;
-            managed_unit_price: any;
-            power_consumption: any;
-            total_hosting_fee: any;
-            total_income_usd: any;
-            net_income: any;
-            hosting_fee_ratio: any;
-          },
-          index: any,
-        ) => ({
+        (item: {
+          date: any;
+          venue_id: any;
+          venue_name: any;
+          hash: any;
+          income_btc: any;
+          managed_unit_price: any;
+          power_consumption: any;
+          total_hosting_fee: any;
+          total_income_usd: any;
+          net_income: any;
+          hosting_fee_ratio: any;
+        }) => ({
           key: item.venue_id, // 使用场地ID作为唯一 key
-          serialNumber: index + 1,
           venue_name: item.venue_name,
           // sub_account_name: item.sub_account_name,
           // observer_link: item.observer_link,
@@ -82,39 +83,25 @@ export default function StatisticsPage() {
   useEffect(() => {
     setColumns([
       {
-        // title: "序号", // 使用英文标题
-        dataIndex: "serialNumber",
-        key: "serialNumber",
-        width: 35,
-        render: (_: any, record: { serialNumber?: any }) => {
-          return <span>{record.serialNumber}</span>;
+        title: (
+          <span className="fee-ratio-title" style={{ padding: 0, margin: 0 }}>
+            No
+          </span>
+        ), // 使用英文标题
+        dataIndex: "venue_name",
+        key: "venue_name",
+        onHeaderCell: () => ({ className: "fee-ratio-header" }),
+        width: 55,
+        render: (_: any, __: any, index: number) => {
+          return <span>{(currentPage - 1) * pageSize + index + 1}</span>;
         },
       },
       {
-        title: "场地名",
+        title: <span className="fee-ratio-title">场地名</span>,
         dataIndex: "venue_name",
         key: "venue_name",
-        width: 150,
-        // render: (text: any) => (
-        //   <Tooltip
-        //     title={text}
-        //     placement="top"
-        //     overlayInnerStyle={{ color: "white" }}
-        //     style={{ color: "white" }}
-        //   >
-        //     <div
-        //       style={{
-        //         width: "100%",
-        //         overflow: "hidden",
-        //         color: "#333",
-        //         textOverflow: "ellipsis",
-        //         whiteSpace: "nowrap",
-        //       }}
-        //     >
-        //       {text}
-        //     </div>
-        //   </Tooltip>
-        // ),
+        onHeaderCell: () => ({ className: "fee-ratio-header" }),
+        width: 280,
         render: (text: string, record: { key?: any }) => {
           const isSpecialVenue = text === "Arct-HF01-J XP-AR-US" || text === "ARCT Technologies-HF02-AR-US";
           return (
@@ -126,7 +113,7 @@ export default function StatisticsPage() {
             >
               <div
                 style={{
-                  width: "100%",
+                  width: "280px",
                   overflow: "hidden",
                   color: isSpecialVenue ? "red" : "#333", // 特殊场地字体颜色为红色
                   textOverflow: "ellipsis",
@@ -165,74 +152,70 @@ export default function StatisticsPage() {
       //   ), // 渲染单位
       // },
       {
-        title: "24h平均算力",
+        title: <span className="fee-ratio-title">24h算力</span>,
         dataIndex: "hash",
         key: "hash",
+        onHeaderCell: () => ({ className: "fee-ratio-header" }),
         // width: 140,
-        width: "15%",
+        width: "10%",
         sorter: (a: any, b: any) => a.hash - b.hash, // 添加排序逻辑
         render: (text: any) => (
           <span>
-            <span style={{ color: "#1677ff" }}>{text.toFixed(2)}</span>
-            <span style={{ marginLeft: 4, color: "rgba(0,0,0,0.45)" }}>TH/s</span>
+            <span>{formatHashrate(text, "TH", 2, "EH")}</span>
+            {/* <span style={{ marginLeft: 4, color: "rgba(0,0,0,0.45)" }}>TH/s</span> */}
           </span>
         ), // 渲染单位
       },
-      // {
-      //   title: "总托管费",
-      //   dataIndex: "total_hosting_fee",
-      //   key: "total_hosting_fee",
-      //   sorter: (a: any, b: any) => a.total_hosting_fee - b.total_hosting_fee, // 添加排序逻辑
-      //   render: (text: any) => (
-      //     <span>
-      //       {text} <span style={{ fontSize: "em" }}> USD</span>
-      //     </span>
-      //   ), // 渲染单位
-      // },
       {
-        title: "收益(BTC/USD/净USD)",
+        title: <span className="fee-ratio-title">收益(BTC/USD/净USD)</span>,
         dataIndex: "total_income_btc",
         key: "total_income_btc",
         // width: 280,
-        width: "30%",
+        width: "25%",
+        onHeaderCell: () => ({ className: "fee-ratio-header" }),
         sorter: (a: any, b: any) => a.total_income_btc - b.total_income_btc, // 添加排序逻辑
         render: (text: any, record: any) => (
-          <span>
-            <span style={{ color: "#1677ff" }}>{text.toFixed(8)}</span>
-            <span style={{ marginLeft: 4, color: "rgba(0,0,0,0.45)" }}>BTC</span>
-            <span style={{ marginLeft: 12, color: "#1677ff" }}>{record.total_income_usd.toFixed(2)}</span>
-            <span style={{ marginLeft: 4, color: "rgba(0,0,0,0.45)" }}>USD</span>
-            <span style={{ marginLeft: 12, color: "#1677ff" }}>{record.net_income.toFixed(2)}</span>
-            <span style={{ marginLeft: 4, color: "rgba(0,0,0,0.45)" }}>USD</span>
-          </span>
+          <>
+            <Tag color="gold" style={{ marginBottom: 8 }}>
+              {text.toFixed(8)}
+              <span style={{ marginLeft: 2, color: "rgba(0,0,0,0.45)" }}>BTC</span>
+            </Tag>
+            <Tag color="green">
+              <span style={{ marginRight: 3 }}>{formatAmount(record.total_income_usd, 2, "$")}</span>
+              <span style={{ marginLeft: 2, color: "rgba(0,0,0,0.45)" }}>/</span>
+              <span style={{ marginLeft: 3 }}>{formatAmount(record.net_income, 2, "$")}</span>
+            </Tag>
+          </>
         ), // 渲染单位
       },
       {
-        title: "托管费(单价/能耗)",
+        title: <span className="fee-ratio-title">单价/能耗</span>,
         dataIndex: "energy_ratio",
         key: "energy_ratio",
-        // width: 100,
+        onHeaderCell: () => ({ className: "fee-ratio-header" }),
+        // width: 220,
         width: "20%",
         render: (text: any, record: any) => (
-          <span>
-            <Tag color="gold">{record.basic_hosting_fee} $/kwh</Tag>
-            <Tag color="green">{text} kW</Tag>
-          </span>
+          <>
+            <Tag color="gold" style={{ marginBottom: 8 }}>
+              {record.basic_hosting_fee} $/kwh
+            </Tag>
+            <Tag color="green">{text} J/T</Tag>
+          </>
         ),
       },
       {
-        title: "总托管费",
         dataIndex: "hosting_fee_ratio",
         key: "hosting_fee_ratio",
+        title: <span className="fee-ratio-title">总托管费</span>,
         // width: 200,
-        width: "10%",
+        width: "8%",
         render: (text: any, record: any) => (
           <span>
             {/* <span style={{ color: "#3498DB" }}> {record.basic_hosting_fee}</span>{" "}
             <span className="text-sm text-gray-500">$/kwh</span> /{" "} */}
             <span style={{ display: "none" }}>{text.toFixed(2)}</span>
-            <span style={{ color: "#3498DB" }}>{record.total_hosting_fee.toFixed(2)}</span>
-            <span className="text-sm text-gray-500"> usd</span>
+            <span>{formatAmount(record.total_hosting_fee, 2, "$")}</span>
           </span>
         ), // 渲染单位
       },
@@ -261,23 +244,28 @@ export default function StatisticsPage() {
       //   sorter: (a: any, b: any) => a.net_income - b.net_income, // 添加排序逻辑
       // },
       {
-        title: "托管费占比",
+        title: <span className="fee-ratio-title">托管费占比</span>,
         dataIndex: "hosting_fee_ratio",
         key: "hosting_fee_ratio",
-        // width: 100,
+        // width: 220,
         width: "10%",
         sorter: (a: any, b: any) => a.hosting_fee_ratio - b.hosting_fee_ratio,
-        render: (text: any) => (
-          <span style={{ color: "green" }}>
-            {typeof text === "number" ? `${text.toFixed(2)}%` : `${text}%`}
-          </span>
-        ), // 渲染单位
+        onHeaderCell: () => ({ className: "fee-ratio-header" }),
+        onCell: (record: any) => {
+          const val = record?.hosting_fee_ratio;
+          const num = typeof val === "number" ? val : parseFloat(val);
+          return {
+            className: num >= 90 ? "fee-ratio-high" : "fee-ratio-low",
+          };
+        },
+        render: (text: any) => <span>{typeof text === "number" ? `${text.toFixed(2)}%` : `${text}%`}</span>, // 渲染单位
       },
       {
-        title: "收益日期",
+        title: <span className="fee-ratio-title">收益日期</span>,
+        // width: 140,
+        width: "10%",
         dataIndex: "report_date",
         key: "report_date",
-        width: "10%",
         sorter: (a: any, b: any) => new Date(a.report_date).getTime() - new Date(b.report_date).getTime(), // 确保将日期转换为时间戳进行比较
         render: (text: any) => {
           const date = new Date(text);
@@ -486,7 +474,9 @@ export default function StatisticsPage() {
             defaultPageSize: 20,
             showTotal: (total) => `共 ${total} 条`,
             total: filteredData?.length,
-            onChange: () => {
+            onChange: (page, pageSize) => {
+              setCurrentPage(page);
+              setPageSize(pageSize);
               const tableBody = document.querySelector(".ant-table-body");
               if (tableBody) {
                 tableBody.scrollTop = 0;

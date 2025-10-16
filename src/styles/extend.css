@@ -462,3 +462,11 @@
   .header-custom-select .ant-select-selector:hover .ant-select-selection-item {
     color: #fff;
   }
+
+/* 托管费占比高/低背景色（提高特异性，避免被表格单元格背景覆盖） */
+.ant-table-wrapper .ant-table-tbody > tr > td.fee-ratio-high {
+  background-color: #fff1f0 !important; /* 浅红 */
+}
+.ant-table-wrapper .ant-table-tbody > tr > td.fee-ratio-low {
+  background-color: #f6ffed !important; /* 浅绿 */
+}
