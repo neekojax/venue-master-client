@@ -64,6 +64,7 @@ const PriceApp: React.FC = () => {
         xAxis: {
           type: "category",
           data: months,
+          boundaryGap: false,
           axisLabel: {
             formatter: (value: string) => {
               const m = /^(\d{4})[-/](\d{2})[-/](\d{2})/.exec(value);

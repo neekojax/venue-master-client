@@ -40,6 +40,7 @@ export default function StatisticsPage() {
 
   // const { data: linksData, error, isLoading: isLoadingFields } = useCustodyInfoList();
   const [columns, setColumns] = useState<any>([]);
+  const [filteredData, setFilteredData] = useState<any[]>([]);
   const [tableData, setTableData] = useState<any>([]);
   const [searchTerm, setSearchTerm] = useState(""); // 新增搜索状态
   // 全局序号需要分页信息
@@ -321,6 +322,32 @@ export default function StatisticsPage() {
     ]);
   }, [timeRange]);
 
+  // 每当 tableData/filter 改变时，更新 displayData
+  useEffect(() => {
+    // const filtered = tableData.filter((item: any) => {
+    //   // ...你的筛选逻辑
+    //   return true;
+    // });
+    // 根据搜索词过滤数据
+    const filteredData = tableData.filter((item: { [s: string]: unknown } | ArrayLike<unknown>) => {
+      const matchesSearchTerm = Object.values(item).some((value) =>
+        String(value).toLowerCase().includes(searchTerm.toLowerCase()),
+      );
+      // 根据选定的池进行过滤
+      // @ts-ignore
+      const matchesPoolFilter = poolFilter ? false : true;
+      // 高托管费过滤（> 90）
+      const ratioVal = (item as any)?.hosting_fee_ratio;
+      const ratioNum = typeof ratioVal === "number" ? ratioVal : parseFloat(ratioVal);
+      const matchesHighFee = showHighFeeOnly ? ratioNum > 90 : true;
+      const matchesSelectedVenues =
+        selectedVenues.length > 0 ? selectedVenues.includes((item as any).venue_name) : true;
+
+      return matchesSearchTerm && matchesPoolFilter && matchesHighFee && matchesSelectedVenues;
+    });
+    setFilteredData(filteredData);
+  }, [tableData, searchTerm, showHighFeeOnly, selectedVenues]);
+
   // Loading 状态
   if (isLoading) {
     return <Spin tip="加载中..." />;
@@ -346,24 +373,6 @@ export default function StatisticsPage() {
   const handlePoolFilterChange = (value: string) => {
     setPoolFilter(value);
   };
-
-  // 根据搜索词过滤数据
-  const filteredData = tableData.filter((item: { [s: string]: unknown } | ArrayLike<unknown>) => {
-    const matchesSearchTerm = Object.values(item).some((value) =>
-      String(value).toLowerCase().includes(searchTerm.toLowerCase()),
-    );
-    // 根据选定的池进行过滤
-    // @ts-ignore
-    const matchesPoolFilter = poolFilter ? false : true;
-    // 高托管费过滤（> 90）
-    const ratioVal = (item as any)?.hosting_fee_ratio;
-    const ratioNum = typeof ratioVal === "number" ? ratioVal : parseFloat(ratioVal);
-    const matchesHighFee = showHighFeeOnly ? ratioNum > 90 : true;
-    const matchesSelectedVenues =
-      selectedVenues.length > 0 ? selectedVenues.includes((item as any).venue_name) : true;
-
-    return matchesSearchTerm && matchesPoolFilter && matchesHighFee && matchesSelectedVenues;
-  });
 
   // @ts-ignore
   return (
@@ -457,22 +466,22 @@ export default function StatisticsPage() {
                     </span>
                   ),
                 },
-                {
-                  value: "3month",
-                  label: (
-                    <span style={{ display: "flex", alignItems: "center" }}>
-                      <AiOutlineCalendar style={{ color: "#252F4A", fontSize: 14, marginRight: 8 }} /> 三个月
-                    </span>
-                  ),
-                },
-                {
-                  value: "6month",
-                  label: (
-                    <span style={{ display: "flex", alignItems: "center" }}>
-                      <AiOutlineCalendar style={{ color: "#252F4A", fontSize: 14, marginRight: 8 }} /> 半年
-                    </span>
-                  ),
-                },
+                // {
+                //   value: "3month",
+                //   label: (
+                //     <span style={{ display: "flex", alignItems: "center" }}>
+                //       <AiOutlineCalendar style={{ color: "#252F4A", fontSize: 14, marginRight: 8 }} /> 三个月
+                //     </span>
+                //   ),
+                // },
+                // {
+                //   value: "6month",
+                //   label: (
+                //     <span style={{ display: "flex", alignItems: "center" }}>
+                //       <AiOutlineCalendar style={{ color: "#252F4A", fontSize: 14, marginRight: 8 }} /> 半年
+                //     </span>
+                //   ),
+                // },
               ]}
               value={timeRange} // 设置选中的值
             />
@@ -540,7 +549,8 @@ export default function StatisticsPage() {
             onClick: () => navigate(`/custody-menu/statisticsDetail/${record.venue_id}`),
             style: { cursor: "pointer" },
           })}
-          rowKey={(record: any) => record.venue_id}
+          // rowKey={(record: any) => record.venue_id}
+          rowKey={(record) => record.id || record._id || record.miner_name || Math.random()} // ✅ 确保唯一
           columns={columns}
           dataSource={filteredData}
           scroll={{ x: "max-content" }}
