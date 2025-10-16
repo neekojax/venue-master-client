@@ -1,11 +1,11 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { AiOutlineCalendar } from "react-icons/ai";
 import { FaList } from "react-icons/fa6";
 import { FcCalendar } from "react-icons/fc";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 // import { GiMining } from "react-icons/gi";
-import { ExportOutlined, SearchOutlined } from "@ant-design/icons"; // 导入时钟图标
-import { Alert, Button, Input, Select, Space, Spin, Table, Tag, Tooltip } from "antd";
+import { ExportOutlined } from "@ant-design/icons"; // 导入时钟图标
+import { Alert, Button, Select, Space, Spin, Table, Tag, Tooltip } from "antd";
 // import EditTable from "@/components/edit-table";
 import useAuthRedirect from "@/hooks/useAuthRedirect.ts";
 import { useSelector, useSettingsStore } from "@/stores";
@@ -30,6 +30,8 @@ const getInitialPoolFilter = () => {
 export default function StatisticsPage() {
   useAuthRedirect();
 
+  const navigate = useNavigate();
+
   const { poolType } = useSettingsStore(useSelector(["poolType"]));
 
   const [timeRange, setTimeRange] = useState(getInitialTimeRange()); // 默认时间范围
@@ -43,6 +45,13 @@ export default function StatisticsPage() {
   // 全局序号需要分页信息
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(20);
+  // 高托管费筛选（> 90%）
+  const [showHighFeeOnly, setShowHighFeeOnly] = useState(true);
+  const [selectedVenues, setSelectedVenues] = useState<string[]>([]);
+  const venueOptions = useMemo(() => {
+    const names = Array.from(new Set(tableData.map((i: any) => i.venue_name))).filter(Boolean) as string[];
+    return names.map((name) => ({ label: name, value: name }));
+  }, [tableData]);
 
   useEffect(() => {
     if (statisticsData && statisticsData.data) {
@@ -62,6 +71,7 @@ export default function StatisticsPage() {
         }) => ({
           key: item.venue_id, // 使用场地ID作为唯一 key
           venue_name: item.venue_name,
+          venue_id: item.venue_id,
           // sub_account_name: item.sub_account_name,
           // observer_link: item.observer_link,
           energy_ratio: item.power_consumption,
@@ -77,7 +87,7 @@ export default function StatisticsPage() {
       );
       setTableData(newData); // 设置表格数据源
     }
-  }, [statisticsData]);
+  }, [statisticsData, timeRange]);
 
   // 表头定义
   useEffect(() => {
@@ -88,8 +98,8 @@ export default function StatisticsPage() {
             No
           </span>
         ), // 使用英文标题
-        dataIndex: "venue_name",
-        key: "venue_name",
+        dataIndex: "index",
+        key: "index",
         onHeaderCell: () => ({ className: "fee-ratio-header" }),
         width: 55,
         render: (_: any, __: any, index: number) => {
@@ -127,7 +137,11 @@ export default function StatisticsPage() {
                   </Tag>
                 )}
                 {/* {text} */}
-                <Link to={`/venue/detail/${record.key}`} className="text-blue-500 hover:underline">
+                <Link
+                  to={`/venue/detail/${record.key}`}
+                  onClick={(e) => e.stopPropagation()}
+                  className="text-blue-500 hover:underline"
+                >
                   {text}
                 </Link>
               </div>
@@ -158,7 +172,9 @@ export default function StatisticsPage() {
         onHeaderCell: () => ({ className: "fee-ratio-header" }),
         // width: 140,
         width: "10%",
-        sorter: (a: any, b: any) => a.hash - b.hash, // 添加排序逻辑
+        sorter: (a: any, b: any) =>
+          (typeof a.hash === "number" ? a.hash : parseFloat(a.hash)) -
+          (typeof b.hash === "number" ? b.hash : parseFloat(b.hash)), // 添加排序逻辑（兼容字符串）
         render: (text: any) => (
           <span>
             <span>{formatHashrate(text, "TH", 2, "EH")}</span>
@@ -173,7 +189,9 @@ export default function StatisticsPage() {
         // width: 280,
         width: "25%",
         onHeaderCell: () => ({ className: "fee-ratio-header" }),
-        sorter: (a: any, b: any) => a.total_income_btc - b.total_income_btc, // 添加排序逻辑
+        sorter: (a: any, b: any) =>
+          (typeof a.total_income_btc === "number" ? a.total_income_btc : parseFloat(a.total_income_btc)) -
+          (typeof b.total_income_btc === "number" ? b.total_income_btc : parseFloat(b.total_income_btc)), // 添加排序逻辑（兼容字符串）
         render: (text: any, record: any) => (
           <>
             <Tag color="gold" style={{ marginBottom: 8 }}>
@@ -189,20 +207,34 @@ export default function StatisticsPage() {
         ), // 渲染单位
       },
       {
-        title: <span className="fee-ratio-title">单价/能耗</span>,
+        title: <span className="fee-ratio-title">单价</span>,
+        dataIndex: "basic_hosting_fee",
+        key: "basic_hosting_fee",
+        onHeaderCell: () => ({ className: "fee-ratio-header" }),
+        // width: 220,
+        width: "10%",
+        sorter: (a: any, b: any) =>
+          (typeof a.basic_hosting_fee === "number" ? a.basic_hosting_fee : parseFloat(a.basic_hosting_fee)) -
+          (typeof b.basic_hosting_fee === "number" ? b.basic_hosting_fee : parseFloat(b.basic_hosting_fee)), // 添加排序逻辑（兼容字符串）
+        render: (text: any) => (
+          <>
+            {/* <Tag color="gold" style={{ marginBottom: 8 }}> */}
+            {text}$/kwh
+            {/* </Tag> */}
+          </>
+        ),
+      },
+      {
+        title: <span className="fee-ratio-title">能耗</span>,
         dataIndex: "energy_ratio",
         key: "energy_ratio",
         onHeaderCell: () => ({ className: "fee-ratio-header" }),
         // width: 220,
-        width: "20%",
-        render: (text: any, record: any) => (
-          <>
-            <Tag color="gold" style={{ marginBottom: 8 }}>
-              {record.basic_hosting_fee} $/kwh
-            </Tag>
-            <Tag color="green">{text} J/T</Tag>
-          </>
-        ),
+        width: "8%",
+        sorter: (a: any, b: any) =>
+          (typeof a.energy_ratio === "number" ? a.energy_ratio : parseFloat(a.energy_ratio)) -
+          (typeof b.energy_ratio === "number" ? b.energy_ratio : parseFloat(b.energy_ratio)), // 添加排序逻辑（兼容字符串）
+        render: (text: any) => <>{text}J/T</>,
       },
       {
         dataIndex: "hosting_fee_ratio",
@@ -248,8 +280,14 @@ export default function StatisticsPage() {
         dataIndex: "hosting_fee_ratio",
         key: "hosting_fee_ratio",
         // width: 220,
-        width: "10%",
-        sorter: (a: any, b: any) => a.hosting_fee_ratio - b.hosting_fee_ratio,
+        width: "12%",
+        sorter: (a: any, b: any) => {
+          const av =
+            typeof a.hosting_fee_ratio === "number" ? a.hosting_fee_ratio : parseFloat(a.hosting_fee_ratio);
+          const bv =
+            typeof b.hosting_fee_ratio === "number" ? b.hosting_fee_ratio : parseFloat(b.hosting_fee_ratio);
+          return av - bv;
+        },
         onHeaderCell: () => ({ className: "fee-ratio-header" }),
         onCell: (record: any) => {
           const val = record?.hosting_fee_ratio;
@@ -272,39 +310,36 @@ export default function StatisticsPage() {
           const month = date.getMonth() + 1;
           const day = date.getDate();
           return `${month}-${day}`;
-
           // return moment(text).format("MM-DD");
         },
       },
-
       // {
       //   title: "操作",
       //   valueType: "option",
       //   key: "operation",
       // },
     ]);
-  }, []);
+  }, [timeRange]);
 
   // Loading 状态
   if (isLoading) {
     return <Spin tip="加载中..." />;
   }
-
   // 错误状态
   if (error) {
     return <Alert message="错误" description={error.message} type="error" showIcon />;
   }
-
   // 时间选择
   const handleChange = (value: string) => {
     setTimeRange(value);
+    handleSearch();
     localStorage.setItem("timeRange", value); // 存储到本地存储
   };
 
   // 搜索处理函数
-  const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleSearch = () => {
     handlePoolFilterChange("");
-    setSearchTerm(e.target.value);
+    setSearchTerm("");
   };
 
   // 池选择处理函数
@@ -314,23 +349,25 @@ export default function StatisticsPage() {
 
   // 根据搜索词过滤数据
   const filteredData = tableData.filter((item: { [s: string]: unknown } | ArrayLike<unknown>) => {
-    // return Object.values(item).some((value) =>
-    //   String(value).toLowerCase().includes(searchTerm.toLowerCase()),
-    // );
     const matchesSearchTerm = Object.values(item).some((value) =>
       String(value).toLowerCase().includes(searchTerm.toLowerCase()),
     );
-
     // 根据选定的池进行过滤
     // @ts-ignore
     const matchesPoolFilter = poolFilter ? false : true;
+    // 高托管费过滤（> 90）
+    const ratioVal = (item as any)?.hosting_fee_ratio;
+    const ratioNum = typeof ratioVal === "number" ? ratioVal : parseFloat(ratioVal);
+    const matchesHighFee = showHighFeeOnly ? ratioNum > 90 : true;
+    const matchesSelectedVenues =
+      selectedVenues.length > 0 ? selectedVenues.includes((item as any).venue_name) : true;
 
-    return matchesSearchTerm && matchesPoolFilter;
+    return matchesSearchTerm && matchesPoolFilter && matchesHighFee && matchesSelectedVenues;
   });
 
   // @ts-ignore
   return (
-    <div style={{ padding: "20px" }}>
+    <div>
       <div
         style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}
       >
@@ -442,15 +479,31 @@ export default function StatisticsPage() {
           </div>
         </Space>
 
-        <div style={{ display: "flex", justifyContent: "space-between" }}>
-          <Input
-            prefix={<SearchOutlined style={{ color: "rgba(0, 0, 0, 0.25)", fontSize: 18 }} />}
-            placeholder="请输入搜索字段"
-            value={searchTerm}
-            onChange={handleSearch}
-            style={{ width: 250 }} // 设定宽度
-            className="text-sm mr-10"
+        <div style={{ display: "flex", justifyContent: "flex-end" }}>
+          <Select
+            mode="multiple"
+            allowClear
+            showSearch
+            size="middle"
+            placeholder="选择场地"
+            value={selectedVenues}
+            onChange={(vals) => setSelectedVenues(vals as string[])}
+            options={venueOptions}
+            maxTagCount="responsive"
+            maxTagTextLength={8}
+            maxTagPlaceholder={(omitted) => `已选 ${omitted.length} 项`}
+            style={{ width: 300, marginRight: 10 }}
+            className="text-sm"
           />
+          <Button.Group size="middle" style={{ marginRight: 10 }}>
+            <Button type={!showHighFeeOnly ? "primary" : "default"} onClick={() => setShowHighFeeOnly(false)}>
+              全部
+            </Button>
+            <Button type={showHighFeeOnly ? "primary" : "default"} onClick={() => setShowHighFeeOnly(true)}>
+              高托管费
+            </Button>
+          </Button.Group>
+
           <Button
             // type="text"
             icon={<ExportOutlined className="exportIcon" />}
@@ -479,11 +532,15 @@ export default function StatisticsPage() {
               setPageSize(pageSize);
               const tableBody = document.querySelector(".ant-table-body");
               if (tableBody) {
-                tableBody.scrollTop = 0;
+                (tableBody as HTMLElement).scrollTop = 0;
               }
             },
           }}
-          rowKey={(record: any) => record.key}
+          onRow={(record) => ({
+            onClick: () => navigate(`/custody-menu/statisticsDetail/${record.venue_id}`),
+            style: { cursor: "pointer" },
+          })}
+          rowKey={(record: any) => record.venue_id}
           columns={columns}
           dataSource={filteredData}
           scroll={{ x: "max-content" }}

@@ -35,6 +35,38 @@ export const custodyMenuRoute: RouteObject = {
         crumb: () => <Link to={ROUTE_PATHS.statistics}>信息统计</Link>,
       },
     },
+    // {
+    //   path: ROUTE_PATHS.statisticsDetail(0),
+    //   lazy: async () => ({
+    //     Component: (await import("@/pages/custody-statistics/statisticsDetail")).default,
+    //   }),
+    //   HydrateFallback: ProgressBar,
+    //   handle: {
+    //     title: "趋势分析",
+    //     crumb: () => <Link to={ROUTE_PATHS.statisticsDetail(0)}>趋势分析</Link>,
+    //   },
+    // },
+    {
+      path: "/custody-menu/statisticsDetail/:venueId", // 直接使用动态参数
+      lazy: async () => ({
+        Component: (await import("@/pages/custody-statistics/statisticsDetail")).default,
+      }),
+      HydrateFallback: ProgressBar,
+      handle: {
+        title: "趋势分析",
+        crumb: (params: { venueId?: string }) => (
+          <Link
+            to={
+              params?.venueId
+                ? ROUTE_PATHS.statisticsDetail(params.venueId)
+                : "/custody-menu/statisticsDetail"
+            }
+          >
+            趋势分析
+          </Link>
+        ),
+      },
+    },
     {
       path: ROUTE_PATHS.dailyAveragePrice,
       lazy: async () => ({

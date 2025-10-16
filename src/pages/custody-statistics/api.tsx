@@ -31,3 +31,19 @@ export const fetchCustodyStatisticsList = async ({ queryKey }: { queryKey: [stri
 export const fetchDailyAveragePrice = async () => {
   return await fetchGet(`custody/dailyAveragePriceList`);
 };
+
+// 获取托管费比例变化
+// /custody/getCustodyStatisticsHistory
+// "venue id": [102],"interval":"30"
+export const fetchCustodyFeeRatioHistory = async ({ venueId }: { venueId: number }) => {
+  return await fetchPost(`custody/getCustodyStatisticsHistory`, {
+    venue_id: [venueId],
+    interval: 30,
+  });
+};
+
+// 获取180天内的BTC每日均价
+///custody/dailyBtcPrice/180 获取180天内的BTC每日均价
+export const fetchDailyBtcPrice = async ({ venueId }: { venueId: number }) => {
+  return await fetchGet(`custody/dailyBtcPrice/${venueId}`);
+};

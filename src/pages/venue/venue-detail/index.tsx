@@ -5,6 +5,7 @@ import { Select } from "antd";
 import BasicDataChart from "./components/BasicDataChart";
 import BusinessReport from "./components/Business";
 import ChartFail from "./components/ChartFail";
+import ChartFee from "./components/chartFee";
 import ChartHighTemperatureImpact from "./components/ChartHighTemperatureImpact";
 import ChartLimitImpact from "./components/ChartLimitImpact";
 import ChartSuanli from "./components/ChartSuanli";
@@ -159,6 +160,7 @@ const VenueDetail: React.FC = () => {
       </header>
       {stats && <BasicDataChart stats={stats} loading={loading} />}
       {/* 图表区域 */}
+      <ChartFee />
       <div className="grid grid-cols-2 gap-4 mb-8">
         <div className="bg-white p-4 rounded-lg shadow-sm">
           <ChartSuanli></ChartSuanli>

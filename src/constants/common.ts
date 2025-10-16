@@ -10,6 +10,8 @@ export const ROUTE_PATHS = {
   custodyMenu: "/custody-menu",
   setting: "/custody-menu/setting",
   statistics: "/custody-menu/statistics",
+  statisticsDetail: (venueId: string | number) => `/custody-menu/statisticsDetail/${venueId}`,
+  // miningSiteDetail: (venueId: string | number) => `/venue/detail/${venueId}`, // 场地详情，需传参数
   dashboard: "/dashboard",
   dailyAveragePrice: "/custody-menu/price",
   electric: "/electric",
