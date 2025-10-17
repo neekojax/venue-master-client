@@ -38,7 +38,7 @@ export const fetchDailyAveragePrice = async () => {
 export const fetchCustodyFeeRatioHistory = async ({ venueId }: { venueId: number }) => {
   return await fetchPost(`custody/getCustodyStatisticsHistory`, {
     venue_id: [venueId],
-    interval: 30,
+    interval: 180,
   });
 };
 

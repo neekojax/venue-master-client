@@ -17,7 +17,7 @@ const PriceApp: React.FC = () => {
   const isInvalidVenueId = isNaN(parsedVenueId);
 
   const fetchBtcPriceHistory = useCallback(async () => {
-    const res = await fetchDailyBtcPrice({ venueId: parsedVenueId });
+    const res = await fetchDailyBtcPrice({ venueId: 180 });
     const payload: any = res;
     if (payload && (payload.code === 0 || payload.success === true) && payload.data) {
       const arr = payload.data || [];
@@ -48,63 +48,72 @@ const PriceApp: React.FC = () => {
   useEffect(() => {
     if (btcChartRef.current) {
       const btcChart = echarts.init(btcChartRef.current);
-      btcChart.setOption({
-        title: {
-          text: "BTC单价趋势（USD）",
-          textStyle: {
-            fontSize: 16,
-            fontWeight: "bold",
-            color: "#1890ff",
+      const renderChart = () => {
+        btcChart.setOption({
+          title: {
+            text: "BTC单价趋势（USD）",
+            textStyle: {
+              fontSize: 16,
+              fontWeight: "bold",
+              color: "#1890ff",
+            },
+            left: "center",
           },
-          left: "center",
-        },
-        tooltip: {
-          trigger: "axis",
-        },
-        xAxis: {
-          type: "category",
-          data: months,
-          boundaryGap: false,
-          axisLabel: {
-            formatter: (value: string) => {
-              const m = /^(\d{4})[-/](\d{2})[-/](\d{2})/.exec(value);
-              if (m) return `${m[2]}/${m[3]}`;
-              const d = new Date(value);
-              if (!isNaN(d.getTime())) {
-                const mm = String(d.getMonth() + 1).padStart(2, "0");
-                const dd = String(d.getDate()).padStart(2, "0");
-                return `${mm}/${dd}`;
-              }
-              const parts = value.split(" ")[0].split("-");
-              if (parts.length >= 3) return `${parts[1]}/${parts[2]}`;
-              return value;
+          tooltip: {
+            trigger: "axis",
+          },
+          xAxis: {
+            type: "category",
+            data: months,
+            boundaryGap: false,
+            axisLabel: {
+              formatter: (value: string) => {
+                const m = /^(\d{4})[-/](\d{2})[-/](\d{2})/.exec(value);
+                if (m) return `${m[2]}/${m[3]}`;
+                const d = new Date(value);
+                if (!isNaN(d.getTime())) {
+                  const mm = String(d.getMonth() + 1).padStart(2, "0");
+                  const dd = String(d.getDate()).padStart(2, "0");
+                  return `${mm}/${dd}`;
+                }
+                const parts = value.split(" ")[0].split("-");
+                if (parts.length >= 3) return `${parts[1]}/${parts[2]}`;
+                return value;
+              },
             },
           },
-        },
-        yAxis: {
-          type: "value",
-          axisLabel: {
-            formatter: "${value}",
+          yAxis: {
+            type: "value",
+            min: Math.min(...btcPrices) - 5000,
+            axisLabel: {
+              formatter: "${value}",
+            },
           },
-        },
-        series: [
-          {
-            data: btcPrices,
-            type: "line",
-            smooth: true,
-            itemStyle: { color: "#1890ff" },
-            areaStyle: { color: "rgba(24, 144, 255, 0.1)" },
-            showSymbol: false, // Hide symbols for better performance with many data points
+          series: [
+            {
+              data: btcPrices,
+              type: "line",
+              smooth: true,
+              itemStyle: { color: "#1890ff" },
+              areaStyle: { color: "rgba(24, 144, 255, 0.1)" },
+              showSymbol: false, // Hide symbols for better performance with many data points
+            },
+          ],
+          grid: {
+            left: "5%",
+            right: "5%",
+            bottom: "10%",
+            containLabel: true,
           },
-        ],
-        grid: {
-          left: "0%",
-          right: "0%",
-          bottom: "5%",
-          containLabel: true,
-        },
-        animation: false,
-      });
+          animation: false,
+        });
+      };
+      renderChart();
+      // 👇 添加监听窗口尺寸变化事件，图表自适应
+      const handleResize = () => {
+        btcChart.resize();
+      };
+      window.addEventListener("resize", handleResize);
       return () => {
         btcChart.dispose();
       };

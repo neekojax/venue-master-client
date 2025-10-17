@@ -65,6 +65,8 @@ export default function StatisticsPage() {
           income_btc: any;
           managed_unit_price: any;
           power_consumption: any;
+          nominal_power_consumption: any;
+          power_consumption_diff: any;
           total_hosting_fee: any;
           total_income_usd: any;
           net_income: any;
@@ -75,6 +77,9 @@ export default function StatisticsPage() {
           venue_id: item.venue_id,
           // sub_account_name: item.sub_account_name,
           // observer_link: item.observer_link,
+          power_consumption: item.power_consumption,
+          nominal_power_consumption: item.nominal_power_consumption,
+          power_consumption_diff: item.power_consumption_diff,
           energy_ratio: item.power_consumption,
           basic_hosting_fee: item.managed_unit_price,
           hash: item.hash,
@@ -220,7 +225,7 @@ export default function StatisticsPage() {
         render: (text: any) => (
           <>
             {/* <Tag color="gold" style={{ marginBottom: 8 }}> */}
-            {text}$/kwh
+            {text} $/kwh
             {/* </Tag> */}
           </>
         ),
@@ -235,7 +240,31 @@ export default function StatisticsPage() {
         sorter: (a: any, b: any) =>
           (typeof a.energy_ratio === "number" ? a.energy_ratio : parseFloat(a.energy_ratio)) -
           (typeof b.energy_ratio === "number" ? b.energy_ratio : parseFloat(b.energy_ratio)), // 添加排序逻辑（兼容字符串）
-        render: (text: any) => <>{text}J/T</>,
+        render: (text: any) => <>{text} J/T</>,
+      },
+      {
+        dataIndex: "nominal_power_consumption",
+        key: "nominal_power_consumption",
+        title: <span className="fee-ratio-title">额定能耗</span>,
+        // width: 200,
+        width: "8%",
+        render: (text: any) => (
+          <>
+            <span>{text.toFixed(2)}</span>
+          </>
+        ), // 渲染单位
+      },
+      {
+        dataIndex: "power_consumption_diff",
+        key: "power_consumption_diff",
+        title: <span className="fee-ratio-title">能耗差异</span>,
+        // width: 200,
+        width: "8%",
+        render: (text: any) => (
+          <>
+            <span>{text}%</span>
+          </>
+        ), // 渲染单位
       },
       {
         dataIndex: "hosting_fee_ratio",

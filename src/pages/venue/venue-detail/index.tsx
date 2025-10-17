@@ -5,7 +5,6 @@ import { Select } from "antd";
 import BasicDataChart from "./components/BasicDataChart";
 import BusinessReport from "./components/Business";
 import ChartFail from "./components/ChartFail";
-import ChartFee from "./components/chartFee";
 import ChartHighTemperatureImpact from "./components/ChartHighTemperatureImpact";
 import ChartLimitImpact from "./components/ChartLimitImpact";
 import ChartSuanli from "./components/ChartSuanli";
@@ -14,6 +13,7 @@ import { useSelector, useSettingsStore } from "@/stores";
 
 import "./index.css";
 
+import ChartFee from "@/pages/custody-statistics/statisticsDetail/components/chartFee";
 import { getVenueBasicInfo, getVenueDailyStat } from "@/pages/venue/api.tsx";
 import { useVenueList } from "@/pages/venue/hook/hook";
 
