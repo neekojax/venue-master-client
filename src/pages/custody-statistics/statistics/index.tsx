@@ -47,7 +47,7 @@ export default function StatisticsPage() {
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(20);
   // 高托管费筛选（> 90%）
-  const [showHighFeeOnly, setShowHighFeeOnly] = useState(true);
+  const [showHighFeeOnly, setShowHighFeeOnly] = useState(false);
   const [selectedVenues, setSelectedVenues] = useState<string[]>([]);
   const venueOptions = useMemo(() => {
     const names = Array.from(new Set(tableData.map((i: any) => i.venue_name))).filter(Boolean) as string[];
@@ -155,22 +155,6 @@ export default function StatisticsPage() {
           );
         },
       },
-      // {
-      //   title: "子账号",
-      //   dataIndex: "sub_account_name",
-      //   key: "sub_account_name",
-      // },
-
-      // {
-      //   title: "基础托管费",
-      //   dataIndex: "basic_hosting_fee",
-      //   key: "basic_hosting_fee",
-      //   render: (text: any) => (
-      //     <span>
-      //       {text} <span style={{ fontSize: "em" }}>$/kwh</span>
-      //     </span>
-      //   ), // 渲染单位
-      // },
       {
         title: <span className="fee-ratio-title">24h算力</span>,
         dataIndex: "hash",
@@ -231,23 +215,23 @@ export default function StatisticsPage() {
         ),
       },
       {
-        title: <span className="fee-ratio-title">能耗</span>,
+        title: <span className="fee-ratio-title">预估能耗</span>,
         dataIndex: "energy_ratio",
         key: "energy_ratio",
         onHeaderCell: () => ({ className: "fee-ratio-header" }),
         // width: 220,
-        width: "8%",
+        width: "10%",
         sorter: (a: any, b: any) =>
           (typeof a.energy_ratio === "number" ? a.energy_ratio : parseFloat(a.energy_ratio)) -
           (typeof b.energy_ratio === "number" ? b.energy_ratio : parseFloat(b.energy_ratio)), // 添加排序逻辑（兼容字符串）
-        render: (text: any) => <>{text} J/T</>,
+        render: (text: any) => <>{text}</>,
       },
       {
         dataIndex: "nominal_power_consumption",
         key: "nominal_power_consumption",
         title: <span className="fee-ratio-title">额定能耗</span>,
         // width: 200,
-        width: "8%",
+        width: "7%",
         render: (text: any) => (
           <>
             <span>{text.toFixed(2)}</span>
@@ -259,10 +243,10 @@ export default function StatisticsPage() {
         key: "power_consumption_diff",
         title: <span className="fee-ratio-title">能耗差异</span>,
         // width: 200,
-        width: "8%",
+        width: "7%",
         render: (text: any) => (
           <>
-            <span>{text}%</span>
+            <span style={{ color: text > 10 ? "red" : "green" }}>{text}%</span>
           </>
         ), // 渲染单位
       },
@@ -281,30 +265,6 @@ export default function StatisticsPage() {
           </span>
         ), // 渲染单位
       },
-      // {
-      //   title: "BTC收益",
-      //   dataIndex: "total_income_btc",
-      //   key: "total_income_btc",
-      //   sorter: (a: any, b: any) => a.total_income_btc - b.total_income_btc, // 添加排序逻辑
-      //   render: (text: any) => (
-      //     <span>
-      //       <span>{text}</span> {/* 数字部分设置为蓝色 */}
-      //       <span style={{ fontSize: "1em" }}> BTC</span> {/* 单位颜色不变 */}
-      //     </span>
-      //   ), // 渲染单位
-      // },
-      // {
-      //   title: "USD收益",
-      //   dataIndex: "total_income_usd",
-      //   key: "total_income_usd",
-      //   sorter: (a: any, b: any) => a.total_income_usd - b.total_income_usd, // 添加排序逻辑
-      // },
-      // {
-      //   title: "净收益USD",
-      //   dataIndex: "net_income",
-      //   key: "net_income",
-      //   sorter: (a: any, b: any) => a.net_income - b.net_income, // 添加排序逻辑
-      // },
       {
         title: <span className="fee-ratio-title">托管费占比</span>,
         dataIndex: "hosting_fee_ratio",
@@ -343,20 +303,11 @@ export default function StatisticsPage() {
           // return moment(text).format("MM-DD");
         },
       },
-      // {
-      //   title: "操作",
-      //   valueType: "option",
-      //   key: "operation",
-      // },
     ]);
   }, [timeRange]);
 
   // 每当 tableData/filter 改变时，更新 displayData
   useEffect(() => {
-    // const filtered = tableData.filter((item: any) => {
-    //   // ...你的筛选逻辑
-    //   return true;
-    // });
     // 根据搜索词过滤数据
     const filteredData = tableData.filter((item: { [s: string]: unknown } | ArrayLike<unknown>) => {
       const matchesSearchTerm = Object.values(item).some((value) =>

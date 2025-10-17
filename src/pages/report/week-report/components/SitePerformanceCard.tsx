@@ -17,6 +17,8 @@ interface DailyData {
   LimitImpactRate: number; // 限电影响率（%）
   Failure: number; // 故障数量
   FailureRate: number; // 故障率（%）
+  PendingRepair: number; // 待维修数量
+  PendingRepairRate: number; // 待维修率（%）
 }
 interface DataItem {
   venue_id: number; // 场馆 ID
@@ -28,6 +30,7 @@ interface DataItem {
   average_failure_rate: number; // 平均故障率（%）
   average_high_temperature_impact_rate: number; // 平均高温影响率（%）
   average_limit_impact_rate: number; // 平均限电影响率（%）
+  average_pending_repair_rate: number; // 平均待维修率（%）
   daily_items: DailyData[];
 }
 
@@ -231,6 +234,14 @@ const SitePerformanceCard: React.FC<SitePerformanceCardProps> = ({
                     <span>{value}%</span>
                   </div>
                 ),
+              },
+              {
+                title: "待修率",
+                dataIndex: "PendingRepairRate",
+                key: "PendingRepairRate",
+                align: "center",
+                sorter: (a, b) => a.PendingRepairRate - b.PendingRepairRate,
+                render: (value) => <span className="text-orange-500">{value}%</span>,
               },
               {
                 title: "高温影响率",

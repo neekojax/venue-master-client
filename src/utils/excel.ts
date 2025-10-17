@@ -4,34 +4,38 @@ export const exportCustodyStatisticsToExcel = (data: any) => {
   // 创建一个工作簿
   const workbook = XLSX.utils.book_new();
 
-  // 自定义表头
+  // 自定义表头（对齐数据库返回字段）
   const customHeader = [
-    { header: "场地", key: "venue_name" },
-    { header: "子账号", key: "sub_account_name" },
     { header: "收益日期", key: "report_date" },
-    { header: "能耗比（J/T）", key: "energy_ratio" },
-    { header: "基础托管费（$/kwh）", key: "basic_hosting_fee" },
-    { header: "24小时平均算力（TH/s）", key: "hourly_computing_power" },
-    { header: "总托管费", key: "total_hosting_fee" },
+    { header: "场地ID", key: "venue_id" },
+    { header: "场地名", key: "venue_name" },
+    { header: "24h算力（TH/s）", key: "hash" },
     { header: "BTC收益（BTC）", key: "total_income_btc" },
     { header: "USD收益（USD）", key: "total_income_usd" },
     { header: "净收益（USD）", key: "net_income" },
-    { header: "托管费占比", key: "hosting_fee_ratio" },
+    { header: "单价（$/kwh）", key: "basic_hosting_fee" },
+    { header: "预估能耗", key: "power_consumption" },
+    { header: "实际能耗", key: "nominal_power_consumption" },
+    { header: "能耗差异", key: "power_consumption_diff" },
+    { header: "总托管费（USD）", key: "total_hosting_fee" },
+    { header: "托管费占比（%）", key: "hosting_fee_ratio" },
   ];
 
-  // 处理数据并生成工作表
+  // 处理数据并生成工作表（映射数据库字段）
   const formattedData = data.map((item: any) => ({
-    venue_name: item.venue_name,
-    sub_account_name: item.sub_account_name,
     report_date: item.report_date,
-    energy_ratio: item.energy_ratio,
-    basic_hosting_fee: item.basic_hosting_fee,
-    hourly_computing_power: item.hourly_computing_power,
-    total_hosting_fee: item.total_hosting_fee,
+    venue_id: item.venue_id,
+    venue_name: item.venue_name,
+    hash: item.hash,
     total_income_btc: item.total_income_btc,
+    basic_hosting_fee: item.basic_hosting_fee,
+    power_consumption: item.power_consumption,
+    nominal_power_consumption: item.nominal_power_consumption,
+    power_consumption_diff: item.power_consumption_diff + "%",
+    total_hosting_fee: item.total_hosting_fee,
     total_income_usd: item.total_income_usd,
     net_income: item.net_income,
-    hosting_fee_ratio: item.hosting_fee_ratio,
+    hosting_fee_ratio: item.hosting_fee_ratio.toFixed(2) + "%",
   }));
 
   // 将自定义表头和数据合并
@@ -43,20 +47,21 @@ export const exportCustodyStatisticsToExcel = (data: any) => {
   // 生成工作表
   const worksheet = XLSX.utils.aoa_to_sheet(worksheetData);
 
-  // 设置列宽度
-  // 设置每一列的宽度
+  // 设置列宽度（与表头数量一致）
   worksheet["!cols"] = [
-    { wch: 20 }, // 场地
-    { wch: 20 }, // 子账号
-    { wch: 20 }, // 收益日期
-    { wch: 20 }, // 能耗比
-    { wch: 20 }, // 基础托管费
-    { wch: 25 }, // 24小时平均算力
-    { wch: 20 }, // 总托管费
-    { wch: 20 }, // BTC收益
+    { wch: 12 }, // 收益日期
+    { wch: 10 }, // 场地ID
+    { wch: 30 }, // 场地
+    { wch: 18 }, // 算力
+    { wch: 18 }, // BTC收益
     { wch: 20 }, // USD收益
     { wch: 20 }, // 净收益USD
-    { wch: 15 }, // 托管费占比
+    { wch: 18 }, // 基础托管费
+    { wch: 16 }, // 能耗
+    { wch: 16 }, // 标称能耗
+    { wch: 14 }, // 能耗差值
+    { wch: 20 }, // 总托管费
+    { wch: 14 }, // 托管费占比
   ];
 
   // 将工作表添加到工作簿
