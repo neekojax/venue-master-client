@@ -5,7 +5,7 @@ import { FcCalendar } from "react-icons/fc";
 import { Link, useNavigate } from "react-router-dom";
 // import { GiMining } from "react-icons/gi";
 import { ExportOutlined } from "@ant-design/icons"; // 导入时钟图标
-import { Alert, Button, Select, Space, Spin, Table, Tag, Tooltip } from "antd";
+import { Alert, Button, message, Select, Space, Spin, Table, Tag, Tooltip } from "antd";
 // import EditTable from "@/components/edit-table";
 import useAuthRedirect from "@/hooks/useAuthRedirect.ts";
 import { useSelector, useSettingsStore } from "@/stores";
@@ -92,6 +92,25 @@ export default function StatisticsPage() {
         }),
       );
       setTableData(newData); // 设置表格数据源
+    } else {
+      // 处理空数据情况
+      // setAlertMessage({
+      //   message: "暂无数据",
+      //   type: "info",
+      // });
+      setFilteredData([]);
+      setTableData([]);
+      // 如果当前时间是最近的时间范围，不展示数据
+      const now = new Date(); // 当前时间
+      const hour = now.getHours(); // 获取当前小时（0~23）
+
+      if (timeRange === "1days" && hour < 10) {
+        message.open({
+          type: "warning",
+          content: "今日数据处理中，请稍后查看，或者查看近三天的数据",
+          duration: 5,
+        });
+      }
     }
   }, [statisticsData, timeRange]);
 
