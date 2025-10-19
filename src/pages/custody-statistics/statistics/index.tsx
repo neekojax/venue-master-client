@@ -5,7 +5,7 @@ import { FcCalendar } from "react-icons/fc";
 import { Link, useNavigate } from "react-router-dom";
 // import { GiMining } from "react-icons/gi";
 import { ExportOutlined } from "@ant-design/icons"; // 导入时钟图标
-import { Alert, Button, message, Select, Space, Spin, Table, Tag, Tooltip } from "antd";
+import { Alert, Button, Select, Space, Spin, Table, Tag, Tooltip } from "antd";
 // import EditTable from "@/components/edit-table";
 import useAuthRedirect from "@/hooks/useAuthRedirect.ts";
 import { useSelector, useSettingsStore } from "@/stores";
@@ -43,6 +43,7 @@ export default function StatisticsPage() {
   const [filteredData, setFilteredData] = useState<any[]>([]);
   const [tableData, setTableData] = useState<any>([]);
   const [searchTerm, setSearchTerm] = useState(""); // 新增搜索状态
+  const [alertMessage, setAlertMessage] = useState("");
   // 全局序号需要分页信息
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(20);
@@ -56,6 +57,7 @@ export default function StatisticsPage() {
 
   useEffect(() => {
     if (statisticsData && statisticsData.data) {
+      setAlertMessage("");
       const newData = statisticsData.data.map(
         (item: {
           date: any;
@@ -105,11 +107,14 @@ export default function StatisticsPage() {
       const hour = now.getHours(); // 获取当前小时（0~23）
 
       if (timeRange === "1days" && hour < 10) {
-        message.open({
-          type: "warning",
-          content: "今日数据处理中，请稍后查看，或者查看近三天的数据",
-          duration: 5,
-        });
+        setAlertMessage("今日数据处理中，请稍后查看，或者查看近三天的数据");
+        // message.open({
+        //   type: "warning",
+        //   content: "今日数据处理中，请稍后查看，或者查看近三天的数据",
+        //   duration: 5,
+        // });
+      } else {
+        setAlertMessage("");
       }
     }
   }, [statisticsData, timeRange]);
@@ -527,34 +532,46 @@ export default function StatisticsPage() {
       {isLoading ? (
         <Spin style={{ marginTop: 20 }} />
       ) : (
-        <Table
-          pagination={{
-            position: ["bottomCenter"],
-            showSizeChanger: true,
-            pageSizeOptions: ["10", "20", "30", "50"],
-            defaultPageSize: 20,
-            showTotal: (total) => `共 ${total} 条`,
-            total: filteredData?.length,
-            onChange: (page, pageSize) => {
-              setCurrentPage(page);
-              setPageSize(pageSize);
-              const tableBody = document.querySelector(".ant-table-body");
-              if (tableBody) {
-                (tableBody as HTMLElement).scrollTop = 0;
-              }
-            },
-          }}
-          onRow={(record) => ({
-            onClick: () => navigate(`/custody-menu/statisticsDetail/${record.venue_id}`),
-            style: { cursor: "pointer" },
-          })}
-          // rowKey={(record: any) => record.venue_id}
-          rowKey={(record) => record.id || record._id || record.miner_name || Math.random()} // ✅ 确保唯一
-          columns={columns}
-          dataSource={filteredData}
-          scroll={{ x: "max-content" }}
-          style={{ marginTop: "15px", width: "100%" }}
-        />
+        <div>
+          {alertMessage ? (
+            <div
+              className="bg-yellow-100 border border-yellow-400 text-yellow-700 px-4 py-3 rounded relative"
+              role="alert"
+            >
+              <strong className="font-bold">提示：</strong>
+              <span className="block sm:inline">{alertMessage}</span>
+            </div>
+          ) : (
+            <Table
+              pagination={{
+                position: ["bottomCenter"],
+                showSizeChanger: true,
+                pageSizeOptions: ["10", "20", "30", "50"],
+                defaultPageSize: 20,
+                showTotal: (total) => `共 ${total} 条`,
+                total: filteredData?.length,
+                onChange: (page, pageSize) => {
+                  setCurrentPage(page);
+                  setPageSize(pageSize);
+                  const tableBody = document.querySelector(".ant-table-body");
+                  if (tableBody) {
+                    (tableBody as HTMLElement).scrollTop = 0;
+                  }
+                },
+              }}
+              onRow={(record) => ({
+                onClick: () => navigate(`/custody-menu/statisticsDetail/${record.venue_id}`),
+                style: { cursor: "pointer" },
+              })}
+              // rowKey={(record: any) => record.venue_id}
+              rowKey={(record) => record.id || record._id || record.miner_name || Math.random()} // ✅ 确保唯一
+              columns={columns}
+              dataSource={filteredData}
+              scroll={{ x: "max-content" }}
+              style={{ marginTop: "15px", width: "100%" }}
+            />
+          )}
+        </div>
         // <Table
         //   columns={columns}
         //   dataSource={filteredData}
