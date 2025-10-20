@@ -52,18 +52,19 @@ const WaveLineCard: React.FC<Props> = ({ hashEffectiveRate }) => {
         axisLine: { show: false },
         axisLabel: {
           show: true,
+          Size: 12,
           formatter: (value: string) => {
             // 假设 value = "2025-08-23"
             const d = new Date(value);
             if (!isNaN(d.getTime())) {
               const month = d.getMonth() + 1;
               const day = d.getDate();
-              return `${month}-${day}`;
+              return `${month}/${day}`;
             }
             // 如果不是标准日期字符串，比如 "2025/08/23"
             const parts = value.split(/[-/]/);
             if (parts.length >= 3) {
-              return `${parts[1]}-${parts[2]}`;
+              return `${parts[1]}/${parts[2]}`;
             }
             return value;
           },
@@ -74,11 +75,13 @@ const WaveLineCard: React.FC<Props> = ({ hashEffectiveRate }) => {
       yAxis: {
         type: "value",
         // min: 0,
-        // max: 100,
+        // max: (yAxisData.length > 0 ? Math.floor(Math.max(...yAxisData) + 10 / 10) * 10 : 0),
+        // min: (yAxisData.length > 0 ? Math.floor((Math.min(...yAxisData) - 10) / 10) * 10 : 0),
+        min: yAxisData.length > 0 ? Math.floor(Math.min(...yAxisData) - 10) : 0,
         splitNumber: 4,
         axisLine: { show: false },
         axisTick: { show: false },
-        axisLabel: { formatter: "{value}" },
+        axisLabel: { fontSize: 12, formatter: (value: number) => `${value.toFixed(0)}%` },
         splitLine: { lineStyle: { type: "dashed" } },
       },
       series: [

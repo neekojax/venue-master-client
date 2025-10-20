@@ -22,6 +22,7 @@ const WaveLineCard: React.FC<Props> = ({ failureRate }) => {
   const chartRef = useRef<echarts.EChartsType | null>(null);
   const xAxisData = failureRate.map((item: any) => item.date);
   const yAxisData = failureRate.map((item: any) => item.failureRate);
+  const yAxisData_failure_num = failureRate.map((item: any) => item.failure);
 
   // 获取当前日期
   useEffect(() => {
@@ -33,15 +34,20 @@ const WaveLineCard: React.FC<Props> = ({ failureRate }) => {
 
     const option = {
       title: { text: "", left: "center", top: 6, textStyle: { fontSize: 14, fontWeight: 600 } },
-      grid: { left: 12, right: 12, top: 10, bottom: 16, containLabel: true },
+      grid: { left: 12, right: 0, top: 10, bottom: 16, containLabel: true },
       tooltip: {
         trigger: "axis",
         axisPointer: { type: "line" },
+        fontSize: 10,
         formatter: (params: any) => {
-          // params 是数组，因为 trigger: "axis"
-
           return params
-            .map((item: any) => `${item.name || ""}<br>${item.marker}故障率：${item.value.toFixed(2)}%`)
+            .map((item: any) => {
+              if (item.seriesName === "故障率") {
+                return `${item.name || ""}<br>${item.marker}${item.seriesName}：${item.value.toFixed(2)}%`;
+              } else {
+                return `${item.marker}${item.seriesName}：${item.value.toFixed(0)}`;
+              }
+            })
             .join("<br/>");
         },
       },
@@ -58,12 +64,12 @@ const WaveLineCard: React.FC<Props> = ({ failureRate }) => {
             if (!isNaN(d.getTime())) {
               const month = d.getMonth() + 1;
               const day = d.getDate();
-              return `${month}-${day}`;
+              return `${month}/${day}`;
             }
             // 如果不是标准日期字符串，比如 "2025/08/23"
             const parts = value.split(/[-/]/);
             if (parts.length >= 3) {
-              return `${parts[1]}-${parts[2]}`;
+              return `${parts[1]}/${parts[2]}`;
             }
             return value;
           },
@@ -71,19 +77,37 @@ const WaveLineCard: React.FC<Props> = ({ failureRate }) => {
         data: xAxisData,
         // data: Array.from({ length: 256 }, (_, i) => i)
       },
-      yAxis: {
-        type: "value",
-        // min: 0,
-        // max: 100,
-        splitNumber: 4,
-        axisLine: { show: false },
-        axisTick: { show: false },
-        axisLabel: { formatter: "{value}" },
-        splitLine: { lineStyle: { type: "dashed" } },
-      },
+      yAxis: [
+        {
+          type: "value",
+          name: "故障率",
+          // min: 0,
+          // max: 100,
+          splitNumber: 4,
+          axisLine: { show: false },
+          axisTick: { show: false },
+          axisLabel: { formatter: (value: number) => `${value.toFixed(0)}%` },
+          splitLine: { lineStyle: { type: "dashed" } },
+          // formatter: (value: number) => `${value.toFixed(2)}%`,
+        },
+        {
+          type: "value",
+          name: "故障数",
+          position: "right",
+          show: false,
+          // min: 0,
+          // max: 100,
+          splitNumber: 4,
+          axisLine: { show: false },
+          axisTick: { show: false },
+          axisLabel: { formatter: "{value}" },
+          splitLine: { lineStyle: { type: "dashed" } },
+        },
+      ],
       series: [
         {
           type: "line",
+          name: "故障率",
           smooth: true,
           itemStyle: {
             color: "rgb(216, 70, 70)", //rgb(216, 70, 70) 点的颜色
@@ -99,6 +123,29 @@ const WaveLineCard: React.FC<Props> = ({ failureRate }) => {
               { offset: 1, color: "rgba(220, 38, 38,  0)" },
             ]),
           },
+        },
+        {
+          type: "line",
+          name: "故障数",
+          smooth: true,
+
+          showSymbol: false,
+          itemStyle: {
+            show: false,
+            color: "#fff", //rgb(216, 70, 70) 点的颜色
+          },
+          yAxisIndex: 1,
+          // symbol: 'none',
+          data: yAxisData_failure_num,
+          // data: makeWave(0),
+          lineStyle: { show: false, width: 2, color: "#fff" }, // #dc2626
+          // areaStyle: { opacity: 0.35 }
+          // areaStyle: {
+          //   color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
+          //     { offset: 0, color: "rgba(220, 38, 38, 0.2)" },
+          //     { offset: 1, color: "rgba(220, 38, 38,  0)" },
+          //   ]),
+          // },
         },
       ],
     };
@@ -135,7 +182,7 @@ const WaveLineCard: React.FC<Props> = ({ failureRate }) => {
                     <Radio.Button value="month">月</Radio.Button>
                 </Radio.Group> */}
       </div>
-      <div ref={domRef} style={{ width: "100%", height: 255 }} />
+      <div ref={domRef} style={{ width: "108%", height: 255 }} />
     </>
   );
 };
