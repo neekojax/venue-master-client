@@ -5,9 +5,9 @@ import { LineChart } from "echarts/charts";
 import { GridComponent, TitleComponent, TooltipComponent } from "echarts/components";
 import * as echarts from "echarts/core";
 import { CanvasRenderer } from "echarts/renderers";
-import { useSelector, useSettingsStore } from "@/stores";
+import { formatAmount } from "@/utils/num";
 
-import { getLast30DaysEffectiveRate } from "@/pages/venue/api.tsx";
+import { fetchBtcPrice } from "@/pages/report/api.tsx";
 
 // 注册 ECharts 组件
 echarts.use([LineChart, GridComponent, TooltipComponent, TitleComponent, CanvasRenderer]);
@@ -15,15 +15,14 @@ echarts.use([LineChart, GridComponent, TooltipComponent, TitleComponent, CanvasR
 // 定义返回值类型
 interface HashRecord {
   date: string;
-  hashEffective: number;
+  openPrice: number;
 }
 
 interface ApiResponse {
   data: HashRecord[];
 }
 
-const ChartPrice: React.FC = () => {
-  const { poolType } = useSettingsStore(useSelector(["poolType"]));
+const ChartPrice: React.FC<{ chartDate: string }> = ({ chartDate }) => {
   const domRef = useRef<HTMLDivElement | null>(null);
   const { venueId } = useParams<{ venueId: string }>();
   const chartRef = useRef<echarts.EChartsType | null>(null);
@@ -34,9 +33,9 @@ const ChartPrice: React.FC = () => {
   // 获取数据
   const fetchData = async () => {
     try {
-      const response: ApiResponse = await getLast30DaysEffectiveRate(poolType, Number(venueId));
+      const response: ApiResponse = await fetchBtcPrice(chartDate);
       setDates(response.data.map((item) => item.date).reverse());
-      setHashValues(response.data.map((item) => item.hashEffective).reverse());
+      setHashValues(response.data.map((item) => item.openPrice).reverse());
 
       // 处理响应数据
     } catch (error) {
@@ -66,7 +65,7 @@ const ChartPrice: React.FC = () => {
         formatter: (params: any) => {
           // params 是数组，因为 trigger: "axis"
           return params
-            .map((item: any) => `${item.name || ""}<br>${item.marker}算力有效率：${item.value.toFixed(2)}%`)
+            .map((item: any) => `${item.name || ""}<br>${item.marker}单价：${item.value} USDT`)
             .join("<br/>");
         },
       },
@@ -98,27 +97,32 @@ const ChartPrice: React.FC = () => {
       },
       yAxis: {
         type: "value",
-        // min: 0,
+        min: hashValues.length > 0 ? Math.floor(Math.min(...hashValues) - 30000) : 0,
         // max: 100,
         splitNumber: 4,
         axisLine: { show: false },
         axisTick: { show: false },
-        axisLabel: { formatter: "{value}" },
+        axisLabel: {
+          //  formatter: "{value}"
+          formatter: (value: number) => {
+            return formatAmount(value, 0);
+          },
+        },
         splitLine: { lineStyle: { type: "dashed" } },
       },
       series: [
         {
           type: "line",
           smooth: true,
-          // symbol: 'none',
+          symbol: "none",
           data: hashValues,
           // data: makeWave(0),
-          lineStyle: { width: 2, color: "#2563eb" }, // #2563eb
+          lineStyle: { width: 2, color: "#f59e0b" }, // 橙色
           // areaStyle: { opacity: 0.35 }
           areaStyle: {
             color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
-              { offset: 0, color: "rgba(37, 99, 235, 0.2)" },
-              { offset: 1, color: "rgba(37, 99, 235, 0)" },
+              { offset: 0, color: "rgba(245, 158, 11, 0.2)" },
+              { offset: 1, color: "rgba(245, 158, 11, 0)" },
             ]),
           },
         },
@@ -143,7 +147,7 @@ const ChartPrice: React.FC = () => {
   return (
     <>
       <div className="flex justify-between items-center mb-4">
-        <h3 className="text-lg font-semibold">单价趋势变化曲线</h3>
+        {/* <h3 className="text-lg font-semibold">单价趋势变化曲线</h3> */}
       </div>
       <div ref={domRef} style={{ width: "100%", height: 320 }} />
     </>

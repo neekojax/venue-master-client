@@ -5,9 +5,8 @@ import { LineChart } from "echarts/charts";
 import { GridComponent, TitleComponent, TooltipComponent } from "echarts/components";
 import * as echarts from "echarts/core";
 import { CanvasRenderer } from "echarts/renderers";
-import { useSelector, useSettingsStore } from "@/stores";
 
-import { getLast30DaysEffectiveRate } from "@/pages/venue/api.tsx";
+import { fetchHashRateTrend } from "@/pages/report/api.tsx";
 
 // 注册 ECharts 组件
 echarts.use([LineChart, GridComponent, TooltipComponent, TitleComponent, CanvasRenderer]);
@@ -15,15 +14,14 @@ echarts.use([LineChart, GridComponent, TooltipComponent, TitleComponent, CanvasR
 // 定义返回值类型
 interface HashRecord {
   date: string;
-  hashEffective: number;
+  hashRate: number;
 }
 
 interface ApiResponse {
   data: HashRecord[];
 }
 
-const ChartSuanli: React.FC = () => {
-  const { poolType } = useSettingsStore(useSelector(["poolType"]));
+const ChartSuanli: React.FC<{ chartDate: string }> = ({ chartDate }) => {
   const domRef = useRef<HTMLDivElement | null>(null);
   const { venueId } = useParams<{ venueId: string }>();
   const chartRef = useRef<echarts.EChartsType | null>(null);
@@ -34,10 +32,9 @@ const ChartSuanli: React.FC = () => {
   // 获取数据
   const fetchData = async () => {
     try {
-      const response: ApiResponse = await getLast30DaysEffectiveRate(poolType, Number(venueId));
+      const response: ApiResponse = await fetchHashRateTrend(chartDate);
       setDates(response.data.map((item) => item.date).reverse());
-      setHashValues(response.data.map((item) => item.hashEffective).reverse());
-
+      setHashValues(response.data.map((item) => item.hashRate).reverse());
       // 处理响应数据
     } catch (error) {
       // 处理错误
@@ -66,7 +63,7 @@ const ChartSuanli: React.FC = () => {
         formatter: (params: any) => {
           // params 是数组，因为 trigger: "axis"
           return params
-            .map((item: any) => `${item.name || ""}<br>${item.marker}算力有效率：${item.value.toFixed(2)}%`)
+            .map((item: any) => `${item.name || ""}<br>${item.marker}全网算力：${item.value.toFixed(2)} EH/s`)
             .join("<br/>");
         },
       },
@@ -98,6 +95,8 @@ const ChartSuanli: React.FC = () => {
       },
       yAxis: {
         type: "value",
+        // min: Math.min(...hashValues) - 50,
+        // min: hashValues.length > 0 ? Math.floor(Math.min(...hashValues) - 300) : 0,
         // min: 0,
         // max: 100,
         splitNumber: 4,
@@ -110,7 +109,7 @@ const ChartSuanli: React.FC = () => {
         {
           type: "line",
           smooth: true,
-          // symbol: 'none',
+          symbol: "none",
           data: hashValues,
           // data: makeWave(0),
           lineStyle: { width: 2, color: "#2563eb" }, // #2563eb
@@ -143,7 +142,7 @@ const ChartSuanli: React.FC = () => {
   return (
     <>
       <div className="flex justify-between items-center mb-4">
-        <h3 className="text-lg font-semibold">算力有效率变化曲线</h3>
+        {/* <h3 className="text-lg font-semibold">算力有效率变化曲线</h3> */}
         {/* <Radio.Group
                     value={chart.period}
                     onChange={(e) => {

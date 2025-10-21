@@ -45,3 +45,11 @@
   font-weight: 500; /* 略微加粗 */
   color:  #25252D;
 }
+
+.data-summary .ant-table-css-var [class^="ant-table"] {
+  border: none !important;
+  border-radius: 0 !important;
+}
+.data-summary >tbody >tr{
+    border-bottom: 1px solid rgba(239, 239, 245, 1);
+}

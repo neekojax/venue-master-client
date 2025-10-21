@@ -7,11 +7,15 @@ import ChartDashboard from "./components/chartDashboard";
 import DataCardGrid from "./components/dataCard";
 import Efficiency from "./components/efficiency";
 import FaultRate from "./components/faultRate";
+
 // import { fetchBtcMarketInfo } from "@/pages/report/api";
 
 const App: React.FC = () => {
   // const [data, setData] = useState({});
-  const [date, setDate] = useState(dayjs());
+  const [date, setDate] = useState(() => {
+    const now = dayjs();
+    return now.hour() >= 10 ? now.subtract(1, "day") : now.subtract(2, "day");
+  });
   // const getbtcMarketInfo = async () => {
   //   console.log(date.format("YYYY-MM-DD"));
   //   const res = await fetchBtcMarketInfo(date.format("YYYY-MM-DD"));
@@ -323,8 +327,9 @@ const App: React.FC = () => {
             </div>
           </div> */}
         </div>
-        <div className="bg-white rounded-lg p-6 shadow-sm" style={{ clear: "both" }}>
+        <div className="col-span-2 bg-white rounded-lg p-6 shadow-sm" style={{ clear: "both" }}>
           <ChartDashboard
+            chartDate={date.format("YYYY-MM-DD")}
             panels={[
               { title: "算力趋势", id: "powerTrend" },
               { title: "单价趋势", id: "priceTrend" },
@@ -515,7 +520,7 @@ const App: React.FC = () => {
             <div id="efficiency" className="h-64"></div>
           </div>
         </div> */}
-        <Efficiency />
+        <Efficiency chartDate={date.format("YYYY-MM-DD")} />
 
         {/* 利润预估 */}
         {/* <Profit /> */}

@@ -28,17 +28,25 @@ export const fetchAllDailyStat = async (poolType: string, venueID: number, start
   return await fetchGet(`/venue/getAllDailyStat/${poolType}/${venueID}/${start}/${end}`);
 };
 
+// 数据看板～相关接口，基础信息
 // summary/btc-market-info/
 export const fetchBtcMarketInfo = async (date: string) => {
   return await fetchGet(`/summary/btc-market-info/${date}`);
 };
 
+// 数据看板～相关接口，算力趋势
 // summary/hash-rate-trend/
 export const fetchHashRateTrend = async (date: string) => {
   return await fetchGet(`/summary/hash-rate-trend/${date}`);
 };
 
+// 数据看板～相关接口，价格趋势
 // summary/btc-price/
 export const fetchBtcPrice = async (date: string) => {
   return await fetchGet(`/summary/btc-price/${date}`);
+};
+// 数据看板～相关接口，影响效率统计
+// summary/efficiency-stat/:date/:poolType/
+export const fetchEfficiencyStat = async (date: string, poolType: string) => {
+  return await fetchGet(`/summary/efficiency-stat/${date}/${poolType}`);
 };

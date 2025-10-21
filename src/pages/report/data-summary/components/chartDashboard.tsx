@@ -1,4 +1,6 @@
 import React from "react";
+import ChartPrice from "./chartPrice";
+import ChartSuanli from "./chartSuanli";
 
 export type ChartPanel = {
   title: string;
@@ -13,16 +15,18 @@ type ChartDashboardProps = {
   className?: string; // 额外样式
 };
 
-const ChartDashboard: React.FC<ChartDashboardProps> = () => {
+const ChartDashboard: React.FC<ChartDashboardProps & { chartDate: string }> = ({ chartDate }) => {
   return (
     <div className="grid grid-cols-2 gap-6">
       <div>
-        <div className="text-gray-500 mb-2">算力趋势</div>
-        <div id="powerTrend" className="h-64"></div>
+        <div className="text-gray-500 mb-2">全网算力(EH/s)</div>
+        <ChartSuanli chartDate={chartDate} />
+        {/* <div id="powerTrend" className="h-64"></div> */}
       </div>
       <div>
-        <div className="text-gray-500 mb-2">单价趋势</div>
-        <div id="priceTrend" className="h-64"></div>
+        <div className="text-gray-500 mb-2">单价趋势（USDT）</div>
+        <ChartPrice chartDate={chartDate} />
+        {/* <div id="priceTrend" className="h-64"></div> */}
       </div>
     </div>
   );
