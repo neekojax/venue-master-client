@@ -6,8 +6,9 @@ import { LineChart } from "echarts/charts";
 import { GridComponent, TitleComponent, TooltipComponent } from "echarts/components";
 import * as echarts from "echarts/core";
 import { CanvasRenderer } from "echarts/renderers";
+import { formatAmount } from "@/utils/num";
 
-import { fetchHashRateTrend } from "@/pages/report/api.tsx";
+import { fetchBtcPrice } from "@/pages/report/api.tsx";
 
 // 注册 ECharts 组件
 echarts.use([LineChart, GridComponent, TooltipComponent, TitleComponent, CanvasRenderer]);
@@ -15,14 +16,18 @@ echarts.use([LineChart, GridComponent, TooltipComponent, TitleComponent, CanvasR
 // 定义返回值类型
 interface HashRecord {
   date: string;
-  hashRate: number;
+  openPrice: number;
 }
 
 interface ApiResponse {
   data: HashRecord[];
 }
 
-const ChartSuanli: React.FC<{ loading: any; chartDate: string }> = ({ loading, chartDate }) => {
+const ChartPriceCard: React.FC<{ loading: any; chartDate: string; onLoaded?: () => void }> = ({
+  loading,
+  chartDate,
+  onLoaded,
+}) => {
   const domRef = useRef<HTMLDivElement | null>(null);
   const { venueId } = useParams<{ venueId: string }>();
   const chartRef = useRef<echarts.EChartsType | null>(null);
@@ -33,9 +38,11 @@ const ChartSuanli: React.FC<{ loading: any; chartDate: string }> = ({ loading, c
   // 获取数据
   const fetchData = async () => {
     try {
-      const response: ApiResponse = await fetchHashRateTrend(chartDate);
+      const response: ApiResponse = await fetchBtcPrice(chartDate);
       setDates(response.data.map((item) => item.date));
-      setHashValues(response.data.map((item) => item.hashRate));
+      setHashValues(response.data.map((item) => item.openPrice));
+      onLoaded?.();
+
       // 处理响应数据
     } catch (error) {
       // 处理错误
@@ -57,19 +64,21 @@ const ChartSuanli: React.FC<{ loading: any; chartDate: string }> = ({ loading, c
 
     const option = {
       title: { text: "", left: "center", top: 6, textStyle: { fontSize: 14, fontWeight: 600 } },
-      grid: { left: 12, right: 12, top: 10, bottom: 16, containLabel: true },
+      // grid: { left: 12, right: 12, top: 10, bottom: 16, containLabel: true },
+      grid: { left: 0, right: 0, top: 0, bottom: 0, containLabel: true },
       tooltip: {
         trigger: "axis",
         axisPointer: { type: "line" },
         formatter: (params: any) => {
           // params 是数组，因为 trigger: "axis"
           return params
-            .map((item: any) => `${item.name || ""}<br>${item.marker}全网算力：${item.value.toFixed(2)} EH/s`)
+            .map((item: any) => `${item.name || ""}<br>${item.marker}单价：${item.value} USDT`)
             .join("<br/>");
         },
       },
       xAxis: {
         type: "category",
+        show: false,
         boundaryGap: false,
         axisTick: { show: false },
         axisLine: { show: false },
@@ -95,15 +104,19 @@ const ChartSuanli: React.FC<{ loading: any; chartDate: string }> = ({ loading, c
         // data: Array.from({ length: 256 }, (_, i) => i)
       },
       yAxis: {
+        show: false,
         type: "value",
-        // min: Math.min(...hashValues) - 50,
-        // min: hashValues.length > 0 ? Math.floor(Math.min(...hashValues) - 300) : 0,
-        // min: 0,
+        min: hashValues.length > 0 ? Math.floor(Math.min(...hashValues) - 10000) : 0,
         // max: 100,
         splitNumber: 4,
         axisLine: { show: false },
         axisTick: { show: false },
-        axisLabel: { formatter: "{value}" },
+        axisLabel: {
+          //  formatter: "{value}"
+          formatter: (value: number) => {
+            return formatAmount(value, 0);
+          },
+        },
         splitLine: { lineStyle: { type: "dashed" } },
       },
       series: [
@@ -113,14 +126,14 @@ const ChartSuanli: React.FC<{ loading: any; chartDate: string }> = ({ loading, c
           symbol: "none",
           data: hashValues,
           // data: makeWave(0),
-          lineStyle: { width: 2, color: "#2563eb" }, // #2563eb
+          lineStyle: { width: 2, color: "#f59e0b" }, // 橙色
           // areaStyle: { opacity: 0.35 }
-          areaStyle: {
-            color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
-              { offset: 0, color: "rgba(37, 99, 235, 0.2)" },
-              { offset: 1, color: "rgba(37, 99, 235, 0)" },
-            ]),
-          },
+          // areaStyle: {
+          //   color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
+          //     { offset: 0, color: "rgba(245, 158, 11, 0.2)" },
+          //     { offset: 1, color: "rgba(245, 158, 11, 0)" },
+          //   ]),
+          // },
         },
       ],
     };
@@ -143,23 +156,11 @@ const ChartSuanli: React.FC<{ loading: any; chartDate: string }> = ({ loading, c
   return (
     <Spin spinning={!!loading}>
       <div className="flex justify-between items-center mb-4">
-        {/* <h3 className="text-lg font-semibold">算力有效率变化曲线</h3> */}
-        {/* <Radio.Group
-                    value={chart.period}
-                    onChange={(e) => {
-                        const newCharts = [...charts];
-                        newCharts[index].period = e.target.value;
-                        setCharts(newCharts);
-                    }}
-                    size="small"
-                >
-                    <Radio.Button value="day">日</Radio.Button>
-                    <Radio.Button value="month">月</Radio.Button>
-                </Radio.Group> */}
+        {/* <h3 className="text-lg font-semibold">单价趋势变化曲线</h3> */}
       </div>
-      <div ref={domRef} style={{ width: "100%", height: 320 }} />
+      <div ref={domRef} style={{ width: "190%", height: 90 }} />
     </Spin>
   );
 };
 
-export default ChartSuanli;
+export default ChartPriceCard;

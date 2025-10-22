@@ -47,9 +47,19 @@
 }
 
 .data-summary .ant-table-css-var [class^="ant-table"] {
-  border: none !important;
+  border-left: none !important;
+  border-right: none !important;
   border-radius: 0 !important;
+  border-top: none !important;
+  /* border-bottom: 1px solid rgba(229, 231, 235, 1) !important; */
 }
-.data-summary >tbody >tr{
-    border-bottom: 1px solid rgba(239, 239, 245, 1);
+/* .data-summary >tbody >tr{
+    border-bottom: 1px solid #f3f4f6 !important;
+} */
+table-wrapper .ant-table-tbody >tr >td{
+    padding: 0.7rem;
+}
+
+.data-summary .ant-table-container table>thead>tr>th{
+    padding: 0.7rem;
 }

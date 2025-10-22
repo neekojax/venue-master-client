@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from "react";
 // import { Radio } from 'antd';
 import { useParams } from "react-router-dom";
+import { Spin } from "antd";
 import { LineChart } from "echarts/charts";
 import { GridComponent, TitleComponent, TooltipComponent } from "echarts/components";
 import * as echarts from "echarts/core";
@@ -22,7 +23,11 @@ interface ApiResponse {
   data: HashRecord[];
 }
 
-const ChartPrice: React.FC<{ chartDate: string }> = ({ chartDate }) => {
+const ChartPrice: React.FC<{ loading: any; chartDate: string; onLoaded?: () => void }> = ({
+  loading,
+  chartDate,
+  onLoaded,
+}) => {
   const domRef = useRef<HTMLDivElement | null>(null);
   const { venueId } = useParams<{ venueId: string }>();
   const chartRef = useRef<echarts.EChartsType | null>(null);
@@ -34,8 +39,9 @@ const ChartPrice: React.FC<{ chartDate: string }> = ({ chartDate }) => {
   const fetchData = async () => {
     try {
       const response: ApiResponse = await fetchBtcPrice(chartDate);
-      setDates(response.data.map((item) => item.date).reverse());
-      setHashValues(response.data.map((item) => item.openPrice).reverse());
+      setDates(response.data.map((item) => item.date));
+      setHashValues(response.data.map((item) => item.openPrice));
+      onLoaded?.();
 
       // 处理响应数据
     } catch (error) {
@@ -145,12 +151,12 @@ const ChartPrice: React.FC<{ chartDate: string }> = ({ chartDate }) => {
   }, [dates, hashValues]);
 
   return (
-    <>
+    <Spin spinning={!!loading}>
       <div className="flex justify-between items-center mb-4">
         {/* <h3 className="text-lg font-semibold">单价趋势变化曲线</h3> */}
       </div>
       <div ref={domRef} style={{ width: "100%", height: 320 }} />
-    </>
+    </Spin>
   );
 };
 

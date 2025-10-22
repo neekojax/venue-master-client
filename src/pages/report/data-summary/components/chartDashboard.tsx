@@ -1,4 +1,5 @@
 import React from "react";
+// import { Spin } from "antd";
 import ChartPrice from "./chartPrice";
 import ChartSuanli from "./chartSuanli";
 
@@ -13,22 +14,26 @@ type ChartDashboardProps = {
   cols?: 1 | 2 | 3 | 4 | 5 | 6; // 默认 2 列
   gapClass?: string; // 默认 gap-6
   className?: string; // 额外样式
+  loading?: boolean;
+  onLoaded?: () => void;
 };
 
-const ChartDashboard: React.FC<ChartDashboardProps & { chartDate: string }> = ({ chartDate }) => {
+const ChartDashboard: React.FC<ChartDashboardProps & { chartDate: string }> = ({ chartDate, loading }) => {
   return (
-    <div className="grid grid-cols-2 gap-6">
-      <div>
-        <div className="text-gray-500 mb-2">全网算力(EH/s)</div>
-        <ChartSuanli chartDate={chartDate} />
-        {/* <div id="powerTrend" className="h-64"></div> */}
+    <>
+      <div className="grid grid-cols-2 gap-6">
+        <div className="bg-white rounded-lg p-6 shadow-sm">
+          <div className="text-gray-500 mb-2">全网算力(EH/s)</div>
+          <ChartSuanli loading={loading} chartDate={chartDate} />
+          {/* <div id="powerTrend" className="h-64"></div> */}
+        </div>
+        <div className="bg-white rounded-lg p-6 shadow-sm">
+          <div className="text-gray-500 mb-2">单价趋势（USDT）</div>
+          <ChartPrice loading={loading} chartDate={chartDate} />
+          {/* <div id="priceTrend" className="h-64"></div> */}
+        </div>
       </div>
-      <div>
-        <div className="text-gray-500 mb-2">单价趋势（USDT）</div>
-        <ChartPrice chartDate={chartDate} />
-        {/* <div id="priceTrend" className="h-64"></div> */}
-      </div>
-    </div>
+    </>
   );
 };
 

@@ -22,7 +22,7 @@ interface ApiResponse {
   data: HashRecord[];
 }
 
-const ChartSuanli: React.FC<{ loading: any; chartDate: string }> = ({ loading, chartDate }) => {
+const ChartSuanliCard: React.FC<{ loading: any; chartDate: string }> = ({ loading, chartDate }) => {
   const domRef = useRef<HTMLDivElement | null>(null);
   const { venueId } = useParams<{ venueId: string }>();
   const chartRef = useRef<echarts.EChartsType | null>(null);
@@ -56,8 +56,8 @@ const ChartSuanli: React.FC<{ loading: any; chartDate: string }> = ({ loading, c
     chartRef.current = chart;
 
     const option = {
-      title: { text: "", left: "center", top: 6, textStyle: { fontSize: 14, fontWeight: 600 } },
-      grid: { left: 12, right: 12, top: 10, bottom: 16, containLabel: true },
+      title: { text: "", left: "center", top: 0, textStyle: { fontSize: 14, fontWeight: 600 } },
+      grid: { left: 0, right: 0, top: 0, bottom: 0, containLabel: true },
       tooltip: {
         trigger: "axis",
         axisPointer: { type: "line" },
@@ -70,6 +70,7 @@ const ChartSuanli: React.FC<{ loading: any; chartDate: string }> = ({ loading, c
       },
       xAxis: {
         type: "category",
+        show: false,
         boundaryGap: false,
         axisTick: { show: false },
         axisLine: { show: false },
@@ -96,14 +97,15 @@ const ChartSuanli: React.FC<{ loading: any; chartDate: string }> = ({ loading, c
       },
       yAxis: {
         type: "value",
-        // min: Math.min(...hashValues) - 50,
+        show: false,
+        min: Math.min(...hashValues) - 100,
         // min: hashValues.length > 0 ? Math.floor(Math.min(...hashValues) - 300) : 0,
         // min: 0,
-        // max: 100,
+        max: Math.max(...hashValues) + 100,
         splitNumber: 4,
         axisLine: { show: false },
         axisTick: { show: false },
-        axisLabel: { formatter: "{value}" },
+        axisLabel: { formatter: "{value}", show: false },
         splitLine: { lineStyle: { type: "dashed" } },
       },
       series: [
@@ -115,12 +117,12 @@ const ChartSuanli: React.FC<{ loading: any; chartDate: string }> = ({ loading, c
           // data: makeWave(0),
           lineStyle: { width: 2, color: "#2563eb" }, // #2563eb
           // areaStyle: { opacity: 0.35 }
-          areaStyle: {
-            color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
-              { offset: 0, color: "rgba(37, 99, 235, 0.2)" },
-              { offset: 1, color: "rgba(37, 99, 235, 0)" },
-            ]),
-          },
+          // areaStyle: {
+          //   color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
+          //     { offset: 0, color: "rgba(37, 99, 235, 0.2)" },
+          //     { offset: 1, color: "rgba(37, 99, 235, 0)" },
+          //   ]),
+          // },
         },
       ],
     };
@@ -157,9 +159,9 @@ const ChartSuanli: React.FC<{ loading: any; chartDate: string }> = ({ loading, c
                     <Radio.Button value="month">月</Radio.Button>
                 </Radio.Group> */}
       </div>
-      <div ref={domRef} style={{ width: "100%", height: 320 }} />
+      <div ref={domRef} style={{ width: "190%", height: 80 }} />
     </Spin>
   );
 };
 
-export default ChartSuanli;
+export default ChartSuanliCard;

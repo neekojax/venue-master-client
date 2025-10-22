@@ -50,3 +50,15 @@ export const fetchBtcPrice = async (date: string) => {
 export const fetchEfficiencyStat = async (date: string, poolType: string) => {
   return await fetchGet(`/summary/efficiency-stat/${date}/${poolType}`);
 };
+
+// 数据看板～相关接口，故障率统计
+// summary/machine-stat/:date/:poolType/
+export const fetchMachineStat = async (date: string, poolType: string) => {
+  return await fetchGet(`/summary/machine-stat/${date}/${poolType}`);
+};
+
+// 数据看板～利润
+//summary/profit-stat/2025-10-20/CANG
+export const fetchProfitStat = async (date: string, poolType: string) => {
+  return await fetchGet(`/summary/profit-stat/${date}/${poolType}`);
+};
