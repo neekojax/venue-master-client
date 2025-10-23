@@ -62,3 +62,8 @@ export const fetchMachineStat = async (date: string, poolType: string) => {
 export const fetchProfitStat = async (date: string, poolType: string) => {
   return await fetchGet(`/summary/profit-stat/${date}/${poolType}`);
 };
+
+///summary/mtd-profit-stat/2025-10-20/CANG
+export const fetchMtdProfitStat = async (date: string, poolType: string) => {
+  return await fetchGet(`/summary/mtd-profit-stat/${date}/${poolType}`);
+};

@@ -1,5 +1,4 @@
 import { useEffect, useRef, useState } from "react";
-import { BiLoaderCircle } from "react-icons/bi";
 import { FaRegChartBar } from "react-icons/fa";
 import { MdMonitorHeart } from "react-icons/md";
 import { SiNginxproxymanager } from "react-icons/si";
@@ -117,31 +116,31 @@ const SiderItems = () => {
           key: ROUTE_PATHS.statistics,
           label: <Link to={ROUTE_PATHS.statistics}>费用统计</Link>,
         },
-        {
-          key: ROUTE_PATHS.dailyAveragePrice,
-          label: <Link to={ROUTE_PATHS.dailyAveragePrice}>BTC均价</Link>,
-        },
+        // {
+        //   key: ROUTE_PATHS.dailyAveragePrice,
+        //   label: <Link to={ROUTE_PATHS.dailyAveragePrice}>BTC均价</Link>,
+        // },
       ],
     },
-    {
-      icon: <BiLoaderCircle />,
-      label: "电网数据",
-      key: ROUTE_PATHS.electric,
-      children: [
-        {
-          key: ROUTE_PATHS.electricLimit,
-          label: <Link to={ROUTE_PATHS.electricLimit}>限电记录</Link>,
-        },
-        {
-          key: ROUTE_PATHS.electricAverage,
-          label: <Link to={ROUTE_PATHS.electricAverage}>平均电价</Link>,
-        },
-        {
-          key: ROUTE_PATHS.electricBasic,
-          label: <Link to={ROUTE_PATHS.electricBasic}>基础数据</Link>,
-        },
-      ].filter(Boolean), // 移除 null 值，避免报错,
-    },
+    // {
+    //   icon: <BiLoaderCircle />,
+    //   label: "电网数据",
+    //   key: ROUTE_PATHS.electric,
+    //   children: [
+    //     {
+    //       key: ROUTE_PATHS.electricLimit,
+    //       label: <Link to={ROUTE_PATHS.electricLimit}>限电记录</Link>,
+    //     },
+    //     {
+    //       key: ROUTE_PATHS.electricAverage,
+    //       label: <Link to={ROUTE_PATHS.electricAverage}>平均电价</Link>,
+    //     },
+    //     {
+    //       key: ROUTE_PATHS.electricBasic,
+    //       label: <Link to={ROUTE_PATHS.electricBasic}>基础数据</Link>,
+    //     },
+    //   ].filter(Boolean), // 移除 null 值，避免报错,
+    // },
     // {
     //   icon: <MenuOutlined />,
     //   label: "收益管理",

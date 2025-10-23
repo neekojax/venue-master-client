@@ -93,7 +93,7 @@ const FaultRate: React.FC<{ chartDate: string; loading?: boolean; onLoaded?: () 
 
         <div className="flex items-center gap-4 mb-6">
           <div className="flex-1">
-            <div className="bg-gray-50 rounded-lg p-4 h-[184px] border border-gray-100">
+            <div className="bg-gray-50 rounded-lg p-4 h-[154px] border border-gray-100">
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <div className="flex items-center gap-4 mb-4">
@@ -176,7 +176,7 @@ const FaultRate: React.FC<{ chartDate: string; loading?: boolean; onLoaded?: () 
           />
         </div>
 
-        <div className="mb-6">
+        <div className="mb-1">
           <BarFaultData data={data.lastestRegionFailure} />
         </div>
       </div>

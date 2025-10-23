@@ -158,7 +158,7 @@ const Efficiency: React.FC<{ chartDate: string; loading?: boolean; onLoaded?: ()
             }}
           />
         </div>
-        <div className="mb-6">
+        <div className="mb-1">
           <BarEfficiencyData data={data.lastestRegionEfficiency} />
         </div>
       </div>

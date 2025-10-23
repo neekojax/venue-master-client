@@ -48,9 +48,9 @@ const BarEfficiencyData = ({ data }: { data: EfficiencyDetail[] }) => {
     const efficiencyOption = {
       animation: false,
       grid: {
-        top: 30,
+        top: 40,
         right: 20,
-        bottom: 60,
+        bottom: 20,
         left: 50,
       },
       tooltip: {

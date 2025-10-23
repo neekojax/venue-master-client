@@ -63,10 +63,11 @@ const ChartPriceCard: React.FC<{ loading: any; chartDate: string; onLoaded?: () 
     chartRef.current = chart;
 
     const option = {
-      title: { text: "", left: "center", top: 6, textStyle: { fontSize: 14, fontWeight: 600 } },
+      title: { text: "", show: false, left: "center", top: 0, textStyle: { fontSize: 12, fontWeight: 600 } },
       // grid: { left: 12, right: 12, top: 10, bottom: 16, containLabel: true },
       grid: { left: 0, right: 0, top: 0, bottom: 0, containLabel: true },
       tooltip: {
+        show: false,
         trigger: "axis",
         axisPointer: { type: "line" },
         formatter: (params: any) => {
@@ -106,7 +107,7 @@ const ChartPriceCard: React.FC<{ loading: any; chartDate: string; onLoaded?: () 
       yAxis: {
         show: false,
         type: "value",
-        min: hashValues.length > 0 ? Math.floor(Math.min(...hashValues) - 10000) : 0,
+        min: hashValues.length > 0 ? Math.floor(Math.min(...hashValues) - 20000) : 0,
         // max: 100,
         splitNumber: 4,
         axisLine: { show: false },
@@ -126,7 +127,7 @@ const ChartPriceCard: React.FC<{ loading: any; chartDate: string; onLoaded?: () 
           symbol: "none",
           data: hashValues,
           // data: makeWave(0),
-          lineStyle: { width: 2, color: "#f59e0b" }, // 橙色
+          lineStyle: { width: 2, color: "#22ab94" }, //rgb(81, 180, 76)
           // areaStyle: { opacity: 0.35 }
           // areaStyle: {
           //   color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
@@ -155,10 +156,7 @@ const ChartPriceCard: React.FC<{ loading: any; chartDate: string; onLoaded?: () 
 
   return (
     <Spin spinning={!!loading}>
-      <div className="flex justify-between items-center mb-4">
-        {/* <h3 className="text-lg font-semibold">单价趋势变化曲线</h3> */}
-      </div>
-      <div ref={domRef} style={{ width: "190%", height: 90 }} />
+      <div ref={domRef} style={{ width: "100%", height: 80 }} />
     </Spin>
   );
 };
