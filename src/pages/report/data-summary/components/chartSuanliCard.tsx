@@ -99,10 +99,10 @@ const ChartSuanliCard: React.FC<{ loading: any; chartDate: string }> = ({ loadin
       yAxis: {
         type: "value",
         show: false,
-        min: Math.min(...hashValues) - 400,
+        min: Math.min(...hashValues),
         // min: hashValues.length > 0 ? Math.floor(Math.min(...hashValues) - 300) : 0,
         // min: 0,
-        max: Math.max(...hashValues) + 100,
+        max: Math.max(...hashValues),
         splitNumber: 4,
         axisLine: { show: false },
         axisTick: { show: false },

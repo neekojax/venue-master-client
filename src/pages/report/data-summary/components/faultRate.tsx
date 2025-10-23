@@ -97,22 +97,30 @@ const FaultRate: React.FC<{ chartDate: string; loading?: boolean; onLoaded?: () 
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <div className="flex items-center gap-4 mb-4">
-                    <div className="text-gray-500">新增故障台数</div>
+                    <div className="text-gray-500" style={{ minWidth: "80px" }}>
+                      新增故障台数
+                    </div>
                     <div className="text-2xl text-gray-800">{data.TotalNewFailure}</div>
                   </div>
                   <div className="flex items-center gap-4">
-                    <div className="text-gray-500">新增故障率</div>
+                    <div className="text-gray-500" style={{ minWidth: "80px" }}>
+                      新增故障率
+                    </div>
                     <div className="text-2xl text-gray-800">{data.TotalNewFailureRate}%</div>
                   </div>
                 </div>
                 <div>
                   <div className="flex items-center gap-4 mb-4">
-                    <div className="text-gray-500">总故障台数</div>
-                    <div className="text-2xl">{data.TotalFailure}</div>
+                    <div className="text-gray-500" style={{ minWidth: "80px" }}>
+                      总故障台数
+                    </div>
+                    <div className="text-2xl text-gray-800">{data.TotalFailure}</div>
                   </div>
                   <div className="flex items-center gap-4">
-                    <div className="text-gray-500">总故障率</div>
-                    <div className="text-2xl">{data.TotalFailureRate}%</div>
+                    <div className="text-gray-500" style={{ minWidth: "80px" }}>
+                      总故障率
+                    </div>
+                    <div className="text-2xl text-gray-800">{data.TotalFailureRate}%</div>
                   </div>
                 </div>
               </div>

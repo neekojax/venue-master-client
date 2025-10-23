@@ -63,3 +63,9 @@ table-wrapper .ant-table-tbody >tr >td{
 .data-summary .ant-table-container table>thead>tr>th{
     padding: 0.7rem;
 }
+.data-summary .ant-table-container table>tbody>tr>td:first-child{
+   width: 120px;
+   overflow: hidden;
+   text-overflow: ellipsis;
+   white-space: nowrap;
+}

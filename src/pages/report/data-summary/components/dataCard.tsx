@@ -23,7 +23,7 @@ const DataCardGrid: React.FC<{ chartDate: string; loading?: boolean; onLoaded?: 
     // setLoading(true);
     fetchBtcMarketInfo(chartDate)
       .then((response) => {
-        console.log(response.data);
+        // console.log(response.data);
         setData(response.data);
         onLoaded?.();
       })

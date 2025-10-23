@@ -107,7 +107,7 @@ const ChartPriceCard: React.FC<{ loading: any; chartDate: string; onLoaded?: () 
       yAxis: {
         show: false,
         type: "value",
-        min: hashValues.length > 0 ? Math.floor(Math.min(...hashValues) - 20000) : 0,
+        min: hashValues.length > 0 ? Math.floor(Math.min(...hashValues)) : 0,
         // max: 100,
         splitNumber: 4,
         axisLine: { show: false },

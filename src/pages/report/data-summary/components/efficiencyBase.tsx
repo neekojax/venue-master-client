@@ -14,7 +14,7 @@ const EfficiencyBase: React.FC<{ data: EfficiencyStat }> = ({ data }) => {
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-4">
               <div className="flex items-center gap-4">
-                <div className="text-gray-500" style={{ minWidth: "50px" }}>
+                <div className="text-gray-500" style={{ minWidth: "80px" }}>
                   算力
                 </div>
                 <div className="text-xl text-gray-800">
@@ -22,13 +22,13 @@ const EfficiencyBase: React.FC<{ data: EfficiencyStat }> = ({ data }) => {
                 </div>
               </div>
               <div className="flex items-center gap-4">
-                <div className="text-gray-500" style={{ minWidth: "50px" }}>
+                <div className="text-gray-500" style={{ minWidth: "80px" }}>
                   全网比例
                 </div>
                 <div className="text-xl text-gray-800">{data?.networkHashRate.toFixed(2)}%</div>
               </div>
               <div className="flex items-center gap-4">
-                <div className="text-gray-500" style={{ minWidth: "50px" }}>
+                <div className="text-gray-500" style={{ minWidth: "80px" }}>
                   算力有效率
                 </div>
                 <div className="text-xl text-gray-800">{data?.hashEffective.toFixed(2)}%</div>
@@ -36,7 +36,7 @@ const EfficiencyBase: React.FC<{ data: EfficiencyStat }> = ({ data }) => {
             </div>
             <div className="space-y-4">
               <div className="flex items-center gap-4">
-                <div className="text-gray-500" style={{ minWidth: "50px" }}>
+                <div className="text-gray-500" style={{ minWidth: "80px" }}>
                   日产出
                 </div>
                 <div className="text-xl text-gray-800">
@@ -44,7 +44,7 @@ const EfficiencyBase: React.FC<{ data: EfficiencyStat }> = ({ data }) => {
                 </div>
               </div>
               <div className="flex items-center gap-4">
-                <div className="text-gray-500" style={{ minWidth: "50px" }}>
+                <div className="text-gray-500" style={{ minWidth: "80px" }}>
                   MTD产出
                 </div>
                 <div className="text-xl text-gray-800">
@@ -52,7 +52,7 @@ const EfficiencyBase: React.FC<{ data: EfficiencyStat }> = ({ data }) => {
                 </div>
               </div>
               <div className="flex items-center gap-4">
-                <div className="text-gray-500" style={{ minWidth: "50px" }}>
+                <div className="text-gray-500" style={{ minWidth: "80px" }}>
                   累计产出
                 </div>
                 <div className="text-xl text-gray-800">
