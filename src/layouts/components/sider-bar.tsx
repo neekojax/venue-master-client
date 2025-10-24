@@ -62,10 +62,10 @@ const SiderItems = () => {
       label: "场地管理",
       key: ROUTE_PATHS.venue,
       children: [
-        {
-          key: ROUTE_PATHS.miningSiteData,
-          label: <Link to={ROUTE_PATHS.miningSiteData}>运行指标</Link>,
-        },
+        // {
+        //   key: ROUTE_PATHS.miningSiteData,
+        //   label: <Link to={ROUTE_PATHS.miningSiteData}>运行指标</Link>,
+        // },
         {
           key: ROUTE_PATHS.eventLog,
           label: <Link to={ROUTE_PATHS.eventLog}>事件日志</Link>,
