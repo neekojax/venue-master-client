@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
 import { Spin } from "antd";
 import BarFaultData from "./BarFaultData";
 import FaultRateTable from "./faultRateTable";
@@ -81,6 +82,11 @@ const FaultRate: React.FC<{ chartDate: string; loading?: boolean; onLoaded?: () 
           <div className="flex items-center gap-2 text-lg">
             <i className="fas fa-robot text-blue-500"></i>
             <span>故障率</span>
+          </div>
+          <div className="text-sm text-gray-400">
+            <Link to="/report/data-summary/list" className="text-blue-500 hover:underline">
+              查看更多
+            </Link>
           </div>
           {/* <button
             type="button"

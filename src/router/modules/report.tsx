@@ -25,6 +25,17 @@ export const reportRoute: RouteObject = {
       },
     },
     {
+      path: ROUTE_PATHS.dataSummaryList,
+      lazy: async () => ({
+        Component: (await import("@/pages/report/data-summary-list/index.tsx")).default,
+      }),
+      HydrateFallback: ProgressBar,
+      handle: {
+        title: "数据概览详情",
+        crumb: () => <Link to={ROUTE_PATHS.dataSummaryList}>数据概览详情</Link>,
+      },
+    },
+    {
       path: ROUTE_PATHS.dailyReport,
       lazy: async () => ({
         Component: (await import("@/pages/report/daily-report")).default,

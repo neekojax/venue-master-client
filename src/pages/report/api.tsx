@@ -67,3 +67,7 @@ export const fetchProfitStat = async (date: string, poolType: string) => {
 export const fetchMtdProfitStat = async (date: string, poolType: string) => {
   return await fetchGet(`/summary/mtd-profit-stat/${date}/${poolType}`);
 };
+//summary/efficiency-machine-stat/2025-10-20/2025-10-20/CANG
+export const fetchEfficiencyMachineStat = async (start: string, end: string, poolType: string) => {
+  return await fetchGet(`/summary/efficiency-machine-stat/${start}/${end}/${poolType}`);
+};

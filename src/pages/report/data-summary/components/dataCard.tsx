@@ -8,7 +8,17 @@ import { formatAmount } from "@/utils/num";
 export type DataCardItem = {
   dailyYield: number;
   hashRate: number;
+  hashRateDiffPercent: number;
   price: string;
+  priceDiffPercent: number;
+  yieldDiffPercent: number;
+
+  //  "dailyYield": 496.875,
+  //     "hashRate": 1159.63,
+  //     "hashRateDiffPercent": -11.17,
+  //     "price": "111042.13",
+  //     "priceDiffPercent": 0.84,
+  //     "yieldDiffPercent": -11.17
 };
 
 const DataCardGrid: React.FC<{ chartDate: string; loading?: boolean; onLoaded?: () => void }> = ({
@@ -36,9 +46,23 @@ const DataCardGrid: React.FC<{ chartDate: string; loading?: boolean; onLoaded?: 
     <Spin spinning={loading}>
       <div className={["grid", colsClass, "gap-4", "mb-6"].join(" ").trim()}>
         <div className="bg-gray-50 rounded-lg p-4 border border-gray-100 flex items-stretch gap-4">
-          <div className="flex-none w-40">
+          <div className="flex-none w-55">
             <div className="text-gray-500 mb-2">算力 EH/s</div>
-            <div className="text-2xl">{formatAmount(data.hashRate, 2, "", false)}</div>
+            <div className="text-2xl">
+              {formatAmount(data.hashRate, 2, "", false)}
+
+              {data.hashRateDiffPercent > 0 ? (
+                <span className="text-green-500 text-sm" style={{ marginLeft: "8px" }}>
+                  {data.hashRateDiffPercent} %
+                  {/* {formatAmount(data.hashRateDiffPercent, 2, "%", false)} 增加 */}
+                </span>
+              ) : (
+                <span className="text-red-500 text-sm" style={{ marginLeft: "8px" }}>
+                  {data.hashRateDiffPercent} %
+                  {/* {formatAmount(data.hashRateDiffPercent, 2, "%", false)} 减少 */}
+                </span>
+              )}
+            </div>
           </div>
           <div className="flex-1 h-[80px] overflow-hidden">
             <ChartSuanliCard loading={loading} chartDate={chartDate} />
@@ -49,9 +73,23 @@ const DataCardGrid: React.FC<{ chartDate: string; loading?: boolean; onLoaded?: 
           <div className="text-2xl">{formatAmount(data.dailyYield, 2, "", false)}</div>
         </div>
         <div className="bg-gray-50 rounded-lg p-4 border border-gray-100 flex  items-stretch gap-4">
-          <div className="flex-none w-40">
+          <div className="flex-none w-55">
             <div className="text-gray-500 mb-2">单价 $</div>
-            <div className="text-2xl">{formatAmount(data.price, 2, "", false)}</div>
+            <div className="text-2xl">
+              {formatAmount(data.price, 2, "", false)}
+
+              {data.priceDiffPercent > 0 ? (
+                <span className="text-green-500 text-sm" style={{ marginLeft: "6px" }}>
+                  + {data.priceDiffPercent} %
+                  {/* {formatAmount(data.hashRateDiffPercent, 2, "%", false)} 增加 */}
+                </span>
+              ) : (
+                <span className="text-red-500 text-sm" style={{ marginLeft: "6px" }}>
+                  {data.priceDiffPercent} %
+                  {/* {formatAmount(data.hashRateDiffPercent, 2, "%", false)} 减少 */}
+                </span>
+              )}
+            </div>
           </div>
           <div className="flex-1 h-[80px] overflow-hidden">
             <ChartPriceCard loading={loading} chartDate={chartDate} />

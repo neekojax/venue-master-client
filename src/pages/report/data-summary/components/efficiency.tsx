@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
 import { Spin } from "antd";
 import BarEfficiencyData from "./BarEfficiencyData";
 import EfficiencyBase from "./efficiencyBase";
@@ -73,10 +74,15 @@ const Efficiency: React.FC<{ chartDate: string; loading?: boolean; onLoaded?: ()
   return (
     <Spin spinning={!!loading}>
       <div className="bg-white rounded-lg p-6 shadow-sm">
-        <div className="flex items-center justify之间 mb-4">
+        <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-2 text-lg">
             <i className="fas fa-tachometer-alt text-blue-500"></i>
             <span>效率</span>
+          </div>
+          <div className="text-sm text-gray-400">
+            <Link to="/report/data-summary/list" className="text-blue-500 hover:underline">
+              查看更多
+            </Link>
           </div>
         </div>
         <EfficiencyBase data={data} />
