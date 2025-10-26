@@ -81,10 +81,10 @@ const SiderItems = () => {
       label: "报表",
       key: ROUTE_PATHS.report,
       children: [
-        // {
-        //   key: ROUTE_PATHS.dataSummary,
-        //   label: <Link to={ROUTE_PATHS.dataSummary}>数据概览</Link>,
-        // },
+        {
+          key: ROUTE_PATHS.dataSummary,
+          label: <Link to={ROUTE_PATHS.dataSummary}>数据概览</Link>,
+        },
         {
           key: ROUTE_PATHS.dailyReport,
           label: <Link to={ROUTE_PATHS.dailyReport}>运营日报</Link>,
