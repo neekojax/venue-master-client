@@ -31,6 +31,7 @@ interface DataItem {
   average_high_temperature_impact_rate: number; // 平均高温影响率（%）
   average_limit_impact_rate: number; // 平均限电影响率（%）
   average_pending_repair_rate: number; // 平均待维修率（%）
+  hash_effective_diff_rate: number; // 算力有效率差异（%）
   daily_items: DailyData[];
 }
 

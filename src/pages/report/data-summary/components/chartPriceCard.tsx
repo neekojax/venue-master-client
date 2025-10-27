@@ -23,11 +23,12 @@ interface ApiResponse {
   data: HashRecord[];
 }
 
-const ChartPriceCard: React.FC<{ loading: any; chartDate: string; onLoaded?: () => void }> = ({
-  loading,
-  chartDate,
-  onLoaded,
-}) => {
+const ChartPriceCard: React.FC<{
+  loading: any;
+  priceDiffPercent?: number;
+  chartDate: string;
+  onLoaded?: () => void;
+}> = ({ loading, priceDiffPercent, chartDate, onLoaded }) => {
   const domRef = useRef<HTMLDivElement | null>(null);
   const { venueId } = useParams<{ venueId: string }>();
   const chartRef = useRef<echarts.EChartsType | null>(null);
@@ -61,6 +62,7 @@ const ChartPriceCard: React.FC<{ loading: any; chartDate: string; onLoaded?: () 
 
     const chart = echarts.init(domRef.current);
     chartRef.current = chart;
+    const lineColor = priceDiffPercent !== undefined && priceDiffPercent < 0 ? "#ef4444" : "#22ab94";
 
     const option = {
       title: { text: "", show: false, left: "center", top: 0, textStyle: { fontSize: 12, fontWeight: 600 } },
@@ -127,7 +129,7 @@ const ChartPriceCard: React.FC<{ loading: any; chartDate: string; onLoaded?: () 
           symbol: "none",
           data: hashValues,
           // data: makeWave(0),
-          lineStyle: { width: 2, color: "#22ab94" }, //rgb(81, 180, 76)
+          lineStyle: { width: 2, color: lineColor }, //rgb(81, 180, 76)
           // areaStyle: { opacity: 0.35 }
           // areaStyle: {
           //   color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
@@ -152,7 +154,7 @@ const ChartPriceCard: React.FC<{ loading: any; chartDate: string; onLoaded?: () 
       chartRef.current?.dispose();
       chartRef.current = null;
     };
-  }, [dates, hashValues]);
+  }, [dates, hashValues, priceDiffPercent]);
 
   return (
     <Spin spinning={!!loading}>

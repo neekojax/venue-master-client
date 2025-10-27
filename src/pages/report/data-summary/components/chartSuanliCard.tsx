@@ -22,7 +22,11 @@ interface ApiResponse {
   data: HashRecord[];
 }
 
-const ChartSuanliCard: React.FC<{ loading: any; chartDate: string }> = ({ loading, chartDate }) => {
+const ChartSuanliCard: React.FC<{ loading: any; hashRateDiffPercent?: number; chartDate: string }> = ({
+  loading,
+  hashRateDiffPercent,
+  chartDate,
+}) => {
   const domRef = useRef<HTMLDivElement | null>(null);
   const { venueId } = useParams<{ venueId: string }>();
   const chartRef = useRef<echarts.EChartsType | null>(null);
@@ -54,6 +58,8 @@ const ChartSuanliCard: React.FC<{ loading: any; chartDate: string }> = ({ loadin
 
     const chart = echarts.init(domRef.current);
     chartRef.current = chart;
+    const lineColor = hashRateDiffPercent !== undefined && hashRateDiffPercent < 0 ? "#ef4444" : "#22ab94"; // # #22ab94
+    console.log("hashRateDiffPercent", hashRateDiffPercent, lineColor);
 
     const option = {
       title: { text: "", show: false, left: "center", top: 0, textStyle: { fontSize: 12, fontWeight: 600 } },
@@ -116,7 +122,7 @@ const ChartSuanliCard: React.FC<{ loading: any; chartDate: string }> = ({ loadin
           symbol: "none",
           data: hashValues,
           // data: makeWave(0),
-          lineStyle: { width: 2, color: "#22ab94" }, // #2563eb
+          lineStyle: { width: 2, color: lineColor }, // #2563eb
         },
       ],
     };
@@ -134,7 +140,7 @@ const ChartSuanliCard: React.FC<{ loading: any; chartDate: string }> = ({ loadin
       chartRef.current?.dispose();
       chartRef.current = null;
     };
-  }, [dates, hashValues]);
+  }, [dates, hashValues, hashRateDiffPercent]);
 
   return (
     <Spin spinning={!!loading}>

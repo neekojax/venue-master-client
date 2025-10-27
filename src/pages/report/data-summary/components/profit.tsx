@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { Card } from "antd";
 import { fetchProfitStat } from "../../api";
 import MonthData from "./monthData";
 import ProfitTable from "./profitTable";
@@ -59,43 +60,48 @@ const Profit: React.FC<{ chartDate: string }> = ({ chartDate }) => {
   }, [chartDate]);
 
   return (
-    <div className="col-span-2 bg-white rounded-lg p-6 shadow-sm">
-      <div className="flex items-center justify-between mb-4">
-        <div className="flex items-center gap-2 text-lg">
-          <i className="fas fa-chart-pie text-blue-500"></i>
-          <span>利润 - 预估 (单位: $)</span>
-        </div>
-      </div>
-      <div className="grid grid-cols-3 gap-4 mb-6">
-        <div className="bg-gray-50 rounded-lg p-4 border border-gray-100">
-          <div className="text-gray-500 mb-2">日产出价值</div>
-          <div className="text-2xl">$ {formatAmount(profitStat.dailyIncomeUSD, 0, "", false)}</div>
-        </div>
-        <div className="bg-gray-50 rounded-lg p-4 border border-gray-100">
-          <div className="text-gray-500 mb-2">累计产出价值</div>
-          <div className="text-2xl">$ {formatAmount(profitStat.accumulatedIncomeUSD, 0, "", false)}</div>
-        </div>
-        <div className="bg-gray-50 rounded-lg p-4 border border-gray-100">
-          <div className="text-gray-500 mb-2">累计单币成本</div>
-          <div className="text-2xl">$ {formatAmount(profitStat.accumulatedPerCoinCost, 0, "", false)}</div>
-        </div>
-        <div className="bg-gray-50 rounded-lg p-4 border border-gray-100">
-          <div className="text-gray-500 mb-2">累计托管费</div>
-          <div className="text-2xl">$ {formatAmount(profitStat.accumulatedHostingFee, 0, "", false)}</div>
-        </div>
-        <div className="bg-gray-50 rounded-lg p-4 border border-gray-100">
-          <div className="text-gray-500 mb-2">累计单币成本-含折旧</div>
-          <div className="text-2xl">
-            $ {formatAmount(profitStat.accumulatedDepreciationPerCoinCost, 0, "", false)}
+    <div className="col-span-2  rounded-lg  shadow-sm">
+      <Card className="mt-6">
+        <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center gap-2 text-lg">
+            <i className="fas fa-chart-pie text-blue-500"></i>
+            <span>利润 - 预估 (单位: $)</span>
           </div>
         </div>
-        <div className="bg-gray-50 rounded-lg p-4 border border-gray-100">
-          <div className="text-gray-500 mb-2">累计运维费</div>
-          <div className="text-2xl">$ {formatAmount(profitStat.accumulatedMaintenanceFee, 0, "", false)}</div>
+        <div className="grid grid-cols-3 gap-4 mb-6">
+          <div className="bg-gray-50 rounded-lg p-4 border border-gray-100">
+            <div className="text-gray-500 mb-2">日产出价值</div>
+            <div className="text-2xl">$ {formatAmount(profitStat.dailyIncomeUSD, 0, "", false)}</div>
+          </div>
+          <div className="bg-gray-50 rounded-lg p-4 border border-gray-100">
+            <div className="text-gray-500 mb-2">累计产出价值</div>
+            <div className="text-2xl">$ {formatAmount(profitStat.accumulatedIncomeUSD, 0, "", false)}</div>
+          </div>
+          <div className="bg-gray-50 rounded-lg p-4 border border-gray-100">
+            <div className="text-gray-500 mb-2">累计单币成本</div>
+            <div className="text-2xl">$ {formatAmount(profitStat.accumulatedPerCoinCost, 0, "", false)}</div>
+          </div>
+          <div className="bg-gray-50 rounded-lg p-4 border border-gray-100">
+            <div className="text-gray-500 mb-2">累计托管费</div>
+            <div className="text-2xl">$ {formatAmount(profitStat.accumulatedHostingFee, 0, "", false)}</div>
+          </div>
+          <div className="bg-gray-50 rounded-lg p-4 border border-gray-100">
+            <div className="text-gray-500 mb-2">累计单币成本-含折旧</div>
+            <div className="text-2xl">
+              $ {formatAmount(profitStat.accumulatedDepreciationPerCoinCost, 0, "", false)}
+            </div>
+          </div>
+          <div className="bg-gray-50 rounded-lg p-4 border border-gray-100">
+            <div className="text-gray-500 mb-2">累计运维费</div>
+            <div className="text-2xl">
+              $ {formatAmount(profitStat.accumulatedMaintenanceFee, 0, "", false)}
+            </div>
+          </div>
         </div>
-      </div>
+      </Card>
+
       <div className="grid grid-cols-2 gap-6">
-        <div className="space-y-6">
+        <Card className="mt-6">
           <div className="overflow-x-auto border-gray-200 pb-6">
             <ProfitTable
               tableProps={{
@@ -130,48 +136,47 @@ const Profit: React.FC<{ chartDate: string }> = ({ chartDate }) => {
               }}
             />
           </div>
-        </div>
-        <div className="space-y-6">
-          <div>
-            <div className="overflow-x-auto  border-gray-200 pb-6">
-              <ProfitTable
-                tableProps={{
-                  columns: [
-                    {
-                      title: "地区",
-                      dataIndex: "category",
-                    },
-                    {
-                      title: "累计产出价值",
-                      dataIndex: "income_usd",
-                      render: (value) => `${formatAmount(value, 0, "", false)}`,
-                    },
-                    {
-                      title: "累计托管费",
-                      dataIndex: "hosting_fee",
-                      render: (value) => `${formatAmount(value, 0, "", false)}`,
-                    },
-                    {
-                      title: "累计运维费",
-                      dataIndex: "maintenance_fee",
-                      render: (value) => `${formatAmount(value, 0, "", false)}`,
-                    },
-                    {
-                      title: "累计单币成本",
-                      dataIndex: "per_coin_cost",
-                      render: (value) => `${formatAmount(value, 0, "", false)}`,
-                    },
-                  ],
-                  dataSource: profitStat?.accumulatedRegionFinancials ?? [],
-                  pagination: false,
-                }}
-              />
-            </div>
+        </Card>
+        <Card className="mt-6">
+          <div className="overflow-x-auto  border-gray-200 pb-6">
+            <ProfitTable
+              tableProps={{
+                columns: [
+                  {
+                    title: "地区",
+                    dataIndex: "category",
+                  },
+                  {
+                    title: "累计产出价值",
+                    dataIndex: "income_usd",
+                    render: (value) => `${formatAmount(value, 0, "", false)}`,
+                  },
+                  {
+                    title: "累计托管费",
+                    dataIndex: "hosting_fee",
+                    render: (value) => `${formatAmount(value, 0, "", false)}`,
+                  },
+                  {
+                    title: "累计运维费",
+                    dataIndex: "maintenance_fee",
+                    render: (value) => `${formatAmount(value, 0, "", false)}`,
+                  },
+                  {
+                    title: "累计单币成本",
+                    dataIndex: "per_coin_cost",
+                    render: (value) => `${formatAmount(value, 0, "", false)}`,
+                  },
+                ],
+                dataSource: profitStat?.accumulatedRegionFinancials ?? [],
+                pagination: false,
+              }}
+            />
           </div>
-        </div>
+        </Card>
       </div>
       <div className="grid grid-cols-2 gap-6">
-        <div className="space-y-6">
+        <Card className="mt-6">
+          {" "}
           <div className="overflow-x-auto pt-4">
             <ProfitTable
               tableProps={{
@@ -206,9 +211,127 @@ const Profit: React.FC<{ chartDate: string }> = ({ chartDate }) => {
               }}
             />
           </div>
+        </Card>
+        <Card className="mt-6">
+          <div className="overflow-x-auto pt-4">
+            <ProfitTable
+              tableProps={{
+                columns: [
+                  {
+                    title: "类型",
+                    dataIndex: "category",
+                  },
+                  {
+                    title: "累计产出价值",
+                    dataIndex: "income_usd",
+                    render: (value) => `${formatAmount(value, 0, "", false)}`,
+                  },
+                  {
+                    title: "累计托管费",
+                    dataIndex: "hosting_fee",
+                    render: (value) => `${formatAmount(value, 0, "", false)}`,
+                  },
+                  {
+                    title: "累计运维费",
+                    dataIndex: "maintenance_fee",
+                    render: (value) => `${formatAmount(value, 0, "", false)}`,
+                  },
+                  {
+                    title: "累计单币成本",
+                    dataIndex: "per_coin_cost",
+                    render: (value) => `${formatAmount(value, 0, "", false)}`,
+                  },
+                ],
+                dataSource: profitStat?.accumulatedHeadDissFinancials ?? [],
+                pagination: false,
+              }}
+            />
+          </div>
+        </Card>
+      </div>
+
+      {/* <Card className=" mt-6">
+
+        <div className="grid grid-cols-2 gap-6">
+          <div className="space-y-6">
+            <div className="overflow-x-auto border-gray-200 pb-6">
+              <ProfitTable
+                tableProps={{
+                  columns: [
+                    {
+                      title: "地区",
+                      dataIndex: "category",
+                    },
+                    {
+                      title: "日产出价值",
+                      dataIndex: "income_usd",
+                      render: (value) => `${formatAmount(value, 0, "", false)}`,
+                    },
+                    {
+                      title: "日托管费",
+                      dataIndex: "hosting_fee",
+                      render: (value) => `${formatAmount(value, 0, "", false)}`,
+                    },
+                    {
+                      title: "日运维费",
+                      dataIndex: "maintenance_fee",
+                      render: (value) => `${formatAmount(value, 0, "", false)}`,
+                    },
+                    {
+                      title: "日单币成本",
+                      dataIndex: "per_coin_cost",
+                      render: (value) => `${formatAmount(value, 0, "", false)}`,
+                    },
+                  ],
+                  dataSource: profitStat?.dailyRegionFinancials ?? [],
+                  pagination: false,
+                }}
+              />
+            </div>
+          </div>
+          <div className="space-y-6">
+            <div>
+              <div className="overflow-x-auto  border-gray-200 pb-6">
+                <ProfitTable
+                  tableProps={{
+                    columns: [
+                      {
+                        title: "地区",
+                        dataIndex: "category",
+                      },
+                      {
+                        title: "累计产出价值",
+                        dataIndex: "income_usd",
+                        render: (value) => `${formatAmount(value, 0, "", false)}`,
+                      },
+                      {
+                        title: "累计托管费",
+                        dataIndex: "hosting_fee",
+                        render: (value) => `${formatAmount(value, 0, "", false)}`,
+                      },
+                      {
+                        title: "累计运维费",
+                        dataIndex: "maintenance_fee",
+                        render: (value) => `${formatAmount(value, 0, "", false)}`,
+                      },
+                      {
+                        title: "累计单币成本",
+                        dataIndex: "per_coin_cost",
+                        render: (value) => `${formatAmount(value, 0, "", false)}`,
+                      },
+                    ],
+                    dataSource: profitStat?.accumulatedRegionFinancials ?? [],
+                    pagination: false,
+                  }}
+                />
+              </div>
+            </div>
+          </div>
         </div>
-        <div className="space-y-6">
-          <div>
+      </Card>
+      <Card className=" mt-6">
+        <div className="grid grid-cols-2 gap-6">
+          <div className="space-y-6">
             <div className="overflow-x-auto pt-4">
               <ProfitTable
                 tableProps={{
@@ -218,35 +341,76 @@ const Profit: React.FC<{ chartDate: string }> = ({ chartDate }) => {
                       dataIndex: "category",
                     },
                     {
-                      title: "累计产出价值",
+                      title: "日产出价值",
                       dataIndex: "income_usd",
                       render: (value) => `${formatAmount(value, 0, "", false)}`,
                     },
                     {
-                      title: "累计托管费",
+                      title: "日托管费",
                       dataIndex: "hosting_fee",
                       render: (value) => `${formatAmount(value, 0, "", false)}`,
                     },
                     {
-                      title: "累计运维费",
+                      title: "日运维费",
                       dataIndex: "maintenance_fee",
                       render: (value) => `${formatAmount(value, 0, "", false)}`,
                     },
                     {
-                      title: "累计单币成本",
+                      title: "日单币成本",
                       dataIndex: "per_coin_cost",
                       render: (value) => `${formatAmount(value, 0, "", false)}`,
                     },
                   ],
-                  dataSource: profitStat?.accumulatedHeadDissFinancials ?? [],
+                  dataSource: profitStat?.dailyHeadDissFinancialsArray ?? [],
                   pagination: false,
                 }}
               />
             </div>
           </div>
+          <div className="space-y-6">
+            <div>
+              <div className="overflow-x-auto pt-4">
+                <ProfitTable
+                  tableProps={{
+                    columns: [
+                      {
+                        title: "类型",
+                        dataIndex: "category",
+                      },
+                      {
+                        title: "累计产出价值",
+                        dataIndex: "income_usd",
+                        render: (value) => `${formatAmount(value, 0, "", false)}`,
+                      },
+                      {
+                        title: "累计托管费",
+                        dataIndex: "hosting_fee",
+                        render: (value) => `${formatAmount(value, 0, "", false)}`,
+                      },
+                      {
+                        title: "累计运维费",
+                        dataIndex: "maintenance_fee",
+                        render: (value) => `${formatAmount(value, 0, "", false)}`,
+                      },
+                      {
+                        title: "累计单币成本",
+                        dataIndex: "per_coin_cost",
+                        render: (value) => `${formatAmount(value, 0, "", false)}`,
+                      },
+                    ],
+                    dataSource: profitStat?.accumulatedHeadDissFinancials ?? [],
+                    pagination: false,
+                  }}
+                />
+              </div>
+            </div>
+          </div>
         </div>
-      </div>
-      <MonthData date={chartDate} />
+      </Card> */}
+
+      <Card className=" mt-6">
+        <MonthData date={chartDate} />
+      </Card>
     </div>
   );
 };

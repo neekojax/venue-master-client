@@ -31,6 +31,7 @@ interface DataItem {
   average_high_temperature_impact_rate: number; // 平均高温影响率（%）
   average_limit_impact_rate: number; // 平均限电影响率（%）
   average_pending_repair_rate: number; // 平均待维修率（%）
+  hash_effective_diff_rate: number; // 算力有效率差异（%）
   daily_items: DailyData[];
 }
 
@@ -96,14 +97,25 @@ const VenuePage: React.FC<VenueTableProps> = ({ data }) => {
       key: "average_hash_effective_rate",
       align: "center",
       sorter: (a, b) => a.average_hash_effective_rate - b.average_hash_effective_rate,
-      render: (value) => (
-        <div className="flex items-center gap-2">
-          <div className="flex-1 bg-gray-200 rounded-full h-2">
-            <div className="bg-green-500 h-2 rounded-full" style={{ width: `${value}%` }}></div>
+      render: (value: number, record: { hash_effective_diff_rate?: number }) => {
+        const diff = record?.hash_effective_diff_rate ?? 0;
+        const isIncrease = diff > 0;
+        const barColor = isIncrease ? "bg-green-500" : diff < 0 ? "bg-red-500" : "bg-gray-400";
+        const indicatorColor = isIncrease ? "text-green-600" : diff < 0 ? "text-red-600" : "text-gray-500";
+        const arrow = isIncrease ? "↑ " : diff < 0 ? "↓ " : "→ ";
+        return (
+          <div className="flex items-center gap-2">
+            <div className="flex-1 bg-gray-200 rounded-full h-2">
+              <div className={`${barColor} h-2 rounded-full`} style={{ width: `${value}%` }}></div>
+            </div>
+            <span>{value}%</span>
+            <span className={`${indicatorColor} text-xs ml-1`}>
+              {arrow}
+              {Math.abs(diff).toFixed(2)}%
+            </span>
           </div>
-          <span>{value}%</span>
-        </div>
-      ),
+        );
+      },
     },
     {
       title: "故障率",

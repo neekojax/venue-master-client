@@ -16,6 +16,7 @@ echarts.use([LineChart, GridComponent, TooltipComponent, TitleComponent, CanvasR
 interface HashRecord {
   date: string;
   dayMachineFailRate: number;
+  totalMachineFail: number;
 }
 
 interface ApiResponse {
@@ -29,6 +30,7 @@ const WaveLineCard: React.FC = () => {
   const chartRef = useRef<echarts.EChartsType | null>(null);
   const [dates, setDates] = useState<string[]>([]);
   const [hashValues, setHashValues] = useState<number[]>([]);
+  const [failNum, setFailNum] = useState<number[]>([]);
   // const [dailyData, setDailyData] = useState<string[]>([]);
 
   // 获取数据
@@ -38,7 +40,7 @@ const WaveLineCard: React.FC = () => {
 
       setDates(response.data.map((item) => item.date).reverse());
       setHashValues(response.data.map((item) => item.dayMachineFailRate).reverse());
-
+      setFailNum(response.data.map((item) => item.totalMachineFail).reverse());
       // 处理响应数据
     } catch (error) {
       // 处理错误
@@ -61,14 +63,30 @@ const WaveLineCard: React.FC = () => {
     const option = {
       title: { text: "", left: "center", top: 6, textStyle: { fontSize: 14, fontWeight: 600 } },
       grid: { left: 12, right: 12, top: 10, bottom: 16, containLabel: true },
+      // tooltip: {
+      //   trigger: "axis",
+      //   axisPointer: { type: "line" },
+      //   formatter: (params: any) => {
+      //     // params 是数组，因为 trigger: "axis"
+
+      //     return params
+      //       .map((item: any) => `${item.name || ""}<br>${item.marker}故障率：${item.value.toFixed(2)}%`)
+      //       .join("<br/>");
+      //   },
+      // },
       tooltip: {
         trigger: "axis",
         axisPointer: { type: "line" },
+        fontSize: 10,
         formatter: (params: any) => {
-          // params 是数组，因为 trigger: "axis"
-
           return params
-            .map((item: any) => `${item.name || ""}<br>${item.marker}故障率：${item.value.toFixed(2)}%`)
+            .map((item: any) => {
+              if (item.seriesName === "故障率") {
+                return `${item.name || ""}<br>${item.marker}${item.seriesName}：${item.value.toFixed(2)}%`;
+              } else {
+                return `${item.marker}${item.seriesName}：${item.value.toFixed(0)}`;
+              }
+            })
             .join("<br/>");
         },
       },
@@ -98,20 +116,36 @@ const WaveLineCard: React.FC = () => {
         data: dates,
         // data: Array.from({ length: 256 }, (_, i) => i)
       },
-      yAxis: {
-        type: "value",
-        // min: 0,
-        // max: 100,
-        splitNumber: 4,
-        axisLine: { show: false },
-        axisTick: { show: false },
-        axisLabel: { formatter: "{value}" },
-        splitLine: { lineStyle: { type: "dashed" } },
-      },
+      yAxis: [
+        {
+          type: "value",
+          // min: 0,
+          // max: 100,
+          name: "故障率",
+          splitNumber: 4,
+          axisLine: { show: false },
+          axisTick: { show: false },
+          axisLabel: { formatter: "{value}" },
+          splitLine: { lineStyle: { type: "dashed" } },
+        },
+        {
+          type: "value",
+          min: 0,
+          name: "故障数",
+
+          // max: 100,
+          splitNumber: 4,
+          axisLine: { show: false },
+          axisTick: { show: false },
+          axisLabel: { formatter: "{value}" },
+        },
+      ],
       series: [
         {
           type: "line",
           smooth: true,
+          name: "故障率",
+          yAxisIndex: 0,
           itemStyle: {
             color: "rgb(216, 70, 70)", //rgb(216, 70, 70) 点的颜色
           },
@@ -126,6 +160,21 @@ const WaveLineCard: React.FC = () => {
               { offset: 1, color: "rgba(220, 38, 38,  0)" },
             ]),
           },
+        },
+        {
+          type: "line",
+          smooth: true,
+          name: "故障数",
+
+          yAxisIndex: 1,
+          itemStyle: {
+            color: "rgb(241, 235, 235)", //rgb(216, 70, 70) 点的颜色
+          },
+          symbol: "none", // 不显示点
+          data: failNum,
+          // data: makeWave(0),
+          lineStyle: { width: 0, color: "#dc2626" }, // #dc2626
+          // areaStyle: { opacity: 0.35 }
         },
       ],
     };

@@ -135,10 +135,10 @@ const WaveLineCard: React.FC<Props> = ({ failureRate }) => {
             color: "#fff", //rgb(216, 70, 70) 点的颜色
           },
           yAxisIndex: 1,
-          // symbol: 'none',
+          symbol: "none",
           data: yAxisData_failure_num,
           // data: makeWave(0),
-          lineStyle: { show: false, width: 2, color: "#fff" }, // #dc2626
+          lineStyle: { show: false, width: 0, color: "#fff" }, // #dc2626
           // areaStyle: { opacity: 0.35 }
           // areaStyle: {
           //   color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [

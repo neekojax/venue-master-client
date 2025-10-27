@@ -65,12 +65,27 @@ const DataCardGrid: React.FC<{ chartDate: string; loading?: boolean; onLoaded?: 
             </div>
           </div>
           <div className="flex-1 h-[80px] overflow-hidden">
-            <ChartSuanliCard loading={loading} chartDate={chartDate} />
+            <ChartSuanliCard
+              loading={loading}
+              hashRateDiffPercent={data.hashRateDiffPercent}
+              chartDate={chartDate}
+            />
           </div>
         </div>
         <div className="bg-gray-50 rounded-lg p-4 border border-gray-100">
           <div className="text-gray-500 mb-2">全网日产出</div>
-          <div className="text-2xl">{formatAmount(data.dailyYield, 2, "", false)}</div>
+          <div className="text-2xl">
+            {formatAmount(data.dailyYield, 2, "", false)}
+            {data.yieldDiffPercent > 0 ? (
+              <span className="text-green-500 text-sm" style={{ marginLeft: "8px" }}>
+                {data.yieldDiffPercent} %{/* {formatAmount(data.hashRateDiffPercent, 2, "%", false)} 增加 */}
+              </span>
+            ) : (
+              <span className="text-red-500 text-sm" style={{ marginLeft: "8px" }}>
+                {data.yieldDiffPercent} %{/* {formatAmount(data.hashRateDiffPercent, 2, "%", false)} 减少 */}
+              </span>
+            )}
+          </div>
         </div>
         <div className="bg-gray-50 rounded-lg p-4 border border-gray-100 flex  items-stretch gap-4">
           <div className="flex-none w-55">
@@ -92,7 +107,11 @@ const DataCardGrid: React.FC<{ chartDate: string; loading?: boolean; onLoaded?: 
             </div>
           </div>
           <div className="flex-1 h-[80px] overflow-hidden">
-            <ChartPriceCard loading={loading} chartDate={chartDate} />
+            <ChartPriceCard
+              loading={loading}
+              priceDiffPercent={data.priceDiffPercent}
+              chartDate={chartDate}
+            />
           </div>
         </div>
       </div>
