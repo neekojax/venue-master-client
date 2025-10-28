@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { useParams } from "react-router-dom";
+import { SyncOutlined } from "@ant-design/icons";
 import { Button, Spin, Table, Tag } from "antd";
 import type { ColumnsType } from "antd/es/table";
 import { useSelector, useSettingsStore } from "@/stores";
@@ -180,7 +181,7 @@ const BusinessReport: React.FC<BusinessReportProps> = ({ venueName }) => {
       key: "power24h",
       width: 145,
       align: "right",
-      render: (value) => value.toFixed(2),
+      render: (value) => value.toFixed(2).toLocaleString(),
     },
     {
       title: "24小时有效率",
@@ -198,8 +199,20 @@ const BusinessReport: React.FC<BusinessReportProps> = ({ venueName }) => {
       align: "center",
       render: (value) => `${value.toFixed(2)}%`,
     },
-    { title: "托管台数", dataIndex: "totalMachines", key: "totalMachines", width: 105 },
-    { title: "总故障数", dataIndex: "totalFailures", key: "totalFailures", width: 120 },
+    {
+      title: "托管台数",
+      dataIndex: "totalMachines",
+      key: "totalMachines",
+      width: 105,
+      render: (value) => value.toLocaleString(),
+    },
+    {
+      title: "总故障数",
+      dataIndex: "totalFailures",
+      key: "totalFailures",
+      width: 120,
+      render: (value) => value.toLocaleString(),
+    },
     {
       title: "总故障率",
       dataIndex: "totalFailuresRate",
@@ -260,9 +273,21 @@ const BusinessReport: React.FC<BusinessReportProps> = ({ venueName }) => {
           console.log(text);
         }
         if (record.start_time && record.end_time) {
-          return getTimeDifference(record.start_time, record.end_time);
+          const duration = getTimeDifference(record.start_time, record.end_time);
+          if (duration != "---") {
+            return duration;
+          }
+          return (
+            <Tag color="red">
+              <SyncOutlined spin style={{ marginRight: 4 }} /> 影响中
+            </Tag>
+          );
         }
-        return "---";
+        return (
+          <Tag color="red">
+            <SyncOutlined spin style={{ marginRight: 4 }} /> 影响中
+          </Tag>
+        );
         // return dayjs(text).format("YYYY-MM-DD HH:mm");
       },
     },
@@ -290,7 +315,13 @@ const BusinessReport: React.FC<BusinessReportProps> = ({ venueName }) => {
         return <Tag color={colors[text as keyof typeof colors]}>{text}</Tag>;
       },
     },
-    { title: "影响台数", dataIndex: "impact_count", key: "impact_count" },
+    {
+      title: "影响台数",
+      dataIndex: "impact_count",
+      key: "impact_count",
+      width: 105,
+      render: (value) => value.toLocaleString(),
+    },
     { title: "影响算力", dataIndex: "impact_power_loss", key: "impact_power_loss" },
     { title: "事件原因", dataIndex: "event_reason", key: "event_reason" },
   ];

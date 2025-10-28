@@ -6,6 +6,7 @@ import {
   EditOutlined,
   PlusOutlined,
   SearchOutlined,
+  SyncOutlined,
 } from "@ant-design/icons";
 import {
   Button,
@@ -135,6 +136,7 @@ const App: React.FC = () => {
         return type === "valid" ? hasDuration : !hasDuration;
       });
     // 2️⃣ 收藏过滤
+
     // const matchesCollection = !showCollectionOnly || log.collection === 1;
     return matchesLocation && matchesEventType && matchesSearchText && matchesDateRange && matchesDuration;
   });
@@ -195,40 +197,27 @@ const App: React.FC = () => {
       title: "影响时长",
       dataIndex: "log_date",
       width: 120,
-      // filters: [
-      //   { text: "未结束事件", value: "empty" },
-      //   { text: "已结束事件", value: "valid" },
-      // ],
-      // onFilter: (value: any) => {
-      //   setSelectedDurationType([value]);
-      //   return true;
-      // },
-      // onFilter: (value: any, record: any) => {
-      //   console.log("value", value)
-      //   // console.log("filters", filters)
-      //   setSelectedDurationType(value);
-      //   const hasDuration = record.start_time && record.end_time;
-      //   if (value === "valid") return hasDuration;
-      //   if (value === "empty") return !hasDuration;
-      //   return true;
-      // },
-      // filteredData()
-      // if (value === "valid") return setSelectedDurationType('valid');
-      // if (value === "empty") return !hasDuration;
-
-      // const hasDuration = record.start_time && record.end_time;
-      // if (value === "valid") return hasDuration;
-      // if (value === "empty") return !hasDuration;
-      // return true;
-      // },
       render: (_: string, record: any) => {
         // if (text === "---valid---") {
         //   console.log(text);
         // }
         if (record.start_time && record.end_time) {
-          return getTimeDifference(record.start_time, record.end_time);
+          // return getTimeDifference(record.start_time, record.end_time);
+          const duration = getTimeDifference(record.start_time, record.end_time);
+          if (duration != "---") {
+            return duration;
+          }
+          return (
+            <Tag color="red">
+              <SyncOutlined spin style={{ marginRight: 4 }} /> 影响中
+            </Tag>
+          );
         }
-        return "---";
+        return (
+          <Tag color="red">
+            <SyncOutlined spin style={{ marginRight: 4 }} /> 影响中
+          </Tag>
+        );
         // return dayjs(text).format("YYYY-MM-DD HH:mm");
       },
       sorter: (a, b) => {

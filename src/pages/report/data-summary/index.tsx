@@ -1,7 +1,7 @@
 // // 代码已包含 CSS：使用 TailwindCSS , 安装 TailwindCSS 后方可看到布局样式效果
 import React, { useState } from "react";
 import { LoadingOutlined } from "@ant-design/icons";
-import { DatePicker } from "antd";
+import { Alert, DatePicker } from "antd";
 import dayjs from "dayjs";
 import ChartDashboard from "./components/chartDashboard";
 import DataCardGrid from "./components/dataCard";
@@ -21,6 +21,18 @@ const App: React.FC = () => {
   return (
     <div className="min-h-screen  text-gray-800">
       {/* 顶部导航 */}
+      <Alert
+        showIcon
+        banner
+        type="warning"
+        className="mb-3"
+        message={
+          <span>
+            <strong>数据核对中：</strong>{" "}
+            当前展示的数据为临时核对结果，非最终版，可能存在偏差；最终数据发布后将及时同步。
+          </span>
+        }
+      />
       <div className="flex items-center justify-between  h-16 border-b border-gray-200">
         <div className="flex items-center gap-3"></div>
         <DatePicker

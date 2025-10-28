@@ -142,6 +142,7 @@ export default function StatisticsPage() {
         key: "venue_name",
         onHeaderCell: () => ({ className: "fee-ratio-header" }),
         width: 280,
+        sorter: (a: any, b: any) => a.venue_name.localeCompare(b.venue_name), // 场地名排序
         render: (text: string, record: { key?: any }) => {
           const isSpecialVenue = text === "Arct-HF01-J XP-AR-US" || text === "ARCT Technologies-HF02-AR-US";
           return (

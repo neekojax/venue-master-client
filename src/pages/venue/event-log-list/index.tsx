@@ -6,6 +6,7 @@ import {
   EditOutlined,
   PlusOutlined,
   SearchOutlined,
+  SyncOutlined,
 } from "@ant-design/icons";
 import {
   Button,
@@ -151,14 +152,28 @@ const App: React.FC = () => {
         if (value === "empty") return !hasDuration;
         return true;
       },
-      render: (text: string, record: any) => {
-        if (text === "---valid---") {
-          console.log(text);
-        }
+      render: (_: any, record: any) => {
         if (record.start_time && record.end_time) {
-          return getTimeDifference(record.start_time, record.end_time);
+          // return getTimeDifference(record.start_time, record.end_time);
+          const duration = getTimeDifference(record.start_time, record.end_time);
+          if (duration != "---") {
+            return duration;
+          }
+          return (
+            <Tag color="red">
+              <SyncOutlined spin style={{ marginRight: 4 }} /> 影响中
+            </Tag>
+          );
         }
-        return "---";
+        return (
+          <Tag color="red">
+            <SyncOutlined spin style={{ marginRight: 4 }} /> 影响中
+          </Tag>
+        );
+        // if (record.start_time && record.end_time) {
+        //   return getTimeDifference(record.start_time, record.end_time);
+        // }
+        // return "---";
         // return dayjs(text).format("YYYY-MM-DD HH:mm");
       },
       sorter: (a, b) => {
