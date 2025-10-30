@@ -82,17 +82,21 @@ export default function MainLayout() {
                 className="mr-2"
               />
             )}
-            <Breadcrumb />
+            {localStorage.getItem("user_access_level") != "special" && <Breadcrumb />}
             <Flex gap={12} className="ml-auto items-center">
               {/*<CustomSkin />*/}
               {/*<ThemeSwitch />*/}
               {/* <NetworkEfficiencyCard value={12345} /> */}
-              <NetworkEfficiencyCard
-                title="昨日全网产出效率："
-                value={suanlilv?.BTCNetworkPerEPower}
-                unit="BTC/EH"
-              />
-              <PoolTypeSelect />
+              {localStorage.getItem("user_access_level") != "special" && (
+                <>
+                  <NetworkEfficiencyCard
+                    title="昨日全网产出效率："
+                    value={suanlilv?.BTCNetworkPerEPower}
+                    unit="BTC/EH"
+                  />
+                  <PoolTypeSelect />
+                </>
+              )}
               <UserAvatar />
             </Flex>
           </Layout.Header>
