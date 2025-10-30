@@ -113,26 +113,28 @@ const VenueDetail: React.FC = () => {
             </div>
           </div>
           <div>
-            <Select
-              placeholder="选择场地"
-              style={{ width: 200 }}
-              value={venueId}
-              showSearch
-              filterOption={(input, option) =>
-                String(option?.label ?? "")
-                  .toLowerCase()
-                  .includes(input.toLowerCase())
-              }
-              onChange={(value) => {
-                navigate(`/venue/detail/${value}`);
-              }}
-              options={
-                venueListData?.data?.map((venue: any) => ({
-                  label: venue.venue_name,
-                  value: venue.id.toString(),
-                })) || []
-              }
-            />
+            {localStorage.getItem("user_access_level") != "special" && (
+              <Select
+                placeholder="选择场地"
+                style={{ width: 200 }}
+                value={venueId}
+                showSearch
+                filterOption={(input, option) =>
+                  String(option?.label ?? "")
+                    .toLowerCase()
+                    .includes(input.toLowerCase())
+                }
+                onChange={(value) => {
+                  navigate(`/venue/detail/${value}`);
+                }}
+                options={
+                  venueListData?.data?.map((venue: any) => ({
+                    label: venue.venue_name,
+                    value: venue.id.toString(),
+                  })) || []
+                }
+              />
+            )}
           </div>
         </div>
         <div className="flex flex-wrap gap-4 text-sm">

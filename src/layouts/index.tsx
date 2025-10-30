@@ -56,7 +56,8 @@ export default function MainLayout() {
     <>
       <AppHelmet />
       <Layout>
-        {isSidebarVisible && <SiderBar />} {/* 根据状态显示 SiderBar */}
+        {localStorage.getItem("user_access_level") != "special" && isSidebarVisible && <SiderBar />}{" "}
+        {/* 根据状态显示 SiderBar */}
         <Layout>
           <Layout.Header
             id="app-header-bar"

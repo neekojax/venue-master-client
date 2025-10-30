@@ -69,6 +69,16 @@ export default function LoginForm() {
         localStorage.setItem("user_id", data.data.id); //保存用户id
         localStorage.setItem("access_token", data.data.access_token);
         localStorage.setItem("refresh_token", data.data.refresh_token);
+        // 权限相关
+        localStorage.setItem("user_access_level", data.data.user_access_level);
+        localStorage.setItem("user_access_type", data.data.user_access_type);
+        localStorage.setItem("venue_id", data.data.venue_id);
+        if (localStorage.getItem("venue_id") && localStorage.getItem("user_access_level") == "special") {
+          // localStorage.setItem("admin_venue_id", data.data.venue_id);
+          ///venue/detail/24
+          // console.log("跳转>>维修详情", ROUTE_PATHS.miningSiteDetail(data.data.venue_id))
+          location.href = ROUTE_PATHS.miningSiteDetail(data.data.venue_id); // 进行导航
+        }
 
         navigate(ROUTE_PATHS.landing); // 进行导航
         window.$notification?.success({
