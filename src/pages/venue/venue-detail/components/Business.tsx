@@ -334,7 +334,6 @@ const BusinessReport: React.FC<BusinessReportProps> = ({ venueName }) => {
       // console.log(response);
       setAbnormalData(response.data);
       setLoading(false);
-
       // 处理响应数据
     } catch (error) {
       // 处理错误
@@ -418,7 +417,7 @@ const BusinessReport: React.FC<BusinessReportProps> = ({ venueName }) => {
                   />
                 </div>
               ),
-              rowExpandable: (record) => record.subAccountStats && record.subAccountStats.length > 0,
+              rowExpandable: (record) => (record.subAccountStats?.length ?? 0) > 1,
             }}
           />
         ) : (

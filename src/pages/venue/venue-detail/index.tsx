@@ -17,11 +17,6 @@ import ChartFee from "@/pages/custody-statistics/statisticsDetail/components/cha
 import { getVenueBasicInfo, getVenueDailyStat } from "@/pages/venue/api.tsx";
 import { useVenueList } from "@/pages/venue/hook/hook";
 
-// type ChartConfig = {
-//   id: string;
-//   title: string;
-//   period: "day" | "month";
-// };
 interface SubAccount {
   pool_id: number;
   pool_name: string;
@@ -71,7 +66,7 @@ const VenueDetail: React.FC = () => {
     try {
       const response = await getVenueDailyStat(poolType, Number(venueId), formattedDate);
       if (response.data) {
-        console.log("response.data", response.data);
+        // console.log("response.data", response.data);
         setStats(response.data);
         // 不在这里直接调用 initChart，而是通过 useEffect 监听 stats 变化
       }

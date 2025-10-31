@@ -385,7 +385,7 @@ const App: React.FC = () => {
   };
 
   const onDateChange = (dates: null | [Dayjs, Dayjs], dateStrings: [string, string]) => {
-    console.log("原始 Dayjs 对象:", dates); // [Dayjs, Dayjs]
+    // console.log("原始 Dayjs 对象:", dates); // [Dayjs, Dayjs]
     console.log("格式化字符串:", dateStrings); // ["2025-08-01", "2025-08-24"]
 
     setDateRange(dates);
@@ -403,15 +403,18 @@ const App: React.FC = () => {
       <div className="mx-auto bg-white rounded-lg shadow-sm">
         <div className="p-6 border-b border-gray-200">
           <div className="grid grid-cols-[auto_1fr] gap-6 mb-6 filter-form">
-            <Button
-              type="primary"
-              icon={<PlusOutlined />}
-              onClick={handleAdd}
-              size="middle"
-              className="!rounded-button"
-            >
-              新增事件
-            </Button>
+            {localStorage.getItem("user_access_level") != "special" && (
+              <Button
+                type="primary"
+                icon={<PlusOutlined />}
+                onClick={handleAdd}
+                size="middle"
+                className="!rounded-button"
+              >
+                新增事件
+              </Button>
+            )}
+
             <div className="flex items-center justify-end gap-4">
               <Input
                 placeholder="搜索事件内容"
@@ -434,7 +437,7 @@ const App: React.FC = () => {
 
           <div className="flex items-center gap-4 mb-6">
             <Space>
-              {selectedRowKeys.length > 0 && (
+              {localStorage.getItem("user_access_level") != "special" && selectedRowKeys.length > 0 && (
                 <Button
                   danger
                   icon={<DeleteOutlined />}
@@ -444,44 +447,48 @@ const App: React.FC = () => {
                   批量删除
                 </Button>
               )}
-              <UploadExcel />
-              <Button
-                icon={<DownloadOutlined />}
-                size="middle"
-                onClick={() => {
-                  const headers = [
-                    "场地",
-                    "日期",
-                    "时间范围",
-                    "事件类型",
-                    "影响台数",
-                    "事件原因",
-                    "解决措施",
-                    "记录人",
-                    "记录时间",
-                  ];
-                  const data = filteredData.map((item) => [
-                    item.venue_name,
-                    item.log_date,
-                    `${item.start_time} - ${item.end_time}`,
-                    item.log_type,
-                    item.impact_count,
-                    item.event_reason,
-                    item.resolution_measures,
-                    item.created_at,
-                  ]);
-                  const csvContent = [headers, ...data].map((row) => row.join(",")).join("\n");
-                  const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
-                  const link = document.createElement("a");
-                  link.href = URL.createObjectURL(blob);
-                  link.download = `事件日志_${dayjs().format("YYYY-MM-DD")}.csv`;
-                  link.click();
-                  message.success("导出成功");
-                }}
-                className="!rounded-button"
-              >
-                导出事件
-              </Button>
+              {localStorage.getItem("user_access_level") != "special" && (
+                <>
+                  <UploadExcel />
+                  <Button
+                    icon={<DownloadOutlined />}
+                    size="middle"
+                    onClick={() => {
+                      const headers = [
+                        "场地",
+                        "日期",
+                        "时间范围",
+                        "事件类型",
+                        "影响台数",
+                        "事件原因",
+                        "解决措施",
+                        "记录人",
+                        "记录时间",
+                      ];
+                      const data = filteredData.map((item) => [
+                        item.venue_name,
+                        item.log_date,
+                        `${item.start_time} - ${item.end_time}`,
+                        item.log_type,
+                        item.impact_count,
+                        item.event_reason,
+                        item.resolution_measures,
+                        item.created_at,
+                      ]);
+                      const csvContent = [headers, ...data].map((row) => row.join(",")).join("\n");
+                      const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+                      const link = document.createElement("a");
+                      link.href = URL.createObjectURL(blob);
+                      link.download = `事件日志_${dayjs().format("YYYY-MM-DD")}.csv`;
+                      link.click();
+                      message.success("导出成功");
+                    }}
+                    className="!rounded-button"
+                  >
+                    导出事件
+                  </Button>
+                </>
+              )}
             </Space>
           </div>
         </div>
