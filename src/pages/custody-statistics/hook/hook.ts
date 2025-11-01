@@ -4,6 +4,7 @@ import {
   fetchCustodyInfoList,
   fetchCustodyStatisticsList,
   fetchDailyAveragePrice,
+  fetchMonthlyCustodyStatistics,
   submitCustodyInfoDelete,
   submitCustodyInfoNew,
   submitCustodyUpdate,
@@ -71,6 +72,13 @@ export const useCustodyStatisticsList = (timeRange: string, poolType: string) =>
   return useQuery({
     queryKey: ["custody-statistics-list", timeRange, poolType],
     queryFn: fetchCustodyStatisticsList,
+  });
+};
+
+export const useMonthlyCustodyStatisticsList = (poolType: string, startTime: string, endTime: string) => {
+  return useQuery({
+    queryKey: ["monthly-custody-statistics-list", poolType, startTime, endTime],
+    queryFn: fetchMonthlyCustodyStatistics,
   });
 };
 

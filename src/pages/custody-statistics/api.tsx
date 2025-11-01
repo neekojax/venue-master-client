@@ -47,3 +47,15 @@ export const fetchCustodyFeeRatioHistory = async ({ venueId }: { venueId: number
 export const fetchDailyBtcPrice = async ({ venueId }: { venueId: number }) => {
   return await fetchGet(`custody/dailyBtcPrice/${venueId}`);
 };
+
+// 按月获取托管统计信息
+// /custody/monthlyCustodyStatistics/CANG/2025-09-01/2025-09-30
+export const fetchMonthlyCustodyStatistics = async ({
+  queryKey,
+}: {
+  queryKey: [string, string, string, string];
+}) => {
+  const [_key, poolType, startDate, endDate] = queryKey; // 解构参数
+  console.log(_key);
+  return await fetchGet(`custody/monthlyCustodyStatistics/${poolType}/${startDate}/${endDate}`);
+};

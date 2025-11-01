@@ -1,598 +1,285 @@
-import { useEffect, useMemo, useState } from "react";
-import { AiOutlineCalendar } from "react-icons/ai";
-import { FaList } from "react-icons/fa6";
-import { FcCalendar } from "react-icons/fc";
-import { Link, useNavigate } from "react-router-dom";
-// import { GiMining } from "react-icons/gi";
-import { ExportOutlined } from "@ant-design/icons"; // 导入时钟图标
-import { Alert, Button, Select, Space, Spin, Table, Tag, Tooltip } from "antd";
-// import EditTable from "@/components/edit-table";
-import useAuthRedirect from "@/hooks/useAuthRedirect.ts";
-import { useSelector, useSettingsStore } from "@/stores";
-import { exportCustodyStatisticsToExcel } from "@/utils/excel";
-import { formatHashrate } from "@/utils/num";
-import { formatAmount } from "@/utils/num";
+import { useEffect, useState } from "react";
+import { ExportOutlined } from "@ant-design/icons";
+import { Button, Select } from "antd";
+import CustodyStatisticsMonthTable from "./components/CustodyStatisticsMonthTable";
+import CustodyStatisticsTable from "./components/CustodyStatisticsTable";
 
-import { useCustodyStatisticsList } from "@/pages/custody-statistics/hook/hook.ts";
+// 单文件 React 组件：可直接在支持 Tailwind 的项目中预览
+// 说明：这是一个设计原型，展示“按天数搜索（下拉）”与“按月搜索（日历月）”二选一的交互和界面风格
 
-// 初始化时从 localStorage 获取值
-const getInitialTimeRange = () => {
-  const stored = localStorage.getItem("timeRange");
-  console.log("stored", stored);
-  return stored ? stored : "1days"; // 默认为 'all'
-};
+export default function DateModeHeader() {
+  const [mode, setMode] = useState("day"); // 'day' 或 'month'
+  const [dayRange, setDayRange] = useState("1");
 
-const getInitialPoolFilter = () => {
-  const stored = localStorage.getItem("poolFilter");
-  return stored ? stored : ""; // 默认为空
-};
+  // 读取默认时间范围（与 dailyData.tsx 保持一致）
+  // const getInitialTimeRange = () => {
+  //   const stored = localStorage.getItem("timeRange");
+  //   return stored ? stored : "1days";
+  // };
 
-export default function StatisticsPage() {
-  useAuthRedirect();
-
-  const navigate = useNavigate();
-
-  const { poolType } = useSettingsStore(useSelector(["poolType"]));
-
-  const [timeRange, setTimeRange] = useState(getInitialTimeRange()); // 默认时间范围
-  const [poolFilter, setPoolFilter] = useState(getInitialPoolFilter()); // 默认池过滤
-  const { data: statisticsData, error, isLoading } = useCustodyStatisticsList(timeRange, poolType);
-
-  // const { data: linksData, error, isLoading: isLoadingFields } = useCustodyInfoList();
-  const [columns, setColumns] = useState<any>([]);
-  const [filteredData, setFilteredData] = useState<any[]>([]);
-  const [tableData, setTableData] = useState<any>([]);
-  const [searchTerm, setSearchTerm] = useState(""); // 新增搜索状态
-  const [alertMessage, setAlertMessage] = useState("");
-  // 全局序号需要分页信息
-  const [currentPage, setCurrentPage] = useState(1);
-  const [pageSize, setPageSize] = useState(20);
-  // 高托管费筛选（> 90%）
-  const [showHighFeeOnly, setShowHighFeeOnly] = useState(false);
-  const [selectedVenues, setSelectedVenues] = useState<string[]>([]);
-  const venueOptions = useMemo(() => {
-    const names = Array.from(new Set(tableData.map((i: any) => i.venue_name))).filter(Boolean) as string[];
-    return names.map((name) => ({ label: name, value: name }));
-  }, [tableData]);
-
-  useEffect(() => {
-    if (statisticsData && statisticsData.data) {
-      setAlertMessage("");
-      const newData = statisticsData.data.map(
-        (item: {
-          date: any;
-          venue_id: any;
-          venue_name: any;
-          hash: any;
-          income_btc: any;
-          managed_unit_price: any;
-          power_consumption: any;
-          nominal_power_consumption: any;
-          power_consumption_diff: any;
-          total_hosting_fee: any;
-          total_income_usd: any;
-          net_income: any;
-          hosting_fee_ratio: any;
-        }) => ({
-          key: item.venue_id, // 使用场地ID作为唯一 key
-          venue_name: item.venue_name,
-          venue_id: item.venue_id,
-          // sub_account_name: item.sub_account_name,
-          // observer_link: item.observer_link,
-          power_consumption: item.power_consumption,
-          nominal_power_consumption: item.nominal_power_consumption,
-          power_consumption_diff: item.power_consumption_diff,
-          energy_ratio: item.power_consumption,
-          basic_hosting_fee: item.managed_unit_price,
-          hash: item.hash,
-          total_hosting_fee: item.total_hosting_fee,
-          total_income_btc: item.income_btc,
-          total_income_usd: item.total_income_usd,
-          net_income: item.net_income,
-          hosting_fee_ratio: item.hosting_fee_ratio,
-          report_date: item.date,
-        }),
-      );
-      setTableData(newData); // 设置表格数据源
-    } else {
-      // 处理空数据情况
-      // setAlertMessage({
-      //   message: "暂无数据",
-      //   type: "info",
-      // });
-      setFilteredData([]);
-      setTableData([]);
-      // 如果当前时间是最近的时间范围，不展示数据
-      const now = new Date(); // 当前时间
-      const hour = now.getHours(); // 获取当前小时（0~23）
-
-      if (timeRange === "1days" && hour < 10) {
-        setAlertMessage("今日数据处理中，请稍后查看，或者查看近三天的数据");
-        // message.open({
-        //   type: "warning",
-        //   content: "今日数据处理中，请稍后查看，或者查看近三天的数据",
-        //   duration: 5,
-        // });
-      } else {
-        setAlertMessage("");
+  const [month, setMonth] = useState(() => {
+    const d = new Date();
+    let year = d.getFullYear();
+    let monthNum = d.getMonth() + 1; // 1-12
+    // 若今天是当月1号，则将初始值设为上一个月
+    if (d.getDate() === 1) {
+      monthNum -= 1;
+      if (monthNum === 0) {
+        monthNum = 12;
+        year -= 1;
       }
     }
-  }, [statisticsData, timeRange]);
+    return `${year}-${String(monthNum).padStart(2, "0")}`; // YYYY-MM
+  });
+  // 提升的筛选与导出相关状态
+  const [selectedVenues, setSelectedVenues] = useState<string[]>([]);
+  const [showHighFeeOnly, setShowHighFeeOnly] = useState(false);
+  const [venueOptions, setVenueOptions] = useState<{ label: string; value: string }[]>([]);
+  const [filteredData, setFilteredData] = useState<any[]>([]);
 
-  // 表头定义
+  // 计算表格内容可滚动高度，确保分页在底部始终可见
+  const [tableScrollY, setTableScrollY] = useState<number>(480);
   useEffect(() => {
-    setColumns([
-      {
-        title: (
-          <span className="fee-ratio-title" style={{ padding: 0, margin: 0 }}>
-            No
-          </span>
-        ), // 使用英文标题
-        dataIndex: "index",
-        key: "index",
-        onHeaderCell: () => ({ className: "fee-ratio-header" }),
-        width: 55,
-        render: (_: any, __: any, index: number) => {
-          return <span>{(currentPage - 1) * pageSize + index + 1}</span>;
-        },
-      },
-      {
-        title: <span className="fee-ratio-title">场地名</span>,
-        dataIndex: "venue_name",
-        key: "venue_name",
-        onHeaderCell: () => ({ className: "fee-ratio-header" }),
-        width: 280,
-        sorter: (a: any, b: any) => a.venue_name.localeCompare(b.venue_name), // 场地名排序
-        render: (text: string, record: { key?: any }) => {
-          const isSpecialVenue = text === "Arct-HF01-J XP-AR-US" || text === "ARCT Technologies-HF02-AR-US";
-          return (
-            <Tooltip
-              title={text}
-              placement="top"
-              overlayInnerStyle={{ color: "white" }}
-              style={{ color: "white" }}
-            >
-              <div
-                style={{
-                  width: "280px",
-                  overflow: "hidden",
-                  color: isSpecialVenue ? "red" : "#333", // 特殊场地字体颜色为红色
-                  textOverflow: "ellipsis",
-                  whiteSpace: "nowrap",
-                  fontWeight: isSpecialVenue ? "bold" : "normal", // 加粗特殊场地
-                }}
-              >
-                {isSpecialVenue && (
-                  <Tag color="red" style={{ marginLeft: 2 }}>
-                    补充
-                  </Tag>
-                )}
-                {/* {text} */}
-                <Link
-                  to={`/venue/detail/${record.key}`}
-                  onClick={(e) => e.stopPropagation()}
-                  className="text-blue-500 hover:underline"
-                >
-                  {text}
-                </Link>
-              </div>
-            </Tooltip>
-          );
-        },
-      },
-      {
-        title: <span className="fee-ratio-title">24h算力</span>,
-        dataIndex: "hash",
-        key: "hash",
-        onHeaderCell: () => ({ className: "fee-ratio-header" }),
-        // width: 140,
-        width: "10%",
-        sorter: (a: any, b: any) =>
-          (typeof a.hash === "number" ? a.hash : parseFloat(a.hash)) -
-          (typeof b.hash === "number" ? b.hash : parseFloat(b.hash)), // 添加排序逻辑（兼容字符串）
-        render: (text: any) => (
-          <span>
-            <span>{formatHashrate(text, "TH", 2, "EH")}</span>
-            {/* <span style={{ marginLeft: 4, color: "rgba(0,0,0,0.45)" }}>TH/s</span> */}
-          </span>
-        ), // 渲染单位
-      },
-      {
-        title: <span className="fee-ratio-title">收益(BTC/USD/净USD)</span>,
-        dataIndex: "total_income_btc",
-        key: "total_income_btc",
-        // width: 280,
-        width: "25%",
-        onHeaderCell: () => ({ className: "fee-ratio-header" }),
-        sorter: (a: any, b: any) =>
-          (typeof a.total_income_btc === "number" ? a.total_income_btc : parseFloat(a.total_income_btc)) -
-          (typeof b.total_income_btc === "number" ? b.total_income_btc : parseFloat(b.total_income_btc)), // 添加排序逻辑（兼容字符串）
-        render: (text: any, record: any) => (
-          <>
-            <Tag color="gold" style={{ marginBottom: 8 }}>
-              {text.toFixed(8)}
-              <span style={{ marginLeft: 2, color: "rgba(0,0,0,0.45)" }}>BTC</span>
-            </Tag>
-            <Tag color="green">
-              <span style={{ marginRight: 3 }}>{formatAmount(record.total_income_usd, 2, "$")}</span>
-              <span style={{ marginLeft: 2, color: "rgba(0,0,0,0.45)" }}>/</span>
-              <span style={{ marginLeft: 3 }}>{formatAmount(record.net_income, 2, "$")}</span>
-            </Tag>
-          </>
-        ), // 渲染单位
-      },
-      {
-        title: <span className="fee-ratio-title">单价</span>,
-        dataIndex: "basic_hosting_fee",
-        key: "basic_hosting_fee",
-        onHeaderCell: () => ({ className: "fee-ratio-header" }),
-        // width: 220,
-        width: "10%",
-        sorter: (a: any, b: any) =>
-          (typeof a.basic_hosting_fee === "number" ? a.basic_hosting_fee : parseFloat(a.basic_hosting_fee)) -
-          (typeof b.basic_hosting_fee === "number" ? b.basic_hosting_fee : parseFloat(b.basic_hosting_fee)), // 添加排序逻辑（兼容字符串）
-        render: (text: any) => (
-          <>
-            {/* <Tag color="gold" style={{ marginBottom: 8 }}> */}
-            {text} $/kwh
-            {/* </Tag> */}
-          </>
-        ),
-      },
-      {
-        title: <span className="fee-ratio-title">预估能耗</span>,
-        dataIndex: "energy_ratio",
-        key: "energy_ratio",
-        onHeaderCell: () => ({ className: "fee-ratio-header" }),
-        // width: 220,
-        width: "10%",
-        sorter: (a: any, b: any) =>
-          (typeof a.energy_ratio === "number" ? a.energy_ratio : parseFloat(a.energy_ratio)) -
-          (typeof b.energy_ratio === "number" ? b.energy_ratio : parseFloat(b.energy_ratio)), // 添加排序逻辑（兼容字符串）
-        render: (text: any) => <>{text}</>,
-      },
-      {
-        dataIndex: "nominal_power_consumption",
-        key: "nominal_power_consumption",
-        title: <span className="fee-ratio-title">额定能耗</span>,
-        // width: 200,
-        width: "7%",
-        render: (text: any) => (
-          <>
-            <span>{text.toFixed(2)}</span>
-          </>
-        ), // 渲染单位
-      },
-      {
-        dataIndex: "power_consumption_diff",
-        key: "power_consumption_diff",
-        title: <span className="fee-ratio-title">能耗差异</span>,
-        // width: 200,
-        width: "7%",
-        render: (text: any) => (
-          <>
-            <span style={{ color: text > 10 ? "red" : "green" }}>{text}%</span>
-          </>
-        ), // 渲染单位
-      },
-      {
-        dataIndex: "hosting_fee_ratio",
-        key: "hosting_fee_ratio",
-        title: <span className="fee-ratio-title">总托管费</span>,
-        // width: 200,
-        width: "8%",
-        render: (text: any, record: any) => (
-          <span>
-            {/* <span style={{ color: "#3498DB" }}> {record.basic_hosting_fee}</span>{" "}
-            <span className="text-sm text-gray-500">$/kwh</span> /{" "} */}
-            <span style={{ display: "none" }}>{text.toFixed(2)}</span>
-            <span>{formatAmount(record.total_hosting_fee, 2, "$")}</span>
-          </span>
-        ), // 渲染单位
-      },
-      {
-        title: <span className="fee-ratio-title">托管费占比</span>,
-        dataIndex: "hosting_fee_ratio",
-        key: "hosting_fee_ratio",
-        // width: 220,
-        width: "12%",
-        sorter: (a: any, b: any) => {
-          const av =
-            typeof a.hosting_fee_ratio === "number" ? a.hosting_fee_ratio : parseFloat(a.hosting_fee_ratio);
-          const bv =
-            typeof b.hosting_fee_ratio === "number" ? b.hosting_fee_ratio : parseFloat(b.hosting_fee_ratio);
-          return av - bv;
-        },
-        onHeaderCell: () => ({ className: "fee-ratio-header" }),
-        onCell: (record: any) => {
-          const val = record?.hosting_fee_ratio;
-          const num = typeof val === "number" ? val : parseFloat(val);
-          return {
-            className: num >= 90 ? "fee-ratio-high" : "fee-ratio-low",
-          };
-        },
-        render: (text: any) => <span>{typeof text === "number" ? `${text.toFixed(2)}%` : `${text}%`}</span>, // 渲染单位
-      },
-      {
-        title: <span className="fee-ratio-title">收益日期</span>,
-        // width: 140,
-        width: "10%",
-        dataIndex: "report_date",
-        key: "report_date",
-        sorter: (a: any, b: any) => new Date(a.report_date).getTime() - new Date(b.report_date).getTime(), // 确保将日期转换为时间戳进行比较
-        render: (text: any) => {
-          const date = new Date(text);
-          const month = date.getMonth() + 1;
-          const day = date.getDate();
-          return `${month}-${day}`;
-          // return moment(text).format("MM-DD");
-        },
-      },
-    ]);
-  }, [timeRange]);
+    const calc = () => {
+      const vpH = window.innerHeight;
+      // 表格容器相对视口顶部的距离
+      const tableContainer = document.getElementById("statistics-table-container");
+      const top = tableContainer?.getBoundingClientRect().top ?? 0;
+      // 分页区域高度（如果未渲染，则使用预估高度）
+      const paginationEl = document.querySelector(".ant-table-pagination") as HTMLElement | null;
+      const paginationH = paginationEl?.offsetHeight ?? 64;
+      const bottomPadding = 32; // 预留底部内边距
+      const y = Math.max(240, vpH - top - paginationH - bottomPadding - 60);
+      setTableScrollY(y);
+    };
+    // 初始与窗口尺寸变化时计算
+    calc();
+    window.addEventListener("resize", calc);
+    return () => window.removeEventListener("resize", calc);
+  }, [mode, dayRange, month, selectedVenues, showHighFeeOnly]);
 
-  // 每当 tableData/filter 改变时，更新 displayData
-  useEffect(() => {
-    // 根据搜索词过滤数据
-    const filteredData = tableData.filter((item: { [s: string]: unknown } | ArrayLike<unknown>) => {
-      const matchesSearchTerm = Object.values(item).some((value) =>
-        String(value).toLowerCase().includes(searchTerm.toLowerCase()),
-      );
-      // 根据选定的池进行过滤
-      // @ts-ignore
-      const matchesPoolFilter = poolFilter ? false : true;
-      // 高托管费过滤（> 90）
-      const ratioVal = (item as any)?.hosting_fee_ratio;
-      const ratioNum = typeof ratioVal === "number" ? ratioVal : parseFloat(ratioVal);
-      const matchesHighFee = showHighFeeOnly ? ratioNum > 90 : true;
-      const matchesSelectedVenues =
-        selectedVenues.length > 0 ? selectedVenues.includes((item as any).venue_name) : true;
+  // 简单 CSV 导出（无需额外依赖）
+  const exportCustodyStatisticsToExcel = (rows: any[]) => {
+    if (!rows || rows.length === 0) return;
 
-      return matchesSearchTerm && matchesPoolFilter && matchesHighFee && matchesSelectedVenues;
-    });
-    setFilteredData(filteredData);
-  }, [tableData, searchTerm, showHighFeeOnly, selectedVenues]);
+    // 定义导出列的顺序与对应中文列名
+    const columns = [
+      { key: "venue_name", label: "场地名" },
+      { key: "hash", label: "24h算力" },
+      { key: "total_income_btc", label: "收益BTC" },
+      { key: "total_income_usd", label: "收益USD" },
+      { key: "net_income", label: "净USD" },
+      { key: "basic_hosting_fee", label: "单价($/kwh)" },
+      { key: "energy_ratio", label: "预估能耗" },
+      { key: "nominal_power_consumption", label: "额定能耗" },
+      { key: "power_consumption_diff", label: "能耗差异" },
+      { key: "total_hosting_fee", label: "总托管费" },
+      { key: "hosting_fee_ratio", label: "托管费占比" },
+      { key: "report_date", label: "收益日期" },
+    ];
 
-  // Loading 状态
-  if (isLoading) {
-    return <Spin tip="加载中..." />;
-  }
-  // 错误状态
-  if (error) {
-    return <Alert message="错误" description={error.message} type="error" showIcon />;
-  }
-  // 时间选择
-  const handleChange = (value: string) => {
-    setTimeRange(value);
-    handleSearch();
-    localStorage.setItem("timeRange", value); // 存储到本地存储
+    // 仅导出在数据中实际存在的列
+    const keys = columns.map((c) => c.key).filter((k) => rows.some((r) => k in r));
+    const labels = columns.filter((c) => keys.includes(c.key)).map((c) => c.label);
+
+    // 按字段名格式化数值：收益BTC保持8位，其它数值保留2位；_ratio/_diff追加百分号
+    const formatValue = (key: string, val: any) => {
+      if (val === null || val === undefined) return "";
+      const isPercent = key.includes("_ratio") || key.includes("_diff");
+      const isBTC = key === "total_income_btc";
+
+      const toNumber = (v: any) => (typeof v === "number" ? v : parseFloat(v));
+      const num = toNumber(val);
+
+      if (Number.isFinite(num)) {
+        if (isBTC) return num.toFixed(8); // 收益BTC保持8位
+        if (isPercent) return `${num.toFixed(2)}%`; // 百分比两位并加%
+        return num.toFixed(2); // 其它数值保留两位
+      }
+
+      // 非数值，直接字符串返回
+      return String(val);
+    };
+
+    // 处理 CSV 单元格转义（包含逗号、引号、换行）
+    const escapeCell = (v: any) => {
+      if (v === null || v === undefined) return "";
+      const str = String(v);
+      if (/[",\n]/.test(str)) return `"${str.replace(/"/g, '""')}"`;
+      return str;
+    };
+
+    const csvLines = [
+      labels.join(","),
+      ...rows.map((r) => keys.map((k) => escapeCell(formatValue(k, (r as any)[k]))).join(",")),
+    ];
+
+    const csv = csvLines.join("\n");
+    const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    //  {mode === "day" ? `最近 ${dayRange} 天` : `${month}`}
+    const fileName = mode === "day" ? `最近 ${dayRange} 天电费统计` : `${month}电费统计`;
+    a.download = `${fileName}_${new Date().toISOString().slice(0, 10)}.csv`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
   };
 
-  // 搜索处理函数
-  const handleSearch = () => {
-    handlePoolFilterChange("");
-    setSearchTerm("");
-  };
-
-  // 池选择处理函数
-  const handlePoolFilterChange = (value: string) => {
-    setPoolFilter(value);
-  };
-
-  // @ts-ignore
   return (
-    <div>
-      <div
-        style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}
-      >
-        <Space size={24}>
-          {/* <div style={{ display: "flex", alignItems: "center" }}>
-            <GiMining style={{ fontSize: "20px", color: "#1890ff", marginRight: "16px" }} />
-            <Select
-              placeholder="选择池"
-              style={{ width: 180, height: 32 }}
-              className={"text-xs"}
-              size={"small"}
-              onChange={handlePoolFilterChange}
-              options={[
-                {
-                  value: "",
-                  label: (
-                    <span style={{ display: "flex", alignItems: "center" }}>
-                      <FaList style={{ color: "green", fontSize: 14, marginRight: 8 }} /> 全部
-                    </span>
-                  ),
-                },
-                {
-                  value: "antpool",
-                  label: (
-                    <span style={{ display: "flex", alignItems: "center" }}>
-                      <FaAdn style={{ color: "green", fontSize: 14, marginRight: 8 }} /> 蚂蚁矿池
-                    </span>
-                  ),
-                },
-                {
-                  value: "f2pool",
-                  label: (
-                    <span style={{ display: "flex", alignItems: "center" }}>
-                      <FaFish style={{ color: "#252F4A", fontSize: 14, marginRight: 8 }} /> 鱼池
-                    </span>
-                  ),
-                },
-              ]}
-              value={poolFilter} // 设置选中的值
-            />
-          </div> */}
-          <div style={{ display: "flex", alignItems: "center" }}>
-            <FcCalendar style={{ fontSize: "20px", color: "#1890ff", marginRight: "16px" }} />
-            <Select
-              placeholder="选择时间"
-              style={{ width: 180, height: 32 }}
-              size={"small"}
-              onChange={handleChange}
-              options={[
-                {
-                  value: "all",
-                  label: (
-                    <span style={{ display: "flex", alignItems: "center" }}>
-                      <FaList style={{ color: "green", fontSize: 14, marginRight: 8 }} /> 全部
-                    </span>
-                  ),
-                },
-                {
-                  value: "1days",
-                  label: (
-                    <span style={{ display: "flex", alignItems: "center" }}>
-                      <AiOutlineCalendar style={{ color: "#252F4A", fontSize: 14, marginRight: 8 }} /> 一天
-                    </span>
-                  ),
-                },
-                {
-                  value: "3days",
-                  label: (
-                    <span style={{ display: "flex", alignItems: "center" }}>
-                      <AiOutlineCalendar style={{ color: "#252F4A", fontSize: 14, marginRight: 8 }} /> 三天
-                    </span>
-                  ),
-                },
-                {
-                  value: "7days",
-                  label: (
-                    <span style={{ display: "flex", alignItems: "center" }}>
-                      <AiOutlineCalendar style={{ color: "#252F4A", fontSize: 14, marginRight: 8 }} /> 一周
-                    </span>
-                  ),
-                },
-                {
-                  value: "1month",
-                  label: (
-                    <span style={{ display: "flex", alignItems: "center" }}>
-                      <AiOutlineCalendar style={{ color: "#252F4A", fontSize: 14, marginRight: 8 }} /> 一个月
-                    </span>
-                  ),
-                },
-                // {
-                //   value: "3month",
-                //   label: (
-                //     <span style={{ display: "flex", alignItems: "center" }}>
-                //       <AiOutlineCalendar style={{ color: "#252F4A", fontSize: 14, marginRight: 8 }} /> 三个月
-                //     </span>
-                //   ),
-                // },
-                // {
-                //   value: "6month",
-                //   label: (
-                //     <span style={{ display: "flex", alignItems: "center" }}>
-                //       <AiOutlineCalendar style={{ color: "#252F4A", fontSize: 14, marginRight: 8 }} /> 半年
-                //     </span>
-                //   ),
-                // },
-              ]}
-              value={timeRange} // 设置选中的值
-            />
+    <div className="bg-gray-50" style={{ height: "100%" }}>
+      {/* Card-like container for header */}
+      <div className=" mx-auto bg-white rounded-2xl shadow-md p-6">
+        <header className="sticky  z-40 bg-white flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+          <div>
+            <h1 className="text-lg font-semibold">电费信息统计</h1>
+            <p className="text-sm text-gray-500 mt-1">选择你要展示的时间粒度：按天数 或 按月（单月）</p>
           </div>
-        </Space>
 
-        <div style={{ display: "flex", justifyContent: "flex-end" }}>
-          <Select
-            mode="multiple"
-            allowClear
-            showSearch
-            size="middle"
-            placeholder="选择场地"
-            value={selectedVenues}
-            onChange={(vals) => setSelectedVenues(vals as string[])}
-            options={venueOptions}
-            maxTagCount="responsive"
-            maxTagTextLength={8}
-            maxTagPlaceholder={(omitted) => `已选 ${omitted.length} 项`}
-            style={{ width: 300, marginRight: 10 }}
-            className="text-sm"
-          />
-          <Button.Group size="middle" style={{ marginRight: 10 }}>
-            <Button type={!showHighFeeOnly ? "primary" : "default"} onClick={() => setShowHighFeeOnly(false)}>
-              全部
-            </Button>
-            <Button type={showHighFeeOnly ? "primary" : "default"} onClick={() => setShowHighFeeOnly(true)}>
-              高托管费
-            </Button>
-          </Button.Group>
+          {/* 模式切换控件 */}
+          <div className="flex items-center gap-3">
+            <div className="inline-flex rounded-full bg-gray-100 p-1">
+              <button
+                onClick={() => setMode("day")}
+                className={`px-3 py-1 rounded-full text-sm font-medium transition-colors ${
+                  mode === "day" ? "bg-white shadow-sm text-indigo-700" : "text-gray-600"
+                }`}
+                aria-pressed={mode === "day"}
+              >
+                按天数
+              </button>
+              <button
+                onClick={() => setMode("month")}
+                className={`px-3 py-1 rounded-full text-sm font-medium transition-colors ${
+                  mode === "month" ? "bg-white shadow-sm text-indigo-700" : "text-gray-600"
+                }`}
+                aria-pressed={mode === "month"}
+              >
+                按月
+              </button>
+            </div>
 
-          <Button
-            // type="text"
-            icon={<ExportOutlined className="exportIcon" />}
-            size="middle"
-            className={"text-blue-500 exportButton"}
-            onClick={() => exportCustodyStatisticsToExcel(filteredData)}
-          >
-            导出
-          </Button>
+            {/* 控件区：根据模式展示不同控件（互斥） */}
+            <div className="flex items-center gap-3">
+              <div
+                className={`group flex items-center gap-2 p-1 rounded-xl border transition ${mode === "day" ? "border-indigo-300 bg-white shadow-sm ring-2 ring-indigo-100" : "border-gray-200 bg-gray-100 text-gray-400 opacity-70 pointer-events-none"}`}
+                aria-hidden={mode !== "day"}
+              >
+                <label className={`text-sm ${mode === "day" ? "text-indigo-600" : "text-gray-500"}`}>
+                  最近
+                </label>
+                <select
+                  value={dayRange}
+                  onChange={(e) => setDayRange(e.target.value)}
+                  disabled={mode !== "day"}
+                  className={`appearance-none bg-transparent text-sm font-medium outline-none px-2 py-1 rounded-md ring-1 transition ${mode === "day" ? "ring-gray-300 focus:ring-indigo-500 hover:ring-indigo-300" : "ring-gray-200 bg-gray-100 text-gray-400 cursor-not-allowed"}`}
+                >
+                  <option value="1">1 天</option>
+                  <option value="7">7 天</option>
+                  <option value="30">30 天</option>
+                  <option value="90">90 天</option>
+                </select>
+                <span className={`text-sm ${mode === "day" ? "text-gray-400" : "text-gray-500"}`}>数据</span>
+              </div>
+
+              <div
+                className={`group flex items-center gap-2 p-1 rounded-xl border transition ${mode === "month" ? "border-indigo-300 bg-white shadow-sm ring-2 ring-indigo-100" : "border-gray-200 bg-gray-100 text-gray-400 opacity-70 pointer-events-none"}`}
+                aria-hidden={mode !== "month"}
+              >
+                <label className={`text-sm ${mode === "month" ? "text-indigo-600" : "text-gray-500"}`}>
+                  选择月份
+                </label>
+                <input
+                  type="month"
+                  value={month}
+                  onChange={(e) => setMonth(e.target.value)}
+                  disabled={mode !== "month"}
+                  className={`text-sm font-medium outline-none bg-transparent px-2 py-1 rounded-md ring-1 transition ${mode === "month" ? "ring-gray-300 focus:ring-indigo-500 hover:ring-indigo-300" : "ring-gray-200 bg-gray-100 text-gray-400 cursor-not-allowed"}`}
+                />
+              </div>
+            </div>
+          </div>
+        </header>
+
+        {/* 分割线 */}
+        <div className="border-t mt-6 pt-6">
+          {/* 预览区域：展示卡片与时间范围提示 */}
+          <div className="flex items-center justify-between mb-4">
+            <div className="text-sm text-gray-500">
+              当前筛选：
+              <span className="ml-2 font-medium text-gray-700">
+                {mode === "day" ? `最近 ${dayRange} 天` : `${month}`}
+              </span>
+            </div>
+            <div style={{ display: "flex", justifyContent: "flex-end", marginTop: -20 }}>
+              <Select
+                mode="multiple"
+                allowClear
+                showSearch
+                size="middle"
+                placeholder="选择场地"
+                value={selectedVenues}
+                onChange={(vals: string[]) => setSelectedVenues(vals)}
+                options={venueOptions}
+                maxTagCount="responsive"
+                maxTagTextLength={8}
+                maxTagPlaceholder={(omitted: any[]) => `已选 ${omitted.length} 项`}
+                style={{ width: 300, marginRight: 10 }}
+                className="text-sm"
+              />
+              <Button.Group size="middle" style={{ marginRight: 10 }}>
+                <Button
+                  type={!showHighFeeOnly ? "primary" : "default"}
+                  onClick={() => setShowHighFeeOnly(false)}
+                >
+                  全部
+                </Button>
+                <Button
+                  type={showHighFeeOnly ? "primary" : "default"}
+                  onClick={() => setShowHighFeeOnly(true)}
+                >
+                  高托管费
+                </Button>
+              </Button.Group>
+              <Button
+                icon={<ExportOutlined className="exportIcon" />}
+                size="middle"
+                className={"text-blue-500 exportButton"}
+                onClick={() => exportCustodyStatisticsToExcel(filteredData)}
+              >
+                导出
+              </Button>
+            </div>
+          </div>
+
+          {/* 在筛选头部下方展示统计表格 */}
+          <div id="statistics-table-container" className="mx-auto">
+            {mode === "day" ? (
+              <CustodyStatisticsTable
+                dayRange={dayRange}
+                selectedVenues={selectedVenues}
+                showHighFeeOnly={showHighFeeOnly}
+                onVenueOptionsReady={(opts: { label: string; value: string }[]) => setVenueOptions(opts)}
+                onFilteredDataChange={(data: any[]) => setFilteredData(data)}
+                scrollY={tableScrollY}
+              />
+            ) : (
+              <CustodyStatisticsMonthTable
+                month={month}
+                selectedVenues={selectedVenues}
+                showHighFeeOnly={showHighFeeOnly}
+                onVenueOptionsReady={(opts: { label: string; value: string }[]) => setVenueOptions(opts)}
+                onFilteredDataChange={(data: any[]) => setFilteredData(data)}
+                scrollY={tableScrollY}
+              />
+            )}
+          </div>
         </div>
       </div>
 
-      {isLoading ? (
-        <Spin style={{ marginTop: 20 }} />
-      ) : (
-        <div>
-          {alertMessage ? (
-            <div
-              className="bg-yellow-100 border border-yellow-400 text-yellow-700 px-4 py-3 rounded relative"
-              role="alert"
-            >
-              <strong className="font-bold">提示：</strong>
-              <span className="block sm:inline">{alertMessage}</span>
-            </div>
-          ) : (
-            <Table
-              pagination={{
-                position: ["bottomCenter"],
-                showSizeChanger: true,
-                pageSizeOptions: ["10", "20", "30", "50"],
-                defaultPageSize: 20,
-                showTotal: (total) => `共 ${total} 条`,
-                total: filteredData?.length,
-                onChange: (page, pageSize) => {
-                  setCurrentPage(page);
-                  setPageSize(pageSize);
-                  const tableBody = document.querySelector(".ant-table-body");
-                  if (tableBody) {
-                    (tableBody as HTMLElement).scrollTop = 0;
-                  }
-                },
-              }}
-              onRow={(record) => ({
-                onClick: () => navigate(`/custody-menu/statisticsDetail/${record.venue_id}`),
-                style: { cursor: "pointer" },
-              })}
-              // rowKey={(record: any) => record.venue_id}
-              rowKey={(record) => record.id || record._id || record.miner_name || Math.random()} // ✅ 确保唯一
-              columns={columns}
-              dataSource={filteredData}
-              scroll={{ x: "max-content" }}
-              style={{ marginTop: "15px", width: "100%" }}
-            />
-          )}
-        </div>
-        // <Table
-        //   columns={columns}
-        //   dataSource={filteredData}
-        // pagination={{
-        //   current: currentPage,
-        //   pageSize,
-        //   total: tableData.length,
-        //   onChange: (page) => setCurrentPage(page),
-        // }}
-        // />
-        // <EditTable
-        //   tableData={filteredData}
-        //   setTableData={setTableData}
-        //   columns={columns}
-        //   // @ts-ignore
-        //   handleDelete={() => { }}
-        //   // @ts-ignore
-        //   handleSave={() => { }}
-        // />
-      )}
+      {/* 页面底部提示，用于移动端说明交互 */}
     </div>
   );
 }
