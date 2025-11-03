@@ -92,26 +92,26 @@ export default function CustodyStatisticsMonthTable({
   // 列定义（分页编号依赖 currentPage/pageSize）
   useEffect(() => {
     setColumns([
-      {
-        title: (
-          <span className="fee-ratio-title" style={{ padding: 0, margin: 0 }}>
-            No
-          </span>
-        ),
-        dataIndex: "index",
-        key: "index",
-        onHeaderCell: () => ({ className: "fee-ratio-header" }),
-        width: 55,
-        render: (_: any, __: any, index: number) => {
-          return <span>{(currentPage - 1) * pageSize + index + 1}</span>;
-        },
-      },
+      // {
+      //   title: (
+      //     <span className="fee-ratio-title" style={{ padding: 0, margin: 0 }}>
+      //       No
+      //     </span>
+      //   ),
+      //   dataIndex: "index",
+      //   key: "index",
+      //   onHeaderCell: () => ({ className: "fee-ratio-header" }),
+      //   width: 55,
+      //   render: (_: any, __: any, index: number) => {
+      //     return <span>{(currentPage - 1) * pageSize + index + 1}</span>;
+      //   },
+      // },
       {
         title: <span className="fee-ratio-title">场地名</span>,
         dataIndex: "venue_name",
         key: "venue_name",
         onHeaderCell: () => ({ className: "fee-ratio-header" }),
-        width: 280,
+        width: 200,
         sorter: (a: any, b: any) => a.venue_name.localeCompare(b.venue_name),
         render: (text: string) => {
           const isSpecialVenue = text === "Arct-HF01-J XP-AR-US" || text === "ARCT Technologies-HF02-AR-US";
@@ -124,7 +124,7 @@ export default function CustodyStatisticsMonthTable({
             >
               <div
                 style={{
-                  width: "280px",
+                  width: "200px",
                   overflow: "hidden",
                   color: isSpecialVenue ? "red" : "#333",
                   textOverflow: "ellipsis",
@@ -170,7 +170,7 @@ export default function CustodyStatisticsMonthTable({
         render: (text: any, record: any) => (
           <>
             <Tag color="gold" style={{ marginBottom: 8 }}>
-              {text.toFixed(8)}
+              {text.toFixed(4)}
               <span style={{ marginLeft: 2, color: "rgba(0,0,0,0.45)" }}>BTC</span>
             </Tag>
             <Tag color="green">
@@ -181,20 +181,7 @@ export default function CustodyStatisticsMonthTable({
           </>
         ),
       },
-      {
-        title: <span className="fee-ratio-title">单价</span>,
-        dataIndex: "basic_hosting_fee",
-        key: "basic_hosting_fee",
-        onHeaderCell: () => ({ className: "fee-ratio-header" }),
-        width: 120,
-        sorter: (a: any, b: any) =>
-          (typeof a.basic_hosting_fee === "number" ? a.basic_hosting_fee : parseFloat(a.basic_hosting_fee)) -
-          (typeof b.basic_hosting_fee === "number" ? b.basic_hosting_fee : parseFloat(b.basic_hosting_fee)),
-        render: (text: any) => {
-          const num = typeof text === "number" ? text : parseFloat(text);
-          return <>{Number.isFinite(num) ? num.toFixed(2) : text} $/kwh</>;
-        },
-      },
+
       {
         title: <span className="fee-ratio-title">预估能耗</span>,
         dataIndex: "energy_ratio",
@@ -271,6 +258,20 @@ export default function CustodyStatisticsMonthTable({
         render: (text: any) => {
           const num = typeof text === "number" ? text : parseFloat(text);
           return <span>{Number.isFinite(num) ? `${num.toFixed(2)}%` : `${text}%`}</span>;
+        },
+      },
+      {
+        title: <span className="fee-ratio-title">单价</span>,
+        dataIndex: "basic_hosting_fee",
+        key: "basic_hosting_fee",
+        onHeaderCell: () => ({ className: "fee-ratio-header" }),
+        width: 120,
+        sorter: (a: any, b: any) =>
+          (typeof a.basic_hosting_fee === "number" ? a.basic_hosting_fee : parseFloat(a.basic_hosting_fee)) -
+          (typeof b.basic_hosting_fee === "number" ? b.basic_hosting_fee : parseFloat(b.basic_hosting_fee)),
+        render: (text: any) => {
+          const num = typeof text === "number" ? text : parseFloat(text);
+          return <>{Number.isFinite(num) ? num.toFixed(2) : text} $/kwh</>;
         },
       },
       // {

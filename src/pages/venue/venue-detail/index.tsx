@@ -157,7 +157,8 @@ const VenueDetail: React.FC = () => {
       </header>
       {stats && <BasicDataChart stats={stats} loading={loading} />}
       {/* 图表区域 */}
-      <ChartFee />
+      {localStorage.getItem("user_access_level") != "special" && <ChartFee />}
+
       <div className="grid grid-cols-2 gap-4 mb-8">
         <div className="bg-white p-4 rounded-lg shadow-sm">
           <ChartSuanli></ChartSuanli>
