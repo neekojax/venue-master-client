@@ -43,16 +43,16 @@ const formFields = [
     name: "theoretical_hashrate",
     component: Input,
   },
-  {
-    label: "能耗比",
-    name: "energy_ratio",
-    component: Input,
-  },
-  {
-    label: "基础托管费",
-    name: "basic_hosting_fee",
-    component: Input,
-  },
+  // {
+  //   label: "能耗比",
+  //   name: "energy_ratio",
+  //   component: Input,
+  // },
+  // {
+  //   label: "基础托管费",
+  //   name: "basic_hosting_fee",
+  //   component: Input,
+  // },
   { label: "主链接", name: "master_link", component: Input },
   { label: "备用链接", name: "backup_link", component: Input },
 ];

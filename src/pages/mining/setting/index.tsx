@@ -57,8 +57,8 @@ const emptyData = {
   hosted_machine: 0,
   // pool_category: "",
   theoretical_hashrate: 0,
-  energy_ratio: 0,
-  basic_hosting_fee: 0,
+  // energy_ratio: 0,
+  // basic_hosting_fee: 0,
   master_link: "",
   backup_link: "",
 };
@@ -123,8 +123,8 @@ export default function MiningSettingPage() {
     hosted_machine: number;
     pool_category?: string;
     theoretical_hashrate?: number;
-    energy_ratio?: number;
-    basic_hosting_fee?: number;
+    // energy_ratio?: number;
+    // basic_hosting_fee?: number;
     heat_diss_mode?: number;
     link?: string;
   };
@@ -176,8 +176,8 @@ export default function MiningSettingPage() {
             status: any;
             pool_category: any;
             theoretical_hashrate: any;
-            energy_ratio: any;
-            basic_hosting_fee: any;
+            // energy_ratio: any;
+            // basic_hosting_fee: any;
             heat_diss_mode: any;
             link: any;
             collection: any;
@@ -197,8 +197,8 @@ export default function MiningSettingPage() {
           status: item.status,
           pool_category: item.pool_category,
           theoretical_hashrate: item.theoretical_hashrate,
-          energy_ratio: item.energy_ratio,
-          basic_hosting_fee: item.basic_hosting_fee,
+          // energy_ratio: item.energy_ratio,
+          // basic_hosting_fee: item.basic_hosting_fee,
           heat_diss_mode: item.heat_diss_mode,
           link: item.link,
           collection: item.collection,
@@ -393,18 +393,18 @@ export default function MiningSettingPage() {
           return a.theoretical_hashrate - b.theoretical_hashrate; // 返回值用于升序排序
         },
       },
-      {
-        title: "能耗比(J/T)",
-        dataIndex: "energy_ratio",
-        key: "energy_ratio",
-        width: 120,
-      },
-      {
-        title: "托管费($/kwh)",
-        dataIndex: "basic_hosting_fee",
-        key: "basic_hosting_fee",
-        width: 120,
-      },
+      // {
+      //   title: "能耗比(J/T)",
+      //   dataIndex: "energy_ratio",
+      //   key: "energy_ratio",
+      //   width: 120,
+      // },
+      // {
+      //   title: "托管费($/kwh)",
+      //   dataIndex: "basic_hosting_fee",
+      //   key: "basic_hosting_fee",
+      //   width: 120,
+      // },
       {
         title: "散热模式",
         dataIndex: "heat_diss_mode",
@@ -553,8 +553,8 @@ export default function MiningSettingPage() {
       status: data.status,
       pool_category: data.pool_category,
       theoretical_hashrate: String(data.theoretical_hashrate),
-      energy_ratio: String(data.energy_ratio),
-      basic_hosting_fee: String(data.basic_hosting_fee),
+      // energy_ratio: String(data.energy_ratio),
+      // basic_hosting_fee: String(data.basic_hosting_fee),
       heat_diss_mode: Number(data.heat_diss_mode),
       link: data.link,
     };
@@ -917,12 +917,12 @@ export default function MiningSettingPage() {
               />
             </Form.Item>
 
-            <Form.Item<FieldType>
+            {/* <Form.Item<FieldType>
               label="能耗比"
               name="energy_ratio"
               rules={[{ required: true, message: "Please input your energy_ratio!" }]}
             >
-              {/* <Input /> */}
+             
               <InputNumber<string>
                 style={{ width: 200 }}
                 // defaultValue="1"
@@ -938,7 +938,7 @@ export default function MiningSettingPage() {
               name="basic_hosting_fee"
               rules={[{ required: true, message: "Please input your basic_hosting_fee!" }]}
             >
-              {/* <Input /> */}
+            
               <InputNumber<string>
                 style={{ width: 200 }}
                 // defaultValue="1"
@@ -947,7 +947,7 @@ export default function MiningSettingPage() {
                 step="0.01"
                 stringMode
               />
-            </Form.Item>
+            </Form.Item> */}
 
             <Form.Item<FieldType>
               label="Link"

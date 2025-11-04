@@ -39,6 +39,13 @@ const BarEfficiencyData = ({ data }: { data: EfficiencyDetail[] }) => {
         itemStyle: {
           color: colorPalette[idx % colorPalette.length],
         },
+        label: {
+          show: true, // 显示数值
+          position: "top", // 数值显示在柱子顶部
+          color: "#333", // 数值颜色
+          fontSize: 8,
+          formatter: (params: any) => `${params.value.toFixed(2)}%`, // 格式化数值
+        },
       };
     });
 
