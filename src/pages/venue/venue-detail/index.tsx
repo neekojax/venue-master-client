@@ -51,7 +51,6 @@ const VenueDetail: React.FC = () => {
       const response = await getVenueBasicInfo(poolType, Number(venueId));
       // console.log(response)
       setBasicInfo(response.data);
-
       // 处理响应数据
     } catch (error) {
       // 处理错误

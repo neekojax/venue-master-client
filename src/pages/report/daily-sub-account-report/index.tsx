@@ -204,24 +204,23 @@ const App: React.FC = () => {
       render: (value) => value.toLocaleString(),
       sorter: (a, b) => a.totalMachines - b.totalMachines,
     },
-
-    {
-      title: "在线数",
-      dataIndex: "onlineMachines",
-      key: "onlineMachines",
-      width: 100,
-      align: "right",
-    },
+    // {
+    //   title: "在线数",
+    //   dataIndex: "onlineMachines",
+    //   key: "onlineMachines",
+    //   width: 100,
+    //   align: "right",
+    // },
     {
       title: (
         <div style={{ display: "flex", alignItems: "center", justifyContent: "flex-end" }}>
-          <span>在线率</span>
+          <span>在架有效率</span>
           <FormulaTooltip />
         </div>
       ),
       dataIndex: "onlineRatio",
       key: "onlineRatio",
-      width: 100,
+      width: 125,
       align: "right",
       render: (value: number, record) => (
         <div style={{ display: "flex", alignItems: "center", justifyContent: "flex-end" }}>

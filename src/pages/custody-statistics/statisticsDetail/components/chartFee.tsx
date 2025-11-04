@@ -209,7 +209,10 @@ const FeeApp: React.FC<{ onVenueNameChange?: (name: string) => void }> = ({ onVe
               type: "line",
               smooth: true,
               show: false,
-              color: "#fff",
+              lineStyle: {
+                color: "#52c41a", // 绿色线
+                width: 0,
+              },
               yAxisIndex: 1,
               // areaStyle: {
               //   color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [

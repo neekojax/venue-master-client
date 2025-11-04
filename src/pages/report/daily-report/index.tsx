@@ -211,13 +211,13 @@ const App: React.FC = () => {
     {
       title: (
         <div style={{ display: "flex" }}>
-          <span>在线率</span>
+          <span>在架有效率</span>
           <FormulaTooltip />
         </div>
       ),
       dataIndex: "onlineRatio",
       key: "onlineRatio",
-      width: 125,
+      width: 145,
       align: "left",
       render: (value: number, record) => (
         <div style={{ display: "flex", alignItems: "left", justifyContent: "flex-start" }}>
@@ -659,7 +659,7 @@ const App: React.FC = () => {
       // "T-2日有效率": item.effectiveRateT2.toFixed(2) + "%",
       // "T-3日有效率": item.effectiveRateT3.toFixed(2) + "%",
       托管台数: item.totalMachines.toLocaleString(),
-      在线率: item.onlineRatio.toFixed(2) + "%",
+      在架有效率: item.effectiveRate24h.toFixed(2) + "%",
       // 总故障台数: item.totalFailures.toLocaleString(),
       "24小时故障数": item.failures24h.toLocaleString(),
       "24小时故障率": item.failureRate24h.toFixed(2) + "%",
