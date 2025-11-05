@@ -53,7 +53,7 @@ const App: React.FC = () => {
               <i className="fas fa-chart-bar text-blue-500"></i>
               <span>市场行情</span>
             </div>
-            <div className="text-sm text-gray-400">实时数据</div>
+            {/* <div className="text-sm text-gray-400">实时数据</div> */}
           </div>
           <DataCardGrid
             chartDate={date.format("YYYY-MM-DD")}
