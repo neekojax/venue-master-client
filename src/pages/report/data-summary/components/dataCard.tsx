@@ -12,7 +12,8 @@ export type DataCardItem = {
   price: string;
   priceDiffPercent: number;
   yieldDiffPercent: number;
-
+  hashRateDate: string;
+  btcPriceDate: string;
   //  "dailyYield": 496.875,
   //     "hashRate": 1159.63,
   //     "hashRateDiffPercent": -11.17,
@@ -47,7 +48,7 @@ const DataCardGrid: React.FC<{ chartDate: string; loading?: boolean; onLoaded?: 
       <div className={["grid", colsClass, "gap-4", "mb-6"].join(" ").trim()}>
         <div className="bg-gray-50 rounded-lg p-4 border border-gray-100 flex items-stretch gap-4">
           <div className="flex-none w-55">
-            <div className="text-gray-500 mb-2">算力 EH/s</div>
+            <div className="text-gray-500 mb-2">算力 EH/s（{data.hashRateDate}）</div>
             <div className="text-2xl">
               {formatAmount(data.hashRate, 2, "", false)}
 
@@ -89,7 +90,7 @@ const DataCardGrid: React.FC<{ chartDate: string; loading?: boolean; onLoaded?: 
         </div>
         <div className="bg-gray-50 rounded-lg p-4 border border-gray-100 flex  items-stretch gap-4">
           <div className="flex-none w-55">
-            <div className="text-gray-500 mb-2">单价 $</div>
+            <div className="text-gray-500 mb-2">单价 $（{data.btcPriceDate}）</div>
             <div className="text-2xl">
               {formatAmount(data.price, 2, "", false)}
 
