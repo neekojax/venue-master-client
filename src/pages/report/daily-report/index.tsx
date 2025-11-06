@@ -244,7 +244,7 @@ const App: React.FC = () => {
                     </div>
                     <div>
                       <b>总故障数：</b>
-                      {record.totalFailuresT2}
+                      {record.totalFailuresT1}
                     </div>
                     <div>
                       <b>不可抗力影响台数：</b>
@@ -660,6 +660,10 @@ const App: React.FC = () => {
       // "T-3日有效率": item.effectiveRateT3.toFixed(2) + "%",
       托管台数: item.totalMachines.toLocaleString(),
       在架有效率: item.effectiveRate24h.toFixed(2) + "%",
+      "在架算力(E)": (
+        ((item.totalMachines - item.totalFailuresT1 - item.impactMachine) * item.theoreticalPower) /
+        item.totalMachines
+      ).toFixed(6),
       // 总故障台数: item.totalFailures.toLocaleString(),
       "24小时故障数": item.failures24h.toLocaleString(),
       "24小时故障率": item.failureRate24h.toFixed(2) + "%",
