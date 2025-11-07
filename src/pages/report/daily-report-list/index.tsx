@@ -21,6 +21,7 @@ interface SubAccountStat {
   btcOutput24h: number;
   theoreticalPower: number;
   power24h: number;
+  impactMachine: number;
   effectiveRate24h: number;
   totalMachines: number;
   totalFailures: number;
@@ -392,6 +393,7 @@ const App: React.FC = () => {
       btcOutput24h: "24小时产出(BTC)",
       theoreticalPower: "理论算力(P)",
       power24h: "24小时算力(P)",
+      impactMachine: "在架算力(P)",
       effectiveRate24h: "24小时有效率",
       totalMachines: "托管台数",
       onlineRatio: "在线率",
@@ -447,7 +449,21 @@ const App: React.FC = () => {
         // 转换其他字段
         Object.keys(subAccount).forEach((key) => {
           const chineseKey = subAccountHeaders[key as keyof typeof subAccountHeaders] || key;
-          let value = (subAccount as any)[key];
+          // let value = (subAccount as any)[key];
+
+          let value = null;
+
+          if (key == "impactMachine") {
+            value = (
+              ((subAccount["totalMachines"] - subAccount["totalFailures"] - subAccount["impactMachine"]) *
+                subAccount["theoreticalPower"]) /
+              subAccount["totalMachines"]
+            ).toFixed(2); // （托管台数-总故障数-不可抗力）*理论算力/托管台数
+            // console.log("impactMachine >> value", value);
+          } else {
+            value = (subAccount as any)[key];
+          }
+
           // 为包含rate、Rate、ratio、Ratio的字段添加百分号
           // console.log("key.toLowerCase()", key.toLowerCase());
           if (key.toLowerCase().includes("rate") || key.toLowerCase().includes("ratio")) {
