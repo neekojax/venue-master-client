@@ -308,18 +308,19 @@ const App: React.FC = () => {
       const translatedData: any = {};
       Object.keys(mainDataHeaders).forEach((key) => {
         const chineseKey = (mainDataHeaders as any)[key];
-        let value = (item as any)[key];
-        if (key === "hash") {
-          value = typeof value === "number" ? formatHashrate(value, "TH") : value;
-        } else if (key === "income_btc") {
-          value = typeof value === "number" ? value.toFixed(8) : value;
-        } else if (key === "managed_unit_price" || key === "maintenance_price") {
-          value = typeof value === "number" ? value.toFixed(3) : value;
-        } else if (key === "nominal_power_consumption" || key === "power_consumption") {
-          value = typeof value === "number" ? value.toFixed(2) : value;
-        } else if (key === "total_hosting_fee" || key === "total_maintenance_fee") {
-          value = formatAmount(value);
-        }
+        const value = (item as any)[key];
+        // if (key === "hash") {
+        //   value = typeof value === "number" ? formatHashrate(value, "TH") : value;
+        // } else if (key === "income_btc") {
+        //   value = typeof value === "number" ? value.toFixed(8) : value;
+        // } else if (key === "managed_unit_price" || key === "maintenance_price") {
+        //   value = typeof value === "number" ? value.toFixed(3) : value;
+        // } else if (key === "nominal_power_consumption" || key === "power_consumption") {
+        //   value = typeof value === "number" ? value.toFixed(2) : value;
+        // }
+        // else if (key === "total_hosting_fee" || key === "total_maintenance_fee") {
+        //   value = formatAmount(value);
+        // }
         translatedData[chineseKey] = value;
       });
       return translatedData;

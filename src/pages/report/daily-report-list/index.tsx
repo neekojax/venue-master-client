@@ -433,7 +433,7 @@ const App: React.FC = () => {
 
         translatedData[chineseKey] = value;
       });
-      console.log("translatedData", translatedData);
+      // console.log("translatedData", translatedData);
       return translatedData;
     });
 

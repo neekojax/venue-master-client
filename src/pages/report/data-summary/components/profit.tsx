@@ -72,7 +72,7 @@ const Profit: React.FC<{ chartDate: string }> = ({ chartDate }) => {
             to="/report/data-summary/profit-list"
             className="text-blue-600 hover:text-blue-700 hover:underline text-sm"
           >
-            +查看更多
+            查看更多
           </Link>
         </div>
         <div className="grid grid-cols-3 gap-4 mb-6">
