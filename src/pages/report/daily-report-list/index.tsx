@@ -37,6 +37,7 @@ interface DataType {
   btcOutput24h: number;
   theoreticalPower: number;
   power24h: number;
+  impactMachine: number;
   effectiveRate24h: number;
   totalMachines: number;
   totalFailures: number;
@@ -312,6 +313,7 @@ const App: React.FC = () => {
           effectiveRate24h: venue.effectiveRate24h || 0,
           totalMachines: venue.totalMachines || 0,
           totalFailures: venue.totalFailures || 0,
+          impactMachine: venue.impactMachine || 0,
           failures24h: venue.failures24h || 0,
           failureRate24h: venue.failureRate24h || 0,
           impactRatio: venue.impactRatio || 0,
@@ -372,6 +374,7 @@ const App: React.FC = () => {
       btcOutput24h: "24小时产出(BTC)",
       theoreticalPower: "理论算力(P)",
       power24h: "24小时算力(P)",
+      impactMachine: "在架算力(P)",
       effectiveRate24h: "24小时有效率",
       totalMachines: "托管台数",
       onlineRatio: "在线率",
@@ -403,17 +406,34 @@ const App: React.FC = () => {
 
     // 准备主数据（排除subAccountStats字段并转换为中文列名）
     const mainData = filteredData.map(({ subAccountStats, ...rest }) => {
-      console.log("subAccountStats", subAccountStats);
+      console.log("subAccountStats", subAccountStats.length);
       const translatedData: any = {};
+
       Object.keys(rest).forEach((key) => {
         const chineseKey = mainDataHeaders[key as keyof typeof mainDataHeaders] || key;
-        let value = (rest as any)[key];
+        let value = null;
+
+        if (key == "impactMachine") {
+          value = (
+            ((rest["totalMachines"] - rest["totalFailures"] - rest["impactMachine"]) *
+              rest["theoreticalPower"]) /
+            rest["totalMachines"]
+          ).toFixed(2); // （托管台数-总故障数-不可抗力）*理论算力/托管台数
+          // console.log("impactMachine >> value", value);
+        } else {
+          value = (rest as any)[key];
+        }
+        // value = (rest as any)[key];
+
         // 为包含rate、Rate、ratio、Ratio的字段添加百分号
         if (key.toLowerCase().includes("rate") || key.toLowerCase().includes("ratio")) {
           value = typeof value === "number" ? `${value.toFixed(2)}%` : value;
         }
+        // console.log("key", key, "values", value);
+
         translatedData[chineseKey] = value;
       });
+      console.log("translatedData", translatedData);
       return translatedData;
     });
 
@@ -429,7 +449,7 @@ const App: React.FC = () => {
           const chineseKey = subAccountHeaders[key as keyof typeof subAccountHeaders] || key;
           let value = (subAccount as any)[key];
           // 为包含rate、Rate、ratio、Ratio的字段添加百分号
-          console.log("key.toLowerCase()", key.toLowerCase());
+          // console.log("key.toLowerCase()", key.toLowerCase());
           if (key.toLowerCase().includes("rate") || key.toLowerCase().includes("ratio")) {
             value = typeof value === "number" ? `${value.toFixed(2)}%` : value;
           }

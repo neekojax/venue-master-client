@@ -71,3 +71,8 @@ export const fetchMtdProfitStat = async (date: string, poolType: string) => {
 export const fetchEfficiencyMachineStat = async (start: string, end: string, poolType: string) => {
   return await fetchGet(`/summary/efficiency-machine-stat/${start}/${end}/${poolType}`);
 };
+
+// summary/daily-venue-hosting-stat/:venueType/:date
+export const fetchDailyVenueHostingStat = async (date: string, venueType: string) => {
+  return await fetchGet(`/summary/daily-venue-hosting-stat/${venueType}/${date}`);
+};

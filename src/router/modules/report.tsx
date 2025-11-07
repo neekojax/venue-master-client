@@ -36,6 +36,17 @@ export const reportRoute: RouteObject = {
       },
     },
     {
+      path: ROUTE_PATHS.dataSummaryProfitList,
+      lazy: async () => ({
+        Component: (await import("@/pages/report/data-summary-profit-list/index.tsx")).default,
+      }),
+      HydrateFallback: ProgressBar,
+      handle: {
+        title: "数据概览利润详情",
+        crumb: () => <Link to={ROUTE_PATHS.dataSummaryProfitList}>数据概览利润详情</Link>,
+      },
+    },
+    {
       path: ROUTE_PATHS.dailyReport,
       lazy: async () => ({
         Component: (await import("@/pages/report/daily-report")).default,

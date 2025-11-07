@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
 import { Card } from "antd";
 import { fetchProfitStat } from "../../api";
 import MonthData from "./monthData";
@@ -67,6 +68,12 @@ const Profit: React.FC<{ chartDate: string }> = ({ chartDate }) => {
             <i className="fas fa-chart-pie text-blue-500"></i>
             <span>利润 - 预估 (单位: $)</span>
           </div>
+          <Link
+            to="/report/data-summary/profit-list"
+            className="text-blue-600 hover:text-blue-700 hover:underline text-sm"
+          >
+            +查看更多
+          </Link>
         </div>
         <div className="grid grid-cols-3 gap-4 mb-6">
           <div className="bg-gray-50 rounded-lg p-4 border border-gray-100">
