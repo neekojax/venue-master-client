@@ -9,8 +9,8 @@ import isSameOrAfter from "dayjs/plugin/isSameOrAfter";
 import isSameOrBefore from "dayjs/plugin/isSameOrBefore";
 import * as XLSX from "xlsx";
 import { useSelector, useSettingsStore } from "@/stores";
-import { formatAmount, formatHashrate } from "@/utils/num";
 
+// import { formatAmount, formatHashrate } from "@/utils/num";
 import { fetchDailyVenueHostingStat } from "@/pages/report/api.tsx";
 // 必须扩展 dayjs，否则会报 “不存在属性”
 dayjs.extend(isSameOrAfter);
@@ -120,7 +120,8 @@ const App: React.FC = () => {
       key: "hash",
       width: 140,
       align: "right",
-      render: (value: number) => formatHashrate(value, "TH"),
+      render: (value: number) => value.toFixed(2),
+      // render: (value: number) => formatHashrate(value, "TH"),
       sorter: (a, b) => a.hash - b.hash,
     },
     {
@@ -156,7 +157,7 @@ const App: React.FC = () => {
       key: "nominal_power_consumption",
       width: 140,
       align: "right",
-      render: (value: number) => (typeof value === "number" ? value.toFixed(2) : value),
+      render: (value: number) => (typeof value === "number" ? value.toFixed(4) : value),
       sorter: (a, b) => a.nominal_power_consumption - b.nominal_power_consumption,
     },
     {
@@ -165,7 +166,7 @@ const App: React.FC = () => {
       key: "power_consumption",
       width: 140,
       align: "right",
-      render: (value: number) => (typeof value === "number" ? value.toFixed(2) : value),
+      render: (value: number) => (typeof value === "number" ? value.toFixed(4) : value),
       sorter: (a, b) => a.power_consumption - b.power_consumption,
     },
     // {
@@ -183,7 +184,8 @@ const App: React.FC = () => {
       key: "total_hosting_fee",
       width: 160,
       align: "right",
-      render: (value: number) => formatAmount(value),
+      render: (value: number) => (typeof value === "number" ? value.toFixed(4) : value),
+      // render: (value: number) => formatAmount(value),
       sorter: (a, b) => a.total_hosting_fee - b.total_hosting_fee,
     },
     {
@@ -192,7 +194,8 @@ const App: React.FC = () => {
       key: "total_maintenance_fee",
       width: 160,
       align: "right",
-      render: (value: number) => formatAmount(value),
+      render: (value: number) => (typeof value === "number" ? value.toFixed(4) : value),
+      // render: (value: number) => formatAmount(value),
       sorter: (a, b) => a.total_maintenance_fee - b.total_maintenance_fee,
     },
     // {
