@@ -28,7 +28,7 @@ const ChartDashboard: React.FC<ChartDashboardProps & { chartDate: string }> = ({
           {/* <div id="powerTrend" className="h-64"></div> */}
         </div>
         <div className="bg-white rounded-lg p-6 shadow-sm">
-          <div className="text-gray-500 mb-2">单价趋势（USDT）</div>
+          <div className="text-gray-500 mb-2">币价趋势（USD）</div>
           <ChartPrice loading={loading} chartDate={chartDate} />
           {/* <div id="priceTrend" className="h-64"></div> */}
         </div>

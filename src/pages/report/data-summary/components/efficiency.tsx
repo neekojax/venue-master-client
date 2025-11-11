@@ -77,7 +77,7 @@ const Efficiency: React.FC<{ chartDate: string; loading?: boolean; onLoaded?: ()
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-2 text-lg">
             <i className="fas fa-tachometer-alt text-blue-500"></i>
-            <span>效率</span>
+            <span>CANGO - 效率</span>
           </div>
           <div className="text-sm text-gray-400">
             <Link to="/report/data-summary/list" className="text-blue-500 hover:underline">

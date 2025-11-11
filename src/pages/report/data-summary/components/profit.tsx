@@ -66,7 +66,7 @@ const Profit: React.FC<{ chartDate: string }> = ({ chartDate }) => {
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-2 text-lg">
             <i className="fas fa-chart-pie text-blue-500"></i>
-            <span>利润 - 预估 (单位: $)</span>
+            <span>CANGO - 预估利润 (单位: $)</span>
           </div>
           <Link
             to="/report/data-summary/profit-list"

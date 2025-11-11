@@ -1,8 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { Spin } from "antd";
 import { fetchBtcMarketInfo } from "../../api";
-import ChartPriceCard from "./chartPriceCard";
-import ChartSuanliCard from "./chartSuanliCard";
 import { formatAmount } from "@/utils/num";
 
 export type DataCardItem = {
@@ -48,7 +46,7 @@ const DataCardGrid: React.FC<{ chartDate: string; loading?: boolean; onLoaded?: 
       <div className={["grid", colsClass, "gap-4", "mb-6"].join(" ").trim()}>
         <div className="bg-gray-50 rounded-lg p-4 border border-gray-100 flex items-stretch gap-4">
           <div className="flex-none w-55">
-            <div className="text-gray-500 mb-2">算力 EH/s（{data.hashRateDate}）</div>
+            <div className="text-gray-500 mb-2">全网算力（{data.hashRateDate}）</div>
             <div className="text-2xl">
               {formatAmount(data.hashRate, 2, "", false)}
 
@@ -65,13 +63,13 @@ const DataCardGrid: React.FC<{ chartDate: string; loading?: boolean; onLoaded?: 
               )}
             </div>
           </div>
-          <div className="flex-1 h-[80px] overflow-hidden">
+          {/* <div className="flex-1 h-[80px] overflow-hidden">
             <ChartSuanliCard
               loading={loading}
               hashRateDiffPercent={data.hashRateDiffPercent}
               chartDate={chartDate}
             />
-          </div>
+          </div> */}
         </div>
         <div className="bg-gray-50 rounded-lg p-4 border border-gray-100">
           <div className="text-gray-500 mb-2">全网日产出</div>
@@ -90,7 +88,7 @@ const DataCardGrid: React.FC<{ chartDate: string; loading?: boolean; onLoaded?: 
         </div>
         <div className="bg-gray-50 rounded-lg p-4 border border-gray-100 flex  items-stretch gap-4">
           <div className="flex-none w-55">
-            <div className="text-gray-500 mb-2">单价 $（{data.btcPriceDate}）</div>
+            <div className="text-gray-500 mb-2">币价 $（{data.btcPriceDate}）</div>
             <div className="text-2xl">
               {formatAmount(data.price, 2, "", false)}
 
@@ -107,13 +105,13 @@ const DataCardGrid: React.FC<{ chartDate: string; loading?: boolean; onLoaded?: 
               )}
             </div>
           </div>
-          <div className="flex-1 h-[80px] overflow-hidden">
+          {/* <div className="flex-1 h-[80px] overflow-hidden">
             <ChartPriceCard
               loading={loading}
               priceDiffPercent={data.priceDiffPercent}
               chartDate={chartDate}
             />
-          </div>
+          </div> */}
         </div>
       </div>
     </Spin>

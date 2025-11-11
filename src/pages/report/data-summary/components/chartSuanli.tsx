@@ -98,7 +98,7 @@ const ChartSuanli: React.FC<{ loading: any; chartDate: string }> = ({ loading, c
         type: "value",
         // min: Math.min(...hashValues) - 50,
         // min: hashValues.length > 0 ? Math.floor(Math.min(...hashValues) - 300) : 0,
-        // min: 0,
+        min: 700,
         // max: 100,
         splitNumber: 4,
         axisLine: { show: false },

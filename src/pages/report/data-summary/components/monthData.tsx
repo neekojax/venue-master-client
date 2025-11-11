@@ -48,7 +48,7 @@ const MonthData = ({ date }: { date: string }) => {
     <div className=" rounded-lg">
       <div className="text-lg font-medium mb-4 flex items-center gap-2">
         <i className="fas fa-calendar text-blue-500"></i>
-        <span>全月情况（{data.dateRange}）</span>
+        <span>CANGO - 全月情况（{data.dateRange}）</span>
       </div>
       <div className="grid grid-cols-4 gap-4">
         <div>

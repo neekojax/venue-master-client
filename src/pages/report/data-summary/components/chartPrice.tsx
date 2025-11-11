@@ -67,11 +67,11 @@ const ChartPrice: React.FC<{ loading: any; chartDate: string; onLoaded?: () => v
       grid: { left: 12, right: 12, top: 10, bottom: 16, containLabel: true },
       tooltip: {
         trigger: "axis",
-        axisPointer: { type: "line" },
+        axisPointer: { type: "line", color: "#f59e0b" },
         formatter: (params: any) => {
           // params 是数组，因为 trigger: "axis"
           return params
-            .map((item: any) => `${item.name || ""}<br>${item.marker}单价：${item.value} USDT`)
+            .map((item: any) => `${item.name || ""}<br>${item.marker}币价：${item.value} USD`)
             .join("<br/>");
         },
       },
@@ -103,7 +103,8 @@ const ChartPrice: React.FC<{ loading: any; chartDate: string; onLoaded?: () => v
       },
       yAxis: {
         type: "value",
-        min: hashValues.length > 0 ? Math.floor(Math.min(...hashValues) - 30000) : 0,
+        min: 85000,
+        // min: hashValues.length > 0 ? Math.floor(Math.min(...hashValues) - 30000) : 0,
         // max: 100,
         splitNumber: 4,
         axisLine: { show: false },
