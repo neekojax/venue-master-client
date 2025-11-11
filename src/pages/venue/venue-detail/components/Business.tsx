@@ -102,7 +102,7 @@ const BusinessReport: React.FC<BusinessReportProps> = ({ venueName }) => {
       render: (value) => `${value.toFixed(2)}%`,
     },
     {
-      title: "在线率",
+      title: "在架有效率",
       dataIndex: "onlineRatio",
       key: "onlineRatio",
       width: 140,
@@ -192,7 +192,7 @@ const BusinessReport: React.FC<BusinessReportProps> = ({ venueName }) => {
       render: (value) => `${value.toFixed(2)}%`,
     },
     {
-      title: "在线率",
+      title: "在架有效率",
       dataIndex: "onlineRatio",
       key: "onlineRatio",
       width: 140,
