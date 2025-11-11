@@ -23,7 +23,7 @@ const EfficiencyBase: React.FC<{ data: EfficiencyStat }> = ({ data }) => {
               </div>
               <div className="flex items-center gap-4">
                 <div className="text-gray-500" style={{ minWidth: "80px" }}>
-                  全网比例
+                  全网占比
                 </div>
                 <div className="text-xl text-gray-800">{data?.networkHashRate.toFixed(2)}%</div>
               </div>

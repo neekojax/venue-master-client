@@ -77,7 +77,7 @@ const FaultRate: React.FC<{ chartDate: string; loading?: boolean; onLoaded?: () 
 
   return (
     <Spin spinning={!!loading}>
-      <div className={`bg-white rounded-lg p-6 shadow-sm`}>
+      <div className={`bg-white rounded-lg p-6 shadow-sm`} style={{ border: "solid 1px #e5e5e5" }}>
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-2 text-lg">
             <i className="fas fa-robot text-blue-500"></i>

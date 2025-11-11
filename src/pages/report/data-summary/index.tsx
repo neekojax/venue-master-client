@@ -37,7 +37,7 @@ const App: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen  text-gray-800">
+    <div className="min-h-screen data-summary-container text-gray-800">
       {/* 顶部导航 */}
       {/* <Alert
         showIcon
@@ -51,7 +51,7 @@ const App: React.FC = () => {
           </span>
         }
       /> */}
-      <div className="flex items-center justify-between  h-16 border-b border-gray-200">
+      <div className="flex items-center justify-between  h-16">
         <div className="flex items-center gap-3"></div>
         <div className="flex items-center gap-3">
           <Button type="primary" icon={<DownloadOutlined />} onClick={handleSaveImage}>
@@ -68,9 +68,9 @@ const App: React.FC = () => {
           />
         </div>
       </div>
-      <div ref={containerRef} className=" grid grid-cols-2 gap-6">
+      <div ref={containerRef} className=" grid grid-cols-2 gap-6" style={{ border: "none" }}>
         {/* 市场行情 */}
-        <div className="col-span-2 bg-white rounded-lg p-6 shadow-sm">
+        <div className="col-span-2 bg-white rounded-lg p-6 " style={{ border: "solid 1px #e5e5e5" }}>
           <div className="flex items-center justify-between mb-4">
             <div className="flex items中心 gap-2 text-lg">
               <i className="fas fa-chart-bar text-blue-500"></i>

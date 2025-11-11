@@ -470,3 +470,8 @@
 .ant-table-wrapper .ant-table-tbody > tr > td.fee-ratio-low {
   background-color: #f6ffed !important; /* 浅绿 */
 }
+
+
+.data-summary-container .bg-white >.shadow-sm {
+border: solid 1px #e5e5e5 !important;
+}

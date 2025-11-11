@@ -62,7 +62,7 @@ const Profit: React.FC<{ chartDate: string }> = ({ chartDate }) => {
 
   return (
     <div className="col-span-2  rounded-lg  shadow-sm">
-      <Card className="mt-6">
+      <Card className="mt-6" style={{ border: "solid 1px #e5e5e5" }}>
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-2 text-lg">
             <i className="fas fa-chart-pie text-blue-500"></i>
@@ -112,7 +112,7 @@ const Profit: React.FC<{ chartDate: string }> = ({ chartDate }) => {
       </Card>
 
       <div className="grid grid-cols-2 gap-6">
-        <Card className="mt-6">
+        <Card className="mt-6" style={{ border: "solid 1px #e5e5e5" }}>
           <div className="overflow-x-auto border-gray-200 pb-6">
             <ProfitTable
               tableProps={{
@@ -148,7 +148,7 @@ const Profit: React.FC<{ chartDate: string }> = ({ chartDate }) => {
             />
           </div>
         </Card>
-        <Card className="mt-6">
+        <Card className="mt-6" style={{ border: "solid 1px #e5e5e5" }}>
           <div className="overflow-x-auto  border-gray-200 pb-6">
             <ProfitTable
               tableProps={{
@@ -186,7 +186,7 @@ const Profit: React.FC<{ chartDate: string }> = ({ chartDate }) => {
         </Card>
       </div>
       <div className="grid grid-cols-2 gap-6">
-        <Card className="mt-6">
+        <Card className="mt-6" style={{ border: "solid 1px #e5e5e5" }}>
           {" "}
           <div className="overflow-x-auto pt-4">
             <ProfitTable
@@ -223,7 +223,7 @@ const Profit: React.FC<{ chartDate: string }> = ({ chartDate }) => {
             />
           </div>
         </Card>
-        <Card className="mt-6">
+        <Card className="mt-6" style={{ border: "solid 1px #e5e5e5" }}>
           <div className="overflow-x-auto pt-4">
             <ProfitTable
               tableProps={{
@@ -419,7 +419,7 @@ const Profit: React.FC<{ chartDate: string }> = ({ chartDate }) => {
         </div>
       </Card> */}
 
-      <Card className=" mt-6">
+      <Card className=" mt-6" style={{ border: "solid 1px #e5e5e5" }}>
         <MonthData date={chartDate} />
       </Card>
     </div>
