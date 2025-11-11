@@ -1,8 +1,9 @@
 // // 代码已包含 CSS：使用 TailwindCSS , 安装 TailwindCSS 后方可看到布局样式效果
-import React, { useState } from "react";
-import { LoadingOutlined } from "@ant-design/icons";
-import { Alert, DatePicker } from "antd";
+import React, { useRef, useState } from "react";
+import { DownloadOutlined, LoadingOutlined } from "@ant-design/icons";
+import { Button, DatePicker } from "antd";
 import dayjs from "dayjs";
+import { toPng } from "html-to-image";
 import ChartDashboard from "./components/chartDashboard";
 import DataCardGrid from "./components/dataCard";
 import Efficiency from "./components/efficiency";
@@ -17,11 +18,28 @@ const App: React.FC = () => {
     return now.hour() >= 10 ? now.subtract(1, "day") : now.subtract(2, "day");
   });
   const [loading, setLoading] = useState(true);
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  const handleSaveImage = async () => {
+    if (!containerRef.current) return;
+    try {
+      const dataUrl = await toPng(containerRef.current, {
+        cacheBust: true,
+        backgroundColor: "#ffffff",
+      });
+      const link = document.createElement("a");
+      link.download = `数据总览-${date.format("YYYY-MM-DD")}.png`;
+      link.href = dataUrl;
+      link.click();
+    } catch (error) {
+      console.error("保存图片失败:", error);
+    }
+  };
 
   return (
     <div className="min-h-screen  text-gray-800">
       {/* 顶部导航 */}
-      <Alert
+      {/* <Alert
         showIcon
         banner
         type="warning"
@@ -32,20 +50,25 @@ const App: React.FC = () => {
             当前展示的数据为临时核对结果，非最终版，可能存在偏差；最终数据发布后将及时同步。
           </span>
         }
-      />
+      /> */}
       <div className="flex items-center justify-between  h-16 border-b border-gray-200">
         <div className="flex items-center gap-3"></div>
-        <DatePicker
-          value={date}
-          onChange={(newDate) => {
-            setDate(newDate!);
-            setLoading(true);
-          }}
-          className="bg-white border border-gray-200 text-gray-800"
-          suffixIcon={loading ? <LoadingOutlined spin /> : undefined}
-        />
+        <div className="flex items-center gap-3">
+          <Button type="primary" icon={<DownloadOutlined />} onClick={handleSaveImage}>
+            保存为图片
+          </Button>
+          <DatePicker
+            value={date}
+            onChange={(newDate) => {
+              setDate(newDate!);
+              setLoading(true);
+            }}
+            className="bg-white border border-gray-200 text-gray-800"
+            suffixIcon={loading ? <LoadingOutlined spin /> : undefined}
+          />
+        </div>
       </div>
-      <div className=" grid grid-cols-2 gap-6">
+      <div ref={containerRef} className=" grid grid-cols-2 gap-6">
         {/* 市场行情 */}
         <div className="col-span-2 bg-white rounded-lg p-6 shadow-sm">
           <div className="flex items-center justify-between mb-4">
@@ -77,14 +100,15 @@ const App: React.FC = () => {
             onLoaded={() => setLoading(false)}
           />
         </div>
-        {/* 故障率 */}
-        <FaultRate
+
+        {/* 有效率 */}
+        <Efficiency
           chartDate={date.format("YYYY-MM-DD")}
           loading={loading}
           onLoaded={() => setLoading(false)}
         />
-        {/* 有效率 */}
-        <Efficiency
+        {/* 故障率 */}
+        <FaultRate
           chartDate={date.format("YYYY-MM-DD")}
           loading={loading}
           onLoaded={() => setLoading(false)}

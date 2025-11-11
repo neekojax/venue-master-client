@@ -80,28 +80,32 @@ const Profit: React.FC<{ chartDate: string }> = ({ chartDate }) => {
             <div className="text-gray-500 mb-2">日产出价值</div>
             <div className="text-2xl">$ {formatAmount(profitStat.dailyIncomeUSD, 0, "", false)}</div>
           </div>
-          <div className="bg-gray-50 rounded-lg p-4 border border-gray-100">
-            <div className="text-gray-500 mb-2">累计产出价值</div>
-            <div className="text-2xl">$ {formatAmount(profitStat.accumulatedIncomeUSD, 0, "", false)}</div>
-          </div>
-          <div className="bg-gray-50 rounded-lg p-4 border border-gray-100">
-            <div className="text-gray-500 mb-2">累计单币成本</div>
-            <div className="text-2xl">$ {formatAmount(profitStat.accumulatedPerCoinCost, 0, "", false)}</div>
-          </div>
+
           <div className="bg-gray-50 rounded-lg p-4 border border-gray-100">
             <div className="text-gray-500 mb-2">累计托管费</div>
             <div className="text-2xl">$ {formatAmount(profitStat.accumulatedHostingFee, 0, "", false)}</div>
           </div>
           <div className="bg-gray-50 rounded-lg p-4 border border-gray-100">
-            <div className="text-gray-500 mb-2">累计单币成本-含折旧</div>
-            <div className="text-2xl">
-              $ {formatAmount(profitStat.accumulatedDepreciationPerCoinCost, 0, "", false)}
-            </div>
+            <div className="text-gray-500 mb-2">累计单币成本</div>
+            <div className="text-2xl">$ {formatAmount(profitStat.accumulatedPerCoinCost, 0, "", false)}</div>
           </div>
+
+          <div className="bg-gray-50 rounded-lg p-4 border border-gray-100">
+            <div className="text-gray-500 mb-2">累计产出价值</div>
+            <div className="text-2xl">$ {formatAmount(profitStat.accumulatedIncomeUSD, 0, "", false)}</div>
+          </div>
+
           <div className="bg-gray-50 rounded-lg p-4 border border-gray-100">
             <div className="text-gray-500 mb-2">累计运维费</div>
             <div className="text-2xl">
               $ {formatAmount(profitStat.accumulatedMaintenanceFee, 0, "", false)}
+            </div>
+          </div>
+
+          <div className="bg-gray-50 rounded-lg p-4 border border-gray-100">
+            <div className="text-gray-500 mb-2">累计单币成本-含折旧</div>
+            <div className="text-2xl">
+              $ {formatAmount(profitStat.accumulatedDepreciationPerCoinCost, 0, "", false)}
             </div>
           </div>
         </div>
