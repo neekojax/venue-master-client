@@ -14,4 +14,5 @@ export interface VenueStats {
   highTemperatureRate: number;
   onlineMachines: number;
   onRackMachines: number;
+  onRackHashRate: number;
 }

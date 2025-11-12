@@ -11,9 +11,9 @@ import { Card, Col, Row, Skeleton, Typography } from "antd";
 import type { EChartsType } from "echarts";
 import * as echarts from "echarts";
 // @ts-ignore
-import SiteOnlineNote from "@/components/tooltip/SiteOnlineNote.jsx";
+// import SiteOnlineNote from "@/components/tooltip/SiteOnlineNote.jsx";
 // @ts-ignore
-import SiteStockWithNote from "@/components/tooltip/SiteStockWithNote.jsx";
+// import SiteStockWithNote from "@/components/tooltip/SiteStockWithNote.jsx";
 import type { VenueStats } from "../types";
 import EffectChart from "./EffectChart";
 import EfficiencyGauge from "./gauge";
@@ -33,7 +33,7 @@ const App: React.FC<{ stats: VenueStats; loading: boolean }> = ({ stats, loading
       }, 0);
       return () => clearTimeout(timer);
     }
-  }, [stats]);
+  }, [stats, loading]);
 
   // 使用 ResizeObserver 监听元素尺寸变化（只在组件挂载时设置一次）
   useEffect(() => {
@@ -48,7 +48,7 @@ const App: React.FC<{ stats: VenueStats; loading: boolean }> = ({ stats, loading
     return () => {
       resizeObserver.disconnect();
     };
-  }, []);
+  }, [loading]);
 
   // 组件卸载时清理图表实例
   useEffect(() => {
@@ -58,7 +58,7 @@ const App: React.FC<{ stats: VenueStats; loading: boolean }> = ({ stats, loading
         chartInstance.current = null;
       }
     };
-  }, []);
+  }, [loading]);
   // 获取当前日期
   const initChart = () => {
     // 防止重复初始化
@@ -91,16 +91,16 @@ const App: React.FC<{ stats: VenueStats; loading: boolean }> = ({ stats, loading
       chartInstance.current = echarts.init(chartRef.current);
 
       // const shangjia = data.totalEstimateOnRackMachines; // 估计在线机器数
-      const shangjia = stats.onRackMachines || 0; // 在架机器数
-      const zaixian = stats.onlineMachines || 0; // 在线机器数
+      const failures = stats.totalFailures || 0; // 故障机器数
+      // const zaixian = stats.onlineMachines || 0; // 在线机器数
       const total = stats.totalMachines || 0; // 总机器数
 
       // 调试信息
-      console.log("图表数据:", { total, shangjia, zaixian, stats });
+      // console.log("图表数据:", { total, shangjia, zaixian, stats });
 
       // 数据验证
-      const validZaixian = Math.min(zaixian, total); // 确保在线数不超过总数
-      const validShangjia = Math.min(shangjia, total); // 确保在架数不超过总数
+      // const validZaixian = Math.min(zaixian, total); // 确保在线数不超过总数
+      const validFailures = Math.min(failures, total); // 确保故障数不超过总数
 
       const option = {
         tooltip: { trigger: "item" },
@@ -117,40 +117,40 @@ const App: React.FC<{ stats: VenueStats; loading: boolean }> = ({ stats, loading
             radius: ["75%", "95%"],
             // label: { },
             label: { show: false, position: "center", formatter: "{b}\n{c}" },
-            data: [{ value: total, name: "总数", itemStyle: { color: "#fa8c16" } }],
+            data: [{ value: total, name: "总数", itemStyle: { color: "#1890ff" } }],
           },
           {
-            name: "在架数",
+            name: "故障数",
             type: "pie",
             radius: ["50%", "70%"],
             label: { show: false },
             data: [
-              { value: validShangjia, name: "在架数", itemStyle: { color: "#1890ff" } },
+              { value: validFailures, name: "故障数", itemStyle: { color: "#fa8c16" } },
               {
-                value: Math.max(0, total - validShangjia),
-                name: "非在架数",
+                value: Math.max(0, total - validFailures),
+                name: "故障数",
                 itemStyle: { color: "transparent" },
               },
             ],
           },
-          {
-            name: "在线数",
-            type: "pie",
-            radius: ["25%", "45%"],
-            label: { show: false },
-            data: [
-              { value: validZaixian, name: "在线", itemStyle: { color: "#52c41a" } },
-              {
-                value: Math.max(0, total - validZaixian),
-                name: "不在线",
-                itemStyle: { color: "transparent" },
-              },
-            ],
-          },
+          // {
+          //   name: "在线数",
+          //   type: "pie",
+          //   radius: ["25%", "45%"],
+          //   label: { show: false },
+          //   data: [
+          //     { value: validZaixian, name: "在线", itemStyle: { color: "#52c41a" } },
+          //     {
+          //       value: Math.max(0, total - validZaixian),
+          //       name: "不在线",
+          //       itemStyle: { color: "transparent" },
+          //     },
+          //   ],
+          // },
         ],
       };
       chartInstance.current.setOption(option);
-      console.log("Chart initialized successfully");
+      // console.log("Chart initialized successfully");
     } catch (error) {
       console.error("Error initializing chart:", error);
     } finally {
@@ -170,11 +170,11 @@ const App: React.FC<{ stats: VenueStats; loading: boolean }> = ({ stats, loading
                   <CloseCircleOutlined style={{ color: "red", fontSize: 16, marginRight: "10px" }} />
                   <span>故障率：{(stats?.totalFailuresRate || 0)?.toFixed(2)}%</span>
                 </span>,
-                <span key="setting">
-                  {/* <SettingOutlined /> */}
-                  <CheckCircleOutlined style={{ color: "green", fontSize: 16, marginRight: "10px" }} />
-                  <span>在线率：{(stats?.onlineRatio || 0)?.toFixed(2)}%</span>
-                </span>,
+                // <span key="setting">
+                //   {/* <SettingOutlined /> */}
+                //   <CheckCircleOutlined style={{ color: "green", fontSize: 16, marginRight: "10px" }} />
+                //   <span>在线率：{(stats?.onlineRatio || 0)?.toFixed(2)}%</span>
+                // </span>,
               ]}
             >
               <Row justify="space-between" align="middle">
@@ -198,6 +198,8 @@ const App: React.FC<{ stats: VenueStats; loading: boolean }> = ({ stats, loading
                       textAlign: "left",
                       whiteSpace: "nowrap",
                       overflow: "hidden",
+                      fontSize: 13,
+                      color: "rgb(127, 128, 130)", //rgb(127, 128, 130)
                       textOverflow: "ellipsis",
                     }}
                   >
@@ -205,34 +207,34 @@ const App: React.FC<{ stats: VenueStats; loading: boolean }> = ({ stats, loading
                   </Typography.Text>
                 </Col>
                 {
-                  <Col span={12} style={{ textAlign: "right" }}>
-                    <Typography.Text
-                      style={{
-                        width: 95,
-                        display: "inline-block", // 必须加，才能让宽度生效
-                        textAlign: "center",
-                        whiteSpace: "nowrap",
-                        overflow: "hidden",
-                        textOverflow: "ellipsis",
-                      }}
-                    >
-                      <SiteOnlineNote />
-                    </Typography.Text>
-                    <Typography.Text
-                      style={{
-                        width: 80,
-                        display: "inline-block", // 必须加，才能让宽度生效
-                        textAlign: "left",
-                        whiteSpace: "nowrap",
-                        overflow: "hidden",
-                        textOverflow: "ellipsis",
-                      }}
-                    >
-                      {stats?.onRackMachines}
-                    </Typography.Text>
-                  </Col>
+                  // <Col span={12} style={{ textAlign: "right" }}>
+                  //   <Typography.Text
+                  //     style={{
+                  //       width: 95,
+                  //       display: "inline-block", // 必须加，才能让宽度生效
+                  //       textAlign: "center",
+                  //       whiteSpace: "nowrap",
+                  //       overflow: "hidden",
+                  //       textOverflow: "ellipsis",
+                  //     }}
+                  //   >
+                  //     <SiteOnlineNote />
+                  //   </Typography.Text>
+                  //   <Typography.Text
+                  //     style={{
+                  //       width: 80,
+                  //       display: "inline-block", // 必须加，才能让宽度生效
+                  //       textAlign: "left",
+                  //       whiteSpace: "nowrap",
+                  //       overflow: "hidden",
+                  //       textOverflow: "ellipsis",
+                  //     }}
+                  //   >
+                  //     {stats?.onRackMachines}
+                  //   </Typography.Text>
+                  // </Col>
                 }
-                <Col span={12} style={{ textAlign: "left" }}>
+                <Col span={12} style={{ textAlign: "right" }}>
                   <Typography.Text
                     style={{
                       width: 80,
@@ -253,44 +255,46 @@ const App: React.FC<{ stats: VenueStats; loading: boolean }> = ({ stats, loading
                       whiteSpace: "nowrap",
                       overflow: "hidden",
                       textOverflow: "ellipsis",
+                      fontSize: 13,
+                      color: "rgb(127, 128, 130)", //rgb(127, 128, 130)
                     }}
                   >
                     {stats?.totalFailures}
                   </Typography.Text>
                 </Col>
                 {
-                  <Col span={12} style={{ textAlign: "right" }}>
-                    <Typography.Text
-                      style={{
-                        width: 95,
-                        display: "inline-block", // 必须加，才能让宽度生效
-                        textAlign: "center",
-                        whiteSpace: "nowrap",
-                        overflow: "hidden",
-                        textOverflow: "ellipsis",
-                      }}
-                    >
-                      <SiteStockWithNote />
-                    </Typography.Text>
-                    <Typography.Text
-                      style={{
-                        width: 80,
-                        display: "inline-block", // 必须加，才能让宽度生效
-                        textAlign: "left",
-                        whiteSpace: "nowrap",
-                        overflow: "hidden",
-                        textOverflow: "ellipsis",
-                      }}
-                    >
-                      {stats?.onlineMachines}
-                      {/* {stats?.totalMachines && stats?.onlineRatio
-                                            ? (stats.totalMachines * stats.onlineRatio / 100).toFixed(0)
-                                            : 0} */}
-                    </Typography.Text>
-                  </Col>
+                  // <Col span={12} style={{ textAlign: "right" }}>
+                  //   <Typography.Text
+                  //     style={{
+                  //       width: 95,
+                  //       display: "inline-block", // 必须加，才能让宽度生效
+                  //       textAlign: "center",
+                  //       whiteSpace: "nowrap",
+                  //       overflow: "hidden",
+                  //       textOverflow: "ellipsis",
+                  //     }}
+                  //   >
+                  //     <SiteStockWithNote />
+                  //   </Typography.Text>
+                  //   <Typography.Text
+                  //     style={{
+                  //       width: 80,
+                  //       display: "inline-block", // 必须加，才能让宽度生效
+                  //       textAlign: "left",
+                  //       whiteSpace: "nowrap",
+                  //       overflow: "hidden",
+                  //       textOverflow: "ellipsis",
+                  //     }}
+                  //   >
+                  //     {stats?.onlineMachines}
+                  //     {/* {stats?.totalMachines && stats?.onlineRatio
+                  //                           ? (stats.totalMachines * stats.onlineRatio / 100).toFixed(0)
+                  //                           : 0} */}
+                  //   </Typography.Text>
+                  // </Col>
                 }
               </Row>
-              <div ref={chartRef} style={{ width: "100%", height: 168, marginTop: 0, marginBottom: 0 }} />
+              <div ref={chartRef} style={{ width: "100%", height: 190, marginTop: 20, marginBottom: 0 }} />
             </Card>
           </Skeleton>
         </Col>
@@ -300,6 +304,11 @@ const App: React.FC<{ stats: VenueStats; loading: boolean }> = ({ stats, loading
               title="算力汇总"
               actions={[
                 <span key="setting">
+                  {/* <SettingOutlined /> */}
+                  <CheckCircleOutlined style={{ color: "green", fontSize: 16, marginRight: "10px" }} />
+                  <span>在架有效率：{(stats?.onlineRatio || 0)?.toFixed(2)}%</span>
+                </span>,
+                <span key="setting">
                   <SettingOutlined style={{ fontSize: 16, color: "#1890ff", marginRight: "10px" }} />
                   {/* <ThunderboltOutlined style={{ color: 'orange', fontSize: 16, marginRight: '10px' }} /> */}
                   <span>算力有效率：{(stats?.effectiveRate24h || 0)?.toFixed(2)}%</span>
@@ -308,12 +317,89 @@ const App: React.FC<{ stats: VenueStats; loading: boolean }> = ({ stats, loading
             >
               <Row justify="space-between" align="middle">
                 <Col span={12} style={{ textAlign: "left" }}>
-                  有效算力：{stats?.power24h}
-                  &nbsp;&nbsp;PH/S
+                  <Typography.Text
+                    style={{
+                      width: 80,
+                      display: "inline-block", // 必须加，才能让宽度生效
+                      textAlign: "left",
+                      whiteSpace: "nowrap",
+                      overflow: "hidden",
+                      textOverflow: "ellipsis",
+                    }}
+                  >
+                    有效算力：
+                  </Typography.Text>
+                  <Typography.Text
+                    style={{
+                      width: 80,
+                      display: "inline-block", // 必须加，才能让宽度生效
+                      textAlign: "left",
+                      whiteSpace: "nowrap",
+                      overflow: "hidden",
+                      fontSize: 13,
+                      color: "rgb(127, 128, 130)", //rgb(127, 128, 130)
+                      textOverflow: "ellipsis",
+                    }}
+                  >
+                    {stats?.power24h} PH/S
+                  </Typography.Text>
                 </Col>
+
                 <Col span={12} style={{ textAlign: "right" }}>
-                  理论算力：{stats?.theoreticalPower?.toFixed(2)}
-                  &nbsp;&nbsp;PH/S
+                  <Typography.Text
+                    style={{
+                      width: 100,
+                      display: "inline-block", // 必须加，才能让宽度生效
+                      textAlign: "center",
+                      whiteSpace: "nowrap",
+                      overflow: "hidden",
+                      textOverflow: "ellipsis",
+                    }}
+                  >
+                    在架理论算力：
+                  </Typography.Text>
+                  <Typography.Text
+                    style={{
+                      width: 80,
+                      display: "inline-block", // 必须加，才能让宽度生效
+                      textAlign: "right",
+                      whiteSpace: "nowrap",
+                      overflow: "hidden",
+                      textOverflow: "ellipsis",
+                      fontSize: 13,
+                      color: "rgb(127, 128, 130)", //rgb(127, 128, 130)
+                    }}
+                  >
+                    {stats?.onRackHashRate?.toFixed(2)} PH/S
+                  </Typography.Text>
+                </Col>
+                <Col span={12} style={{ textAlign: "left" }}>
+                  <Typography.Text
+                    style={{
+                      width: 80,
+                      display: "inline-block", // 必须加，才能让宽度生效
+                      textAlign: "left",
+                      whiteSpace: "nowrap",
+                      overflow: "hidden",
+                      textOverflow: "ellipsis",
+                    }}
+                  >
+                    理论算力：
+                  </Typography.Text>
+                  <Typography.Text
+                    style={{
+                      width: 80,
+                      display: "inline-block", // 必须加，才能让宽度生效
+                      textAlign: "left",
+                      whiteSpace: "nowrap",
+                      overflow: "hidden",
+                      textOverflow: "ellipsis",
+                      fontSize: 13,
+                      color: "rgb(127, 128, 130)", //rgb(127, 128, 130)
+                    }}
+                  >
+                    {stats?.theoreticalPower?.toFixed(2)} PH/S
+                  </Typography.Text>
                 </Col>
               </Row>
               <EfficiencyGauge effective={stats?.power24h || 0} theoretical={stats?.theoreticalPower || 0} />

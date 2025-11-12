@@ -76,3 +76,8 @@ export const fetchEfficiencyMachineStat = async (start: string, end: string, poo
 export const fetchDailyVenueHostingStat = async (date: string, venueType: string) => {
   return await fetchGet(`/summary/daily-venue-hosting-stat/${venueType}/${date}`);
 };
+
+// summary/overview/:venueType/:date
+export const fetchSummaryOverview = async (date: string, venueType: string) => {
+  return await fetchGet(`/summary/overview/${venueType}/${date}`);
+};

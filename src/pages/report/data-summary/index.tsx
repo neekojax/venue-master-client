@@ -8,6 +8,7 @@ import ChartDashboard from "./components/chartDashboard";
 import DataCardGrid from "./components/dataCard";
 import Efficiency from "./components/efficiency";
 import FaultRate from "./components/faultRate";
+import OverviewModel from "./components/OverviewModel";
 import Profit from "./components/profit";
 
 // import { fetchBtcMarketInfo } from "@/pages/report/api";
@@ -54,6 +55,8 @@ const App: React.FC = () => {
       <div className="flex items-center justify-between  h-16">
         <div className="flex items-center gap-3"></div>
         <div className="flex items-center gap-3">
+          <OverviewModel chartDate={date.format("YYYY-MM-DD")} />
+
           <Button type="primary" icon={<DownloadOutlined />} onClick={handleSaveImage}>
             保存为图片
           </Button>

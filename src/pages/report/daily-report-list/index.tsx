@@ -290,6 +290,7 @@ const App: React.FC = () => {
 
   const fetchReportData = async () => {
     setLoading(true); // 👈 开始加载
+    setFilteredData([]);
 
     try {
       // 检查 dateRange 是否存在

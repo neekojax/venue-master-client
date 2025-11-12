@@ -48,7 +48,7 @@ const EffectChart: React.FC<EffectChartProps> = ({ data }) => {
         {
           name: "影响占比",
           type: "pie",
-          top: "20%",
+          top: "30%",
           radius: ["70%", "100%"],
           avoidLabelOverlap: false,
           itemStyle: {
@@ -92,7 +92,7 @@ const EffectChart: React.FC<EffectChartProps> = ({ data }) => {
     chartInstance.current.setOption(option);
   };
 
-  return <div ref={chartRef} style={{ height: 173, width: "100%" }} />;
+  return <div ref={chartRef} style={{ height: 190, width: "100%" }} />;
 };
 
 export default EffectChart;
