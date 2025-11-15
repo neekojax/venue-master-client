@@ -14,6 +14,28 @@ export const venueRoute: RouteObject = {
   },
   children: [
     {
+      path: ROUTE_PATHS.venueEnvironment,
+      lazy: async () => ({
+        Component: (await import("@/pages/venue/venue-environment")).default,
+      }),
+      HydrateFallback: ProgressBar,
+      handle: {
+        title: "场地环境",
+        crumb: () => <Link to={ROUTE_PATHS.miningSiteData}>运行指标</Link>,
+      },
+    },
+    {
+      path: ROUTE_PATHS.venueWeather,
+      lazy: async () => ({
+        Component: (await import("@/pages/venue/venue-weather")).default,
+      }),
+      HydrateFallback: ProgressBar,
+      handle: {
+        title: "场地天气",
+        crumb: () => <Link to={ROUTE_PATHS.miningSiteData}>运行指标</Link>,
+      },
+    },
+    {
       path: ROUTE_PATHS.miningSiteData,
       lazy: async () => ({
         Component: (await import("@/pages/venue/venue-running-kpi")).default,

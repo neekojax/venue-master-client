@@ -66,6 +66,14 @@ const SiderItems = () => {
         //   key: ROUTE_PATHS.miningSiteData,
         //   label: <Link to={ROUTE_PATHS.miningSiteData}>运行指标</Link>,
         // },
+        // {
+        //   key: ROUTE_PATHS.venueEnvironment,
+        //   label: <Link to={ROUTE_PATHS.venueEnvironment}>场地环境</Link>,
+        // },
+        {
+          key: ROUTE_PATHS.venueWeather,
+          label: <Link to={ROUTE_PATHS.venueWeather}>场地天气</Link>,
+        },
         {
           key: ROUTE_PATHS.eventLog,
           label: <Link to={ROUTE_PATHS.eventLog}>事件日志</Link>,

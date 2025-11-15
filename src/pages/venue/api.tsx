@@ -91,3 +91,9 @@ export const uploadVenueExcel = async (file: File) => {
     return response;
   });
 };
+
+// 天气预报接口
+// weather/list/:venueType/:date"
+export const fetchWeatherList = async (poolType: string, date: string) => {
+  return await fetchGet(`/weather/list/${poolType}/${date}`);
+};
