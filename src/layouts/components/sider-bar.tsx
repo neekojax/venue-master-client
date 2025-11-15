@@ -70,10 +70,10 @@ const SiderItems = () => {
         //   key: ROUTE_PATHS.venueEnvironment,
         //   label: <Link to={ROUTE_PATHS.venueEnvironment}>场地环境</Link>,
         // },
-        {
-          key: ROUTE_PATHS.venueWeather,
-          label: <Link to={ROUTE_PATHS.venueWeather}>场地天气</Link>,
-        },
+        // {
+        //   key: ROUTE_PATHS.venueWeather,
+        //   label: <Link to={ROUTE_PATHS.venueWeather}>场地天气</Link>,
+        // },
         {
           key: ROUTE_PATHS.eventLog,
           label: <Link to={ROUTE_PATHS.eventLog}>事件日志</Link>,
@@ -97,10 +97,14 @@ const SiderItems = () => {
               },
             ]
           : []),
-        {
-          key: ROUTE_PATHS.dailyReport,
-          label: <Link to={ROUTE_PATHS.dailyReport}>运营日报</Link>,
-        },
+        ...(showNDPoolType !== "LN" && showNDPoolType !== "ND1" && showNDPoolType !== "ND2"
+          ? [
+              {
+                key: ROUTE_PATHS.dailyReport,
+                label: <Link to={ROUTE_PATHS.dailyReport}>运营日报</Link>,
+              },
+            ]
+          : []),
         ...(showNDPoolType !== "CANG" // 日报菜单项，仅在 type === 'ND' 时显示
           ? [
               {
