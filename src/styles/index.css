@@ -111,3 +111,8 @@ body,html{
 .dark::view-transition-old(root) {
   z-index: 9999;
 }
+
+/* Venue Weather: Select placeholder size override */
+.select-placeholder-12 .ant-select-selection-placeholder {
+  font-size: 12px !important;
+}

@@ -1,6 +1,6 @@
 // 代码已包含 CSS：使用 TailwindCSS , 安装 TailwindCSS 后方可看到布局样式效果
 import React, { useEffect, useState } from "react";
-import { EnvironmentFilled, SearchOutlined } from "@ant-design/icons";
+import { SearchOutlined } from "@ant-design/icons";
 import { DatePicker, Pagination, Select, Spin } from "antd";
 import dayjs from "dayjs";
 import { LineChart } from "echarts/charts";
@@ -40,7 +40,6 @@ interface DateGroup {
   day?: WeatherData;
   night?: WeatherData;
 }
-
 // const weatherConditions = [
 //     { label: '晴天', value: 'sunny', icon: <SunOutlined /> },
 //     { label: '多云', value: 'cloudy', icon: <CloudOutlined /> },
@@ -91,6 +90,7 @@ const App: React.FC = () => {
       }
       if (data && typeof data === "object") {
         const arr = Object.entries(data).map(([key, value]) => {
+          // console.log("key:", key, "value:", value, Array.isArray(value));
           if (!value || !Array.isArray(value) || value.length === 0) {
             return {
               venue_id: 0,
@@ -106,7 +106,9 @@ const App: React.FC = () => {
             grouped_list: groupByDate(value as WeatherData[]),
           };
         });
-        setFilteredData(arr);
+        // 过滤掉没有数据的场地
+        const validVenue = arr.filter((v) => v.grouped_list?.length > 0);
+        setFilteredData(validVenue);
       } else {
         setFilteredData([]);
       }
@@ -167,11 +169,12 @@ const App: React.FC = () => {
   return (
     <div className="min-h-screen text-gray-900">
       {/* 筛选区域 */}
-      <div className={`bg-white shadow-sm py-6 px-8 mt-6  rounded-lg`}>
-        <div className="max-w-7xl mx-auto flex flex-wrap gap-6 items-center">
+      <div className={`bg-white shadow-sm py-4 px-4 rounded-lg`} style={{ marginBottom: "16px" }}>
+        <div className="mx-auto flex flex-wrap gap-6 items-center justify-between">
           {/* 日期范围选择器 */}
           <div>
             <DatePicker
+              size="middle"
               placeholder={"选择日期"}
               className="w-40"
               format="YYYY-MM-DD"
@@ -199,10 +202,12 @@ const App: React.FC = () => {
           <div className="relative ml-auto w-64">
             <SearchOutlined className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
             <Select
+              size="middle"
               showSearch
               allowClear
               placeholder="搜索场地名称..."
-              className="w-full"
+              style={{ fontSize: "12px" }}
+              className="w-full select-placeholder-12"
               onSearch={(val) => setSearchTerm(val)}
               onChange={(val) => setSearchTerm(val || "")}
               options={venueOptions}
@@ -219,32 +224,38 @@ const App: React.FC = () => {
         <div className=" flex-grow">
           <div className="mx-auto">
             {/* 分组显示天气数据 */}
-            {pageEntries.map(([venueId, group]) => (
-              <div key={venueId} className={`mb-6 rounded-xl overflow-hidden `}>
-                {/* 场地头部 */}
-                <div className={`p-1 flex justify-between items-center cursor-pointer  hover:bg-gray-200`}>
-                  <div className="flex items-center">
-                    <div className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center mr-3 shadow-md ring-2 ring-blue-200">
-                      <EnvironmentFilled style={{ fontSize: 14, color: "#fff" }} />
+            {pageEntries
+              .filter(([, group]) => group.items?.length > 0)
+              .map(([venueId, group]) => (
+                <div
+                  key={venueId}
+                  className={`mb-6 rounded-xl overflow-hidden `}
+                  style={{ backgroundColor: "#ccdff1" }}
+                >
+                  {/* 场地头部 */}
+                  <div className="flex items-center justify-between bg-transparent border-b border-gray-200/70 h-8 px-4">
+                    <div className="flex items-center">
+                      <h2
+                        className="text-middle md:text-middle font-semibold tracking-wide text-[#6177a7] leading-none"
+                        style={{ marginBottom: "0px" }}
+                      >
+                        {group.venue.name}
+                      </h2>
                     </div>
-                    <h2 className="text-xl font-semibold">{group.venue.name}</h2>
+                  </div>
+                  {/* 天气详情列表 */}
+                  <div className="grid grid-cols-3 bg-white  overflow-hidden divide-x divide-y divide-gray-200/70">
+                    {group.items.map((item, idx) => (
+                      <div
+                        key={`${group.venue.id}-${item.date}-${idx}`}
+                        className="px-4 py-3 hover:bg-gray-50 transition-colors"
+                      >
+                        <WeatherDetail item={item} />
+                      </div>
+                    ))}
                   </div>
                 </div>
-                {/* 天气详情列表 */}
-                {/* {expandedGroups[group.venue.id.toString()] && ( */}
-                <div className="grid grid-cols-3 gap-4" style={{ background: "none" }}>
-                  {group.items.map((item, idx) => (
-                    <div
-                      key={`${group.venue.id}-${item.date}-${idx}`}
-                      className="bg-white p-4 rounded-lg shadow-md"
-                    >
-                      <WeatherDetail item={item} />
-                    </div>
-                  ))}
-                </div>
-                {/* )} */}
-              </div>
-            ))}
+              ))}
             <div className="flex justify-center mt-6">
               <Pagination
                 current={currentPage}

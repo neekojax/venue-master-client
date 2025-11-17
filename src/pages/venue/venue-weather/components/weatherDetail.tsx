@@ -29,8 +29,9 @@ const normalizeCondition = (w: string): string => {
   if (!w) return "sunny";
   const s = w.toLowerCase();
   if (w.includes("雷") || s.includes("storm")) return "storm";
-  if (w.includes("云") || w.includes("阴") || s.includes("cloud")) return "cloudy";
+  if (w.includes("云") || s.includes("cloud")) return "cloudy";
   if (w.includes("雨") || w.includes("暴雨") || s.includes("rain")) return "rain";
+  if (w.includes("阴")) return "yin";
   return "sunny";
 };
 
@@ -82,9 +83,9 @@ const WeatherDetail: React.FC<WeatherDetailProps> = ({ item }) => {
     <div className=" flex flex-col md:flex-row items-start md:items-center">
       {/* 天气详情 */}
       <div className="mb-4 md:mb-0">
-        <div className="flex flex-col gap-4">
+        <div className="flex flex-col gap-2">
           {/* 日期信息 */}
-          <div className="mb-2 md:mb-0">
+          <div className="md:mb-0">
             <div className="text-xs text-gray-600">
               {date}
               <span className="text-gray-400">
@@ -93,33 +94,59 @@ const WeatherDetail: React.FC<WeatherDetailProps> = ({ item }) => {
               </span>
             </div>
           </div>
-          {/* 白天天气 */}
           <div className="grid grid-cols-2 gap-2">
             {/* 白天天气（紧凑） */}
             <div>
               <h3 className="text-xs text-gray-500 dark:text-gray-400 mb-1">白天</h3>
               <div className="flex flex-wrap items-center gap-2">
                 <div className="flex items-center">
-                  <i
-                    className={`fas ${
-                      (dayData.weather || "").includes("雨")
-                        ? "fa-cloud-rain"
-                        : (dayData.weather || "").includes("多云") || (dayData.weather || "").includes("阴")
-                          ? "fa-cloud"
-                          : (dayData.weather || "").includes("晴")
-                            ? "fa-sun"
-                            : "fa-cloud"
-                    } text-lg mr-1`}
-                    style={{
-                      color: (dayData.weather || "").includes("雨")
-                        ? "#409EFF"
-                        : (dayData.weather || "").includes("多云") || (dayData.weather || "").includes("阴")
-                          ? "#555"
-                          : (dayData.weather || "").includes("晴")
-                            ? "orange"
-                            : "gray",
-                    }}
-                  ></i>
+                  {(dayData.weather || "").includes("晴") && (
+                    <span className="text-lg mr-1" role="img" aria-label="sunny">
+                      ☀️
+                    </span>
+                  )}
+                  {(dayData.weather || "").includes("多云") && (
+                    <span className="text-lg mr-1" role="img" aria-label="cloudy">
+                      🌤
+                    </span>
+                  )}
+                  {(dayData.weather || "").includes("阴") && (
+                    <span className="text-lg mr-1 text-gray-400" role="img" aria-label="rainy">
+                      ☁️
+                    </span>
+                  )}
+                  {/* (dayData.weather || "").includes("多云") || (dayData.weather || "").includes("阴") */}
+
+                  {((dayData.weather || "").includes("大雨") || (dayData.weather || "").includes("暴雨")) && (
+                    <span className="text-lg mr-1" role="img" aria-label="rainy">
+                      ⛈️
+                    </span>
+                  )}
+                  {(dayData.weather || "").includes("小雨") && (
+                    <span className="text-lg mr-1" role="img" aria-label="rainy">
+                      🌧
+                    </span>
+                  )}
+
+                  {/* <i
+                                        className={`fas ${(dayData.weather || "").includes("雨")
+                                            ? "fa-cloud-rain"
+                                            : (dayData.weather || "").includes("多云") || (dayData.weather || "").includes("阴")
+                                                ? "fa-cloud"
+                                                : (dayData.weather || "").includes("晴")
+                                                    ? "fa-sun"
+                                                    : "fa-cloud"
+                                            } text-lg mr-1`}
+                                        style={{
+                                            color: (dayData.weather || "").includes("雨")
+                                                ? "#409EFF"
+                                                : (dayData.weather || "").includes("多云") || (dayData.weather || "").includes("阴")
+                                                    ? "#555"
+                                                    : (dayData.weather || "").includes("晴")
+                                                        ? "orange"
+                                                        : "gray",
+                                        }}
+                                    ></i> */}
                   <span className="text-sm capitalize">
                     {weatherConditions.find((c) => c.value === normalizeCondition(dayData.weather))?.label ??
                       dayData.weather ??
@@ -146,28 +173,60 @@ const WeatherDetail: React.FC<WeatherDetailProps> = ({ item }) => {
               <h3 className="text-xs text-gray-500 dark:text-gray-400 mb-1">夜间</h3>
               <div className="flex flex-wrap items-center gap-2">
                 <div className="flex items-center">
-                  <i
-                    className={`fas ${
-                      (nightData.weather || "").includes("雨")
-                        ? "fa-cloud-rain"
-                        : (nightData.weather || "").includes("多云") ||
-                            (nightData.weather || "").includes("阴")
-                          ? "fa-cloud"
-                          : (nightData.weather || "").includes("晴")
-                            ? "fa-moon"
-                            : "fa-cloud"
-                    } text-lg mr-1`}
-                    style={{
-                      color: (nightData.weather || "").includes("雨")
-                        ? "#409EFF"
-                        : (nightData.weather || "").includes("多云") ||
-                            (nightData.weather || "").includes("阴")
-                          ? "#555"
-                          : (nightData.weather || "").includes("晴")
-                            ? "blue"
-                            : "gray",
-                    }}
-                  ></i>
+                  {(nightData.weather || "").includes("晴") && (
+                    <span className="text-lg mr-1" role="img" aria-label="sunny">
+                      🌙
+                    </span>
+                  )}
+                  {(nightData.weather || "").includes("多云") && (
+                    <span className="text-lg mr-1" role="img" aria-label="cloudy">
+                      ☁️
+                    </span>
+                  )}
+                  {(nightData.weather || "").includes("阴") && (
+                    <span
+                      className="text-lg mr-1 text-gray-400"
+                      role="img"
+                      aria-label="cloudy"
+                      style={{ color: "#000" }}
+                    >
+                      ☁️
+                    </span>
+                  )}
+
+                  {/* (dayData.weather || "").includes("多云") || (dayData.weather || "").includes("阴") */}
+                  {((nightData.weather || "").includes("大雨") ||
+                    (nightData.weather || "").includes("暴雨")) && (
+                    <span className="text-lg mr-1" role="img" aria-label="rainy">
+                      ⛈️
+                    </span>
+                  )}
+                  {(nightData.weather || "").includes("小雨") && (
+                    <span className="text-lg mr-1" role="img" aria-label="rainy">
+                      🌧
+                    </span>
+                  )}
+                  {/* <i
+                                        className={`fas ${(nightData.weather || "").includes("雨")
+                                            ? "fa-cloud-rain"
+                                            : (nightData.weather || "").includes("多云") ||
+                                                (nightData.weather || "").includes("阴")
+                                                ? "fa-cloud"
+                                                : (nightData.weather || "").includes("晴")
+                                                    ? "fa-moon"
+                                                    : "fa-cloud"
+                                            } text-lg mr-1`}
+                                        style={{
+                                            color: (nightData.weather || "").includes("雨")
+                                                ? "#409EFF"
+                                                : (nightData.weather || "").includes("多云") ||
+                                                    (nightData.weather || "").includes("阴")
+                                                    ? "#555"
+                                                    : (nightData.weather || "").includes("晴")
+                                                        ? "blue"
+                                                        : "gray",
+                                        }}
+                                    ></i> */}
                   <span className="text-sm capitalize">
                     {weatherConditions.find((c) => c.value === normalizeCondition(nightData.weather))
                       ?.label ??
@@ -193,51 +252,6 @@ const WeatherDetail: React.FC<WeatherDetailProps> = ({ item }) => {
               </div>
             </div>
           </div>
-          {/* 夜间天气 */}
-          {/* <div className="pt-1">
-                        <h3 className="font-medium text-gray-500 dark:text-gray-400 mb-2">夜间</h3>
-                        <div className="flex flex-wrap items-center gap-4">
-                            <div className="flex items-center">
-                                <i
-                                    className={`fas ${(nightData.weather || "").includes("雨")
-                                        ? "fa-cloud-rain"
-                                        : (nightData.weather || "").includes("多云") || (nightData.weather || "").includes("阴")
-                                            ? "fa-cloud"
-                                            : (nightData.weather || "").includes("晴")
-                                                ? "fa-moon"
-                                                : "fa-cloud"
-                                        } text-xl mr-2`}
-                                    style={{
-                                        color: (nightData.weather || "").includes("雨")
-                                            ? "#409EFF"
-                                            : (nightData.weather || "").includes("多云") || (nightData.weather || "").includes("阴")
-                                                ? "#555"
-                                                : (nightData.weather || "").includes("晴")
-                                                    ? "blue"
-                                                    : "gray",
-                                    }}
-                                ></i>
-                                <span className="text-middle capitalize">
-                                    {weatherConditions.find((c) => c.value === normalizeCondition(nightData.weather))?.label ??
-                                        nightData.weather ??
-                                        "-"}
-                                </span>
-                            </div>
-                            <div className="text-xl font-bold">
-                                {nightData.min_temperature}~{nightData.max_temperature}°C
-                            </div>
-                            <div className="flex items-center gap-4">
-                                <span>湿度: {Math.max(0, nightData.humidity ?? 0)}%</span>
-                                <span>风速: {parseFloat(Number(nightData.wind_speed).toFixed(0))} km/h</span>
-                                <span>
-                                    降水:{" "}
-                                    {nightData.precipitation > 0
-                                        ? `${Math.min(10, nightData.precipitation ?? 0).toFixed(2)}mm`
-                                        : "无"}
-                                </span>
-                            </div>
-                        </div>
-                    </div> */}
         </div>
       </div>
     </div>

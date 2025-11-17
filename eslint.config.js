@@ -25,6 +25,16 @@ export default tseslint.config({
     "@typescript-eslint/no-explicit-any": "off",
     "@typescript-eslint/ban-ts-comment": "off",
     "@typescript-eslint/no-unsafe-function-type": "off",
+    // 允许以下划线开头的未使用变量/参数/捕获错误（例如 ([_, group])）
+    "@typescript-eslint/no-unused-vars": [
+      "warn",
+      {
+        argsIgnorePattern: "^_",
+        varsIgnorePattern: "^_",
+        caughtErrorsIgnorePattern: "^_",
+        ignoreRestSiblings: true,
+      },
+    ],
     "no-multiple-empty-lines": ["error", { max: 1 }], // 禁止多个空行
     "no-console": process.env.NODE_ENV === "production" ? "error" : "warn",
     "no-debugger": process.env.NODE_ENV === "production" ? "error" : "warn",
