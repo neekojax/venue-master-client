@@ -63,6 +63,8 @@ export default function CustodyStatisticsMonthTable({
 
   // 数据映射
   useEffect(() => {
+    setTableData([]);
+    setFilteredData([]);
     if (statisticsData && statisticsData.data) {
       setAlertMessage("");
       const newData = statisticsData.data.map((item: any) => ({

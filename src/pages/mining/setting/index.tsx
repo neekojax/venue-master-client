@@ -880,6 +880,7 @@ export default function MiningSettingPage() {
                 options={[
                   { value: 0, label: "暂停" },
                   { value: 1, label: "活跃" },
+                  { value: 2, label: "已撤场" },
                 ]}
               />
             </Form.Item>

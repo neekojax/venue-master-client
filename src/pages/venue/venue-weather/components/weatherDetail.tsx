@@ -79,13 +79,13 @@ const WeatherDetail: React.FC<WeatherDetailProps> = ({ item }) => {
   const nightData = night ?? defaultNight;
 
   return (
-    <div className="p-3 flex flex-col md:flex-row items-start md:items-center">
+    <div className=" flex flex-col md:flex-row items-start md:items-center">
       {/* 天气详情 */}
       <div className="mb-4 md:mb-0">
         <div className="flex flex-col gap-4">
           {/* 日期信息 */}
-          <div className="mb-4 md:mb-0">
-            <div className="text-lg font-small" style={{ fontSize: "12px" }}>
+          <div className="mb-2 md:mb-0">
+            <div className="text-xs text-gray-600">
               {date}
               <span className="text-gray-400">
                 {" "}
@@ -94,94 +94,150 @@ const WeatherDetail: React.FC<WeatherDetailProps> = ({ item }) => {
             </div>
           </div>
           {/* 白天天气 */}
-          <div className="border-b border-gray-200 dark:border-gray-700 pb-4">
-            <h3 className="font-medium text-gray-500 dark:text-gray-400 mb-2">白天</h3>
-            <div className="flex flex-wrap items-center gap-4">
-              <div className="flex items-center">
-                <i
-                  className={`fas ${
-                    (dayData.weather || "").includes("雨")
-                      ? "fa-cloud-rain"
-                      : (dayData.weather || "").includes("多云") || (dayData.weather || "").includes("阴")
-                        ? "fa-cloud"
-                        : (dayData.weather || "").includes("晴")
-                          ? "fa-sun"
-                          : "fa-cloud"
-                  } text-xl mr-2`}
-                  style={{
-                    color: (dayData.weather || "").includes("雨")
-                      ? "#409EFF"
-                      : (dayData.weather || "").includes("多云") || (dayData.weather || "").includes("阴")
-                        ? "#555"
-                        : (dayData.weather || "").includes("晴")
-                          ? "orange"
-                          : "gray",
-                  }}
-                ></i>
-                <span className="text-lg capitalize">
-                  {weatherConditions.find((c) => c.value === normalizeCondition(dayData.weather))?.label ??
-                    dayData.weather ??
-                    "-"}
-                </span>
+          <div className="grid grid-cols-2 gap-2">
+            {/* 白天天气（紧凑） */}
+            <div>
+              <h3 className="text-xs text-gray-500 dark:text-gray-400 mb-1">白天</h3>
+              <div className="flex flex-wrap items-center gap-2">
+                <div className="flex items-center">
+                  <i
+                    className={`fas ${
+                      (dayData.weather || "").includes("雨")
+                        ? "fa-cloud-rain"
+                        : (dayData.weather || "").includes("多云") || (dayData.weather || "").includes("阴")
+                          ? "fa-cloud"
+                          : (dayData.weather || "").includes("晴")
+                            ? "fa-sun"
+                            : "fa-cloud"
+                    } text-lg mr-1`}
+                    style={{
+                      color: (dayData.weather || "").includes("雨")
+                        ? "#409EFF"
+                        : (dayData.weather || "").includes("多云") || (dayData.weather || "").includes("阴")
+                          ? "#555"
+                          : (dayData.weather || "").includes("晴")
+                            ? "orange"
+                            : "gray",
+                    }}
+                  ></i>
+                  <span className="text-sm capitalize">
+                    {weatherConditions.find((c) => c.value === normalizeCondition(dayData.weather))?.label ??
+                      dayData.weather ??
+                      "-"}
+                  </span>
+                </div>
+                <div className="text-sm font-semibold">
+                  {dayData.min_temperature}~{dayData.max_temperature}°C
+                </div>
+                <div className="flex items-center gap-2 text-xs text-gray-600">
+                  <span>湿度: {dayData.humidity}%</span>
+                  <span>|</span>
+                  <span>风速: {Number(dayData.wind_speed).toFixed(0)} km/h</span>
+                  <span>|</span>
+                  <span>
+                    降水: {dayData.precipitation > 0 ? `${dayData.precipitation.toFixed(2)}mm` : "无"}
+                  </span>
+                </div>
               </div>
-              <div className="text-2xl font-bold">
-                {dayData.min_temperature}~{dayData.max_temperature}°C
-              </div>
-              <div className="flex items-center gap-4">
-                <span>湿度: {dayData.humidity}%</span>
-                <span>风速: {Number(dayData.wind_speed).toFixed(0)} km/h</span>
-                <span>
-                  降水: {dayData.precipitation > 0 ? `${dayData.precipitation.toFixed(2)}mm` : "无"}
-                </span>
+            </div>
+
+            {/* 夜间天气（紧凑） */}
+            <div>
+              <h3 className="text-xs text-gray-500 dark:text-gray-400 mb-1">夜间</h3>
+              <div className="flex flex-wrap items-center gap-2">
+                <div className="flex items-center">
+                  <i
+                    className={`fas ${
+                      (nightData.weather || "").includes("雨")
+                        ? "fa-cloud-rain"
+                        : (nightData.weather || "").includes("多云") ||
+                            (nightData.weather || "").includes("阴")
+                          ? "fa-cloud"
+                          : (nightData.weather || "").includes("晴")
+                            ? "fa-moon"
+                            : "fa-cloud"
+                    } text-lg mr-1`}
+                    style={{
+                      color: (nightData.weather || "").includes("雨")
+                        ? "#409EFF"
+                        : (nightData.weather || "").includes("多云") ||
+                            (nightData.weather || "").includes("阴")
+                          ? "#555"
+                          : (nightData.weather || "").includes("晴")
+                            ? "blue"
+                            : "gray",
+                    }}
+                  ></i>
+                  <span className="text-sm capitalize">
+                    {weatherConditions.find((c) => c.value === normalizeCondition(nightData.weather))
+                      ?.label ??
+                      nightData.weather ??
+                      "-"}
+                  </span>
+                </div>
+                <div className="text-sm font-semibold">
+                  {nightData.min_temperature}~{nightData.max_temperature}°C
+                </div>
+                <div className="flex items-center gap-2 text-xs text-gray-600">
+                  <span>湿度: {Math.max(0, nightData.humidity ?? 0)}%</span>
+                  <span>|</span>
+                  <span>风速: {parseFloat(Number(nightData.wind_speed).toFixed(0))} km/h</span>
+                  <span>|</span>
+                  <span>
+                    降水:{" "}
+                    {nightData.precipitation > 0
+                      ? `${Math.min(10, nightData.precipitation ?? 0).toFixed(2)}mm`
+                      : "无"}
+                  </span>
+                </div>
               </div>
             </div>
           </div>
           {/* 夜间天气 */}
-          <div className="pt-4">
-            <h3 className="font-medium text-gray-500 dark:text-gray-400 mb-2">夜间</h3>
-            <div className="flex flex-wrap items-center gap-4">
-              <div className="flex items-center">
-                <i
-                  className={`fas ${
-                    (nightData.weather || "").includes("雨")
-                      ? "fa-cloud-rain"
-                      : (nightData.weather || "").includes("多云") || (nightData.weather || "").includes("阴")
-                        ? "fa-cloud"
-                        : (nightData.weather || "").includes("晴")
-                          ? "fa-moon"
-                          : "fa-cloud"
-                  } text-xl mr-2`}
-                  style={{
-                    color: (nightData.weather || "").includes("雨")
-                      ? "#409EFF"
-                      : (nightData.weather || "").includes("多云") || (nightData.weather || "").includes("阴")
-                        ? "#555"
-                        : (nightData.weather || "").includes("晴")
-                          ? "blue"
-                          : "gray",
-                  }}
-                ></i>
-                <span className="text-lg capitalize">
-                  {weatherConditions.find((c) => c.value === normalizeCondition(nightData.weather))?.label ??
-                    nightData.weather ??
-                    "-"}
-                </span>
-              </div>
-              <div className="text-2xl font-bold">
-                {nightData.min_temperature}~{nightData.max_temperature}°C
-              </div>
-              <div className="flex items-center gap-4">
-                <span>湿度: {Math.max(0, nightData.humidity ?? 0)}%</span>
-                <span>风速: {parseFloat(Number(nightData.wind_speed).toFixed(0))} km/h</span>
-                <span>
-                  降水:{" "}
-                  {nightData.precipitation > 0
-                    ? `${Math.min(10, nightData.precipitation ?? 0).toFixed(2)}mm`
-                    : "无"}
-                </span>
-              </div>
-            </div>
-          </div>
+          {/* <div className="pt-1">
+                        <h3 className="font-medium text-gray-500 dark:text-gray-400 mb-2">夜间</h3>
+                        <div className="flex flex-wrap items-center gap-4">
+                            <div className="flex items-center">
+                                <i
+                                    className={`fas ${(nightData.weather || "").includes("雨")
+                                        ? "fa-cloud-rain"
+                                        : (nightData.weather || "").includes("多云") || (nightData.weather || "").includes("阴")
+                                            ? "fa-cloud"
+                                            : (nightData.weather || "").includes("晴")
+                                                ? "fa-moon"
+                                                : "fa-cloud"
+                                        } text-xl mr-2`}
+                                    style={{
+                                        color: (nightData.weather || "").includes("雨")
+                                            ? "#409EFF"
+                                            : (nightData.weather || "").includes("多云") || (nightData.weather || "").includes("阴")
+                                                ? "#555"
+                                                : (nightData.weather || "").includes("晴")
+                                                    ? "blue"
+                                                    : "gray",
+                                    }}
+                                ></i>
+                                <span className="text-middle capitalize">
+                                    {weatherConditions.find((c) => c.value === normalizeCondition(nightData.weather))?.label ??
+                                        nightData.weather ??
+                                        "-"}
+                                </span>
+                            </div>
+                            <div className="text-xl font-bold">
+                                {nightData.min_temperature}~{nightData.max_temperature}°C
+                            </div>
+                            <div className="flex items-center gap-4">
+                                <span>湿度: {Math.max(0, nightData.humidity ?? 0)}%</span>
+                                <span>风速: {parseFloat(Number(nightData.wind_speed).toFixed(0))} km/h</span>
+                                <span>
+                                    降水:{" "}
+                                    {nightData.precipitation > 0
+                                        ? `${Math.min(10, nightData.precipitation ?? 0).toFixed(2)}mm`
+                                        : "无"}
+                                </span>
+                            </div>
+                        </div>
+                    </div> */}
         </div>
       </div>
     </div>

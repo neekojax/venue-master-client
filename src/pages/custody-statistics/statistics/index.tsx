@@ -120,7 +120,10 @@ export default function DateModeHeader() {
     const a = document.createElement("a");
     a.href = url;
     //  {mode === "day" ? `最近 ${dayRange} 天` : `${month}`}
-    const fileName = mode === "day" ? `最近 ${dayRange} 天电费统计` : `${month}电费统计`;
+    const fileName =
+      mode === "day"
+        ? `最近 ${dayRange.replace("days", "天").replace("month", "月")} 电费统计`
+        : `${month}电费统计`;
     a.download = `${fileName}_${new Date().toISOString().slice(0, 10)}.csv`;
     document.body.appendChild(a);
     a.click();
@@ -210,7 +213,9 @@ export default function DateModeHeader() {
             <div className="text-sm text-gray-500">
               当前筛选：
               <span className="ml-2 font-medium text-gray-700">
-                {mode === "day" ? `最近 ${dayRange} 天` : `${month}`}
+                {mode === "day"
+                  ? `最近 ${dayRange.replace("days", "天").replace("month", "月")}`
+                  : `${month.replace("month", "月")}`}
               </span>
             </div>
             <div style={{ display: "flex", justifyContent: "flex-end", marginTop: -20 }}>

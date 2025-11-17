@@ -1,6 +1,6 @@
 // 代码已包含 CSS：使用 TailwindCSS , 安装 TailwindCSS 后方可看到布局样式效果
 import React, { useEffect, useState } from "react";
-import { SearchOutlined, UserOutlined } from "@ant-design/icons";
+import { EnvironmentFilled, SearchOutlined } from "@ant-design/icons";
 import { DatePicker, Pagination, Select, Spin } from "antd";
 import dayjs from "dayjs";
 import { LineChart } from "echarts/charts";
@@ -89,7 +89,6 @@ const App: React.FC = () => {
       if (success === false || (typeof code === "number" && code !== 0)) {
         throw new Error(`API error! code: ${code}, message: ${msg}`);
       }
-
       if (data && typeof data === "object") {
         const arr = Object.entries(data).map(([key, value]) => {
           if (!value || !Array.isArray(value) || value.length === 0) {
@@ -221,23 +220,26 @@ const App: React.FC = () => {
           <div className="mx-auto">
             {/* 分组显示天气数据 */}
             {pageEntries.map(([venueId, group]) => (
-              <div key={venueId} className={`mb-6 rounded-xl overflow-hidden shadow-lg bg-white`}>
+              <div key={venueId} className={`mb-6 rounded-xl overflow-hidden `}>
                 {/* 场地头部 */}
-                <div
-                  className={`p-4 flex justify-between items-center cursor-pointer bg-gray-300 hover:bg-gray-200`}
-                >
+                <div className={`p-1 flex justify-between items-center cursor-pointer  hover:bg-gray-200`}>
                   <div className="flex items-center">
-                    <div className="w-10 h-10 rounded-full bg-blue-100 dark:bg-blue-900 flex items-center justify-center mr-3">
-                      <UserOutlined className="text-blue-500 dark:text-blue-300" />
+                    <div className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center mr-3 shadow-md ring-2 ring-blue-200">
+                      <EnvironmentFilled style={{ fontSize: 14, color: "#fff" }} />
                     </div>
                     <h2 className="text-xl font-semibold">{group.venue.name}</h2>
                   </div>
                 </div>
                 {/* 天气详情列表 */}
                 {/* {expandedGroups[group.venue.id.toString()] && ( */}
-                <div className="grid grid-cols-3 gap-4">
+                <div className="grid grid-cols-3 gap-4" style={{ background: "none" }}>
                   {group.items.map((item, idx) => (
-                    <WeatherDetail key={`${group.venue.id}-${item.date}-${idx}`} item={item} />
+                    <div
+                      key={`${group.venue.id}-${item.date}-${idx}`}
+                      className="bg-white p-4 rounded-lg shadow-md"
+                    >
+                      <WeatherDetail item={item} />
+                    </div>
                   ))}
                 </div>
                 {/* )} */}

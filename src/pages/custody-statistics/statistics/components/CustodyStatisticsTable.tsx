@@ -56,8 +56,12 @@ export default function CustodyStatisticsTable({
   }, [venueOptions, onVenueOptionsReady]);
 
   useEffect(() => {
+    console.log("newest", statisticsData);
+    setTableData([]);
+    setFilteredData([]);
     if (statisticsData && statisticsData.data) {
       setAlertMessage("");
+      console.log("statisticsData >> ", statisticsData.data);
       const newData = statisticsData.data.map(
         (item: {
           date: any;
