@@ -185,7 +185,7 @@ export default function CustodyStatisticsMonthTable({
       },
 
       {
-        title: <span className="fee-ratio-title">预估能耗</span>,
+        title: <span className="fee-ratio-title">预估功耗</span>,
         dataIndex: "energy_ratio",
         key: "energy_ratio",
         onHeaderCell: () => ({ className: "fee-ratio-header" }),
@@ -201,19 +201,29 @@ export default function CustodyStatisticsMonthTable({
       {
         dataIndex: "nominal_power_consumption",
         key: "nominal_power_consumption",
-        title: <span className="fee-ratio-title">额定能耗</span>,
+        title: <span className="fee-ratio-title">额定功耗</span>,
         width: 120,
         render: (text: any) => (
           <>
             <span>{text.toFixed(2)}</span>
           </>
         ),
+        // sorter: (a: any, b: any) =>
+        //   (typeof a.nominal_power_consumption === "number" ? a.nominal_power_consumption : parseFloat(a.nominal_power_consumption)) -
+        //   (typeof b.nominal_power_consumption === "number" ? b.nominal_power_consumption : parseFloat(b.nominal_power_consumption)),
       },
       {
         dataIndex: "power_consumption_diff",
         key: "power_consumption_diff",
-        title: <span className="fee-ratio-title">能耗差异</span>,
+        title: <span className="fee-ratio-title">功耗差异</span>,
         width: 120,
+        sorter: (a: any, b: any) =>
+          (typeof a.power_consumption_diff === "number"
+            ? a.power_consumption_diff
+            : parseFloat(a.power_consumption_diff)) -
+          (typeof b.power_consumption_diff === "number"
+            ? b.power_consumption_diff
+            : parseFloat(b.power_consumption_diff)),
         render: (text: any) => {
           const num = typeof text === "number" ? text : parseFloat(text);
           return (
