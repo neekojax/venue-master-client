@@ -9,7 +9,7 @@ import CustodyStatisticsTable from "./components/CustodyStatisticsTable";
 
 export default function DateModeHeader() {
   const [mode, setMode] = useState("day"); // 'day' 或 'month'
-  const [dayRange, setDayRange] = useState("1");
+  const [dayRange, setDayRange] = useState("1days");
 
   // 读取默认时间范围（与 dailyData.tsx 保持一致）
   // const getInitialTimeRange = () => {
@@ -176,10 +176,10 @@ export default function DateModeHeader() {
                   disabled={mode !== "day"}
                   className={`appearance-none bg-transparent text-sm font-medium outline-none px-2 py-1 rounded-md ring-1 transition ${mode === "day" ? "ring-gray-300 focus:ring-indigo-500 hover:ring-indigo-300" : "ring-gray-200 bg-gray-100 text-gray-400 cursor-not-allowed"}`}
                 >
-                  <option value="1">1 天</option>
-                  <option value="7">7 天</option>
-                  <option value="30">30 天</option>
-                  <option value="90">90 天</option>
+                  <option value="1days">1 天</option>
+                  <option value="7days">7 天</option>
+                  <option value="1month">30 天</option>
+                  <option value="3month">90 天</option>
                 </select>
                 <span className={`text-sm ${mode === "day" ? "text-gray-400" : "text-gray-500"}`}>数据</span>
               </div>

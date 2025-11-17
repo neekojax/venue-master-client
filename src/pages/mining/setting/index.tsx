@@ -157,6 +157,9 @@ export default function MiningSettingPage() {
     } else if (status === 0) {
       statusText = "暂停";
       statusStyle = { color: "red" }; // 暂停状态，红色
+    } else if (status === 2) {
+      statusText = "已撤场";
+      statusStyle = { color: "orange" }; // 已撤场状态，红色
     }
 
     return <span style={statusStyle}>{statusText}</span>;
@@ -374,13 +377,6 @@ export default function MiningSettingPage() {
         dataIndex: "status",
         key: "status",
         width: 75,
-        filters: [
-          { text: "活跃", value: 1 },
-          { text: "暂停", value: 0 },
-        ],
-        onFilter: () => {
-          return true;
-        },
         render: (_text: any, record: { status: unknown }) => <StatusColumn status={record.status} />,
       },
       {
@@ -722,6 +718,9 @@ export default function MiningSettingPage() {
                 </Option>
                 <Option value={0} style={{ fontSize: "12px" }}>
                   暂停
+                </Option>
+                <Option value={2} style={{ fontSize: "12px" }}>
+                  已撤场
                 </Option>
               </Select>
 

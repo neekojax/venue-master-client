@@ -35,7 +35,7 @@ export default function CustodyStatisticsTable({
   const navigate = useNavigate();
   const { poolType } = useSettingsStore(useSelector(["poolType"]));
   // 根据父组件 dayRange 组装后端需要的 timeRange，例如 "7days"
-  const timeRange = useMemo(() => `${dayRange}days`, [dayRange]);
+  const timeRange = useMemo(() => `${dayRange}`, [dayRange]);
   const { data: statisticsData, error, isLoading } = useCustodyStatisticsList(timeRange, poolType);
 
   const [columns, setColumns] = useState<any>([]);
