@@ -29,6 +29,7 @@ export const ROUTE_PATHS = {
   miningSiteData: "/venue/running-kpi",
   venueEnvironment: "/venue/environment",
   venueWeather: "/venue/weather",
+  venueBill: "/venue/bill",
   miningSiteDetail: (venueId: string | number) => `/venue/detail/${venueId}`, // 场地详情，需传参数
   eventLog: "/venue/event-log",
   eventLogList: (venueId: string | number) => `/venue/event-loglist/${venueId}`, // 场地详情，需传参数

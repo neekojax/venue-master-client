@@ -97,3 +97,12 @@ export const uploadVenueExcel = async (file: File) => {
 export const fetchWeatherList = async (poolType: string, date: string) => {
   return await fetchGet(`/weather/list/${poolType}/${date}`);
 };
+// /powerConsumption/list
+export const fetchPowerConsumptionList = async () => {
+  return await fetchGet(`/powerConsumption/list`);
+};
+
+// /hosting/record/listAll
+export const fetchHostingRecordListAll = async () => {
+  return await fetchGet(`/hosting/record/listAll`);
+};

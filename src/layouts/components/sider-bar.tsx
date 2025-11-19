@@ -75,6 +75,10 @@ const SiderItems = () => {
         //   label: <Link to={ROUTE_PATHS.venueWeather}>场地天气</Link>,
         // },
         {
+          key: ROUTE_PATHS.venueBill,
+          label: <Link to={ROUTE_PATHS.venueBill}>场地账单</Link>,
+        },
+        {
           key: ROUTE_PATHS.eventLog,
           label: <Link to={ROUTE_PATHS.eventLog}>事件日志</Link>,
         },

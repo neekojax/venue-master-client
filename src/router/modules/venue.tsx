@@ -36,6 +36,17 @@ export const venueRoute: RouteObject = {
       },
     },
     {
+      path: ROUTE_PATHS.venueBill,
+      lazy: async () => ({
+        Component: (await import("@/pages/venue/venue-bill")).default,
+      }),
+      HydrateFallback: ProgressBar,
+      handle: {
+        title: "场地账单",
+        crumb: () => <Link to={ROUTE_PATHS.venueBill}>场地账单</Link>,
+      },
+    },
+    {
       path: ROUTE_PATHS.miningSiteData,
       lazy: async () => ({
         Component: (await import("@/pages/venue/venue-running-kpi")).default,
