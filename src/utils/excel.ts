@@ -528,20 +528,34 @@ export const exportPowerConsumptionToExcel = (data: any[]) => {
 export const exportHostingRecordToExcel = (data: any[]) => {
   const workbook = XLSX.utils.book_new();
 
-  const customHeader = [
+  // 声明导出行的类型，使 header 的 key 成为该类型的键
+  type HostingRecordExportRow = {
+    siteName: string;
+    start_time: string;
+    end_time: string;
+    hosting_price: number | string;
+    maintenance_price: number | string;
+  };
+  type HeaderKey = keyof HostingRecordExportRow;
+
+  const customHeader: Array<{ header: string; key: HeaderKey }> = [
     { header: "场地名称", key: "siteName" },
     { header: "账单开始", key: "start_time" },
     { header: "账单结束", key: "end_time" },
-    { header: "托管单价（$）", key: "hosting_price" },
-    { header: "运维单价（$）", key: "maintenance_price" },
+    { header: "托管单价（USD）", key: "hosting_price" },
+    { header: "运维单价（USD）", key: "maintenance_price" },
   ];
 
-  const formattedData = (data || []).map((item: any) => ({
-    siteName: item.siteName,
-    start_time: item.start_time,
-    end_time: item.end_time,
-    hosting_price: item.hosting_price,
-    maintenance_price: item.maintenance_price,
+  const formattedData: HostingRecordExportRow[] = (data || []).map((item: any) => ({
+    siteName: String(item?.siteName ?? ""),
+    start_time: String(item?.start_time ?? ""),
+    end_time: String(item?.end_time ?? ""),
+    hosting_price:
+      typeof item?.hosting_price === "number" ? item.hosting_price : String(item?.hosting_price ?? ""),
+    maintenance_price:
+      typeof item?.maintenance_price === "number"
+        ? item.maintenance_price
+        : String(item?.maintenance_price ?? ""),
   }));
 
   const worksheetData = [
