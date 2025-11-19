@@ -473,3 +473,95 @@ export const exportMiningPoolMonthRecordToExcel = (data: any) => {
   // 导出 Excel 文件
   XLSX.writeFile(workbook, "矿池数据.xlsx");
 };
+
+export const exportPowerConsumptionToExcel = (data: any[]) => {
+  // 创建一个工作簿
+  const workbook = XLSX.utils.book_new();
+
+  // 自定义表头（功耗账单）
+  const customHeader = [
+    { header: "场地名称", key: "siteName" },
+    { header: "账单开始", key: "start_time" },
+    { header: "账单结束", key: "end_time" },
+    { header: "总功耗 (kWh)", key: "power_consumption" },
+  ];
+
+  // 处理数据并生成工作表
+  const formattedData = (data || []).map((item: any) => ({
+    siteName: item.siteName,
+    start_time: item.start_time,
+    end_time: item.end_time,
+    power_consumption: item.power_consumption,
+  }));
+
+  // 将自定义表头和数据合并
+  const worksheetData = [
+    customHeader.map((field) => field.header),
+    ...formattedData.map((item: { [x: string]: any }) => customHeader.map((field) => item[field.key])),
+  ];
+
+  // 生成工作表
+  const worksheet = XLSX.utils.aoa_to_sheet(worksheetData);
+
+  // 设置列宽度
+  worksheet["!cols"] = [
+    { wch: 30 }, // 场地名称
+    { wch: 20 }, // 账单开始
+    { wch: 20 }, // 账单结束
+    { wch: 16 }, // 总功耗
+  ];
+
+  // 将工作表添加到工作簿
+  XLSX.utils.book_append_sheet(workbook, worksheet, "总功耗账单");
+
+  // 获取当前日期并格式化为 YYYY-MM-DD
+  const date = new Date();
+  const formattedDate = date.toISOString().split("T")[0];
+
+  // 生成文件名
+  const fileName = `总功耗账单_${formattedDate}.xlsx`;
+
+  // 导出 Excel 文件
+  XLSX.writeFile(workbook, fileName);
+};
+
+export const exportHostingRecordToExcel = (data: any[]) => {
+  const workbook = XLSX.utils.book_new();
+
+  const customHeader = [
+    { header: "场地名称", key: "siteName" },
+    { header: "账单开始", key: "start_time" },
+    { header: "账单结束", key: "end_time" },
+    { header: "托管单价（$）", key: "hosting_price" },
+    { header: "运维单价（$）", key: "maintenance_price" },
+  ];
+
+  const formattedData = (data || []).map((item: any) => ({
+    siteName: item.siteName,
+    start_time: item.start_time,
+    end_time: item.end_time,
+    hosting_price: item.hosting_price,
+    maintenance_price: item.maintenance_price,
+  }));
+
+  const worksheetData = [
+    customHeader.map((f) => f.header),
+    ...formattedData.map((row) => customHeader.map((f) => row[f.key])),
+  ];
+
+  const worksheet = XLSX.utils.aoa_to_sheet(worksheetData);
+  worksheet["!cols"] = [
+    { wch: 30 }, // 场地名称
+    { wch: 20 }, // 账单开始
+    { wch: 20 }, // 账单结束
+    { wch: 18 }, // 托管单价
+    { wch: 18 }, // 运维单价
+  ];
+
+  XLSX.utils.book_append_sheet(workbook, worksheet, "服务费用账单");
+
+  const date = new Date();
+  const formattedDate = date.toISOString().split("T")[0];
+  const fileName = `服务费用账单_${formattedDate}.xlsx`;
+  XLSX.writeFile(workbook, fileName);
+};
