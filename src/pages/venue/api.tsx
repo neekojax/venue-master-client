@@ -106,3 +106,7 @@ export const fetchPowerConsumptionList = async () => {
 export const fetchHostingRecordListAll = async () => {
   return await fetchGet(`/hosting/record/listAll`);
 };
+// /venue/environment/:venueType/:date 场地环境
+export const fetchVenueEnvironment = async (poolType: string) => {
+  return await fetchGet(`/venue/environment/${poolType}`);
+};
