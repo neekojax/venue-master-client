@@ -78,7 +78,7 @@ const SiderItems = () => {
           ? [
               {
                 key: ROUTE_PATHS.venueBill,
-                label: <Link to={ROUTE_PATHS.venueBill}>场地账单</Link>,
+                label: <Link to={ROUTE_PATHS.venueBill}>电费参数</Link>,
               },
             ]
           : []),

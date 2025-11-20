@@ -238,7 +238,7 @@ const App: React.FC = () => {
                 }`}
                 onClick={() => setActiveTab("power")}
               >
-                总功耗账单
+                账单总功耗
               </button>
               <button
                 className={`py-4 px-6 text-center border-b-2 font-medium text-sm ${
@@ -248,7 +248,7 @@ const App: React.FC = () => {
                 }`}
                 onClick={() => setActiveTab("service")}
               >
-                服务费用账单
+                托管运维单价
               </button>
             </div>
           </div>

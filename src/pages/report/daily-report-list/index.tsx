@@ -141,14 +141,14 @@ const App: React.FC = () => {
       title: "24小时故障率",
       dataIndex: "failureRate24h",
       key: "failureRate24h",
-      width: 138,
+      width: 140,
       render: (value) => `${value.toFixed(2)}%`,
     },
     {
       title: "影响占比",
       dataIndex: "impactRatio",
       key: "impactRatio",
-      width: 105,
+      width: 120,
       render: (value) => `${value.toFixed(2)}%`,
     },
     {
@@ -156,7 +156,6 @@ const App: React.FC = () => {
       dataIndex: "limitImpactRate",
       key: "limitImpactRate",
       width: 140,
-      align: "right",
       render: (value) => `${value.toFixed(2)}%`,
     },
     {
@@ -164,8 +163,8 @@ const App: React.FC = () => {
       dataIndex: "highTemperatureRate",
       key: "highTemperatureRate",
       width: 140,
-      align: "right",
-      render: (value) => `${value.toFixed(2)}%`,
+      render: (value: number) => `${value.toFixed(2)}%`,
+      sorter: (a, b) => a.highTemperatureRate - b.highTemperatureRate,
     },
   ];
 
@@ -307,6 +306,7 @@ const App: React.FC = () => {
         dateRange[1].format("YYYY-MM-DD"),
       );
       if (reportData && reportData.data) {
+        console.log("reportData:", reportData);
         const formattedData: DataType[] = reportData.data.map((venue: any) => ({
           date: venue.date || "",
           btcOutput24h: venue.btcOutput24h || 0,
@@ -362,8 +362,14 @@ const App: React.FC = () => {
 
   const onDateChange: RangePickerProps["onChange"] = (dates) => {
     setDateRange(dates as [dayjs.Dayjs, dayjs.Dayjs] | null);
-    console.log(dateRange, dates);
-    fetchReportData();
+  };
+
+  // 新增：重置按钮处理
+  const handleReset = () => {
+    const defaultStart = dayjs().subtract(1, "months");
+    const defaultEnd = dayjs();
+    setDateRange([defaultStart, defaultEnd]);
+    setFilteredData([]); // 立即清空，触发表格重新渲染，随后 useEffect 会重新拉取
   };
 
   // 导出 Excel
@@ -557,7 +563,7 @@ const App: React.FC = () => {
       worksheet["!rows"] = rowHeights;
 
       // 设置冻结窗格 - 固定表头
-      worksheet["!freeze"] = { xSplit: 0, ySplit: 1, topLeftCell: "A2" };
+      worksheet["!freeze"] = { xSplit: 0, ySplit: 1, topLeftCell: "A2" } as any;
     };
 
     // 添加主数据sheet
@@ -593,8 +599,8 @@ const App: React.FC = () => {
       >
         <div className="mb-6 flex items-center justify-between gap-4">
           <RangePicker
+            value={dateRange}
             onChange={onDateChange}
-            defaultValue={[dayjs().subtract(1, "months"), dayjs()]}
             disabledDate={(current, { from }) => {
               if (!from) return false;
               // 限制最大选择范围为2个月
@@ -603,14 +609,19 @@ const App: React.FC = () => {
               return diffMonths > maxRange;
             }}
           />
-          <Button
-            type="primary"
-            icon={<DownloadOutlined />}
-            onClick={exportToCSV}
-            className="!rounded-button"
-          >
-            导出报表
-          </Button>
+          <div className="flex items-center gap-2">
+            <Button onClick={handleReset} className="!rounded-button">
+              重置
+            </Button>
+            <Button
+              type="primary"
+              icon={<DownloadOutlined />}
+              onClick={exportToCSV}
+              className="!rounded-button"
+            >
+              导出报表
+            </Button>
+          </div>
         </div>
         <div className="mx-auto">
           <Table

@@ -185,6 +185,12 @@ const HostingRecord = forwardRef<HostingRecordHandle, HostingRecordProps>(functi
 
   return (
     <>
+      <div className="mb-4 p-4 bg-green-50 rounded-lg">
+        <div className="text-green-800 font-medium mb-1">托管运维单价说明</div>
+        <div className="text-green-600 text-sm">
+          此页展示单价为合同约定的正常托管单价及运维单价，因在线率不达标或电费比不达标等原因而导致的电费折扣未计入
+        </div>
+      </div>
       <Table
         columns={columns}
         dataSource={filteredData}

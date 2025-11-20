@@ -2,8 +2,8 @@ import { forwardRef, useEffect, useImperativeHandle, useMemo, useState } from "r
 import { CaretRightOutlined, UpOutlined } from "@ant-design/icons";
 import { Table } from "antd";
 import type { ColumnsType } from "antd/es/table";
-import { exportPowerConsumptionToExcel } from "../../../../utils/excel";
 import { fetchPowerConsumptionList } from "../../api";
+import { exportPowerConsumptionToExcel } from "@/utils/excel";
 
 interface PowerConsumptionRecord {
   venue_id: number;
@@ -173,6 +173,11 @@ const PowerConsumption = forwardRef<PowerConsumptionHandle, PowerConsumptionProp
 
     return (
       <>
+        <div className="mb-4 p-4 bg-blue-50 rounded-lg">
+          {/* <div className="text-blue-800 font-medium mb-1">名词释义</div> */}
+          <div className="text-blue-600 text-sm">结算电量：实际产生的电力消耗量，用于计算电费的基础数据</div>
+          <div className="text-blue-600 text-sm">矿池算力：连接至矿池的设备总算力，反映场地的服务能力</div>
+        </div>
         <Table
           columns={columns}
           dataSource={filteredData}
