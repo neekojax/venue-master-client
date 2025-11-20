@@ -54,7 +54,7 @@ const PowerConsumption = forwardRef<PowerConsumptionHandle, PowerConsumptionProp
         ),
       },
       {
-        title: "总功耗 (kWh)",
+        title: "总功耗",
         dataIndex: "power_consumption",
         key: "power_consumption",
         sorter: (a, b) => a.power_consumption - b.power_consumption,

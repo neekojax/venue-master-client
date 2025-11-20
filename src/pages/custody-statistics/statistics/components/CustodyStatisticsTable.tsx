@@ -299,7 +299,7 @@ export default function CustodyStatisticsTable({
           (typeof b.basic_hosting_fee === "number" ? b.basic_hosting_fee : parseFloat(b.basic_hosting_fee)),
         render: (text: any) => {
           const num = typeof text === "number" ? text : parseFloat(text);
-          return <>{Number.isFinite(num) ? num.toFixed(2) : text} $/kwh</>;
+          return <>{Number.isFinite(num) ? num.toFixed(4) : text} $/kwh</>;
         },
       },
       {
