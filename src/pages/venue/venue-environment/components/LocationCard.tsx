@@ -28,14 +28,14 @@ const LocationCard: React.FC<LocationCardProps> = ({ location, getTemperatureCol
           <span className="font-medium text-gray-800">{location.temperature}°C</span>
         </div>
         <Progress
-          percent={((location.temperature - 15) / 20) * 100}
+          percent={((location.temperature - 0) / 45) * 100}
           strokeColor={getTemperatureColor(location.temperature)}
           showInfo={false}
           size="small"
         />
         <div className="flex justify-between text-xs text-gray-500 mt-1">
-          <span>15°C</span>
-          <span>35°C</span>
+          <span>0°C</span>
+          <span>45°C</span>
         </div>
       </div>
       {/* 湿度信息 */}
