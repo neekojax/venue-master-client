@@ -1,7 +1,7 @@
 // 代码已包含 CSS：使用 TailwindCSS , 安装 TailwindCSS 后方可看到布局样式效果
 import React, { useEffect, useState } from "react";
 import { ReloadOutlined } from "@ant-design/icons";
-import { Button, message, Pagination, Select, Space } from "antd";
+import { Button, message, Pagination, Select, Spin } from "antd";
 import type { ProgressProps } from "antd/es/progress";
 import LocationCard from "./components/LocationCard";
 import { useSelector, useSettingsStore } from "@/stores"; // 根据实际路径调整
@@ -23,7 +23,6 @@ interface EnvironmentData {
 const App: React.FC = () => {
   const { poolType } = useSettingsStore(useSelector(["poolType"]));
   // 当前选中的场地
-  const [selectedVenue, setSelectedVenue] = useState<number>(1);
   // 场地数据
   const [venueData, setVenueData] = useState<EnvironmentData[]>([]);
   // 最后更新时间
@@ -49,6 +48,7 @@ const App: React.FC = () => {
 
   // 初始化数据
   useEffect(() => {
+    setLoading(true);
     generateVenueData();
     updateLastUpdatedTime();
   }, []);
@@ -58,14 +58,14 @@ const App: React.FC = () => {
     setCurrentPage(1);
   }, [filterText, venueData]);
 
-  // 生成模拟数据
+  // 生成场地环境数据
   const generateVenueData = () => {
-    const venues: EnvironmentData[] = [];
     fetchVenueEnvironment(poolType).then((res) => {
       console.log(res);
       const { data } = res;
       if (data && data.length > 0) {
         setVenueData(data);
+        setLoading(false);
       }
     });
   };
@@ -108,18 +108,6 @@ const App: React.FC = () => {
   };
   return (
     <div className="min-h-screen " style={{ minWidth: "1440px" }}>
-      {/* 标题栏 */}
-      {/* <header className="bg-gray-800 text-white h-16 flex items-center justify之间 px-8 shadow-md"> */}
-      {/* <h1 className="text-xl font-semibold">场地环境监测系统</h1> */}
-      {/* <div className="flex items-center space-x-4">
-          <Button type="text" className="text白 hover:text-gray-300">
-            <SettingOutlined className="text-lg" />
-          </Button>
-          <Button type="text" className="text白 hover:text-gray-300">
-            <UserOutlined className="text-lg" />
-          </Button>
-        </div> */}
-      {/* </header> */}
       {/* 主内容区 */}
       <main className=" py-6">
         {/* 筛选与分页控制栏 */}
@@ -158,40 +146,48 @@ const App: React.FC = () => {
           </>
         </div>
 
-        {/* 位置信息展示区 */}
-        {paginatedVenues.map((venue) => (
-          <div key={venue.id} className="mb-8">
-            <h2 className="text-lg font-medium mb-4 text-gray-700">{venue.venue_name} - 环境数据</h2>
-            <div className="grid grid-cols-5 gap-6">
-              {venue.environments.map((location, index) => (
-                <LocationCard
-                  key={index}
-                  location={{
-                    name: location.location,
-                    temperature: location.temperature,
-                    humidity: location.humidity,
-                  }}
-                  getTemperatureColor={getTemperatureColor}
-                  getHumidityColor={getHumidityColor}
-                />
-              ))}
+        <Spin
+          spinning={loading}
+          tip="加载中..."
+          size="large"
+          className="w-full"
+          style={{ minHeight: "200px" }}
+        >
+          {/* 位置信息展示区 */}
+          {paginatedVenues.map((venue) => (
+            <div key={venue.id} className="mb-8">
+              <h2 className="text-lg font-medium mb-4 text-gray-700">{venue.venue_name} - 环境数据</h2>
+              <div className="grid grid-cols-5 gap-6">
+                {venue.environments.map((location, index) => (
+                  <LocationCard
+                    key={index}
+                    location={{
+                      name: location.location,
+                      temperature: location.temperature,
+                      humidity: location.humidity,
+                    }}
+                    getTemperatureColor={getTemperatureColor}
+                    getHumidityColor={getHumidityColor}
+                  />
+                ))}
+              </div>
             </div>
-          </div>
-        ))}
+          ))}
 
-        {/* 分页器 */}
-        <div className="mt-4 flex justify-end">
-          <Pagination
-            current={currentPage}
-            pageSize={pageSize}
-            total={filteredVenues.length}
-            onChange={(page) => setCurrentPage(page)}
-            showTotal={(total: number, _range: [number, number]) => `共 ${total} 条`}
-          />
-        </div>
+          {/* 分页器 */}
+          <div className="mt-4 flex justify-end">
+            <Pagination
+              current={currentPage}
+              pageSize={pageSize}
+              total={filteredVenues.length}
+              onChange={(page) => setCurrentPage(page)}
+              showTotal={(total: number, _range: [number, number]) => `共 ${total} 条`}
+            />
+          </div>
+        </Spin>
 
         {/* 环境标准说明 */}
-        {/* <div className="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
+        {/* <div className="bg白 rounded-xl shadow-sm p-6 border border-gray-100">
           <h3 className="text-lg font-medium text-gray-800 mb-4">环境标准参考</h3>
           <div className="grid grid-cols-2 gap-4">
             <div>
