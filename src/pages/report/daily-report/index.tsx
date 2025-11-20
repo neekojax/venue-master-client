@@ -3,7 +3,6 @@ import React, { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import { DownloadOutlined } from "@ant-design/icons";
 import { InfoCircleOutlined } from "@ant-design/icons";
-// import { Button, DatePicker, Input, message, Select, Table, Tag, Tooltip } from "antd";
 import { Button, DatePicker, Select, Switch, Table, Tag, Tooltip } from "antd";
 import type { ColumnsType } from "antd/es/table";
 import * as XLSX from "xlsx";
@@ -11,12 +10,9 @@ import antIcon from "@/assets/ant-icon.png";
 import emptyAntIcon from "@/assets/empty-ant.png";
 // @ts-ignore
 import FormulaTooltip from "@/components/tooltip/FormulaTooltip";
-// import zaixianIcon from "@/assets/zaixianlv.jpg";
 import { useSelector, useSettingsStore } from "@/stores";
 
-// import { fetchDailyReport, updateReport } from "@/pages/report/api.tsx";
 import { fetchDailyReport } from "@/pages/report/api.tsx";
-// import { ReportUpdateParam } from "@/pages/report/type.tsx";
 
 interface DataType {
   key: string;
@@ -49,7 +45,98 @@ interface DataType {
   collection: number;
   status_of_filling: number;
   impactMachine: number;
+  pendingRepairT2: number;
 }
+// 是否启用T2
+function isUseT2(record: DataType) {
+  // 北京时间（UTC+8）
+  const beijingHour = (new Date().getUTCHours() + 8) % 24;
+  // console.log("beijingHour:", beijingHour);
+  const useT2 = record.anget_key === "" && record.status_of_filling === 0 && beijingHour > 14; // 大于16点使用T2
+  return useT2;
+}
+
+// 新增：封装 T1/T2 故障显示渲染函数（模块级别）
+function renderFailureRateCell(text: number, record: DataType) {
+  const useT2 = isUseT2(record);
+  const failureCount = useT2 ? record.totalFailuresT2 : text;
+  const rateStr = ((failureCount / record.totalMachines) * 100).toFixed(2);
+  const isHighRate = parseFloat(rateStr) > 10;
+
+  return (
+    <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: "8px" }}>
+      <div
+        style={{
+          display: "flex",
+          alignItems: "center",
+          backgroundColor: "#f6f6f6",
+          padding: "2px 6px",
+          borderRadius: "4px",
+          flex: "1",
+        }}
+      >
+        {record.anget_key !== "" ? (
+          <img src={antIcon} alt="antIcon" style={{ width: 12, height: 12, marginRight: 4 }} />
+        ) : record.status_of_filling === 0 ? (
+          <>
+            <span
+              style={{
+                backgroundColor: "#f5222d",
+                color: "#fff",
+                borderRadius: 2,
+                padding: "0 4px",
+                fontSize: 8,
+                marginRight: 4,
+              }}
+            >
+              NoFill
+            </span>
+          </>
+        ) : (
+          <img src={emptyAntIcon} alt="antIcon" style={{ width: 12, height: 12, marginRight: 4 }} />
+        )}
+
+        {useT2 ? (
+          <span
+            style={{
+              backgroundColor: "orange",
+              color: "#fff",
+              borderRadius: 2,
+              padding: "0 4px",
+              fontSize: 8,
+              marginRight: 4,
+            }}
+          >
+            T2
+          </span>
+        ) : (
+          // <Tag color="orange" style={{ marginRight: 4 }}>T2</Tag>
+          <></>
+        )}
+        <span style={{ fontWeight: "bold", fontSize: "12px" }}>{failureCount}</span>
+      </div>
+      <div
+        style={{
+          backgroundColor: isHighRate ? "#fff2f0" : "#f0f8ff",
+          border: `1px solid ${isHighRate ? "#ffccc7" : "#91caff"}`,
+          color: isHighRate ? "#cf1322" : "#1677ff",
+          padding: "1px 6px",
+          borderRadius: "8px",
+          fontSize: "11px",
+          fontWeight: "bold",
+          whiteSpace: "nowrap",
+          display: "flex",
+          alignItems: "center",
+          gap: 6,
+        }}
+      >
+        {/* <Tag color={useT2 ? "orange" : "blue"} style={{ marginRight: 0 }}>{useT2 ? "T2占比" : "T1占比"}</Tag> */}
+        {rateStr}%
+      </div>
+    </div>
+  );
+}
+
 const App: React.FC = () => {
   const { poolType } = useSettingsStore(useSelector(["poolType"]));
   const [showCollectionOnly, setShowCollectionOnly] = useState(() => {
@@ -267,59 +354,7 @@ const App: React.FC = () => {
       key: "totalFailuresT1",
       width: 170,
       align: "center",
-      render: (text, record) => {
-        const total_gzl = ((text / record.totalMachines) * 100).toFixed(2);
-        const isHighRate = parseFloat(total_gzl) > 10; // T-1故障率超过5%标红
-
-        return (
-          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: "8px" }}>
-            <div
-              style={{
-                display: "flex",
-                alignItems: "center",
-                backgroundColor: "#f6f6f6",
-                padding: "2px 6px",
-                borderRadius: "4px",
-                flex: "1",
-              }}
-            >
-              {record.anget_key !== "" ? (
-                <img src={antIcon} alt="antIcon" style={{ width: 12, height: 12, marginRight: 4 }} />
-              ) : record.status_of_filling === 0 ? (
-                <span
-                  style={{
-                    backgroundColor: "#f5222d",
-                    color: "#fff",
-                    borderRadius: 2,
-                    padding: "0 4px",
-                    fontSize: 8,
-                    marginRight: 4,
-                  }}
-                >
-                  NoFill
-                </span>
-              ) : (
-                <img src={emptyAntIcon} alt="antIcon" style={{ width: 12, height: 12, marginRight: 4 }} />
-              )}
-              <span style={{ fontWeight: "bold", fontSize: "12px" }}>{text}</span>
-            </div>
-            <div
-              style={{
-                backgroundColor: isHighRate ? "#fff2f0" : "#f0f8ff",
-                border: `1px solid ${isHighRate ? "#ffccc7" : "#91caff"}`,
-                color: isHighRate ? "#cf1322" : "#1677ff",
-                padding: "1px 6px",
-                borderRadius: "8px",
-                fontSize: "11px",
-                fontWeight: "bold",
-                whiteSpace: "nowrap",
-              }}
-            >
-              {total_gzl}%
-            </div>
-          </div>
-        );
-      },
+      render: (text: number, record: DataType) => renderFailureRateCell(text, record),
       sorter: (a, b) => a.totalFailuresT1 - b.totalFailuresT1,
     },
     {
@@ -420,7 +455,9 @@ const App: React.FC = () => {
       width: 150,
       align: "center",
       render: (value, record) => {
-        const repairRate = ((value / record.totalMachines) * 100).toFixed(2);
+        const useT2 = isUseT2(record);
+        const pendingRepairNum = useT2 ? record.pendingRepairT2 : value;
+        const repairRate = ((pendingRepairNum / record.totalMachines) * 100).toFixed(2);
         const isHighRate = parseFloat(repairRate) > 10; // 待修率超过5%标红
 
         return (
@@ -435,7 +472,26 @@ const App: React.FC = () => {
                 flex: "1",
               }}
             >
-              <span style={{ fontWeight: "bold", fontSize: "12px" }}>{value.toLocaleString()}</span>
+              {useT2 ? (
+                <span
+                  style={{
+                    backgroundColor: "orange",
+                    color: "#fff",
+                    borderRadius: 2,
+                    padding: "0 4px",
+                    fontSize: 8,
+                    marginRight: 4,
+                  }}
+                >
+                  T2
+                </span>
+              ) : (
+                // <Tag color="orange" style={{ marginRight: 4 }}>T2</Tag>
+                <></>
+              )}
+              <span style={{ fontWeight: "bold", fontSize: "12px" }}>
+                {pendingRepairNum.toLocaleString()}
+              </span>
             </div>
             <div
               style={{
@@ -555,6 +611,7 @@ const App: React.FC = () => {
               effectiveRateT3: venue.effectiveRateT3 || 0,
               totalFailuresT1: venue.totalFailuresT1 || 0,
               totalFailuresT2: venue.totalFailuresT2 || 0,
+              pendingRepairT2: venue.pendingRepairT2 || 0,
               totalMachines: venue.totalMachines || 0,
               onlineRatio: venue.onlineRatio || 0,
               totalFailures: venue.totalFailures || 0,
@@ -667,14 +724,18 @@ const App: React.FC = () => {
       // 总故障台数: item.totalFailures.toLocaleString(),
       "24小时故障数": item.failures24h.toLocaleString(),
       "24小时故障率": item.failureRate24h.toFixed(2) + "%",
-      "T-1故障数": item.totalFailuresT1.toLocaleString(),
-      "T-1故障率": `${((item.totalFailuresT1 / item.totalMachines) * 100).toFixed(2)}%`,
+      "T-1故障数": isUseT2(item)
+        ? item.totalFailuresT2.toLocaleString()
+        : item.totalFailuresT1.toLocaleString(),
+      "T-1故障率": isUseT2(item)
+        ? `${((item.totalFailuresT2 / item.totalMachines) * 100).toFixed(2)}%`
+        : `${((item.totalFailuresT1 / item.totalMachines) * 100).toFixed(2)}%`,
       "T-2故障数": item.totalFailuresT2.toLocaleString(),
       "T-2故障率": `${((item.totalFailuresT2 / item.totalMachines) * 100).toFixed(2)}%`,
       // "T-2故障情况": `${item.totalFailuresT2.toLocaleString()} 台 (${item.failureRateT2.toFixed(2)}%)`,
       // "T-3日故障率": item.failureRateT3.toFixed(2) + "%",
       "24小时上架数": item.shelved,
-      待修数: item.pendingRepair.toLocaleString(),
+      待修数: isUseT2(item) ? item.pendingRepairT2.toLocaleString() : item.pendingRepair.toLocaleString(),
       待修情况: `${((Number(item.pendingRepair) / item.totalMachines) * 100).toFixed(2)}%`,
       "影响算力（E）": item.powerImpact.toFixed(8),
       影响占比: item.impactRatio.toFixed(2) + "%",
