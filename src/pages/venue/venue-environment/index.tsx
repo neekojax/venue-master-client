@@ -61,10 +61,12 @@ const App: React.FC = () => {
   // 生成场地环境数据
   const generateVenueData = () => {
     fetchVenueEnvironment(poolType).then((res) => {
-      console.log(res);
+      // console.log(res);
       const { data } = res;
       if (data && data.length > 0) {
-        setVenueData(data);
+        // 过滤掉没有数据的场地
+        const validVenue = data.filter((v: any) => v.environments?.length > 0);
+        setVenueData(validVenue);
         setLoading(false);
       }
     });
@@ -96,8 +98,8 @@ const App: React.FC = () => {
   // 获取温度进度条颜色
   const getTemperatureColor = (temp: number): ProgressProps["strokeColor"] => {
     // if (temp < 20) return "#90EE90"; // 偏冷 #90EE90
-    if (temp < 25) return "#90EE90"; // 舒适 #90EE90
-    if (temp < 30) return "#FFD700"; // 偏热 #FFD700
+    if (temp < 20) return "#90EE90"; // 舒适 #90EE90
+    if (temp < 28) return "#FFD700"; // 偏热 #FFD700
     return "#FF6347"; // 过热 #FF6347
   };
   // 获取湿度进度条颜色
@@ -107,7 +109,7 @@ const App: React.FC = () => {
     return "#4682B4"; // 潮湿 #4682B4
   };
   return (
-    <div className="min-h-screen " style={{ minWidth: "1440px" }}>
+    <div className="min-h-screen ">
       {/* 主内容区 */}
       <main className=" py-6">
         {/* 筛选与分页控制栏 */}
@@ -158,18 +160,19 @@ const App: React.FC = () => {
             <div key={venue.id} className="mb-8">
               <h2 className="text-lg font-medium mb-4 text-gray-700">{venue.venue_name} - 环境数据</h2>
               <div className="grid grid-cols-5 gap-6">
-                {venue.environments.map((location, index) => (
-                  <LocationCard
-                    key={index}
-                    location={{
-                      name: location.location,
-                      temperature: location.temperature,
-                      humidity: location.humidity,
-                    }}
-                    getTemperatureColor={getTemperatureColor}
-                    getHumidityColor={getHumidityColor}
-                  />
-                ))}
+                {venue.environments &&
+                  venue.environments.map((location, index) => (
+                    <LocationCard
+                      key={index}
+                      location={{
+                        name: location.location,
+                        temperature: location.temperature,
+                        humidity: location.humidity,
+                      }}
+                      getTemperatureColor={getTemperatureColor}
+                      getHumidityColor={getHumidityColor}
+                    />
+                  ))}
               </div>
             </div>
           ))}

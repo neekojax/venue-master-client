@@ -10,6 +10,8 @@ import antIcon from "@/assets/ant-icon.png";
 import emptyAntIcon from "@/assets/empty-ant.png";
 // @ts-ignore
 import FormulaTooltip from "@/components/tooltip/FormulaTooltip";
+// @ts-ignore
+import FormulaYouxiaolvTooltip from "@/components/tooltip/FormulaYouxiaolvTooltip";
 import { useSelector, useSettingsStore } from "@/stores";
 
 import { fetchDailyReport } from "@/pages/report/api.tsx";
@@ -46,6 +48,7 @@ interface DataType {
   status_of_filling: number;
   impactMachine: number;
   pendingRepairT2: number;
+  forecastHashEfficiency: number;
 }
 // 是否启用T2
 function isUseT2(record: DataType) {
@@ -276,6 +279,20 @@ const App: React.FC = () => {
       align: "left",
       render: (value) => value.toFixed(6),
       sorter: (a, b) => a.power24h - b.power24h,
+    },
+    {
+      title: (
+        <div style={{ display: "flex" }}>
+          <span>净有效率</span>
+          <FormulaYouxiaolvTooltip />
+        </div>
+      ),
+      dataIndex: "forecastHashEfficiency",
+      key: "forecastHashEfficiency",
+      width: 140,
+      align: "left",
+      render: (value) => `${value.toFixed(2)}%`,
+      // sorter: (a, b) => a.forecastHashEfficiency - b.forecastHashEfficiency,
     },
     {
       title: "24H有效率",
@@ -607,6 +624,7 @@ const App: React.FC = () => {
               theoreticalPower: venue.theoreticalPower || 0,
               power24h: venue.power24h || 0,
               effectiveRate24h: venue.effectiveRate24h || 0, // 转换为小数形式
+              forecastHashEfficiency: venue.forecastHashEfficiency || 0, // 转换为小数形式
               effectiveRateT2: venue.effectiveRateT2 || 0,
               effectiveRateT3: venue.effectiveRateT3 || 0,
               totalFailuresT1: venue.totalFailuresT1 || 0,
@@ -704,6 +722,9 @@ const App: React.FC = () => {
     setFilteredData(filtered);
   }, [selectedSites, data, showCollectionOnly]);
 
+  // 在 CANG 以外的池型隐藏“近有效率”列
+  const columnsToRender: ColumnsType<DataType> =
+    poolType === "CANG" ? columns : columns.filter((c) => c.key !== "forecastHashEfficiency");
   // 导出数据为 CSV 的函数
   const exportToCSV = () => {
     const data = filteredData.map((item) => ({
@@ -712,6 +733,7 @@ const App: React.FC = () => {
       "24小时产出（BTC）": item.btcOutput24h.toFixed(8),
       "理论算力（E）": item.theoreticalPower.toFixed(6),
       "24小时算力（E）": item.power24h.toFixed(8),
+      ...(poolType === "CANG" ? { 近有效率: item.forecastHashEfficiency.toFixed(2) + "%" } : {}),
       "24小时有效率": item.effectiveRate24h.toFixed(2) + "%",
       // "T-2日有效率": item.effectiveRateT2.toFixed(2) + "%",
       // "T-3日有效率": item.effectiveRateT3.toFixed(2) + "%",
@@ -936,7 +958,7 @@ const App: React.FC = () => {
             </div>
           </div>
           <Table
-            columns={columns}
+            columns={columnsToRender}
             dataSource={filteredData}
             scroll={{ x: 1500 }}
             // sticky={true}

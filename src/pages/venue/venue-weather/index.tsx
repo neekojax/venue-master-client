@@ -7,7 +7,7 @@ import { LineChart } from "echarts/charts";
 import { GridComponent, TitleComponent, TooltipComponent } from "echarts/components";
 import * as echarts from "echarts/core";
 import { CanvasRenderer } from "echarts/renderers";
-import WeatherDetail from "./components/weatherDetail";
+import { SiteCard } from "./components/siteCard";
 import { useSelector, useSettingsStore } from "@/stores";
 
 import { fetchWeatherList } from "@/pages/venue/api";
@@ -108,6 +108,7 @@ const App: React.FC = () => {
         });
         // 过滤掉没有数据的场地
         const validVenue = arr.filter((v) => v.grouped_list?.length > 0);
+        // console.log("validVenue》〉》〉:", validVenue);
         setFilteredData(validVenue);
       } else {
         setFilteredData([]);
@@ -222,39 +223,41 @@ const App: React.FC = () => {
       {/* 主体内容区域 */}
       <Spin spinning={loading} tip="加载中...">
         <div className=" flex-grow">
-          <div className="mx-auto">
+          <div className="mx-auto ">
             {/* 分组显示天气数据 */}
             {pageEntries
               .filter(([, group]) => group.items?.length > 0)
               .map(([venueId, group]) => (
-                <div
-                  key={venueId}
-                  className={`mb-6 rounded-xl overflow-hidden `}
-                  style={{ backgroundColor: "#ccdff1" }}
-                >
-                  {/* 场地头部 */}
-                  <div className="flex items-center justify-between bg-transparent border-b border-gray-200/70 h-8 px-4">
-                    <div className="flex items-center">
-                      <h2
-                        className="text-middle md:text-middle font-semibold tracking-wide text-[#6177a7] leading-none"
-                        style={{ marginBottom: "0px" }}
-                      >
-                        {group.venue.name}
-                      </h2>
-                    </div>
-                  </div>
-                  {/* 天气详情列表 */}
-                  <div className="grid grid-cols-3 bg-white  overflow-hidden divide-x divide-y divide-gray-200/70">
-                    {group.items.map((item, idx) => (
-                      <div
-                        key={`${group.venue.id}-${item.date}-${idx}`}
-                        className="px-4 py-3 hover:bg-gray-50 transition-colors"
-                      >
-                        <WeatherDetail item={item} />
-                      </div>
-                    ))}
-                  </div>
-                </div>
+                <SiteCard key={venueId} site={group} />
+
+                // <div
+                //   key={venueId}
+                //   className={`mb-6 rounded-xl overflow-hidden `}
+                //   style={{ backgroundColor: "#ccdff1" }}
+                // >
+                //   {/* 场地头部 */}
+                //   <div className="flex items-center justify-between bg-transparent border-b border-gray-200/70 h-8 px-4">
+                //     <div className="flex items-center">
+                //       <h2
+                //         className="text-middle md:text-middle font-semibold tracking-wide text-[#6177a7] leading-none"
+                //         style={{ marginBottom: "0px" }}
+                //       >
+                //         {group.venue.name}
+                //       </h2>
+                //     </div>
+                //   </div>
+                //   {/* 天气详情列表 */}
+                //   <div className="grid grid-cols-3 bg-white  overflow-hidden divide-x divide-y divide-gray-200/70">
+                //     {group.items.map((item, idx) => (
+                //       <div
+                //         key={`${group.venue.id}-${item.date}-${idx}`}
+                //         className="px-4 py-3 hover:bg-gray-50 transition-colors"
+                //       >
+                //         <WeatherDetail item={item} />
+                //       </div>
+                //     ))}
+                //   </div>
+                // </div>
               ))}
             <div className="flex justify-center mt-6">
               <Pagination

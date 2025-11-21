@@ -47,11 +47,7 @@ const HostingRecord = forwardRef<HostingRecordHandle, HostingRecordProps>(functi
       dataIndex: "start_time",
       key: "start_time",
       width: 250,
-      render: (value, record) => (
-        <>
-          {value} ~ {record.end_time}
-        </>
-      ),
+      render: (value) => <>{value} ~</>,
     },
     {
       title: "托管单价",

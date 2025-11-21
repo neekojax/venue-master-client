@@ -38,6 +38,7 @@ interface DataType {
   limitImpactRate: number;
   highTemperatureRate: number;
   events: string;
+  onRackHashRate: number;
 }
 const App: React.FC = () => {
   const { poolType } = useSettingsStore(useSelector(["poolType"]));
@@ -460,6 +461,7 @@ const App: React.FC = () => {
               outputImpact: venue.outputImpact || 0,
               limitImpactRate: venue.limitImpactRate || 0,
               highTemperatureRate: venue.highTemperatureRate || 0,
+              onRackHashRate: venue.onRackHashRate || 0,
               // "限电影响": item.limitImpactRate,
               // "高温影响": item.highTemperatureRate,
               events: venue.events || "",
@@ -541,6 +543,7 @@ const App: React.FC = () => {
       // 总故障率: ((item.totalFailures / item.totalMachines) * 100).toFixed(2) + "%",
       "24小时故障数": item.failures24h.toLocaleString(),
       "24小时故障率": item.failureRate24h.toFixed(2) + "%",
+      "在架理论算力（E）": item.onRackHashRate.toFixed(8),
       "影响算力（E）": item.powerImpact.toFixed(8),
       影响占比: item.impactRatio.toFixed(2) + "%",
       "影响产出（BTC）": item.outputImpact.toFixed(8),

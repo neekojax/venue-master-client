@@ -38,7 +38,7 @@ const EfficiencyGauge = (props: { effective: number; theoretical: number }) => {
             valueAnimation: true,
             formatter: "{value}%",
             fontSize: 20,
-            offsetCenter: [0, 80], // 文字往下偏移60px，和仪表盘有间距
+            offsetCenter: [0, 60], // 文字往下偏移60px，和仪表盘有间距
           },
           data: [{ value: efficiency.toFixed(2) }],
         },
@@ -52,7 +52,7 @@ const EfficiencyGauge = (props: { effective: number; theoretical: number }) => {
     };
   }, [efficiency]);
 
-  return <div ref={chartRef} style={{ height: 200, width: "100%" }} />;
+  return <div ref={chartRef} style={{ height: 170, width: "100%" }} />;
 };
 
 export default EfficiencyGauge;

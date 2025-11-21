@@ -572,10 +572,10 @@ export const exportHostingRecordToExcel = (data: any[]) => {
     { wch: 18 }, // 运维单价
   ];
 
-  XLSX.utils.book_append_sheet(workbook, worksheet, "服务费用账单");
+  XLSX.utils.book_append_sheet(workbook, worksheet, "托管运维单价");
 
   const date = new Date();
   const formattedDate = date.toISOString().split("T")[0];
-  const fileName = `服务费用账单_${formattedDate}.xlsx`;
+  const fileName = `托管运维单价_${formattedDate}.xlsx`;
   XLSX.writeFile(workbook, fileName);
 };

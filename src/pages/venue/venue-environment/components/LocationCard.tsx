@@ -25,6 +25,21 @@ const LocationCard: React.FC<LocationCardProps> = ({ location, getTemperatureCol
             <i className="fas fa-thermometer-half mr-2 text-red-500"></i>
             温度
           </span>
+          {location.temperature === 0 && (
+            <span
+              className="animate-pulse ring-2 ring-red-500 ring-offset-1 shadow-sm"
+              style={{
+                backgroundColor: "#f5222d",
+                color: "#fff",
+                borderRadius: 2,
+                padding: "0 4px",
+                fontSize: 8,
+                marginRight: 4,
+              }}
+            >
+              设备异常，请检查设备
+            </span>
+          )}
           <span className="font-medium text-gray-800">{location.temperature}°C</span>
         </div>
         <Progress
@@ -45,6 +60,21 @@ const LocationCard: React.FC<LocationCardProps> = ({ location, getTemperatureCol
             <i className="fas fa-tint mr-2 text-blue-500"></i>
             湿度
           </span>
+          {location.humidity === 0 && (
+            <span
+              className="animate-pulse ring-2 ring-red-500 ring-offset-1 shadow-sm"
+              style={{
+                backgroundColor: "#f5222d",
+                color: "#fff",
+                borderRadius: 2,
+                padding: "0 4px",
+                fontSize: 8,
+                marginRight: 4,
+              }}
+            >
+              设备异常，请检查设备
+            </span>
+          )}
           <span className="font-medium text-gray-800">{location.humidity}%</span>
         </div>
         <Progress
