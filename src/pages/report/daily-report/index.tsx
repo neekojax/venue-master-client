@@ -280,20 +280,7 @@ const App: React.FC = () => {
       render: (value) => value.toFixed(6),
       sorter: (a, b) => a.power24h - b.power24h,
     },
-    {
-      title: (
-        <div style={{ display: "flex" }}>
-          <span>净有效率</span>
-          <FormulaYouxiaolvTooltip />
-        </div>
-      ),
-      dataIndex: "forecastHashEfficiency",
-      key: "forecastHashEfficiency",
-      width: 140,
-      align: "left",
-      render: (value) => `${value.toFixed(2)}%`,
-      // sorter: (a, b) => a.forecastHashEfficiency - b.forecastHashEfficiency,
-    },
+
     {
       title: "24H有效率",
       dataIndex: "effectiveRate24h",
@@ -364,6 +351,20 @@ const App: React.FC = () => {
         </div>
       ),
       // render: (value) => `${value.toFixed(2)}%`,
+    },
+    {
+      title: (
+        <div style={{ display: "flex" }}>
+          <span>净有效率</span>
+          <FormulaYouxiaolvTooltip />
+        </div>
+      ),
+      dataIndex: "forecastHashEfficiency",
+      key: "forecastHashEfficiency",
+      width: 140,
+      align: "left",
+      render: (value) => `${value.toFixed(2)}%`,
+      // sorter: (a, b) => a.forecastHashEfficiency - b.forecastHashEfficiency,
     },
     {
       title: "T-1总故障数/占比",
