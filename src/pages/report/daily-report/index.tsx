@@ -280,7 +280,6 @@ const App: React.FC = () => {
       render: (value) => value.toFixed(6),
       sorter: (a, b) => a.power24h - b.power24h,
     },
-
     {
       title: "24H有效率",
       dataIndex: "effectiveRate24h",
@@ -350,6 +349,7 @@ const App: React.FC = () => {
           )}
         </div>
       ),
+      sorter: (a, b) => a.onlineRatio - b.onlineRatio,
       // render: (value) => `${value.toFixed(2)}%`,
     },
     {
@@ -364,7 +364,7 @@ const App: React.FC = () => {
       width: 140,
       align: "left",
       render: (value) => `${value.toFixed(2)}%`,
-      // sorter: (a, b) => a.forecastHashEfficiency - b.forecastHashEfficiency,
+      sorter: (a, b) => a.forecastHashEfficiency - b.forecastHashEfficiency,
     },
     {
       title: "T-1总故障数/占比",
@@ -734,7 +734,6 @@ const App: React.FC = () => {
       "24小时产出（BTC）": item.btcOutput24h.toFixed(8),
       "理论算力（E）": item.theoreticalPower.toFixed(6),
       "24小时算力（E）": item.power24h.toFixed(8),
-      ...(poolType === "CANG" ? { 近有效率: item.forecastHashEfficiency.toFixed(2) + "%" } : {}),
       "24小时有效率": item.effectiveRate24h.toFixed(2) + "%",
       // "T-2日有效率": item.effectiveRateT2.toFixed(2) + "%",
       // "T-3日有效率": item.effectiveRateT3.toFixed(2) + "%",
@@ -747,6 +746,7 @@ const App: React.FC = () => {
       // 总故障台数: item.totalFailures.toLocaleString(),
       "24小时故障数": item.failures24h.toLocaleString(),
       "24小时故障率": item.failureRate24h.toFixed(2) + "%",
+      ...(poolType === "CANG" ? { 近有效率: item.forecastHashEfficiency.toFixed(2) + "%" } : {}),
       "T-1故障数": isUseT2(item)
         ? item.totalFailuresT2.toLocaleString()
         : item.totalFailuresT1.toLocaleString(),
