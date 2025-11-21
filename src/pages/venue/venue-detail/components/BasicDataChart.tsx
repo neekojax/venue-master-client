@@ -304,14 +304,14 @@ const App: React.FC<{ stats: VenueStats; loading: boolean }> = ({ stats, loading
               title="算力汇总"
               actions={[
                 <span key="setting">
-                  {/* <SettingOutlined /> */}
-                  <CheckCircleOutlined style={{ color: "green", fontSize: 16, marginRight: "10px" }} />
-                  <span>在架有效率：{(stats?.onlineRatio || 0)?.toFixed(2)}%</span>
-                </span>,
-                <span key="setting">
                   <SettingOutlined style={{ fontSize: 16, color: "#1890ff", marginRight: "10px" }} />
                   {/* <ThunderboltOutlined style={{ color: 'orange', fontSize: 16, marginRight: '10px' }} /> */}
                   <span>算力有效率：{(stats?.effectiveRate24h || 0)?.toFixed(2)}%</span>
+                </span>,
+                <span key="setting">
+                  {/* <SettingOutlined /> */}
+                  <CheckCircleOutlined style={{ color: "green", fontSize: 16, marginRight: "10px" }} />
+                  <span>在架有效率：{(stats?.onlineRatio || 0)?.toFixed(2)}%</span>
                 </span>,
               ]}
             >

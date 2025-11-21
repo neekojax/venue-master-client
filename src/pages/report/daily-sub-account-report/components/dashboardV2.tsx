@@ -317,14 +317,14 @@ const App: React.FC<{ data: any; loading: boolean }> = ({ data, loading }) => {
               bordered={false}
               actions={[
                 <span key="setting">
-                  {/* <SettingOutlined /> */}
-                  <CheckCircleOutlined style={{ color: "green", fontSize: 16, marginRight: "10px" }} />
-                  <span>在线率：{data.totalOnlineRatio?.toFixed(2)}%</span>
-                </span>,
-                <span key="setting">
                   <SettingOutlined style={{ fontSize: 16, color: "#1890ff", marginRight: "10px" }} />
                   {/* <ThunderboltOutlined style={{ color: 'orange', fontSize: 16, marginRight: '10px' }} /> */}
                   <span>算力有效率：{(data?.averageEffectiveRate || 0)?.toFixed(2)}%</span>
+                </span>,
+                <span key="setting">
+                  {/* <SettingOutlined /> */}
+                  <CheckCircleOutlined style={{ color: "green", fontSize: 16, marginRight: "10px" }} />
+                  <span>在架有效率：{data.totalOnlineRatio?.toFixed(2)}%</span>
                 </span>,
               ]}
             >
