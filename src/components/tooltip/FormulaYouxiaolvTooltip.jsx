@@ -11,7 +11,7 @@ const { Text } = Typography;
 const FormulaYouxiaolvTooltip = () => {
     // 定义公式的 LaTeX 表达式
     // const formula = `在线率 = \\frac{理论在线数}{理论在架数} = \\frac{\\frac{24小时算力 \\times 托管台数}{理论算力}}{托管台数 - 总故障数 - 不可抗力因素影响的台数}`;
-    const formula = `净有效率=\\frac{有效算力}{理论算力-预报废态算力}`;
+    const formula = `净有效率=\\frac{24H有效算力}{理论算力-预报废态算力}`;
 
     return (
         <Tooltip
