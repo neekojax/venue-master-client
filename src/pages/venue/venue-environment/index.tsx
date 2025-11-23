@@ -18,6 +18,7 @@ interface LocationData {
 interface EnvironmentData {
   id: number;
   venue_name: string;
+  last_update: string;
   environments: LocationData[];
 }
 const App: React.FC = () => {
@@ -26,7 +27,7 @@ const App: React.FC = () => {
   // 场地数据
   const [venueData, setVenueData] = useState<EnvironmentData[]>([]);
   // 最后更新时间
-  const [lastUpdated, setLastUpdated] = useState<string>("");
+  // const [lastUpdated, setLastUpdated] = useState<string>("");
   // 加载状态
   const [loading, setLoading] = useState<boolean>(false);
   // 新增：场地名筛选与分页
@@ -50,7 +51,7 @@ const App: React.FC = () => {
   useEffect(() => {
     setLoading(true);
     generateVenueData();
-    updateLastUpdatedTime();
+    // updateLastUpdatedTime();
   }, []);
 
   // 当筛选或数据源变化时，重置到第一页
@@ -72,17 +73,17 @@ const App: React.FC = () => {
     });
   };
   // 更新最后更新时间
-  const updateLastUpdatedTime = () => {
-    const now = new Date();
-    const timeString = `${now.getFullYear()}年${(now.getMonth() + 1).toString().padStart(2, "0")}月${now.getDate().toString().padStart(2, "0")}日 ${now.getHours().toString().padStart(2, "0")}:${now.getMinutes().toString().padStart(2, "0")}:${now.getSeconds().toString().padStart(2, "0")}`;
-    setLastUpdated(timeString);
-  };
+  // const updateLastUpdatedTime = () => {
+  //   const now = new Date();
+  //   const timeString = `${now.getFullYear()}年${(now.getMonth() + 1).toString().padStart(2, "0")}月${now.getDate().toString().padStart(2, "0")}日 ${now.getHours().toString().padStart(2, "0")}:${now.getMinutes().toString().padStart(2, "0")}:${now.getSeconds().toString().padStart(2, "0")}`;
+  //   setLastUpdated(timeString);
+  // };
   // 刷新数据
   const handleRefresh = () => {
     setLoading(true);
     setTimeout(() => {
       generateVenueData();
-      updateLastUpdatedTime();
+      // updateLastUpdatedTime();
       setLoading(false);
       message.success("数据更新成功");
     }, 800);
@@ -133,7 +134,7 @@ const App: React.FC = () => {
           />
           <>
             <div className="text-gray-600 text-sm">
-              <span style={{ marginRight: "10px" }}>最后更新: {lastUpdated}</span>
+              {/* <span style={{ marginRight: "10px" }}>最后更新: {lastUpdated}</span> */}
               <Button
                 size="middle"
                 type="primary"
@@ -158,7 +159,15 @@ const App: React.FC = () => {
           {/* 位置信息展示区 */}
           {paginatedVenues.map((venue) => (
             <div key={venue.id} className="mb-8">
-              <h2 className="text-lg font-medium mb-4 text-gray-700">{venue.venue_name} - 环境数据</h2>
+              <div className="mb-4 flex items-center justify-between">
+                <h2 className="text-lg font-semibold text-gray-800 flex items-center">
+                  <span className="mr-2">{venue.venue_name}</span>
+                  <span className="text-sm text-gray-500">环境数据</span>
+                </h2>
+                <div className="text-xs text-gray-600 bg-gray-50 border border-gray-200 rounded-full px-3 py-1">
+                  最后更新: <span className="font-mono">{venue.last_update}</span>
+                </div>
+              </div>
               <div className="grid grid-cols-5 gap-6">
                 {venue.environments &&
                   venue.environments.map((location, index) => (
