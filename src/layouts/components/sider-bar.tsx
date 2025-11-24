@@ -78,14 +78,7 @@ const SiderItems = () => {
               },
             ]
           : []),
-        ...(showNDPoolType == "CANG"
-          ? [
-              {
-                key: ROUTE_PATHS.venueBill,
-                label: <Link to={ROUTE_PATHS.venueBill}>电费参数</Link>,
-              },
-            ]
-          : []),
+
         {
           key: ROUTE_PATHS.eventLog,
           label: <Link to={ROUTE_PATHS.eventLog}>事件日志</Link>,
@@ -144,6 +137,14 @@ const SiderItems = () => {
           key: ROUTE_PATHS.statistics,
           label: <Link to={ROUTE_PATHS.statistics}>费用统计</Link>,
         },
+        ...(showNDPoolType == "CANG"
+          ? [
+              {
+                key: ROUTE_PATHS.venueBill,
+                label: <Link to={ROUTE_PATHS.venueBill}>电费参数</Link>,
+              },
+            ]
+          : []),
         // {
         //   key: ROUTE_PATHS.dailyAveragePrice,
         //   label: <Link to={ROUTE_PATHS.dailyAveragePrice}>BTC均价</Link>,

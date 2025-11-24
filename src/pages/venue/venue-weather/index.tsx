@@ -1,7 +1,7 @@
 // 代码已包含 CSS：使用 TailwindCSS , 安装 TailwindCSS 后方可看到布局样式效果
 import React, { useEffect, useState } from "react";
 import { SearchOutlined } from "@ant-design/icons";
-import { DatePicker, Pagination, Select, Spin } from "antd";
+import { DatePicker, Pagination, Select, Spin, Switch } from "antd";
 import dayjs from "dayjs";
 import { LineChart } from "echarts/charts";
 import { GridComponent, TitleComponent, TooltipComponent } from "echarts/components";
@@ -29,6 +29,7 @@ interface WeatherData {
 interface Venue {
   venue_id: number;
   venue_name: string;
+  collection: number;
   grouped_list?: DateGroup[];
 }
 interface GroupVenue {
@@ -57,6 +58,13 @@ const App: React.FC = () => {
   const [pageSize, setPageSize] = useState(5);
   const [selectedDate, setSelectedDate] = useState<string>(dayjs().format("YYYY-MM-DD"));
   const [loading, setLoading] = useState(false);
+  const [showCollectionOnly, setShowCollectionOnly] = useState<boolean>(
+    () => localStorage.getItem("showCollectionOnly") === "true",
+  );
+
+  useEffect(() => {
+    localStorage.setItem("showCollectionOnly", String(showCollectionOnly));
+  }, [showCollectionOnly]);
 
   const groupByDate = (value: WeatherData[]): DateGroup[] => {
     const map = new Map<string, DateGroup>();
@@ -95,6 +103,7 @@ const App: React.FC = () => {
             return {
               venue_id: 0,
               venue_name: key,
+              collection: 0,
               list: (value as WeatherData[]) || [],
               grouped_list: [] as DateGroup[],
             };
@@ -102,12 +111,17 @@ const App: React.FC = () => {
           return {
             venue_id: Number(value?.[0]?.venue_id ?? 0),
             venue_name: key,
+            collection: Number(value?.[0]?.collection ?? 0),
             list: value as WeatherData[],
             grouped_list: groupByDate(value as WeatherData[]),
           };
         });
         // 过滤掉没有数据的场地
-        const validVenue = arr.filter((v) => v.grouped_list?.length > 0);
+        const validVenue = arr
+          .filter((v) => v.grouped_list?.length > 0)
+          .sort((a, b) =>
+            (a.venue_name || "").localeCompare(b.venue_name || "", undefined, { sensitivity: "base" }),
+          );
         // console.log("validVenue》〉》〉:", validVenue);
         setFilteredData(validVenue);
       } else {
@@ -145,10 +159,9 @@ const App: React.FC = () => {
 
   // 根据下拉框选择或搜索词进行模糊过滤
   const visibleData = filteredData.filter((v) => {
-    if (!searchTerm) return true;
-    const n = (v.venue_name || "").toLowerCase();
-    const s = searchTerm.toLowerCase();
-    return n.includes(s);
+    const bySearch = !searchTerm || (v.venue_name || "").toLowerCase().includes(searchTerm.toLowerCase());
+    const byCollection = !showCollectionOnly || Number(v.collection) === 1;
+    return bySearch && byCollection;
   });
 
   // 按场地分组数据（使用过滤后的数据）
@@ -200,23 +213,37 @@ const App: React.FC = () => {
                         ))}
                     </div> */}
           {/* 搜索框 */}
-          <div className="relative ml-auto w-64">
-            <SearchOutlined className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
-            <Select
-              size="middle"
-              showSearch
-              allowClear
-              placeholder="搜索场地名称..."
-              style={{ fontSize: "12px" }}
-              className="w-full select-placeholder-12"
-              onSearch={(val) => setSearchTerm(val)}
-              onChange={(val) => setSearchTerm(val || "")}
-              options={venueOptions}
-              filterOption={(input, option) => {
-                const label = (option?.label ?? "").toString().toLowerCase();
-                return label.includes(input.toLowerCase());
-              }}
-            />
+          <div className="relative ml-auto " style={{ width: "400px" }}>
+            <div className="flex justify-between">
+              <>
+                <SearchOutlined className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+                <Select
+                  size="middle"
+                  showSearch
+                  allowClear
+                  placeholder="搜索场地名称..."
+                  style={{ fontSize: "12px" }}
+                  className="w-full select-placeholder-12"
+                  onSearch={(val) => setSearchTerm(val)}
+                  onChange={(val) => setSearchTerm(val || "")}
+                  options={venueOptions}
+                  filterOption={(input, option) => {
+                    const label = (option?.label ?? "").toString().toLowerCase();
+                    return label.includes(input.toLowerCase());
+                  }}
+                />
+              </>
+              <div className="items-center mt-2" style={{ marginLeft: "10px", width: "150px" }}>
+                <Switch
+                  checked={showCollectionOnly}
+                  onChange={(checked) => setShowCollectionOnly(checked)}
+                  className="mr-1"
+                />
+                <span className="text-sm" style={{ fontSize: "12px" }}>
+                  我的场地
+                </span>
+              </div>
+            </div>
           </div>
         </div>
       </div>

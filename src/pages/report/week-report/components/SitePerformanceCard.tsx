@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { SearchOutlined } from "@ant-design/icons";
-import { Button, Input, Switch, Table } from "antd";
+import { Button, Input, Select, Switch, Table } from "antd";
 import type { ColumnsType } from "antd/es/table";
 import { formatDivide1000 } from "@/utils/format";
 
@@ -19,6 +19,7 @@ interface DailyData {
   FailureRate: number; // 故障率（%）
   PendingRepair: number; // 待维修数量
   PendingRepairRate: number; // 待维修率（%）
+  ForecastHashEfficiency: number; // 净修率（%）
 }
 interface DataItem {
   venue_id: number; // 场馆 ID
@@ -33,6 +34,7 @@ interface DataItem {
   average_pending_repair_rate: number; // 平均待维修率（%）
   hash_effective_diff_rate: number; // 算力有效率差异（%）
   daily_items: DailyData[];
+  forecast_hash_efficiency: number; // 净修率（%）
 }
 
 interface SitePerformanceCardProps {
@@ -67,6 +69,42 @@ const SitePerformanceCard: React.FC<SitePerformanceCardProps> = ({
     localStorage.setItem("showCollectionOnly", String(showCollectionOnly));
   }, [showCollectionOnly]);
 
+  const allColumnKeys = useMemo(
+    () => columns.map((c: any) => String(c.key)).filter((k) => k !== "venue_name"),
+    [columns],
+  );
+  const columnOptions = useMemo(
+    () =>
+      columns
+        .filter((c: any) => c.key !== "venue_name")
+        .map((c: any) => ({
+          value: String(c.key),
+          label: typeof c.title === "string" ? c.title : String(c.title),
+        })),
+    [columns],
+  );
+  const [selectedColumnKeys, setSelectedColumnKeys] = useState<string[]>(() => {
+    const saved = localStorage.getItem("weekReportSelectedColumns");
+    if (saved) {
+      try {
+        const arr = JSON.parse(saved);
+        if (Array.isArray(arr)) return arr as string[];
+      } catch (e) {
+        // 解析失败则忽略并使用默认列集合
+        console.warn("Failed to parse weekReportSelectedColumns from localStorage:", e);
+      }
+    }
+    return allColumnKeys;
+  });
+
+  useEffect(() => {
+    localStorage.setItem("weekReportSelectedColumns", JSON.stringify(selectedColumnKeys));
+  }, [selectedColumnKeys]);
+
+  const displayedColumns = useMemo(
+    () => columns.filter((c: any) => c.key === "venue_name" || selectedColumnKeys.includes(String(c.key))),
+    [columns, selectedColumnKeys],
+  );
   // 1. 定义分页 state
   const [pagination, setPagination] = useState({
     current: 1,
@@ -121,6 +159,20 @@ const SitePerformanceCard: React.FC<SitePerformanceCardProps> = ({
               value={searchText}
               onChange={(e) => setSearchText(e.target.value)} // 更新搜索文本
             />
+            <Select
+              size="small"
+              mode="multiple"
+              allowClear
+              placeholder="选择显示的列"
+              className="!rounded-button min-w-[220px]"
+              options={columnOptions}
+              value={selectedColumnKeys}
+              maxTagCount="responsive"
+              maxTagPlaceholder={(omitted) => `已选${omitted.length}列`}
+              showSearch
+              optionFilterProp="label"
+              onChange={(vals) => setSelectedColumnKeys(vals as string[])}
+            />
             {/* <Button type="primary" className="!rounded-button whitespace-nowrap" onClick={onFilterAll}>
             全部场地
           </Button>
@@ -167,10 +219,11 @@ const SitePerformanceCard: React.FC<SitePerformanceCardProps> = ({
 
       {/* 主表格 */}
       <Table
-        columns={columns}
+        columns={displayedColumns}
         tableLayout="fixed"
         dataSource={filteredData}
         rowKey="venue_id" // ⚠ 关键：Table 用 venue_id 作为唯一 key
+        scroll={{ x: 1500 }}
         pagination={{
           ...pagination,
           total: filteredData.length,
@@ -222,6 +275,14 @@ const SitePerformanceCard: React.FC<SitePerformanceCardProps> = ({
                 ),
               },
               {
+                title: "净有效率",
+                dataIndex: "ForecastHashEfficiency",
+                key: "ForecastHashEfficiency",
+                align: "center",
+                render: (value: number) => value?.toFixed(2) + "%",
+                sorter: (a, b) => a.ForecastHashEfficiency - b.ForecastHashEfficiency,
+              },
+              {
                 title: "故障率",
                 dataIndex: "FailureRate",
                 key: "FailureRate",
@@ -261,15 +322,31 @@ const SitePerformanceCard: React.FC<SitePerformanceCardProps> = ({
                 render: (value) => <span className="text-yellow-500">{value}%</span>,
               },
             ];
+            // 同步主表列选择，对应隐藏/显示内层明细列
+            const dailyToMainKeyMap: Record<string, string> = {
+              TheoreticalPower: "average_thermal_power",
+              Power24h: "average_power_24h",
+              HashEffectiveRate: "average_hash_effective_rate",
+              ForecastHashEfficiency: "forecast_hash_efficiency",
+              FailureRate: "average_failure_rate",
+              PendingRepairRate: "average_pending_repair_rate",
+              HighTemperatureImpactRate: "average_high_temperature_impact_rate",
+              LimitImpactRate: "average_limit_impact_rate",
+            };
+            const filteredDailyColumns: ColumnsType<DailyData> = dailyColumns.filter((c: any) => {
+              if (c.key === "Date") return true; // 始终显示日期
+              const mapped = dailyToMainKeyMap[String(c.key)] || "";
+              return selectedColumnKeys.includes(mapped);
+            });
             return (
               <div className="p-4 bg-[#FAFBFC]">
                 <Table
-                  columns={dailyColumns}
+                  columns={filteredDailyColumns}
                   dataSource={record.daily_items}
                   pagination={false}
                   size="small"
-                  // rowClassName={(_, index) => (index % 2 === 0 ? "bg-gray-50" : "bg-white")} // ✅ 斑马纹
                   className="custom-inner-table"
+                  scroll={{ x: 1500 }}
                 />
               </div>
             );

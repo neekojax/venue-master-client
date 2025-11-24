@@ -1,7 +1,7 @@
 // 代码已包含 CSS：使用 TailwindCSS , 安装 TailwindCSS 后方可看到布局样式效果
 import React, { useEffect, useState } from "react";
 import { ReloadOutlined } from "@ant-design/icons";
-import { Button, message, Pagination, Select, Spin } from "antd";
+import { Button, message, Pagination, Select, Spin, Switch } from "antd";
 import type { ProgressProps } from "antd/es/progress";
 import LocationCard from "./components/LocationCard";
 import { useSelector, useSettingsStore } from "@/stores"; // 根据实际路径调整
@@ -19,6 +19,7 @@ interface EnvironmentData {
   id: number;
   venue_name: string;
   last_update: string;
+  collection: number;
   environments: LocationData[];
 }
 const App: React.FC = () => {
@@ -40,11 +41,18 @@ const App: React.FC = () => {
     label: name,
     value: name,
   }));
+  // 新增：我的自选开关
+  const [showCollectionOnly, setShowCollectionOnly] = useState<boolean>(
+    () => localStorage.getItem("showCollectionOnly") === "true",
+  );
+  useEffect(() => {
+    localStorage.setItem("showCollectionOnly", String(showCollectionOnly));
+  }, [showCollectionOnly]);
 
   // 依据筛选计算派生数据
-  const filteredVenues = venueData.filter((v) =>
-    v.venue_name.toLowerCase().includes(filterText.trim().toLowerCase()),
-  );
+  const filteredVenues = venueData
+    .filter((v) => v.venue_name.toLowerCase().includes(filterText.trim().toLowerCase()))
+    .filter((v) => !showCollectionOnly || Number(v.collection) === 1);
   const paginatedVenues = filteredVenues.slice((currentPage - 1) * pageSize, currentPage * pageSize);
 
   // 初始化数据
@@ -65,8 +73,13 @@ const App: React.FC = () => {
       // console.log(res);
       const { data } = res;
       if (data && data.length > 0) {
-        // 过滤掉没有数据的场地
-        const validVenue = data.filter((v: any) => v.environments?.length > 0);
+        // 过滤掉没有数据的场地，并为 collection 提供缺省值
+        const validVenue = data
+          .filter((v: any) => v.environments?.length > 0)
+          .map((v: any) => ({
+            ...v,
+            collection: Number(v.collection ?? 0),
+          }));
         setVenueData(validVenue);
         setLoading(false);
       }
@@ -115,23 +128,33 @@ const App: React.FC = () => {
       <main className=" py-6">
         {/* 筛选与分页控制栏 */}
         <div className="flex items-center justify-between mb-4">
-          <Select
-            showSearch
-            size="middle"
-            allowClear
-            placeholder="按场地名筛选"
-            options={venueNameOptions}
-            value={selectedVenueName}
-            onSearch={(val) => setFilterText(val)}
-            onChange={(val) => {
-              setSelectedVenueName(val || undefined);
-              setFilterText((val as string) || "");
-            }}
-            filterOption={(input, option) =>
-              ((option?.label as string) || "").toLowerCase().includes(input.toLowerCase())
-            }
-            style={{ width: 280 }}
-          />
+          <div>
+            <Select
+              showSearch
+              size="middle"
+              allowClear
+              placeholder="按场地名筛选"
+              options={venueNameOptions}
+              value={selectedVenueName}
+              onSearch={(val) => setFilterText(val)}
+              onChange={(val) => {
+                setSelectedVenueName(val || undefined);
+                setFilterText((val as string) || "");
+              }}
+              filterOption={(input, option) =>
+                ((option?.label as string) || "").toLowerCase().includes(input.toLowerCase())
+              }
+              style={{ width: 280 }}
+            />
+            <Switch
+              checked={showCollectionOnly}
+              onChange={(checked) => setShowCollectionOnly(checked)}
+              className="mr-3"
+              style={{ marginLeft: "10px" }}
+            />
+            <span className="ml-1">我的自选</span>
+          </div>
+
           <>
             <div className="text-gray-600 text-sm">
               {/* <span style={{ marginRight: "10px" }}>最后更新: {lastUpdated}</span> */}
@@ -163,9 +186,44 @@ const App: React.FC = () => {
                 <h2 className="text-lg font-semibold text-gray-800 flex items-center">
                   <span className="mr-2">{venue.venue_name}</span>
                   <span className="text-sm text-gray-500">环境数据</span>
+                  {(() => {
+                    const d = new Date(venue.last_update);
+                    const parsed = !isNaN(d.getTime())
+                      ? d
+                      : new Date(String(venue.last_update).replace(/-/g, "/"));
+                    const diffMs = parsed && !isNaN(parsed.getTime()) ? Date.now() - parsed.getTime() : 0;
+                    return diffMs > 3600_000 ? (
+                      <span className="ml-2 inline-flex items-center rounded-full bg-red-100 text-red-700 border border-red-200 px-2 py-0.5 animate-bounce">
+                        设备异常，请检查设备
+                      </span>
+                    ) : null;
+                  })()}
                 </h2>
-                <div className="text-xs text-gray-600 bg-gray-50 border border-gray-200 rounded-full px-3 py-1">
-                  最后更新: <span className="font-mono">{venue.last_update}</span>
+                <div
+                  className={`text-xs ${(() => {
+                    const d = new Date(venue.last_update);
+                    const parsed = !isNaN(d.getTime())
+                      ? d
+                      : new Date(String(venue.last_update).replace(/-/g, "/"));
+                    const diffMs = parsed && !isNaN(parsed.getTime()) ? Date.now() - parsed.getTime() : 0;
+                    return diffMs > 3600_000
+                      ? "text-red-600 bg-red-50 border-red-200 ring-1 ring-red-300 animate-pulse"
+                      : "text-gray-600 bg-gray-50 border-gray-200";
+                  })()} rounded-full px-3 py-1`}
+                >
+                  最后更新:{" "}
+                  <span
+                    className={`font-mono ${(() => {
+                      const d = new Date(venue.last_update);
+                      const parsed = !isNaN(d.getTime())
+                        ? d
+                        : new Date(String(venue.last_update).replace(/-/g, "/"));
+                      const diffMs = parsed && !isNaN(parsed.getTime()) ? Date.now() - parsed.getTime() : 0;
+                      return diffMs > 3600_000 ? "text-red-700" : "";
+                    })()}`}
+                  >
+                    {venue.last_update}
+                  </span>
                 </div>
               </div>
               <div className="grid grid-cols-5 gap-6">

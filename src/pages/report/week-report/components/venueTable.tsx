@@ -19,6 +19,7 @@ interface DailyData {
   FailureRate: number; // 故障率（%）
   PendingRepair: number;
   PendingRepairRate: number; // 待维修率（%）
+  ForecastHashEfficiency: number; // 净修率（%）
 }
 interface DataItem {
   venue_id: number; // 场馆 ID
@@ -32,6 +33,7 @@ interface DataItem {
   average_limit_impact_rate: number; // 平均限电影响率（%）
   average_pending_repair_rate: number; // 平均待维修率（%）
   hash_effective_diff_rate: number; // 算力有效率差异（%）
+  forecast_hash_efficiency: number; // 净修率（%）
   daily_items: DailyData[];
 }
 
@@ -77,11 +79,13 @@ const VenuePage: React.FC<VenueTableProps> = ({ data }) => {
         );
       },
     },
+
     {
       title: "理论算力 (PH/s)",
       dataIndex: "average_thermal_power",
       key: "average_thermal_power",
       align: "center",
+      width: 150,
       render: (value: number) => value?.toFixed(3),
     },
     {
@@ -89,6 +93,7 @@ const VenuePage: React.FC<VenueTableProps> = ({ data }) => {
       dataIndex: "average_power_24h",
       key: "average_power_24h",
       align: "center",
+      width: 150,
       render: (value: number) => value?.toFixed(3),
     },
     {
@@ -96,6 +101,7 @@ const VenuePage: React.FC<VenueTableProps> = ({ data }) => {
       dataIndex: "average_hash_effective_rate",
       key: "average_hash_effective_rate",
       align: "center",
+      width: 150,
       sorter: (a, b) => a.average_hash_effective_rate - b.average_hash_effective_rate,
       render: (value: number, record: { hash_effective_diff_rate?: number }) => {
         const diff = record?.hash_effective_diff_rate ?? 0;
@@ -118,7 +124,17 @@ const VenuePage: React.FC<VenueTableProps> = ({ data }) => {
       },
     },
     {
+      title: "净有效率",
+      dataIndex: "forecast_hash_efficiency",
+      key: "forecast_hash_efficiency",
+      align: "center",
+      width: 150,
+      render: (value: number) => value?.toFixed(2) + "%",
+      sorter: (a, b) => a.forecast_hash_efficiency - b.forecast_hash_efficiency,
+    },
+    {
       title: "故障率",
+      width: 150,
       dataIndex: "average_failure_rate",
       key: "average_failure_rate",
       align: "center",
@@ -134,14 +150,17 @@ const VenuePage: React.FC<VenueTableProps> = ({ data }) => {
     },
     {
       title: "待修率",
+      width: 150,
       dataIndex: "average_pending_repair_rate",
       key: "average_pending_repair_rate",
       align: "center",
       sorter: (a, b) => a.average_pending_repair_rate - b.average_pending_repair_rate,
       render: (value) => <span className="text-orange-500">{value}%</span>,
     },
+
     {
       title: "高温影响率",
+      width: 150,
       dataIndex: "average_high_temperature_impact_rate",
       key: "average_high_temperature_impact_rate",
       align: "center",
@@ -150,6 +169,7 @@ const VenuePage: React.FC<VenueTableProps> = ({ data }) => {
     },
     {
       title: "限电影响率",
+      width: 150,
       dataIndex: "average_limit_impact_rate",
       key: "average_limit_impact_rate",
       align: "center",
