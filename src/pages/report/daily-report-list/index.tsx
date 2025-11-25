@@ -42,6 +42,7 @@ interface DataType {
   effectiveRate24h: number;
   totalMachines: number;
   totalFailures: number;
+  totalFailuresRate: number;
   failures24h: number;
   failureRate24h: number;
   impactRatio: number;
@@ -103,7 +104,6 @@ const App: React.FC = () => {
       align: "right",
       render: (value) => value.toFixed(2),
     },
-
     {
       title: "24小时有效率",
       dataIndex: "effectiveRate24h",
@@ -323,6 +323,7 @@ const App: React.FC = () => {
           limitImpactRate: venue.limitImpactRate || 0,
           highTemperatureRate: venue.highTemperatureRate || 0,
           subAccountStats: venue.subAccountStats || [],
+          totalFailuresRate: venue.totalFailuresRate || 0,
         }));
         // setData(formattedData);
         // 应用默认的日期筛选（最近1个月）
@@ -387,6 +388,7 @@ const App: React.FC = () => {
       totalMachines: "托管台数",
       onlineRatio: "在架有效率",
       totalFailures: "总故障数",
+      totalFailuresRate: "总故障率",
       failures24h: "24小时故障数",
       failureRate24h: "24小时故障率",
       impactRatio: "影响占比",
