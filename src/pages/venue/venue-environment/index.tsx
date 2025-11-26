@@ -18,8 +18,7 @@ interface LocationData {
 interface EnvironmentData {
   id: number;
   venue_name: string;
-  last_update: string; //
-  // is_normal: boolean;// 判断环境整体是否正常：所以environments 更新时间都有问题，则异常
+  last_update: string;
   collection: number;
   environments: LocationData[];
 }
@@ -187,7 +186,7 @@ const App: React.FC = () => {
                 <h2 className="text-lg font-semibold text-gray-800 flex items-center">
                   <span className="mr-2">{venue.venue_name}</span>
                   <span className="text-sm text-gray-500">环境数据</span>
-                  {/* {(() => {
+                  {(() => {
                     const d = new Date(venue.last_update);
                     const parsed = !isNaN(d.getTime())
                       ? d
@@ -198,7 +197,7 @@ const App: React.FC = () => {
                         设备异常，请检查设备
                       </span>
                     ) : null;
-                  })()} */}
+                  })()}
                 </h2>
                 <div
                   className={`text-xs ${(() => {
