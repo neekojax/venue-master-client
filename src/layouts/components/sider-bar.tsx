@@ -232,22 +232,20 @@ export default function SiderBar() {
       }}
     >
       <Link
-        className="font-bold text-xl hover:text-current h-16 flex justify-center items-center gap-2 text-nowrap"
+        className="font-bold text-xl hover:text-current h-20 flex justify-center items-center gap-2 text-nowrap "
         to="/"
       >
-        {/*<PandaIcon className="size-9" />*/}
-        <img
-          src={logo}
-          alt="Logo"
-          className="size-9"
-          style={{ width: "2rem", height: "2rem", borderRadius: "0.5rem" }}
-        />{" "}
-        {/* 替换为 logo */}
-        {collapsed ? null : (
-          <span className="text-gradient-ripple" style={{ fontSize: "0.875rem" }}>
-            运营管理系统
-          </span>
-        )}
+        <div className="h-20 flex items-center px-4 bg-slate-900/40 border-b border-white/10">
+          <div className="size-10 rounded-lg bg-gradient-to-br from-brand-500 to-blue-600 flex items-center justify-center mr-0 ring-1 ring-white/10 relative overflow-hidden shrink-0">
+            <img src={logo} alt="Logo" className="size-10 rounded" />
+          </div>
+          {collapsed ? null : (
+            <div className="leading-none mt-0 ml-2" style={{ marginTop: "12px" }}>
+              <h1 className="text-white font-semibold text-sm leading-none">运营管理系统</h1>
+              <p className="text-[10px] text-slate-400 leading-none">Operation System</p>
+            </div>
+          )}
+        </div>
       </Link>
       {/* <div className="aside"> */}
       <Menu
