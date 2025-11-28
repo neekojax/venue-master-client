@@ -7,6 +7,8 @@ export type LocationCardProps = {
     name: string;
     temperature: number;
     humidity: number;
+    last_update: string;
+    status: string;
   };
   getTemperatureColor: (temp: number) => ProgressProps["strokeColor"];
   getHumidityColor: (humidity: number) => ProgressProps["strokeColor"];
@@ -25,7 +27,7 @@ const LocationCard: React.FC<LocationCardProps> = ({ location, getTemperatureCol
             <i className="fas fa-thermometer-half mr-2 text-red-500"></i>
             温度
           </span>
-          {location.temperature === 0 && (
+          {location.temperature === 0 && location.humidity === 0 && (
             <span
               className="animate-pulse ring-2 ring-red-500 ring-offset-1 shadow-sm"
               style={{
@@ -40,6 +42,26 @@ const LocationCard: React.FC<LocationCardProps> = ({ location, getTemperatureCol
               设备异常，请检查设备
             </span>
           )}
+
+          {location.status === "fault" && (
+            <>
+              <span
+                className="animate-pulse ring-2 ring-red-500 ring-offset-1 shadow-sm"
+                style={{
+                  backgroundColor: "#f5222d",
+                  color: "#fff",
+                  borderRadius: 2,
+                  padding: "0 4px",
+                  fontSize: 8,
+                  marginRight: 4,
+                }}
+              >
+                设备异常，请检查设备<br></br>
+                最后更新时间：{location.last_update}
+              </span>
+            </>
+          )}
+
           <span className="font-medium text-gray-800">{location.temperature}°C</span>
         </div>
         <Progress
@@ -60,7 +82,7 @@ const LocationCard: React.FC<LocationCardProps> = ({ location, getTemperatureCol
             <i className="fas fa-tint mr-2 text-blue-500"></i>
             湿度
           </span>
-          {location.humidity === 0 && (
+          {/* {location.humidity === 0 && (
             <span
               className="animate-pulse ring-2 ring-red-500 ring-offset-1 shadow-sm"
               style={{
@@ -74,7 +96,7 @@ const LocationCard: React.FC<LocationCardProps> = ({ location, getTemperatureCol
             >
               设备异常，请检查设备
             </span>
-          )}
+          )} */}
           <span className="font-medium text-gray-800">{location.humidity}%</span>
         </div>
         <Progress

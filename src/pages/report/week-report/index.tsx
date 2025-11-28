@@ -112,11 +112,11 @@ const App: React.FC = () => {
   const lastWeek = dayjs().subtract(1, "week").startOf("week");
   const [selectedWeek, setSelectedWeek] = useState<dayjs.Dayjs>(lastWeek);
   useEffect(() => {
-    const sunday = selectedWeek.startOf("week").subtract(1, "day"); // 上周日
-    const saturday = sunday.add(6, "day"); // 本周六
+    const monday = selectedWeek.startOf("week"); // 周一
+    const sunday = monday.add(6, "day"); // 周日
 
-    setStartDate(sunday.format("YYYY-MM-DD"));
-    setEndDate(saturday.format("YYYY-MM-DD"));
+    setStartDate(monday.format("YYYY-MM-DD"));
+    setEndDate(sunday.format("YYYY-MM-DD"));
 
     onWeekChange(selectedWeek);
     renderLabel(selectedWeek);
@@ -124,9 +124,9 @@ const App: React.FC = () => {
 
   // 禁止选择未结束的周（本周及未来）
   const disabledDate = (current: dayjs.Dayjs) => {
-    const sunday = current.startOf("week").subtract(1, "day"); // 上周日
-    const saturday = sunday.add(6, "day"); // 本周六 23:59:59
-    return saturday.isAfter(dayjs()); // 如果本周六还没到，则禁用
+    const monday = current.startOf("week"); // 周一
+    const sunday = monday.add(6, "day"); // 周日 23:59:59
+    return sunday.isAfter(dayjs()); // 如果本周日还没到，则禁用
   };
 
   const renderLabel = (date: dayjs.Dayjs | null) => {
@@ -139,8 +139,8 @@ const App: React.FC = () => {
     const firstDayOfMonth = date.startOf("month");
     const monthWeek = date.week() - firstDayOfMonth.week() + 1;
 
-    const sunday = date.startOf("week").subtract(1, "day"); // 上周日
-    const saturday = sunday.add(6, "day"); // 本周六
+    const monday = date.startOf("week"); // 周一
+    const sunday = monday.add(6, "day"); // 周日
 
     return (
       <div className="flex items-center gap-2">
@@ -150,7 +150,7 @@ const App: React.FC = () => {
           {year}年{month}月第{monthWeek}周
         </span>
         <span className="text-gray-500">
-          {sunday.format("YYYY-MM-DD")}~~{saturday.format("YYYY-MM-DD")}
+          {monday.format("YYYY-MM-DD")}~~{sunday.format("YYYY-MM-DD")}
         </span>
       </div>
     );
@@ -266,7 +266,7 @@ const App: React.FC = () => {
           <ImpactCard title="限电影响率排名" data={top5LimitImpactRate} onReload={handleReload} />
         </div>
 
-        <VenueTable data={data} />
+        <VenueTable data={data} startDate={startDate} endDate={endDate} onRequestRefresh={fetchReportData} />
       </Spin>
     </div>
   );

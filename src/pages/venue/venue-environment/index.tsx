@@ -14,6 +14,8 @@ interface LocationData {
   humidity: number;
   location: string;
   temperature: number;
+  last_update: string;
+  status: string;
 }
 interface EnvironmentData {
   id: number;
@@ -186,7 +188,7 @@ const App: React.FC = () => {
                 <h2 className="text-lg font-semibold text-gray-800 flex items-center">
                   <span className="mr-2">{venue.venue_name}</span>
                   <span className="text-sm text-gray-500">环境数据</span>
-                  {(() => {
+                  {/* {(() => {
                     const d = new Date(venue.last_update);
                     const parsed = !isNaN(d.getTime())
                       ? d
@@ -197,7 +199,7 @@ const App: React.FC = () => {
                         设备异常，请检查设备
                       </span>
                     ) : null;
-                  })()}
+                  })()} */}
                 </h2>
                 <div
                   className={`text-xs ${(() => {
@@ -235,6 +237,8 @@ const App: React.FC = () => {
                         name: location.location,
                         temperature: location.temperature,
                         humidity: location.humidity,
+                        last_update: location.last_update,
+                        status: location.status,
                       }}
                       getTemperatureColor={getTemperatureColor}
                       getHumidityColor={getHumidityColor}

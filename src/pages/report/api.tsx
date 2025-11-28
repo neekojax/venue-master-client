@@ -81,3 +81,9 @@ export const fetchDailyVenueHostingStat = async (date: string, venueType: string
 export const fetchSummaryOverview = async (date: string, venueType: string) => {
   return await fetchGet(`/summary/overview/${venueType}/${date}`);
 };
+
+// /report/week/event/:venueType/:date
+// 修改事件原因，时间，进度，跟进情况
+export const fetchWeekEvent = async (data: any) => {
+  return await fetchPost(`/report/week/event`, data);
+};
