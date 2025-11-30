@@ -30,24 +30,19 @@ const MiningBenefitCard: React.FC<MiningPoolCardProps> = ({ poolType }) => {
   const navigate = useNavigate();
 
   const fetchData = async (poolType: string) => {
+    setLoading(true);
     try {
-      const lastProfitStatusResult = await fetchTotalLastProfitStatus(poolType);
+      const [lastProfitStatusResult, suanlilvResult] = await Promise.all([
+        fetchTotalLastProfitStatus(poolType),
+        (async () => {
+          const targetDate = dayjs()
+            .subtract(dayjs().hour() < 10 ? 2 : 1, "day")
+            .format("YYYY-MM-DD");
+          return await fetchHomesuanli(poolType, targetDate);
+        })(),
+      ]);
       setLastProfitStatus(lastProfitStatusResult.data);
-    } catch (err) {
-      // empty
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const fetchSuanlilvData = async (poolType: string) => {
-    try {
-      const targetDate = dayjs()
-        .subtract(dayjs().hour() < 10 ? 2 : 1, "day")
-        .format("YYYY-MM-DD");
-
-      const suanlilv = await fetchHomesuanli(poolType, targetDate);
-      setSuanlilv(suanlilv.data);
+      setSuanlilv(suanlilvResult.data);
     } catch (err) {
       // empty
     } finally {
@@ -57,7 +52,6 @@ const MiningBenefitCard: React.FC<MiningPoolCardProps> = ({ poolType }) => {
 
   useEffect(() => {
     fetchData(poolType);
-    fetchSuanlilvData(poolType);
   }, [poolType]);
 
   if (loading) {

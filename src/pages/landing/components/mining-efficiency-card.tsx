@@ -12,6 +12,7 @@ const MiningEfficiencyCard = ({ poolType }) => {
   const [timeFrame, setTimeFrame] = useState("30");
 
   const fetchData = async (timeFrame: string) => {
+    setLoading(true);
     try {
       const Result = await fetchLastestHashRateEfficiency(poolType, timeFrame);
       const formattedData = Result.data?.map((item: { date: any; efficiency: any }) => ({

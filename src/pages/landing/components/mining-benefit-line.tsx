@@ -12,6 +12,7 @@ const MiningBenefitCard = ({ poolType }) => {
   const [loading, setLoading] = useState<boolean>(true);
 
   const fetchData = async (timeFrame: string) => {
+    setLoading(true);
     try {
       const Result = await fetchMiningBenefitLine(poolType, timeFrame);
       const formattedData = Result.data.map(
