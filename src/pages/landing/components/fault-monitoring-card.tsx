@@ -1,32 +1,51 @@
-import React, { useEffect, useRef } from "react";
-import * as echarts from "echarts";
+import React, { useEffect, useState } from "react";
 import { AlertCircle, AlertTriangle } from "lucide-react";
 import { ReactEcharts } from "@/components/react-echarts";
+import { useSelector, useSettingsStore } from "@/stores";
+
+import { fetchFailureStatistics } from "@/pages/landing/api.ts";
+
+interface FailureData {
+  total_failure_last_7_days: number;
+  yesterday_new_failure: number;
+  failure_rate: number;
+  new_failure_rate: number;
+  date_range: {
+    date: string;
+    failure: number;
+  }[];
+}
 
 const FaultMonitoringCard = () => {
-  // Mock data for 7 days
-  const generateFaultData = () => {
-    const data = [];
-    const today = new Date();
+  const { poolType } = useSettingsStore(useSelector(["poolType"]));
+  const [data, setData] = useState<FailureData | null>(null);
+  const [loading, setLoading] = useState<boolean>(true);
 
-    for (let i = 0; i < 7; i++) {
-      const date = new Date(today);
-      date.setDate(today.getDate() - (6 - i));
-      const faultNum = Math.floor(Math.random() * 6) + 2;
-
-      data.push({
-        date: date.toISOString().split("T")[0].slice(5), // MM-DD
-        faultNum: faultNum,
-      });
+  const fetchData = async () => {
+    try {
+      const result = await fetchFailureStatistics(poolType);
+      setData(result.data);
+    } catch (error) {
+      console.error("Failed to fetch failure stats:", error);
+    } finally {
+      setLoading(false);
     }
-    return data;
   };
 
-  const data = generateFaultData();
+  useEffect(() => {
+    fetchData();
+  }, [poolType]);
 
   const getOption = () => {
-    const dates = data.map((item) => item.date);
-    const faults = data.map((item) => item.faultNum);
+    if (!data?.date_range) return {};
+
+    // Sort by date from oldest to newest
+    const sortedData = [...data.date_range].sort(
+      (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime(),
+    );
+
+    const dates = sortedData.map((item) => item.date.slice(5)); // MM-DD
+    const faults = sortedData.map((item) => item.failure);
 
     return {
       grid: {
@@ -41,7 +60,7 @@ const FaultMonitoringCard = () => {
         data: dates,
         axisLine: { show: false },
         axisTick: { show: false },
-        axisLabel: { show: false }, // Recharts example didn't show x-axis labels in the chart area
+        axisLabel: { show: false },
       },
       yAxis: {
         type: "value",
@@ -53,8 +72,9 @@ const FaultMonitoringCard = () => {
           data: faults.map((val) => ({
             value: val,
             itemStyle: {
-              color: val > 5 ? "#ef4444" : "#cbd5e1",
+              color: val > 5 ? "#ef4444" : "#ef4444", // Keep consistent red for faults
               borderRadius: [4, 4, 4, 4],
+              opacity: val === 0 ? 0.3 : 1,
             },
             label: {
               show: true,
@@ -71,6 +91,24 @@ const FaultMonitoringCard = () => {
       ],
     };
   };
+
+  if (loading) {
+    return (
+      <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 h-full flex flex-col animate-pulse">
+        <div className="flex justify-between items-center mb-6">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 bg-slate-100 rounded-lg"></div>
+            <div className="w-24 h-6 bg-slate-100 rounded"></div>
+          </div>
+        </div>
+        <div className="flex gap-4 mb-6">
+          <div className="flex-1 h-24 bg-slate-100 rounded-2xl"></div>
+          <div className="flex-1 h-24 bg-slate-100 rounded-2xl"></div>
+        </div>
+        <div className="flex-1 bg-slate-100 rounded-xl"></div>
+      </div>
+    );
+  }
 
   return (
     <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 h-full flex flex-col hover:shadow-md transition-shadow duration-300">
@@ -92,17 +130,23 @@ const FaultMonitoringCard = () => {
           <div className="flex-1 bg-slate-50/80 rounded-2xl p-4 border border-slate-100 flex flex-col justify-between hover:border-slate-300 transition-colors">
             <div className="flex items-center gap-2 mb-2 text-slate-500">
               <AlertCircle size={14} />
-              <span className="text-xs font-semibold uppercase">今日总故障数</span>
+              <span className="text-xs font-semibold uppercase">昨日总故障数</span>
             </div>
-            <div className="text-3xl font-bold text-slate-900">12</div>
+            <div className="flex justify-between items-end">
+              <div className="text-3xl font-bold text-slate-900">{data?.total_failure_last_7_days ?? 0}</div>
+              <div className="text-xs font-medium text-slate-500 mb-1">{data?.failure_rate ?? 0}%</div>
+            </div>
           </div>
 
           <div className="flex-1 bg-red-50/50 rounded-2xl p-4 border border-red-100 flex flex-col justify-between hover:border-red-200 transition-colors">
             <div className="flex items-center gap-2 mb-2 text-red-600">
               <AlertTriangle size={14} />
-              <span className="text-xs font-semibold uppercase">今日新增故障数</span>
+              <span className="text-xs font-semibold uppercase">昨日新增故障数</span>
             </div>
-            <div className="text-3xl font-bold text-red-600">3</div>
+            <div className="flex justify-between items-end">
+              <div className="text-3xl font-bold text-red-600">{data?.yesterday_new_failure ?? 0}</div>
+              <div className="text-xs font-medium text-red-500 mb-1">{data?.new_failure_rate ?? 0}%</div>
+            </div>
           </div>
         </div>
 

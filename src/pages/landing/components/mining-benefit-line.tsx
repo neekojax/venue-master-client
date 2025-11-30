@@ -37,7 +37,7 @@ const MiningBenefitCard = ({ poolType }) => {
 
   useEffect(() => {
     fetchData(timeFrame);
-  }, [poolType]);
+  }, [poolType, timeFrame]);
 
   const getOption = () => {
     // @ts-ignore
