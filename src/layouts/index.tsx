@@ -1,120 +1,49 @@
 import { useEffect, useState } from "react";
 import { useMediaQuery } from "react-responsive";
-import { MenuFoldOutlined, MenuUnfoldOutlined } from "@ant-design/icons";
-import { Button, Flex, Layout } from "antd";
 import { AppHelmet } from "@/components/helmet";
-import Breadcrumb from "./components/bread-crumb";
+import Header from "./components/header";
 import Content from "./components/main-content";
-import NetworkEfficiencyCard from "./components/NetworkEfficiencyCard.tsx";
 import SiderBar from "./components/sider-bar";
-import UserAvatar from "./components/user-avatar";
 import useAuthRedirect from "@/hooks/useAuthRedirect.ts";
 import { setCollapsed, useSelector, useSettingsStore } from "@/stores";
 
-import PoolTypeSelect from "@/layouts/components/pool-type-select.tsx";
-
 export default function MainLayout() {
   useAuthRedirect();
-  // const [suanlilv, setSuanlilv] = useState<number>(0);
-  const [suanlilv, setSuanlilv] = useState<any>({});
   const { collapsed } = useSettingsStore(useSelector(["collapsed"]));
-  const [isSidebarVisible, setIsSidebarVisible] = useState(false); // 状态管理 SiderBar 显示与否
+  const [isSidebarVisible, setIsSidebarVisible] = useState(false);
   const isMobile = useMediaQuery({ query: "(max-width: 768px)" });
 
   useEffect(() => {
     if (isMobile) {
-      setIsSidebarVisible(false); // 手机端默认关闭 SiderBar
+      setIsSidebarVisible(false);
+      if (!collapsed) setCollapsed(true);
     } else {
-      setIsSidebarVisible(true); // 电脑端默认显示 SiderBar
+      setIsSidebarVisible(true);
     }
   }, [isMobile]);
-
-  // 设置header阴影
-  useEffect(() => {
-    // 初始从 localStorage 读取
-    const localData = localStorage.getItem("suanlilv");
-    if (localData) {
-      setSuanlilv(JSON.parse(localData));
-    }
-
-    const handleScroll = () => {
-      const scrollTop = document.scrollingElement?.scrollTop || document.body.scrollTop;
-      const className = "shadow-[0_6px_10px_-10px_rgba(0,0,0,0.3)]";
-      if (scrollTop > 0) {
-        document.getElementById("app-header-bar")?.classList.add(className);
-      } else {
-        document.getElementById("app-header-bar")?.classList.remove(className);
-      }
-    };
-    window.addEventListener("scroll", handleScroll);
-    return () => {
-      window.removeEventListener("scroll", handleScroll);
-    };
-  }, []);
 
   return (
     <>
       <AppHelmet />
-      <Layout>
-        {localStorage.getItem("user_access_level") != "special" && isSidebarVisible && <SiderBar />}{" "}
-        {/* 根据状态显示 SiderBar */}
-        <Layout>
-          <Layout.Header
-            id="app-header-bar"
-            className="flex items-center sticky top-0 z-[999] pl-0 bg-white dark:bg-[#001529]"
-          >
-            {isMobile ? (
-              // 手机端按钮
-              <Button
-                type="text"
-                icon={isSidebarVisible ? <MenuUnfoldOutlined /> : <MenuFoldOutlined />}
-                onClick={() => setIsSidebarVisible(!isSidebarVisible)} // 切换 SiderBar 状态
-                className="mr-2"
-              />
-            ) : (
-              // 电脑端按钮
-              <Button
-                type="text"
-                icon={collapsed ? <MenuUnfoldOutlined /> : <MenuFoldOutlined />}
-                onClick={() => {
-                  setCollapsed(!collapsed); // 切换 collapsed 状态
-                }}
-                className="mr-2"
-              />
-            )}
-            {localStorage.getItem("user_access_level") != "special" && <Breadcrumb />}
-            <Flex gap={12} className="ml-auto items-center">
-              {/*<CustomSkin />*/}
-              {/*<ThemeSwitch />*/}
-              {/* <NetworkEfficiencyCard value={12345} /> */}
-              {localStorage.getItem("user_access_level") != "special" && (
-                <>
-                  <NetworkEfficiencyCard
-                    title="昨日全网产出效率："
-                    value={suanlilv?.BTCNetworkPerEPower}
-                    unit="BTC/EH"
-                  />
-                  <PoolTypeSelect />
-                </>
-              )}
-              <UserAvatar />
-            </Flex>
-          </Layout.Header>
-          <Content />
-          {/* <div v-show="">
-            检测到系统有新版本发布，请立即刷新页面！
-            <Button
-              type="primary"
-              onClick={() => {
-                location.reload();
+      <div className="min-h-screen bg-[#f8fafc]">
+        {localStorage.getItem("user_access_level") != "special" && (
+          <div className={`${isMobile && !collapsed ? "block" : "hidden"} md:block`}>
+            <SiderBar />
+          </div>
+        )}
 
-              }}
-            >
-              立即刷新
-            </Button>
-          </div> */}
-        </Layout>
-      </Layout>
+        <div
+          className={`flex-1 flex flex-col min-w-0 transition-all duration-300 ${
+            localStorage.getItem("user_access_level") == "special" ? "" : collapsed ? "md:ml-20" : "md:ml-64"
+          }`}
+        >
+          <Header collapsed={collapsed} setCollapsed={setCollapsed} />
+
+          <main className="flex-1 overflow-y-auto">
+            <Content />
+          </main>
+        </div>
+      </div>
     </>
   );
 }

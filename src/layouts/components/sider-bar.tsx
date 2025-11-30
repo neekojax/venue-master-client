@@ -1,96 +1,81 @@
-import { useEffect, useRef, useState } from "react";
-import { FaRegChartBar } from "react-icons/fa";
-import { MdMonitorHeart } from "react-icons/md";
-import { SiNginxproxymanager } from "react-icons/si";
+import { useEffect, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { HomeOutlined, ProductOutlined } from "@ant-design/icons"; //<RadiusSettingOutlined />
-import { Layout, Menu, type MenuProps } from "antd";
+import {
+  Activity,
+  ChevronDown,
+  ChevronRight,
+  FileText,
+  Home,
+  LayoutDashboard,
+  MapPin,
+  Server,
+  Settings,
+  Zap,
+} from "lucide-react";
 import { useTheme } from "@/components/theme-provider";
-import logo from "../../../public/logo_middle.png";
+const logo = "/logo_middle.png";
 import { ROUTE_PATHS } from "@/constants/common";
 import { useSelector, useSettingsStore } from "@/stores";
-
-// 递归函数，找到匹配的菜单项
-const findSelectedKeys = (items: MenuProps["items"], pathname: string, path: string[] = []) => {
-  const selectedKeys: string[] = [];
-  let openKeys: string[] = [];
-
-  const travel = (items: MenuProps["items"], pathname: string, path: string[]) => {
-    for (const item of items!) {
-      if (item!.key === pathname) {
-        selectedKeys.push(item!.key);
-        openKeys = [...path];
-        return;
-      }
-      if ((item as any).children) {
-        path.push(item!.key as string);
-        travel((item as any).children, pathname, path);
-        path.pop();
-      }
-    }
-  };
-
-  travel(items, pathname, path);
-  return { selectedKeys, openKeys };
-};
 
 const SiderItems = () => {
   const showNDPoolType = useSettingsStore((state) => state.poolType);
   return [
     {
-      icon: <HomeOutlined />,
-      label: <Link to={ROUTE_PATHS.landing}>首页</Link>,
+      icon: <Home size={20} />,
+      label: "首页",
       key: ROUTE_PATHS.landing,
+      path: ROUTE_PATHS.landing,
     },
     {
-      icon: <MdMonitorHeart />,
+      icon: <Activity size={20} />,
       label: "算力监控",
       key: ROUTE_PATHS.mining,
       children: [
         {
           key: ROUTE_PATHS.miningHashRate,
-          label: <Link to={ROUTE_PATHS.miningHashRate}>实时算力</Link>,
+          label: "实时算力",
+          path: ROUTE_PATHS.miningHashRate,
         },
         {
           key: ROUTE_PATHS.miningSetting,
-          label: <Link to={ROUTE_PATHS.miningSetting}>矿池设置</Link>,
+          label: "矿池设置",
+          path: ROUTE_PATHS.miningSetting,
         },
       ],
     },
     {
-      icon: <SiNginxproxymanager />,
+      icon: <MapPin size={20} />,
       label: "场地管理",
       key: ROUTE_PATHS.venue,
       children: [
-        // {
-        //   key: ROUTE_PATHS.miningSiteData,
-        //   label: <Link to={ROUTE_PATHS.miningSiteData}>运行指标</Link>,
-        // },
         ...(showNDPoolType == "CANG"
           ? [
               {
                 key: ROUTE_PATHS.venueEnvironment,
-                label: <Link to={ROUTE_PATHS.venueEnvironment}>场地环境</Link>,
+                label: "场地环境",
+                path: ROUTE_PATHS.venueEnvironment,
               },
               {
                 key: ROUTE_PATHS.venueWeather,
-                label: <Link to={ROUTE_PATHS.venueWeather}>场地天气</Link>,
+                label: "场地天气",
+                path: ROUTE_PATHS.venueWeather,
               },
             ]
           : []),
-
         {
           key: ROUTE_PATHS.eventLog,
-          label: <Link to={ROUTE_PATHS.eventLog}>事件日志</Link>,
+          label: "事件日志",
+          path: ROUTE_PATHS.eventLog,
         },
         {
           key: ROUTE_PATHS.venueSetting,
-          label: <Link to={ROUTE_PATHS.venueSetting}>场地设置</Link>,
+          label: "场地设置",
+          path: ROUTE_PATHS.venueSetting,
         },
       ],
     },
     {
-      icon: <FaRegChartBar />,
+      icon: <FileText size={20} />,
       label: "报表",
       key: ROUTE_PATHS.report,
       children: [
@@ -98,7 +83,8 @@ const SiderItems = () => {
           ? [
               {
                 key: ROUTE_PATHS.dataSummary,
-                label: <Link to={ROUTE_PATHS.dataSummary}>数据概览</Link>,
+                label: "数据概览",
+                path: ROUTE_PATHS.dataSummary,
               },
             ]
           : []),
@@ -106,162 +92,175 @@ const SiderItems = () => {
           ? [
               {
                 key: ROUTE_PATHS.dailyReport,
-                label: <Link to={ROUTE_PATHS.dailyReport}>运营日报</Link>,
+                label: "运营日报",
+                path: ROUTE_PATHS.dailyReport,
               },
             ]
           : []),
-        ...(showNDPoolType !== "CANG" // 日报菜单项，仅在 type === 'ND' 时显示
+        ...(showNDPoolType !== "CANG"
           ? [
               {
                 key: ROUTE_PATHS.subAccountDailyReport,
-                label: <Link to={ROUTE_PATHS.subAccountDailyReport}>账户日报</Link>,
+                label: "账户日报",
+                path: ROUTE_PATHS.subAccountDailyReport,
               },
             ]
           : []),
         {
           key: ROUTE_PATHS.weekReport,
-          label: <Link to={ROUTE_PATHS.weekReport}>运营周报</Link>,
+          label: "运营周报",
+          path: ROUTE_PATHS.weekReport,
         },
       ].filter(Boolean),
     },
     {
-      icon: <ProductOutlined />,
+      icon: <Zap size={20} />,
       label: "电费监控",
       key: ROUTE_PATHS.custodyMenu,
       children: [
-        // {
-        //   key: ROUTE_PATHS.setting,
-        //   label: <Link to={ROUTE_PATHS.setting}>基础设置</Link>,
-        // },
         {
           key: ROUTE_PATHS.statistics,
-          label: <Link to={ROUTE_PATHS.statistics}>费用统计</Link>,
+          label: "费用统计",
+          path: ROUTE_PATHS.statistics,
         },
         ...(showNDPoolType == "CANG"
           ? [
               {
                 key: ROUTE_PATHS.venueBill,
-                label: <Link to={ROUTE_PATHS.venueBill}>电费参数</Link>,
+                label: "电费参数",
+                path: ROUTE_PATHS.venueBill,
               },
             ]
           : []),
-        // {
-        //   key: ROUTE_PATHS.dailyAveragePrice,
-        //   label: <Link to={ROUTE_PATHS.dailyAveragePrice}>BTC均价</Link>,
-        // },
       ],
     },
-    // {
-    //   icon: <BiLoaderCircle />,
-    //   label: "电网数据",
-    //   key: ROUTE_PATHS.electric,
-    //   children: [
-    //     {
-    //       key: ROUTE_PATHS.electricLimit,
-    //       label: <Link to={ROUTE_PATHS.electricLimit}>限电记录</Link>,
-    //     },
-    //     {
-    //       key: ROUTE_PATHS.electricAverage,
-    //       label: <Link to={ROUTE_PATHS.electricAverage}>平均电价</Link>,
-    //     },
-    //     {
-    //       key: ROUTE_PATHS.electricBasic,
-    //       label: <Link to={ROUTE_PATHS.electricBasic}>基础数据</Link>,
-    //     },
-    //   ].filter(Boolean), // 移除 null 值，避免报错,
-    // },
-    // {
-    //   icon: <MenuOutlined />,
-    //   label: "收益管理",
-    //   key: ROUTE_PATHS.nestMenu,
-    //   children: [
-    //     {
-    //       key: ROUTE_PATHS.link,
-    //       label: <Link to={ROUTE_PATHS.link}>观察者链接</Link>,
-    //     },
-    //     {
-    //       key: ROUTE_PATHS.report,
-    //       label: <Link to={ROUTE_PATHS.report}>收益记录</Link>,
-    //     },
-    //   ],
-    // },
-    // {
-    //   icon: <RadiusSettingOutlined />,
-    //   label: <Link to={ROUTE_PATHS.base}>模版管理</Link>,
-    //   key: ROUTE_PATHS.base,
-    // },
   ];
 };
 
 export default function SiderBar() {
   const location = useLocation();
   const navigate = useNavigate();
-
-  const firstRenderRef = useRef(true);
-
-  const [selectedKeys, setSelectedKeys] = useState<string[]>([]);
-  const [openKeys, setOpenKeys] = useState<string[]>([]);
-
   const { collapsed } = useSettingsStore(useSelector(["collapsed"]));
+  const menuItems = SiderItems();
 
-  const { isDarkMode } = useTheme();
+  const [openMenus, setOpenMenus] = useState<Record<string, boolean>>({});
 
-  const itemList: any = SiderItems();
-
+  // Initialize open menus based on current path
   useEffect(() => {
-    if (location.pathname === "/") return;
-    const { selectedKeys, openKeys } = findSelectedKeys(itemList, location.pathname);
-    setSelectedKeys(selectedKeys);
-    // 首次渲染时，设置默认值
-    if (firstRenderRef.current) {
-      setOpenKeys(openKeys);
-    }
-    // 将首次渲染标记设置为false
-    firstRenderRef.current = false;
+    const newOpenMenus: Record<string, boolean> = {};
+    menuItems.forEach((item) => {
+      if (item.children) {
+        const hasActiveChild = item.children.some(
+          (child: any) => location.pathname === child.path || location.pathname.startsWith(child.path),
+        );
+        if (hasActiveChild) {
+          newOpenMenus[item.label as string] = true;
+        }
+      }
+    });
+    setOpenMenus((prev) => ({ ...prev, ...newOpenMenus }));
   }, [location.pathname]);
 
+  const toggleMenu = (label: string) => {
+    setOpenMenus((prev) => ({ ...prev, [label]: !prev[label] }));
+  };
+
+  const handleNavigate = (path: string) => {
+    navigate(path);
+  };
+
   return (
-    <Layout.Sider
-      trigger={null}
-      collapsible
-      collapsed={collapsed}
-      theme={isDarkMode ? "dark" : "light"}
-      className="h-screen overflow-auto !sticky top-0 left-0 start-0"
-      style={{
-        width: "265px !important",
-      }}
+    <aside
+      className={`bg-black text-slate-400 flex flex-col h-screen fixed left-0 top-0 z-50 shadow-xl font-sans transition-all duration-300 ${
+        collapsed ? "w-20" : "w-64"
+      }`}
     >
-      <Link
-        className="font-bold text-xl hover:text-current h-20 flex justify-center items-center gap-2 text-nowrap "
-        to="/"
+      <div
+        className={`h-20 flex items-center ${collapsed ? "justify-center px-0" : "px-6"} bg-slate-900/50 border-b border-white/10 transition-all duration-300`}
       >
-        <div className="h-20 flex items-center px-4 bg-slate-900/40 border-b border-white/10">
-          <div className="size-10 rounded-lg bg-gradient-to-br from-brand-500 to-blue-600 flex items-center justify-center mr-0 ring-1 ring-white/10 relative overflow-hidden shrink-0">
-            <img src={logo} alt="Logo" className="size-10 rounded" />
-          </div>
-          {collapsed ? null : (
-            <div className="leading-none mt-0 ml-2" style={{ marginTop: "12px" }}>
-              <h1 className="text-white font-semibold text-sm leading-none">运营管理系统</h1>
-              <p className="text-[10px] text-slate-400 leading-none">Operation System</p>
-            </div>
-          )}
+        <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl flex items-center justify-center shadow-lg shadow-blue-500/20 ring-1 ring-white/10 relative overflow-hidden group shrink-0">
+          <div className="absolute inset-0 bg-white/10 opacity-0 group-hover:opacity-20 transition-opacity duration-300"></div>
+          <img src={logo} alt="Logo" className="w-full h-full object-cover rounded-xl" />
         </div>
-      </Link>
-      {/* <div className="aside"> */}
-      <Menu
-        theme={isDarkMode ? "dark" : "light"}
-        mode="inline"
-        items={itemList}
-        selectedKeys={selectedKeys}
-        onSelect={({ selectedKeys }) => {
-          setSelectedKeys(selectedKeys);
-        }}
-        openKeys={openKeys}
-        onOpenChange={(openKeys) => setOpenKeys(openKeys)}
-        className="!border-e-0"
-        onClick={({ key }) => navigate(key)} // ✅ 跳转页面
-      />
-      {/* </div> */}
-    </Layout.Sider>
+        {!collapsed && (
+          <div className="ml-3 overflow-hidden whitespace-nowrap">
+            <h1 className="font-bold text-white tracking-wide text-sm leading-tight">运营管理系统</h1>
+            <p className="text-[10px] text-slate-500 font-medium uppercase tracking-wider mt-0.5">
+              Operation System
+            </p>
+          </div>
+        )}
+      </div>
+
+      <div className="flex-1 overflow-y-auto custom-scrollbar py-6">
+        <nav className="space-y-1.5 px-3">
+          {menuItems.map((item) => (
+            <div key={item.key}>
+              {item.children && item.children.length > 0 ? (
+                <div>
+                  <button
+                    onClick={() => !collapsed && toggleMenu(item.label as string)}
+                    className={`w-full flex items-center justify-between px-4 py-3 rounded-xl transition-all duration-200 ${
+                      openMenus[item.label as string]
+                        ? "bg-slate-900 text-white"
+                        : "hover:bg-slate-900 hover:text-white"
+                    } ${collapsed ? "justify-center px-2" : ""}`}
+                    title={collapsed ? (item.label as string) : ""}
+                  >
+                    <div className={`flex items-center gap-3 ${collapsed ? "justify-center w-full" : ""}`}>
+                      {item.icon}
+                      {!collapsed && <span className="text-sm font-medium">{item.label}</span>}
+                    </div>
+                    {!collapsed &&
+                      (openMenus[item.label as string] ? (
+                        <ChevronDown size={14} />
+                      ) : (
+                        <ChevronRight size={14} />
+                      ))}
+                  </button>
+
+                  {!collapsed && openMenus[item.label as string] && (
+                    <div className="mt-1 mb-2 ml-4 space-y-1 pl-4 border-l border-slate-800">
+                      {item.children.map((sub: any) => (
+                        <button
+                          key={sub.key}
+                          onClick={() => handleNavigate(sub.path)}
+                          className={`w-full text-left px-4 py-2 text-sm rounded-lg transition-all ${
+                            location.pathname === sub.path
+                              ? "text-white bg-slate-800"
+                              : "text-slate-500 hover:text-white hover:bg-slate-900/50"
+                          }`}
+                        >
+                          {sub.label}
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              ) : (
+                <button
+                  onClick={() => handleNavigate(item.path!)}
+                  className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 ${
+                    location.pathname === item.path
+                      ? "bg-blue-600 text-white shadow-lg shadow-blue-500/25"
+                      : "hover:bg-slate-900 hover:text-white"
+                  } ${collapsed ? "justify-center px-2" : ""}`}
+                  title={collapsed ? (item.label as string) : ""}
+                >
+                  {item.icon}
+                  {!collapsed && <span className="text-sm font-medium">{item.label}</span>}
+                </button>
+              )}
+            </div>
+          ))}
+        </nav>
+      </div>
+
+      {!collapsed && (
+        <div className="p-4 bg-black border-t border-white/5 text-xs text-center text-slate-600">
+          v2.5.0 &copy; 2024 运营管理系统
+        </div>
+      )}
+    </aside>
   );
 }
