@@ -361,7 +361,7 @@ const VenuePage: React.FC<VenueTableProps> = ({ data, startDate, endDate, onRequ
       key: "average_pending_repair_rate",
       align: "center",
       sorter: (a, b) => a.average_pending_repair_rate - b.average_pending_repair_rate,
-      render: (value) => <span className="text-orange-500">{value}%</span>,
+      render: (value) => <span>{value}%</span>,
     },
     {
       title: "净故障率",
@@ -441,15 +441,31 @@ const VenuePage: React.FC<VenueTableProps> = ({ data, startDate, endDate, onRequ
         const safe = sanitizeHTML(decodeHTML(text));
         if (!safe) return <span>-</span>;
         return (
-          <Tooltip title={<div dangerouslySetInnerHTML={{ __html: safe }} />} placement="top">
+          <Tooltip
+            title={
+              <div
+                className="text-[12px] content-html"
+                style={{
+                  width: 200,
+                  whiteSpace: "normal",
+                  overflowWrap: "anywhere",
+                  wordBreak: "break-word",
+                }}
+                dangerouslySetInnerHTML={{ __html: safe }}
+              />
+            }
+            placement="top"
+          >
             <div
+              className="text-[12px] content-html"
               style={{
                 display: "inline-block",
-                maxWidth: "100%",
-                overflow: "hidden",
-                textOverflow: "ellipsis",
-                whiteSpace: "nowrap",
+                width: 200,
+                whiteSpace: "normal",
+                overflowWrap: "anywhere",
+                wordBreak: "break-word",
                 verticalAlign: "middle",
+                textAlign: "left",
               }}
               dangerouslySetInnerHTML={{ __html: safe }}
             />
@@ -467,15 +483,31 @@ const VenuePage: React.FC<VenueTableProps> = ({ data, startDate, endDate, onRequ
         const safe = sanitizeHTML(decodeHTML(text));
         if (!safe) return <span>-</span>;
         return (
-          <Tooltip title={<div dangerouslySetInnerHTML={{ __html: safe }} />} placement="top">
+          <Tooltip
+            title={
+              <div
+                className="text-[12px] content-html"
+                style={{
+                  width: 200,
+                  whiteSpace: "normal",
+                  overflowWrap: "anywhere",
+                  wordBreak: "break-word",
+                }}
+                dangerouslySetInnerHTML={{ __html: safe }}
+              />
+            }
+            placement="top"
+          >
             <div
+              className="text-[12px] content-html"
               style={{
                 display: "inline-block",
-                maxWidth: "100%",
-                overflow: "hidden",
-                textOverflow: "ellipsis",
-                whiteSpace: "nowrap",
+                width: 200,
+                whiteSpace: "normal",
+                overflowWrap: "anywhere",
+                wordBreak: "break-word",
                 verticalAlign: "middle",
+                textAlign: "left",
               }}
               dangerouslySetInnerHTML={{ __html: safe }}
             />
@@ -488,21 +520,36 @@ const VenuePage: React.FC<VenueTableProps> = ({ data, startDate, endDate, onRequ
       width: 150,
       dataIndex: "progress",
       key: "progress",
-      align: "center",
+      align: "left",
       render: (text: string | undefined) => {
         const safe = sanitizeHTML(decodeHTML(text));
         if (!safe) return <span>-</span>;
         return (
-          <Tooltip title={<div dangerouslySetInnerHTML={{ __html: safe }} />} placement="top">
+          <Tooltip
+            title={
+              <div
+                className="text-[12px] content-html"
+                style={{
+                  width: 200,
+                  whiteSpace: "normal",
+                  overflowWrap: "anywhere",
+                  wordBreak: "break-word",
+                }}
+                dangerouslySetInnerHTML={{ __html: safe }}
+              />
+            }
+            placement="top"
+          >
             <div
+              className="text-[12px] content-html"
               style={{
                 display: "inline-block",
-                maxWidth: "100%",
-                overflow: "hidden",
-                textOverflow: "ellipsis",
-                whiteSpace: "nowrap",
+                width: 200,
+                whiteSpace: "normal",
+                overflowWrap: "anywhere",
+                wordBreak: "break-word",
                 verticalAlign: "middle",
-                textAlign: "center",
+                textAlign: "left",
               }}
               dangerouslySetInnerHTML={{ __html: safe }}
             />

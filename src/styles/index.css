@@ -116,3 +116,22 @@ body,html{
 .select-placeholder-12 .ant-select-selection-placeholder {
   font-size: 12px !important;
 }
+
+/* Rich content list defaults: ensure ul/ol/li markers show inside container width */
+.content-html ul {
+  list-style: disc;
+  list-style-position: inside;
+  padding-left: 0;
+  margin: 0;
+}
+.content-html ol {
+  list-style: decimal;
+  list-style-position: inside;
+  padding-left: 0;
+  margin: 0;
+}
+.content-html li {
+  white-space: normal;
+  word-break: break-word;
+  overflow-wrap: anywhere;
+}
