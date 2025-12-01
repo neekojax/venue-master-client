@@ -117,3 +117,20 @@ async function getHtmlBuildTime(): Promise<string | null> {
     return null;
   }
 }
+
+// 在开发环境下过滤不影响功能的库级警告（例如 findDOMNode deprecated）
+export function setupDevWarningFilter() {
+  if (import.meta.env.DEV) {
+    const originalError = console.error;
+    console.error = (...args: any[]) => {
+      const msg = args[0];
+      if (typeof msg === "string") {
+        // 过滤 React 关于 findDOMNode 的废弃警告
+        if (msg.includes("findDOMNode is deprecated")) {
+          return; // 忽略该条警告
+        }
+      }
+      originalError(...args);
+    };
+  }
+}

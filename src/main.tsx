@@ -4,7 +4,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import { ConfigProvider } from "antd";
 import { ErrorBoundary } from "./components/error-boundary";
-import { setupAppVersionNotification } from "./plugins/app";
+import { setupAppVersionNotification, setupDevWarningFilter } from "./plugins/app";
 import App from "./App";
 
 import "@fortawesome/fontawesome-free/css/all.min.css";
@@ -21,6 +21,8 @@ import "./styles/extend.css";
 // setupGlobalErrorHandler();
 // ✅ 在应用渲染前执行版本检查
 setupAppVersionNotification();
+// ✅ 开发环境下过滤无害的库级警告（例如 findDOMNode deprecated）
+setupDevWarningFilter();
 
 const queryClient = new QueryClient({
   defaultOptions: {

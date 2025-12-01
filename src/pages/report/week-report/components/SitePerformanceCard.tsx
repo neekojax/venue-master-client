@@ -286,7 +286,7 @@ const SitePerformanceCard: React.FC<SitePerformanceCardProps> = ({
         tableLayout="fixed"
         dataSource={filteredData}
         rowKey="venue_id" // ⚠ 关键：Table 用 venue_id 作为唯一 key
-        scroll={{ x: 1500 }}
+        scroll={{ x: "max-content" }}
         pagination={{
           ...pagination,
           total: filteredData.length,

@@ -1,7 +1,85 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
+import ReactQuill from "react-quill";
+import DOMPurify from "dompurify";
+
+import "react-quill/dist/quill.snow.css";
+
+// 仅在展示端保留有限的样式属性，避免丢失常见格式（颜色/背景/对齐/字号）
+const sanitizeHTML = (html?: string) =>
+  DOMPurify.sanitize(html || "", {
+    USE_PROFILES: { html: true },
+    // 扩展允许的属性以支持图片、视频等常见内容
+    ALLOWED_ATTR: [
+      "class",
+      "style",
+      "href",
+      "target",
+      "rel",
+      "align",
+      "src",
+      "alt",
+      "title",
+      "width",
+      "height",
+      "controls",
+      "frameborder",
+      "allow",
+      "allowfullscreen",
+      "referrerpolicy",
+    ],
+    // 扩展允许的标签，尽量覆盖常见富文本场景
+    ALLOWED_TAGS: [
+      "p",
+      "br",
+      "span",
+      "strong",
+      "em",
+      "u",
+      "s",
+      "a",
+      "ul",
+      "ol",
+      "li",
+      "blockquote",
+      "code",
+      "pre",
+      "h1",
+      "h2",
+      "h3",
+      "div",
+      "img",
+      "video",
+      "sub",
+      "sup",
+      "table",
+      "thead",
+      "tbody",
+      "tr",
+      "th",
+      "td",
+    ],
+  });
+
+// 将后端可能存储的 HTML 实体（如 &lt;br/&gt;）还原为真实标签
+// const decodeHTML = (html?: string) => {
+//   if (!html) return "";
+//   console.log("html11", html);
+//   const el = document.createElement("textarea");
+//   el.innerHTML = html;
+//   return el.value;
+// };
+
+// const decodeHTML = (html?: string) => html || "";
+const decodeHTML = (html?: string) => {
+  if (!html) return "";
+  const el = document.createElement("textarea");
+  el.innerHTML = html;
+  return el.value;
+};
+
 import { Link } from "react-router-dom";
 import { EditOutlined } from "@ant-design/icons";
-import { Button, Form, Input, message, Modal, Tag, Tooltip } from "antd";
+import { Button, Form, message, Modal, Tag, Tooltip } from "antd";
 import type { ColumnsType } from "antd/es/table";
 import SitePerformanceCard from "./SitePerformanceCard";
 import type { DataItem } from "./types";
@@ -17,6 +95,83 @@ interface VenueTableProps {
   onRequestRefresh?: () => void; // 通知主界面刷新数据
 }
 
+const formats = [
+  "header",
+  "bold",
+  "italic",
+  "underline",
+  "strike",
+  "blockquote",
+  "list",
+  "bullet",
+  "indent",
+  "align",
+  "link",
+  "image",
+  "color",
+  "background",
+];
+
+// 富文本编辑器（React-Quill）：保留格式、支持常用工具栏与行高设置
+const SimpleRichEditor: React.FC<{
+  value?: string; // HTML 字符串
+  onChange?: (val: string) => void; // 返回 HTML 字符串
+  placeholder?: string;
+  refreshKey?: string | number; // 用于强制刷新组件
+}> = ({ value = "", onChange, placeholder, refreshKey }) => {
+  console.log("value >> SimpleRichEditor", value);
+  const quillRef = React.useRef<ReactQuill | null>(null);
+
+  const modules = {
+    toolbar: [
+      [{ header: [1, 2, 3, false] }],
+      ["bold", "italic", "underline", "strike"],
+      [{ color: [] }, { background: [] }],
+      [{ list: "ordered" }, { list: "bullet" }],
+      [{ align: [] }],
+      ["blockquote", "link", "image"],
+      ["clean"],
+    ],
+    clipboard: {
+      matchVisual: false,
+    },
+  };
+
+  // 当外部传入的 HTML 发生变化时，使用 Quill 的 dangerouslyPasteHTML 进行导入，避免格式丢失
+  React.useEffect(() => {
+    const incoming = value || "";
+    const quillInstance: any = (quillRef.current as any)?.getEditor?.() || (quillRef.current as any)?.editor;
+    if (!quillInstance) return;
+    try {
+      const currentHTML = quillInstance?.root?.innerHTML || "";
+      // 仅当传入值包含 HTML 且与当前内容不一致时粘贴，减少不必要覆盖
+      if (incoming && incoming.includes("<") && incoming !== currentHTML) {
+        quillInstance.clipboard.dangerouslyPasteHTML(incoming);
+      }
+    } catch (e) {
+      // 兜底：不抛错影响页面，保持受控 value 渲染
+      console.warn("Quill dangerouslyPasteHTML failed:", e);
+    }
+  }, [value, refreshKey]);
+
+  return (
+    <div>
+      <ReactQuill
+        key={refreshKey}
+        ref={quillRef}
+        theme="snow"
+        value={value || ""}
+        placeholder={placeholder || "请输入内容"}
+        modules={modules}
+        onChange={(html) => {
+          onChange?.(html);
+        }}
+        formats={formats}
+      />
+    </div>
+  );
+};
+
 const VenuePage: React.FC<VenueTableProps> = ({ data, startDate, endDate, onRequestRefresh }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [submitting, setSubmitting] = useState(false);
@@ -28,15 +183,13 @@ const VenuePage: React.FC<VenueTableProps> = ({ data, startDate, endDate, onRequ
   //   return dayjs(date).add(1, "day").format("YYYY-MM-DD");
   // };
 
+  // const [editorRefreshKey, setEditorRefreshKey] = useState(0);
+
   const openEditModal = (record: DataItem) => {
     setEditingRecord(record);
     setIsModalOpen(true);
-    // 初始化表单为当前记录值
-    form.setFieldsValue({
-      event_reason: record.event_reason ?? "",
-      follow_up: record.follow_up ?? "",
-      progress: record.progress ?? "",
-    });
+    // setEditorRefreshKey((k) => k + 1); // 触发编辑器强制刷新
+    // 表单初始值改由 Form.initialValues 控制，避免未挂载时调用 setFieldsValue 警告
   };
 
   const handleCancel = () => {
@@ -74,6 +227,18 @@ const VenuePage: React.FC<VenueTableProps> = ({ data, startDate, endDate, onRequ
     }
   };
 
+  useEffect(() => {
+    if (editingRecord) {
+      console.log("editingRecord>>222", editingRecord.event_reason);
+      form.setFieldsValue({
+        event_reason: decodeHTML(editingRecord.event_reason || ""),
+        follow_up: decodeHTML(editingRecord.follow_up || ""),
+        progress: decodeHTML(editingRecord.progress || ""),
+      });
+      // 刷新组件状态
+    }
+  }, [editingRecord]);
+
   const columns: ColumnsType<DataItem> = [
     {
       title: "场地名称",
@@ -81,6 +246,7 @@ const VenuePage: React.FC<VenueTableProps> = ({ data, startDate, endDate, onRequ
       key: "venue_name",
       align: "left",
       width: 250,
+      fixed: "left",
       sorter: (a: DataItem, b: DataItem) => a.venue_name.localeCompare(b.venue_name),
       // defaultSortOrder: "ascend", // ✅ 默认升序
       render: (text: string, record: { venue_name?: any; venue_id?: any }) => {
@@ -230,7 +396,7 @@ const VenuePage: React.FC<VenueTableProps> = ({ data, startDate, endDate, onRequ
       key: "average_high_temperature_impact_rate",
       align: "center",
       sorter: (a, b) => a.average_high_temperature_impact_rate - b.average_high_temperature_impact_rate,
-      render: (value) => <span className="text-orange-500">{value}%</span>,
+      render: (value) => <span>{value}%</span>,
     },
     {
       title: "限电影响率",
@@ -239,9 +405,8 @@ const VenuePage: React.FC<VenueTableProps> = ({ data, startDate, endDate, onRequ
       key: "average_limit_impact_rate",
       align: "center",
       sorter: (a, b) => a.average_limit_impact_rate - b.average_limit_impact_rate,
-      render: (value) => <span className="text-yellow-500">{value}%</span>,
+      render: (value) => <span>{value}%</span>,
     },
-
     {
       title: "本周上架",
       width: 120,
@@ -272,44 +437,51 @@ const VenuePage: React.FC<VenueTableProps> = ({ data, startDate, endDate, onRequ
       dataIndex: "event_reason",
       key: "event_reason",
       align: "left",
-      render: (text: string | undefined) => (
-        <Tooltip title={text ?? ""} placement="top">
-          <span
-            style={{
-              display: "inline-block",
-              maxWidth: "100%",
-              overflow: "hidden",
-              textOverflow: "ellipsis",
-              whiteSpace: "nowrap",
-            }}
-          >
-            {text ?? "-"}
-          </span>
-        </Tooltip>
-      ),
+      render: (text: string | undefined) => {
+        const safe = sanitizeHTML(decodeHTML(text));
+        if (!safe) return <span>-</span>;
+        return (
+          <Tooltip title={<div dangerouslySetInnerHTML={{ __html: safe }} />} placement="top">
+            <div
+              style={{
+                display: "inline-block",
+                maxWidth: "100%",
+                overflow: "hidden",
+                textOverflow: "ellipsis",
+                whiteSpace: "nowrap",
+                verticalAlign: "middle",
+              }}
+              dangerouslySetInnerHTML={{ __html: safe }}
+            />
+          </Tooltip>
+        );
+      },
     },
-
     {
       title: "跟进事项",
       width: 200,
       dataIndex: "follow_up",
       key: "follow_up",
       align: "left",
-      render: (text: string | undefined) => (
-        <Tooltip title={text ?? ""} placement="top">
-          <span
-            style={{
-              display: "inline-block",
-              maxWidth: "100%",
-              overflow: "hidden",
-              textOverflow: "ellipsis",
-              whiteSpace: "nowrap",
-            }}
-          >
-            {text ?? "-"}
-          </span>
-        </Tooltip>
-      ),
+      render: (text: string | undefined) => {
+        const safe = sanitizeHTML(decodeHTML(text));
+        if (!safe) return <span>-</span>;
+        return (
+          <Tooltip title={<div dangerouslySetInnerHTML={{ __html: safe }} />} placement="top">
+            <div
+              style={{
+                display: "inline-block",
+                maxWidth: "100%",
+                overflow: "hidden",
+                textOverflow: "ellipsis",
+                whiteSpace: "nowrap",
+                verticalAlign: "middle",
+              }}
+              dangerouslySetInnerHTML={{ __html: safe }}
+            />
+          </Tooltip>
+        );
+      },
     },
     {
       title: "处理进度",
@@ -317,21 +489,26 @@ const VenuePage: React.FC<VenueTableProps> = ({ data, startDate, endDate, onRequ
       dataIndex: "progress",
       key: "progress",
       align: "center",
-      render: (text: string | undefined) => (
-        <Tooltip title={text ?? ""} placement="top">
-          <span
-            style={{
-              display: "inline-block",
-              maxWidth: "100%",
-              overflow: "hidden",
-              textOverflow: "ellipsis",
-              whiteSpace: "nowrap",
-            }}
-          >
-            {text ?? "-"}
-          </span>
-        </Tooltip>
-      ),
+      render: (text: string | undefined) => {
+        const safe = sanitizeHTML(decodeHTML(text));
+        if (!safe) return <span>-</span>;
+        return (
+          <Tooltip title={<div dangerouslySetInnerHTML={{ __html: safe }} />} placement="top">
+            <div
+              style={{
+                display: "inline-block",
+                maxWidth: "100%",
+                overflow: "hidden",
+                textOverflow: "ellipsis",
+                whiteSpace: "nowrap",
+                verticalAlign: "middle",
+                textAlign: "center",
+              }}
+              dangerouslySetInnerHTML={{ __html: safe }}
+            />
+          </Tooltip>
+        );
+      },
     },
     {
       title: "操作",
@@ -370,15 +547,39 @@ const VenuePage: React.FC<VenueTableProps> = ({ data, startDate, endDate, onRequ
           <div>开始日期：{startDate}</div>
           <div>结束日期：{endDate}</div>
         </div>
-        <Form form={form} layout="vertical">
+        <Form
+          form={form}
+          layout="vertical"
+          key={editingRecord?.venue_id ?? "form"}
+          // initialValues={{
+          //   event_reason: editingRecord?.event_reason ?? "",
+          //   follow_up: editingRecord?.follow_up ?? "",
+          //   progress: editingRecord?.progress ?? "",
+          // }}
+        >
           <Form.Item name="event_reason" label="事件原因">
-            <Input.TextArea rows={2} placeholder="请输入事件原因" style={{ fontSize: "12px" }} />
+            <SimpleRichEditor
+              value={form.getFieldValue("event_reason")}
+              onChange={(html) => form.setFieldValue("event_reason", html)}
+              placeholder="请输入事件原因"
+              refreshKey={`event_reason_${editingRecord?.venue_id ?? "form"}`}
+            />
           </Form.Item>
           <Form.Item name="progress" label="处理进度">
-            <Input.TextArea rows={3} placeholder="请输入处理进度" style={{ fontSize: "12px" }} />
+            <SimpleRichEditor
+              value={form.getFieldValue("progress")}
+              onChange={(html) => form.setFieldValue("progress", html)}
+              placeholder="请输入处理进度"
+              refreshKey={`progress_${editingRecord?.venue_id ?? "form"}`}
+            />
           </Form.Item>
           <Form.Item name="follow_up" label="跟进事项">
-            <Input.TextArea rows={3} placeholder="请输入跟进事项" style={{ fontSize: "12px" }} />
+            <SimpleRichEditor
+              value={form.getFieldValue("follow_up")}
+              onChange={(html) => form.setFieldValue("follow_up", html)}
+              placeholder="请输入跟进事项"
+              refreshKey={`follow_up_${editingRecord?.venue_id ?? "form"}`}
+            />
           </Form.Item>
         </Form>
       </Modal>
