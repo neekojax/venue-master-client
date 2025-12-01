@@ -70,12 +70,12 @@ export default function DateModeHeader() {
       { key: "total_income_usd", label: "收益USD" },
       { key: "net_income", label: "净USD" },
       { key: "basic_hosting_fee", label: "单价($/kwh)" },
-      { key: "energy_ratio", label: "预估功耗" },
+      { key: "power_consumption", label: "预估功耗" },
       { key: "nominal_power_consumption", label: "额定功耗" },
       { key: "power_consumption_diff", label: "功耗差异" },
       { key: "total_hosting_fee", label: "总托管费" },
       { key: "hosting_fee_ratio", label: "托管费占比" },
-      { key: "report_date", label: "收益日期" },
+      { key: "date", label: "收益日期" },
     ];
 
     // 仅导出在数据中实际存在的列

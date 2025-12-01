@@ -74,7 +74,7 @@ export default function CustodyStatisticsMonthTable({
         power_consumption: item.power_consumption,
         nominal_power_consumption: item.nominal_power_consumption,
         power_consumption_diff: item.power_consumption_diff,
-        energy_ratio: item.power_consumption,
+        // energy_ratio: item.power_consumption,
         basic_hosting_fee: item.managed_unit_price,
         hash: item.hash,
         total_hosting_fee: item.total_hosting_fee,
@@ -186,13 +186,13 @@ export default function CustodyStatisticsMonthTable({
 
       {
         title: <span className="fee-ratio-title">预估功耗</span>,
-        dataIndex: "energy_ratio",
-        key: "energy_ratio",
+        dataIndex: "power_consumption",
+        key: "power_consumption",
         onHeaderCell: () => ({ className: "fee-ratio-header" }),
         width: 140,
         sorter: (a: any, b: any) =>
-          (typeof a.energy_ratio === "number" ? a.energy_ratio : parseFloat(a.energy_ratio)) -
-          (typeof b.energy_ratio === "number" ? b.energy_ratio : parseFloat(b.energy_ratio)),
+          (typeof a.power_consumption === "number" ? a.power_consumption : parseFloat(a.power_consumption)) -
+          (typeof b.power_consumption === "number" ? b.power_consumption : parseFloat(b.power_consumption)),
         render: (text: any) => {
           const num = typeof text === "number" ? text : parseFloat(text);
           return <>{Number.isFinite(num) ? num.toFixed(2) : text}</>;

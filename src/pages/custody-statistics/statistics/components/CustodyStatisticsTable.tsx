@@ -32,6 +32,7 @@ export default function CustodyStatisticsTable({
   onFilteredDataChange,
   scrollY,
 }: Props) {
+  // console.log("selectedVenues >> >>", selectedVenues);
   const navigate = useNavigate();
   const { poolType } = useSettingsStore(useSelector(["poolType"]));
   // 根据父组件 dayRange 组装后端需要的 timeRange，例如 "7days"
@@ -78,13 +79,14 @@ export default function CustodyStatisticsTable({
           net_income: any;
           hosting_fee_ratio: any;
         }) => ({
-          key: item.venue_id,
+          // 使用 复合键 确保每行唯一，避免 React 重复 key 警告
+          key: `${item.venue_id}-${item.date}`,
           venue_name: item.venue_name,
           venue_id: item.venue_id,
           power_consumption: item.power_consumption,
           nominal_power_consumption: item.nominal_power_consumption,
           power_consumption_diff: item.power_consumption_diff,
-          energy_ratio: item.power_consumption,
+          // energy_ratio: item.power_consumption,
           basic_hosting_fee: item.managed_unit_price,
           hash: item.hash,
           total_hosting_fee: item.total_hosting_fee,
@@ -202,13 +204,13 @@ export default function CustodyStatisticsTable({
 
       {
         title: <span className="fee-ratio-title">预估功耗</span>,
-        dataIndex: "energy_ratio",
-        key: "energy_ratio",
+        dataIndex: "power_consumption",
+        key: "power_consumption",
         onHeaderCell: () => ({ className: "fee-ratio-header" }),
         width: 140,
         sorter: (a: any, b: any) =>
-          (typeof a.energy_ratio === "number" ? a.energy_ratio : parseFloat(a.energy_ratio)) -
-          (typeof b.energy_ratio === "number" ? b.energy_ratio : parseFloat(b.energy_ratio)),
+          (typeof a.power_consumption === "number" ? a.power_consumption : parseFloat(a.power_consumption)) -
+          (typeof b.power_consumption === "number" ? b.power_consumption : parseFloat(b.power_consumption)),
         render: (text: any) => {
           const num = typeof text === "number" ? text : parseFloat(text);
           return <>{Number.isFinite(num) ? num.toFixed(2) : text}</>;
@@ -323,18 +325,42 @@ export default function CustodyStatisticsTable({
     const filtered = tableData.filter((item: any) => {
       const ratioVal = item?.hosting_fee_ratio;
       const ratioNum = typeof ratioVal === "number" ? ratioVal : parseFloat(ratioVal);
-      const matchesHighFee = showHighFeeOnly ? ratioNum > 90 : true;
-      const matchesSelectedVenues =
-        selectedVenues.length > 0 ? selectedVenues.includes(item.venue_name) : true;
-      return matchesHighFee && matchesSelectedVenues;
+      const hasSelection = Array.isArray(selectedVenues) && selectedVenues.length > 0;
+      const matchesSelectedVenues = hasSelection
+        ? selectedVenues.some((name) => {
+            const sel = String(name || "")
+              .trim()
+              .toLowerCase();
+            const venue = String(item?.venue_name || "")
+              .trim()
+              .toLowerCase();
+            // 支持部分匹配与大小写不敏感匹配
+            return sel.length > 0 && venue.includes(sel);
+          })
+        : true;
+
+      // 当选择了场地名时，只按场地过滤；未选择时才考虑“仅高费率”筛选
+      const passesHighFee = showHighFeeOnly ? ratioNum > 90 : true;
+
+      return hasSelection ? matchesSelectedVenues : passesHighFee;
     });
     setFilteredData(filtered);
+    // 重置到第一页，避免切换场地名后仍停留在旧页码
+    setCurrentPage(1);
   }, [tableData, showHighFeeOnly, selectedVenues]);
 
   // notify parent of filtered data changes
   useEffect(() => {
     onFilteredDataChange?.(filteredData);
   }, [filteredData, onFilteredDataChange]);
+
+  // 当筛选结果更新时，将表格滚动位置复位到顶部，提升可见性
+  useEffect(() => {
+    const tableBody = document.querySelector(".ant-table-body");
+    if (tableBody) {
+      (tableBody as HTMLElement).scrollTop = 0;
+    }
+  }, [filteredData]);
 
   if (isLoading) {
     return <Spin style={{ marginTop: 20 }} />;
@@ -376,13 +402,15 @@ export default function CustodyStatisticsTable({
             onClick: () => navigate(`/custody-menu/statisticsDetail/${(record as any).venue_id}`),
             style: { cursor: "pointer" },
           })}
-          rowKey={(record) =>
-            (record as any).venue_id ||
-            (record as any).id ||
-            (record as any)._id ||
-            (record as any).miner_name ||
-            Math.random()
-          }
+          rowKey={(record) => {
+            const rec: any = record as any;
+            // 优先使用我们在映射时生成的唯一 key
+            if (rec.key) return String(rec.key);
+            const vid = rec.venue_id ?? rec.id ?? rec._id ?? rec.miner_name;
+            const date = rec.report_date ?? "";
+            if (vid) return `${vid}-${date}`;
+            return `${Math.random()}-${date}`; // 兜底，尽量减少重复概率
+          }}
           columns={columns}
           dataSource={filteredData}
           sticky={{ offsetHeader: 64 }}
