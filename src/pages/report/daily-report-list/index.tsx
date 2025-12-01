@@ -417,7 +417,7 @@ const App: React.FC = () => {
 
     // 准备主数据（排除subAccountStats字段并转换为中文列名）
     const mainData = filteredData.map(({ subAccountStats, ...rest }) => {
-      console.log("subAccountStats", subAccountStats.length);
+      // console.log("subAccountStats", subAccountStats.length);
       const translatedData: any = {};
 
       Object.keys(rest).forEach((key) => {
@@ -572,7 +572,12 @@ const App: React.FC = () => {
     const mainWorksheet = XLSX.utils.json_to_sheet(mainData);
     const mainHeaderKeys = Object.keys(mainData[0] || {});
     setWorksheetStyle(mainWorksheet, mainHeaderKeys);
-    XLSX.utils.book_append_sheet(workbook, mainWorksheet, "日报汇总数据");
+    // 工作表命名：当前场地名 + 日期时间（Excel 工作表名最多 31 字符，且不能包含 : \ / ? * [ ]）
+    const ts = dayjs().format("YYYYMMDD_HHmm");
+    const rawSheetName = `${venueName || "未命名场地"}-${ts}`;
+    // 仅保留必须的转义（反斜杠与中括号），移除对 "/", "?", "*" 的不必要转义
+    const safeSheetName = rawSheetName.replace("/[\\/:?*[]]/g", "-").slice(0, 31);
+    XLSX.utils.book_append_sheet(workbook, mainWorksheet, safeSheetName);
 
     // 添加子账户数据sheet
     const subAccountWorksheet = XLSX.utils.json_to_sheet(subAccountData);
@@ -581,7 +586,7 @@ const App: React.FC = () => {
     XLSX.utils.book_append_sheet(workbook, subAccountWorksheet, "子账户详细数据");
 
     // 导出文件
-    XLSX.writeFile(workbook, "日报数据.xlsx");
+    XLSX.writeFile(workbook, safeSheetName + ".xlsx");
   };
 
   return (
