@@ -67,6 +67,7 @@ export default function CustodyStatisticsMonthTable({
     setFilteredData([]);
     if (statisticsData && statisticsData.data) {
       setAlertMessage("");
+
       const newData = statisticsData.data.map((item: any) => ({
         key: item.venue_id,
         venue_name: item.venue_name,

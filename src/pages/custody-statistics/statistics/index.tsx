@@ -75,7 +75,7 @@ export default function DateModeHeader() {
       { key: "power_consumption_diff", label: "功耗差异" },
       { key: "total_hosting_fee", label: "总托管费" },
       { key: "hosting_fee_ratio", label: "托管费占比" },
-      { key: "date", label: "收益日期" },
+      { key: "report_date", label: "收益日期" },
     ];
 
     // 仅导出在数据中实际存在的列
