@@ -7,6 +7,7 @@ import {
   fetchEventLog,
   fetchVenueList,
   getAllVEvent,
+  listEventPage,
   newEventLog,
   newVenue,
   updateEventLog,
@@ -19,6 +20,49 @@ export const useVenueList = (poolType: string) => {
   return useQuery({
     queryKey: ["venue-list", poolType], // 添加 poolType 到 queryKey
     queryFn: () => fetchVenueList(poolType), // 传递 poolType 参数
+  });
+};
+
+// 自定义 Hook: 使用场地列表
+export const useListEventPage = (poolType: string, params: { page: number; pageSize: number }) => {
+  return useQuery({
+    queryKey: ["event-log-Page", poolType], // 添加 poolType 到 queryKey
+    queryFn: () => listEventPage(poolType, params), // 传递 poolType 参数
+  });
+};
+
+// 聚合分页：每次取 pageSize=100，直到拿完所有数据
+export const useAllEventPages = (poolType: string, pageSize = 1000) => {
+  const queryClient = useQueryClient();
+  return useQuery({
+    queryKey: ["event-log-all", poolType, pageSize],
+    queryFn: async () => {
+      let page = 1;
+      // 先返回第一页数据，保证前端快速展示
+      const first = await listEventPage(poolType, { page, pageSize });
+      const firstData = first?.data?.data || [];
+      const total = Number(first?.data?.total ?? firstData.length);
+      const initial = { data: firstData, total };
+
+      // 异步继续加载剩余页码，并逐步写入缓存，前端列表会自动扩充
+      const totalPages = Math.ceil(total / pageSize);
+      if (totalPages > 1) {
+        (async () => {
+          let allItems = [...firstData];
+          for (page = 2; page <= totalPages; page++) {
+            const resp = await listEventPage(poolType, { page, pageSize });
+            const items = resp?.data?.data || [];
+            if (!items.length) break; // 防御：无数据则提前结束
+            allItems = allItems.concat(items);
+            // 更新 react-query 缓存，让使用该 Hook 的组件逐步拿到更多数据
+            queryClient.setQueryData(["event-log-all", poolType, pageSize], { data: allItems, total });
+            if (allItems.length >= total) break; // 已经拉满
+          }
+        })();
+      }
+
+      return initial;
+    },
   });
 };
 

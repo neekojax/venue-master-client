@@ -17,6 +17,16 @@ export const updateVenue = async (data: VenueInfoParam) => {
   return await fetchPost(`/venue/updateVenue`, data);
 };
 
+// event/listEventPage/CANG
+export const listEventPage = async (poolType: string, data: { page: number; pageSize: number }) => {
+  const { page, pageSize } = data || {};
+  // 正常传参：将分页参数作为查询字符串传递
+  const url = `/event/listEventPage/${poolType}?page=${encodeURIComponent(String(page))}&pageSize=${encodeURIComponent(
+    String(pageSize),
+  )}`;
+  return await fetchGet(url);
+};
+
 export const fetchEventLog = async (poolType: string) => {
   return await fetchGet(`/event/listEvent/${poolType}`);
 };

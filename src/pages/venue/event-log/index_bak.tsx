@@ -23,7 +23,6 @@ import {
   Tooltip,
   // Switch
 } from "antd";
-import { Spin } from "antd";
 import type { ColumnsType } from "antd/es/table";
 import dayjs from "dayjs";
 import isBetween from "dayjs/plugin/isBetween"; // 引入 isBetween 插件
@@ -32,8 +31,8 @@ import { getTimeDifference } from "@/utils/date";
 
 import UploadExcel from "@/pages/venue/components/UploadExcel";
 import {
-  useAllEventPages,
   useDeleteUpdate,
+  useEventList,
   useEventNew,
   useEventUpdate,
   useVenueList,
@@ -66,8 +65,7 @@ const App: React.FC = () => {
   const [selectedRowKeys] = useState<React.Key[]>([]);
   const [form] = Form.useForm();
   const { poolType } = useSettingsStore(useSelector(["poolType"]));
-  // 聚合分页：每次拉 100 条，循环至总量
-  const { data, isLoading } = useAllEventPages(poolType, 1000);
+  const { data, isLoading } = useEventList(poolType);
   const { data: venueList } = useVenueList(poolType);
   const newMutation = useEventNew();
   const updateMutation = useEventUpdate();
@@ -96,7 +94,7 @@ const App: React.FC = () => {
 
   // 数据转换
   const logData: EventLog[] =
-    (data?.data || [])?.map((item: any, index: any) => ({
+    data?.data?.map((item: any, index: any) => ({
       key: index + 1,
       id: item.id,
       venue_id: item.venue_id,
@@ -112,9 +110,6 @@ const App: React.FC = () => {
       created_at: item.created_at,
       collection: item.collection,
     })) || [];
-
-  const total = data?.total || 0;
-  console.log("total", total);
 
   // 过滤后的数据
   const filteredData = logData.filter((log) => {
@@ -582,13 +577,7 @@ const App: React.FC = () => {
         </div>
 
         <div
-          style={{
-            background: "#fff",
-            color: "grey",
-            borderRadius: "0.5rem",
-            padding: "20px 0px",
-            position: "relative",
-          }}
+          style={{ background: "#fff", color: "grey", borderRadius: "0.5rem", padding: "20px 0px" }}
           className="longdataTable"
         >
           {/* <div style={{ marginBottom: 16, marginRight: '10px', color: '#000', textAlign: 'right' }}>
@@ -609,11 +598,11 @@ const App: React.FC = () => {
             loading={isLoading}
             // onChange={handleTableChange}
             onChange={(_: any, filters: any) => {
-              // console.log("Table >>选中的事件类型：", filters.log_type); // 是数组
+              console.log("Table >>选中的事件类型：", filters.log_type); // 是数组
               setSelectedEventType(filters.log_type || []); // 设置选中的事件类型数组
             }}
             pagination={{
-              total: total,
+              total: filteredData.length,
               pageSize: pageSize,
               showSizeChanger: true,
               pageSizeOptions: ["10", "20", "30", "50"],
@@ -631,24 +620,6 @@ const App: React.FC = () => {
             }}
             // className="px-6"
           />
-          {filteredData.length !== total && (
-            <div
-              style={{
-                position: "relative",
-                inset: 0,
-                top: "-50px",
-                left: "20px",
-                width: "100px",
-                // display: "flex",
-                alignItems: "left",
-                justifyContent: "center",
-                background: "rgba(255,255,255,0.6)",
-                pointerEvents: "none",
-              }}
-            >
-              <Spin tip={`数据加载中... 已加载 ${filteredData.length}/${total}`} />
-            </div>
-          )}
         </div>
       </div>
       <Modal
