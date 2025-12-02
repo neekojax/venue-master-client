@@ -358,7 +358,7 @@ const SitePerformanceCard: React.FC<SitePerformanceCardProps> = ({
                 key: "Failure",
                 align: "center",
                 width: 120,
-                render: (value: number) => value?.toFixed(2) + "%",
+                render: (value: number) => value,
                 sorter: (a, b) => a.Failure - b.Failure,
               },
 
