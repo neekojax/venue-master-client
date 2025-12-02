@@ -153,9 +153,12 @@ const SitePerformanceCard: React.FC<SitePerformanceCardProps> = ({
   // filtered = filtered.sort((a, b) => a.siteName.localeCompare(b.siteName));
 
   return (
-    <div className="bg-white p-4 rounded-[4px] border border-[#F0F2F5] shadow-sm">
+    <div
+      style={{ height: "calc(100vh - 200px)", paddingTop: "0px" }}
+      className="bg-white p-4 rounded-[4px] border border-[#F0F2F5] shadow-sm relative max-h-[70vh] overflow-y-auto"
+    >
       {/* 标题 + 操作栏 */}
-      <div className="items-center mb-4">
+      <div className="items-center mb-2 sticky top-0 z-20 bg-white pt-2 pb-2 shadow-sm">
         <h3 className="text-lg font-bold">{title}</h3>
         <div className="flex items-center gap-4  justify-between">
           <span>
@@ -287,6 +290,7 @@ const SitePerformanceCard: React.FC<SitePerformanceCardProps> = ({
         dataSource={filteredData}
         rowKey="venue_id" // ⚠ 关键：Table 用 venue_id 作为唯一 key
         scroll={{ x: "max-content" }}
+        sticky={{ offsetHeader: 72 }}
         pagination={{
           ...pagination,
           total: filteredData.length,
@@ -470,7 +474,8 @@ const SitePerformanceCard: React.FC<SitePerformanceCardProps> = ({
                   pagination={false}
                   size="small"
                   className="custom-inner-table"
-                  scroll={{ x: 1500 }}
+                  // 为内层表设置垂直滚动，使表头固定、内容在该区域内上下滚动
+                  scroll={{ x: 1500, y: 320 }}
                 />
               </div>
             );
