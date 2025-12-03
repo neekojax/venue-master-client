@@ -55,7 +55,7 @@ function isUseT2(record: DataType) {
   // 北京时间（UTC+8）
   const beijingHour = (new Date().getUTCHours() + 8) % 24;
   // console.log("beijingHour:", beijingHour);
-  const useT2 = record.anget_key === "" && record.status_of_filling === 0 && beijingHour > 15; // 大于16点使用T2
+  const useT2 = record.anget_key === "" && record.status_of_filling === 0 && beijingHour > 14; // 大于14点使用T2
   return useT2;
 }
 
