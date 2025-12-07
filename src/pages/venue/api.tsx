@@ -120,3 +120,8 @@ export const fetchHostingRecordListAll = async () => {
 export const fetchVenueEnvironment = async (poolType: string) => {
   return await fetchGet(`/venue/environment/${poolType}`);
 };
+
+// /venue/environment/history/12?startDate=2025-12-05&endDate=2025-12-06 场地环境历史数据
+export const fetchVenueEnvironmentHistory = async (venueID: number, startDate: string, endDate: string) => {
+  return await fetchGet(`/venue/environment/history/${venueID}?startDate=${startDate}&endDate=${endDate}`);
+};

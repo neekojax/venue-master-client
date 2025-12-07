@@ -66,7 +66,7 @@ const SiderItems = () => {
         //   key: ROUTE_PATHS.miningSiteData,
         //   label: <Link to={ROUTE_PATHS.miningSiteData}>运行指标</Link>,
         // },
-        ...(showNDPoolType == "CANG"
+        ...(showNDPoolType == "CANG" || showNDPoolType == "LN"
           ? [
               {
                 key: ROUTE_PATHS.venueEnvironment,

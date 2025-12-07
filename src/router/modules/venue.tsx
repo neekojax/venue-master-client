@@ -21,8 +21,36 @@ export const venueRoute: RouteObject = {
       HydrateFallback: ProgressBar,
       handle: {
         title: "场地环境",
-        crumb: () => <Link to={ROUTE_PATHS.miningSiteData}>运行指标</Link>,
+        crumb: () => <Link to={ROUTE_PATHS.miningSiteData}>场地环境</Link>,
       },
+    },
+    {
+      path: "/venue/environment/history/:venueId",
+      lazy: async () => {
+        return {
+          Component: (await import("@/pages/venue/venue-environment-history")).default,
+        };
+      },
+      HydrateFallback: ProgressBar,
+      handle: {
+        title: "场地环境详情",
+        crumb: (params: { venueId?: string }) => (
+          <Link
+            to={
+              params?.venueId
+                ? `/venue/environment/history/${params.venueId}`
+                : "/venue/environment/history/0"
+            }
+          >
+            场地环境详情
+          </Link>
+        ),
+      },
+      // HydrateFallback: ProgressBar,
+      // handle: {
+      //   title: "场地环境详情",
+      //   crumb: () => <Link to={ROUTE_PATHS.venueEnvironmentHistory}>场地环境详情</Link>,
+      // },
     },
     {
       path: ROUTE_PATHS.venueWeather,

@@ -1,5 +1,6 @@
 // 代码已包含 CSS：使用 TailwindCSS , 安装 TailwindCSS 后方可看到布局样式效果
 import React, { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
 import { ReloadOutlined } from "@ant-design/icons";
 import { Button, message, Pagination, Select, Spin, Switch } from "antd";
 import type { ProgressProps } from "antd/es/progress";
@@ -18,7 +19,7 @@ interface LocationData {
   status: string;
 }
 interface EnvironmentData {
-  id: number;
+  venue_id: number;
   venue_name: string;
   last_update: string;
   collection: number;
@@ -82,6 +83,7 @@ const App: React.FC = () => {
             ...v,
             collection: Number(v.collection ?? 0),
           }));
+        // console.log('validVenue:', validVenue);
         setVenueData(validVenue);
         setLoading(false);
       }
@@ -183,10 +185,14 @@ const App: React.FC = () => {
         >
           {/* 位置信息展示区 */}
           {paginatedVenues.map((venue) => (
-            <div key={venue.id} className="mb-8">
+            <div key={venue.venue_id} className="mb-8">
               <div className="mb-4 flex items-center justify-between">
                 <h2 className="text-lg font-semibold text-gray-800 flex items-center">
-                  <span className="mr-2">{venue.venue_name}</span>
+                  <span className="mr-2">
+                    <Link to={`/venue/environment/history/${venue.venue_id}`} className="hover:text-blue-600">
+                      {venue.venue_name}
+                    </Link>
+                  </span>
                   <span className="text-sm text-gray-500">环境数据</span>
                   {/* {(() => {
                     const d = new Date(venue.last_update);
@@ -233,6 +239,7 @@ const App: React.FC = () => {
                   venue.environments.map((location, index) => (
                     <LocationCard
                       key={index}
+                      // venueId={venue.id}
                       location={{
                         name: location.location,
                         temperature: location.temperature,
