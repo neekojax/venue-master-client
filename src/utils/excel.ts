@@ -288,36 +288,38 @@ export const exportHashRateToExcel = (data: any) => {
   const workbook = XLSX.utils.book_new();
   // 自定义表头
   const customHeader = [
-    { header: "场地", key: "pool_name" },
+    { header: "场地", key: "venue_name" },
+    { header: "子账号", key: "pool_name" },
     { header: "实时算力", key: "current_hash" },
     { header: "在线", key: "online" },
     { header: "离线", key: "offline" },
-    { header: "24小时算力", key: "last_hash" },
-    { header: "上次结算算力", key: "last_settlement_hash" },
+    // { header: "24小时算力", key: "last_hash" },
+    // { header: "上次结算算力", key: "last_settlement_hash" },
     { header: "理论算力", key: "theoretical" },
     { header: "算力达成率", key: "last_hash_rate_effective" },
-    { header: "上次结算收益BTC", key: "last_settlement_profit_btc" },
-    { header: "上次结算收益FB", key: "last_settlement_profit_fb" },
-    { header: "上次结算时间", key: "last_settlement_date" },
+    // { header: "上次结算收益BTC", key: "last_settlement_profit_btc" },
+    // { header: "上次结算收益FB", key: "last_settlement_profit_fb" },
+    // { header: "上次结算时间", key: "last_settlement_date" },
     { header: "刷新时间", key: "update_time" },
     { header: "链接", key: "link" },
   ];
 
   // 处理数据并生成工作表
   const formattedData = data.map((item: any) => ({
+    venue_name: item.venue_name,
     pool_name: item.pool_name,
     current_hash: item.current_hash,
     online: item.online,
     offline: item.offline,
 
-    last_hash: item.last_hash,
-    last_settlement_hash: item.last_settlement_hash,
+    // last_hash: item.last_hash,
+    // last_settlement_hash: item.last_settlement_hash,
     theoretical: item.theoretical,
     last_hash_rate_effective: item.last_hash_rate_effective,
 
-    last_settlement_profit_btc: item.last_settlement_profit_btc,
-    last_settlement_profit_fb: item.last_settlement_profit_fb,
-    last_settlement_date: item.last_settlement_date,
+    // last_settlement_profit_btc: item.last_settlement_profit_btc,
+    // last_settlement_profit_fb: item.last_settlement_profit_fb,
+    // last_settlement_date: item.last_settlement_date,
     update_time: item.update_time,
     link: item.link,
   }));
@@ -350,14 +352,19 @@ export const exportHashRateToExcel = (data: any) => {
   ];
 
   // 将工作表添加到工作簿
-  XLSX.utils.book_append_sheet(workbook, worksheet, "哈希记录");
+  XLSX.utils.book_append_sheet(
+    workbook,
+    worksheet,
+    localStorage.getItem(`mining-hash_poolCategory`) || "主矿池" + "_实时算力",
+  );
 
   // 获取当前日期并格式化为 YYYY-MM-DD
   const date = new Date();
   const formattedDate = date.toISOString().split("T")[0]; // 获取日期部分
 
   // 生成文件名
-  const fileName = `哈希记录_${formattedDate}.xlsx`;
+  const fileName =
+    (localStorage.getItem(`mining-hash_poolCategory`) || "主矿池") + `_实时算力_${formattedDate}.xlsx`;
 
   // 导出 Excel 文件
   XLSX.writeFile(workbook, fileName);
@@ -366,28 +373,75 @@ export const exportHashRateToExcel = (data: any) => {
 export const exportMiningPoolListToExcel = (data: any) => {
   // 创建一个工作簿
   const workbook = XLSX.utils.book_new();
+  const StatusColumn = ({ status }: { status: number }) => {
+    let statusText = "";
+    // let statusStyle = {};
+
+    if (status === 1) {
+      statusText = "活跃";
+      // statusStyle = { color: "green" }; // 活跃状态，绿色
+    } else if (status === 0) {
+      statusText = "暂停";
+      // statusStyle = { color: "red" }; // 暂停状态，红色
+    } else if (status === 2) {
+      statusText = "已撤场";
+      // statusStyle = { color: "orange" }; // 已撤场状态，红色
+    }
+
+    return { statusText };
+  };
   // 自定义表头
 
   const customHeader = [
-    { header: "账户", key: "pool_name" },
-    { header: "主体类型", key: "pool_type" },
+    { header: "场地", key: "venue_name" },
+    { header: "子账户", key: "pool_name" },
+    // { header: "主体类型", key: "pool_type" },
     { header: "场地类型", key: "pool_category" },
     { header: "所属国家", key: "country" },
-    { header: "理论算力", key: "theoretical_hashrate" },
-    { header: "能耗比(J/T)", key: "energy_ratio" },
-    { header: "基础托管费($/kwh)", key: "basic_hosting_fee" },
+    {
+      header: "托管机器",
+      key: "hosted_machine",
+    },
+    {
+      header: "状态",
+      key: "status",
+      // render: (_text: any, record: { status: unknown }) => StatusColumn({ status: record.status }).statusText,
+    },
+
+    { header: "理论算力（PH/s）", key: "theoretical_hashrate" },
+    {
+      header: "散热模式",
+      key: "heat_diss_mode",
+
+      // render: (value: number) => {
+      //   if (value === 1) {
+      //     return <Tag color="green">风冷</Tag>;
+      //   }
+      //   if (value === 2) {
+      //     return <Tag color="geekblue">水冷</Tag>;
+      //   }
+      //   return <Tag color="default">未知</Tag>;
+      // },
+    },
+
+    // { header: "能耗比(J/T)", key: "energy_ratio" },
+    // { header: "基础托管费($/kwh)", key: "basic_hosting_fee" },
     { header: "链接", key: "link" },
   ];
 
   // 处理数据并生成工作表
   const formattedData = data.map((item: any) => ({
+    venue_name: item.venue_name,
     pool_name: item.pool_name,
-    pool_type: item.pool_type,
+    // pool_type: item.pool_type,
     pool_category: item.pool_category,
     country: item.country,
+    hosted_machine: item.hosted_machine,
+    status: StatusColumn({ status: item.status }).statusText,
     theoretical_hashrate: item.theoretical_hashrate,
-    energy_ratio: item.energy_ratio,
-    basic_hosting_fee: item.basic_hosting_fee,
+    heat_diss_mode: item.heat_diss_mode === 1 ? "风冷" : item.heat_diss_mode === 2 ? "水冷" : "未知",
+    // energy_ratio: item.energy_ratio,
+    // basic_hosting_fee: item.basic_hosting_fee,
     link: item.link,
   }));
 
@@ -414,14 +468,19 @@ export const exportMiningPoolListToExcel = (data: any) => {
   ];
 
   // 将工作表添加到工作簿
-  XLSX.utils.book_append_sheet(workbook, worksheet, "矿池列表");
+  XLSX.utils.book_append_sheet(
+    workbook,
+    worksheet,
+    localStorage.getItem(`mining-hash_poolCategory`) || "主矿池" + "_矿池列表",
+  );
 
   // 获取当前日期并格式化为 YYYY-MM-DD
   const date = new Date();
   const formattedDate = date.toISOString().split("T")[0]; // 获取日期部分
 
   // 生成文件名
-  const fileName = `矿池列表_${formattedDate}.xlsx`;
+  const fileName =
+    (localStorage.getItem(`mining-hash_poolCategory`) || "主矿池") + `_矿池列表_${formattedDate}.xlsx`;
 
   // 导出 Excel 文件
   XLSX.writeFile(workbook, fileName);
