@@ -84,6 +84,10 @@ const SiderItems = () => {
           label: <Link to={ROUTE_PATHS.eventLog}>事件日志</Link>,
         },
         {
+          key: ROUTE_PATHS.eventAnalysis,
+          label: <Link to={ROUTE_PATHS.eventAnalysis}>事件分析</Link>,
+        },
+        {
           key: ROUTE_PATHS.venueSetting,
           label: <Link to={ROUTE_PATHS.venueSetting}>场地设置</Link>,
         },

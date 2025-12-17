@@ -33,6 +33,7 @@ export const ROUTE_PATHS = {
   venueBill: "/venue/bill",
   miningSiteDetail: (venueId: string | number) => `/venue/detail/${venueId}`, // 场地详情，需传参数
   eventLog: "/venue/event-log",
+  eventAnalysis: "/venue/event-analysis",
   eventLogList: (venueId: string | number) => `/venue/event-loglist/${venueId}`, // 场地详情，需传参数
   venueSetting: "/venue/setting",
 
