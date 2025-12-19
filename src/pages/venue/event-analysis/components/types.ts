@@ -1,18 +1,48 @@
 export interface SiteData {
-  id: string;
+  device_failure_hashrate: number;
+  device_failure_rate: number;
+  extreme_weather_hashrate: number;
+  extreme_weather_rate: number;
+  high_temperature_hashrate: number;
+  high_temperature_rate: number;
+  limit_hashrate: number;
+  limit_rate: number;
+  network_hashrate: number;
+  network_rate: number;
+  power_hashrate: number;
+  power_rate: number;
+  total_hashrate: number;
+  venue_id: number;
+  venue_name: string;
+}
+export interface StatisticsData {
+  affected_venue_count: number;
+  main_impact_category: EventType;
+  record_count: number;
+  total_loss_hashrate: number;
+}
+
+export interface DailyEventImpact {
+  date: string; // "2025-12-01"
+  limit_rate: number;
+  limit_hashrate: number;
+  high_temperature_rate: number;
+  high_temperature_hashrate: number;
+  power_rate: number;
+  power_hashrate: number;
+  device_failure_rate: number;
+  device_failure_hashrate: number;
+  network_rate: number;
+  network_hashrate: number;
+  extreme_weather_rate: number;
+  extreme_weather_hashrate: number;
+}
+
+export interface CauseShareData {
+  type: string;
   name: string;
-  theoreticalHashrate: number; // PH/s
-  realHashrate: number; // PH/s
-  efficiency: number; // percentage (0-100+)
-  efficiencyChange: number; // percentage change
-  netEfficiency: number; // percentage
-  failureRate: number; // percentage
-  repairRate: number; // percentage
-  highTempRate: number; // percentage
-  powerLimitRate: number; // percentage
-  eventCause: string;
-  followUpItems: string;
-  processingProgress: string;
+  share: number;
+  hashrate: number;
 }
 
 export type SortField = keyof SiteData;
@@ -49,21 +79,53 @@ export interface VenueEnvironmentHistoryResp {
 // --- Event Impact Analysis Types ---
 
 export type EventType =
-  | "power_limit"
-  | "high_temp"
-  | "power_outage"
+  | "limit"
+  | "high_temperature"
+  | "power"
   | "device_failure"
   | "network"
   | "extreme_weather";
 
+export type dailyEventImpact = {
+  date: string; // "2025-12-01"
+  limit_rate: number;
+  limit_hashrate: number;
+  high_temperature_rate: number;
+  high_temperature_hashrate: number;
+  power_rate: number;
+  power_hashrate: number;
+  device_failure_rate: number;
+  device_failure_hashrate: number;
+  network_rate: number;
+  network_hashrate: number;
+  extreme_weather_rate: number;
+  extreme_weather_hashrate: number;
+};
+
 export interface EventImpactRecord {
   id: string;
-  date: string; // YYYY-MM-DD
+  date: string; // "2025-12-01"
   siteName: string;
   eventType: EventType;
-  lossHashrate: number; // PH/s
-  lossPercent: number; // % of total capacity
+  lossHashrate: number;
+  lossPercent: number;
   durationHours: number;
+
+  // device_failure_hashrate: number;
+  // device_failure_rate: number;
+  // extreme_weather_hashrate: number;
+  // extreme_weather_rate: number;
+  // high_temperature_hashrate: number;
+  // high_temperature_rate: number;
+  // limit_hashrate: number;
+  // limit_rate: number;
+  // network_hashrate: number;
+  // network_rate: number;
+  // power_hashrate: number;
+  // power_rate: number;
+  // total_hashrate: number;
+  // venue_id: number;
+  // venue_name: string;
 }
 
 export interface EventAggregation {

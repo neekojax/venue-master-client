@@ -1,4 +1,5 @@
-import React, { useEffect, useMemo, useRef, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
+import { Spin } from "antd";
 import {
   AlertTriangle,
   BarChart3,
@@ -9,28 +10,31 @@ import {
   ChevronUp,
   CloudRain,
   Download,
-  Edit2,
-  FileText,
-  Filter,
   LayoutList,
   PieChart,
-  Plus,
-  Search,
   Server,
   Thermometer,
-  Trash2,
-  Upload,
   Wifi,
   Zap,
 } from "lucide-react";
-import { EventImpactRecord, EventType } from "./types";
+import SimplePieChart from "./SimplePieChart";
+import StackedBarChart from "./StackedBarChart";
+import {
+  CauseShareData,
+  dailyEventImpact,
+  EventImpactRecord,
+  EventType,
+  SiteData,
+  StatisticsData,
+} from "./types";
+import { useSelector, useSettingsStore } from "@/stores"; // 根据实际路径调整
 
-// --- Constants & Config ---
+import { fetchEventImpactDaily } from "@/pages/venue/api";
 
 const EVENT_CONFIG: Record<EventType, { label: string; color: string; bg: string; icon: React.ReactNode }> = {
-  power_limit: { label: "限电", color: "#f59e0b", bg: "bg-amber-50", icon: <Zap size={14} /> }, // Amber
-  high_temp: { label: "高温", color: "#ef4444", bg: "bg-red-50", icon: <Thermometer size={14} /> }, // Red
-  power_outage: { label: "电力", color: "#8b5cf6", bg: "bg-purple-50", icon: <AlertTriangle size={14} /> }, // Purple
+  limit: { label: "限电", color: "#f59e0b", bg: "bg-amber-50", icon: <Zap size={14} /> }, // Amber
+  high_temperature: { label: "高温", color: "#ef4444", bg: "bg-red-50", icon: <Thermometer size={14} /> }, // Red
+  power: { label: "电力", color: "#8b5cf6", bg: "bg-purple-50", icon: <AlertTriangle size={14} /> }, // Purple
   device_failure: { label: "设备故障", color: "#6b7280", bg: "bg-gray-50", icon: <Server size={14} /> }, // Gray
   network: { label: "网络", color: "#3b82f6", bg: "bg-blue-50", icon: <Wifi size={14} /> }, // Blue
   extreme_weather: {
@@ -41,281 +45,121 @@ const EVENT_CONFIG: Record<EventType, { label: string; color: string; bg: string
   }, // Emerald
 };
 
-const EVENT_TYPES = Object.keys(EVENT_CONFIG) as EventType[];
-
-const MOCK_SITES = [
-  "AllRise-HF01-SC-US",
-  "Atlas-HF02-ND-US",
-  "Bitmain-S19-Group-A",
-  "Oman-Datacenter-01",
-  "Ethiopia-Site-A",
-  "Paraguay-Hydro-01",
-  "Texas-Solar-Farm-02",
-  "Kazakhstan-Grid-B",
-  "Canada-Hydro-Quebec",
-  "Sweden-Wind-Farm-01",
-  "Norway-Hydro-04",
-  "Iceland-Geo-01",
-  "Dubai-Solar-Park",
-  "Argentina-Hydro-02",
-  "Bhutan-Hydro-01",
-];
-
-const MOCK_CAUSES = [
-  "断路器跳闸",
-  "电厂线路问题",
-  "高温价保停机",
-  "光纤挖断",
-  "变压器过载",
-  "例行停电检修",
-  "暴风雨天气",
-  "冷却系统故障",
-];
-
-// Generate Mock Data for 30 days
-const generateMockEvents = (): EventImpactRecord[] => {
-  const records: EventImpactRecord[] = [];
-  const now = new Date();
-
-  // Ensure we have data for "today" and recent days for all sites to make the table look populated
-  for (let i = 0; i < 60; i++) {
-    const date = new Date(now.getTime() - i * 86400000); // Past 60 days
-    const dateStr = date.toISOString().split("T")[0];
-
-    MOCK_SITES.forEach((site) => {
-      // Randomly decide if an event happened
-      if (Math.random() > 0.3) {
-        const type = EVENT_TYPES[Math.floor(Math.random() * EVENT_TYPES.length)];
-        // Generate some realistic small percentages, occasionally a large one
-        const isMajor = Math.random() > 0.9;
-        const lossPct = isMajor ? Math.random() * 5 + 3 : Math.random() * 2;
-
-        records.push({
-          id: `evt-${site}-${i}`,
-          date: dateStr,
-          siteName: site,
-          eventType: type,
-          lossHashrate: Math.floor(lossPct * 20), // Rough calc
-          lossPercent: parseFloat(lossPct.toFixed(2)),
-          durationHours: Math.floor(Math.random() * 24),
-        });
-      }
-    });
+const EVENT_CONFIG_NAME = (type: string) => {
+  if (type === "限电") {
+    return <Zap size={14} className="bg-amber-50" />;
   }
-  return records;
+  if (type === "高温") {
+    return <Thermometer size={14} className="bg-red-50" />;
+  }
+  if (type === "电力") {
+    return <AlertTriangle size={14} className="bg-yellow-50" />;
+  }
+  if (type === "设备故障") {
+    return <Server size={14} className="bg-gray-50" />;
+  }
+  if (type === "网络") {
+    return <Wifi size={14} className="bg-blue-50" />;
+  }
+  if (type === "极端天气") {
+    return <CloudRain size={14} className="bg-emerald-50" />;
+  }
+  return type;
 };
 
-// --- Charts Components ---
-
-const StackedBarChart: React.FC<{
-  data: { label: string; values: Record<EventType, number> }[];
-  mode: "daily" | "monthly";
-}> = ({ data, mode }) => {
-  const containerRef = useRef<HTMLDivElement>(null);
-  const [tooltipData, setTooltipData] = useState<{
-    x: number;
-    y: number;
-    label: string;
-    type: EventType;
-    value: number;
-  } | null>(null);
-
-  const height = 250;
-  const width = 800;
-  const paddingX = 40;
-  const paddingY = 30;
-
-  if (data.length === 0)
-    return <div className="h-full flex items-center justify-center text-gray-400">暂无数据</div>;
-
-  // Calculate Max Y for scale
-  const totals = data.map((d) => (Object.values(d.values) as number[]).reduce((a, b) => a + b, 0));
-  const maxTotal = Math.max(...totals) * 1.1 || 10;
-
-  const barWidth = Math.min(((width - paddingX * 2) / data.length) * 0.6, 50);
-
-  const getX = (index: number) =>
-    paddingX +
-    index * ((width - paddingX * 2) / data.length) +
-    ((width - paddingX * 2) / data.length - barWidth) / 2;
-  const getY = (val: number) => height - paddingY - (val / maxTotal) * (height - paddingY * 2);
-
-  return (
-    <div ref={containerRef} className="w-full h-full relative group">
-      <svg viewBox={`0 0 ${width} ${height}`} className="w-full h-full overflow-visible">
-        {/* Grid Lines */}
-        {[0, 0.25, 0.5, 0.75, 1].map((tick, i) => (
-          <g key={i}>
-            <line
-              x1={paddingX}
-              y1={getY(maxTotal * tick)}
-              x2={width}
-              y2={getY(maxTotal * tick)}
-              stroke="#f3f4f6"
-              strokeDasharray="4 4"
-            />
-            <text
-              x={paddingX - 10}
-              y={getY(maxTotal * tick) + 4}
-              textAnchor="end"
-              fontSize="10"
-              fill="#9ca3af"
-            >
-              {(maxTotal * tick).toFixed(0)}
-            </text>
-          </g>
-        ))}
-
-        {data.map((item, i) => {
-          let currentY = height - paddingY;
-          return (
-            <g key={i}>
-              {Object.entries(item.values).map(([type, val]) => {
-                const v = val as number;
-                if (v <= 0) return null;
-                const barH = (v / maxTotal) * (height - paddingY * 2);
-                const y = currentY - barH;
-                currentY = y;
-                return (
-                  <rect
-                    key={type}
-                    x={getX(i)}
-                    y={y}
-                    width={barWidth}
-                    height={barH}
-                    fill={EVENT_CONFIG[type as EventType].color}
-                    className="hover:opacity-80 transition-opacity cursor-pointer"
-                    onMouseMove={(e) => {
-                      if (containerRef.current) {
-                        const rect = containerRef.current.getBoundingClientRect();
-                        setTooltipData({
-                          x: e.clientX - rect.left,
-                          y: e.clientY - rect.top,
-                          label: item.label,
-                          type: type as EventType,
-                          value: v,
-                        });
-                      }
-                    }}
-                    onMouseLeave={() => setTooltipData(null)}
-                  />
-                );
-              })}
-              <text
-                x={getX(i) + barWidth / 2}
-                y={height - 5}
-                textAnchor="middle"
-                fontSize="10"
-                fill="#6b7280"
-                className="select-none"
-                transform={
-                  mode === "daily" ? `rotate(-15, ${getX(i) + barWidth / 2}, ${height - 5})` : undefined
-                }
-              >
-                {item.label}
-              </text>
-            </g>
-          );
-        })}
-      </svg>
-
-      {tooltipData && (
-        <div
-          className="absolute z-50 bg-gray-900/95 backdrop-blur-sm text-white text-xs rounded-lg shadow-xl p-3 pointer-events-none border border-white/10"
-          style={{
-            left: tooltipData.x,
-            top: tooltipData.y,
-            transform: "translate(-50%, -100%) translateY(-10px)", // Center horizontally above cursor
-            minWidth: "150px",
-          }}
-        >
-          <div className="font-bold text-gray-200 mb-1 border-b border-white/20 pb-1">
-            {tooltipData.label}
-          </div>
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-1.5">
-              <div
-                className="w-2 h-2 rounded-full"
-                style={{ backgroundColor: EVENT_CONFIG[tooltipData.type].color }}
-              ></div>
-              <span className="text-gray-300">{EVENT_CONFIG[tooltipData.type].label}</span>
-            </div>
-            <span className="font-mono font-bold">
-              {tooltipData.value.toFixed(2)}
-              {mode === "daily" ? "%" : " PH/s"}
-            </span>
-          </div>
-        </div>
-      )}
-    </div>
-  );
-};
-
-const SimplePieChart: React.FC<{ data: { type: EventType; value: number }[] }> = ({ data }) => {
-  const size = 160;
-  const center = size / 2;
-  const radius = size / 2 - 10;
-  const total = data.reduce((acc, cur) => acc + cur.value, 0);
-
-  if (total === 0) return <div className="h-full flex items-center justify-center text-gray-400">无数据</div>;
-
-  let currentAngle = 0;
-
-  return (
-    <div className="flex items-center gap-6">
-      <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`}>
-        {data.map((item, i) => {
-          const angle = (item.value / total) * 360;
-          const x1 = center + radius * Math.cos((Math.PI * currentAngle) / 180);
-          const y1 = center + radius * Math.sin((Math.PI * currentAngle) / 180);
-          const x2 = center + radius * Math.cos((Math.PI * (currentAngle + angle)) / 180);
-          const y2 = center + radius * Math.sin((Math.PI * (currentAngle + angle)) / 180);
-
-          const largeArc = angle > 180 ? 1 : 0;
-
-          // Fix for single item (360 degrees)
-          const d =
-            data.length === 1
-              ? `M ${center},${center - radius} A ${radius},${radius} 0 1,1 ${center},${center + radius} A ${radius},${radius} 0 1,1 ${center},${center - radius}`
-              : `M ${center} ${center} L ${x1} ${y1} A ${radius} ${radius} 0 ${largeArc} 1 ${x2} ${y2} Z`;
-
-          currentAngle += angle;
-
-          return (
-            <path key={item.type} d={d} fill={EVENT_CONFIG[item.type].color} stroke="white" strokeWidth="2" />
-          );
-        })}
-      </svg>
-      <div className="space-y-2">
-        {data.map((item) => (
-          <div key={item.type} className="flex items-center gap-2 text-sm">
-            <div
-              className="w-3 h-3 rounded-full"
-              style={{ backgroundColor: EVENT_CONFIG[item.type].color }}
-            ></div>
-            <span className="text-gray-600 w-20">{EVENT_CONFIG[item.type].label}</span>
-            <span className="font-mono font-medium">{((item.value / total) * 100).toFixed(1)}%</span>
-          </div>
-        ))}
-      </div>
-    </div>
-  );
-};
+const EVENT_TYPES = Object.keys(EVENT_CONFIG) as EventType[];
 
 // --- Analysis View (Original Content) ---
 
 const AnalysisView: React.FC = () => {
-  const [data, setData] = useState<EventImpactRecord[]>(generateMockEvents());
+  const [loading, setLoading] = useState(false);
+  const [data, setData] = useState<EventImpactRecord[]>([]);
+  const [venues, setVenues] = useState<SiteData[]>([]);
+  const [dailyData, setDailyData] = useState<dailyEventImpact[]>([]);
+  const [statistics, setStatistics] = useState<StatisticsData>({} as StatisticsData);
+  const [causeShare, setCauseShare] = useState<any[]>([]);
   const [viewMode, setViewMode] = useState<"daily" | "monthly">("daily");
+
   const [selectedDate, setSelectedDate] = useState(new Date().toISOString().slice(0, 10));
   const [selectedMonth, setSelectedMonth] = useState(new Date().toISOString().slice(0, 7));
-  const [selectedSite, setSelectedSite] = useState<string>("all");
+  const [selectedSite] = useState<string>("all");
   const [sortConfig, setSortConfig] = useState<{ key: string; direction: "asc" | "desc" } | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(10);
+  const { poolType } = useSettingsStore(useSelector(["poolType"]));
+
+  // Fetch real daily impact data and replace current dataset
+  useEffect(() => {
+    setCurrentPage(1);
+    setCauseShare([] as CauseShareData[]);
+    setStatistics({} as StatisticsData);
+    setDailyData([]);
+    setData([]);
+    const searchDate = viewMode === "daily" ? selectedDate : selectedMonth;
+    setLoading(true);
+    fetchEventImpactDaily(viewMode, poolType, searchDate)
+      .then((res) => {
+        // console.log("res >>", res);
+        const { data: resp } = res as { data: any };
+        const { venue_stats, statistics, cause_share, daily_stats } = resp || {};
+        const causeShareData = cause_share.map((item: any) => ({
+          type: item.type as EventType,
+          value: item.share || 0,
+        }));
+        setVenues(venue_stats || []);
+        setCauseShare(causeShareData);
+        setDailyData(daily_stats || []);
+        const normalized: EventImpactRecord[] = [];
+        (venue_stats || []).forEach((s: any) => {
+          const typeMap: Record<string, EventType> = {
+            limit: "limit",
+            high_temperature: "high_temperature",
+            power: "power",
+            device_failure: "device_failure",
+            network: "network",
+            extreme_weather: "extreme_weather",
+          };
+
+          Object.entries(typeMap).forEach(([key, eventType]) => {
+            const rate = s[`${key}_rate`] || 0;
+            const hashrate = s[`${key}_hashrate`] || 0;
+            if (rate > 0 || hashrate > 0) {
+              normalized.push({
+                id: `${s.venue_id}-${eventType}`,
+                date: searchDate,
+                siteName: s.venue_name,
+                eventType: eventType,
+                lossHashrate: hashrate,
+                lossPercent: rate,
+                durationHours: 0,
+              });
+            } else {
+              normalized.push({
+                id: `${s.venue_id}-${eventType}`,
+                date: searchDate,
+                siteName: s.venue_name,
+                eventType: eventType,
+                lossHashrate: 0,
+                lossPercent: 0,
+                durationHours: 0,
+              });
+            }
+          });
+        });
+        // console.log("normalized >>", normalized);
+
+        setData(normalized);
+        setStatistics(statistics || ({} as StatisticsData));
+      })
+      .catch((err) => {
+        console.error("Fetch failed", err);
+      })
+      .finally(() => {
+        setLoading(false);
+      });
+  }, [viewMode, selectedDate, selectedMonth, poolType]);
 
   // --- Filtering & Aggregation Logic ---
-
   const filteredRecords = useMemo(() => {
     return data.filter((r) => {
       const matchSite = selectedSite === "all" || r.siteName === selectedSite;
@@ -330,16 +174,14 @@ const AnalysisView: React.FC = () => {
   }, [data, selectedSite, viewMode, selectedDate, selectedMonth]);
 
   const pivotData = useMemo(() => {
-    // Record<SiteName, { values: Record<EventType, pct>, totalLossHashrate: number }>
     const sitesMap: Record<string, { values: Record<EventType, number>; totalLossHashrate: number }> = {};
-
-    MOCK_SITES.forEach((site) => {
-      if (selectedSite === "all" || selectedSite === site) {
-        sitesMap[site] = {
+    filteredRecords.forEach((r) => {
+      if (!sitesMap[r.siteName]) {
+        sitesMap[r.siteName] = {
           values: {
-            power_limit: 0,
-            high_temp: 0,
-            power_outage: 0,
+            limit: 0,
+            high_temperature: 0,
+            power: 0,
             device_failure: 0,
             network: 0,
             extreme_weather: 0,
@@ -347,13 +189,8 @@ const AnalysisView: React.FC = () => {
           totalLossHashrate: 0,
         };
       }
-    });
-
-    filteredRecords.forEach((r) => {
-      if (sitesMap[r.siteName]) {
-        sitesMap[r.siteName].values[r.eventType] += r.lossPercent;
-        sitesMap[r.siteName].totalLossHashrate += r.lossHashrate;
-      }
+      sitesMap[r.siteName].values[r.eventType] += r.lossPercent;
+      sitesMap[r.siteName].totalLossHashrate += r.lossHashrate;
     });
 
     return Object.entries(sitesMap).map(([siteName, data]) => ({
@@ -361,7 +198,7 @@ const AnalysisView: React.FC = () => {
       values: data.values,
       totalLossHashrate: data.totalLossHashrate,
     }));
-  }, [filteredRecords, selectedSite]);
+  }, [filteredRecords, selectedSite, viewMode]);
 
   const sortedPivotData = useMemo(() => {
     const d = [...pivotData];
@@ -396,27 +233,42 @@ const AnalysisView: React.FC = () => {
 
   const totalPages = Math.ceil(sortedPivotData.length / itemsPerPage);
 
-  const chartData = useMemo(() => {
+  const chartData: any = useMemo(() => {
     if (viewMode === "daily") {
-      return pivotData.map((p) => ({
-        label: p.siteName.split("-")[0],
-        values: { ...p.values },
-      }));
+      return pivotData
+        .map((p) => {
+          const allValuesAreZero = Object.values(p.values).every((val) => val === 0);
+          if (allValuesAreZero) {
+            return null;
+          }
+          return {
+            label: p.siteName,
+            values: { ...p.values },
+          };
+        })
+        .filter(Boolean);
     } else {
       const dailyGroup: Record<string, Record<EventType, number>> = {};
-      filteredRecords.forEach((r) => {
+      dailyData.forEach((r) => {
         const day = r.date.slice(5);
         if (!dailyGroup[day]) {
           dailyGroup[day] = {
-            power_limit: 0,
-            high_temp: 0,
-            power_outage: 0,
+            limit: 0,
+            high_temperature: 0,
+            power: 0,
             device_failure: 0,
             network: 0,
             extreme_weather: 0,
           };
         }
-        dailyGroup[day][r.eventType] += r.lossHashrate;
+        dailyGroup[day] = {
+          limit: r.limit_rate,
+          high_temperature: r.high_temperature_rate,
+          power: r.power_rate,
+          device_failure: r.device_failure_rate,
+          network: r.network_rate,
+          extreme_weather: r.extreme_weather_rate,
+        };
       });
       return Object.keys(dailyGroup)
         .sort()
@@ -425,35 +277,45 @@ const AnalysisView: React.FC = () => {
           values: dailyGroup[day],
         }));
     }
-  }, [viewMode, pivotData, filteredRecords]);
-
-  const pieData = useMemo(() => {
-    const totalByEvent: Record<EventType, number> = {
-      power_limit: 0,
-      high_temp: 0,
-      power_outage: 0,
-      device_failure: 0,
-      network: 0,
-      extreme_weather: 0,
-    };
-    filteredRecords.forEach((r) => {
-      totalByEvent[r.eventType] += r.lossHashrate;
-    });
-    return (Object.keys(totalByEvent) as EventType[])
-      .map((key) => ({
-        type: key,
-        value: totalByEvent[key],
-      }))
-      .sort((a, b) => b.value - a.value);
-  }, [filteredRecords]);
-
-  const totalLoss = filteredRecords.reduce((acc, r) => acc + r.lossHashrate, 0);
+  }, [viewMode, pivotData, filteredRecords, dailyData]);
 
   const handleExport = () => {
-    const headers = ["场地名称", "影响算力 (T)", ...EVENT_TYPES.map((t) => EVENT_CONFIG[t].label)];
-    const csvRows = sortedPivotData.map((row) => {
-      const vals = EVENT_TYPES.map((t) => row.values[t].toFixed(2) + "%");
-      return [row.siteName, row.totalLossHashrate, ...vals].join(",");
+    const headers = [
+      "场地名称",
+      "影响算力 (T)",
+      "限电影响算力 (T)",
+      "限电影响算力 (%)",
+      "高温影响算力 (T)",
+      "高温影响算力 (%)",
+      "电力影响算力 (T)",
+      "电力影响占比 (%)",
+      "设备故障影响算力 (T)",
+      "设备故障影响占比 (%)",
+      "网络影响算力 (T)",
+      "网络影响占比 (%)",
+      "极端天气影响算力 (T)",
+      "极端天气影响占比 (%)",
+    ];
+    const csvRows = venues.map((row) => {
+      // console.log("row", row);
+      // const vals = EVENT_TYPES.map((t) => row[t + "_rate"]?.toFixed(2) + "%" || "0%");
+      // console.log("vals", vals);
+      return [
+        row.venue_name,
+        row.total_hashrate,
+        row.limit_hashrate || 0,
+        row.limit_rate + "%",
+        row?.high_temperature_hashrate || 0,
+        row.high_temperature_rate + "%",
+        row.power_hashrate || 0,
+        row.power_rate + "%",
+        row.device_failure_hashrate || 0,
+        row.device_failure_rate + "%",
+        row.network_hashrate || 0,
+        row.network_rate + "%",
+        row.extreme_weather_hashrate || 0,
+        row.extreme_weather_rate + "%",
+      ].join(",");
     });
 
     const csvContent = [headers.join(","), ...csvRows].join("\n");
@@ -514,249 +376,243 @@ const AnalysisView: React.FC = () => {
   };
 
   return (
-    <div className="flex flex-col h-full bg-gray-50 overflow-hidden">
-      {/* Header Controls for Analysis */}
-      <div className="px-6 py-4 flex flex-col md:flex-row md:items-center justify-between shrink-0 z-20 gap-4 bg-white border-b border-gray-100">
-        <div className="flex flex-wrap items-center gap-3">
-          <div className="bg-gray-100 p-1 rounded-lg flex items-center text-sm font-medium">
-            <button
-              onClick={() => setViewMode("daily")}
-              className={`px-3 py-1.5 rounded-md transition-all ${viewMode === "daily" ? "bg-white text-blue-600 shadow-sm" : "text-gray-500 hover:text-gray-700"}`}
-            >
-              日维度
-            </button>
-            <button
-              onClick={() => setViewMode("monthly")}
-              className={`px-3 py-1.5 rounded-md transition-all ${viewMode === "monthly" ? "bg-white text-blue-600 shadow-sm" : "text-gray-500 hover:text-gray-700"}`}
-            >
-              月维度
-            </button>
-          </div>
+    <Spin spinning={loading} tip="加载中...">
+      <div className="flex flex-col h-full bg-gray-50 overflow-hidden">
+        {/* Header Controls for Analysis */}
+        <div className="px-6 py-4 flex flex-col md:flex-row md:items-center justify-between shrink-0 z-20 gap-4 bg-white border-b border-gray-100">
+          <div className="flex flex-wrap items-center gap-3">
+            <div className="bg-gray-100 p-1 rounded-lg flex items-center text-sm font-medium">
+              <button
+                onClick={() => setViewMode("daily")}
+                className={`px-3 py-1.5 rounded-md transition-all ${viewMode === "daily" ? "bg-white text-blue-600 shadow-sm" : "text-gray-500 hover:text-gray-700"}`}
+              >
+                日维度
+              </button>
+              <button
+                onClick={() => setViewMode("monthly")}
+                className={`px-3 py-1.5 rounded-md transition-all ${viewMode === "monthly" ? "bg-white text-blue-600 shadow-sm" : "text-gray-500 hover:text-gray-700"}`}
+              >
+                月维度
+              </button>
+            </div>
 
-          <div className="h-6 w-px bg-gray-300 mx-1 hidden md:block"></div>
-
-          <div className="flex items-center gap-2 bg-white border border-gray-300 rounded-md px-3 py-1.5 shadow-sm hover:border-blue-400 transition-colors">
-            <Calendar size={16} className="text-gray-400" />
-            {viewMode === "daily" ? (
-              <input
-                type="date"
-                value={selectedDate}
-                onChange={(e) => setSelectedDate(e.target.value)}
-                className="bg-transparent text-sm text-gray-700 outline-none cursor-pointer font-mono font-medium"
-              />
-            ) : (
-              <input
-                type="month"
-                value={selectedMonth}
-                onChange={(e) => setSelectedMonth(e.target.value)}
-                className="bg-transparent text-sm text-gray-700 outline-none cursor-pointer font-mono font-medium"
-              />
-            )}
-          </div>
-        </div>
-
-        <button
-          onClick={handleExport}
-          className="bg-white border border-gray-300 hover:bg-gray-50 text-gray-700 px-3 py-1.5 rounded-md text-sm font-medium flex items-center gap-2 transition-colors shadow-sm"
-        >
-          <Download size={16} />
-          <span className="hidden sm:inline">导出表格</span>
-        </button>
-      </div>
-
-      <div className="flex-1 overflow-y-auto p-6 space-y-6">
-        {/* Top Metrics Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-          <div className="bg-white p-4 rounded-xl border border-gray-200 shadow-sm">
-            <div className="text-xs text-gray-500 font-medium uppercase mb-1">筛选范围总损失 (PH/s)</div>
-            <div className="text-2xl font-bold text-gray-900 font-mono">{totalLoss}</div>
-          </div>
-
-          <div className="bg-white p-4 rounded-xl border border-gray-200 shadow-sm">
-            <div className="text-xs text-gray-500 font-medium uppercase mb-1">主要影响类别</div>
-            <div className="text-lg font-bold text-gray-900 flex items-center gap-2">
-              {pieData.length > 0 ? (
-                <>
-                  <div className="p-1 rounded bg-gray-100">{EVENT_CONFIG[pieData[0].type].icon}</div>
-                  {EVENT_CONFIG[pieData[0].type].label}
-                </>
+            <div className="h-6 w-px bg-gray-300 mx-1 hidden md:block"></div>
+            <div className="flex items-center gap-2 bg-white border border-gray-300 rounded-md px-3 py-1.5 shadow-sm hover:border-blue-400 transition-colors">
+              <Calendar size={16} className="text-gray-400" />
+              {viewMode === "daily" ? (
+                <input
+                  type="date"
+                  value={selectedDate}
+                  onChange={(e) => setSelectedDate(e.target.value)}
+                  className="bg-transparent text-sm text-gray-700 outline-none cursor-pointer font-mono font-medium"
+                />
               ) : (
-                "-"
+                <input
+                  type="month"
+                  value={selectedMonth}
+                  onChange={(e) => setSelectedMonth(e.target.value)}
+                  className="bg-transparent text-sm text-gray-700 outline-none cursor-pointer font-mono font-medium"
+                />
               )}
             </div>
           </div>
 
-          <div className="bg-white p-4 rounded-xl border border-gray-200 shadow-sm">
-            <div className="text-xs text-gray-500 font-medium uppercase mb-1">受影响场地数</div>
-            <div className="text-2xl font-bold text-gray-900 font-mono">
-              {pivotData.filter((p) => (Object.values(p.values) as number[]).some((v) => v > 0)).length}
-            </div>
-          </div>
-
-          <div className="bg-white p-4 rounded-xl border border-gray-200 shadow-sm">
-            <div className="text-xs text-gray-500 font-medium uppercase mb-1">记录条数</div>
-            <div className="text-2xl font-bold text-gray-900 font-mono">{filteredRecords.length}</div>
-          </div>
+          <button
+            onClick={handleExport}
+            className="bg-white border border-gray-300 hover:bg-gray-50 text-gray-700 px-3 py-1.5 rounded-md text-sm font-medium flex items-center gap-2 transition-colors shadow-sm"
+          >
+            <Download size={16} />
+            <span className="hidden sm:inline">导出表格</span>
+          </button>
         </div>
 
-        {/* Matrix Table */}
-        <div className="bg-white rounded-xl border border-gray-200 shadow-sm flex flex-col overflow-hidden">
-          <div className="px-6 py-4 border-b border-gray-100 flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <div className="bg-blue-50 p-1.5 rounded text-blue-600">
-                <LayoutList size={16} />
+        <div className="flex-1 overflow-y-auto p-6 space-y-6">
+          {/* Top Metrics Cards */}
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <div className="bg-white p-4 rounded-xl border border-gray-200 shadow-sm">
+              <div className="text-xs text-gray-500 font-medium uppercase mb-1">筛选范围总损失 (PH/s)</div>
+              <div className="text-2xl font-bold text-gray-900 font-mono">
+                {statistics.total_loss_hashrate}
               </div>
-              <h3 className="font-bold text-gray-800">各场地事件影响分布表</h3>
             </div>
-            <div className="text-xs text-gray-400">单位: 影响比例 (%)</div>
+
+            <div className="bg-white p-4 rounded-xl border border-gray-200 shadow-sm">
+              <div className="text-xs text-gray-500 font-medium uppercase mb-1">主要影响类别</div>
+              <div className="text-lg font-bold text-gray-900 flex items-center gap-2">
+                <>
+                  <div className="p-1 rounded bg-gray-100">
+                    {EVENT_CONFIG_NAME(statistics.main_impact_category)}
+                  </div>
+                  {statistics.main_impact_category}
+                </>
+              </div>
+            </div>
+
+            <div className="bg-white p-4 rounded-xl border border-gray-200 shadow-sm">
+              <div className="text-xs text-gray-500 font-medium uppercase mb-1">受影响场地数</div>
+              <div className="text-2xl font-bold text-gray-900 font-mono">
+                {statistics.affected_venue_count}
+                {/* {pivotData.filter((p) => (Object.values(p.values) as number[]).some((v) => v > 0)).length} */}
+              </div>
+            </div>
+
+            <div className="bg-white p-4 rounded-xl border border-gray-200 shadow-sm">
+              <div className="text-xs text-gray-500 font-medium uppercase mb-1">记录条数</div>
+              <div className="text-2xl font-bold text-gray-900 font-mono">{statistics.record_count}</div>
+            </div>
           </div>
 
-          <div className="overflow-x-auto">
-            <table className="min-w-full divide-y divide-gray-200 table-fixed">
-              <thead className="bg-gray-50">
-                <tr>
-                  <th
-                    className="px-6 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider w-64 cursor-pointer hover:bg-gray-100 transition-colors"
-                    onClick={() => handleSort("siteName")}
-                  >
-                    <div className="flex items-center gap-1">
-                      场地名称
-                      {renderSortIcon("siteName")}
-                    </div>
-                  </th>
-                  <th
-                    className="px-4 py-3 text-right text-xs font-bold text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100 transition-colors"
-                    onClick={() => handleSort("totalLossHashrate")}
-                  >
-                    <div className="flex items-center justify-end gap-1">
-                      影响算力 (T)
-                      {renderSortIcon("totalLossHashrate")}
-                    </div>
-                  </th>
-                  {EVENT_TYPES.map((type) => (
+          {/* Matrix Table */}
+          <div className="bg-white rounded-xl border border-gray-200 shadow-sm flex flex-col overflow-hidden">
+            <div className="px-6 py-4 border-b border-gray-100 flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <div className="bg-blue-50 p-1.5 rounded text-blue-600">
+                  <LayoutList size={16} />
+                </div>
+                <h3 className="font-bold text-gray-800">各场地事件影响分布表</h3>
+              </div>
+              <div className="text-xs text-gray-400">单位: 影响比例 (%)</div>
+            </div>
+
+            <div className="overflow-x-auto">
+              <table className="min-w-full divide-y divide-gray-200 table-fixed">
+                <thead className="bg-gray-50">
+                  <tr>
                     <th
-                      key={type}
-                      className="px-4 py-3 text-right text-xs font-bold text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100 transition-colors"
-                      onClick={() => handleSort(type)}
+                      className="px-6 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider w-64 cursor-pointer hover:bg-gray-100 transition-colors"
+                      onClick={() => handleSort("siteName")}
                     >
-                      <div className="flex items-center justify-end gap-1">
-                        {EVENT_CONFIG[type].label}
-                        {renderSortIcon(type)}
+                      <div className="flex items-center gap-1">
+                        场地名称
+                        {renderSortIcon("siteName")}
                       </div>
                     </th>
+
+                    {EVENT_TYPES.map((type) => (
+                      <th
+                        key={type}
+                        className="px-4 py-3 text-right text-xs font-bold text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100 transition-colors"
+                        onClick={() => handleSort(type)}
+                      >
+                        <div className="flex items-center justify-end gap-1">
+                          {EVENT_CONFIG[type].label}
+                          {renderSortIcon(type)}
+                        </div>
+                      </th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody className="bg-white divide-y divide-gray-200">
+                  {paginatedData.map((row) => (
+                    <tr key={row.siteName} className="hover:bg-gray-50 transition-colors">
+                      <td className="px-6 py-4 text-sm font-medium text-gray-900 truncate border-r border-gray-100 bg-white sticky left-0 shadow-[2px_0_5px_-2px_rgba(0,0,0,0.05)]">
+                        {row.siteName}
+                      </td>
+                      {/* <td className="px-4 py-4 text-sm text-right font-mono text-gray-700 border-r border-gray-100">
+                      {row.totalLossHashrate.toFixed(2)}
+                    </td> */}
+                      {EVENT_TYPES.map((type) => {
+                        const val = row.values[type];
+                        return (
+                          <td
+                            key={type}
+                            className={`px-4 py-4 text-sm text-right font-mono border-b border-gray-50 ${getCellClass(val)}`}
+                          >
+                            {val > 0 ? val.toFixed(2) : "0.00"}%
+                          </td>
+                        );
+                      })}
+                    </tr>
                   ))}
-                </tr>
-              </thead>
-              <tbody className="bg-white divide-y divide-gray-200">
-                {paginatedData.map((row) => (
-                  <tr key={row.siteName} className="hover:bg-gray-50 transition-colors">
-                    <td className="px-6 py-4 text-sm font-medium text-gray-900 truncate border-r border-gray-100 bg-white sticky left-0 shadow-[2px_0_5px_-2px_rgba(0,0,0,0.05)]">
-                      {row.siteName}
-                    </td>
-                    <td className="px-4 py-4 text-sm text-right font-mono text-gray-700 border-r border-gray-100">
-                      {row.totalLossHashrate}
-                    </td>
-                    {EVENT_TYPES.map((type) => {
-                      const val = row.values[type];
-                      return (
-                        <td
-                          key={type}
-                          className={`px-4 py-4 text-sm text-right font-mono border-b border-gray-50 ${getCellClass(val)}`}
-                        >
-                          {val.toFixed(2)}%
-                        </td>
-                      );
-                    })}
-                  </tr>
-                ))}
-                {paginatedData.length === 0 && (
-                  <tr>
-                    <td colSpan={EVENT_TYPES.length + 2} className="px-6 py-10 text-center text-gray-500">
-                      暂无数据
-                    </td>
-                  </tr>
-                )}
-              </tbody>
-            </table>
-          </div>
+                  {data.length === 0 && (
+                    <tr>
+                      <td colSpan={EVENT_TYPES.length + 2} className="px-6 py-10 text-center text-gray-500">
+                        暂无数据
+                      </td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
 
-          {/* Pagination */}
-          {sortedPivotData.length > 0 && (
-            <div className="px-6 py-4 border-t border-gray-100 flex flex-col sm:flex-row items-center justify-between gap-4 bg-gray-50">
-              <div className="text-sm text-gray-500">
-                显示 <span className="font-medium text-gray-900">{(currentPage - 1) * itemsPerPage + 1}</span>{" "}
-                到{" "}
-                <span className="font-medium text-gray-900">
-                  {Math.min(currentPage * itemsPerPage, sortedPivotData.length)}
-                </span>{" "}
-                条，共 <span className="font-medium text-gray-900">{sortedPivotData.length}</span> 条
-              </div>
-
-              <div className="flex items-center gap-4">
-                <div className="flex items-center gap-2">
-                  <span className="text-sm text-gray-500">每页:</span>
-                  <select
-                    value={itemsPerPage}
-                    onChange={(e) => {
-                      setItemsPerPage(Number(e.target.value));
-                      setCurrentPage(1);
-                    }}
-                    className="bg-white border border-gray-300 text-gray-700 text-sm rounded-md focus:ring-blue-500 focus:border-blue-500 p-1 pr-6 cursor-pointer shadow-sm outline-none"
-                  >
-                    <option value={5}>5 条</option>
-                    <option value={10}>10 条</option>
-                    <option value={20}>20 条</option>
-                  </select>
+            {/* Pagination */}
+            {sortedPivotData.length > 0 && (
+              <div className="px-6 py-4 border-t border-gray-100 flex flex-col sm:flex-row items-center justify-between gap-4 bg-gray-50">
+                <div className="text-sm text-gray-500">
+                  显示{" "}
+                  <span className="font-medium text-gray-900">{(currentPage - 1) * itemsPerPage + 1}</span> 到{" "}
+                  <span className="font-medium text-gray-900">
+                    {Math.min(currentPage * itemsPerPage, sortedPivotData.length)}
+                  </span>{" "}
+                  条，共 <span className="font-medium text-gray-900">{sortedPivotData.length}</span> 条
                 </div>
 
-                <div className="flex rounded-md shadow-sm">
-                  <button
-                    onClick={() => handlePageChange(currentPage - 1)}
-                    disabled={currentPage === 1}
-                    className="relative inline-flex items-center rounded-l-md border border-gray-300 bg-white px-2 py-2 text-sm font-medium text-gray-500 hover:bg-gray-50 focus:z-10 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-                  >
-                    <ChevronLeft size={16} />
-                  </button>
-                  <span className="relative inline-flex items-center border-t border-b border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 min-w-[3rem] justify-center">
-                    {currentPage} / {totalPages}
-                  </span>
-                  <button
-                    onClick={() => handlePageChange(currentPage + 1)}
-                    disabled={currentPage === totalPages || totalPages === 0}
-                    className="relative inline-flex items-center rounded-r-md border border-gray-300 bg-white px-2 py-2 text-sm font-medium text-gray-500 hover:bg-gray-50 focus:z-10 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-                  >
-                    <ChevronRight size={16} />
-                  </button>
+                <div className="flex items-center gap-4">
+                  <div className="flex items-center gap-2">
+                    <span className="text-sm text-gray-500">每页:</span>
+                    <select
+                      value={itemsPerPage}
+                      onChange={(e) => {
+                        setItemsPerPage(Number(e.target.value));
+                        setCurrentPage(1);
+                      }}
+                      className="bg-white border border-gray-300 text-gray-700 text-sm rounded-md focus:ring-blue-500 focus:border-blue-500 p-1 pr-6 cursor-pointer shadow-sm outline-none"
+                    >
+                      <option value={5}>5 条</option>
+                      <option value={10}>10 条</option>
+                      <option value={20}>20 条</option>
+                    </select>
+                  </div>
+
+                  <div className="flex rounded-md shadow-sm">
+                    <button
+                      onClick={() => handlePageChange(currentPage - 1)}
+                      disabled={currentPage === 1}
+                      className="relative inline-flex items-center rounded-l-md border border-gray-300 bg-white px-2 py-2 text-sm font-medium text-gray-500 hover:bg-gray-50 focus:z-10 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                    >
+                      <ChevronLeft size={16} />
+                    </button>
+                    <span className="relative inline-flex items-center border-t border-b border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 min-w-[3rem] justify-center">
+                      {currentPage} / {totalPages}
+                    </span>
+                    <button
+                      onClick={() => handlePageChange(currentPage + 1)}
+                      disabled={currentPage === totalPages || totalPages === 0}
+                      className="relative inline-flex items-center rounded-r-md border border-gray-300 bg-white px-2 py-2 text-sm font-medium text-gray-500 hover:bg-gray-50 focus:z-10 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                    >
+                      <ChevronRight size={16} />
+                    </button>
+                  </div>
                 </div>
               </div>
-            </div>
-          )}
-        </div>
-
-        {/* Charts */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 h-[320px]">
-          <div className="lg:col-span-2 bg-white p-5 rounded-xl border border-gray-200 shadow-sm flex flex-col">
-            <h3 className="font-bold text-gray-800 mb-4 flex items-center gap-2">
-              <BarChart3 size={16} className="text-blue-500" />
-              {viewMode === "daily" ? "各场地影响对比" : "月度趋势分析"}
-            </h3>
-            <div className="flex-1 min-h-0">
-              <StackedBarChart data={chartData} mode={viewMode} />
-            </div>
+            )}
           </div>
 
-          <div className="bg-white p-5 rounded-xl border border-gray-200 shadow-sm flex flex-col">
-            <h3 className="font-bold text-gray-800 mb-4 flex items-center gap-2">
-              <PieChart size={16} className="text-purple-500" />
-              损失原因占比
-            </h3>
-            <div className="flex-1 min-h-0 flex items-center justify-center">
-              <SimplePieChart data={pieData} />
+          {/* Charts */}
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 h-[320px]">
+            <div className="lg:col-span-2 bg-white p-5 rounded-xl border border-gray-200 shadow-sm flex flex-col">
+              <h3 className="font-bold text-gray-800 mb-4 flex items-center gap-2">
+                <BarChart3 size={16} className="text-blue-500" />
+                {viewMode === "daily" ? "各场地影响对比" : "月度趋势分析"}
+              </h3>
+              <div className="flex-1 min-h-0">
+                <StackedBarChart data={chartData} mode={viewMode} />
+              </div>
+            </div>
+
+            <div className="bg-white p-5 rounded-xl border border-gray-200 shadow-sm flex flex-col">
+              <h3 className="font-bold text-gray-800 mb-4 flex items-center gap-2">
+                <PieChart size={16} className="text-purple-500" />
+                损失原因占比
+              </h3>
+              <div className="flex-1 min-h-0 flex items-center justify-center">
+                <SimplePieChart data={causeShare} />
+              </div>
             </div>
           </div>
         </div>
       </div>
-    </div>
+    </Spin>
   );
 };
 

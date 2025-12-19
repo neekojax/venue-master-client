@@ -79,13 +79,13 @@ const SiderItems = () => {
             ]
           : []),
 
-        {
-          key: ROUTE_PATHS.eventLog,
-          label: <Link to={ROUTE_PATHS.eventLog}>事件日志</Link>,
-        },
+        // {
+        //   key: ROUTE_PATHS.eventLog,
+        //   label: <Link to={ROUTE_PATHS.eventLog}>事件日志</Link>,
+        // },
         {
           key: ROUTE_PATHS.eventAnalysis,
-          label: <Link to={ROUTE_PATHS.eventAnalysis}>事件分析</Link>,
+          label: <Link to={ROUTE_PATHS.eventAnalysis}>事件日志</Link>,
         },
         {
           key: ROUTE_PATHS.venueSetting,
