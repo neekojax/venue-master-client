@@ -32,3 +32,10 @@ export const formatDivide1000 = (value: number | string): string => {
   if (isNaN(num)) return "-"; // 非数字处理
   return (num / 1000).toFixed(3);
 };
+
+export const formatThousands = (value?: number | string | null): string => {
+  if (value === null || value === undefined || value === "") return "--";
+  const num = Number(value);
+  if (isNaN(num)) return "--";
+  return num.toLocaleString();
+};

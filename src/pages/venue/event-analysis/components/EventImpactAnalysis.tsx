@@ -28,6 +28,7 @@ import {
   StatisticsData,
 } from "./types";
 import { useSelector, useSettingsStore } from "@/stores"; // 根据实际路径调整
+import { formatThousands } from "@/utils/format";
 
 import { fetchEventImpactDaily } from "@/pages/venue/api";
 
@@ -80,8 +81,16 @@ const AnalysisView: React.FC = () => {
   const [causeShare, setCauseShare] = useState<any[]>([]);
   const [viewMode, setViewMode] = useState<"daily" | "monthly">("daily");
 
-  const [selectedDate, setSelectedDate] = useState(new Date().toISOString().slice(0, 10));
-  const [selectedMonth, setSelectedMonth] = useState(new Date().toISOString().slice(0, 7));
+  const [selectedDate, setSelectedDate] = useState(() => {
+    const today = new Date();
+    const yesterday = new Date(today);
+    yesterday.setDate(today.getDate() - 1);
+    return yesterday.toISOString().slice(0, 10);
+  });
+  const [selectedMonth, setSelectedMonth] = useState(() => {
+    const today = new Date();
+    return today.toISOString().slice(0, 7);
+  });
   const [selectedSite] = useState<string>("all");
   const [sortConfig, setSortConfig] = useState<{ key: string; direction: "asc" | "desc" } | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
@@ -432,7 +441,7 @@ const AnalysisView: React.FC = () => {
             <div className="bg-white p-4 rounded-xl border border-gray-200 shadow-sm">
               <div className="text-xs text-gray-500 font-medium uppercase mb-1">筛选范围总损失 (PH/s)</div>
               <div className="text-2xl font-bold text-gray-900 font-mono">
-                {statistics.total_loss_hashrate}
+                {formatThousands(statistics.total_loss_hashrate)}
               </div>
             </div>
 
@@ -458,7 +467,9 @@ const AnalysisView: React.FC = () => {
 
             <div className="bg-white p-4 rounded-xl border border-gray-200 shadow-sm">
               <div className="text-xs text-gray-500 font-medium uppercase mb-1">记录条数</div>
-              <div className="text-2xl font-bold text-gray-900 font-mono">{statistics.record_count}</div>
+              <div className="text-2xl font-bold text-gray-900 font-mono">
+                {formatThousands(statistics.record_count)}
+              </div>
             </div>
           </div>
 
@@ -479,7 +490,7 @@ const AnalysisView: React.FC = () => {
                 <thead className="bg-gray-50">
                   <tr>
                     <th
-                      className="px-6 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider w-64 cursor-pointer hover:bg-gray-100 transition-colors"
+                      className="px-6 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider w-[250px] overflow-hidden text-ellipsis whitespace-nowrap cursor-pointer hover:bg-gray-100 transition-colors"
                       onClick={() => handleSort("siteName")}
                     >
                       <div className="flex items-center gap-1">

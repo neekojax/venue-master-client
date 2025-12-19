@@ -4,7 +4,7 @@ import AnalysisView from "./components/EventImpactAnalysis";
 import EventLogsView from "./components/EventLog";
 
 const EventImpactAnalysis: React.FC = () => {
-  const [activeTab, setActiveTab] = useState<"analysis" | "logs">("analysis");
+  const [activeTab, setActiveTab] = useState<"analysis" | "logs">("logs");
 
   return (
     <div className="flex flex-col h-full bg-gray-50">
