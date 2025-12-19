@@ -96,6 +96,17 @@ export const venueRoute: RouteObject = {
         crumb: () => <Link to={ROUTE_PATHS.eventLog}>事件日志</Link>,
       },
     },
+    {
+      path: ROUTE_PATHS.eventAnalysis,
+      lazy: async () => ({
+        Component: (await import("@/pages/venue/event-analysis")).default,
+      }),
+      HydrateFallback: ProgressBar,
+      handle: {
+        title: "事件分析",
+        crumb: () => <Link to={ROUTE_PATHS.eventAnalysis}>事件分析</Link>,
+      },
+    },
 
     {
       path: ROUTE_PATHS.venueSetting,
