@@ -1,5 +1,7 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { Spin } from "antd";
+import ExcelJS from "exceljs";
+import { saveAs } from "file-saver";
 import {
   AlertTriangle,
   BarChart3,
@@ -288,59 +290,6 @@ const AnalysisView: React.FC = () => {
     }
   }, [viewMode, pivotData, filteredRecords, dailyData]);
 
-  const handleExport = () => {
-    const headers = [
-      "场地名称",
-      // "影响算力 (T)",
-      "限电影响算力 (T)",
-      "限电影响算力 (%)",
-      "高温影响算力 (T)",
-      "高温影响算力 (%)",
-      "电力影响算力 (T)",
-      "电力影响占比 (%)",
-      "设备故障影响算力 (T)",
-      "设备故障影响占比 (%)",
-      "网络影响算力 (T)",
-      "网络影响占比 (%)",
-      "极端天气影响算力 (T)",
-      "极端天气影响占比 (%)",
-    ];
-    const csvRows = venues.map((row) => {
-      // console.log("row", row);
-      // const vals = EVENT_TYPES.map((t) => row[t + "_rate"]?.toFixed(2) + "%" || "0%");
-      // console.log("vals", vals);
-      return [
-        row.venue_name,
-        // row.total_hashrate || 0,
-        row.limit_hashrate || 0,
-        row.limit_rate + "%",
-        row?.high_temperature_hashrate || 0,
-        row.high_temperature_rate + "%",
-        row.power_hashrate || 0,
-        row.power_rate + "%",
-        row.device_failure_hashrate || 0,
-        row.device_failure_rate + "%",
-        row.network_hashrate || 0,
-        row.network_rate + "%",
-        row.extreme_weather_hashrate || 0,
-        row.extreme_weather_rate + "%",
-      ].join(",");
-    });
-
-    const csvContent = [headers.join(","), ...csvRows].join("\n");
-    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
-    const link = document.createElement("a");
-    const url = URL.createObjectURL(blob);
-    link.setAttribute("href", url);
-    link.setAttribute(
-      "download",
-      `事件影响_${viewMode}_${viewMode === "daily" ? selectedDate : selectedMonth}.csv`,
-    );
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-  };
-
   const handleSort = (key: string) => {
     let direction: "asc" | "desc" = "desc";
     if (sortConfig && sortConfig.key === key && sortConfig.direction === "desc") {
@@ -382,6 +331,155 @@ const AnalysisView: React.FC = () => {
         <ChevronDown size={10} className="text-blue-600" />
       </div>
     );
+  };
+
+  const handleExport = async () => {
+    const workbook = new ExcelJS.Workbook();
+    const worksheet = workbook.addWorksheet("事件影响分析");
+
+    const headers = [
+      "场地名称",
+      "限电影响算力 (T)",
+      "限电影响算力 (%)",
+      "高温影响算力 (T)",
+      "高温影响算力 (%)",
+      "电力影响算力 (T)",
+      "电力影响占比 (%)",
+      "设备故障影响算力 (T)",
+      "设备故障影响占比 (%)",
+      "网络影响算力 (T)",
+      "网络影响占比 (%)",
+      "极端天气影响算力 (T)",
+      "极端天气影响占比 (%)",
+    ];
+
+    worksheet.addRow(headers);
+
+    const data = venues.map((row) => ({
+      venue_name: row.venue_name,
+      limit_hashrate: row.limit_hashrate || 0,
+      limit_rate: row.limit_rate.toFixed(2) + "%",
+      high_temperature_hashrate: row?.high_temperature_hashrate || 0,
+      high_temperature_rate: row.high_temperature_rate + "%",
+      power_hashrate: row.power_hashrate || 0,
+      power_rate: row.power_rate.toFixed(2) + "%",
+      device_failure_hashrate: row.device_failure_hashrate || 0,
+      device_failure_rate: row.device_failure_rate.toFixed(2) + "%",
+      network_hashrate: row.network_hashrate || 0,
+      network_rate: row.network_rate.toFixed(2) + "%",
+      extreme_weather_hashrate: row.extreme_weather_hashrate || 0,
+      extreme_weather_rate: row.extreme_weather_rate.toFixed(2) + "%",
+    }));
+
+    data.forEach((row, rIdx) => {
+      const newRow = worksheet.addRow(Object.values(row));
+      // Apply conditional styling for limit_rate column
+      const limitRateColIndex = headers.indexOf("限电影响算力 (%)") + 1; // ExcelJS is 1-indexed
+      if (limitRateColIndex > 0) {
+        const originalLimitRate = venues[rIdx].limit_rate;
+        if (originalLimitRate > 1) {
+          const cell = newRow.getCell(limitRateColIndex);
+          cell.fill = {
+            type: "pattern",
+            pattern: "solid",
+            fgColor: { argb: "FFFFC7CE" }, // Light red background
+          };
+          cell.font = {
+            bold: true,
+          };
+        }
+      }
+      const highTemperatureRateColIndex = headers.indexOf("高温影响算力 (%)") + 1; // ExcelJS is 1-indexed
+      if (highTemperatureRateColIndex > 0) {
+        const originalHighTemperatureRate = venues[rIdx].high_temperature_rate;
+        if (originalHighTemperatureRate > 1) {
+          const cell = newRow.getCell(highTemperatureRateColIndex);
+          cell.fill = {
+            type: "pattern",
+            pattern: "solid",
+            fgColor: { argb: "FFFFC7CE" }, // Light red background
+          };
+          cell.font = {
+            bold: true,
+          };
+        }
+      }
+      const powerRateColIndex = headers.indexOf("电力影响占比 (%)") + 1; // ExcelJS is 1-indexed
+      if (powerRateColIndex > 0) {
+        const originalPowerRate = venues[rIdx].power_rate;
+        if (originalPowerRate > 1) {
+          const cell = newRow.getCell(powerRateColIndex);
+          cell.fill = {
+            type: "pattern",
+            pattern: "solid",
+            fgColor: { argb: "FFFFC7CE" }, // Light red background
+          };
+          cell.font = {
+            bold: true,
+          };
+        }
+      }
+      const deviceFailureRateColIndex = headers.indexOf("设备故障影响占比 (%)") + 1; // ExcelJS is 1-indexed
+      if (deviceFailureRateColIndex > 0) {
+        const originalDeviceFailureRate = venues[rIdx].device_failure_rate;
+        if (originalDeviceFailureRate > 1) {
+          const cell = newRow.getCell(deviceFailureRateColIndex);
+          cell.fill = {
+            type: "pattern",
+            pattern: "solid",
+            fgColor: { argb: "FFFFC7CE" }, // Light red background
+          };
+          cell.font = {
+            bold: true,
+          };
+        }
+      }
+      const networkRateColIndex = headers.indexOf("网络影响占比 (%)") + 1; // ExcelJS is 1-indexed
+      if (networkRateColIndex > 0) {
+        const originalNetworkRate = venues[rIdx].network_rate;
+        if (originalNetworkRate > 1) {
+          const cell = newRow.getCell(networkRateColIndex);
+          cell.fill = {
+            type: "pattern",
+            pattern: "solid",
+            fgColor: { argb: "FFFFC7CE" }, // Light red background
+          };
+          cell.font = {
+            bold: true,
+          };
+        }
+      }
+      const extremeWeatherRateColIndex = headers.indexOf("极端天气影响占比 (%)") + 1; // ExcelJS is 1-indexed
+      if (extremeWeatherRateColIndex > 0) {
+        const originalExtremeWeatherRate = venues[rIdx].extreme_weather_rate;
+        if (originalExtremeWeatherRate > 1) {
+          const cell = newRow.getCell(extremeWeatherRateColIndex);
+          cell.fill = {
+            type: "pattern",
+            pattern: "solid",
+            fgColor: { argb: "FFFFC7CE" }, // Light red background
+          };
+          cell.font = {
+            bold: true,
+          };
+        }
+      }
+    });
+
+    // Adjust column widths using getColumn to avoid undefined columns
+    headers.forEach((header, i) => {
+      const column = worksheet.getColumn(i + 1);
+      let maxLength = header.length;
+      column.eachCell({ includeEmpty: true }, (cell) => {
+        const cellValue = cell.value ? String(cell.value) : "";
+        maxLength = Math.max(maxLength, cellValue.length);
+      });
+      column.width = Math.max(10, maxLength + 2); // Add padding and minimum width
+    });
+
+    const buffer = await workbook.xlsx.writeBuffer();
+    const fileName = `事件影响_${viewMode}_${viewMode === "daily" ? selectedDate : selectedMonth}.xlsx`;
+    saveAs(new Blob([buffer]), fileName);
   };
 
   return (
@@ -626,7 +724,5 @@ const AnalysisView: React.FC = () => {
     </Spin>
   );
 };
-
-// --- Event Logs View (New Content) ---
 
 export default AnalysisView;
