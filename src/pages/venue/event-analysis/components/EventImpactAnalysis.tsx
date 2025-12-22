@@ -291,7 +291,7 @@ const AnalysisView: React.FC = () => {
   const handleExport = () => {
     const headers = [
       "场地名称",
-      "影响算力 (T)",
+      // "影响算力 (T)",
       "限电影响算力 (T)",
       "限电影响算力 (%)",
       "高温影响算力 (T)",
@@ -311,7 +311,7 @@ const AnalysisView: React.FC = () => {
       // console.log("vals", vals);
       return [
         row.venue_name,
-        row.total_hashrate,
+        // row.total_hashrate || 0,
         row.limit_hashrate || 0,
         row.limit_rate + "%",
         row?.high_temperature_hashrate || 0,
