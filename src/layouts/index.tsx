@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { useMediaQuery } from "react-responsive";
+import { useLocation } from "react-router-dom";
 import { MenuFoldOutlined, MenuUnfoldOutlined } from "@ant-design/icons";
 import { Button, Flex, Layout } from "antd";
 import { AppHelmet } from "@/components/helmet";
@@ -12,6 +13,7 @@ import useAuthRedirect from "@/hooks/useAuthRedirect.ts";
 import { setCollapsed, useSelector, useSettingsStore } from "@/stores";
 
 import PoolTypeSelect from "@/layouts/components/pool-type-select.tsx";
+import { checkPermission } from "@/service/api/auth";
 
 export default function MainLayout() {
   useAuthRedirect();
@@ -20,7 +22,7 @@ export default function MainLayout() {
   const { collapsed } = useSettingsStore(useSelector(["collapsed"]));
   const [isSidebarVisible, setIsSidebarVisible] = useState(false); // 状态管理 SiderBar 显示与否
   const isMobile = useMediaQuery({ query: "(max-width: 768px)" });
-
+  const location = useLocation();
   useEffect(() => {
     if (isMobile) {
       setIsSidebarVisible(false); // 手机端默认关闭 SiderBar
@@ -51,6 +53,69 @@ export default function MainLayout() {
       window.removeEventListener("scroll", handleScroll);
     };
   }, []);
+
+  useEffect(() => {
+    // 每次路由变化都会调用
+    const verify = async () => {
+      try {
+        const res = await checkPermission();
+        const { data = [] } = res || {};
+        // console.log('data', data);
+
+        // 提取 data 中的 id，生成以逗号分隔的字符串
+        const permissionIdString = (Array.isArray(data) ? data : [])
+          .map((item: any) => item?.id)
+          .filter((id: any) => typeof id === "string" && id.length > 0)
+          .join(",");
+        localStorage.setItem("permission_ids", permissionIdString);
+        // if(permissionIdString=="role-venue-ops"){
+        //   window.location.href = "/login";
+        // }
+        // 输出并保存，便于后续使用
+        // console.log('permissionIdString', permissionIdString);
+        try {
+          localStorage.setItem("permission_ids", permissionIdString);
+          // 广播权限变更事件，便于侧边栏等组件实时响应
+          window.dispatchEvent(new CustomEvent("permission_ids_updated", { detail: permissionIdString }));
+        } catch (err) {
+          console.log("权限广播error", err);
+        }
+
+        // const Permission = data.array.forEach();
+        // ((item: any) => item.id !== 1);
+        // console.log('hasPermission', hasPermission);
+        // if () {
+        //   window.location.href = "/login";
+        //   return;
+        // }
+        // const hasPermission = data.some((item: any) => item.path === location.pathname);
+        // console.log('hasPermission', hasPermission);
+
+        // if (location.pathname === "/login") {
+        //   return;
+        // }
+        // window.location.href = "/login";
+        // console.log('权限结果', location.pathname, res);
+        // if (location.pathname === "/login") {
+        //   return;
+        // }
+
+        // if (!res?.data?.length) {
+        //   // 没有权限，重定向到登录页
+        //   window.location.href = "/login";
+        //   return;
+        // }
+        // if (res?.data?.length === 0) {
+        //   // 没有权限，重定向到登录页
+        //   window.location.href = "/login";
+        //   return;
+        // }
+      } catch (err) {
+        console.error(err);
+      }
+    };
+    verify();
+  }, [location.pathname]); // 路径变化触发
 
   return (
     <>

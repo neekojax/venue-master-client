@@ -41,5 +41,8 @@ export async function login(data: LoginField) {
 }
 
 export async function loginOut(data: any) {
+  // 清除所有本地存储数据
+  localStorage.clear();
+  sessionStorage.clear();
   return await fetchPost("/passport/logout", data);
 }

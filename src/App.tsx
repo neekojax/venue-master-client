@@ -15,10 +15,9 @@ export default function App() {
       (event: any) => {
         // 专门针对 JS 脚本加载失败的情况
         // alert(event.target?.tagName)
-        console.log(event.target?.tagName);
+        // console.log(event.target?.tagName);
         if (event.target?.tagName === "SCRIPT" && event.target.src?.includes(".js")) {
-          console.error("检测到 JS 资源加载失败:", event.target.src);
-
+          // console.error("检测到 JS 资源加载失败:", event.target.src);
           // 避免死循环，加个标志
           if (!sessionStorage.getItem("reload-once")) {
             sessionStorage.setItem("reload-once", "true");
@@ -30,7 +29,7 @@ export default function App() {
     ); // ⚠️ 注意这里必须用捕获阶段 true
 
     window.addEventListener("unhandledrejection", (event) => {
-      alert(event.reason?.message);
+      // alert(event.reason?.message);
       if (event.reason?.message?.includes("Failed to fetch dynamically imported module")) {
         console.error("动态模块加载失败:", event.reason);
 

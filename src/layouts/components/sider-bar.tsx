@@ -34,7 +34,7 @@ const findSelectedKeys = (items: MenuProps["items"], pathname: string, path: str
   return { selectedKeys, openKeys };
 };
 
-const SiderItems = () => {
+const SiderItems = (permissionIds: string) => {
   const showNDPoolType = useSettingsStore((state) => state.poolType);
   return [
     {
@@ -102,6 +102,7 @@ const SiderItems = () => {
           ? [
               {
                 key: ROUTE_PATHS.dataSummary,
+                hidden: permissionIds.includes("role-venue-ops"),
                 label: <Link to={ROUTE_PATHS.dataSummary}>数据概览</Link>,
               },
             ]
@@ -132,6 +133,8 @@ const SiderItems = () => {
       icon: <ProductOutlined />,
       label: "电费监控",
       key: ROUTE_PATHS.custodyMenu,
+      hidden: permissionIds.includes("role-venue-ops"),
+      // hidden: localStorage.getItem("permission_ids") !== "role-venue-ops",
       children: [
         // {
         //   key: ROUTE_PATHS.setting,
@@ -205,12 +208,34 @@ export default function SiderBar() {
 
   const [selectedKeys, setSelectedKeys] = useState<string[]>([]);
   const [openKeys, setOpenKeys] = useState<string[]>([]);
+  const [permissionIds, setPermissionIds] = useState<string>(localStorage.getItem("permission_ids") || "");
 
   const { collapsed } = useSettingsStore(useSelector(["collapsed"]));
 
   const { isDarkMode } = useTheme();
 
-  const itemList: any = SiderItems();
+  const itemList: any = SiderItems(permissionIds);
+
+  useEffect(() => {
+    const update = (value?: string) => {
+      setPermissionIds(value || localStorage.getItem("permission_ids") || "");
+    };
+    const onStorage = (e: StorageEvent) => {
+      if (e.key === "permission_ids") {
+        update(e.newValue ?? "");
+      }
+    };
+    const onCustom = (e: Event) => {
+      const detail = (e as CustomEvent<string>).detail;
+      update(detail);
+    };
+    window.addEventListener("storage", onStorage);
+    window.addEventListener("permission_ids_updated", onCustom as EventListener);
+    return () => {
+      window.removeEventListener("storage", onStorage);
+      window.removeEventListener("permission_ids_updated", onCustom as EventListener);
+    };
+  }, []);
 
   useEffect(() => {
     if (location.pathname === "/") return;
