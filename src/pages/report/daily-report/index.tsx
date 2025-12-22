@@ -49,6 +49,7 @@ interface DataType {
   impactMachine: number;
   pendingRepairT2: number;
   forecastHashEfficiency: number;
+  outputEfficiency: number;
 }
 // 是否启用T2
 function isUseT2(record: DataType) {
@@ -261,6 +262,15 @@ const App: React.FC = () => {
       align: "left",
       render: (value) => value.toFixed(8),
       sorter: (a, b) => a.btcOutput24h - b.btcOutput24h,
+    },
+    {
+      title: "产出效率(BTC/EH)",
+      dataIndex: "outputEfficiency",
+      key: "outputEfficiency",
+      width: 170,
+      align: "left",
+      render: (value) => `${value.toFixed(4)}`,
+      sorter: (a, b) => a.outputEfficiency - b.outputEfficiency,
     },
     {
       title: "理论算力(E)",
@@ -551,6 +561,7 @@ const App: React.FC = () => {
       render: (value) => value.toFixed(6),
       sorter: (a, b) => a.powerImpact - b.powerImpact,
     },
+
     {
       title: "影响占比",
       dataIndex: "impactRatio",
@@ -652,6 +663,7 @@ const App: React.FC = () => {
               collection: venue.collection || 0,
               impactMachine: venue.impactMachine || 0,
               status_of_filling: venue.status_of_filling || 0,
+              outputEfficiency: venue.outputEfficiency || 0,
             };
           });
 
@@ -732,6 +744,7 @@ const App: React.FC = () => {
       // "场地编号": item.siteId,
       场地名: item.siteName,
       "24小时产出（BTC）": item.btcOutput24h.toFixed(8),
+      "产出效率(BTC/EH)": item.outputEfficiency.toFixed(4),
       "理论算力（E）": item.theoreticalPower.toFixed(6),
       "24小时算力（E）": item.power24h.toFixed(8),
       "24小时有效率": item.effectiveRate24h.toFixed(2) + "%",

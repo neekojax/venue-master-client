@@ -39,6 +39,7 @@ interface DataType {
   highTemperatureRate: number;
   events: string;
   onRackHashRate: number;
+  outputEfficiency: number;
 }
 const App: React.FC = () => {
   const { poolType } = useSettingsStore(useSelector(["poolType"]));
@@ -168,6 +169,15 @@ const App: React.FC = () => {
       align: "right",
       render: (value) => value.toFixed(8),
       sorter: (a, b) => a.btcOutput24h - b.btcOutput24h,
+    },
+    {
+      title: "产出效率(BTC/EH)",
+      dataIndex: "outputEfficiency",
+      key: "outputEfficiency",
+      width: 170,
+      align: "right",
+      render: (value) => `${value.toFixed(4)}`,
+      sorter: (a, b) => a.outputEfficiency - b.outputEfficiency,
     },
     {
       title: "理论算力(E)",
@@ -465,6 +475,7 @@ const App: React.FC = () => {
               // "限电影响": item.limitImpactRate,
               // "高温影响": item.highTemperatureRate,
               events: venue.events || "",
+              outputEfficiency: venue.outputEfficiency || 0,
             };
           });
 
@@ -529,6 +540,7 @@ const App: React.FC = () => {
       账户名: item.accountName,
       账户类型: item.ownerType === 0 ? "自营" : "客户",
       "24小时产出（BTC）": item.btcOutput24h.toFixed(8),
+      "产出效率(BTC/EH)": item.outputEfficiency.toFixed(4),
       "理论算力（E）": item.theoreticalPower.toFixed(6),
       "24小时算力（E）": item.power24h.toFixed(8),
       "24小时有效率": item.effectiveRate24h.toFixed(2) + "%",
