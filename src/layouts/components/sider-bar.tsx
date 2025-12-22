@@ -133,7 +133,7 @@ const SiderItems = (permissionIds: string) => {
       icon: <ProductOutlined />,
       label: "电费监控",
       key: ROUTE_PATHS.custodyMenu,
-      hidden: permissionIds.includes("role-venue-ops"),
+
       // hidden: localStorage.getItem("permission_ids") !== "role-venue-ops",
       children: [
         // {
@@ -148,6 +148,7 @@ const SiderItems = (permissionIds: string) => {
           ? [
               {
                 key: ROUTE_PATHS.venueBill,
+                hidden: permissionIds.includes("role-venue-ops"),
                 label: <Link to={ROUTE_PATHS.venueBill}>电费参数</Link>,
               },
             ]
