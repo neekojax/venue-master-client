@@ -19,6 +19,7 @@ export interface DailyData {
   Scrap: number; // 报废数量
   Shelved: number; // 上架数量
   Unshelved: number; // 下架数量
+  OutputEfficiency: number; // 输出效率（%）
 }
 
 export interface DataItem {
@@ -46,4 +47,5 @@ export interface DataItem {
   follow_up?: string; // 跟进事项
   progress?: string; // 处理进度
   shutdown_price?: number; // 关机价格
+  output_efficiency?: number; // 输出效率（%）
 }

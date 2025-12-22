@@ -330,6 +330,14 @@ const SitePerformanceCard: React.FC<SitePerformanceCardProps> = ({
                 render: (value: number) => formatDivide1000(value),
               },
               {
+                title: "产出效率(BTC/EH)",
+                dataIndex: "OutputEfficiency",
+                key: "OutputEfficiency",
+                align: "center",
+                width: 150,
+                render: (value: number) => value?.toFixed(4),
+              },
+              {
                 title: "算力有效率",
                 dataIndex: "HashEffectiveRate",
                 key: "HashEffectiveRate",
@@ -460,6 +468,7 @@ const SitePerformanceCard: React.FC<SitePerformanceCardProps> = ({
               Scrap: "average_scrap",
               Shelved: "week_shelved",
               Unshelved: "week_unshelved",
+              OutputEfficiency: "output_efficiency",
             };
             const filteredDailyColumns: ColumnsType<DailyData> = dailyColumns.filter((c: any) => {
               if (c.key === "Date") return true; // 始终显示日期

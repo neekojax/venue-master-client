@@ -119,7 +119,7 @@ const SimpleRichEditor: React.FC<{
   placeholder?: string;
   refreshKey?: string | number; // 用于强制刷新组件
 }> = ({ value = "", onChange, placeholder, refreshKey }) => {
-  console.log("value >> SimpleRichEditor", value);
+  // console.log("value >> SimpleRichEditor", value);
   const quillRef = React.useRef<ReactQuill | null>(null);
 
   const modules = {
@@ -197,7 +197,6 @@ const VenuePage: React.FC<VenueTableProps> = ({ data, startDate, endDate, onRequ
     setEditingRecord(null);
     form.resetFields();
   };
-
   const handleSubmit = async () => {
     try {
       const values = await form.validateFields();
@@ -229,7 +228,7 @@ const VenuePage: React.FC<VenueTableProps> = ({ data, startDate, endDate, onRequ
 
   useEffect(() => {
     if (editingRecord) {
-      console.log("editingRecord>>222", editingRecord.event_reason);
+      // console.log("editingRecord>>222", editingRecord.event_reason);
       form.setFieldsValue({
         event_reason: decodeHTML(editingRecord.event_reason || ""),
         follow_up: decodeHTML(editingRecord.follow_up || ""),
@@ -292,6 +291,14 @@ const VenuePage: React.FC<VenueTableProps> = ({ data, startDate, endDate, onRequ
       align: "center",
       width: 150,
       render: (value: number) => value?.toFixed(3),
+    },
+    {
+      title: "产出效率(BTC/EH)",
+      dataIndex: "output_efficiency",
+      key: "output_efficiency",
+      align: "center",
+      width: 150,
+      render: (value: number) => value?.toFixed(4),
     },
     {
       title: "算力有效率",

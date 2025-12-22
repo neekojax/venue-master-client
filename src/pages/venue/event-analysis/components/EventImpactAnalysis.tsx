@@ -246,7 +246,7 @@ const AnalysisView: React.FC = () => {
 
   const chartData: any = useMemo(() => {
     if (viewMode === "daily") {
-      return pivotData
+      const filteredPivotData = pivotData
         .map((p) => {
           const allValuesAreZero = Object.values(p.values).every((val) => val === 0);
           if (allValuesAreZero) {
@@ -257,7 +257,16 @@ const AnalysisView: React.FC = () => {
             values: { ...p.values },
           };
         })
-        .filter(Boolean);
+        .filter(Boolean) as { label: string; values: Record<EventType, number> }[];
+
+      // Sort by sum of all values descending
+      filteredPivotData.sort((a, b) => {
+        const sumA = Object.values(a.values).reduce((acc, v) => acc + (typeof v === "number" ? v : 0), 0);
+        const sumB = Object.values(b.values).reduce((acc, v) => acc + (typeof v === "number" ? v : 0), 0);
+        return sumB - sumA;
+      });
+
+      return filteredPivotData;
     } else {
       const dailyGroup: Record<string, Record<EventType, number>> = {};
       dailyData.forEach((r) => {
@@ -570,9 +579,31 @@ const AnalysisView: React.FC = () => {
               </div>
             </div>
           </div>
+          {/* Charts */}
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 h-[420px]">
+            <div className="lg:col-span-2 bg-white p-5 rounded-xl border border-gray-200 shadow-sm flex flex-col">
+              <h3 className="font-bold text-gray-800 mb-4 flex items-center gap-2">
+                <BarChart3 size={16} className="text-blue-500" />
+                {viewMode === "daily" ? "各场地影响对比" : "月度趋势分析"}
+              </h3>
+              <div className="flex-1 min-h-0">
+                <StackedBarChart data={chartData} mode={viewMode} />
+              </div>
+            </div>
+
+            <div className="bg-white p-5 rounded-xl border border-gray-200 shadow-sm flex flex-col">
+              <h3 className="font-bold text-gray-800 mb-4 flex items-center gap-2">
+                <PieChart size={16} className="text-purple-500" />
+                损失原因占比
+              </h3>
+              <div className="flex-1 min-h-0 flex items-center justify-center">
+                <SimplePieChart data={causeShare} />
+              </div>
+            </div>
+          </div>
 
           {/* Matrix Table */}
-          <div className="bg-white rounded-xl border border-gray-200 shadow-sm flex flex-col overflow-hidden">
+          <div className="py-4 bg-white rounded-xl border border-gray-200 shadow-sm flex flex-col overflow-hidden">
             <div className="px-6 py-4 border-b border-gray-100 flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <div className="bg-blue-50 p-1.5 rounded text-blue-600">
@@ -695,29 +726,6 @@ const AnalysisView: React.FC = () => {
                 </div>
               </div>
             )}
-          </div>
-
-          {/* Charts */}
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 h-[320px]">
-            <div className="lg:col-span-2 bg-white p-5 rounded-xl border border-gray-200 shadow-sm flex flex-col">
-              <h3 className="font-bold text-gray-800 mb-4 flex items-center gap-2">
-                <BarChart3 size={16} className="text-blue-500" />
-                {viewMode === "daily" ? "各场地影响对比" : "月度趋势分析"}
-              </h3>
-              <div className="flex-1 min-h-0">
-                <StackedBarChart data={chartData} mode={viewMode} />
-              </div>
-            </div>
-
-            <div className="bg-white p-5 rounded-xl border border-gray-200 shadow-sm flex flex-col">
-              <h3 className="font-bold text-gray-800 mb-4 flex items-center gap-2">
-                <PieChart size={16} className="text-purple-500" />
-                损失原因占比
-              </h3>
-              <div className="flex-1 min-h-0 flex items-center justify-center">
-                <SimplePieChart data={causeShare} />
-              </div>
-            </div>
           </div>
         </div>
       </div>

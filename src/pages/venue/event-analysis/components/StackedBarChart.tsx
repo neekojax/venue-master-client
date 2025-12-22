@@ -156,7 +156,8 @@ const StackedBarChart: React.FC<{
               <span className="text-gray-300">{EVENT_CONFIG[tooltipData.type].label}</span>
             </div>
             <span className="font-mono font-bold">
-              {tooltipData.value.toFixed(2)} %{/* {mode === "daily" ? "%" : " %"} */}
+              {tooltipData.value > 0 ? tooltipData.value.toFixed(0) : tooltipData.value.toFixed(2)} %
+              {/* {mode === "daily" ? "%" : " %"} */}
             </span>
           </div>
         </div>
