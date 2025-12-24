@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from "react";
-import { Spin } from "antd";
+import { Select, Spin, Switch } from "antd";
 import ExcelJS from "exceljs";
 import { saveAs } from "file-saver";
 import {
@@ -98,6 +98,8 @@ const AnalysisView: React.FC = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(10);
   const { poolType } = useSettingsStore(useSelector(["poolType"]));
+  const [showAll, setShowAll] = useState(false);
+  const [selectedTableSites, setSelectedTableSites] = useState<string[]>([]);
 
   // Fetch real daily impact data and replace current dataset
   useEffect(() => {
@@ -211,6 +213,13 @@ const AnalysisView: React.FC = () => {
     }));
   }, [filteredRecords, selectedSite, viewMode]);
 
+  const tableSiteOptions = useMemo(() => {
+    const names = Array.from(new Set(pivotData.map((p) => p.siteName)))
+      .filter(Boolean)
+      .sort();
+    return names.map((n) => ({ label: n, value: n }));
+  }, [pivotData]);
+
   const sortedPivotData = useMemo(() => {
     const d = [...pivotData];
     if (sortConfig) {
@@ -237,12 +246,26 @@ const AnalysisView: React.FC = () => {
     setCurrentPage(1);
   }, [selectedSite, viewMode, selectedDate, selectedMonth]);
 
+  const visibleData = useMemo(() => {
+    let base = sortedPivotData;
+    if (selectedTableSites.length > 0) {
+      base = base.filter((row) => selectedTableSites.includes(row.siteName));
+    }
+    if (showAll) return base;
+    return base.filter((row) => !Object.values(row.values).every((v) => v === 0));
+  }, [sortedPivotData, showAll, selectedTableSites]);
+
   const paginatedData = useMemo(() => {
     const startIndex = (currentPage - 1) * itemsPerPage;
-    return sortedPivotData.slice(startIndex, startIndex + itemsPerPage);
-  }, [sortedPivotData, currentPage, itemsPerPage]);
+    return visibleData.slice(startIndex, startIndex + itemsPerPage);
+  }, [visibleData, currentPage, itemsPerPage]);
 
-  const totalPages = Math.ceil(sortedPivotData.length / itemsPerPage);
+  const totalPages = Math.ceil(visibleData.length / itemsPerPage);
+
+  useEffect(() => {
+    // 切换开关或场地筛选时重置到第一页，避免页码越界
+    setCurrentPage(1);
+  }, [showAll, selectedTableSites]);
 
   const chartData: any = useMemo(() => {
     if (viewMode === "daily") {
@@ -611,7 +634,26 @@ const AnalysisView: React.FC = () => {
                 </div>
                 <h3 className="font-bold text-gray-800">各场地事件影响分布表</h3>
               </div>
-              <div className="text-xs text-gray-400">单位: 影响比例 (%)</div>
+              <div className="flex items-center gap-3">
+                <div className="text-xs text-gray-400">单位: 影响比例 (%)</div>
+                <div className="flex items-center gap-2 text-xs text-gray-600">
+                  <span>显示所有</span>
+                  <Switch size="small" checked={showAll} onChange={setShowAll} />
+                </div>
+                <div className="flex items-center gap-2 text-xs text-gray-600">
+                  <span>场地</span>
+                  <Select
+                    mode="multiple"
+                    allowClear
+                    placeholder="筛选场地（多选）"
+                    options={tableSiteOptions}
+                    value={selectedTableSites}
+                    onChange={(vals) => setSelectedTableSites(vals as string[])}
+                    className="min-w-[220px]"
+                    size="small"
+                  />
+                </div>
+              </div>
             </div>
 
             <div className="overflow-x-auto">
@@ -680,11 +722,14 @@ const AnalysisView: React.FC = () => {
               <div className="px-6 py-4 border-t border-gray-100 flex flex-col sm:flex-row items-center justify-between gap-4 bg-gray-50">
                 <div className="text-sm text-gray-500">
                   显示{" "}
-                  <span className="font-medium text-gray-900">{(currentPage - 1) * itemsPerPage + 1}</span> 到{" "}
                   <span className="font-medium text-gray-900">
-                    {Math.min(currentPage * itemsPerPage, sortedPivotData.length)}
+                    {visibleData.length === 0 ? 0 : (currentPage - 1) * itemsPerPage + 1}
                   </span>{" "}
-                  条，共 <span className="font-medium text-gray-900">{sortedPivotData.length}</span> 条
+                  到{" "}
+                  <span className="font-medium text-gray-900">
+                    {Math.min(currentPage * itemsPerPage, visibleData.length)}
+                  </span>{" "}
+                  条，共 <span className="font-medium text-gray-900">{visibleData.length}</span> 条
                 </div>
 
                 <div className="flex items-center gap-4">
