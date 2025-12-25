@@ -59,24 +59,69 @@ export default function MainLayout() {
     const verify = async () => {
       try {
         const res = await checkPermission();
-        const { data = [] } = res || {};
-        // console.log('data', data);
+        const data = res?.data ?? {};
+        // 组织列表
+        const organizations: string[] = Array.isArray((data as any)?.organizations)
+          ? (data as any).organizations
+          : [];
+        // 字母从小到大排序
+        organizations.sort((a, b) => a.localeCompare(b));
 
-        // 提取 data 中的 id，生成以逗号分隔的字符串
-        const permissionIdString = (Array.isArray(data) ? data : [])
-          .map((item: any) => item?.id)
-          .filter((id: any) => typeof id === "string" && id.length > 0)
+        // 角色列表
+        const roles: any[] = Array.isArray((data as any)?.roles) ? (data as any).roles : [];
+
+        // const frontend_routes: string[] = Array.isArray((data as any)?.frontend_routes)
+        //   ? (data as any).frontend_routes
+        //   : [];
+
+        // 角色ID拼接字符串
+        // const permissionIdString = roles
+        //   .map((role: any) => role?.id)
+        //   .filter((id: any) => typeof id === "string" && id.length > 0)
+        //   .join(",");
+
+        // 汇总接口权限
+        const frontend_routes = roles
+          .flatMap((role: any) => (Array.isArray(role?.frontend_routes) ? role.frontend_routes : []))
+          .map((item: any) => item?.path)
+          .filter((p: any) => typeof p === "string" && p.length > 0)
           .join(",");
-        localStorage.setItem("permission_ids", permissionIdString);
+
+        // 汇总接口权限
+        const apiPermissions = roles.flatMap((role: any) =>
+          Array.isArray(role?.api_permissions) ? role.api_permissions : [],
+        );
+        const api_permissions_paths = apiPermissions
+          .map((item: any) => item?.path)
+          .filter((p: any) => typeof p === "string" && p.length > 0)
+          .join(",");
+
+        // 前端路由权限
+        const access_level = roles.flatMap((role: any) => role?.id || "").join(",");
+        localStorage.setItem("api_permissions", JSON.stringify(apiPermissions));
+
+        localStorage.setItem("api_permissions_paths", api_permissions_paths);
+        localStorage.setItem("groups", JSON.stringify(organizations));
+        // localStorage.setItem("access_level", access_level);
         // if(permissionIdString=="role-venue-ops"){
         //   window.location.href = "/login";
         // }
         // 输出并保存，便于后续使用
         // console.log('permissionIdString', permissionIdString);
         try {
-          localStorage.setItem("permission_ids", permissionIdString);
+          localStorage.setItem("permission_ids", access_level);
+          localStorage.setItem("permission_routes", frontend_routes);
           // 广播权限变更事件，便于侧边栏等组件实时响应
-          window.dispatchEvent(new CustomEvent("permission_ids_updated", { detail: permissionIdString }));
+          window.dispatchEvent(
+            new CustomEvent("permission_ids_updated", {
+              detail: {
+                groups: organizations,
+                access_level,
+                frontend_routes,
+                api_permissions_paths,
+              },
+            }),
+          );
         } catch (err) {
           console.log("权限广播error", err);
         }

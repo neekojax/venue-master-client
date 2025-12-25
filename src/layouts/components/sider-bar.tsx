@@ -34,25 +34,40 @@ const findSelectedKeys = (items: MenuProps["items"], pathname: string, path: str
   return { selectedKeys, openKeys };
 };
 
-const SiderItems = (permissionIds: string) => {
+const SiderItems = (permissionIds: string, permissionRoutes: string) => {
+  const hasPermission = (route: string) => {
+    if (permissionIds == "role-super-admin") {
+      return false;
+    }
+    const routerArr = permissionRoutes.split(",");
+    console.log(routerArr);
+    console.log(route);
+    console.log(routerArr.includes(route));
+    // console.log(permissionRoutes);
+    return !routerArr.includes(route);
+  };
   const showNDPoolType = useSettingsStore((state) => state.poolType);
   return [
     {
       icon: <HomeOutlined />,
       label: <Link to={ROUTE_PATHS.landing}>首页</Link>,
       key: ROUTE_PATHS.landing,
+      hidden: hasPermission(ROUTE_PATHS.landing),
     },
     {
       icon: <MdMonitorHeart />,
       label: "算力监控",
       key: ROUTE_PATHS.mining,
+      hidden: hasPermission(ROUTE_PATHS.mining),
       children: [
         {
           key: ROUTE_PATHS.miningHashRate,
+          hidden: hasPermission(ROUTE_PATHS.miningHashRate),
           label: <Link to={ROUTE_PATHS.miningHashRate}>实时算力</Link>,
         },
         {
           key: ROUTE_PATHS.miningSetting,
+          hidden: hasPermission(ROUTE_PATHS.miningSetting),
           label: <Link to={ROUTE_PATHS.miningSetting}>矿池设置</Link>,
         },
       ],
@@ -61,6 +76,7 @@ const SiderItems = (permissionIds: string) => {
       icon: <SiNginxproxymanager />,
       label: "场地管理",
       key: ROUTE_PATHS.venue,
+      hidden: hasPermission(ROUTE_PATHS.venue),
       children: [
         // {
         //   key: ROUTE_PATHS.miningSiteData,
@@ -70,10 +86,12 @@ const SiderItems = (permissionIds: string) => {
           ? [
               {
                 key: ROUTE_PATHS.venueEnvironment,
+                hidden: hasPermission(ROUTE_PATHS.venueEnvironment),
                 label: <Link to={ROUTE_PATHS.venueEnvironment}>场地环境</Link>,
               },
               {
                 key: ROUTE_PATHS.venueWeather,
+                hidden: hasPermission(ROUTE_PATHS.venueWeather),
                 label: <Link to={ROUTE_PATHS.venueWeather}>场地天气</Link>,
               },
             ]
@@ -85,10 +103,12 @@ const SiderItems = (permissionIds: string) => {
         // },
         {
           key: ROUTE_PATHS.eventAnalysis,
+          hidden: hasPermission(ROUTE_PATHS.eventAnalysis),
           label: <Link to={ROUTE_PATHS.eventAnalysis}>事件日志</Link>,
         },
         {
           key: ROUTE_PATHS.venueSetting,
+          hidden: hasPermission(ROUTE_PATHS.venueSetting),
           label: <Link to={ROUTE_PATHS.venueSetting}>场地设置</Link>,
         },
       ],
@@ -97,12 +117,13 @@ const SiderItems = (permissionIds: string) => {
       icon: <FaRegChartBar />,
       label: "报表",
       key: ROUTE_PATHS.report,
+      hidden: hasPermission(ROUTE_PATHS.report),
       children: [
         ...(showNDPoolType == "CANG"
           ? [
               {
                 key: ROUTE_PATHS.dataSummary,
-                hidden: permissionIds.includes("role-venue-ops"),
+                hidden: hasPermission(ROUTE_PATHS.dataSummary),
                 label: <Link to={ROUTE_PATHS.dataSummary}>数据概览</Link>,
               },
             ]
@@ -111,6 +132,7 @@ const SiderItems = (permissionIds: string) => {
           ? [
               {
                 key: ROUTE_PATHS.dailyReport,
+                hidden: hasPermission(ROUTE_PATHS.dailyReport),
                 label: <Link to={ROUTE_PATHS.dailyReport}>运营日报</Link>,
               },
             ]
@@ -119,12 +141,14 @@ const SiderItems = (permissionIds: string) => {
           ? [
               {
                 key: ROUTE_PATHS.subAccountDailyReport,
+                hidden: hasPermission(ROUTE_PATHS.subAccountDailyReport),
                 label: <Link to={ROUTE_PATHS.subAccountDailyReport}>账户日报</Link>,
               },
             ]
           : []),
         {
           key: ROUTE_PATHS.weekReport,
+          hidden: hasPermission(ROUTE_PATHS.weekReport),
           label: <Link to={ROUTE_PATHS.weekReport}>运营周报</Link>,
         },
       ].filter(Boolean),
@@ -133,7 +157,7 @@ const SiderItems = (permissionIds: string) => {
       icon: <ProductOutlined />,
       label: "电费监控",
       key: ROUTE_PATHS.custodyMenu,
-      hidden: permissionIds.includes("role-venue-ops"),
+      hidden: hasPermission(ROUTE_PATHS.custodyMenu),
       // hidden: localStorage.getItem("permission_ids") !== "role-venue-ops",
       children: [
         // {
@@ -142,12 +166,14 @@ const SiderItems = (permissionIds: string) => {
         // },
         {
           key: ROUTE_PATHS.statistics,
+          hidden: hasPermission(ROUTE_PATHS.statistics),
           label: <Link to={ROUTE_PATHS.statistics}>费用统计</Link>,
         },
         ...(showNDPoolType == "CANG"
           ? [
               {
                 key: ROUTE_PATHS.venueBill,
+                hidden: hasPermission(ROUTE_PATHS.venueBill),
                 label: <Link to={ROUTE_PATHS.venueBill}>电费参数</Link>,
               },
             ]
@@ -209,25 +235,29 @@ export default function SiderBar() {
   const [selectedKeys, setSelectedKeys] = useState<string[]>([]);
   const [openKeys, setOpenKeys] = useState<string[]>([]);
   const [permissionIds, setPermissionIds] = useState<string>(localStorage.getItem("permission_ids") || "");
+  const [permissionRoutes, setPermissionRoutes] = useState<string>(
+    localStorage.getItem("permission_routes") || "",
+  );
 
   const { collapsed } = useSettingsStore(useSelector(["collapsed"]));
 
   const { isDarkMode } = useTheme();
 
-  const itemList: any = SiderItems(permissionIds);
+  const itemList: any = SiderItems(permissionIds, permissionRoutes);
 
   useEffect(() => {
     const update = (value?: string) => {
-      setPermissionIds(value || localStorage.getItem("permission_ids") || "");
+      setPermissionIds(value || localStorage.getItem("access_level") || "");
+      setPermissionRoutes(localStorage.getItem("permission_routes") || "");
     };
     const onStorage = (e: StorageEvent) => {
-      if (e.key === "permission_ids") {
+      if (e.key === "access_level") {
         update(e.newValue ?? "");
       }
     };
     const onCustom = (e: Event) => {
-      const detail = (e as CustomEvent<string>).detail;
-      update(detail);
+      const detail = (e as CustomEvent<any>).detail;
+      update(detail.permission_ids);
     };
     window.addEventListener("storage", onStorage);
     window.addEventListener("permission_ids_updated", onCustom as EventListener);
