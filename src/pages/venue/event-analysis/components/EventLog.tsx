@@ -613,7 +613,7 @@ const App: React.FC = () => {
               setSelectedEventType(filters.log_type || []); // 设置选中的事件类型数组
             }}
             pagination={{
-              total: total,
+              total: filteredData.length,
               pageSize: pageSize,
               showSizeChanger: true,
               pageSizeOptions: ["10", "20", "30", "50"],
@@ -631,7 +631,7 @@ const App: React.FC = () => {
             }}
             // className="px-6"
           />
-          {filteredData.length !== total && (
+          {(isLoading || (!isLoading && logData.length < total)) && (
             <div
               style={{
                 position: "relative",
@@ -646,7 +646,7 @@ const App: React.FC = () => {
                 pointerEvents: "none",
               }}
             >
-              <Spin tip={`数据加载中... 已加载 ${filteredData.length}/${total}`} />
+              <Spin tip={`数据加载中... 已加载 ${logData.length}/${total}`} />
             </div>
           )}
         </div>

@@ -356,8 +356,14 @@ const VenueManagement: React.FC = () => {
         pagination={{
           pageSize: pageSize, // 使用动态 pageSize
           showSizeChanger: true,
-          onShowSizeChange: (size) => {
-            setPageSize(size); // 更新 pageSize 状态
+          onShowSizeChange: (current, size) => {
+            console.log("onShowSizeChange", current, size);
+            setPageSize(size); // 更新 pageSize 状态（注意：第2个参数才是 pageSize）
+          },
+          onChange: (_page, size) => {
+            // 兼容某些版本只触发 onChange 的情况
+            console.log("onChange", _page, size);
+            if (size && size !== pageSize) setPageSize(size);
           },
           showQuickJumper: true,
           showTotal: (total) => `共 ${total} 条`,

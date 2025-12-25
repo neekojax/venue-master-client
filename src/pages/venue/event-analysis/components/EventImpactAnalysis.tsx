@@ -1,7 +1,8 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { Select, Spin, Switch } from "antd";
 import ExcelJS from "exceljs";
 import { saveAs } from "file-saver";
+import { toPng } from "html-to-image";
 import {
   AlertTriangle,
   BarChart3,
@@ -12,6 +13,7 @@ import {
   ChevronUp,
   CloudRain,
   Download,
+  ImageDown,
   LayoutList,
   PieChart,
   Server,
@@ -100,6 +102,7 @@ const AnalysisView: React.FC = () => {
   const { poolType } = useSettingsStore(useSelector(["poolType"]));
   const [showAll, setShowAll] = useState(false);
   const [selectedTableSites, setSelectedTableSites] = useState<string[]>([]);
+  const contentRef = useRef<HTMLDivElement>(null);
 
   // Fetch real daily impact data and replace current dataset
   useEffect(() => {
@@ -514,6 +517,31 @@ const AnalysisView: React.FC = () => {
     saveAs(new Blob([buffer]), fileName);
   };
 
+  const handleExportImage = async () => {
+    try {
+      const node = contentRef.current;
+      if (!node) {
+        console.warn("未找到要导出的内容容器");
+        return;
+      }
+      const dataUrl = await toPng(node, {
+        backgroundColor: "#ffffff",
+        pixelRatio: 2,
+        cacheBust: true,
+        style: {
+          overflow: "visible",
+        },
+      });
+      const link = document.createElement("a");
+      const fileName = `事件影响_图片_${viewMode}_${viewMode === "daily" ? selectedDate : selectedMonth}.png`;
+      link.download = fileName;
+      link.href = dataUrl;
+      link.click();
+    } catch (err) {
+      console.error("导出图片失败", err);
+    }
+  };
+
   return (
     <Spin spinning={loading} tip="加载中...">
       <div className="flex flex-col h-full bg-gray-50 overflow-hidden">
@@ -555,17 +583,28 @@ const AnalysisView: React.FC = () => {
               )}
             </div>
           </div>
-
-          <button
-            onClick={handleExport}
-            className="bg-white border border-gray-300 hover:bg-gray-50 text-gray-700 px-3 py-1.5 rounded-md text-sm font-medium flex items-center gap-2 transition-colors shadow-sm"
-          >
-            <Download size={16} />
-            <span className="hidden sm:inline">导出表格</span>
-          </button>
+          <div>
+            <div className="flex items-center justify-between w-full">
+              <button
+                style={{ marginRight: 8 }}
+                onClick={handleExport}
+                className="bg-white border border-gray-300 hover:bg-gray-50 text-gray-700 px-3 py-1.5 rounded-md text-sm font-medium flex items-center gap-2 transition-colors shadow-sm"
+              >
+                <Download size={16} />
+                <span className="hidden sm:inline">导出表格</span>
+              </button>
+              <button
+                onClick={handleExportImage}
+                className="bg-white border border-gray-300 hover:bg-gray-50 text-gray-700 px-3 py-1.5 rounded-md text-sm font-medium flex items-center gap-2 transition-colors shadow-sm"
+              >
+                <ImageDown size={16} />
+                <span className="hidden sm:inline">导出图片</span>
+              </button>
+            </div>
+          </div>
         </div>
 
-        <div className="flex-1 overflow-y-auto p-6 space-y-6">
+        <div ref={contentRef} className="flex-1 overflow-y-auto p-6 space-y-6">
           {/* Top Metrics Cards */}
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
             <div className="bg-white p-4 rounded-xl border border-gray-200 shadow-sm">
@@ -746,6 +785,9 @@ const AnalysisView: React.FC = () => {
                       <option value={5}>5 条</option>
                       <option value={10}>10 条</option>
                       <option value={20}>20 条</option>
+                      <option value={50}>50 条</option>
+                      <option value={100}>100 条</option>
+                      <option value={200}>200 条</option>
                     </select>
                   </div>
 
