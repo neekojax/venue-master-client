@@ -114,7 +114,7 @@ const App: React.FC = () => {
     })) || [];
 
   const total = data?.total || 0;
-  console.log("total", total);
+  // console.log("total", total);
 
   // 过滤后的数据
   const filteredData = logData.filter((log) => {
@@ -660,14 +660,32 @@ const App: React.FC = () => {
         okText="确定"
         cancelText="取消"
       >
-        <Form form={form} layout="vertical" className="pt-4">
+        <Form form={form} layout="vertical" className="pt-2">
           <div className="grid grid-cols-2 gap-x-6">
             {/* 隐藏的 ID 字段 */}
             <Form.Item name="id" style={{ display: "none" }}>
               <Input type="hidden" />
             </Form.Item>
             <Form.Item name="venue_id" label="场地" rules={[{ required: true, message: "请选择场地" }]}>
-              <Select placeholder="请选择场地" allowClear style={{ width: "100%", fontSize: "12px" }}>
+              <Select
+                placeholder="请选择场地"
+                size="middle"
+                allowClear
+                showSearch
+                optionFilterProp="children"
+                filterOption={(input, option) => {
+                  const label = String(option?.children ?? "").toLowerCase();
+                  const val = String((option as any)?.value ?? "").toLowerCase();
+                  const query = input.toLowerCase().trim();
+                  return label.includes(query) || val.includes(query);
+                }}
+                filterSort={(optionA, optionB) => {
+                  const labelA = String(optionA?.children ?? "");
+                  const labelB = String(optionB?.children ?? "");
+                  return labelA.localeCompare(labelB, "zh");
+                }}
+                style={{ width: "100%", fontSize: "12px" }}
+              >
                 {venueList?.data?.map((venue: any) => (
                   <Option key={venue.id} value={venue.id} style={{ fontSize: "12px" }}>
                     {venue.venue_name}
@@ -675,30 +693,23 @@ const App: React.FC = () => {
                 ))}
               </Select>
             </Form.Item>
-            <Form.Item name="log_date" label="日期" rules={[{ required: true, message: "请选择日期" }]}>
+            {/* <Form.Item name="log_date" label="日期" rules={[{ required: true, message: "请选择日期" }]}>
               <DatePicker className="w-full" />
-            </Form.Item>
+            </Form.Item> */}
             <Form.Item
               name="start_time"
               label="开始时间"
               rules={[{ required: true, message: "请选择开始时间" }]}
             >
-              <DatePicker showTime className="w-full" />
-            </Form.Item>
-            <Form.Item
-              name="end_time"
-              label="结束时间"
-              rules={[{ required: true, message: "请选择结束时间" }]}
-            >
-              <DatePicker showTime className="w-full" />
+              <DatePicker size="middle" showTime className="w-full" />
             </Form.Item>
             <Form.Item
               name="log_type"
               label="事件类型"
               rules={[{ required: true, message: "请选择事件类型" }]}
             >
-              <Select placeholder="请选择事件类型">
-                {["电力", "高温", "极端天气", "日常维护", "设备故障", "限电"].map((type) => (
+              <Select size="middle" placeholder="请选择事件类型">
+                {["电力", "高温", "极端天气", "日常维护", "设备故障", "限电", "其他"].map((type) => (
                   <Option key={type} value={type}>
                     {type}
                   </Option>
@@ -706,37 +717,44 @@ const App: React.FC = () => {
               </Select>
             </Form.Item>
             <Form.Item
+              name="end_time"
+              label="结束时间"
+              rules={[{ required: false, message: "请选择结束时间" }]}
+            >
+              <DatePicker size="middle" showTime className="w-full" />
+            </Form.Item>
+            <Form.Item
               name="impact_count"
               label="影响台数"
               style={{ fontSize: "12px" }}
               rules={[{ required: true, message: "请输入影响台数" }]}
             >
-              <Input type="number" placeholder="请输入影响台数" style={{ fontSize: "12px" }} />
+              <Input size="middle" type="number" placeholder="请输入影响台数" style={{ fontSize: "12px" }} />
             </Form.Item>
             <Form.Item
               name="impact_power_loss"
               label="影响算力"
               style={{ fontSize: "12px" }}
-              rules={[{ required: true, message: "请输入影响算力" }]}
+              rules={[{ required: false, message: "请输入影响算力" }]}
             >
-              <Input type="number" placeholder="请输入影响算力" style={{ fontSize: "12px" }} />
+              <Input size="middle" type="number" placeholder="请输入影响算力" style={{ fontSize: "12px" }} />
             </Form.Item>
           </div>
           <Form.Item
             name="event_reason"
             label="事件原因"
             style={{ fontSize: "12px" }}
-            rules={[{ required: true, message: "请输入事件原因" }]}
+            rules={[{ required: false, message: "请输入事件原因" }]}
           >
-            <TextArea rows={4} placeholder="请输入事件原因" style={{ fontSize: "12px" }} />
+            <TextArea size="middle" rows={4} placeholder="请输入事件原因" style={{ fontSize: "12px" }} />
           </Form.Item>
           <Form.Item
             name="resolution_measures"
             label="解决措施"
             style={{ fontSize: "12px" }}
-            rules={[{ required: true, message: "请输入解决措施" }]}
+            rules={[{ required: false, message: "请输入解决措施" }]}
           >
-            <TextArea rows={4} placeholder="请输入解决措施" style={{ fontSize: "12px" }} />
+            <TextArea size="middle" rows={4} placeholder="请输入解决措施" style={{ fontSize: "12px" }} />
           </Form.Item>
         </Form>
       </Modal>
