@@ -11,12 +11,14 @@ import SiderBar from "./components/sider-bar";
 import UserAvatar from "./components/user-avatar";
 import useAuthRedirect from "@/hooks/useAuthRedirect.ts";
 import { setCollapsed, useSelector, useSettingsStore } from "@/stores";
+import { setPoolType } from "@/stores"; // 引入自定义选择器
 
 import PoolTypeSelect from "@/layouts/components/pool-type-select.tsx";
 import { checkPermission } from "@/service/api/auth";
 
 export default function MainLayout() {
   useAuthRedirect();
+  const { poolType } = useSettingsStore(useSelector(["poolType"]));
   // const [suanlilv, setSuanlilv] = useState<number>(0);
   const [suanlilv, setSuanlilv] = useState<any>({});
   const { collapsed } = useSettingsStore(useSelector(["collapsed"]));
@@ -98,11 +100,21 @@ export default function MainLayout() {
 
         // 前端路由权限
         const access_level = roles.flatMap((role: any) => role?.id || "").join(",");
+        // console.log(" poolType", poolType);
+        // console.log("organizations", organizations);
+        // console.log("poolType", poolType);
+        // console.log(" organizations.indexOf(poolType)", organizations.indexOf(poolType));
+        if (organizations.indexOf(poolType) == -1 || !JSON.stringify(organizations).includes(poolType)) {
+          // console.log("organizations", organizations);
+          // console.log("poolType", poolType);
+          // localStorage.setItem("poolType", organizations[0]);
+          setPoolType(organizations[0] === "CANGO" ? "CANG" : organizations[0]);
+        }
         localStorage.setItem("api_permissions", JSON.stringify(apiPermissions));
-
         localStorage.setItem("api_permissions_paths", api_permissions_paths);
         localStorage.setItem("groups", JSON.stringify(organizations));
-        // localStorage.setItem("access_level", access_level);
+
+        // localStorge.setItem("access_level", access_level);
         // if(permissionIdString=="role-venue-ops"){
         //   window.location.href = "/login";
         // }

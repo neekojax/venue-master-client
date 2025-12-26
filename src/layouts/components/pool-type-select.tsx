@@ -57,8 +57,8 @@ export default function PoolSelect() {
   }, []);
 
   // const fallback = ["CANGO", "NS", "ND1", "ND2", "KZ", "LN"];
-  const fallback = [""];
-  const list = orgs.length ? orgs : fallback;
+  // const fallback = [];
+  const list = orgs.length ? orgs : [];
   const options = list.map((org) => ({
     value: org === "CANGO" ? "CANG" : org,
     label: org,
