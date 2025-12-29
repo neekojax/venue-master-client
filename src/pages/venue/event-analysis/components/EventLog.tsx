@@ -1,9 +1,10 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import {
   DeleteOutlined,
   DownloadOutlined,
   EditOutlined,
+  FilterOutlined,
   PlusOutlined,
   SearchOutlined,
   SyncOutlined,
@@ -75,6 +76,15 @@ const App: React.FC = () => {
   const [selectedDurationType, setSelectedDurationType] = useState<string[]>([]);
   // 新增筛选状态
   const [selectedLocation, setSelectedLocation] = useState<string[]>([]);
+  const [showSiteFilter, setShowSiteFilter] = useState(false);
+  const [filters, setFilters] = useState<{ siteName: string }>({ siteName: "" });
+  const powerSites = useMemo(
+    () => Array.from(new Set((venueList?.data || []).map((v: any) => v.venue_name))),
+    [venueList],
+  );
+  const handleFilterChange = (key: keyof typeof filters, value: string) => {
+    setFilters((prev) => ({ ...prev, [key]: value }));
+  };
   const [selectedEventType, setSelectedEventType] = useState<string[]>([]);
   const [searchText, setSearchText] = useState("");
   // 防抖后的搜索文本
@@ -129,10 +139,15 @@ const App: React.FC = () => {
       );
 
     const isValidDateRange = Array.isArray(dateRange) && dateRange.length === 2;
-    const matchesDateRange =
-      isValidDateRange && dateRange[0] && dateRange[1]
-        ? dayjs(log.log_date).isBetween(dateRange[0], dateRange[1], null, "[]")
-        : true;
+    // console.log("dateRange", dateRange);
+    // console.log("log.log_date", dateRange[0]);
+    // console.log("log.log_date", dateRange[1]);
+    const matchesDateRange = (() => {
+      if (!(isValidDateRange && dateRange[0] && dateRange[1])) return true;
+      const start08 = dateRange[0].hour(8).minute(0).second(0).millisecond(0);
+      const end08 = dateRange[1].hour(8).minute(0).second(0).millisecond(0);
+      return dayjs(log.log_date).isBetween(start08, end08, null, "[]");
+    })();
 
     const hasDuration = log.start_time && log.end_time;
     const matchesDuration =
@@ -255,6 +270,7 @@ const App: React.FC = () => {
         { text: "设备故障", value: "设备故障" },
         { text: "网络", value: "网络" },
         { text: "限电", value: "限电" },
+        { text: "其他", value: "其他" },
       ],
       onFilter: () => {
         return true;
@@ -466,23 +482,75 @@ const App: React.FC = () => {
                   setDateRange(rangeValue);
                 }} // 更新日期范围
               />
-              <Select
-                mode="multiple"
-                maxTagCount="responsive"
-                maxTagTextLength={4} // 可选：限制每个标签显示文字长度
-                size="middle"
-                placeholder="选择场地"
-                value={selectedLocation}
-                onChange={setSelectedLocation}
-                style={{ width: 120 }}
-                // className="!rounded-lg"
-              >
-                {venueList?.data?.map((venue: any) => (
-                  <Option key={venue.id} value={venue.venue_name}>
-                    {venue.venue_name}
-                  </Option>
-                ))}
-              </Select>
+              <div className="relative">
+                <Button
+                  size="middle"
+                  icon={<FilterOutlined />}
+                  className="!rounded-button whitespace-nowrap"
+                  onClick={() => setShowSiteFilter(!showSiteFilter)}
+                >
+                  筛选
+                </Button>
+                {showSiteFilter && (
+                  <div className="site-filter-dropdown absolute right-0 mt-2 w-80 bg-white rounded-lg shadow-lg z-10 border border-gray-200 p-4">
+                    <div className="font-medium text-gray-900 mb-3">选择场地</div>
+                    <Input
+                      size="middle"
+                      placeholder="搜索场地..."
+                      className="mb-3"
+                      value={filters.siteName}
+                      onChange={(e) => {
+                        handleFilterChange("siteName", e.target.value);
+                      }}
+                    />
+                    <div className="max-h-60 overflow-y-auto">
+                      {powerSites
+                        .filter((site: any) => site.toLowerCase().includes(filters.siteName.toLowerCase()))
+                        .map((site: any, index: number) => (
+                          <div key={index} className="flex items-center py-2 hover:bg-gray-50 rounded">
+                            <input
+                              type="checkbox"
+                              id={`site-${index}`}
+                              className="h-4 w-4 text-blue-600 rounded border-gray-300 focus:ring-blue-500"
+                              checked={selectedLocation.includes(site)}
+                              onChange={(e) => {
+                                setSelectedLocation((prev: string[]) => {
+                                  const set = new Set(prev);
+                                  if (e.target.checked) {
+                                    set.add(site);
+                                  } else {
+                                    set.delete(site);
+                                  }
+                                  return Array.from(set);
+                                });
+                              }}
+                            />
+                            <label
+                              htmlFor={`site-${index}`}
+                              className="ml-2 text-gray-700 cursor-pointer flex-grow"
+                            >
+                              {site}
+                            </label>
+                          </div>
+                        ))}
+                    </div>
+                    <div className="flex justify-end space-x-2 mt-3 pt-3 border-t border-gray-200">
+                      <Button size="small" onClick={() => setShowSiteFilter(false)}>
+                        取消
+                      </Button>
+                      <Button
+                        size="small"
+                        type="primary"
+                        onClick={() => {
+                          setShowSiteFilter(false);
+                        }}
+                      >
+                        应用
+                      </Button>
+                    </div>
+                  </div>
+                )}
+              </div>
               <Select
                 mode="multiple"
                 placeholder="选择影响时长类型"
