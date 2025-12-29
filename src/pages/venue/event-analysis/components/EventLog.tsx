@@ -395,7 +395,7 @@ const App: React.FC = () => {
         venue_id: values.venue_id,
         log_date: dayjs(values.log_date).format("YYYY-MM-DD"),
         start_time: dayjs(values.start_time).format("YYYY-MM-DD HH:mm"),
-        end_time: dayjs(values.end_time).format("YYYY-MM-DD HH:mm"),
+        end_time: values.end_time ? dayjs(values.end_time).format("YYYY-MM-DD HH:mm") : "", // 如果为 null/undefined，就不传入初始值
         log_type: values.log_type,
         impact_count: parseInt(values.impact_count, 10),
         impact_power_loss: Number(values.impact_power_loss), //数字，包含整数和小数
