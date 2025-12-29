@@ -67,7 +67,7 @@ const App: React.FC = () => {
   const [selectedRowKeys] = useState<React.Key[]>([]);
   const [form] = Form.useForm();
   const { poolType } = useSettingsStore(useSelector(["poolType"]));
-  // 聚合分页：每次拉 100 条，循环至总量
+  // 聚合分页：每次拉 2000 条，循环至总量
   const { data, isLoading } = useAllEventPages(poolType, 1000);
   const { data: venueList } = useVenueList(poolType);
   const newMutation = useEventNew();
@@ -489,7 +489,7 @@ const App: React.FC = () => {
                   className="!rounded-button whitespace-nowrap"
                   onClick={() => setShowSiteFilter(!showSiteFilter)}
                 >
-                  筛选
+                  场地筛选
                 </Button>
                 {showSiteFilter && (
                   <div className="site-filter-dropdown absolute right-0 mt-2 w-80 bg-white rounded-lg shadow-lg z-10 border border-gray-200 p-4">
