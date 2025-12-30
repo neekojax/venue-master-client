@@ -344,6 +344,14 @@ const App: React.FC = () => {
       ellipsis: true,
     },
     {
+      title: "创建时间",
+      dataIndex: "created_at",
+      width: 200,
+      render: (text) => dayjs(text).format("YYYY-MM-DD HH:mm:ss"),
+      sorter: (a, b) => dayjs(a.created_at).unix() - dayjs(b.created_at).unix(),
+      defaultSortOrder: "descend", // 👈 默认按创建时间从新到旧排序
+    },
+    {
       title: "操作",
       key: "action",
       width: 120,
