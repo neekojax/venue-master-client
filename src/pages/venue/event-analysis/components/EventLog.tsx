@@ -777,7 +777,7 @@ const App: React.FC = () => {
               rules={[{ required: true, message: "请选择事件类型" }]}
             >
               <Select size="middle" placeholder="请选择事件类型">
-                {["电力", "高温", "极端天气", "日常维护", "设备故障", "限电", "其他"].map((type) => (
+                {["电力", "高温", "极端天气", "日常维护", "设备故障", "网络", "限电", "其他"].map((type) => (
                   <Option key={type} value={type}>
                     {type}
                   </Option>
