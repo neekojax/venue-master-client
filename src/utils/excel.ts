@@ -1,3 +1,4 @@
+import dayjs from "dayjs";
 import * as XLSX from "xlsx"; // 导入 xlsx 库
 
 export const exportCustodyStatisticsToExcel = (data: any) => {
@@ -636,5 +637,86 @@ export const exportHostingRecordToExcel = (data: any[]) => {
   const date = new Date();
   const formattedDate = date.toISOString().split("T")[0];
   const fileName = `托管运维单价_${formattedDate}.xlsx`;
+  XLSX.writeFile(workbook, fileName);
+};
+
+// 通用：根据内容自适应列宽（中文与数字按字符数近似计算）
+const autoFitColsByContent = (rows: any[][], options?: { min?: number; max?: number; padding?: number }) => {
+  const min = options?.min ?? 8;
+  const max = options?.max ?? 40;
+  const padding = options?.padding ?? 2;
+  const colCount = rows[0]?.length ?? 0;
+  const widths: { wch: number }[] = new Array(colCount).fill(0).map(() => ({ wch: min }));
+
+  for (let r = 0; r < rows.length; r++) {
+    const row = rows[r];
+    for (let c = 0; c < colCount; c++) {
+      const cell = row?.[c];
+      const str = cell == null ? "" : String(cell);
+      // 近似考虑中文宽度：用长度即可，必要时可替换更精确宽度算法
+      const len = str.length + padding;
+      if (len > widths[c].wch) {
+        widths[c].wch = Math.min(Math.max(len, min), max);
+      }
+    }
+  }
+  return widths;
+};
+
+// 事件日志导出（XLSX）：列宽根据内容自适应
+export const exportEventLogsToExcel = (
+  data: Array<{
+    venue_name: string;
+    // log_date: string;
+    log_type: string;
+    start_time: string;
+    end_time: string | null;
+    impact_count: number;
+    event_reason: string;
+    resolution_measures: string;
+    created_at: string;
+    updated_at: string;
+  }>,
+  sheetName = "事件日志",
+  fileName = `事件日志_${new Date().toISOString().split("T")[0]}.xlsx`,
+) => {
+  const workbook = XLSX.utils.book_new();
+
+  // 与页面展示一致的表头（去除无对应字段的“记录人”）
+  const headers = [
+    "场地",
+    "事件类型",
+    // "日期",
+    "开始时间",
+    "结束时间",
+    "影响时长（小时）",
+    "影响台数",
+    "事件原因",
+    "解决措施",
+    "创建时间",
+    "更新时间",
+  ];
+
+  const rows: any[][] = [
+    headers,
+    ...data.map((item) => [
+      item.venue_name ?? "",
+      item.log_type ?? "",
+      // item.log_date ?? "",
+      item.start_time ?? "",
+      item.end_time ?? "",
+      item.end_time ? (dayjs(item.end_time).diff(dayjs(item.start_time), "minute") / 60).toFixed(2) : "--",
+      item.impact_count ?? "",
+      item.event_reason ?? "",
+      item.resolution_measures ?? "",
+      dayjs(item.created_at).format("YYYY-MM-DD HH:mm:ss") ?? "",
+      dayjs(item.updated_at).format("YYYY-MM-DD HH:mm:ss") ?? "",
+    ]),
+  ];
+
+  const worksheet = XLSX.utils.aoa_to_sheet(rows);
+  worksheet["!cols"] = autoFitColsByContent(rows, { min: 10, max: 50, padding: 2 });
+
+  XLSX.utils.book_append_sheet(workbook, worksheet, sheetName);
   XLSX.writeFile(workbook, fileName);
 };

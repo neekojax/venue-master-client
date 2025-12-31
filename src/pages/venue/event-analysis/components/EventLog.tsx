@@ -29,8 +29,9 @@ import type { ColumnsType } from "antd/es/table";
 import dayjs from "dayjs";
 import isBetween from "dayjs/plugin/isBetween"; // 引入 isBetween 插件
 import { useSelector, useSettingsStore } from "@/stores"; // 根据实际路径调整
-import { getTimeDifference } from "@/utils/date";
+import { exportEventLogsToExcel } from "@/utils/excel";
 
+// import { getTimeDifference } from "@/utils/date";
 import UploadExcel from "@/pages/venue/components/UploadExcel";
 import {
   useAllEventPages,
@@ -59,6 +60,7 @@ interface EventLog {
   resolution_measures: string;
   collection: number;
   created_at: string; // 这里使用 created_at 而不是 update_at
+  updated_at: string; // 新增 updated_at 字段
 }
 
 const App: React.FC = () => {
@@ -120,6 +122,7 @@ const App: React.FC = () => {
       event_reason: item.event_reason,
       resolution_measures: item.resolution_measures,
       created_at: item.created_at,
+      updated_at: item.updated_at, // 新增 updated_at 字段
       collection: item.collection,
     })) || [];
 
@@ -214,16 +217,18 @@ const App: React.FC = () => {
       },
     },
     {
-      title: "影响时长",
+      title: "影响时长(小时)",
       dataIndex: "log_date",
-      width: 120,
+      width: 140,
       render: (_: string, record: any) => {
         // if (text === "---valid---") {
         //   console.log(text);
         // }
         if (record.start_time && record.end_time) {
+          const duration = (dayjs(record.end_time).diff(dayjs(record.start_time), "minute") / 60).toFixed(2);
           // return getTimeDifference(record.start_time, record.end_time);
-          const duration = getTimeDifference(record.start_time, record.end_time);
+          // const duration = getTimeDifference(record.start_time, record.end_time);
+          // console.log("duration", duration);
           if (duration != "---") {
             return duration;
           }
@@ -350,6 +355,14 @@ const App: React.FC = () => {
       render: (text) => dayjs(text).format("YYYY-MM-DD HH:mm:ss"),
       sorter: (a, b) => dayjs(a.created_at).unix() - dayjs(b.created_at).unix(),
       defaultSortOrder: "descend", // 👈 默认按创建时间从新到旧排序
+    },
+    {
+      title: "更新时间",
+      dataIndex: "updated_at",
+      width: 200,
+      render: (text) => dayjs(text).format("YYYY-MM-DD HH:mm:ss"),
+      sorter: (a, b) => dayjs(a.updated_at).unix() - dayjs(b.updated_at).unix(),
+      defaultSortOrder: "descend", // 👈 默认按更新时间从新到旧排序
     },
     {
       title: "操作",
@@ -620,34 +633,17 @@ const App: React.FC = () => {
                 icon={<DownloadOutlined />}
                 size="middle"
                 onClick={() => {
-                  const headers = [
-                    "场地",
-                    "日期",
-                    "时间范围",
-                    "事件类型",
-                    "影响台数",
-                    "事件原因",
-                    "解决措施",
-                    "记录人",
-                    "记录时间",
-                  ];
-                  const data = filteredData.map((item) => [
-                    item.venue_name,
-                    item.log_date,
-                    `${item.start_time} - ${item.end_time}`,
-                    item.log_type,
-                    item.impact_count,
-                    item.event_reason,
-                    item.resolution_measures,
-                    item.created_at,
-                  ]);
-                  const csvContent = [headers, ...data].map((row) => row.join(",")).join("\n");
-                  const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
-                  const link = document.createElement("a");
-                  link.href = URL.createObjectURL(blob);
-                  link.download = `事件日志_${dayjs().format("YYYY-MM-DD")}.csv`;
-                  link.click();
-                  message.success("导出成功");
+                  try {
+                    exportEventLogsToExcel(
+                      filteredData,
+                      "事件日志",
+                      `事件日志_${dayjs().format("YYYY-MM-DD")}.xlsx`,
+                    );
+                    message.success("导出成功");
+                  } catch (e) {
+                    console.error(e);
+                    message.error("导出失败，请稍后重试");
+                  }
                 }}
                 className="!rounded-button"
               >
