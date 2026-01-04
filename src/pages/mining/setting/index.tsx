@@ -9,6 +9,7 @@ import {
   ImportOutlined,
   SearchOutlined,
 } from "@ant-design/icons";
+import { CaretDownOutlined, CaretUpOutlined } from "@ant-design/icons";
 import {
   Button,
   Col,
@@ -69,6 +70,53 @@ export default function MiningSettingPage() {
   useAuthRedirect();
 
   const { poolType } = useSettingsStore(useSelector(["poolType"]));
+  // const SortIcon = ({ order }: { order: "ascend" | "descend" | null }) => {
+  //   if (order === "ascend") {
+  //     return <CaretUpOutlined style={{ fontSize: 10, marginLeft: 4 }} />;
+  //   }
+  //   if (order === "descend") {
+  //     return <CaretDownOutlined style={{ fontSize: 10, marginLeft: 4 }} />;
+  //   }
+  //   // 未排序状态
+  //   return (
+  //     <span style={{ marginLeft: 4, color: "#ccc", fontSize: 10 }}>
+  //       ▲▼
+  //     </span>
+  //   );
+  // };
+
+  const ACTIVE_COLOR = "#1677ff";
+  const INACTIVE_COLOR = "#ccc";
+
+  const SortIcon = ({ order }: { order: "ascend" | "descend" | null }) => {
+    return (
+      <span
+        style={{
+          display: "inline-flex",
+          flexDirection: "column",
+          marginLeft: 14,
+          lineHeight: 0.8,
+        }}
+      >
+        <CaretUpOutlined
+          style={{
+            fontSize: 12,
+            color: order === "ascend" ? ACTIVE_COLOR : INACTIVE_COLOR,
+          }}
+        />
+        <CaretDownOutlined
+          style={{
+            fontSize: 12,
+            color: order === "descend" ? ACTIVE_COLOR : INACTIVE_COLOR,
+            marginTop: -4,
+          }}
+        />
+      </span>
+    );
+  };
+
+  const [hashrateSortOrder, setHashrateSortOrder] = useState<"ascend" | "descend" | null>(null);
+
   const [poolCategory, setPoolCategoryType] = useState<string>(
     localStorage.getItem(`${StoragePrefix}_poolCategory`) || "主矿池",
   );
@@ -142,6 +190,29 @@ export default function MiningSettingPage() {
       }
     });
   };
+  // const filteredData = tableData
+  //   .filter((item) => {
+  //     const matchesSearch = Object.values(item).some((value) =>
+  //       String(value).toLowerCase().includes(searchTerm.toLowerCase()),
+  //     );
+
+  //     const matchesCollection = !showCollectionOnly || item.collection === 1;
+  //     const matchesStatus = statusFilter === null || item.status === statusFilter;
+
+  //     return matchesSearch && matchesCollection && matchesStatus;
+  //   })
+  //   .sort((a, b) => {
+  //     // ① 先按算力排序（如果有）
+  //     if (hashrateSortOrder) {
+  //       const diff =
+  //         Number(a.theoretical_hashrate) -
+  //         Number(b.theoretical_hashrate);
+  //       return hashrateSortOrder === "ascend" ? diff : -diff;
+  //     }
+
+  //     // ② 默认按场地名排序
+  //     return a.venue_name.localeCompare(b.venue_name);
+  //   });
 
   const handleCancel = () => {
     setIsModalOpen(false);
@@ -380,15 +451,31 @@ export default function MiningSettingPage() {
         render: (_text: any, record: { status: unknown }) => <StatusColumn status={record.status} />,
       },
       {
-        title: "理论算力(PH/s)",
+        title: (
+          <span
+            style={{ cursor: "pointer" }}
+            onClick={() => {
+              setHashrateSortOrder((prev) => (prev === "ascend" ? "descend" : "ascend"));
+            }}
+          >
+            <span>理论算力(PH/s)</span>
+            <SortIcon order={hashrateSortOrder} />
+          </span>
+        ),
         dataIndex: "theoretical_hashrate",
         key: "theoretical_hashrate",
         width: 140,
-        sorter: (a: any, b: any) => {
-          // 直接比较数值
-          return a.theoretical_hashrate - b.theoretical_hashrate; // 返回值用于升序排序
-        },
       },
+      // {
+      //   title: "理论算力(PH/s)",
+      //   dataIndex: "theoretical_hashrate",
+      //   key: "theoretical_hashrate",
+      //   width: 140,
+      //   sorter: (a: any, b: any) => {
+      //     // 直接比较数值
+      //     return a.theoretical_hashrate - b.theoretical_hashrate; // 返回值用于升序排序
+      //   },
+      // },
       // {
       //   title: "能耗比(J/T)",
       //   dataIndex: "energy_ratio",
@@ -504,7 +591,7 @@ export default function MiningSettingPage() {
         // ],
       },
     ]);
-  }, []);
+  }, [hashrateSortOrder]);
 
   // Loading 状态
   if (isLoadingPools) {
@@ -652,8 +739,14 @@ export default function MiningSettingPage() {
       return matchesSearch && matchesCollection && matchesStatus;
     })
     .sort((a: any, b: any) => {
+      if (hashrateSortOrder) {
+        const diff = Number(a.theoretical_hashrate) - Number(b.theoretical_hashrate);
+        return hashrateSortOrder === "ascend" ? diff : -diff;
+      }
+
       const nameA = a.venue_name.toLowerCase();
       const nameB = b.venue_name.toLowerCase();
+
       return nameA.localeCompare(nameB);
     });
 
@@ -776,6 +869,7 @@ export default function MiningSettingPage() {
             columns={columns}
             handleDelete={handleDelete}
             handleSave={handleSave}
+            // onSorterChange={setHashrateSortOrder}
           />
         )}
         <Modal

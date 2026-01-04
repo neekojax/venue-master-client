@@ -8,6 +8,8 @@ import type { ColumnsType } from "antd/es/table";
 import * as XLSX from "xlsx";
 // @ts-ignore
 import FormulaTooltip from "@/components/tooltip/FormulaTooltip";
+// @ts-ignore
+import FormulaYouxiaolvTooltip from "@/components/tooltip/FormulaYouxiaolvTooltip";
 import DashboardCardsV2 from "./components/dashboardV2";
 // import { ReportUpdateParam } from "@/pages/report/type.tsx";
 // import DashboardCards from "./components/dashboard";
@@ -40,6 +42,7 @@ interface DataType {
   events: string;
   onRackHashRate: number;
   outputEfficiency: number;
+  forecastHashEfficiency: number;
 }
 const App: React.FC = () => {
   const { poolType } = useSettingsStore(useSelector(["poolType"]));
@@ -280,6 +283,20 @@ const App: React.FC = () => {
       // },
     },
     {
+      title: (
+        <div style={{ display: "flex" }}>
+          <span>净有效率</span>
+          <FormulaYouxiaolvTooltip />
+        </div>
+      ),
+      dataIndex: "forecastHashEfficiency",
+      key: "forecastHashEfficiency",
+      width: 140,
+      align: "left",
+      render: (value) => `${value.toFixed(2)}%`,
+      sorter: (a, b) => a.forecastHashEfficiency - b.forecastHashEfficiency,
+    },
+    {
       title: "总故障台数",
       dataIndex: "totalFailures",
       key: "totalFailures",
@@ -472,6 +489,7 @@ const App: React.FC = () => {
               limitImpactRate: venue.limitImpactRate || 0,
               highTemperatureRate: venue.highTemperatureRate || 0,
               onRackHashRate: venue.onRackHashRate || 0,
+              forecastHashEfficiency: venue.forecastHashEfficiency || 0,
               // "限电影响": item.limitImpactRate,
               // "高温影响": item.highTemperatureRate,
               events: venue.events || "",
@@ -547,6 +565,7 @@ const App: React.FC = () => {
       托管台数: item.totalMachines.toLocaleString(),
       在线数: item.onlineMachines.toLocaleString(),
       在线率: item.onlineRatio + "%",
+      净有效率: item.forecastHashEfficiency.toFixed(2) + "%",
       总故障台数: item.totalFailures.toLocaleString(),
       总故障率:
         Number(item.totalFailures) > 0 && Number(item.totalMachines) > 0

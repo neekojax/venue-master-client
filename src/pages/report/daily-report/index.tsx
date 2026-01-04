@@ -487,7 +487,6 @@ const App: React.FC = () => {
         const pendingRepairNum = useT2 ? record.pendingRepairT2 : value;
         const repairRate = ((pendingRepairNum / record.totalMachines) * 100).toFixed(2);
         const isHighRate = parseFloat(repairRate) > 10; // 待修率超过5%标红
-
         return (
           <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: "8px" }}>
             <div
@@ -561,7 +560,6 @@ const App: React.FC = () => {
       render: (value) => value.toFixed(6),
       sorter: (a, b) => a.powerImpact - b.powerImpact,
     },
-
     {
       title: "影响占比",
       dataIndex: "impactRatio",
