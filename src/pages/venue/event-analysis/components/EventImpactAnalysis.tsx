@@ -135,6 +135,7 @@ const AnalysisView: React.FC = () => {
             device_failure: "device_failure",
             network: "network",
             extreme_weather: "extreme_weather",
+            maintenance: "maintenance",
           };
 
           Object.entries(typeMap).forEach(([key, eventType]) => {
@@ -391,6 +392,8 @@ const AnalysisView: React.FC = () => {
       "网络影响占比 (%)",
       "极端天气影响算力 (T)",
       "极端天气影响占比 (%)",
+      "日常维护影响算力 (T)",
+      "日常维护影响占比 (%)",
     ];
 
     worksheet.addRow(headers);
@@ -409,6 +412,8 @@ const AnalysisView: React.FC = () => {
       network_rate: row.network_rate.toFixed(2) + "%",
       extreme_weather_hashrate: row.extreme_weather_hashrate || 0,
       extreme_weather_rate: row.extreme_weather_rate.toFixed(2) + "%",
+      maintenance_hashrate: row.maintenance_hashrate || 0,
+      maintenance_rate: row.maintenance_rate.toFixed(2) + "%",
     }));
 
     data.forEach((row, rIdx) => {
@@ -494,6 +499,21 @@ const AnalysisView: React.FC = () => {
         const originalExtremeWeatherRate = venues[rIdx].extreme_weather_rate;
         if (originalExtremeWeatherRate > 1) {
           const cell = newRow.getCell(extremeWeatherRateColIndex);
+          cell.fill = {
+            type: "pattern",
+            pattern: "solid",
+            fgColor: { argb: "FFFFC7CE" }, // Light red background
+          };
+          cell.font = {
+            bold: true,
+          };
+        }
+      }
+      const maintenanceRateColIndex = headers.indexOf("日常维护影响占比 (%)") + 1; // ExcelJS is 1-indexed
+      if (maintenanceRateColIndex > 0) {
+        const originalMaintenanceRate = venues[rIdx].maintenance_rate;
+        if (originalMaintenanceRate > 1) {
+          const cell = newRow.getCell(maintenanceRateColIndex);
           cell.fill = {
             type: "pattern",
             pattern: "solid",

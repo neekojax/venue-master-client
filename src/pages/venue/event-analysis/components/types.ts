@@ -1,4 +1,6 @@
 export interface SiteData {
+  maintenance_hashrate: number;
+  maintenance_rate: number;
   device_failure_hashrate: number;
   device_failure_rate: number;
   extreme_weather_hashrate: number;
@@ -36,6 +38,8 @@ export interface DailyEventImpact {
   network_hashrate: number;
   extreme_weather_rate: number;
   extreme_weather_hashrate: number;
+  maintenance_rate: number;
+  maintenance_hashrate: number;
 }
 
 export interface CauseShareData {
