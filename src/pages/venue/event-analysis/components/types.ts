@@ -84,7 +84,8 @@ export type EventType =
   | "power"
   | "device_failure"
   | "network"
-  | "extreme_weather";
+  | "extreme_weather"
+  | "maintenance";
 
 export type dailyEventImpact = {
   date: string; // "2025-12-01"
@@ -100,6 +101,8 @@ export type dailyEventImpact = {
   network_hashrate: number;
   extreme_weather_rate: number;
   extreme_weather_hashrate: number;
+  maintenance_rate: number;
+  maintenance_hashrate: number;
 };
 
 export interface EventImpactRecord {

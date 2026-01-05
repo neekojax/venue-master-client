@@ -48,6 +48,7 @@ const EVENT_CONFIG: Record<EventType, { label: string; color: string; bg: string
     bg: "bg-emerald-50",
     icon: <CloudRain size={14} />,
   }, // Emerald
+  maintenance: { label: "日常维护", color: "#f4b092ff", bg: "bg-red-100", icon: <LayoutList size={14} /> }, // Blue
 };
 
 const EVENT_CONFIG_NAME = (type: string) => {
@@ -201,6 +202,7 @@ const AnalysisView: React.FC = () => {
             device_failure: 0,
             network: 0,
             extreme_weather: 0,
+            maintenance: 0,
           },
           totalLossHashrate: 0,
         };
@@ -305,6 +307,7 @@ const AnalysisView: React.FC = () => {
             device_failure: 0,
             network: 0,
             extreme_weather: 0,
+            maintenance: 0,
           };
         }
         dailyGroup[day] = {
@@ -314,6 +317,7 @@ const AnalysisView: React.FC = () => {
           device_failure: r.device_failure_rate,
           network: r.network_rate,
           extreme_weather: r.extreme_weather_rate,
+          maintenance: r.maintenance_rate,
         };
       });
       return Object.keys(dailyGroup)
@@ -340,6 +344,7 @@ const AnalysisView: React.FC = () => {
   };
 
   const getCellClass = (val: number) => {
+    // console.log("getCellClass", val, val <= 0, val > 1);
     if (val <= 0) return "text-gray-300";
     // Style for > 1% impact: Pink bg, Red text
     if (val > 1) return "bg-red-100 text-red-900 font-bold";

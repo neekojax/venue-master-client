@@ -1,5 +1,5 @@
 import React, { useRef, useState } from "react";
-import { AlertTriangle, CloudRain, Server, Thermometer, Wifi, Zap } from "lucide-react";
+import { AlertTriangle, CloudRain, LayoutList, Server, Thermometer, Wifi, Zap } from "lucide-react";
 import { EventType } from "./types";
 
 const StackedBarChart: React.FC<{
@@ -21,6 +21,12 @@ const StackedBarChart: React.FC<{
         bg: "bg-emerald-50",
         icon: <CloudRain size={14} />,
       }, // Emerald
+      maintenance: {
+        label: "日常维护",
+        color: "#f4b092ff",
+        bg: "bg-red-100",
+        icon: <LayoutList size={14} />,
+      }, // Blue
     };
 
   const [tooltipData, setTooltipData] = useState<{

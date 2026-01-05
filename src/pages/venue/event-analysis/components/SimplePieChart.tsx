@@ -1,5 +1,5 @@
 import React from "react";
-import { AlertTriangle, CloudRain, Server, Thermometer, Wifi, Zap } from "lucide-react";
+import { AlertTriangle, CloudRain, LayoutList, Server, Thermometer, Wifi, Zap } from "lucide-react";
 import { EventType } from "./types";
 
 const SimplePieChart: React.FC<{ data: { type: EventType; value: number }[] }> = ({ data }) => {
@@ -23,6 +23,12 @@ const SimplePieChart: React.FC<{ data: { type: EventType; value: number }[] }> =
         bg: "bg-emerald-50",
         icon: <CloudRain size={14} />,
       }, // Emerald
+      maintenance: {
+        label: "日常维护",
+        color: "#f3cab8ff",
+        bg: "bg-red-100",
+        icon: <LayoutList size={14} />,
+      }, // Blue
     };
 
   if (total === 0) return <div className="h-full flex items-center justify-center text-gray-400">无数据</div>;
@@ -50,7 +56,13 @@ const SimplePieChart: React.FC<{ data: { type: EventType; value: number }[] }> =
           currentAngle += angle;
 
           return (
-            <path key={item.type} d={d} fill={EVENT_CONFIG[item.type].color} stroke="white" strokeWidth="2" />
+            <path
+              key={item.type}
+              d={d}
+              fill={EVENT_CONFIG[item.type]?.color || "transparent"}
+              stroke="white"
+              strokeWidth="2"
+            />
           );
         })}
       </svg>
@@ -59,9 +71,9 @@ const SimplePieChart: React.FC<{ data: { type: EventType; value: number }[] }> =
           <div key={item.type} className="flex items-center gap-2 text-sm">
             <div
               className="w-3 h-3 rounded-full"
-              style={{ backgroundColor: EVENT_CONFIG[item.type].color }}
+              style={{ backgroundColor: EVENT_CONFIG[item.type]?.color || "transparent" }}
             ></div>
-            <span className="text-gray-600 w-20">{EVENT_CONFIG[item.type].label}</span>
+            <span className="text-gray-600 w-20">{EVENT_CONFIG[item.type]?.label || item.type}</span>
             <span className="font-mono font-medium">{((item.value / total) * 100).toFixed(1)}%</span>
           </div>
         ))}
