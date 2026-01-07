@@ -86,7 +86,8 @@ export default function CustodyStatisticsMonthTable({
         total_income_btc: item.income_btc,
         total_income_usd: item.total_income_usd,
         net_income: item.net_income,
-        hosting_fee_ratio: item.hosting_fee_ratio,
+        // hosting_fee_ratio: item.hosting_fee_ratio,
+        hosting_fee_ratio: item.monthly_hosting_fee_ratio,
         discount_hosting_fee_ratio: item.discount_hosting_fee_ratio,
         period_type: item.period_type,
         discount_status: item.discount_status,
@@ -291,7 +292,7 @@ export default function CustodyStatisticsMonthTable({
           (typeof b.basic_hosting_fee === "number" ? b.basic_hosting_fee : parseFloat(b.basic_hosting_fee)),
         render: (text: any) => {
           const num = typeof text === "number" ? text : parseFloat(text);
-          return <>{Number.isFinite(num) ? num.toFixed(2) : text} $/kwh</>;
+          return <>{"$ " + (Number.isFinite(num) ? num : text)}</>;
         },
       },
       {

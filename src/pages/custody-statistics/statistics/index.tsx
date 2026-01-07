@@ -137,8 +137,8 @@ export default function DateModeHeader() {
 
       if (Number.isFinite(num)) {
         if (isBTC) return num.toFixed(8); // 收益BTC保持8位
-        if (isPercent) return `${num.toFixed(2)}%`; // 百分比两位并加%
-        return num.toFixed(2); // 其它数值保留两位
+        if (isPercent) return `${num.toFixed(4)}%`; // 百分比两位并加%
+        return num.toFixed(4); // 其它数值保留两位
       }
 
       // 非数值，直接字符串返回
