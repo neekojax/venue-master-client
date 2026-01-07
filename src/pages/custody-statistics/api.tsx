@@ -59,3 +59,23 @@ export const fetchMonthlyCustodyStatistics = async ({
   console.log(_key);
   return await fetchGet(`custody/monthlyCustodyStatistics/${poolType}/${startDate}/${endDate}`);
 };
+
+// 获取日托管费占比统计
+///custody/dailyHostingFeeRatio/:timRange/:venueType
+export const fetchDailyHostingFeeRatio = async ({ queryKey }: { queryKey: [string, string, string] }) => {
+  const [_key, timeRange, poolType] = queryKey; // 解构参数
+  console.log(_key);
+  return await fetchGet(`custody/dailyHostingFeeRatio/${timeRange}/${poolType}`);
+};
+
+// 获取月托管费占比和打折后的托管费占比统计
+///custody/monthlyHostingFeeRatio/:vnueType/:start/:end
+export const fetchMonthlyHostingFeeRatio = async ({
+  queryKey,
+}: {
+  queryKey: [string, string, string, string];
+}) => {
+  const [_key, poolType, startDate, endDate] = queryKey; // 解构参数
+  console.log(_key);
+  return await fetchGet(`custody/monthlyHostingFeeRatio/${poolType}/${startDate}/${endDate}`);
+};

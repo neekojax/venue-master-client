@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
-import { ExportOutlined } from "@ant-design/icons";
-import { Button, Select } from "antd";
+import { ExportOutlined, FilterOutlined, SettingOutlined } from "@ant-design/icons";
+import { Button, Input, Select } from "antd";
 import CustodyStatisticsMonthTable from "./components/CustodyStatisticsMonthTable";
 import CustodyStatisticsTable from "./components/CustodyStatisticsTable";
 
@@ -10,6 +10,7 @@ import CustodyStatisticsTable from "./components/CustodyStatisticsTable";
 export default function DateModeHeader() {
   const [mode, setMode] = useState("day"); // 'day' 或 'month'
   const [dayRange, setDayRange] = useState("1days");
+  const [discountFilter, setDiscountFilter] = useState<"全部状态" | "打折" | "不变" | "分润">("全部状态");
 
   // 读取默认时间范围（与 dailyData.tsx 保持一致）
   // const getInitialTimeRange = () => {
@@ -36,6 +37,45 @@ export default function DateModeHeader() {
   const [showHighFeeOnly, setShowHighFeeOnly] = useState(false);
   const [venueOptions, setVenueOptions] = useState<{ label: string; value: string }[]>([]);
   const [filteredData, setFilteredData] = useState<any[]>([]);
+  // 场地筛选弹层状态
+  const [showSiteFilter, setShowSiteFilter] = useState(false);
+  const [siteSearch, setSiteSearch] = useState("");
+  const [showColumnFilter, setShowColumnFilter] = useState(false);
+  // 列显示管理（默认：显示除“预估功耗”外的所有列）
+  const availableColumns = [
+    { key: "venue_name", label: "场地名" },
+    { key: "hash", label: "24h算力" },
+    { key: "total_income_btc", label: "收益(BTC/USD/净USD)" },
+    { key: "basic_hosting_fee", label: "单价($/kwh)" },
+    { key: "power_consumption", label: "预估功耗" },
+    { key: "nominal_power_consumption", label: "额定功耗" },
+    { key: "power_consumption_diff", label: "功耗差异" },
+    { key: "total_hosting_fee", label: "总托管费" },
+    { key: "hosting_fee_ratio", label: "托管费占比" },
+    { key: "discount_status", label: "折扣状态" },
+    { key: "discount_price", label: "折扣价格" },
+    { key: "discount_hosting_fee_ratio", label: "折扣托管费占比" },
+    { key: "period_type", label: "周期类型" },
+    { key: "date", label: "收益日期" },
+
+    // { key: "total_income_btc", label: "收益BTC" },
+    // { key: "total_income_usd", label: "收益USD" },
+    // { key: "net_income", label: "净USD" },
+    // { key: "power_consumption", label: "预估功耗" },
+    // { key: "nominal_power_consumption", label: "额定功耗" },
+    // { key: "power_consumption_diff", label: "功耗差异" },
+
+    // { key: "discount_status", label: "折扣状态" },
+    // { key: "discount_price", label: "折扣价格" },
+    // { key: "discount_hosting_fee_ratio", label: "折扣托管费占比" },
+    // { key: "period_type", label: "统计周期" },
+    // { key: "date", label: "收益日期" },
+  ];
+  const defaultVisibleColumnKeys = availableColumns
+    .map((c) => c.key)
+    .filter((k) => !["hash", "total_income_btc"].includes(k));
+  const [visibleColumns, setVisibleColumns] = useState<string[]>(defaultVisibleColumnKeys);
+  const [columnSearch, setColumnSearch] = useState("");
 
   // 计算表格内容可滚动高度，确保分页在底部始终可见
   const [tableScrollY, setTableScrollY] = useState<number>(480);
@@ -75,7 +115,11 @@ export default function DateModeHeader() {
       { key: "power_consumption_diff", label: "功耗差异" },
       { key: "total_hosting_fee", label: "总托管费" },
       { key: "hosting_fee_ratio", label: "托管费占比" },
-      { key: "report_date", label: "收益日期" },
+      { key: "discount_status", label: "折扣状态" },
+      { key: "discount_price", label: "折扣价格" },
+      { key: "discount_hosting_fee_ratio", label: "折扣托管费占比" },
+      { key: "period_type", label: "统计周期" },
+      { key: "date", label: "收益日期" },
     ];
 
     // 仅导出在数据中实际存在的列
@@ -219,21 +263,162 @@ export default function DateModeHeader() {
               </span>
             </div>
             <div style={{ display: "flex", justifyContent: "flex-end", marginTop: -20 }}>
+              <div className="relative" style={{ marginRight: 10 }}>
+                <Button
+                  size="middle"
+                  icon={<FilterOutlined />}
+                  className="!rounded-button whitespace-nowrap"
+                  onClick={() => setShowSiteFilter(!showSiteFilter)}
+                >
+                  场地筛选
+                </Button>
+                {showSiteFilter && (
+                  <div className="site-filter-dropdown absolute right-0 mt-2 w-80 bg-white rounded-lg shadow-lg z-10 border border-gray-200 p-4">
+                    <div className="font-medium text-gray-900 mb-3">选择场地</div>
+                    <Input
+                      size="middle"
+                      placeholder="搜索场地..."
+                      className="mb-3"
+                      value={siteSearch}
+                      onChange={(e) => {
+                        setSiteSearch(e.target.value);
+                      }}
+                    />
+                    <div className="max-h-60 overflow-y-auto">
+                      {(venueOptions.map((o) => o.value) || [])
+                        .filter((site: any) =>
+                          String(site || "")
+                            .toLowerCase()
+                            .includes(siteSearch.toLowerCase()),
+                        )
+                        .map((site: any, index: number) => (
+                          <div key={index} className="flex items-center py-2 hover:bg-gray-50 rounded">
+                            <input
+                              type="checkbox"
+                              id={`site-${index}`}
+                              className="h-4 w-4 text-blue-600 rounded border-gray-300 focus:ring-blue-500"
+                              checked={selectedVenues.includes(site)}
+                              onChange={(e) => {
+                                setSelectedVenues((prev) => {
+                                  const set = new Set(prev);
+                                  if (e.target.checked) {
+                                    set.add(site);
+                                  } else {
+                                    set.delete(site);
+                                  }
+                                  return Array.from(set);
+                                });
+                              }}
+                            />
+                            <label
+                              htmlFor={`site-${index}`}
+                              className="ml-2 text-gray-700 cursor-pointer flex-grow"
+                            >
+                              {site}
+                            </label>
+                          </div>
+                        ))}
+                    </div>
+                    <div className="flex justify-end space-x-2 mt-3 pt-3 border-t border-gray-200">
+                      <Button size="small" onClick={() => setShowSiteFilter(false)}>
+                        取消
+                      </Button>
+                      <Button
+                        size="small"
+                        type="primary"
+                        onClick={() => {
+                          setShowSiteFilter(false);
+                        }}
+                      >
+                        应用
+                      </Button>
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* 表头设置（显示列）独立下拉 */}
+              <div className="relative" style={{ marginRight: 10 }}>
+                <Button
+                  size="middle"
+                  icon={<SettingOutlined />}
+                  className="!rounded-button whitespace-nowrap"
+                  onClick={() => setShowColumnFilter(!showColumnFilter)}
+                >
+                  表头设置
+                </Button>
+                {showColumnFilter && (
+                  <div className="column-filter-dropdown absolute right-0 mt-2 w-80 bg-white rounded-lg shadow-lg z-10 border border-gray-200 p-4">
+                    <div className="font-medium text-gray-900 mb-3">显示列</div>
+                    <Input
+                      size="middle"
+                      placeholder="搜索列..."
+                      className="mb-3"
+                      value={columnSearch}
+                      onChange={(e) => setColumnSearch(e.target.value)}
+                    />
+                    <div className="max-h-60 overflow-y-auto">
+                      {availableColumns
+                        .filter((col) => col.label.toLowerCase().includes(columnSearch.toLowerCase()))
+                        .map((col, index) => (
+                          <div key={col.key} className="flex items-center py-2 hover:bg-gray-50 rounded">
+                            <input
+                              type="checkbox"
+                              id={`col-${index}`}
+                              className="h-4 w-4 text-blue-600 rounded border-gray-300 focus:ring-blue-500"
+                              checked={visibleColumns.includes(col.key)}
+                              onChange={(e) => {
+                                setVisibleColumns((prev) => {
+                                  const set = new Set(prev);
+                                  if (e.target.checked) {
+                                    set.add(col.key);
+                                  } else {
+                                    set.delete(col.key);
+                                  }
+                                  return Array.from(set);
+                                });
+                              }}
+                            />
+                            <label
+                              htmlFor={`col-${index}`}
+                              className="ml-2 text-gray-700 cursor-pointer flex-grow"
+                            >
+                              {col.label}
+                            </label>
+                          </div>
+                        ))}
+                    </div>
+                    <div className="flex justify-between space-x-2 mt-3 pt-3 border-t border-gray-200">
+                      <Button size="small" onClick={() => setVisibleColumns(defaultVisibleColumnKeys)}>
+                        恢复默认
+                      </Button>
+                      <Button size="small" type="primary" onClick={() => setShowColumnFilter(false)}>
+                        关闭
+                      </Button>
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* <div style={{ display: "flex", justifyContent: "flex-end", alignItems: "center", gap: 8, marginTop: 8 }}>
+                <span className="fee-ratio-title">折扣状态：</span> */}
               <Select
-                mode="multiple"
-                allowClear
-                showSearch
                 size="middle"
-                placeholder="选择场地"
-                value={selectedVenues}
-                onChange={(vals: string[]) => setSelectedVenues(vals)}
-                options={venueOptions}
-                maxTagCount="responsive"
-                maxTagTextLength={8}
-                maxTagPlaceholder={(omitted: any[]) => `已选 ${omitted.length} 项`}
-                style={{ width: 300, marginRight: 10 }}
-                className="text-sm"
+                value={discountFilter}
+                // allowClear
+                showSearch
+                placeholder="折扣状态"
+                onChange={(val) => setDiscountFilter(val as any)}
+                style={{ width: 120, marginRight: 10 }}
+                options={[
+                  { value: "全部状态", label: "全部状态" },
+                  { value: "打折", label: "打折" },
+                  { value: "不变", label: "不变" },
+                  { value: "分润", label: "分润" },
+                ]}
               />
+
+              {/* </div> */}
               <Button.Group size="middle" style={{ marginRight: 10 }}>
                 <Button
                   type={!showHighFeeOnly ? "primary" : "default"}
@@ -266,6 +451,8 @@ export default function DateModeHeader() {
                 dayRange={dayRange}
                 selectedVenues={selectedVenues}
                 showHighFeeOnly={showHighFeeOnly}
+                discountFilter={discountFilter}
+                visibleColumns={visibleColumns}
                 onVenueOptionsReady={(opts: { label: string; value: string }[]) => setVenueOptions(opts)}
                 onFilteredDataChange={(data: any[]) => setFilteredData(data)}
                 scrollY={tableScrollY}
@@ -275,6 +462,8 @@ export default function DateModeHeader() {
                 month={month}
                 selectedVenues={selectedVenues}
                 showHighFeeOnly={showHighFeeOnly}
+                discountFilter={discountFilter}
+                visibleColumns={visibleColumns}
                 onVenueOptionsReady={(opts: { label: string; value: string }[]) => setVenueOptions(opts)}
                 onFilteredDataChange={(data: any[]) => setFilteredData(data)}
                 scrollY={tableScrollY}

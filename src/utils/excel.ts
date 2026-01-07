@@ -652,7 +652,15 @@ const autoFitColsByContent = (rows: any[][], options?: { min?: number; max?: num
     const row = rows[r];
     for (let c = 0; c < colCount; c++) {
       const cell = row?.[c];
-      const str = cell == null ? "" : String(cell);
+      let str = "";
+      if (cell == null) {
+        str = "";
+      } else if (cell instanceof Date) {
+        // 以导出的日期显示格式估算列宽
+        str = dayjs(cell).format("YYYY-MM-DD HH:mm:ss");
+      } else {
+        str = String(cell);
+      }
       // 近似考虑中文宽度：用长度即可，必要时可替换更精确宽度算法
       const len = str.length + padding;
       if (len > widths[c].wch) {
@@ -703,8 +711,8 @@ export const exportEventLogsToExcel = (
       item.venue_name ?? "",
       item.log_type ?? "",
       // item.log_date ?? "",
-      item.start_time ?? "",
-      item.end_time ?? "",
+      item.start_time ? dayjs(item.start_time).toDate() : null,
+      item.end_time ? dayjs(item.end_time).toDate() : null,
       item.end_time ? (dayjs(item.end_time).diff(dayjs(item.start_time), "minute") / 60).toFixed(2) : "--",
       item.impact_count ?? "",
       item.event_reason ?? "",
@@ -715,8 +723,22 @@ export const exportEventLogsToExcel = (
   ];
 
   const worksheet = XLSX.utils.aoa_to_sheet(rows);
+  // 设置“开始时间”和“结束时间”两列为日期显示格式
+  if (worksheet["!ref"]) {
+    const range = XLSX.utils.decode_range(worksheet["!ref"] as string);
+    for (let R = range.s.r + 1; R <= range.e.r; R++) {
+      for (const C of [2, 3]) {
+        // 0:场地,1:事件类型,2:开始时间,3:结束时间
+        const addr = XLSX.utils.encode_cell({ r: R, c: C });
+        const cell = (worksheet as any)[addr];
+        if (cell && (cell.t === "d" || cell.t === "n")) {
+          cell.z = "yyyy-mm-dd hh:mm:ss";
+        }
+      }
+    }
+  }
   worksheet["!cols"] = autoFitColsByContent(rows, { min: 10, max: 50, padding: 2 });
 
   XLSX.utils.book_append_sheet(workbook, worksheet, sheetName);
-  XLSX.writeFile(workbook, fileName);
+  XLSX.writeFile(workbook, fileName, { cellDates: true });
 };

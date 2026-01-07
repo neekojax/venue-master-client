@@ -4,12 +4,14 @@ import { Alert, Spin, Table, Tag, Tooltip } from "antd";
 import { useSelector, useSettingsStore } from "@/stores";
 import { formatAmount } from "@/utils/num";
 
-import { useMonthlyCustodyStatisticsList } from "@/pages/custody-statistics/hook/hook.ts";
+import { useMonthlyHostingFeeRatioList } from "@/pages/custody-statistics/hook/hook.ts";
 
 type Props = {
   month: string; // YYYY-MM
   selectedVenues: string[];
   showHighFeeOnly: boolean;
+  discountFilter?: "全部状态" | "打折" | "不变" | "分润";
+  visibleColumns?: string[];
   onVenueOptionsReady?: (options: { label: string; value: string }[]) => void;
   onFilteredDataChange?: (data: any[]) => void;
   scrollY?: number; // 新增：用于控制表格内容区的垂直滚动高度
@@ -19,6 +21,8 @@ export default function CustodyStatisticsMonthTable({
   month,
   selectedVenues,
   showHighFeeOnly,
+  discountFilter,
+  visibleColumns,
   onVenueOptionsReady,
   onFilteredDataChange,
   scrollY,
@@ -42,7 +46,7 @@ export default function CustodyStatisticsMonthTable({
     data: statisticsData,
     error,
     isLoading,
-  } = useMonthlyCustodyStatisticsList(poolType, startDate, endDate);
+  } = useMonthlyHostingFeeRatioList(poolType, startDate, endDate);
 
   const [columns, setColumns] = useState<any>([]);
   const [tableData, setTableData] = useState<any[]>([]);
@@ -83,6 +87,10 @@ export default function CustodyStatisticsMonthTable({
         total_income_usd: item.total_income_usd,
         net_income: item.net_income,
         hosting_fee_ratio: item.hosting_fee_ratio,
+        discount_hosting_fee_ratio: item.discount_hosting_fee_ratio,
+        period_type: item.period_type,
+        discount_status: item.discount_status,
+        discount_price: item.discount_price,
         report_date: item.date,
       }));
       setTableData(newData);
@@ -94,7 +102,7 @@ export default function CustodyStatisticsMonthTable({
 
   // 列定义（分页编号依赖 currentPage/pageSize）
   useEffect(() => {
-    setColumns([
+    const allColumns = [
       // {
       //   title: (
       //     <span className="fee-ratio-title" style={{ padding: 0, margin: 0 }}>
@@ -184,7 +192,6 @@ export default function CustodyStatisticsMonthTable({
           </>
         ),
       },
-
       {
         title: <span className="fee-ratio-title">预估功耗</span>,
         dataIndex: "power_consumption",
@@ -287,6 +294,57 @@ export default function CustodyStatisticsMonthTable({
           return <>{Number.isFinite(num) ? num.toFixed(2) : text} $/kwh</>;
         },
       },
+      {
+        title: <span className="fee-ratio-title">折扣状态</span>,
+        width: 120,
+        dataIndex: "discount_status",
+        key: "discount_status",
+        render: (text: any) => {
+          // 允许后端返回英文或中文状态，统一到三类：打折、不变、分润
+          const status = String(text || "").toUpperCase();
+          let label = "不变";
+          let color: any = "default";
+
+          if (status.includes("DISCOUNT") || text === "打折") {
+            label = "打折";
+            color = "green"; // 打折：绿色
+          } else if (status.includes("PROFIT") || text === "分润") {
+            label = "分润";
+            color = "geekblue"; // 分润：蓝色
+          } else {
+            label = "不变";
+            color = "orange"; // 不变：橙色
+          }
+
+          return <Tag color={color}>{label}</Tag>;
+        },
+      },
+      {
+        title: <span className="fee-ratio-title">折扣价格</span>,
+        width: 120,
+        dataIndex: "discount_price",
+        key: "discount_price",
+        // render: (text: any) => ((Number.isFinite(text) && text !== 0 ? "$ " + text.toFixed(4) : "--")),
+        render: (text: any, row: any) =>
+          Number.isFinite(text) && text !== 0 && row.discount_status !== "不变"
+            ? "$ " + text.toFixed(4)
+            : "--",
+      },
+      {
+        title: <span className="fee-ratio-title">折扣托管费占比</span>,
+        width: 140,
+        dataIndex: "discount_hosting_fee_ratio",
+        key: "discount_hosting_fee_ratio",
+        render: (text: any) => (Number.isFinite(text) && text !== 0 ? `${text.toFixed(2)}%` : `--`),
+      },
+      {
+        title: <span className="fee-ratio-title">周期类型</span>,
+        width: 120,
+        dataIndex: "period_type",
+        key: "period_type",
+        // render: (text: any) => (text === "MONTHLY" ? "月" : "日"),
+      },
+
       // {
       //   title: <span className="fee-ratio-title">收益日期</span>,
       //   width: 120,
@@ -300,21 +358,38 @@ export default function CustodyStatisticsMonthTable({
       //     return `${month}-${day}`;
       //   },
       // },
-    ]);
-  }, [startDate, endDate, currentPage, pageSize]);
+    ];
+    const cols =
+      Array.isArray(visibleColumns) && visibleColumns.length > 0
+        ? allColumns.filter((c: any) => !c.key || visibleColumns.includes(c.key))
+        : allColumns;
+    setColumns(cols);
+  }, [startDate, endDate, currentPage, pageSize, visibleColumns]);
 
   // 父驱动的筛选条件联动刷新 filteredData
   useEffect(() => {
+    const normalizeDiscountStatus = (val: any): "打折" | "不变" | "分润" => {
+      const s = String(val || "")
+        .trim()
+        .toUpperCase();
+      if (s.includes("DISCOUNT") || s.includes("打折")) return "打折";
+      if (s.includes("PROFIT") || s.includes("分润")) return "分润";
+      return "不变";
+    };
+
     const filtered = tableData.filter((item: any) => {
       const ratioVal = item?.hosting_fee_ratio;
       const ratioNum = typeof ratioVal === "number" ? ratioVal : parseFloat(ratioVal);
       const matchesHighFee = showHighFeeOnly ? ratioNum > 90 : true;
       const matchesSelectedVenues =
         selectedVenues.length > 0 ? selectedVenues.includes(item.venue_name) : true;
-      return matchesHighFee && matchesSelectedVenues;
+      const df = discountFilter ?? "全部状态";
+      const matchesDiscount =
+        df === "全部状态" ? true : normalizeDiscountStatus(item?.discount_status) === df;
+      return matchesHighFee && matchesSelectedVenues && matchesDiscount;
     });
     setFilteredData(filtered);
-  }, [tableData, showHighFeeOnly, selectedVenues]);
+  }, [tableData, showHighFeeOnly, selectedVenues, discountFilter]);
 
   // 通知父组件：过滤后的数据
   useEffect(() => {

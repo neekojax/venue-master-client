@@ -4,7 +4,9 @@ import {
   fetchCustodyInfoList,
   fetchCustodyStatisticsList,
   fetchDailyAveragePrice,
+  fetchDailyHostingFeeRatio,
   fetchMonthlyCustodyStatistics,
+  fetchMonthlyHostingFeeRatio,
   submitCustodyInfoDelete,
   submitCustodyInfoNew,
   submitCustodyUpdate,
@@ -14,6 +16,20 @@ export const useCustodyInfoList = () => {
   return useQuery({
     queryKey: ["custody-info-list"],
     queryFn: fetchCustodyInfoList,
+  });
+};
+
+export const useDailyHostingFeeRatioList = (timeRange: string, poolType: string) => {
+  return useQuery({
+    queryKey: ["daily-hosting-fee-ratio-list", timeRange, poolType],
+    queryFn: fetchDailyHostingFeeRatio,
+  });
+};
+
+export const useMonthlyHostingFeeRatioList = (poolType: string, startTime: string, endTime: string) => {
+  return useQuery({
+    queryKey: ["monthly-hosting-fee-ratio-list", poolType, startTime, endTime],
+    queryFn: fetchMonthlyHostingFeeRatio,
   });
 };
 

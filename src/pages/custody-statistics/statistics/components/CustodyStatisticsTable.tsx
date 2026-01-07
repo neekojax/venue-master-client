@@ -5,7 +5,7 @@ import { Alert, Spin, Table, Tag, Tooltip } from "antd";
 import { useSelector, useSettingsStore } from "@/stores";
 import { formatAmount, formatHashrate } from "@/utils/num";
 
-import { useCustodyStatisticsList } from "@/pages/custody-statistics/hook/hook.ts";
+import { useDailyHostingFeeRatioList } from "@/pages/custody-statistics/hook/hook.ts";
 // import { exportCustodyStatisticsToExcel } from "@/utils/excel";
 
 // 读取默认时间范围（与 dailyData.tsx 保持一致）
@@ -19,6 +19,8 @@ type Props = {
   dayRange: string; // 例如 "1"、"7"、"30"、"90"
   selectedVenues: string[];
   showHighFeeOnly: boolean;
+  discountFilter?: "全部状态" | "打折" | "不变" | "分润";
+  visibleColumns?: string[];
   onVenueOptionsReady?: (options: { label: string; value: string }[]) => void;
   onFilteredDataChange?: (data: any[]) => void;
   scrollY?: number; // 新增：用于控制表格内容区的垂直滚动高度
@@ -28,6 +30,8 @@ export default function CustodyStatisticsTable({
   dayRange,
   selectedVenues,
   showHighFeeOnly,
+  discountFilter,
+  visibleColumns,
   onVenueOptionsReady,
   onFilteredDataChange,
   scrollY,
@@ -37,11 +41,12 @@ export default function CustodyStatisticsTable({
   const { poolType } = useSettingsStore(useSelector(["poolType"]));
   // 根据父组件 dayRange 组装后端需要的 timeRange，例如 "7days"
   const timeRange = useMemo(() => `${dayRange}`, [dayRange]);
-  const { data: statisticsData, error, isLoading } = useCustodyStatisticsList(timeRange, poolType);
+  const { data: statisticsData, error, isLoading } = useDailyHostingFeeRatioList(timeRange, poolType);
 
   const [columns, setColumns] = useState<any>([]);
   const [tableData, setTableData] = useState<any[]>([]);
   const [filteredData, setFilteredData] = useState<any[]>([]);
+  // const [discountFilter, setDiscountFilter] = useState<"全部" | "打折" | "不变" | "分润">("全部");
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(20);
   const [alertMessage, setAlertMessage] = useState("");
@@ -78,6 +83,10 @@ export default function CustodyStatisticsTable({
           total_income_usd: any;
           net_income: any;
           hosting_fee_ratio: any;
+          discount_status: any;
+          period_type: any;
+          discount_price: any;
+          discount_hosting_fee_ratio: any;
         }) => ({
           // 使用 复合键 确保每行唯一，避免 React 重复 key 警告
           key: `${item.venue_id}-${item.date}`,
@@ -95,6 +104,10 @@ export default function CustodyStatisticsTable({
           net_income: item.net_income,
           hosting_fee_ratio: item.hosting_fee_ratio,
           report_date: item.date,
+          discount_status: item.discount_status,
+          period_type: item.period_type,
+          discount_price: item.discount_price,
+          discount_hosting_fee_ratio: item.discount_hosting_fee_ratio,
         }),
       );
       setTableData(newData);
@@ -111,7 +124,7 @@ export default function CustodyStatisticsTable({
   }, [statisticsData, timeRange]);
 
   useEffect(() => {
-    setColumns([
+    const allColumns = [
       // {
       //   title: (
       //     <span className="fee-ratio-title" style={{ padding: 0, margin: 0 }}>
@@ -301,8 +314,59 @@ export default function CustodyStatisticsTable({
           (typeof b.basic_hosting_fee === "number" ? b.basic_hosting_fee : parseFloat(b.basic_hosting_fee)),
         render: (text: any) => {
           const num = typeof text === "number" ? text : parseFloat(text);
-          return <>{Number.isFinite(num) ? num.toFixed(4) : text} $/kwh</>;
+          return <>{"$ " + (Number.isFinite(num) ? num.toFixed(4) : text)}</>;
         },
+      },
+      {
+        title: <span className="fee-ratio-title">折扣状态</span>,
+        width: 120,
+        dataIndex: "discount_status",
+        key: "discount_status",
+        render: (text: any) => {
+          // 允许后端返回英文或中文状态，统一到三类：打折、不变、分润
+          const status = String(text || "").toUpperCase();
+          let label = "不变";
+          let color: any = "default";
+
+          if (status.includes("DISCOUNT") || text === "打折") {
+            label = "打折";
+            color = "green"; // 打折：绿色
+          } else if (status.includes("PROFIT") || text === "分润") {
+            label = "分润";
+            color = "geekblue"; // 分润：蓝色
+          } else {
+            label = "不变";
+            color = "orange"; // 不变：橙色
+          }
+
+          return <Tag color={color}>{label}</Tag>;
+        },
+      },
+      {
+        title: <span className="fee-ratio-title">折扣价格</span>,
+        width: 120,
+        dataIndex: "discount_price",
+        key: "discount_price",
+        render: (text: any, row: any) =>
+          Number.isFinite(text) && text !== 0 && row.discount_status !== "不变"
+            ? "$ " + text.toFixed(4)
+            : "--",
+        // render: (text: any) => ((Number.isFinite(text) && text !== 0 ? "$ " + text.toFixed(4) : "--")),
+        // render: (text: any) => ((Number.isFinite(text) && text !== 0 ? "$ " + text.toFixed(4) : "--")),
+      },
+      {
+        title: <span className="fee-ratio-title">折扣托管费占比</span>,
+        width: 140,
+        dataIndex: "discount_hosting_fee_ratio",
+        key: "discount_hosting_fee_ratio",
+        render: (text: any) => (Number.isFinite(text) && text !== 0 ? `${text.toFixed(2)}%` : `--`),
+      },
+      {
+        title: <span className="fee-ratio-title">周期类型</span>,
+        width: 120,
+        dataIndex: "period_type",
+        key: "period_type",
+        // render: (text: any) => (text === "MONTHLY" ? "月" : "日"),
       },
       {
         title: <span className="fee-ratio-title">收益日期</span>,
@@ -317,11 +381,25 @@ export default function CustodyStatisticsTable({
           return `${month}-${day}`;
         },
       },
-    ]);
-  }, [timeRange, currentPage, pageSize]);
+    ];
+    const cols =
+      Array.isArray(visibleColumns) && visibleColumns.length > 0
+        ? allColumns.filter((c: any) => !c.key || visibleColumns.includes(c.key))
+        : allColumns;
+    setColumns(cols);
+  }, [timeRange, currentPage, pageSize, visibleColumns]);
 
   // apply filtering based on parent props
   useEffect(() => {
+    const normalizeDiscountStatus = (val: any): "打折" | "不变" | "分润" => {
+      const s = String(val || "")
+        .trim()
+        .toUpperCase();
+      if (s.includes("DISCOUNT") || s.includes("打折")) return "打折";
+      if (s.includes("PROFIT") || s.includes("分润")) return "分润";
+      return "不变";
+    };
+
     const filtered = tableData.filter((item: any) => {
       const ratioVal = item?.hosting_fee_ratio;
       const ratioNum = typeof ratioVal === "number" ? ratioVal : parseFloat(ratioVal);
@@ -342,12 +420,17 @@ export default function CustodyStatisticsTable({
       // 当选择了场地名时，只按场地过滤；未选择时才考虑“仅高费率”筛选
       const passesHighFee = showHighFeeOnly ? ratioNum > 90 : true;
 
-      return hasSelection ? matchesSelectedVenues : passesHighFee;
+      const matchesDiscount =
+        discountFilter === "全部状态"
+          ? true
+          : normalizeDiscountStatus(item?.discount_status) === discountFilter;
+
+      return (hasSelection ? matchesSelectedVenues : passesHighFee) && matchesDiscount;
     });
     setFilteredData(filtered);
     // 重置到第一页，避免切换场地名后仍停留在旧页码
     setCurrentPage(1);
-  }, [tableData, showHighFeeOnly, selectedVenues]);
+  }, [tableData, showHighFeeOnly, selectedVenues, discountFilter]);
 
   // notify parent of filtered data changes
   useEffect(() => {
@@ -380,7 +463,6 @@ export default function CustodyStatisticsTable({
           <span className="block sm:inline">{alertMessage}</span>
         </div>
       ) : (
-        // render table only, toolbar is in parent
         <Table
           pagination={{
             position: ["bottomCenter"],
