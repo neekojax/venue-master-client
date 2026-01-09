@@ -328,8 +328,8 @@ export default function CustodyStatisticsTable({
           let label = "不变";
           let color: any = "default";
 
-          if (status.includes("DISCOUNT") || text === "打折") {
-            label = "打折";
+          if (status.includes("DISCOUNT") || text.includes("打折")) {
+            label = text;
             color = "green"; // 打折：绿色
           } else if (status.includes("PROFIT") || text === "分润") {
             label = "分润";

@@ -1,10 +1,10 @@
 // fetchWrapper.ts
 import axiosInstance from "./axiosInstance";
 
-// GET 请求
-export const fetchGet = async (endpoint: string) => {
+// GET 请求（支持可选查询参数）
+export const fetchGet = async (endpoint: string, params?: Record<string, any>) => {
   try {
-    const response = await axiosInstance.get(endpoint);
+    const response = await axiosInstance.get(endpoint, params ? { params } : undefined);
     checkSuccess(response);
     return response;
   } catch (error) {

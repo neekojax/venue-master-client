@@ -674,7 +674,13 @@ const autoFitColsByContent = (rows: any[][], options?: { min?: number; max?: num
 // 事件日志导出（XLSX）：列宽根据内容自适应
 export const exportEventLogsToExcel = (
   data: Array<{
-    venue_name: string;
+    venue_info: {
+      venue_name: string;
+    };
+    pool_info: {
+      pool_name: string;
+    };
+    is_sleep: number; // 0 未休眠 1 已休眠
     // log_date: string;
     log_type: string;
     start_time: string;
@@ -693,6 +699,8 @@ export const exportEventLogsToExcel = (
   // 与页面展示一致的表头（去除无对应字段的“记录人”）
   const headers = [
     "场地",
+    "子账户",
+    "是否休眠",
     "事件类型",
     // "日期",
     "开始时间",
@@ -708,7 +716,10 @@ export const exportEventLogsToExcel = (
   const rows: any[][] = [
     headers,
     ...data.map((item) => [
-      item.venue_name ?? "",
+      item.venue_info.venue_name ?? "",
+      // item.ven venue_name ?? "",
+      item.pool_info.pool_name ?? "",
+      item.is_sleep === 1 ? "已休眠" : "未休眠", // 0 未休眠 1 已休眠
       item.log_type ?? "",
       // item.log_date ?? "",
       item.start_time ? dayjs(item.start_time).toDate() : null,

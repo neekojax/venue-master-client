@@ -15,6 +15,8 @@ export type EventLogParam = {
   log_date: string;
   start_time: string;
   end_time: string;
+  is_sleep: number;
+  pool_id: number;
 
   log_type: string;
   impact_count: number;

@@ -438,6 +438,8 @@ const App: React.FC = () => {
         impact_power_loss: Number(values.impact_power_loss), //数字，包含整数和小数
         event_reason: values.event_reason,
         resolution_measures: values.resolution_measures,
+        is_sleep: values.is_sleep || false,
+        pool_id: values.pool_type || undefined,
       };
 
       if (values.id !== undefined) {
@@ -634,11 +636,7 @@ const App: React.FC = () => {
                 size="middle"
                 onClick={() => {
                   try {
-                    exportEventLogsToExcel(
-                      filteredData,
-                      "事件日志",
-                      `事件日志_${dayjs().format("YYYY-MM-DD")}.xlsx`,
-                    );
+                    exportEventLogsToExcel([], "事件日志", `事件日志_${dayjs().format("YYYY-MM-DD")}.xlsx`);
                     message.success("导出成功");
                   } catch (e) {
                     console.error(e);

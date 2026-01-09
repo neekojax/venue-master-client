@@ -5,6 +5,7 @@ import { AxiosResponse } from "axios";
 import {
   deleteEventLog,
   fetchEventLog,
+  fetchEventLogWithFilter,
   fetchVenueList,
   getAllVEvent,
   listEventPage,
@@ -15,11 +16,19 @@ import {
 } from "@/pages/venue/api.tsx";
 import { EventLogParam, VenueInfoParam } from "@/pages/venue/type.tsx";
 
-// 自定义 Hook: 使用场地列表
+// 事件日志筛选列表（支持查询参数）
+export const useEventLogWithFilter = (poolType: string, params?: Record<string, any>) => {
+  return useQuery({
+    queryKey: ["event-log-filter", poolType, params],
+    queryFn: () => fetchEventLogWithFilter(poolType, params),
+  });
+};
+
+// 场地列表
 export const useVenueList = (poolType: string) => {
   return useQuery({
-    queryKey: ["venue-list", poolType], // 添加 poolType 到 queryKey
-    queryFn: () => fetchVenueList(poolType), // 传递 poolType 参数
+    queryKey: ["venue-list", poolType],
+    queryFn: () => fetchVenueList(poolType),
   });
 };
 

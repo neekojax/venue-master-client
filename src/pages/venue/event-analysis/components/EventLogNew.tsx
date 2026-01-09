@@ -1,11 +1,11 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import {
   DeleteOutlined,
   DownloadOutlined,
   EditOutlined,
+  FilterOutlined,
   PlusOutlined,
-  SearchOutlined,
   SyncOutlined,
 } from "@ant-design/icons";
 import {
@@ -23,22 +23,26 @@ import {
   Tooltip,
   // Switch
 } from "antd";
-import { Spin } from "antd";
 import type { ColumnsType } from "antd/es/table";
 import dayjs from "dayjs";
 import isBetween from "dayjs/plugin/isBetween"; // 引入 isBetween 插件
+import { EventLogParam } from "../../type";
 import { useSelector, useSettingsStore } from "@/stores"; // 根据实际路径调整
-import { getTimeDifference } from "@/utils/date";
+import { exportEventLogsToExcel } from "@/utils/excel";
 
+import "@/styles/compact-form.css";
+
+import { fetchEventLogForExport, getVenueBasicInfo } from "@/pages/venue/api.tsx";
+// import { getTimeDifference } from "@/utils/date";
 import UploadExcel from "@/pages/venue/components/UploadExcel";
 import {
-  useAllEventPages,
   useDeleteUpdate,
+  useEventLogWithFilter,
   useEventNew,
   useEventUpdate,
   useVenueList,
 } from "@/pages/venue/hook/hook.ts";
-import { EventLogParam } from "@/pages/venue/type.tsx"; // 根据实际路径调整
+// import { EventLogParam } from "@/pages/venue/type.tsx"; // 未使用，移除以避免告警
 
 dayjs.extend(isBetween); // 使用插件
 const { RangePicker } = DatePicker;
@@ -50,6 +54,9 @@ interface EventLog {
   venue_id: number;
   venue_name: string; // 直接在 EventLog 中使用 venue_name
   log_date: string;
+  pool_id: number;
+  pool_name: string;
+  is_sleep: boolean; // 0 未休眠 1 已休眠
   start_time: string;
   end_time: string;
   log_type: string;
@@ -58,6 +65,7 @@ interface EventLog {
   resolution_measures: string;
   collection: number;
   created_at: string; // 这里使用 created_at 而不是 update_at
+  updated_at: string; // 新增 updated_at 字段
 }
 
 const App: React.FC = () => {
@@ -66,8 +74,23 @@ const App: React.FC = () => {
   const [selectedRowKeys] = useState<React.Key[]>([]);
   const [form] = Form.useForm();
   const { poolType } = useSettingsStore(useSelector(["poolType"]));
-  // 聚合分页：每次拉 100 条，循环至总量
-  const { data, isLoading } = useAllEventPages(poolType, 1000);
+  // 模态框内子账户联动（按场地ID）
+  const [modalPoolOptions, setModalPoolOptions] = useState<{ value: number; label: string }[]>([]);
+  const selectedVenueId = Form.useWatch("venue_id", form);
+  // // 参数对象（在依赖声明之后构建）
+  // const params: EventLogParam = useMemo(() => ({
+  //   page: currentPage,
+  //   pageSize,
+  //   startDate,
+  //   endDate,
+  //   venueIds,
+  //   eventStatus: selectedEventType.join(","),
+  //   eventTypes: selectedDurationType.join(","),
+  // }), [currentPage, pageSize, startDate, endDate, venueIds, selectedEventType, selectedDurationType]);
+
+  // 聚合分页：每次拉 2000 条，循环至总量
+  // const { data, isLoading } = useAllEventPages(poolType, 1000);
+
   const { data: venueList } = useVenueList(poolType);
   const newMutation = useEventNew();
   const updateMutation = useEventUpdate();
@@ -75,31 +98,140 @@ const App: React.FC = () => {
   const [selectedDurationType, setSelectedDurationType] = useState<string[]>([]);
   // 新增筛选状态
   const [selectedLocation, setSelectedLocation] = useState<string[]>([]);
+  const [showSiteFilter, setShowSiteFilter] = useState(false);
+  const [filters, setFilters] = useState<{ siteName: string }>({ siteName: "" });
+  const powerSites = useMemo(
+    () => Array.from(new Set((venueList?.data || []).map((v: any) => v.venue_name))),
+    [venueList],
+  );
+  const handleFilterChange = (key: keyof typeof filters, value: string) => {
+    setFilters((prev) => ({ ...prev, [key]: value }));
+  };
   const [selectedEventType, setSelectedEventType] = useState<string[]>([]);
-  const [searchText, setSearchText] = useState("");
+  // const [searchText, setSearchText] = useState("");
   // 防抖后的搜索文本
-  const [debouncedSearchText, setDebouncedSearchText] = useState<string>("");
+  // const [debouncedSearchText, setDebouncedSearchText] = useState<string>("");
+  // 子账户联动：选中场地后展示其子账户
+  const [subAccountOptions, setSubAccountOptions] = useState<
+    { value: number; label: string; venue_id: number }[]
+  >([]);
+  const [selectedSubAccounts, setSelectedSubAccounts] = useState<number[]>([]);
 
   // 搜索防抖处理
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setDebouncedSearchText(searchText);
-    }, 300); // 300ms延迟
+  // useEffect(() => {
+  //   const timer = setTimeout(() => {
+  //     setDebouncedSearchText(searchText);
+  //   }, 300); // 300ms延迟
 
-    return () => {
-      clearTimeout(timer);
-    };
-  }, [searchText]);
+  //   return () => {
+  //     clearTimeout(timer);
+  //   };
+  // }, [searchText]);
   const [dateRange, setDateRange] = useState<[dayjs.Dayjs | null, dayjs.Dayjs | null]>([null, null]);
   // 添加分页大小状态
   const [pageSize, setPageSize] = useState<number>(10);
+  const [currentPage, setCurrentPage] = useState<number>(1);
+  // const [total, setTotal] = useState<number>(0);
+  // 监听模态框中选择的场地ID，联动加载其 pools 列表
+  useEffect(() => {
+    const loadVenuePools = async () => {
+      try {
+        if (!selectedVenueId) {
+          setModalPoolOptions([]);
+          // 清空已选择的子账户
+          form.setFieldsValue({ pool_id: undefined });
+          return;
+        }
+        const venue = (venueList?.data || []).find((v: any) => v.id === Number(selectedVenueId));
+        // console.log("venue", venue);
+        const subs = Array.isArray(venue?.pools) ? venue.pools : [];
+        // console.log("subs", subs);
+        const opts = subs
+          .filter((s: any) => typeof s.pool_id === "number" && s.pool_name)
+          .map((s: any) => ({ value: s.pool_id, label: s.pool_name }));
+        setModalPoolOptions(opts);
+        // 默认选中第一项
+        form.setFieldsValue({ pool_id: opts.length ? opts[0].value : undefined });
+      } catch (err) {
+        console.error("加载场地 pools 失败", err);
+        setModalPoolOptions([]);
+      }
+    };
+    loadVenuePools();
+  }, [selectedVenueId, poolType]);
+  // 当选中的场地变化时，拉取对应子账户列表并聚合
+  useEffect(() => {
+    const loadSubAccounts = async () => {
+      try {
+        const venueNames = selectedLocation;
+        if (!venueNames.length || !Array.isArray(venueList?.data)) {
+          setSubAccountOptions([]);
+          setSelectedSubAccounts([]);
+          return;
+        }
+        // 计算选中场地的 ID 列表
+        const venueIds = venueNames
+          .map((name) => (venueList!.data as any[]).find((v: any) => v.venue_name === name)?.id)
+          .filter((id): id is number => typeof id === "number");
+
+        // 并发获取每个场地的基础信息，提取子账户
+        const results = await Promise.all(venueIds.map((id) => getVenueBasicInfo(poolType, id)));
+        const options: { value: number; label: string; venue_id: number }[] = [];
+        results.forEach((res, idx) => {
+          const vid = venueIds[idx];
+          const subs = res?.data?.sub_accounts || [];
+          subs.forEach((s: any) => {
+            if (typeof s.pool_id === "number" && s.pool_name) {
+              options.push({ value: s.pool_id, label: s.pool_name, venue_id: vid });
+            }
+          });
+        });
+        setSubAccountOptions(options);
+        // 如果当前已选择的子账户不在新选场地下，做一次清理
+        setSelectedSubAccounts((prev) => prev.filter((pid) => options.some((o) => o.value === pid)));
+      } catch (err) {
+        console.error("加载子账户失败", err);
+        setSubAccountOptions([]);
+      }
+    };
+    loadSubAccounts();
+  }, [selectedLocation, venueList, poolType]);
+  // 参数对象（在依赖声明之后构建）
+  const startDate = dateRange[0] ? dateRange[0].format("YYYY-MM-DD") : undefined;
+  const endDate = dateRange[1] ? dateRange[1].format("YYYY-MM-DD") : undefined;
+  // 将场地 ID 转为逗号分隔的字符串（后端期望格式）
+  const venueIds =
+    selectedLocation.length && Array.isArray(venueList?.data)
+      ? selectedLocation
+          .map((name) => (venueList!.data as any[]).find((v: any) => v.venue_name === name)?.id)
+          .filter((id): id is number => typeof id === "number")
+          .join(",")
+      : undefined;
+  const eventTypes = selectedEventType;
+  const eventStatus = selectedDurationType;
+  const params = {
+    page: currentPage,
+    pageSize,
+    startDate,
+    endDate,
+    venueIds,
+    eventStatus: eventStatus.join(","),
+    eventTypes: eventTypes.join(","),
+    poolIds: selectedSubAccounts.length ? selectedSubAccounts.join(",") : undefined,
+  };
+
+  // 在依赖声明之后再调用数据查询 hook，避免在声明前使用变量
+  const { data, isLoading, refetch } = useEventLogWithFilter(poolType, params);
 
   // 数据转换
   const logData: EventLog[] =
-    (data?.data || [])?.map((item: any, index: any) => ({
+    (data?.data?.data || [])?.map((item: any, index: any) => ({
       key: index + 1,
       id: item.id,
       venue_id: item.venue_id,
+      pool_id: item.pool_id,
+      pool_name: item.pool_info.pool_name,
+      is_sleep: item.is_sleep, // 0 未休眠 1 已休眠
       venue_name: item.venue_info.venue_name,
       log_date: item.log_date,
       start_time: item.start_time,
@@ -110,42 +242,10 @@ const App: React.FC = () => {
       event_reason: item.event_reason,
       resolution_measures: item.resolution_measures,
       created_at: item.created_at,
+      updated_at: item.updated_at, // 新增 updated_at 字段
       collection: item.collection,
     })) || [];
-
-  const total = data?.total || 0;
-  console.log("total", total);
-
-  // 过滤后的数据
-  const filteredData = logData.filter((log) => {
-    const matchesLocation = selectedLocation.length ? selectedLocation.includes(log.venue_name) : true;
-    const matchesEventType = selectedEventType.length ? selectedEventType.includes(log.log_type) : true;
-    // 改进搜索逻辑：使用防抖后的搜索文本，不区分大小写，并搜索更多字段
-    const searchTextLower = debouncedSearchText.toLowerCase();
-    const matchesSearchText =
-      debouncedSearchText === "" ||
-      [log.venue_name, log.event_reason, log.resolution_measures, log.log_type].some(
-        (field) => field && field.toLowerCase().includes(searchTextLower),
-      );
-
-    const isValidDateRange = Array.isArray(dateRange) && dateRange.length === 2;
-    const matchesDateRange =
-      isValidDateRange && dateRange[0] && dateRange[1]
-        ? dayjs(log.log_date).isBetween(dateRange[0], dateRange[1], null, "[]")
-        : true;
-
-    const hasDuration = log.start_time && log.end_time;
-    const matchesDuration =
-      selectedDurationType.length === 0 ||
-      selectedDurationType.some((type) => {
-        return type === "valid" ? hasDuration : !hasDuration;
-      });
-    // 2️⃣ 收藏过滤
-
-    // const matchesCollection = !showCollectionOnly || log.collection === 1;
-    return matchesLocation && matchesEventType && matchesSearchText && matchesDateRange && matchesDuration;
-  });
-
+  const total = data?.data?.total || 0;
   const columns: ColumnsType<EventLog> = [
     {
       title: "序号",
@@ -166,11 +266,11 @@ const App: React.FC = () => {
       // filters: venueList?.data?.map((venue) => ({ text: venue.venue_name, value: venue.venue_name })),
       // onFilter: (value, record) => record.venue_name === value,
       width: 200,
-      render: (text: string, record: { venue_id?: any }) => {
-        const isSpecialVenue = text === "Arct-HF01-J XP-AR-US"; // 判断是否为特殊场地
+      render: (_: any, record: EventLog) => {
+        const isSpecialVenue = record.venue_name === "Arct-HF01-J XP-AR-US"; // 判断是否为特殊场地
         return (
           <Tooltip
-            title={text}
+            title={record.venue_name}
             placement="top"
             overlayInnerStyle={{ color: "white" }}
             style={{ color: "white" }}
@@ -186,7 +286,7 @@ const App: React.FC = () => {
               }}
             >
               <Link to={`/venue/detail/${record.venue_id}`} className="text-blue-500 hover:underline">
-                {text}
+                {record.venue_name}
               </Link>
               {isSpecialVenue && (
                 <Tag color="red" style={{ marginLeft: 2 }}>
@@ -199,16 +299,35 @@ const App: React.FC = () => {
       },
     },
     {
-      title: "影响时长",
+      title: "子账户",
+      dataIndex: "pool_name",
+      width: 150,
+      render: (_: any, record: EventLog) => {
+        return (
+          <Tooltip
+            title={record.pool_name}
+            placement="top"
+            overlayInnerStyle={{ color: "white" }}
+            style={{ color: "white" }}
+          >
+            {record.pool_name}
+          </Tooltip>
+        );
+      },
+    },
+    {
+      title: "影响时长(小时)",
       dataIndex: "log_date",
-      width: 120,
+      width: 140,
       render: (_: string, record: any) => {
         // if (text === "---valid---") {
         //   console.log(text);
         // }
         if (record.start_time && record.end_time) {
+          const duration = (dayjs(record.end_time).diff(dayjs(record.start_time), "minute") / 60).toFixed(2);
           // return getTimeDifference(record.start_time, record.end_time);
-          const duration = getTimeDifference(record.start_time, record.end_time);
+          // const duration = getTimeDifference(record.start_time, record.end_time);
+          // console.log("duration", duration);
           if (duration != "---") {
             return duration;
           }
@@ -228,10 +347,8 @@ const App: React.FC = () => {
       sorter: (a, b) => {
         const durationA =
           a.start_time && a.end_time ? dayjs(a.end_time).diff(dayjs(a.start_time), "second") : 0;
-
         const durationB =
           b.start_time && b.end_time ? dayjs(b.end_time).diff(dayjs(b.start_time), "second") : 0;
-
         return durationA - durationB;
       },
     },
@@ -255,6 +372,8 @@ const App: React.FC = () => {
         { text: "设备故障", value: "设备故障" },
         { text: "网络", value: "网络" },
         { text: "限电", value: "限电" },
+        { text: "低功耗", value: "低功耗" },
+        { text: "其他", value: "其他" },
       ],
       onFilter: () => {
         return true;
@@ -272,6 +391,7 @@ const App: React.FC = () => {
           极端天气: "magenta", // 为极端天气指定颜色
           日常维护: "green", // 为日常维护指定颜色
           网络: "geekblue", // 为网络指定颜色
+          低功耗: "purple", // 为低功耗指定颜色
           其他: "default",
         };
         return <Tag color={colors[text as keyof typeof colors]}>{text}</Tag>;
@@ -292,6 +412,18 @@ const App: React.FC = () => {
         if (text) {
           return `${text} T`;
         }
+      },
+    },
+    {
+      title: "是否休眠",
+      dataIndex: "is_sleep",
+      width: 120,
+      // sorter: (a, b) => a.impact_count - b.impact_count,
+      render: (text) => {
+        if (text === 1) {
+          return <Tag color="orange">已休眠</Tag>;
+        }
+        return <Tag color="green">未休眠</Tag>;
       },
     },
     {
@@ -328,6 +460,22 @@ const App: React.FC = () => {
       ellipsis: true,
     },
     {
+      title: "创建时间",
+      dataIndex: "created_at",
+      width: 200,
+      render: (text) => dayjs(text).format("YYYY-MM-DD HH:mm:ss"),
+      sorter: (a, b) => dayjs(a.created_at).unix() - dayjs(b.created_at).unix(),
+      defaultSortOrder: "descend", // 👈 默认按创建时间从新到旧排序
+    },
+    {
+      title: "更新时间",
+      dataIndex: "updated_at",
+      width: 200,
+      render: (text) => dayjs(text).format("YYYY-MM-DD HH:mm:ss"),
+      sorter: (a, b) => dayjs(a.updated_at).unix() - dayjs(b.updated_at).unix(),
+      defaultSortOrder: "descend", // 👈 默认按更新时间从新到旧排序
+    },
+    {
       title: "操作",
       key: "action",
       width: 120,
@@ -353,17 +501,18 @@ const App: React.FC = () => {
     },
   ];
 
-  useEffect(() => {
-    if (isLoading) {
-      // message.loading("加载中...");
-    }
-    // console.log(selectedEventType);
-  }, [isLoading, selectedEventType]);
+  // useEffect(() => {
+  //   if (isLoading) {
+  //     // message.loading("加载中...");
+  //   }
+  //   // console.log(selectedEventType);
+  // }, [isLoading, selectedEventType]);
 
   const handleAdd = () => {
     form.resetFields();
     setIsModalVisible(true);
   };
+
   const handleEdit = (record: EventLog) => {
     form.setFieldsValue({
       ...record,
@@ -395,14 +544,14 @@ const App: React.FC = () => {
         venue_id: values.venue_id,
         log_date: dayjs(values.log_date).format("YYYY-MM-DD"),
         start_time: dayjs(values.start_time).format("YYYY-MM-DD HH:mm"),
-        end_time: dayjs(values.end_time).format("YYYY-MM-DD HH:mm"),
+        end_time: values.end_time ? dayjs(values.end_time).format("YYYY-MM-DD HH:mm") : "", // 如果为 null/undefined，就不传入初始值
         log_type: values.log_type,
         impact_count: parseInt(values.impact_count, 10),
         impact_power_loss: Number(values.impact_power_loss), //数字，包含整数和小数
         event_reason: values.event_reason,
         resolution_measures: values.resolution_measures,
-        is_sleep: values.is_sleep || false,
-        pool_id: values.pool_type || undefined,
+        is_sleep: values.is_sleep,
+        pool_id: values.pool_id,
       };
 
       if (values.id !== undefined) {
@@ -446,7 +595,7 @@ const App: React.FC = () => {
               新增事件
             </Button>
             <div className="flex items-center justify-end gap-4">
-              <Input
+              {/* <Input
                 placeholder="搜索场地、事件类型或内容"
                 prefix={<SearchOutlined />}
                 size="middle"
@@ -455,7 +604,76 @@ const App: React.FC = () => {
                 style={{ width: 180 }}
                 onChange={(e) => setSearchText(e.target.value)} // 更新搜索文本
                 allowClear // 添加清除按钮
-              />
+              /> */}
+              <div className="relative">
+                <Button
+                  size="middle"
+                  icon={<FilterOutlined />}
+                  className="!rounded-button whitespace-nowrap"
+                  onClick={() => setShowSiteFilter(!showSiteFilter)}
+                >
+                  场地筛选
+                </Button>
+                {showSiteFilter && (
+                  <div className="site-filter-dropdown absolute right-0 mt-2 w-80 bg-white rounded-lg shadow-lg z-10 border border-gray-200 p-4">
+                    <div className="font-medium text-gray-900 mb-3">选择场地</div>
+                    <Input
+                      size="middle"
+                      placeholder="搜索场地..."
+                      className="mb-3"
+                      value={filters.siteName}
+                      onChange={(e) => {
+                        handleFilterChange("siteName", e.target.value);
+                      }}
+                    />
+                    <div className="max-h-60 overflow-y-auto">
+                      {powerSites
+                        .filter((site: any) => site.toLowerCase().includes(filters.siteName.toLowerCase()))
+                        .map((site: any, index: number) => (
+                          <div key={index} className="flex items-center py-2 hover:bg-gray-50 rounded">
+                            <input
+                              type="checkbox"
+                              id={`site-${index}`}
+                              className="h-4 w-4 text-blue-600 rounded border-gray-300 focus:ring-blue-500"
+                              checked={selectedLocation.includes(site)}
+                              onChange={(e) => {
+                                setSelectedLocation((prev: string[]) => {
+                                  const set = new Set(prev);
+                                  if (e.target.checked) {
+                                    set.add(site);
+                                  } else {
+                                    set.delete(site);
+                                  }
+                                  return Array.from(set);
+                                });
+                              }}
+                            />
+                            <label
+                              htmlFor={`site-${index}`}
+                              className="ml-2 text-gray-700 cursor-pointer flex-grow"
+                            >
+                              {site}
+                            </label>
+                          </div>
+                        ))}
+                    </div>
+                    <div className="flex justify-end space-x-2 mt-3 pt-3 border-t border-gray-200">
+                      <Button size="small" onClick={() => setShowSiteFilter(false)}>
+                        取消
+                      </Button>
+                      <Button
+                        size="small"
+                        type="primary"
+                        onClick={() => {
+                          setShowSiteFilter(false);
+                        }}
+                      >
+                        应用
+                      </Button>
+                    </div>
+                  </div>
+                )}
+              </div>
               <RangePicker
                 size="middle"
                 // className="!rounded-lg"
@@ -468,25 +686,10 @@ const App: React.FC = () => {
                   setDateRange(rangeValue);
                 }} // 更新日期范围
               />
+
               <Select
                 mode="multiple"
-                maxTagCount="responsive"
-                maxTagTextLength={4} // 可选：限制每个标签显示文字长度
                 size="middle"
-                placeholder="选择场地"
-                value={selectedLocation}
-                onChange={setSelectedLocation}
-                style={{ width: 120 }}
-                // className="!rounded-lg"
-              >
-                {venueList?.data?.map((venue: any) => (
-                  <Option key={venue.id} value={venue.venue_name}>
-                    {venue.venue_name}
-                  </Option>
-                ))}
-              </Select>
-              <Select
-                mode="multiple"
                 placeholder="选择影响时长类型"
                 value={selectedDurationType}
                 onChange={setSelectedDurationType}
@@ -496,7 +699,8 @@ const App: React.FC = () => {
                 <Option value="valid">已结束事件</Option>
                 <Option value="empty">未结束事件</Option>
               </Select>
-              {/* <Select
+
+              <Select
                 mode="multiple"
                 maxTagCount="responsive"
                 maxTagTextLength={4} // 可选：限制每个标签显示文字长度
@@ -506,14 +710,38 @@ const App: React.FC = () => {
                 style={{ width: 150 }}
                 // maxTagTextLength={4} // 可选：限制每个标签显示文字长度
                 size="middle"
-              // className="!rounded-lg"
+                // className="!rounded-lg"
               >
-                {["电力", "高温", "极端天气", "日常维护", "设备故障", "网络", "限电"].map((type) => (
-                  <Option key={type} value={type}>
-                    {type}
-                  </Option>
-                ))}
-              </Select> */}
+                {["电力", "高温", "极端天气", "日常维护", "设备故障", "网络", "限电", "低功耗", "其他"].map(
+                  (type) => (
+                    <Option key={type} value={type}>
+                      {type}
+                    </Option>
+                  ),
+                )}
+              </Select>
+
+              <Select
+                mode="multiple"
+                size="middle"
+                placeholder="选择子账户"
+                value={selectedSubAccounts}
+                onChange={(vals) => setSelectedSubAccounts(vals as number[])}
+                style={{ width: 220 }}
+                allowClear
+                options={subAccountOptions.map((o) => ({ value: o.value, label: `${o.label}` }))}
+              />
+
+              <Button
+                icon={<SyncOutlined />}
+                size="middle"
+                loading={isLoading}
+                onClick={() => {
+                  refetch();
+                }}
+              >
+                刷新
+              </Button>
 
               {/* <Select
                 placeholder="选择影响时长类型"
@@ -545,35 +773,26 @@ const App: React.FC = () => {
               <Button
                 icon={<DownloadOutlined />}
                 size="middle"
-                onClick={() => {
-                  const headers = [
-                    "场地",
-                    "日期",
-                    "时间范围",
-                    "事件类型",
-                    "影响台数",
-                    "事件原因",
-                    "解决措施",
-                    "记录人",
-                    "记录时间",
-                  ];
-                  const data = filteredData.map((item) => [
-                    item.venue_name,
-                    item.log_date,
-                    `${item.start_time} - ${item.end_time}`,
-                    item.log_type,
-                    item.impact_count,
-                    item.event_reason,
-                    item.resolution_measures,
-                    item.created_at,
-                  ]);
-                  const csvContent = [headers, ...data].map((row) => row.join(",")).join("\n");
-                  const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
-                  const link = document.createElement("a");
-                  link.href = URL.createObjectURL(blob);
-                  link.download = `事件日志_${dayjs().format("YYYY-MM-DD")}.csv`;
-                  link.click();
-                  message.success("导出成功");
+                onClick={async () => {
+                  try {
+                    const exportParams = {
+                      startDate,
+                      endDate,
+                      venueIds,
+                      eventStatus:
+                        (Array.isArray(eventStatus) ? eventStatus.join(",") : eventStatus) || undefined,
+                      eventTypes:
+                        (Array.isArray(eventTypes) ? eventTypes.join(",") : eventTypes) || undefined,
+                      poolIds: selectedSubAccounts.length ? selectedSubAccounts.join(",") : undefined,
+                    };
+                    const res = await fetchEventLogForExport(poolType, exportParams);
+                    const rows = res?.data?.data ?? res?.data ?? [];
+                    exportEventLogsToExcel(rows, "事件日志", `事件日志_${dayjs().format("YYYY-MM-DD")}.xlsx`);
+                    message.success("导出成功");
+                  } catch (e) {
+                    console.error(e);
+                    message.error("导出失败，请稍后重试");
+                  }
                 }}
                 className="!rounded-button"
               >
@@ -582,7 +801,6 @@ const App: React.FC = () => {
             </Space>
           </div>
         </div>
-
         <div
           style={{
             background: "#fff",
@@ -602,10 +820,11 @@ const App: React.FC = () => {
             {" "}
             我的自选
           </div> */}
+
           <Table
             // rowSelection={rowSelection}
             columns={columns}
-            dataSource={filteredData} // 使用过滤后的数据
+            dataSource={logData || []} // 使用过滤后的数据
             scroll={{ x: 1300 }}
             rowKey="id"
             loading={isLoading}
@@ -622,6 +841,7 @@ const App: React.FC = () => {
               onChange: (page, size) => {
                 // 页码或页面大小变化时都会触发此回调
                 setPageSize(size);
+                setCurrentPage(page);
                 console.log(page, size);
                 const tableBody = document.querySelector(".ant-table-body");
                 if (tableBody) {
@@ -633,7 +853,7 @@ const App: React.FC = () => {
             }}
             // className="px-6"
           />
-          {filteredData.length !== total && (
+          {/* {(isLoading || (!isLoading && logData.length < total)) && (
             <div
               style={{
                 position: "relative",
@@ -648,9 +868,9 @@ const App: React.FC = () => {
                 pointerEvents: "none",
               }}
             >
-              <Spin tip={`数据加载中... 已加载 ${filteredData.length}/${total}`} />
+              <Spin tip={`数据加载中... 已加载 ${logData.length}/${total}`} />
             </div>
-          )}
+          )} */}
         </div>
       </div>
       <Modal
@@ -662,14 +882,32 @@ const App: React.FC = () => {
         okText="确定"
         cancelText="取消"
       >
-        <Form form={form} layout="vertical" className="pt-4">
+        <Form form={form} layout="vertical" className="pt-2 compact-form" initialValues={{ is_sleep: 0 }}>
           <div className="grid grid-cols-2 gap-x-6">
             {/* 隐藏的 ID 字段 */}
             <Form.Item name="id" style={{ display: "none" }}>
               <Input type="hidden" />
             </Form.Item>
             <Form.Item name="venue_id" label="场地" rules={[{ required: true, message: "请选择场地" }]}>
-              <Select placeholder="请选择场地" allowClear style={{ width: "100%", fontSize: "12px" }}>
+              <Select
+                placeholder="请选择场地"
+                size="middle"
+                allowClear
+                showSearch
+                optionFilterProp="children"
+                filterOption={(input, option) => {
+                  const label = String(option?.children ?? "").toLowerCase();
+                  const val = String((option as any)?.value ?? "").toLowerCase();
+                  const query = input.toLowerCase().trim();
+                  return label.includes(query) || val.includes(query);
+                }}
+                filterSort={(optionA, optionB) => {
+                  const labelA = String(optionA?.children ?? "");
+                  const labelB = String(optionB?.children ?? "");
+                  return labelA.localeCompare(labelB, "zh");
+                }}
+                style={{ width: "100%", fontSize: "12px" }}
+              >
                 {venueList?.data?.map((venue: any) => (
                   <Option key={venue.id} value={venue.id} style={{ fontSize: "12px" }}>
                     {venue.venue_name}
@@ -677,35 +915,54 @@ const App: React.FC = () => {
                 ))}
               </Select>
             </Form.Item>
-            <Form.Item name="log_date" label="日期" rules={[{ required: true, message: "请选择日期" }]}>
-              <DatePicker className="w-full" />
+
+            <Form.Item name="pool_id" label="子账户" rules={[{ required: true, message: "请选择子账户" }]}>
+              <Select
+                placeholder="请选择子账户"
+                size="middle"
+                allowClear
+                showSearch
+                optionFilterProp="children"
+              >
+                {modalPoolOptions.map((p) => (
+                  <Option key={p.value} value={p.value} style={{ fontSize: "12px" }}>
+                    {p.label}
+                  </Option>
+                ))}
+              </Select>
             </Form.Item>
+
+            {/* <Form.Item name="log_date" label="日期" rules={[{ required: true, message: "请选择日期" }]}>
+              <DatePicker className="w-full" />
+            </Form.Item> */}
             <Form.Item
               name="start_time"
               label="开始时间"
               rules={[{ required: true, message: "请选择开始时间" }]}
             >
-              <DatePicker showTime className="w-full" />
-            </Form.Item>
-            <Form.Item
-              name="end_time"
-              label="结束时间"
-              rules={[{ required: true, message: "请选择结束时间" }]}
-            >
-              <DatePicker showTime className="w-full" />
+              <DatePicker size="middle" showTime className="w-full" />
             </Form.Item>
             <Form.Item
               name="log_type"
               label="事件类型"
               rules={[{ required: true, message: "请选择事件类型" }]}
             >
-              <Select placeholder="请选择事件类型">
-                {["电力", "高温", "极端天气", "日常维护", "设备故障", "限电"].map((type) => (
-                  <Option key={type} value={type}>
-                    {type}
-                  </Option>
-                ))}
+              <Select size="middle" placeholder="请选择事件类型">
+                {["电力", "高温", "极端天气", "日常维护", "设备故障", "网络", "限电", "低功耗", "其他"].map(
+                  (type) => (
+                    <Option key={type} value={type}>
+                      {type}
+                    </Option>
+                  ),
+                )}
               </Select>
+            </Form.Item>
+            <Form.Item
+              name="end_time"
+              label="结束时间"
+              rules={[{ required: false, message: "请选择结束时间" }]}
+            >
+              <DatePicker size="middle" showTime className="w-full" />
             </Form.Item>
             <Form.Item
               name="impact_count"
@@ -713,32 +970,38 @@ const App: React.FC = () => {
               style={{ fontSize: "12px" }}
               rules={[{ required: true, message: "请输入影响台数" }]}
             >
-              <Input type="number" placeholder="请输入影响台数" style={{ fontSize: "12px" }} />
+              <Input size="middle" type="number" placeholder="请输入影响台数" style={{ fontSize: "12px" }} />
             </Form.Item>
             <Form.Item
               name="impact_power_loss"
               label="影响算力"
               style={{ fontSize: "12px" }}
-              rules={[{ required: true, message: "请输入影响算力" }]}
+              rules={[{ required: false, message: "请输入影响算力" }]}
             >
-              <Input type="number" placeholder="请输入影响算力" style={{ fontSize: "12px" }} />
+              <Input size="middle" type="number" placeholder="请输入影响算力" style={{ fontSize: "12px" }} />
+            </Form.Item>
+            <Form.Item name="is_sleep" label="是否休眠" rules={[{ required: true }]}>
+              <Select size="middle" placeholder="请选择是否休眠">
+                <Option value={0}>不休眠</Option>
+                <Option value={1}>已休眠</Option>
+              </Select>
             </Form.Item>
           </div>
           <Form.Item
             name="event_reason"
             label="事件原因"
             style={{ fontSize: "12px" }}
-            rules={[{ required: true, message: "请输入事件原因" }]}
+            rules={[{ required: false, message: "请输入事件原因" }]}
           >
-            <TextArea rows={4} placeholder="请输入事件原因" style={{ fontSize: "12px" }} />
+            <TextArea size="middle" rows={2} placeholder="请输入事件原因" style={{ fontSize: "12px" }} />
           </Form.Item>
           <Form.Item
             name="resolution_measures"
             label="解决措施"
             style={{ fontSize: "12px" }}
-            rules={[{ required: true, message: "请输入解决措施" }]}
+            rules={[{ required: false, message: "请输入解决措施" }]}
           >
-            <TextArea rows={4} placeholder="请输入解决措施" style={{ fontSize: "12px" }} />
+            <TextArea size="middle" rows={2} placeholder="请输入解决措施" style={{ fontSize: "12px" }} />
           </Form.Item>
         </Form>
       </Modal>

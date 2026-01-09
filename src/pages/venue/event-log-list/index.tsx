@@ -356,6 +356,8 @@ const App: React.FC = () => {
         impact_power_loss: Number(values.impact_power_loss), //数字，包含整数和小数
         event_reason: values.event_reason,
         resolution_measures: values.resolution_measures,
+        is_sleep: values.is_sleep || false,
+        pool_id: values.pool_type || undefined,
       };
 
       if (values.id !== undefined) {

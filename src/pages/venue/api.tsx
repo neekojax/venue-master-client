@@ -130,3 +130,13 @@ export const fetchVenueEnvironmentHistory = async (venueID: number, startDate: s
 export const fetchEventImpactDaily = async (searchType: string, poolType: string, date: string) => {
   return await fetchGet(`/event/event-impact/${searchType}/${poolType}/${date}`);
 };
+
+// /event/listEventPageWithFilter/:venueType
+export const fetchEventLogWithFilter = async (poolType: string, params?: Record<string, any>) => {
+  return await fetchGet(`/event/listEventPageWithFilter/${poolType}`, params);
+};
+
+// /event/listEventForExport/:venueType
+export const fetchEventLogForExport = async (poolType: string, params?: Record<string, any>) => {
+  return await fetchGet(`/event/listEventForExport/${poolType}`, params);
+};

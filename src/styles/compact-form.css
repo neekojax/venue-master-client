@@ -1,0 +1,8 @@
+/* Make vertical antd Form more compact for this page */
+.compact-form.ant-form-vertical .ant-form-item {
+  margin-bottom: 8px;
+}
+
+.compact-form .ant-form-item-label > label {
+  line-height: 1.2;
+}

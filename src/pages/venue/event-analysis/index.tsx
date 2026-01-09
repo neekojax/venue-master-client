@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { AlertTriangle, BarChart3, LayoutList } from "lucide-react";
 import AnalysisView from "./components/EventImpactAnalysis";
-import EventLogsView from "./components/EventLog";
+import EventLogsView from "./components/EventLogNew";
 
 const EventImpactAnalysis: React.FC = () => {
   const [activeTab, setActiveTab] = useState<"analysis" | "logs">("logs");
