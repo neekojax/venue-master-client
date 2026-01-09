@@ -549,8 +549,8 @@ export const exportPowerConsumptionToExcel = (data: any[]) => {
   // 处理数据并生成工作表
   const formattedData = (data || []).map((item: any) => ({
     siteName: item.siteName,
-    start_time: item.start_time,
-    end_time: item.end_time,
+    start_time: item.start_time ? dayjs(item.start_time).toDate() : null,
+    end_time: item.end_time ? dayjs(item.end_time).toDate() : null,
     power_consumption: item.power_consumption,
   }));
 
@@ -563,6 +563,18 @@ export const exportPowerConsumptionToExcel = (data: any[]) => {
   // 生成工作表
   const worksheet = XLSX.utils.aoa_to_sheet(worksheetData);
 
+  if (worksheet["!ref"]) {
+    const range = XLSX.utils.decode_range(worksheet["!ref"] as string);
+    for (let R = range.s.r + 1; R <= range.e.r; R++) {
+      for (const C of [1, 2]) {
+        const addr = XLSX.utils.encode_cell({ r: R, c: C });
+        const cell = (worksheet as any)[addr];
+        if (cell && (cell.t === "d" || cell.t === "n")) {
+          cell.z = "yyyy-mm-dd hh:mm:ss";
+        }
+      }
+    }
+  }
   // 设置列宽度
   worksheet["!cols"] = [
     { wch: 30 }, // 场地名称
@@ -582,7 +594,7 @@ export const exportPowerConsumptionToExcel = (data: any[]) => {
   const fileName = `总功耗账单_${formattedDate}.xlsx`;
 
   // 导出 Excel 文件
-  XLSX.writeFile(workbook, fileName);
+  XLSX.writeFile(workbook, fileName, { cellDates: true });
 };
 
 export const exportHostingRecordToExcel = (data: any[]) => {
@@ -591,8 +603,8 @@ export const exportHostingRecordToExcel = (data: any[]) => {
   // 声明导出行的类型，使 header 的 key 成为该类型的键
   type HostingRecordExportRow = {
     siteName: string;
-    start_time: string;
-    end_time: string;
+    start_time: Date | string | null;
+    end_time: Date | string | null;
     hosting_price: number | string;
     maintenance_price: number | string;
   };
@@ -608,8 +620,8 @@ export const exportHostingRecordToExcel = (data: any[]) => {
 
   const formattedData: HostingRecordExportRow[] = (data || []).map((item: any) => ({
     siteName: String(item?.siteName ?? ""),
-    start_time: String(item?.start_time ?? ""),
-    end_time: String(item?.end_time ?? ""),
+    start_time: item?.start_time ? dayjs(item.start_time).toDate() : null,
+    end_time: item?.end_time ? dayjs(item.end_time).toDate() : null,
     hosting_price:
       typeof item?.hosting_price === "number" ? item.hosting_price : String(item?.hosting_price ?? ""),
     maintenance_price:
@@ -624,6 +636,18 @@ export const exportHostingRecordToExcel = (data: any[]) => {
   ];
 
   const worksheet = XLSX.utils.aoa_to_sheet(worksheetData);
+  if (worksheet["!ref"]) {
+    const range = XLSX.utils.decode_range(worksheet["!ref"] as string);
+    for (let R = range.s.r + 1; R <= range.e.r; R++) {
+      for (const C of [1, 2]) {
+        const addr = XLSX.utils.encode_cell({ r: R, c: C });
+        const cell = (worksheet as any)[addr];
+        if (cell && (cell.t === "d" || cell.t === "n")) {
+          cell.z = "yyyy-mm-dd hh:mm:ss";
+        }
+      }
+    }
+  }
   worksheet["!cols"] = [
     { wch: 30 }, // 场地名称
     { wch: 20 }, // 账单开始
@@ -637,7 +661,7 @@ export const exportHostingRecordToExcel = (data: any[]) => {
   const date = new Date();
   const formattedDate = date.toISOString().split("T")[0];
   const fileName = `托管运维单价_${formattedDate}.xlsx`;
-  XLSX.writeFile(workbook, fileName);
+  XLSX.writeFile(workbook, fileName, { cellDates: true });
 };
 
 // 通用：根据内容自适应列宽（中文与数字按字符数近似计算）
@@ -728,8 +752,8 @@ export const exportEventLogsToExcel = (
       item.impact_count ?? "",
       item.event_reason ?? "",
       item.resolution_measures ?? "",
-      dayjs(item.created_at).format("YYYY-MM-DD HH:mm:ss") ?? "",
-      dayjs(item.updated_at).format("YYYY-MM-DD HH:mm:ss") ?? "",
+      item.created_at ? dayjs(item.created_at).toDate() : null,
+      item.updated_at ? dayjs(item.updated_at).toDate() : null,
     ]),
   ];
 
@@ -738,7 +762,7 @@ export const exportEventLogsToExcel = (
   if (worksheet["!ref"]) {
     const range = XLSX.utils.decode_range(worksheet["!ref"] as string);
     for (let R = range.s.r + 1; R <= range.e.r; R++) {
-      for (const C of [2, 3]) {
+      for (const C of [4, 5, 10, 11]) {
         // 0:场地,1:事件类型,2:开始时间,3:结束时间
         const addr = XLSX.utils.encode_cell({ r: R, c: C });
         const cell = (worksheet as any)[addr];
