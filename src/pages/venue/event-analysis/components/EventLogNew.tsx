@@ -32,7 +32,7 @@ import { exportEventLogsToExcel } from "@/utils/excel";
 
 import "@/styles/compact-form.css";
 
-import { fetchEventLogForExport, getVenueBasicInfo } from "@/pages/venue/api.tsx";
+import { fetchEventLogForExport } from "@/pages/venue/api.tsx";
 // import { getTimeDifference } from "@/utils/date";
 import UploadExcel from "@/pages/venue/components/UploadExcel";
 import {
@@ -112,10 +112,12 @@ const App: React.FC = () => {
   // 防抖后的搜索文本
   // const [debouncedSearchText, setDebouncedSearchText] = useState<string>("");
   // 子账户联动：选中场地后展示其子账户
-  const [subAccountOptions, setSubAccountOptions] = useState<
-    { value: number; label: string; venue_id: number }[]
-  >([]);
-  const [selectedSubAccounts, setSelectedSubAccounts] = useState<number[]>([]);
+  // const [subAccountOptions, setSubAccountOptions] = useState<
+  //   { value: number; label: string; venue_id: number }[]
+  // >([]);
+  // const [selectedSubAccounts, setSelectedSubAccounts] = useState<number[]>([]);
+  // 导出按钮加载状态
+  const [exporting, setExporting] = useState(false);
 
   // 搜索防抖处理
   // useEffect(() => {
@@ -159,46 +161,10 @@ const App: React.FC = () => {
     };
     loadVenuePools();
   }, [selectedVenueId, poolType]);
-  // 当选中的场地变化时，拉取对应子账户列表并聚合
-  useEffect(() => {
-    const loadSubAccounts = async () => {
-      try {
-        const venueNames = selectedLocation;
-        if (!venueNames.length || !Array.isArray(venueList?.data)) {
-          setSubAccountOptions([]);
-          setSelectedSubAccounts([]);
-          return;
-        }
-        // 计算选中场地的 ID 列表
-        const venueIds = venueNames
-          .map((name) => (venueList!.data as any[]).find((v: any) => v.venue_name === name)?.id)
-          .filter((id): id is number => typeof id === "number");
 
-        // 并发获取每个场地的基础信息，提取子账户
-        const results = await Promise.all(venueIds.map((id) => getVenueBasicInfo(poolType, id)));
-        const options: { value: number; label: string; venue_id: number }[] = [];
-        results.forEach((res, idx) => {
-          const vid = venueIds[idx];
-          const subs = res?.data?.sub_accounts || [];
-          subs.forEach((s: any) => {
-            if (typeof s.pool_id === "number" && s.pool_name) {
-              options.push({ value: s.pool_id, label: s.pool_name, venue_id: vid });
-            }
-          });
-        });
-        setSubAccountOptions(options);
-        // 如果当前已选择的子账户不在新选场地下，做一次清理
-        setSelectedSubAccounts((prev) => prev.filter((pid) => options.some((o) => o.value === pid)));
-      } catch (err) {
-        console.error("加载子账户失败", err);
-        setSubAccountOptions([]);
-      }
-    };
-    loadSubAccounts();
-  }, [selectedLocation, venueList, poolType]);
   // 参数对象（在依赖声明之后构建）
-  const startDate = dateRange[0] ? dateRange[0].format("YYYY-MM-DD") : undefined;
-  const endDate = dateRange[1] ? dateRange[1].format("YYYY-MM-DD") : undefined;
+  const startDate = dateRange && dateRange[0] ? dateRange[0].format("YYYY-MM-DD") : undefined;
+  const endDate = dateRange && dateRange[1] ? dateRange[1].format("YYYY-MM-DD") : undefined;
   // 将场地 ID 转为逗号分隔的字符串（后端期望格式）
   const venueIds =
     selectedLocation.length && Array.isArray(venueList?.data)
@@ -217,7 +183,6 @@ const App: React.FC = () => {
     venueIds,
     eventStatus: eventStatus.join(","),
     eventTypes: eventTypes.join(","),
-    poolIds: selectedSubAccounts.length ? selectedSubAccounts.join(",") : undefined,
   };
 
   // 在依赖声明之后再调用数据查询 hook，避免在声明前使用变量
@@ -262,9 +227,6 @@ const App: React.FC = () => {
     {
       title: "场地",
       dataIndex: "venue_name",
-      // width: 120,
-      // filters: venueList?.data?.map((venue) => ({ text: venue.venue_name, value: venue.venue_name })),
-      // onFilter: (value, record) => record.venue_name === value,
       width: 200,
       render: (_: any, record: EventLog) => {
         const isSpecialVenue = record.venue_name === "Arct-HF01-J XP-AR-US"; // 判断是否为特殊场地
@@ -320,14 +282,8 @@ const App: React.FC = () => {
       dataIndex: "log_date",
       width: 140,
       render: (_: string, record: any) => {
-        // if (text === "---valid---") {
-        //   console.log(text);
-        // }
         if (record.start_time && record.end_time) {
           const duration = (dayjs(record.end_time).diff(dayjs(record.start_time), "minute") / 60).toFixed(2);
-          // return getTimeDifference(record.start_time, record.end_time);
-          // const duration = getTimeDifference(record.start_time, record.end_time);
-          // console.log("duration", duration);
           if (duration != "---") {
             return duration;
           }
@@ -364,24 +320,6 @@ const App: React.FC = () => {
       title: "事件类型",
       dataIndex: "log_type",
       width: 120,
-      filters: [
-        { text: "电力", value: "电力" },
-        { text: "高温", value: "高温" },
-        { text: "极端天气", value: "极端天气" },
-        { text: "日常维护", value: "日常维护" },
-        { text: "设备故障", value: "设备故障" },
-        { text: "网络", value: "网络" },
-        { text: "限电", value: "限电" },
-        { text: "低功耗", value: "低功耗" },
-        { text: "其他", value: "其他" },
-      ],
-      onFilter: () => {
-        return true;
-      },
-      // onFilter: (value, record) => {
-      //   console.log(value);
-      //   return record.log_type === value
-      // },
       render: (text) => {
         const colors = {
           限电: "red",
@@ -501,13 +439,6 @@ const App: React.FC = () => {
     },
   ];
 
-  // useEffect(() => {
-  //   if (isLoading) {
-  //     // message.loading("加载中...");
-  //   }
-  //   // console.log(selectedEventType);
-  // }, [isLoading, selectedEventType]);
-
   const handleAdd = () => {
     form.resetFields();
     setIsModalVisible(true);
@@ -516,8 +447,6 @@ const App: React.FC = () => {
   const handleEdit = (record: EventLog) => {
     form.setFieldsValue({
       ...record,
-      // log_date: dayjs(record.log_date),
-      // start_time: dayjs(record.start_time),
       log_date: record.log_date ? dayjs(record.log_date) : undefined,
       start_time: record.start_time ? dayjs(record.start_time) : undefined, //dayjs(record.start_time),
       end_time: record.end_time ? dayjs(record.end_time) : undefined, // 如果为 null/undefined，就不传入初始值
@@ -595,16 +524,6 @@ const App: React.FC = () => {
               新增事件
             </Button>
             <div className="flex items-center justify-end gap-4">
-              {/* <Input
-                placeholder="搜索场地、事件类型或内容"
-                prefix={<SearchOutlined />}
-                size="middle"
-                // className="max-w-xs !rounded-lg"
-                value={searchText}
-                style={{ width: 180 }}
-                onChange={(e) => setSearchText(e.target.value)} // 更新搜索文本
-                allowClear // 添加清除按钮
-              /> */}
               <div className="relative">
                 <Button
                   size="middle"
@@ -682,6 +601,7 @@ const App: React.FC = () => {
                 style={{ width: 220 }}
                 onChange={(dates) => {
                   // 类型转换，确保类型兼容
+                  setCurrentPage(1);
                   const rangeValue = dates as [dayjs.Dayjs | null, dayjs.Dayjs | null];
                   setDateRange(rangeValue);
                 }} // 更新日期范围
@@ -690,14 +610,17 @@ const App: React.FC = () => {
               <Select
                 mode="multiple"
                 size="middle"
-                placeholder="选择影响时长类型"
+                placeholder="选择事件状态"
                 value={selectedDurationType}
-                onChange={setSelectedDurationType}
+                onChange={(vals) => {
+                  setCurrentPage(1);
+                  setSelectedDurationType(vals);
+                }}
                 style={{ width: 120 }}
                 allowClear
               >
-                <Option value="valid">已结束事件</Option>
-                <Option value="empty">未结束事件</Option>
+                <Option value="finished">已结束事件</Option>
+                <Option value="unfinished">未结束事件</Option>
               </Select>
 
               <Select
@@ -706,7 +629,10 @@ const App: React.FC = () => {
                 maxTagTextLength={4} // 可选：限制每个标签显示文字长度
                 placeholder="选择事件类型"
                 value={selectedEventType}
-                onChange={setSelectedEventType}
+                onChange={(vals) => {
+                  setCurrentPage(1);
+                  setSelectedEventType(vals);
+                }}
                 style={{ width: 150 }}
                 // maxTagTextLength={4} // 可选：限制每个标签显示文字长度
                 size="middle"
@@ -720,17 +646,6 @@ const App: React.FC = () => {
                   ),
                 )}
               </Select>
-
-              <Select
-                mode="multiple"
-                size="middle"
-                placeholder="选择子账户"
-                value={selectedSubAccounts}
-                onChange={(vals) => setSelectedSubAccounts(vals as number[])}
-                style={{ width: 220 }}
-                allowClear
-                options={subAccountOptions.map((o) => ({ value: o.value, label: `${o.label}` }))}
-              />
 
               <Button
                 icon={<SyncOutlined />}
@@ -773,7 +688,11 @@ const App: React.FC = () => {
               <Button
                 icon={<DownloadOutlined />}
                 size="middle"
+                loading={exporting}
+                disabled={exporting}
                 onClick={async () => {
+                  if (exporting) return;
+                  setExporting(true);
                   try {
                     const exportParams = {
                       startDate,
@@ -783,7 +702,7 @@ const App: React.FC = () => {
                         (Array.isArray(eventStatus) ? eventStatus.join(",") : eventStatus) || undefined,
                       eventTypes:
                         (Array.isArray(eventTypes) ? eventTypes.join(",") : eventTypes) || undefined,
-                      poolIds: selectedSubAccounts.length ? selectedSubAccounts.join(",") : undefined,
+                      // poolIds: selectedSubAccounts.length ? selectedSubAccounts.join(",") : undefined,
                     };
                     const res = await fetchEventLogForExport(poolType, exportParams);
                     const rows = res?.data?.data ?? res?.data ?? [];
@@ -792,6 +711,8 @@ const App: React.FC = () => {
                   } catch (e) {
                     console.error(e);
                     message.error("导出失败，请稍后重试");
+                  } finally {
+                    setExporting(false);
                   }
                 }}
                 className="!rounded-button"
@@ -828,14 +749,10 @@ const App: React.FC = () => {
             scroll={{ x: 1300 }}
             rowKey="id"
             loading={isLoading}
-            // onChange={handleTableChange}
-            onChange={(_: any, filters: any) => {
-              // console.log("Table >>选中的事件类型：", filters.log_type); // 是数组
-              setSelectedEventType(filters.log_type || []); // 设置选中的事件类型数组
-            }}
             pagination={{
               total: total,
               pageSize: pageSize,
+              current: currentPage,
               showSizeChanger: true,
               pageSizeOptions: ["10", "20", "30", "50"],
               onChange: (page, size) => {
@@ -851,26 +768,7 @@ const App: React.FC = () => {
               // showQuickJumper: true,
               showTotal: (total) => `共 ${total} 条记录`,
             }}
-            // className="px-6"
           />
-          {/* {(isLoading || (!isLoading && logData.length < total)) && (
-            <div
-              style={{
-                position: "relative",
-                inset: 0,
-                top: "-50px",
-                left: "20px",
-                width: "100px",
-                // display: "flex",
-                alignItems: "left",
-                justifyContent: "center",
-                background: "rgba(255,255,255,0.6)",
-                pointerEvents: "none",
-              }}
-            >
-              <Spin tip={`数据加载中... 已加载 ${logData.length}/${total}`} />
-            </div>
-          )} */}
         </div>
       </div>
       <Modal
