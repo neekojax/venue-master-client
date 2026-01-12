@@ -283,13 +283,6 @@ export default function CustodyStatisticsTable({
         dataIndex: "hosting_fee_ratio",
         key: "hosting_fee_ratio",
         width: 140,
-        sorter: (a: any, b: any) => {
-          const av =
-            typeof a.hosting_fee_ratio === "number" ? a.hosting_fee_ratio : parseFloat(a.hosting_fee_ratio);
-          const bv =
-            typeof b.hosting_fee_ratio === "number" ? b.hosting_fee_ratio : parseFloat(b.hosting_fee_ratio);
-          return av - bv;
-        },
         onHeaderCell: () => ({ className: "fee-ratio-header" }),
         onCell: (record: any) => {
           const val = record?.hosting_fee_ratio;
@@ -303,6 +296,13 @@ export default function CustodyStatisticsTable({
         render: (text: any) => {
           const num = typeof text === "number" ? text : parseFloat(text);
           return <span>{Number.isFinite(num) ? `${num.toFixed(2)}%` : `${text}%`}</span>;
+        },
+        sorter: (a: any, b: any) => {
+          const av =
+            typeof a.hosting_fee_ratio === "number" ? a.hosting_fee_ratio : parseFloat(a.hosting_fee_ratio);
+          const bv =
+            typeof b.hosting_fee_ratio === "number" ? b.hosting_fee_ratio : parseFloat(b.hosting_fee_ratio);
+          return av - bv;
         },
       },
       {
@@ -403,6 +403,10 @@ export default function CustodyStatisticsTable({
 
   // apply filtering based on parent props
   useEffect(() => {
+    // const normalizeLower = (s: any) =>
+    //   String(s ?? "")
+    //     .trim()
+    //     .toLowerCase();
     const normalizeDiscountStatus = (val: any): "打折" | "不变" | "分润" => {
       const s = String(val || "")
         .trim()
@@ -412,37 +416,70 @@ export default function CustodyStatisticsTable({
       return "不变";
     };
 
-    const filtered = tableData.filter((item: any) => {
-      const ratioVal = item?.hosting_fee_ratio;
-      const ratioNum = typeof ratioVal === "number" ? ratioVal : parseFloat(ratioVal);
-      const hasSelection = Array.isArray(selectedVenues) && selectedVenues.length > 0;
-      const matchesSelectedVenues = hasSelection
-        ? selectedVenues.some(
-            (name) =>
-              String(name || "")
-                .trim()
-                .toLowerCase().length > 0 &&
-              String(item?.venue_name || "")
-                .trim()
-                .toLowerCase()
-                .includes(
-                  String(name || "")
-                    .trim()
-                    .toLowerCase(),
-                ),
-          )
-        : true;
+    // const filtered = tableData.filter((item: any) => {
+    //   const ratioVal = item?.hosting_fee_ratio;
+    //   const ratioNum = typeof ratioVal === "number" ? ratioVal : parseFloat(ratioVal);
+    //   const hasSelection = Array.isArray(selectedVenues) && selectedVenues.length > 0;
+    //   const matchesSelectedVenues = hasSelection
+    //     ? selectedVenues.some(
+    //       (name) =>
+    //         String(name || "")
+    //           .trim()
+    //           .toLowerCase().length > 0 &&
+    //         String(item?.venue_name || "")
+    //           .trim()
+    //           .toLowerCase()
+    //           .includes(
+    //             String(name || "")
+    //               .trim()
+    //               .toLowerCase(),
+    //           ),
+    //     )
+    //     : true;
 
-      // 当选择了场地名时，只按场地过滤；未选择时才考虑“仅高费率”筛选
-      const passesHighFee = showHighFeeOnly ? ratioNum > 90 : true;
+    //   // 当选择了场地名时，只按场地过滤；未选择时才考虑“仅高费率”筛选
+    //   const passesHighFee = showHighFeeOnly ? ratioNum > 90 : true;
+
+    //   const matchesDiscount =
+    //     discountFilter === "全部状态"
+    //       ? true
+    //       : normalizeDiscountStatus(item?.discount_status) === discountFilter;
+
+    //   return (hasSelection ? matchesSelectedVenues : passesHighFee) && matchesDiscount;
+    // });
+
+    const filtered = tableData.filter((item: any) => {
+      const ratioNum = Number(item?.hosting_fee_ratio);
+      const safeRatio = Number.isFinite(ratioNum) ? ratioNum : 0;
+
+      const cleanVenues = (selectedVenues || [])
+        .map((v) =>
+          String(v || "")
+            .trim()
+            .toLowerCase(),
+        )
+        .filter(Boolean);
+
+      const hasSelection = cleanVenues.length > 0;
+
+      const matchesSelectedVenues =
+        !hasSelection ||
+        cleanVenues.some((name) =>
+          String(item?.venue_name || "")
+            .toLowerCase()
+            .includes(name),
+        );
+
+      const passesHighFee = showHighFeeOnly && !hasSelection ? safeRatio > 90 : true;
 
       const matchesDiscount =
         discountFilter === "全部状态"
           ? true
           : normalizeDiscountStatus(item?.discount_status) === discountFilter;
 
-      return (hasSelection ? matchesSelectedVenues : passesHighFee) && matchesDiscount;
+      return matchesSelectedVenues && passesHighFee && matchesDiscount;
     });
+
     setFilteredData(filtered);
     // 重置到第一页，避免切换场地名后仍停留在旧页码
     setCurrentPage(1);

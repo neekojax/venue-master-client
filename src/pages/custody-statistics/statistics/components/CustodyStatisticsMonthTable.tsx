@@ -272,10 +272,21 @@ export default function CustodyStatisticsMonthTable({
         onCell: (record: any) => {
           const val = record?.hosting_fee_ratio;
           const num = typeof val === "number" ? val : parseFloat(val);
-          return {
-            className: num >= 90 ? "fee-ratio-high" : "fee-ratio-low",
-          };
+          // if (!Number.isFinite(num)) return { className: "" };
+          if (!Number.isFinite(num) || num === 0) return { className: "" };
+          if (num >= 100) return { className: "fee-ratio-loss" };
+          if (num >= 90) return { className: "fee-ratio-high" };
+          if (num < 80) return { className: "fee-ratio-profit" };
+          return { className: "fee-ratio-low" };
         },
+        // onHeaderCell: () => ({ className: "fee-ratio-header" }),
+        // onCell: (record: any) => {
+        //   const val = record?.hosting_fee_ratio;
+        //   const num = typeof val === "number" ? val : parseFloat(val);
+        //   return {
+        //     className: num >= 90 ? "fee-ratio-high" : "fee-ratio-low",
+        //   };
+        // },
         render: (text: any) => {
           const num = typeof text === "number" ? text : parseFloat(text);
           return <span>{Number.isFinite(num) ? `${num.toFixed(2)}%` : `${text}%`}</span>;
@@ -349,6 +360,17 @@ export default function CustodyStatisticsMonthTable({
         width: 140,
         dataIndex: "discount_hosting_fee_ratio",
         key: "discount_hosting_fee_ratio",
+        onHeaderCell: () => ({ className: "fee-ratio-header" }),
+        onCell: (record: any) => {
+          const val = record?.discount_hosting_fee_ratio;
+          const num = typeof val === "number" ? val : parseFloat(val);
+          // if (!Number.isFinite(num)) return { className: "" };
+          if (!Number.isFinite(num) || num === 0) return { className: "" };
+          if (num >= 100) return { className: "fee-ratio-loss" };
+          if (num >= 90) return { className: "fee-ratio-high" };
+          if (num < 80) return { className: "fee-ratio-profit" };
+          return { className: "fee-ratio-low" };
+        },
         render: (text: any) => (Number.isFinite(text) && text !== 0 ? `${text.toFixed(2)}%` : `--`),
       },
       {
