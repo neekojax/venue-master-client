@@ -306,8 +306,8 @@ export default function CustodyStatisticsMonthTable({
           let label = "不变";
           let color: any = "default";
 
-          if (status.includes("DISCOUNT") || text === "打折") {
-            label = "打折";
+          if (status.includes("DISCOUNT") || text.includes("打折")) {
+            label = text;
             color = "green"; // 打折：绿色
           } else if (status.includes("PROFIT") || text === "分润") {
             label = "分润";
@@ -316,6 +316,19 @@ export default function CustodyStatisticsMonthTable({
             label = "不变";
             color = "orange"; // 不变：橙色
           }
+
+          // if (status.includes("DISCOUNT") || text === "打折") {
+          //   label = "打折";
+          //   color = "green"; // 打折：绿色
+          // }
+
+          // else if (status.includes("PROFIT") || text === "分润") {
+          //   label = "分润";
+          //   color = "geekblue"; // 分润：蓝色
+          // } else {
+          //   label = "不变";
+          //   color = "orange"; // 不变：橙色
+          // }
 
           return <Tag color={color}>{label}</Tag>;
         },

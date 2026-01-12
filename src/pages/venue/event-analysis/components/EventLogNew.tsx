@@ -166,13 +166,13 @@ const App: React.FC = () => {
   const startDate = dateRange && dateRange[0] ? dateRange[0].format("YYYY-MM-DD") : undefined;
   const endDate = dateRange && dateRange[1] ? dateRange[1].format("YYYY-MM-DD") : undefined;
   // 将场地 ID 转为逗号分隔的字符串（后端期望格式）
-  const venueIds =
-    selectedLocation.length && Array.isArray(venueList?.data)
-      ? selectedLocation
-          .map((name) => (venueList!.data as any[]).find((v: any) => v.venue_name === name)?.id)
-          .filter((id): id is number => typeof id === "number")
-          .join(",")
-      : undefined;
+  let venueIds: string | undefined = undefined;
+  if (selectedLocation.length && Array.isArray(venueList?.data)) {
+    const ids = selectedLocation
+      .map((name) => (venueList!.data as any[]).find((v: any) => v.venue_name === name)?.id)
+      .filter((id): id is number => typeof id === "number");
+    venueIds = ids.join(",");
+  }
   const eventTypes = selectedEventType;
   const eventStatus = selectedDurationType;
   const params = {
@@ -313,8 +313,8 @@ const App: React.FC = () => {
       dataIndex: "start_time",
       width: 280,
       render: (_text, record) => `${record.start_time} - ${record.end_time}`,
-      sorter: (a, b) => dayjs(a.log_date).unix() - dayjs(b.log_date).unix(),
-      defaultSortOrder: "descend", // 👈 默认按影响时长从大到小排序
+      // sorter: (a, b) => dayjs(a.log_date).unix() - dayjs(b.log_date).unix(),
+      // defaultSortOrder: "descend", // 👈 默认按影响时长从大到小排序
     },
     {
       title: "事件类型",
@@ -339,7 +339,7 @@ const App: React.FC = () => {
       title: "影响台数",
       dataIndex: "impact_count",
       width: 105,
-      sorter: (a, b) => a.impact_count - b.impact_count,
+      // sorter: (a, b) => a.impact_count - b.impact_count,
     },
     {
       title: "影响算力",
@@ -402,16 +402,16 @@ const App: React.FC = () => {
       dataIndex: "created_at",
       width: 200,
       render: (text) => dayjs(text).format("YYYY-MM-DD HH:mm:ss"),
-      sorter: (a, b) => dayjs(a.created_at).unix() - dayjs(b.created_at).unix(),
-      defaultSortOrder: "descend", // 👈 默认按创建时间从新到旧排序
+      // sorter: (a, b) => dayjs(a.created_at).unix() - dayjs(b.created_at).unix(),
+      // defaultSortOrder: "descend", // 👈 默认按创建时间从新到旧排序
     },
     {
       title: "更新时间",
       dataIndex: "updated_at",
       width: 200,
       render: (text) => dayjs(text).format("YYYY-MM-DD HH:mm:ss"),
-      sorter: (a, b) => dayjs(a.updated_at).unix() - dayjs(b.updated_at).unix(),
-      defaultSortOrder: "descend", // 👈 默认按更新时间从新到旧排序
+      // sorter: (a, b) => dayjs(a.updated_at).unix() - dayjs(b.updated_at).unix(),
+      // defaultSortOrder: "descend", // 👈 默认按更新时间从新到旧排序
     },
     {
       title: "操作",
@@ -636,7 +636,6 @@ const App: React.FC = () => {
                 style={{ width: 150 }}
                 // maxTagTextLength={4} // 可选：限制每个标签显示文字长度
                 size="middle"
-                // className="!rounded-lg"
               >
                 {["电力", "高温", "极端天气", "日常维护", "设备故障", "网络", "限电", "低功耗", "其他"].map(
                   (type) => (
@@ -717,7 +716,44 @@ const App: React.FC = () => {
                 }}
                 className="!rounded-button"
               >
-                导出事件
+                导出全部事件
+              </Button>
+              <Button
+                icon={<DownloadOutlined />}
+                size="middle"
+                onClick={() => {
+                  try {
+                    if (!logData.length) {
+                      message.warning("当前页没有数据可导出");
+                      return;
+                    }
+                    const exportRows = (logData || []).map((item: any) => ({
+                      venue_info: { venue_name: item.venue_name },
+                      pool_info: { pool_name: item.pool_name },
+                      is_sleep: Number(item.is_sleep),
+                      log_type: item.log_type,
+                      start_time: item.start_time,
+                      end_time: item.end_time ?? null,
+                      impact_count: item.impact_count,
+                      event_reason: item.event_reason,
+                      resolution_measures: item.resolution_measures,
+                      created_at: item.created_at,
+                      updated_at: item.updated_at,
+                    }));
+                    exportEventLogsToExcel(
+                      exportRows,
+                      "当前页事件",
+                      `事件日志_当前页_${dayjs().format("YYYY-MM-DD")}.xlsx`,
+                    );
+                    message.success("当前页导出成功");
+                  } catch (e) {
+                    console.error(e);
+                    message.error("导出失败，请稍后重试");
+                  }
+                }}
+                className="!rounded-button"
+              >
+                导出当前页
               </Button>
             </Space>
           </div>
@@ -754,7 +790,7 @@ const App: React.FC = () => {
               pageSize: pageSize,
               current: currentPage,
               showSizeChanger: true,
-              pageSizeOptions: ["10", "20", "30", "50"],
+              pageSizeOptions: ["10", "20", "30", "50", "100", "200"],
               onChange: (page, size) => {
                 // 页码或页面大小变化时都会触发此回调
                 setPageSize(size);
