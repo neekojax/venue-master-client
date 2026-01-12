@@ -300,13 +300,13 @@ const App: React.FC = () => {
         );
         // return dayjs(text).format("YYYY-MM-DD HH:mm");
       },
-      sorter: (a, b) => {
-        const durationA =
-          a.start_time && a.end_time ? dayjs(a.end_time).diff(dayjs(a.start_time), "second") : 0;
-        const durationB =
-          b.start_time && b.end_time ? dayjs(b.end_time).diff(dayjs(b.start_time), "second") : 0;
-        return durationA - durationB;
-      },
+      // sorter: (a, b) => {
+      //   const durationA =
+      //     a.start_time && a.end_time ? dayjs(a.end_time).diff(dayjs(a.start_time), "second") : 0;
+      //   const durationB =
+      //     b.start_time && b.end_time ? dayjs(b.end_time).diff(dayjs(b.start_time), "second") : 0;
+      //   return durationA - durationB;
+      // },
     },
     {
       title: "时间范围",

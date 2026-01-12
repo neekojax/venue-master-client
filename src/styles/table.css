@@ -55,6 +55,12 @@
 .fee-ratio-low {
   background-color: #f6ffed !important; /* 浅绿 */
 }
+.fee-ratio-profit {
+  background-color: #b7eb8f !important;
+}
+.fee-ratio-loss {
+  background-color: #e9cefa !important; /* 紫色浅底，突出亏损 */
+}
 
 /* 托管费占比列表头样式 */
 .fee-ratio-header {

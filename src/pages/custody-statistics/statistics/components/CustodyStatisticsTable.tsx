@@ -294,9 +294,11 @@ export default function CustodyStatisticsTable({
         onCell: (record: any) => {
           const val = record?.hosting_fee_ratio;
           const num = typeof val === "number" ? val : parseFloat(val);
-          return {
-            className: num >= 90 ? "fee-ratio-high" : "fee-ratio-low",
-          };
+          if (!Number.isFinite(num)) return { className: "" };
+          if (num >= 100) return { className: "fee-ratio-loss" };
+          if (num >= 90) return { className: "fee-ratio-high" };
+          if (num < 80) return { className: "fee-ratio-profit" };
+          return { className: "fee-ratio-low" };
         },
         render: (text: any) => {
           const num = typeof text === "number" ? text : parseFloat(text);
@@ -359,6 +361,16 @@ export default function CustodyStatisticsTable({
         width: 140,
         dataIndex: "discount_hosting_fee_ratio",
         key: "discount_hosting_fee_ratio",
+        onHeaderCell: () => ({ className: "fee-ratio-header" }),
+        onCell: (record: any) => {
+          const val = record?.discount_hosting_fee_ratio;
+          const num = typeof val === "number" ? val : parseFloat(val);
+          if (!Number.isFinite(num) || num === 0) return { className: "" };
+          if (num >= 100) return { className: "fee-ratio-loss" };
+          if (num >= 90) return { className: "fee-ratio-high" };
+          if (num < 80) return { className: "fee-ratio-profit" };
+          return { className: "fee-ratio-low" };
+        },
         render: (text: any) => (Number.isFinite(text) && text !== 0 ? `${text.toFixed(2)}%` : `--`),
       },
       {
@@ -405,16 +417,20 @@ export default function CustodyStatisticsTable({
       const ratioNum = typeof ratioVal === "number" ? ratioVal : parseFloat(ratioVal);
       const hasSelection = Array.isArray(selectedVenues) && selectedVenues.length > 0;
       const matchesSelectedVenues = hasSelection
-        ? selectedVenues.some((name) => {
-            const sel = String(name || "")
-              .trim()
-              .toLowerCase();
-            const venue = String(item?.venue_name || "")
-              .trim()
-              .toLowerCase();
-            // 支持部分匹配与大小写不敏感匹配
-            return sel.length > 0 && venue.includes(sel);
-          })
+        ? selectedVenues.some(
+            (name) =>
+              String(name || "")
+                .trim()
+                .toLowerCase().length > 0 &&
+              String(item?.venue_name || "")
+                .trim()
+                .toLowerCase()
+                .includes(
+                  String(name || "")
+                    .trim()
+                    .toLowerCase(),
+                ),
+          )
         : true;
 
       // 当选择了场地名时，只按场地过滤；未选择时才考虑“仅高费率”筛选
