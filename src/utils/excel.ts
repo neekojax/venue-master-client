@@ -606,6 +606,7 @@ export const exportHostingRecordToExcel = (data: any[]) => {
     start_time: Date | string | null;
     end_time: Date | string | null;
     hosting_price: number | string;
+    min_hosting_price: number | string;
     maintenance_price: number | string;
   };
   type HeaderKey = keyof HostingRecordExportRow;
@@ -615,6 +616,7 @@ export const exportHostingRecordToExcel = (data: any[]) => {
     { header: "账单开始", key: "start_time" },
     { header: "账单结束", key: "end_time" },
     { header: "托管单价（USD）", key: "hosting_price" },
+    { header: "托管最低单价（USD）", key: "min_hosting_price" },
     { header: "运维单价（USD）", key: "maintenance_price" },
   ];
 
@@ -624,6 +626,10 @@ export const exportHostingRecordToExcel = (data: any[]) => {
     end_time: item?.end_time ? dayjs(item.end_time).toDate() : null,
     hosting_price:
       typeof item?.hosting_price === "number" ? item.hosting_price : String(item?.hosting_price ?? ""),
+    min_hosting_price:
+      typeof item?.min_hosting_price === "number"
+        ? item.min_hosting_price
+        : String(item?.min_hosting_price ?? ""),
     maintenance_price:
       typeof item?.maintenance_price === "number"
         ? item.maintenance_price

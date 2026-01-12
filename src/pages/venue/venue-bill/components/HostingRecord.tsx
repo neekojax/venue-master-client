@@ -13,6 +13,7 @@ interface HostingRecord {
   maintenance_price: number;
   end_time: string;
   start_time: string;
+  min_hosting_price: number;
   history: HostingRecord[];
 }
 
@@ -50,6 +51,14 @@ const HostingRecord = forwardRef<HostingRecordHandle, HostingRecordProps>(functi
       render: (value) => <>{value} ~</>,
     },
     {
+      title: "托管最低单价",
+      dataIndex: "min_hosting_price",
+      key: "min_hosting_price",
+      sorter: (a, b) => a.min_hosting_price - b.min_hosting_price,
+      render: (value) => <span className="font-semibold text-green-600">$ {value}</span>,
+      width: 180,
+    },
+    {
       title: "托管单价",
       dataIndex: "hosting_price",
       key: "hosting_price",
@@ -84,6 +93,14 @@ const HostingRecord = forwardRef<HostingRecordHandle, HostingRecordProps>(functi
       dataIndex: "hosting_price",
       key: "hosting_price",
       sorter: (a, b) => a.hosting_price - b.hosting_price,
+      render: (value) => <span className="font-semibold text-green-600">$ {value}</span>,
+      width: 180,
+    },
+    {
+      title: "托管最低单价",
+      dataIndex: "min_hosting_price",
+      key: "min_hosting_price",
+      sorter: (a, b) => a.min_hosting_price - b.min_hosting_price,
       render: (value) => <span className="font-semibold text-green-600">$ {value}</span>,
       width: 180,
     },
