@@ -52,13 +52,13 @@
 .fee-ratio-high {
   background-color: #fff1f0 !important; /* 浅红 */
 }
-.fee-ratio-low {
+.ant-table-wrapper .fee-ratio-low {
   background-color: #f6ffed !important; /* 浅绿 */
 }
-.fee-ratio-profit {
+.ant-table-wrapper td.fee-ratio-profit {
   background-color: #b7eb8f !important;
 }
-.fee-ratio-loss {
+.ant-table-wrapper td.fee-ratio-loss {
   background-color: #e9cefa !important; /* 紫色浅底，突出亏损 */
 }
 

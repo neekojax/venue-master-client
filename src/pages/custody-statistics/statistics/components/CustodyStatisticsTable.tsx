@@ -87,6 +87,7 @@ export default function CustodyStatisticsTable({
           period_type: any;
           discount_price: any;
           discount_hosting_fee_ratio: any;
+          discount_cost_ratio: any;
         }) => ({
           // 使用 复合键 确保每行唯一，避免 React 重复 key 警告
           key: `${item.venue_id}-${item.date}`,
@@ -108,6 +109,7 @@ export default function CustodyStatisticsTable({
           period_type: item.period_type,
           discount_price: item.discount_price,
           discount_hosting_fee_ratio: item.discount_hosting_fee_ratio,
+          discount_cost_ratio: item.discount_cost_ratio,
         }),
       );
       setTableData(newData);
@@ -366,6 +368,23 @@ export default function CustodyStatisticsTable({
           const val = record?.discount_hosting_fee_ratio;
           const num = typeof val === "number" ? val : parseFloat(val);
           if (!Number.isFinite(num) || num === 0) return { className: "" };
+          if (num >= 100) return { className: "fee-ratio-loss" };
+          if (num >= 90) return { className: "fee-ratio-high" };
+          if (num < 80) return { className: "fee-ratio-profit" };
+          return { className: "fee-ratio-low" };
+        },
+        render: (text: any) => (Number.isFinite(text) && text !== 0 ? `${text.toFixed(2)}%` : `--`),
+      },
+      {
+        title: <span className="discount_cost_ratio">折扣成本占比</span>,
+        width: 140,
+        dataIndex: "discount_cost_ratio",
+        key: "discount_cost_ratio",
+        onHeaderCell: () => ({ className: "fee-ratio-header" }),
+        onCell: (record: any) => {
+          const val = record?.discount_cost_ratio;
+          const num = typeof val === "number" ? val : parseFloat(val);
+          if (!Number.isFinite(num)) return { className: "" };
           if (num >= 100) return { className: "fee-ratio-loss" };
           if (num >= 90) return { className: "fee-ratio-high" };
           if (num < 80) return { className: "fee-ratio-profit" };

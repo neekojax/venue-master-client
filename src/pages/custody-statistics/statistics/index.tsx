@@ -55,6 +55,7 @@ export default function DateModeHeader() {
     { key: "discount_status", label: "折扣状态" },
     { key: "discount_price", label: "折扣价格" },
     { key: "discount_hosting_fee_ratio", label: "折扣托管费占比" },
+    { key: "discount_cost_ratio", label: "折扣成本占比" },
     { key: "period_type", label: "周期类型" },
     { key: "date", label: "收益日期" },
 

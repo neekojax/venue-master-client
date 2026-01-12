@@ -93,6 +93,7 @@ export default function CustodyStatisticsMonthTable({
         discount_status: item.discount_status,
         discount_price: item.discount_price,
         report_date: item.date,
+        discount_cost_ratio: item.discount_cost_ratio,
       }));
       setTableData(newData);
     } else {
@@ -366,6 +367,23 @@ export default function CustodyStatisticsMonthTable({
           const num = typeof val === "number" ? val : parseFloat(val);
           // if (!Number.isFinite(num)) return { className: "" };
           if (!Number.isFinite(num) || num === 0) return { className: "" };
+          if (num >= 100) return { className: "fee-ratio-loss" };
+          if (num >= 90) return { className: "fee-ratio-high" };
+          if (num < 80) return { className: "fee-ratio-profit" };
+          return { className: "fee-ratio-low" };
+        },
+        render: (text: any) => (Number.isFinite(text) && text !== 0 ? `${text.toFixed(2)}%` : `--`),
+      },
+      {
+        title: <span className="discount_cost_ratio">折扣成本比</span>,
+        width: 140,
+        dataIndex: "discount_cost_ratio",
+        key: "discount_cost_ratio",
+        onHeaderCell: () => ({ className: "fee-ratio-header" }),
+        onCell: (record: any) => {
+          const val = record?.discount_cost_ratio;
+          const num = typeof val === "number" ? val : parseFloat(val);
+          if (!Number.isFinite(num)) return { className: "" };
           if (num >= 100) return { className: "fee-ratio-loss" };
           if (num >= 90) return { className: "fee-ratio-high" };
           if (num < 80) return { className: "fee-ratio-profit" };
