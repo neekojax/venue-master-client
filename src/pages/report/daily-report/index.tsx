@@ -880,7 +880,7 @@ const App: React.FC = () => {
                   </span>
                 </div>
                 <div className="text-[10px] text-slate-400 font-bold truncate mt-2 uppercase tracking-tighter">
-                  云算力 {(statistics.totalCloudPower24h || 0).toFixed(2)}E
+                  包含云算力 {(statistics.totalCloudPower24h || 0).toFixed(2)}E
                 </div>
               </div>
             </div>
