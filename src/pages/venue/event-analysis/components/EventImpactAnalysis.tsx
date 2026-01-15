@@ -48,7 +48,11 @@ const EVENT_CONFIG: Record<EventType, { label: string; color: string; bg: string
     bg: "bg-emerald-50",
     icon: <CloudRain size={14} />,
   }, // Emerald
+  // low_power: { label: "低电", color: "#f4b359ff", bg: "bg-red-300", icon: <LayoutList size={14} /> }, // Red
   maintenance: { label: "日常维护", color: "#f4b092ff", bg: "bg-red-100", icon: <LayoutList size={14} /> }, // Blue
+  // other: { label: "其他", color: "#a2f492ff", bg: "bg-green-100", icon: <LayoutList size={14} /> }, // Blue
+  low_power: { label: "低电", color: "#a2f492ff", bg: "bg-green-50", icon: <Zap size={14} /> }, // Green
+  other: { label: "其他", color: "#cdcecdff", bg: "bg-gray-100", icon: <LayoutList size={14} /> }, // Green
 };
 
 const EVENT_CONFIG_NAME = (type: string) => {
@@ -69,6 +73,9 @@ const EVENT_CONFIG_NAME = (type: string) => {
   }
   if (type === "极端天气") {
     return <CloudRain size={14} className="bg-emerald-50" />;
+  }
+  if (type === "low_power") {
+    return <LayoutList size={14} className="bg-red-200" />;
   }
   return type;
 };
@@ -135,6 +142,7 @@ const AnalysisView: React.FC = () => {
             device_failure: "device_failure",
             network: "network",
             extreme_weather: "extreme_weather",
+            low_power: "low_power",
             maintenance: "maintenance",
           };
 
@@ -203,6 +211,8 @@ const AnalysisView: React.FC = () => {
             device_failure: 0,
             network: 0,
             extreme_weather: 0,
+            low_power: 0,
+            other: 0,
             maintenance: 0,
           },
           totalLossHashrate: 0,
@@ -308,6 +318,8 @@ const AnalysisView: React.FC = () => {
             device_failure: 0,
             network: 0,
             extreme_weather: 0,
+            low_power: 0,
+            other: 0,
             maintenance: 0,
           };
         }
@@ -319,6 +331,8 @@ const AnalysisView: React.FC = () => {
           network: r.network_rate,
           extreme_weather: r.extreme_weather_rate,
           maintenance: r.maintenance_rate,
+          low_power: r.low_power_rate,
+          other: r.other_rate,
         };
       });
       return Object.keys(dailyGroup)

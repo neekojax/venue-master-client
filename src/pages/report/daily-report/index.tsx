@@ -5,6 +5,7 @@ import { DownloadOutlined } from "@ant-design/icons";
 import { InfoCircleOutlined } from "@ant-design/icons";
 import { Button, DatePicker, Select, Switch, Table, Tag, Tooltip } from "antd";
 import type { ColumnsType } from "antd/es/table";
+import { AlertTriangle, BarChart3, Database, ShieldCheck, TrendingUp } from "lucide-react";
 import * as XLSX from "xlsx";
 import antIcon from "@/assets/ant-icon.png";
 import emptyAntIcon from "@/assets/empty-ant.png";
@@ -687,6 +688,11 @@ const App: React.FC = () => {
             totalPower24h: summary.totalPower24h || 0,
             totalPowerImpact: summary.totalPowerImpact || 0,
             totalTheoreticalPower: summary.totalTheoreticalPower || 0,
+            totalCloudPower24h: summary.totalCloudPower24h || 0,
+            cloudPowerRatio: summary.cloudPowerRatio || 0,
+            totalLimitImpactPower: summary.totalLimitImpactPower || 0,
+            totalLowPowerImpactPower: summary.totalLowPowerImpactPower || 0,
+            totalWithdrawImpactPower: summary.totalWithdrawImpactPower || 0,
           });
         } else {
           console.error("API 返回的 dailyReportStatistics 无效:", reportData);
@@ -859,78 +865,157 @@ const App: React.FC = () => {
               }}
             />
           </div>
-          <div className="mt-6 grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-4">
-            <div className="rounded-lg bg-gradient-to-br from-blue-50 to-blue-100 p-6 shadow-sm">
-              <div className="text-sm font-medium text-gray-500">平均有效率</div>
-              <div className="mt-2 flex items-baseline">
-                <span className="text-3xl font-bold text-blue-600">
-                  {" "}
-                  {(statistics.averageEfficiency || 0).toFixed(2)}%
-                </span>
+          <div className="mt-6 flex flex-row gap-5 overflow-x-auto">
+            <div className="flex-1 basis-0 bg-white border border-slate-200 rounded-2xl p-5 flex items-center gap-4 hover:border-slate-300 hover:shadow-sm transition-all h-28">
+              <div className="p-3 bg-slate-50 rounded-xl shrink-0 shadow-inner">
+                <ShieldCheck className="text-emerald-500 w-5 h-5" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <div className="text-[10px] font-black text-slate-400 uppercase tracking-tighter truncate">
+                  平均有效率
+                </div>
+                <div className="flex items-baseline gap-0.5 leading-none mt-1.5">
+                  <span className="text-2xl font-black text-slate-900 tracking-tighter">
+                    {(statistics.averageEfficiency || 0).toFixed(2)}%
+                  </span>
+                </div>
+                <div className="text-[10px] text-slate-400 font-bold truncate mt-2 uppercase tracking-tighter">
+                  云算力 {(statistics.totalCloudPower24h || 0).toFixed(2)}E
+                </div>
               </div>
             </div>
-
-            <div className="rounded-lg bg-gradient-to-br from-blue-50 to-blue-100 p-6 shadow-sm">
-              <div className="text-sm font-medium text-gray-500">24小时产出（BTC）</div>
-              <div className="mt-2 flex items-baseline">
-                <span className="text-3xl font-bold text-blue-600">
-                  {" "}
-                  {(statistics.totalBtcOutput || 0).toFixed(4)}
-                </span>
+            <div className="flex-1 basis-0 bg-white border border-slate-200 rounded-2xl p-5 flex items-center gap-4 hover:border-slate-300 hover:shadow-sm transition-all h-28">
+              <div className="p-3 bg-slate-50 rounded-xl shrink-0 shadow-inner">
+                <BarChart3 className="text-blue-500 w-5 h-5" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <div className="text-[10px] font-black text-slate-400 uppercase tracking-tighter truncate">
+                  总理论算力
+                </div>
+                <div className="flex items-baseline gap-0.5 leading-none mt-1.5">
+                  <span className="text-2xl font-black text-slate-800 tracking-tighter">
+                    {(statistics.totalTheoreticalPower || 0).toFixed(2)}
+                  </span>
+                  <span className="text-[11px] font-bold text-slate-400 ml-1.5 uppercase">E</span>
+                </div>
+                <div className="text-[10px] text-slate-400 font-bold truncate mt-2 uppercase tracking-tighter">
+                  24H总算力 {(statistics.totalPower24h || 0).toFixed(2)}E
+                </div>
               </div>
             </div>
-
-            <div className="rounded-lg bg-gradient-to-br from-green-50 to-green-100 p-6 shadow-sm">
-              <div className="text-sm font-medium text-gray-500">总理论算力（E）</div>
-              <div className="mt-2 flex items-baseline">
-                <span className="text-3xl font-bold text-green-600">
-                  {(statistics.totalTheoreticalPower || 0).toFixed(2)}
-                </span>
+            <div className="flex-1 basis-0 bg-white border border-slate-200 rounded-2xl p-5 flex items-center gap-4 hover:border-slate-300 hover:shadow-sm transition-all h-28">
+              <div className="p-3 bg-slate-50 rounded-xl shrink-0 shadow-inner">
+                <TrendingUp className="text-amber-500 w-5 h-5" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <div className="text-[10px] font-black text-slate-400 uppercase tracking-tighter truncate">
+                  24H 产出
+                </div>
+                <div className="flex items-baseline gap-0.5 leading-none mt-1.5">
+                  <span className="text-2xl font-black text-slate-900 tracking-tighter">
+                    {(statistics.totalBtcOutput || 0).toFixed(4)}
+                  </span>
+                  <span className="text-[11px] font-bold text-slate-400 ml-1.5 uppercase">BTC</span>
+                </div>
+                <div className="text-[10px] text-slate-400 font-bold truncate mt-2 uppercase tracking-tighter">
+                  {/* 24H总算力 {(statistics.totalPower24h || 0).toFixed(2)}E */}
+                </div>
               </div>
             </div>
-
-            <div className="rounded-lg bg-gradient-to-br from-green-50 to-green-100 p-6 shadow-sm">
-              <div className="text-sm font-medium text-gray-500">24小时总算力（E）</div>
-              <div className="mt-2 flex items-baseline">
-                <span className="text-3xl font-bold text-green-600">
-                  {(statistics.totalPower24h || 0).toFixed(2)}
-                </span>
+            <div className="flex-1 basis-0 bg-white border border-slate-200 rounded-2xl p-5 flex items-center gap-4 hover:border-slate-300 hover:shadow-sm transition-all h-28">
+              <div className="p-3 bg-slate-50 rounded-xl shrink-0 shadow-inner">
+                <Database className="text-rose-500 w-5 h-5" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <div className="text-[10px] font-black text-slate-400 uppercase tracking-tighter truncate">
+                  托管设备
+                </div>
+                <div className="flex items-baseline gap-0.5 leading-none mt-1.5">
+                  <span className="text-2xl font-black text-slate-900 tracking-tighter">
+                    {(statistics.totalMachines || 0).toLocaleString()}
+                  </span>
+                  <span className="text-[11px] font-bold text-slate-400 ml-1.5 uppercase">台</span>
+                </div>
+                <div className="text-[10px] text-slate-400 font-bold truncate mt-2 uppercase tracking-tighter">
+                  总故障数 {(statistics.totalFailures24h || 0).toLocaleString()}
+                </div>
               </div>
             </div>
-
-            <div className="rounded-lg bg-gradient-to-br from-purple-50 to-purple-100 p-6 shadow-sm">
-              <div className="text-sm font-medium text-gray-500">总影响算力（E）</div>
-              <div className="mt-2 flex items-baseline">
-                <span className="text-3xl font-bold text-purple-600">
+            <div className="bg-white border border-slate-200 rounded-xl flex items-stretch shadow-sm overflow-hidden h-28 basis-0 grow-[2]">
+              <div className="bg-[#0f172a] px-5 flex flex-col justify-center border-r border-slate-800 shrink-0 min-w-[100px]">
+                <div className="flex items-center gap-1.5 text-rose-500 text-[10px] font-black uppercase tracking-tighter mb-1">
+                  <AlertTriangle className="w-3.5 h-3.5" /> 影响分析
+                </div>
+                <div className="text-2xl font-black text-white leading-none">
                   {(statistics.totalPowerImpact || 0).toFixed(2)}
-                </span>
+                  <span className="text-[11px] text-slate-500 ml-1 font-normal uppercase">E</span>
+                </div>
+                <div className="text-[11px] font-bold text-rose-500 mt-2 leading-none">
+                  {(statistics.totalImpactOutput || 0).toFixed(4)} BTC
+                </div>
               </div>
-            </div>
-
-            <div className="rounded-lg bg-gradient-to-br from-purple-50 to-purple-100 p-6 shadow-sm">
-              <div className="text-sm font-medium text-gray-500">总影响产出（BTC）</div>
-              <div className="mt-2 flex items-baseline">
-                <span className="text-3xl font-bold text-purple-600">
-                  {(statistics.totalImpactOutput || 0).toFixed(4)}
-                </span>
-              </div>
-            </div>
-
-            <div className="rounded-lg bg-gradient-to-br from-amber-50 to-amber-100 p-6 shadow-sm">
-              <div className="text-sm font-medium text-gray-500">托管台数</div>
-              <div className="mt-2 flex items-baseline">
-                <span className="text-3xl font-bold text-amber-600">
-                  {(statistics.totalMachines || 0).toLocaleString()}
-                </span>
-              </div>
-            </div>
-
-            <div className="rounded-lg bg-gradient-to-br from-amber-50 to-amber-100 p-6 shadow-sm">
-              <div className="text-sm font-medium text-gray-500">总故障数</div>
-              <div className="mt-2 flex items-baseline">
-                <span className="text-3xl font-bold text-amber-600">
-                  {(statistics.totalFailures24h || 0).toLocaleString()}
-                </span>
+              <div className="flex-1 flex flex-col justify-center px-1 py-2 gap-2.5">
+                <div className="flex items-center gap-3">
+                  <span className="text-[10px] font-bold text-slate-500 w-14 truncate shrink-0">
+                    限电影响
+                  </span>
+                  <div className="flex-1 h-1 bg-slate-100 rounded-full overflow-hidden">
+                    <div
+                      className="h-full bg-rose-500 rounded-full"
+                      style={{
+                        width:
+                          (statistics.totalWithdrawImpactPower / statistics.totalPowerImpact || 0) * 100 +
+                          "%",
+                      }}
+                    />
+                  </div>
+                  <div className="shrink-0 text-right min-w-[50px]">
+                    <span className="text-[11px] font-black text-slate-900">
+                      {(statistics.totalLimitImpactPower || 0).toFixed(2)}
+                    </span>
+                    <span className="text-[8px] text-slate-400 ml-0.5 font-bold uppercase">E</span>
+                  </div>
+                </div>
+                <div className="flex items-center gap-3">
+                  <span className="text-[10px] font-bold text-slate-500 w-14 truncate shrink-0">低功耗</span>
+                  <div className="flex-1 h-1 bg-slate-100 rounded-full overflow-hidden">
+                    <div
+                      className="h-full bg-amber-500 rounded-full"
+                      style={{
+                        width:
+                          (statistics.totalLowPowerImpactPower / statistics.totalPowerImpact || 0) * 100 +
+                          "%",
+                      }}
+                    />
+                  </div>
+                  <div className="shrink-0 text-right min-w-[50px]">
+                    <span className="text-[11px] font-black text-slate-900">
+                      {(statistics.totalLowPowerImpactPower || 0).toFixed(2)}
+                    </span>
+                    <span className="text-[8px] text-slate-400 ml-0.5 font-bold uppercase">E</span>
+                  </div>
+                </div>
+                <div className="flex items-center gap-3">
+                  <span className="text-[10px] font-bold text-slate-500 w-14 truncate shrink-0">
+                    撤场影响
+                  </span>
+                  <div className="flex-1 h-1 bg-slate-100 rounded-full overflow-hidden">
+                    <div
+                      className="h-full bg-slate-300 rounded-full"
+                      style={{
+                        width:
+                          (statistics.totalWithdrawImpactPower / statistics.totalPowerImpact || 0) * 100 +
+                          "%",
+                      }}
+                    />
+                  </div>
+                  <div className="shrink-0 text-right min-w-[50px]">
+                    <span className="text-[11px] font-black text-slate-900">
+                      {(statistics.totalWithdrawImpactPower || 0).toFixed(2)}
+                    </span>
+                    <span className="text-[8px] text-slate-400 ml-0.5 font-bold uppercase">E</span>
+                  </div>
+                </div>
               </div>
             </div>
           </div>

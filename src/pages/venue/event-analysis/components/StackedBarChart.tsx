@@ -6,7 +6,7 @@ const StackedBarChart: React.FC<{
   data: { label: string; values: Record<EventType, number> }[];
   mode: "daily" | "monthly";
 }> = ({ data, mode }) => {
-  console.log("StackedBarChart>>data", data);
+  // console.log("StackedBarChart>>data", data);
   const containerRef = useRef<HTMLDivElement>(null);
   const EVENT_CONFIG: Record<EventType, { label: string; color: string; bg: string; icon: React.ReactNode }> =
     {
@@ -21,12 +21,16 @@ const StackedBarChart: React.FC<{
         bg: "bg-emerald-50",
         icon: <CloudRain size={14} />,
       }, // Emerald
+      // low_power: { label: "低电", color: "#f4b359ff", bg: "bg-red-300", icon: <LayoutList size={14} /> }, // Red
       maintenance: {
         label: "日常维护",
         color: "#f4b092ff",
         bg: "bg-red-100",
         icon: <LayoutList size={14} />,
       }, // Blue
+      // other: { label: "其他", color: "#a2f492ff", bg: "bg-green-100", icon: <LayoutList size={14} /> }, // Blue
+      low_power: { label: "低电", color: "#a2f492ff", bg: "bg-green-50", icon: <Zap size={14} /> }, // Green
+      other: { label: "其他", color: "#cdcecdff", bg: "bg-gray-100", icon: <LayoutList size={14} /> }, // Green
     };
 
   const [tooltipData, setTooltipData] = useState<{
@@ -55,7 +59,7 @@ const StackedBarChart: React.FC<{
   const getY = (val: number) => height - paddingY - (val / maxTotal) * (height - paddingY * 2);
 
   if (data.length === 0)
-    return <div className="h-full flex items-center justify-center text-gray-400">暂无数据</div>;
+    return <div className="h-full flex items-center justify-center text-gray-400"> 暂无数据 </div>;
 
   return (
     <div ref={containerRef} className="w-full h-full relative group">
@@ -158,8 +162,10 @@ const StackedBarChart: React.FC<{
               <div
                 className="w-2 h-2 rounded-full"
                 style={{ backgroundColor: EVENT_CONFIG[tooltipData.type].color }}
-              ></div>
-              <span className="text-gray-300">{EVENT_CONFIG[tooltipData.type].label}</span>
+              >
+                {" "}
+              </div>
+              <span className="text-gray-300"> {EVENT_CONFIG[tooltipData.type].label} </span>
             </div>
             <span className="font-mono font-bold">
               {tooltipData.value > 0 ? tooltipData.value.toFixed(0) : tooltipData.value.toFixed(2)} %

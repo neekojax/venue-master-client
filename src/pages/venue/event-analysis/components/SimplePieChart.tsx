@@ -23,12 +23,16 @@ const SimplePieChart: React.FC<{ data: { type: EventType; value: number }[] }> =
         bg: "bg-emerald-50",
         icon: <CloudRain size={14} />,
       }, // Emerald
+      // low_power: { label: "低电", color: "#f4b359ff", bg: "bg-red-300", icon: <LayoutList size={14} /> }, // Red
       maintenance: {
         label: "日常维护",
-        color: "#f3cab8ff",
+        color: "#f4b092ff",
         bg: "bg-red-100",
         icon: <LayoutList size={14} />,
       }, // Blue
+      // other: { label: "其他", color: "#a2f492ff", bg: "bg-green-100", icon: <LayoutList size={14} /> }, // Blue
+      low_power: { label: "低电", color: "#a2f492ff", bg: "bg-green-50", icon: <Zap size={14} /> }, // Green
+      other: { label: "其他", color: "#cdcecdff", bg: "bg-gray-100", icon: <LayoutList size={14} /> }, // Green
     };
 
   if (total === 0) return <div className="h-full flex items-center justify-center text-gray-400">无数据</div>;
