@@ -48,10 +48,10 @@ const EVENT_CONFIG: Record<EventType, { label: string; color: string; bg: string
     bg: "bg-emerald-50",
     icon: <CloudRain size={14} />,
   }, // Emerald
-  // low_power: { label: "低电", color: "#f4b359ff", bg: "bg-red-300", icon: <LayoutList size={14} /> }, // Red
+  // low_power: { label: "低功耗", color: "#f4b359ff", bg: "bg-red-300", icon: <LayoutList size={14} /> }, // Red
   maintenance: { label: "日常维护", color: "#f4b092ff", bg: "bg-red-100", icon: <LayoutList size={14} /> }, // Blue
   // other: { label: "其他", color: "#a2f492ff", bg: "bg-green-100", icon: <LayoutList size={14} /> }, // Blue
-  low_power: { label: "低电", color: "#a2f492ff", bg: "bg-green-50", icon: <Zap size={14} /> }, // Green
+  low_power: { label: "低功耗", color: "#a2f492ff", bg: "bg-green-50", icon: <Zap size={14} /> }, // Green
   other: { label: "其他", color: "#cdcecdff", bg: "bg-gray-100", icon: <LayoutList size={14} /> }, // Green
 };
 
@@ -408,6 +408,10 @@ const AnalysisView: React.FC = () => {
       "极端天气影响占比 (%)",
       "日常维护影响算力 (T)",
       "日常维护影响占比 (%)",
+      "低功耗影响算力 (T)",
+      "低功耗影响占比 (%)",
+      "其他影响算力 (T)",
+      "其他影响占比 (%)",
     ];
 
     worksheet.addRow(headers);
@@ -428,6 +432,10 @@ const AnalysisView: React.FC = () => {
       extreme_weather_rate: row.extreme_weather_rate.toFixed(2) + "%",
       maintenance_hashrate: row.maintenance_hashrate || 0,
       maintenance_rate: row.maintenance_rate.toFixed(2) + "%",
+      low_power_hashrate: row.low_power_hashrate || 0,
+      low_power_rate: row.low_power_rate.toFixed(2) + "%",
+      other_hashrate: row.other_hashrate || 0,
+      other_rate: row.other_rate.toFixed(2) + "%",
     }));
 
     data.forEach((row, rIdx) => {

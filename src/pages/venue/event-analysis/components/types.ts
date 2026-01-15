@@ -16,6 +16,10 @@ export interface SiteData {
   total_hashrate: number;
   venue_id: number;
   venue_name: string;
+  low_power_hashrate: number;
+  low_power_rate: number;
+  other_hashrate: number;
+  other_rate: number;
 }
 export interface StatisticsData {
   affected_venue_count: number;

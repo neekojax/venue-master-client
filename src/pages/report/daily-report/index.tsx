@@ -954,7 +954,7 @@ const App: React.FC = () => {
                   {(statistics.totalImpactOutput || 0).toFixed(4)} BTC
                 </div>
               </div>
-              <div className="flex-1 flex flex-col justify-center px-1 py-2 gap-2.5">
+              <div className="flex-1 flex flex-col justify-center px-2 py-1 gap-1">
                 <div className="flex items-center gap-3">
                   <span className="text-[10px] font-bold text-slate-500 w-14 truncate shrink-0">
                     限电影响
@@ -964,8 +964,7 @@ const App: React.FC = () => {
                       className="h-full bg-rose-500 rounded-full"
                       style={{
                         width:
-                          (statistics.totalWithdrawImpactPower / statistics.totalPowerImpact || 0) * 100 +
-                          "%",
+                          (statistics.totalLimitImpactPower / statistics.totalPowerImpact || 0) * 100 + "%",
                       }}
                     />
                   </div>
@@ -976,7 +975,7 @@ const App: React.FC = () => {
                     <span className="text-[8px] text-slate-400 ml-0.5 font-bold uppercase">E</span>
                   </div>
                 </div>
-                <div className="flex items-center gap-3">
+                <div className="flex items-center gap-3 ">
                   <span className="text-[10px] font-bold text-slate-500 w-14 truncate shrink-0">低功耗</span>
                   <div className="flex-1 h-1 bg-slate-100 rounded-full overflow-hidden">
                     <div
@@ -1001,7 +1000,7 @@ const App: React.FC = () => {
                   </span>
                   <div className="flex-1 h-1 bg-slate-100 rounded-full overflow-hidden">
                     <div
-                      className="h-full bg-slate-300 rounded-full"
+                      className="h-full bg-blue-500 rounded-full"
                       style={{
                         width:
                           (statistics.totalWithdrawImpactPower / statistics.totalPowerImpact || 0) * 100 +
@@ -1012,6 +1011,33 @@ const App: React.FC = () => {
                   <div className="shrink-0 text-right min-w-[50px]">
                     <span className="text-[11px] font-black text-slate-900">
                       {(statistics.totalWithdrawImpactPower || 0).toFixed(2)}
+                    </span>
+                    <span className="text-[8px] text-slate-400 ml-0.5 font-bold uppercase">E</span>
+                  </div>
+                </div>
+                <div className="flex items-center gap-3">
+                  <span className="text-[10px] font-bold text-slate-500 w-14 truncate shrink-0">其他</span>
+                  <div className="flex-1 h-1 bg-slate-100 rounded-full overflow-hidden">
+                    <div
+                      className="h-full bg-slate-300 rounded-full"
+                      style={{
+                        width:
+                          100 -
+                          (statistics.totalLimitImpactPower / statistics.totalPowerImpact || 0) * 100 -
+                          (statistics.totalLowPowerImpactPower / statistics.totalPowerImpact || 0) * 100 -
+                          (statistics.totalWithdrawImpactPower / statistics.totalPowerImpact || 0) * 100 +
+                          "%",
+                      }}
+                    />
+                  </div>
+                  <div className="shrink-0 text-right min-w-[50px]">
+                    <span className="text-[11px] font-black text-slate-900">
+                      {(
+                        statistics.totalPowerImpact -
+                          statistics.totalWithdrawImpactPower -
+                          statistics.totalLimitImpactPower -
+                          statistics.totalLowPowerImpactPower || 0
+                      ).toFixed(2)}
                     </span>
                     <span className="text-[8px] text-slate-400 ml-0.5 font-bold uppercase">E</span>
                   </div>
