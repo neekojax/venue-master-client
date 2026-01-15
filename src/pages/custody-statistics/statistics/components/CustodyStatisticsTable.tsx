@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
-// import { ExportOutlined } from "@ant-design/icons";
 import { useNavigate } from "react-router-dom";
+import { InfoCircleOutlined } from "@ant-design/icons";
 import { Alert, Spin, Table, Tag, Tooltip } from "antd";
 import { useSelector, useSettingsStore } from "@/stores";
 import { formatAmount, formatHashrate } from "@/utils/num";
@@ -216,9 +216,15 @@ export default function CustodyStatisticsTable({
           </>
         ),
       },
-
       {
-        title: <span className="fee-ratio-title">预估功耗</span>,
+        title: (
+          <span className="fee-ratio-title">
+            预估功耗
+            <Tooltip title="收到的最新一期电费账单总功耗，等于“账单分摊电量/对应期间矿池算力”">
+              <InfoCircleOutlined style={{ marginLeft: 6, color: "#999" }} />
+            </Tooltip>
+          </span>
+        ),
         dataIndex: "power_consumption",
         key: "power_consumption",
         onHeaderCell: () => ({ className: "fee-ratio-header" }),
@@ -281,7 +287,7 @@ export default function CustodyStatisticsTable({
         ),
       },
       {
-        title: <span className="fee-ratio-title">托管费占比</span>,
+        title: <span className="fee-ratio-title">正常托管费占比</span>,
         dataIndex: "hosting_fee_ratio",
         key: "hosting_fee_ratio",
         width: 140,
@@ -308,7 +314,7 @@ export default function CustodyStatisticsTable({
         },
       },
       {
-        title: <span className="fee-ratio-title">单价</span>,
+        title: <span className="fee-ratio-title">正常托管单价</span>,
         dataIndex: "basic_hosting_fee",
         key: "basic_hosting_fee",
         onHeaderCell: () => ({ className: "fee-ratio-header" }),
@@ -322,8 +328,15 @@ export default function CustodyStatisticsTable({
         },
       },
       {
-        title: <span className="fee-ratio-title">折扣状态</span>,
-        width: 120,
+        title: (
+          <span className="fee-ratio-title">
+            预期折扣效果
+            <Tooltip title="假定寄售期均可执行分润1%策略">
+              <InfoCircleOutlined style={{ marginLeft: 6, color: "#999" }} />
+            </Tooltip>
+          </span>
+        ),
+        width: 130,
         dataIndex: "discount_status",
         key: "discount_status",
         render: (text: any) => {
@@ -347,8 +360,15 @@ export default function CustodyStatisticsTable({
         },
       },
       {
-        title: <span className="fee-ratio-title">折扣价格</span>,
-        width: 120,
+        title: (
+          <span className="fee-ratio-title">
+            预估执行托管单价{" "}
+            <Tooltip title="寄售期统一依据我方留存收入1%作为利润、收入99%用于支付托管运维费倒推托管单价">
+              <InfoCircleOutlined style={{ marginLeft: 6, color: "#999" }} />
+            </Tooltip>
+          </span>
+        ),
+        width: 150,
         dataIndex: "discount_price",
         key: "discount_price",
         render: (text: any, row: any) =>
@@ -359,7 +379,14 @@ export default function CustodyStatisticsTable({
         // render: (text: any) => ((Number.isFinite(text) && text !== 0 ? "$ " + text.toFixed(4) : "--")),
       },
       {
-        title: <span className="fee-ratio-title">折扣托管费占比</span>,
+        title: (
+          <span className="fee-ratio-title">
+            折后托管费占比{" "}
+            <Tooltip title="等于“打折或分润后托管费/（该期产币数*平均币价）”">
+              <InfoCircleOutlined style={{ marginLeft: 6, color: "#999" }} />
+            </Tooltip>
+          </span>
+        ),
         width: 140,
         dataIndex: "discount_hosting_fee_ratio",
         key: "discount_hosting_fee_ratio",
@@ -376,7 +403,14 @@ export default function CustodyStatisticsTable({
         render: (text: any) => (Number.isFinite(text) && text !== 0 ? `${text.toFixed(2)}%` : `--`),
       },
       {
-        title: <span className="discount_cost_ratio">折扣成本占比</span>,
+        title: (
+          <span className="fee-ratio-title">
+            折后成本比
+            <Tooltip title="等于“（打折或分润后托管费+运维费）/（该期产币数*平均币价）”">
+              <InfoCircleOutlined style={{ marginLeft: 6, color: "#999" }} />
+            </Tooltip>
+          </span>
+        ),
         width: 140,
         dataIndex: "discount_cost_ratio",
         key: "discount_cost_ratio",
