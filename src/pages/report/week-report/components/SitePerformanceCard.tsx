@@ -373,7 +373,6 @@ const SitePerformanceCard: React.FC<SitePerformanceCardProps> = ({
                 render: (value: number) => value,
                 sorter: (a, b) => a.Failure - b.Failure,
               },
-
               {
                 title: "故障率",
                 dataIndex: "FailureRate",
@@ -437,6 +436,33 @@ const SitePerformanceCard: React.FC<SitePerformanceCardProps> = ({
                 render: (value) => <span className="text-yellow-500">{value}%</span>,
               },
               {
+                title: "低功耗影响率",
+                width: 150,
+                dataIndex: "low_power_impact_rate",
+                key: "low_power_impact_rate",
+                align: "center",
+                sorter: (a, b) => (a.low_power_impact_rate ?? 0) - (b.low_power_impact_rate ?? 0),
+                render: (value) => <span>{value}%</span>,
+              },
+              {
+                title: "撤场比例",
+                width: 150,
+                dataIndex: "withdraw_impact_rate",
+                key: "withdraw_impact_rate",
+                align: "center",
+                sorter: (a, b) => (a.withdraw_impact_rate ?? 0) - (b.withdraw_impact_rate ?? 0),
+                render: (value) => <span>{value}%</span>,
+              },
+              {
+                title: "云算力比例",
+                width: 150,
+                dataIndex: "cloud_power_rate",
+                key: "cloud_power_rate",
+                align: "center",
+                sorter: (a, b) => (a.cloud_power_rate ?? 0) - (b.cloud_power_rate ?? 0),
+                render: (value) => <span>{value}%</span>,
+              },
+              {
                 title: "上架数量",
                 dataIndex: "Shelved",
                 key: "Shelved",
@@ -469,6 +495,9 @@ const SitePerformanceCard: React.FC<SitePerformanceCardProps> = ({
               Shelved: "week_shelved",
               Unshelved: "week_unshelved",
               OutputEfficiency: "output_efficiency",
+              low_power_impact_rate: "average_low_power_impact_rate",
+              withdraw_impact_rate: "average_withdraw_impact_rate",
+              cloud_power_rate: "average_cloud_power_rate",
             };
             const filteredDailyColumns: ColumnsType<DailyData> = dailyColumns.filter((c: any) => {
               if (c.key === "Date") return true; // 始终显示日期

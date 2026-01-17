@@ -20,6 +20,12 @@ export interface DailyData {
   Shelved: number; // 上架数量
   Unshelved: number; // 下架数量
   OutputEfficiency: number; // 输出效率（%）
+  low_power_impact_power: number; // 低功耗影响算力
+  low_power_impact_rate: number; // 低功耗影响率（%）
+  withdraw_impact_power: number; // 撤场影响算力
+  withdraw_impact_rate: number; // 撤场影响率（%）
+  cloud_power_hashrate: number; // 云算力哈希率
+  cloud_power_rate: number; // 云算力率（%）
 }
 
 export interface DataItem {
@@ -48,4 +54,10 @@ export interface DataItem {
   progress?: string; // 处理进度
   shutdown_price?: number; // 关机价格
   output_efficiency?: number; // 输出效率（%）
+  average_low_power_impact_power?: number; // 平均低功耗影响算力
+  average_low_power_impact_rate?: number; // 平均低功耗影响率（%）
+  average_withdraw_impact_power?: number; // 平均提现影响算力
+  average_withdraw_impact_rate?: number; // 平均提现影响率（%）
+  average_cloud_power_hashrate?: number; // 平均云算力哈希率
+  average_cloud_power_rate?: number; // 平均云算力率（%）
 }

@@ -8,8 +8,8 @@ import ImpactCard from "./components/ImpactCard";
 import StatCard from "./components/StatCard";
 import VenueTable from "./components/venueTable";
 import { useSelector, useSettingsStore } from "@/stores";
-import { formatPercent, getIconColor, getNumberColor } from "@/utils/format.ts";
 
+// import { formatPercent, getIconColor, getNumberColor } from "@/utils/format.ts";
 import "./report.css";
 
 import { fetchWeeklyReport } from "@/pages/report/api.tsx";
@@ -65,48 +65,48 @@ const App: React.FC = () => {
   const [top5HighTempImpactRate, setTop5HighTempImpactRate] = useState<Top5Rate[]>([]);
   const [top5LimitImpactRate, setTop5LimitImpactRate] = useState<Top5Rate[]>([]);
   const [data, setData] = useState<any[]>([]); // 数据状态
-  const stats = [
-    {
-      title: "总算力有效率",
-      value: formatPercent(statistics?.TotalHashEffectiveRate),
-      icon: "chart-line",
-      iconColor: getIconColor("总算力有效率"),
-      trend: (statistics?.WeeklyHashEffectiveRateChange ?? 0) > 0 ? "up" : "down",
-      trendValue: formatPercent(statistics?.WeeklyHashEffectiveRateChange),
-      trendText: "较上周",
-      trendColor: getNumberColor(Math.abs(statistics?.WeeklyHashEffectiveRateChange ?? 0)),
-    },
-    {
-      title: "总故障率",
-      value: formatPercent(statistics?.TotalFailureRate),
-      icon: "exclamation-triangle",
-      iconColor: getIconColor("总故障率"),
-      trend: (statistics?.WeeklyFailureRateChange ?? 0) > 0 ? "up" : "down",
-      trendValue: formatPercent(statistics?.WeeklyFailureRateChange),
-      trendText: "较上周",
-      trendColor: getNumberColor(statistics?.WeeklyFailureRateChange ?? 0),
-    },
-    {
-      title: "高温影响率",
-      value: formatPercent(statistics?.TotalHighTemperatureImpactRate),
-      icon: "temperature-high",
-      iconColor: getIconColor("高温影响率"),
-      trend: (statistics?.WeeklyHighTemperatureImpactRateChange ?? 0) > 0 ? "up" : "down",
-      trendValue: formatPercent(Math.abs(statistics?.WeeklyHighTemperatureImpactRateChange ?? 0)),
-      trendText: "较上周",
-      trendColor: getNumberColor(statistics?.WeeklyHighTemperatureImpactRateChange ?? 0),
-    },
-    {
-      title: "限电影响率",
-      value: formatPercent(statistics?.TotalLimitImpactRate),
-      icon: "bolt",
-      iconColor: getIconColor("限电影响率"),
-      trend: (statistics?.WeeklyLimitImpactRateChange ?? 0) > 0 ? "up" : "down",
-      trendValue: formatPercent(Math.abs(statistics?.WeeklyLimitImpactRateChange ?? 0)),
-      trendText: "较上周",
-      trendColor: getNumberColor(statistics?.WeeklyLimitImpactRateChange ?? 0),
-    },
-  ];
+  // const stats = [
+  //   {
+  //     title: "总算力有效率",
+  //     value: formatPercent(statistics?.TotalHashEffectiveRate),
+  //     icon: "chart-line",
+  //     iconColor: getIconColor("总算力有效率"),
+  //     trend: (statistics?.WeeklyHashEffectiveRateChange ?? 0) > 0 ? "up" : "down",
+  //     trendValue: formatPercent(statistics?.WeeklyHashEffectiveRateChange),
+  //     trendText: "较上周",
+  //     trendColor: getNumberColor(Math.abs(statistics?.WeeklyHashEffectiveRateChange ?? 0)),
+  //   },
+  //   {
+  //     title: "总故障率",
+  //     value: formatPercent(statistics?.TotalFailureRate),
+  //     icon: "exclamation-triangle",
+  //     iconColor: getIconColor("总故障率"),
+  //     trend: (statistics?.WeeklyFailureRateChange ?? 0) > 0 ? "up" : "down",
+  //     trendValue: formatPercent(statistics?.WeeklyFailureRateChange),
+  //     trendText: "较上周",
+  //     trendColor: getNumberColor(statistics?.WeeklyFailureRateChange ?? 0),
+  //   },
+  //   {
+  //     title: "高温影响率",
+  //     value: formatPercent(statistics?.TotalHighTemperatureImpactRate),
+  //     icon: "temperature-high",
+  //     iconColor: getIconColor("高温影响率"),
+  //     trend: (statistics?.WeeklyHighTemperatureImpactRateChange ?? 0) > 0 ? "up" : "down",
+  //     trendValue: formatPercent(Math.abs(statistics?.WeeklyHighTemperatureImpactRateChange ?? 0)),
+  //     trendText: "较上周",
+  //     trendColor: getNumberColor(statistics?.WeeklyHighTemperatureImpactRateChange ?? 0),
+  //   },
+  //   {
+  //     title: "限电影响率",
+  //     value: formatPercent(statistics?.TotalLimitImpactRate),
+  //     icon: "bolt",
+  //     iconColor: getIconColor("限电影响率"),
+  //     trend: (statistics?.WeeklyLimitImpactRateChange ?? 0) > 0 ? "up" : "down",
+  //     trendValue: formatPercent(Math.abs(statistics?.WeeklyLimitImpactRateChange ?? 0)),
+  //     trendText: "较上周",
+  //     trendColor: getNumberColor(statistics?.WeeklyLimitImpactRateChange ?? 0),
+  //   },
+  // ];
   // 初始化开始和结束时间
 
   const lastWeek = dayjs().subtract(1, "week").startOf("week");
@@ -224,11 +224,7 @@ const App: React.FC = () => {
         </div>
       </div>
       <Spin spinning={loading} tip="加载中..." size="large">
-        <div className="grid grid-cols-4 gap-4 mb-6">
-          {stats.map((s, i) => (
-            <StatCard key={i} {...s} />
-          ))}
-        </div>
+        <StatCard statistics={statistics} />
         <div className="grid grid-cols-3 gap-4 mb-6">
           <div className="bg-white p-4 rounded-[4px] border border-[#F0F2F5] shadow-sm">
             <ChartSuanli hashEffectiveRate={hashEffectiveRate} />

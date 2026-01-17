@@ -415,6 +415,34 @@ const VenuePage: React.FC<VenueTableProps> = ({ data, startDate, endDate, onRequ
       render: (value) => <span>{value}%</span>,
     },
     {
+      title: "低功耗影响率",
+      width: 150,
+      dataIndex: "average_low_power_impact_rate",
+      key: "average_low_power_impact_rate",
+      align: "center",
+      sorter: (a, b) => (a.average_low_power_impact_rate ?? 0) - (b.average_low_power_impact_rate ?? 0),
+      render: (value) => <span>{value}%</span>,
+    },
+    {
+      title: "撤场比例",
+      width: 150,
+      dataIndex: "average_withdraw_impact_rate",
+      key: "average_withdraw_impact_rate",
+      align: "center",
+      sorter: (a, b) => (a.average_withdraw_impact_rate ?? 0) - (b.average_withdraw_impact_rate ?? 0),
+      render: (value) => <span>{value}%</span>,
+    },
+    {
+      title: "云算力比例",
+      width: 150,
+      dataIndex: "average_cloud_power_rate",
+      key: "average_cloud_power_rate",
+      align: "center",
+      sorter: (a, b) => (a.average_cloud_power_rate ?? 0) - (b.average_cloud_power_rate ?? 0),
+      render: (value) => <span>{value}%</span>,
+    },
+
+    {
       title: "本周上架",
       width: 120,
       dataIndex: "week_shelved",
@@ -601,16 +629,7 @@ const VenuePage: React.FC<VenueTableProps> = ({ data, startDate, endDate, onRequ
           <div>开始日期：{startDate}</div>
           <div>结束日期：{endDate}</div>
         </div>
-        <Form
-          form={form}
-          layout="vertical"
-          key={editingRecord?.venue_id ?? "form"}
-          // initialValues={{
-          //   event_reason: editingRecord?.event_reason ?? "",
-          //   follow_up: editingRecord?.follow_up ?? "",
-          //   progress: editingRecord?.progress ?? "",
-          // }}
-        >
+        <Form form={form} layout="vertical" key={editingRecord?.venue_id ?? "form"}>
           <Form.Item name="event_reason" label="事件原因">
             <SimpleRichEditor
               value={form.getFieldValue("event_reason")}

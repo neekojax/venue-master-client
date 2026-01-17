@@ -1,0 +1,1 @@
+const o=(r,t=2)=>{if(r==null||r==="")return"--";const n=Number(r);return isNaN(n)?"--":`${Math.abs(n).toFixed(t)}%`},i=r=>{if(r==null||r==="")return"-";const t=Number(r);return isNaN(t)?"-":(t/1e3).toFixed(3)},s=r=>{if(r==null||r==="")return"--";const t=Number(r);return isNaN(t)?"--":t.toLocaleString()};export{i as a,s as b,o as f};
