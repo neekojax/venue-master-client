@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { fetchVenueList, fetchWeatherMonitoring } from "../api";
-import ForecastAlerts from "./components/ForecastAlerts";
+// import ForecastAlerts from "./components/ForecastAlerts";
 import ForecastSection from "./components/ForecastSection";
 import WeatherAlertList from "./components/WeatherAlertList";
 import WeatherHero from "./components/WeatherHero";
