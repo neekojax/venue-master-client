@@ -140,3 +140,13 @@ export const fetchEventLogWithFilter = async (poolType: string, params?: Record<
 export const fetchEventLogForExport = async (poolType: string, params?: Record<string, any>) => {
   return await fetchGet(`/event/listEventForExport/${poolType}`, params);
 };
+
+// GET 天气监控列表接口 /weather/monitoring/:venueId
+export const fetchWeatherMonitoring = async (venueID: number) => {
+  return await fetchGet(`/weather/monitoring/${venueID}`);
+};
+
+// GET /weather/alert-center?venueId=123
+export const fetchWeatherMonitoringDetail = async (venueID: number) => {
+  return await fetchGet(`/weather/alert-center?venueId=${venueID}`);
+};
