@@ -16,7 +16,7 @@ const ForecastSection: React.FC<Props> = ({ forecastDays, forecastNight }) => {
         <div className="flex items-center space-x-4">
           <h3 className="text-sm font-bold text-gray-800 flex items-center uppercase tracking-wider">
             <i className="far fa-calendar-days mr-2 text-blue-500"></i>
-            未来 5 日天气预报
+            未来天气预报
           </h3>
 
           <div className="flex bg-gray-200/50 p-1 rounded-lg border border-gray-200 backdrop-blur-sm">
