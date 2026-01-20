@@ -35,27 +35,27 @@ const WeatherAlertList: React.FC<Props> = ({ alerts }) => {
 
                 <div className="flex justify-between items-start mb-2">
                   <span className="text-xs font-bold text-gray-800 group-hover:text-red-600 transition-colors truncate pr-2">
-                    {alert.type}
+                    {alert.description}
                   </span>
                   <span
                     className={`text-[9px] px-1.5 py-0.5 rounded font-black flex-shrink-0 ${
-                      alert.type.includes("红色")
+                      alert.description.includes("红色")
                         ? "bg-red-600 text-white"
-                        : alert.type.includes("橙色")
+                        : alert.description.includes("橙色")
                           ? "bg-orange-500 text-white"
                           : "bg-yellow-400 text-white"
                     }`}
                   >
-                    {alert.type.includes("红色")
+                    {alert.description.includes("红色")
                       ? "LEVEL 1"
-                      : alert.type.includes("橙色")
+                      : alert.description.includes("橙色")
                         ? "LEVEL 2"
                         : "LEVEL 3"}
                   </span>
                 </div>
 
                 <p className="text-[11px] text-gray-500 mb-3 leading-relaxed line-clamp-2 group-hover:line-clamp-none transition-all">
-                  {alert.description}
+                  {alert.summary}
                 </p>
 
                 <div className="flex items-center justify-between mt-auto">

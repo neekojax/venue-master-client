@@ -21,7 +21,7 @@ const WeatherHero: React.FC<Props> = ({ data }) => {
             </span>
             <div className="flex items-center space-x-2 bg-black/10 px-2 py-1 rounded text-[10px] font-mono border border-white/10">
               <i className="fas fa-globe-asia opacity-70"></i>
-              {/* <span>{data.date}</span> */}
+              <span>{data.timezone}</span>
             </div>
           </div>
           <span className="text-blue-100 text-xs flex items-center">

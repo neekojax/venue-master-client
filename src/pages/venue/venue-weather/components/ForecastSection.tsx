@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { WEATHER_ICONS } from "../constants";
+import { WEATHER_ICONS, WEATHER_NIGNT_ICONS } from "../constants";
 import { ForecastDay } from "../types";
 
 interface Props {
@@ -20,28 +20,32 @@ const ForecastSection: React.FC<Props> = ({ forecastDays, forecastNight }) => {
           </h3>
 
           <div className="flex bg-gray-200/50 p-1 rounded-lg border border-gray-200 backdrop-blur-sm">
-            <button
-              onClick={() => setViewMode("day")}
-              className={`flex items-center space-x-2 px-4 py-1 text-[10px] font-bold rounded-md transition-all duration-300 ${
-                viewMode === "day"
+            {(() => {
+              const base =
+                "flex items-center space-x-2 px-4 py-1 text-[10px] font-bold rounded-md transition-all duration-300 ";
+              const dayBtnClass =
+                base +
+                (viewMode === "day"
                   ? "bg-white text-orange-600 shadow-sm"
-                  : "text-gray-500 hover:text-gray-700"
-              }`}
-            >
-              <i className="fas fa-sun"></i>
-              <span>白天</span>
-            </button>
-            <button
-              onClick={() => setViewMode("night")}
-              className={`flex items-center space-x-2 px-4 py-1 text-[10px] font-bold rounded-md transition-all duration-300 ${
-                viewMode === "night"
+                  : "text-gray-500 hover:text-gray-700");
+              const nightBtnClass =
+                base +
+                (viewMode === "night"
                   ? "bg-[#1a1c2e] text-indigo-300 shadow-sm"
-                  : "text-gray-500 hover:text-gray-700"
-              }`}
-            >
-              <i className="fas fa-moon"></i>
-              <span>夜晚</span>
-            </button>
+                  : "text-gray-500 hover:text-gray-700");
+              return (
+                <>
+                  <button onClick={() => setViewMode("day")} className={dayBtnClass}>
+                    <i className="fas fa-sun"></i>
+                    <span>白天</span>
+                  </button>
+                  <button onClick={() => setViewMode("night")} className={nightBtnClass}>
+                    <i className="fas fa-moon"></i>
+                    <span>夜晚</span>
+                  </button>
+                </>
+              );
+            })()}
           </div>
         </div>
 
@@ -58,7 +62,7 @@ const ForecastSection: React.FC<Props> = ({ forecastDays, forecastNight }) => {
           {forecastDays.map((day, idx) => {
             // console.log("day》〉》", day);
             const isNight = false;
-            const weatherDesc = isNight && day.weather === "晴" ? "月朗星稀" : day.weather;
+            const weatherDesc = isNight && day.weather === "晴" ? "" : day.weather;
             const dateParts = day.date.split("-");
             const displayDate = `${dateParts[1]} / ${dateParts[2]}`;
 
@@ -155,11 +159,11 @@ const ForecastSection: React.FC<Props> = ({ forecastDays, forecastNight }) => {
 
                 {/* Weather Visual */}
                 <div className="py-2 flex flex-col items-center">
-                  <div className="text-4xl mb-2 transform transition-transform duration-500 group-hover:scale-110">
+                  <div className="text-4xl mb-2 transform  text-indigo-400 transition-transform duration-500 group-hover:scale-110">
                     {isNight && day.weather === "晴" ? (
                       <i className="fas fa-moon text-indigo-400"></i>
                     ) : (
-                      WEATHER_ICONS[day.weather] || <i className="fas fa-cloud text-gray-300"></i>
+                      WEATHER_NIGNT_ICONS[day.weather] || <i className="fas fa-cloud text-indigo-400"></i>
                     )}
                   </div>
                   <span className="text-[12px] font-black text-gray-800">{weatherDesc}</span>

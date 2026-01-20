@@ -1,10 +1,11 @@
 import React, { useEffect, useState } from "react";
-import { fetchVenueList, fetchWeatherMonitoring } from "../api";
-// import ForecastAlerts from "./components/ForecastAlerts";
+import { Button, Input } from "antd";
+import { fetchVenueList, fetchWeatherMonitoring, fetchWeatherMonitoringDetail } from "../api";
+import ForecastAlerts from "./components/ForecastAlerts";
 import ForecastSection from "./components/ForecastSection";
 import WeatherAlertList from "./components/WeatherAlertList";
 import WeatherHero from "./components/WeatherHero";
-import { ForecastDay, GeographicLocation, VenueWeather, WeatherAlert } from "./types";
+import { ForecastDay, GeographicLocation, VenueWeather, VenueWeatherAlert, WeatherAlert } from "./types";
 import { useSelector, useSettingsStore } from "@/stores";
 
 const App: React.FC = () => {
@@ -14,9 +15,49 @@ const App: React.FC = () => {
   const [realtimeWeather, setRealtimeWeather] = useState<VenueWeather | null>(null);
   const [forecastsDay, setForecastsDay] = useState<ForecastDay[]>([]);
   const [forecastsNight, setForecastsNight] = useState<ForecastDay[]>([]);
+  const [forecasts, setForecasts] = useState<VenueWeatherAlert[]>([]);
   const [systemAlerts, setSystemAlerts] = useState<WeatherAlert[]>([]);
+
   const [geographicLocation, setGeographicLocation] = useState<GeographicLocation>({} as GeographicLocation);
   const [loading, setLoading] = useState(true);
+  const [showSiteFilter, setShowSiteFilter] = useState(false);
+  const [filters, setFilters] = useState<{ siteName: string }>({ siteName: "" });
+  const [selectedSites, setSelectedSites] = useState<number[]>([]);
+  const selectedVenueName = venueOptions.find((v) => v.id === selectedVenue)?.name || "选择场地";
+  const handleFilterChange = (key: "siteName", value: string) => {
+    setFilters((prev) => ({ ...prev, [key]: value }));
+  };
+
+  useEffect(() => {
+    if (!selectedVenue) return;
+    (async () => {
+      try {
+        const resp = await fetchWeatherMonitoringDetail(selectedVenue);
+        const raw = resp?.data?.data || resp?.data || [];
+        const list = Array.isArray(raw) ? raw : Array.isArray(raw?.records) ? raw.records : [];
+        const alerts: WeatherAlert[] = list.map((a: any, i: number) => ({
+          id: Number(a?.id ?? i),
+          type: String(a?.type ?? a?.alert_type ?? a?.title ?? ""),
+          affected_area: String(a?.affected_area ?? a?.area ?? a?.region ?? ""),
+          start_time: String(a?.start_time ?? a?.start ?? a?.begin_time ?? ""),
+          end_time: String(a?.end_time ?? a?.end ?? a?.finish_time ?? ""),
+          description: String(a?.description ?? a?.desc ?? a?.content ?? ""),
+          summary: String(a?.summary ?? a?.title ?? ""),
+          source: String(a?.source ?? a?.origin ?? ""),
+          url: String(a?.url ?? a?.link ?? ""),
+          created_at: String(a?.created_at ?? ""),
+          updated_at: String(a?.updated_at ?? ""),
+        }));
+        setSystemAlerts(alerts);
+      } catch {
+        setSystemAlerts([]);
+      }
+    })();
+  }, [selectedVenue]);
+
+  useEffect(() => {
+    setSelectedSites(selectedVenue ? [selectedVenue] : []);
+  }, [selectedVenue, showSiteFilter]);
 
   useEffect(() => {
     (async () => {
@@ -57,15 +98,15 @@ const App: React.FC = () => {
           ),
           wind_direction: String(realtime_weather?.wind_direction ?? d?.wind?.direction_text ?? ""),
           precipitation: Number(realtime_weather?.precipitation ?? d?.rain ?? 0),
+          timezone: String(realtime_weather?.timezone ?? d?.timezone ?? ""),
         };
         const forecastDays: ForecastDay[] = forecast_5days.daytime;
 
         const forecastNight: ForecastDay[] = forecast_5days.night;
-        const alerts: WeatherAlert[] = d?.forecast_alerts?.records || [];
         setRealtimeWeather(current);
         setForecastsDay(forecastDays);
         setForecastsNight(forecastNight);
-        setSystemAlerts(alerts);
+        setForecasts(d?.forecast_alerts?.records || []);
         setGeographicLocation(d?.geographic_location || ({} as GeographicLocation));
         setLoading(false);
       } catch (_e) {
@@ -78,25 +119,81 @@ const App: React.FC = () => {
     <div className="p-8 mx-auto w-full space-y-8">
       {/* Optimized Venue Selection Module */}
       <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100 flex items-center justify-between">
-        <div className="flex items-center">
+        <div className="flex items-center relative">
           <div className="flex flex-col pr-6">
             <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">监控场地</p>
             <div className="flex items-center space-x-2">
-              <select
-                className="bg-transparent border-none text-xl font-bold text-gray-800 focus:ring-0 p-0 pr-1 cursor-pointer appearance-none"
-                value={selectedVenue}
-                onChange={(e) => setSelectedVenue(Number(e.target.value))}
+              <button
+                type="button"
+                onClick={() => setShowSiteFilter((prev) => !prev)}
+                className="bg-transparent border-none text-xl font-bold text-gray-800 focus:outline-none p-0 pr-1 cursor-pointer flex items-center"
               >
-                {venueOptions.map((v) => (
-                  <option key={v.id} value={v.id}>
-                    {v.name}
-                  </option>
-                ))}
-              </select>
-              <i className="fas fa-chevron-down text-gray-400 text-xs mt-1"></i>
+                <span>{selectedVenueName}</span>
+                <i
+                  className={`fas fa-chevron-down text-gray-400 text-xs ml-2 ${showSiteFilter ? "rotate-180" : ""}`}
+                ></i>
+              </button>
             </div>
           </div>
           <div className="h-10 w-[1px] bg-gray-100 mx-4"></div>
+          {showSiteFilter && (
+            <div className="site-filter-dropdown absolute right-0 top-full mt-2 w-80 bg-white rounded-lg z-20 shadow-lg border border-gray-200 p-4">
+              <div className="font-medium text-gray-900 mb-3">选择场地</div>
+              <Input
+                size="middle"
+                placeholder="搜索场地..."
+                className="mb-3"
+                value={filters.siteName}
+                onChange={(e) => {
+                  handleFilterChange("siteName", e.target.value);
+                }}
+              />
+              <div className="max-h-60 overflow-y-auto">
+                {(venueOptions || [])
+                  .filter((v) => v.name.includes(filters.siteName))
+                  .map((v, index) => (
+                    <div key={v.id} className="flex items-center py-2 hover:bg-gray-50 rounded">
+                      <input
+                        type="radio"
+                        id={`site-${index}`}
+                        name="site-radio-group"
+                        className="h-4 w-4 text-blue-600 rounded border-gray-300 focus:ring-blue-500"
+                        checked={selectedSites[0] === v.id}
+                        onChange={(e) => {
+                          if (e.target.checked) {
+                            setSelectedSites([v.id]);
+                          }
+                        }}
+                      />
+                      <label
+                        htmlFor={`site-${index}`}
+                        className="ml-2 text-gray-700 cursor-pointer flex-grow"
+                      >
+                        {v.name}
+                      </label>
+                    </div>
+                  ))}
+              </div>
+              <div className="flex justify-end space-x-2 mt-3 pt-3 border-t border-gray-200">
+                <Button size="small" onClick={() => setShowSiteFilter(false)}>
+                  取消
+                </Button>
+                <Button
+                  size="small"
+                  type="primary"
+                  onClick={() => {
+                    const pick = selectedSites[0];
+                    if (pick) {
+                      setSelectedVenue(pick);
+                    }
+                    setShowSiteFilter(false);
+                  }}
+                >
+                  应用
+                </Button>
+              </div>
+            </div>
+          )}
         </div>
 
         <button
@@ -134,7 +231,7 @@ const App: React.FC = () => {
 
               <section>
                 <ForecastSection forecastDays={forecastsDay} forecastNight={forecastsNight} />
-                {/* <ForecastAlerts forecasts={forecasts} /> */}
+                <ForecastAlerts forecasts={forecasts} />
               </section>
             </>
           )}
