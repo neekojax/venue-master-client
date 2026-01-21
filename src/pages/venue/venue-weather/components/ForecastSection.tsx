@@ -1,13 +1,14 @@
 import React, { useState } from "react";
-import { WEATHER_ICONS, WEATHER_NIGNT_ICONS } from "../constants";
-import { ForecastDay } from "../types";
+import { ForecastDay, VenueWeather } from "../types";
+import { WeatherIcon } from "./WeatherIcon";
 
 interface Props {
+  basicData: VenueWeather;
   forecastDays: ForecastDay[];
   forecastNight: ForecastDay[];
 }
 
-const ForecastSection: React.FC<Props> = ({ forecastDays, forecastNight }) => {
+const ForecastSection: React.FC<Props> = ({ basicData, forecastDays, forecastNight }) => {
   const [viewMode, setViewMode] = useState<"day" | "night">("day");
 
   return (
@@ -52,7 +53,8 @@ const ForecastSection: React.FC<Props> = ({ forecastDays, forecastNight }) => {
         <div className="flex items-center space-x-2">
           <span className="w-2 h-2 rounded-full bg-green-500"></span>
           <span className="text-[10px] text-gray-400 font-bold uppercase tracking-wider">
-            ACCUWEATHER DATA STREAM
+            {/* ACCUWEATHER DATA STREAM */}
+            {basicData?.data_source}
           </span>
         </div>
       </div>
@@ -60,9 +62,8 @@ const ForecastSection: React.FC<Props> = ({ forecastDays, forecastNight }) => {
       {viewMode === "day" && (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
           {forecastDays.map((day, idx) => {
-            // console.log("day》〉》", day);
             const isNight = false;
-            const weatherDesc = isNight && day.weather === "晴" ? "" : day.weather;
+            // const weatherDesc = isNight && day.weather === "晴" ? "" : day.weather;
             const dateParts = day.date.split("-");
             const displayDate = `${dateParts[1]} / ${dateParts[2]}`;
 
@@ -80,13 +81,9 @@ const ForecastSection: React.FC<Props> = ({ forecastDays, forecastNight }) => {
 
                 <div className="py-2 flex flex-col items-center">
                   <div className="text-4xl mb-2 transform transition-transform duration-500 group-hover:scale-110">
-                    {isNight && day.weather === "晴" ? (
-                      <i className="fas fa-moon text-indigo-400"></i>
-                    ) : (
-                      WEATHER_ICONS[day.weather] || <i className="fas fa-cloud text-gray-300"></i>
-                    )}
+                    <WeatherIcon weatherId={day.icon_id} size={65} />
                   </div>
-                  <span className="text-[12px] font-black text-gray-800">{weatherDesc}</span>
+                  <span className="text-[12px] font-black text-gray-800">{day.weather}</span>
                 </div>
 
                 <div className="px-4 pb-4 mt-4 space-y-4">
@@ -159,12 +156,8 @@ const ForecastSection: React.FC<Props> = ({ forecastDays, forecastNight }) => {
 
                 {/* Weather Visual */}
                 <div className="py-2 flex flex-col items-center">
-                  <div className="text-4xl mb-2 transform  text-indigo-400 transition-transform duration-500 group-hover:scale-110">
-                    {isNight && day.weather === "晴" ? (
-                      <i className="fas fa-moon text-indigo-400"></i>
-                    ) : (
-                      WEATHER_NIGNT_ICONS[day.weather] || <i className="fas fa-cloud text-indigo-400"></i>
-                    )}
+                  <div className="text-4xl mb-2 transform transition-transform duration-500 group-hover:scale-110">
+                    <WeatherIcon weatherId={day.icon_id} size={65} />
                   </div>
                   <span className="text-[12px] font-black text-gray-800">{weatherDesc}</span>
                 </div>

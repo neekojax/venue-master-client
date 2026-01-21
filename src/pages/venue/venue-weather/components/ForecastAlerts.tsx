@@ -34,7 +34,7 @@ const ForecastAlerts: React.FC<Props> = ({ forecasts }) => {
             {/* Severity Side Bar */}
             <div
               className={`w-full md:w-1.5 flex-shrink-0 ${
-                day.level > 7 ? "bg-red-500" : day.level > 4 ? "bg-orange-500" : "bg-yellow-400"
+                day.level > 2 ? "bg-red-500" : day.level > 1 ? "bg-orange-500" : "bg-yellow-400"
               }`}
             ></div>
 
@@ -42,12 +42,13 @@ const ForecastAlerts: React.FC<Props> = ({ forecasts }) => {
               {/* Category and Date */}
               <div className="md:w-44 flex-shrink-0">
                 <div className="flex items-center space-x-2 mb-1">
-                  {/* <span
-                    className={`text-[9px] font-black px-1.5 py-0.5 rounded uppercase tracking-tighter ${day.level > 7 ? "bg-red-100 text-red-700" : "bg-orange-100 text-orange-700"
-                      }`}
+                  <span
+                    className={`text-[9px] font-black px-1.5 py-0.5 rounded uppercase tracking-tighter ${
+                      day.level > 7 ? "bg-red-100 text-red-700" : "bg-orange-100 text-orange-700"
+                    }`}
                   >
                     {day.type || "常规预警"}
-                  </span> */}
+                  </span>
                   <span className="text-[9px] font-bold text-gray-400">LV.{day.level}</span>
                 </div>
                 <p className="text-xs font-bold text-gray-800">{day.start_time.split(" ")[0]}</p>

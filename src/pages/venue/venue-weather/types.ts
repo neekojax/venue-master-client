@@ -23,12 +23,14 @@ export interface ForecastDay {
   humidity_min: number;
   humidity_avg: number;
   humidity_max: number;
+  icon_id: number;
 }
 export interface VenueWeather {
   venue_name: string;
   date: string; // 2006-01-02 15:04:05 or 2006-01-02
   timezone: string;
   weather_condition: string;
+  icon_id?: number;
   data_source: string;
   temperature: number;
   humidity: number;
@@ -50,6 +52,13 @@ export interface WeatherAlert {
   url: string;
   created_at: string;
   updated_at: string;
+  venue_id: number;
+  alert_id: string;
+  timezone: string;
+  is_notified: number;
+  notified_at: null;
+  venue_name: string;
+  collection: number;
 }
 
 export interface Venue {

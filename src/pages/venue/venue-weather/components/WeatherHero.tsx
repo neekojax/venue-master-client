@@ -1,6 +1,6 @@
 import React from "react";
-import { WEATHER_ICONS } from "../constants";
 import { VenueWeather } from "../types";
+import { WeatherIcon } from "./WeatherIcon";
 
 interface Props {
   data: VenueWeather;
@@ -9,9 +9,7 @@ interface Props {
 const WeatherHero: React.FC<Props> = ({ data }) => {
   return (
     <div className="bg-gradient-to-br from-blue-600 to-blue-800 rounded-xl shadow-lg p-8 text-white relative overflow-hidden">
-      <div className="absolute top-[-20px] right-[-20px] text-[160px] opacity-10 rotate-12">
-        {WEATHER_ICONS[data.weather_condition] || <i className="fas fa-cloud"></i>}
-      </div>
+      <div className="absolute top-[-20px] right-[-20px] text-[160px] opacity-10 rotate-12"></div>
 
       <div className="relative z-10">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
@@ -38,7 +36,11 @@ const WeatherHero: React.FC<Props> = ({ data }) => {
             <div className="h-16 w-[1px] bg-white/20"></div>
             <div>
               <div className="text-4xl">
-                {WEATHER_ICONS[data.weather_condition] || <i className="fas fa-cloud"></i>}
+                {data.icon_id ? (
+                  <WeatherIcon weatherId={data.icon_id} size={65} />
+                ) : (
+                  <i className="fas fa-cloud"></i>
+                )}
               </div>
               <div className="text-xl font-medium mt-1">{data.weather_condition}</div>
             </div>
@@ -62,14 +64,12 @@ const WeatherHero: React.FC<Props> = ({ data }) => {
               <p className="text-xl font-semibold">
                 {data.wind_gust_speed} <span className="text-xs opacity-70">km/h</span>
               </p>
-              {/* <p className="text-[10px] text-blue-100/70 mt-1">瞬时最大</p> */}
             </div>
             <div>
               <p className="text-blue-200 text-[10px] font-bold uppercase mb-1">降水量</p>
               <p className="text-xl font-semibold">
                 {data.precipitation} <span className="text-xs opacity-70">mm</span>
               </p>
-              {/* <p className="text-[10px] text-blue-100/70 mt-1">当日累计</p> */}
             </div>
           </div>
         </div>
