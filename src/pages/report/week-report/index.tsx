@@ -1,9 +1,9 @@
 // 代码已包含 CSS：使用 TailwindCSS , 安装 TailwindCSS 后方可看到布局样式效果
 import React, { useEffect, useState } from "react";
-import { ReloadOutlined } from "@ant-design/icons";
-import { Button, DatePicker, Spin } from "antd";
+import { DatePicker, Spin } from "antd";
 import dayjs from "dayjs";
 import weekOfYear from "dayjs/plugin/weekOfYear";
+import { Calendar as CalendarIcon, Clock } from "lucide-react";
 import ImpactCard from "./components/ImpactCard";
 import StatCard from "./components/StatCard";
 import VenueTable from "./components/venueTable";
@@ -54,6 +54,10 @@ const App: React.FC = () => {
   // const lastWeek = dayjs().subtract(1, "week").startOf("week");;
   // const lastWeek = dayjs().subtract(1, "week").startOf("week");
   // const [selectedWeek, setSelectedWeek] = useState<dayjs.Dayjs>(lastWeek);
+  // Date Filter State
+  type FilterMode = "rolling" | "calendar";
+  const [filterMode, setFilterMode] = useState<FilterMode>("calendar");
+  const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split("T")[0]);
 
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
@@ -112,15 +116,20 @@ const App: React.FC = () => {
   const lastWeek = dayjs().subtract(1, "week").startOf("week");
   const [selectedWeek, setSelectedWeek] = useState<dayjs.Dayjs>(lastWeek);
   useEffect(() => {
+    if (filterMode !== "rolling") return;
+    const end = dayjs(selectedDate);
+    const start = end.subtract(7, "day");
+    setStartDate(start.format("YYYY-MM-DD"));
+    setEndDate(end.format("YYYY-MM-DD"));
+  }, [filterMode, selectedDate]);
+
+  useEffect(() => {
+    if (filterMode !== "calendar") return;
     const monday = selectedWeek.startOf("week"); // 周一
     const sunday = monday.add(6, "day"); // 周日
-
     setStartDate(monday.format("YYYY-MM-DD"));
     setEndDate(sunday.format("YYYY-MM-DD"));
-
-    onWeekChange(selectedWeek);
-    renderLabel(selectedWeek);
-  }, [selectedWeek]);
+  }, [filterMode, selectedWeek]);
 
   // 禁止选择未结束的周（本周及未来）
   const disabledDate = (current: dayjs.Dayjs) => {
@@ -151,6 +160,17 @@ const App: React.FC = () => {
         </span>
         <span className="text-gray-500">
           {monday.format("YYYY-MM-DD")}~~{sunday.format("YYYY-MM-DD")}
+        </span>
+      </div>
+    );
+  };
+
+  const renderRollingLabel = (start: string, end: string) => {
+    if (!start && !end) return null;
+    return (
+      <div className="flex items-center gap-2">
+        <span className="text-gray-500">
+          {start}~~{end}
         </span>
       </div>
     );
@@ -194,35 +214,70 @@ const App: React.FC = () => {
   const handleReload = () => {
     fetchReportData();
   };
+  const labelDate = filterMode === "rolling" ? dayjs(selectedDate) : selectedWeek;
   return (
     // <div className="min-h-[1024px] mx-auto max-w-[1440px] p-6 bg-[#FAFBFC]">
 
     <div className="weekReport">
-      <div className="flex justify-between items-center mb-6">
+      <div className="flex justify-between items-center mb-0">
         <div>
           <h1 className="text-2xl font-bold mb-2">矿池周报</h1>
-          {renderLabel(selectedWeek)}
+          {filterMode === "rolling" ? renderRollingLabel(startDate, endDate) : renderLabel(labelDate)}
           <p className="text-gray-500">全面监控和分析矿池算力表现</p>
         </div>
         <div className="flex items-center gap-4">
-          <WeekPicker
-            size="middle"
-            value={selectedWeek}
-            onChange={onWeekChange}
-            format="YYYY-wo"
-            disabledDate={disabledDate}
-          />
-          <Button
-            onClick={handleReload}
-            type="primary"
-            size="middle"
-            icon={<ReloadOutlined />}
-            className="!rounded-button whitespace-nowrap"
-          >
-            刷新
-          </Button>
+          <div className="flex items-center w-[400px] rounded-xl p-1 border border-slate-700/50 shadow-inner">
+            <button
+              onClick={() => setFilterMode("rolling")}
+              title="选择日期并回溯7天"
+              className={`flex items-center gap-1.5 px-4 py-1.5 rounded-lg text-xs font-medium transition-all ${filterMode === "rolling" ? "bg-blue-600 text-white shadow-lg" : "text-slate-400 hover:text-slate-200 hover:bg-slate-700/30"}`}
+            >
+              <Clock size={14} /> 滚动回溯
+            </button>
+            <button
+              onClick={() => setFilterMode("calendar")}
+              title="按日历完整周次查看"
+              className={`flex items-center gap-1.5 px-4 py-1.5 rounded-lg text-xs font-medium transition-all ${filterMode === "calendar" ? "bg-blue-600 text-white shadow-lg" : "text-slate-400 hover:text-slate-200 hover:bg-slate-700/30"}`}
+            >
+              <CalendarIcon size={14} /> 自然周
+            </button>
+
+            {filterMode && filterMode === "rolling" && (
+              <div className="ml-2 pr-2 border-l border-slate-200 pl-3 flex items-center gap-2">
+                <span className="text-[10px] text-slate-500 uppercase tracking-wider font-bold">日期</span>
+                <input
+                  type="date"
+                  value={selectedDate}
+                  onChange={(e) => setSelectedDate(e.target.value)}
+                  className=" rounded px-2 py-1 text-xs text-blue-400 outline-none cursor-pointer  border border-slate-200 hover:border-blue-500/50 transition-colors"
+                />
+              </div>
+            )}
+            {filterMode && filterMode === "calendar" && (
+              <div className="ml-2 pr-2 border-l border-slate-200 pl-3 flex items-center gap-2">
+                <span className="text-[10px] text-slate-500 uppercase tracking-wider font-bold">日期</span>
+                <WeekPicker
+                  size="small"
+                  value={selectedWeek}
+                  onChange={onWeekChange}
+                  format="YYYY-wo"
+                  disabledDate={disabledDate}
+                />
+                {/* <Button
+                  onClick={handleReload}
+                  type="primary"
+                  size="middle"
+                  icon={<ReloadOutlined />}
+                  className="!rounded-button whitespace-nowrap"
+                >
+                  刷新
+                </Button> */}
+              </div>
+            )}
+          </div>
         </div>
       </div>
+
       <Spin spinning={loading} tip="加载中..." size="large">
         <StatCard statistics={statistics} />
         <div className="grid grid-cols-3 gap-4 mb-6">

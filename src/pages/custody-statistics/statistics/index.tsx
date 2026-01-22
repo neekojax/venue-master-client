@@ -57,6 +57,13 @@ export default function DateModeHeader() {
     { key: "discount_hosting_fee_ratio", label: "折扣托管费占比" },
     { key: "discount_cost_ratio", label: "折扣成本占比" },
     { key: "period_type", label: "周期类型" },
+    { key: "downclock_discount_hosting_fee_ratio", label: "降频后托管费占比" },
+    { key: "downclock_discount_cost_ratio", label: "降频后成本比" },
+    { key: "downclock_discount", label: "降频后折扣" },
+    { key: "downclock_price_ranges", label: "降频价格区间" },
+    { key: "downclock_before_profit", label: "降频前利润" },
+    { key: "downclock_after_profit", label: "降频后利润" },
+
     { key: "date", label: "收益日期" },
 
     // { key: "total_income_btc", label: "收益BTC" },
@@ -119,6 +126,14 @@ export default function DateModeHeader() {
       { key: "discount_status", label: "折扣状态" },
       { key: "discount_price", label: "折扣价格" },
       { key: "discount_hosting_fee_ratio", label: "折扣托管费占比" },
+      { key: "discount_cost_ratio", label: "折扣成本占比" },
+      { key: "downclock_discount_hosting_fee_ratio", label: "降频后托管费占比" },
+      { key: "downclock_discount_cost_ratio", label: "降频后成本比" },
+      { key: "downclock_discount", label: "降频后折扣" },
+      { key: "downclock_price_ranges", label: "降频价格区间" },
+      { key: "downclock_before_profit", label: "降频前利润" },
+      { key: "downclock_after_profit", label: "降频后利润" },
+
       { key: "period_type", label: "统计周期" },
       { key: "date", label: "收益日期" },
     ];
@@ -135,6 +150,19 @@ export default function DateModeHeader() {
 
       const toNumber = (v: any) => (typeof v === "number" ? v : parseFloat(v));
       const num = toNumber(val);
+      if (key === "downclock_price_ranges") {
+        // return val.join(",");
+        // text
+        return val
+          .map((pair: any) => {
+            if (!Array.isArray(pair) || pair.length < 2) return null;
+            const a = Math.round(Number(pair[0]));
+            const b = Math.round(Number(pair[1]));
+            return `[${a},${b}]`;
+          })
+          .filter(Boolean)
+          .join(" ,");
+      }
 
       if (Number.isFinite(num)) {
         if (isBTC) return num.toFixed(8); // 收益BTC保持8位

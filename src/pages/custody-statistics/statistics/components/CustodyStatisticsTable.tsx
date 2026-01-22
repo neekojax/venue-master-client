@@ -88,6 +88,12 @@ export default function CustodyStatisticsTable({
           discount_price: any;
           discount_hosting_fee_ratio: any;
           discount_cost_ratio: any;
+          downclock_discount_hosting_fee_ratio: any;
+          downclock_discount_cost_ratio: any;
+          downclock_discount: any;
+          downclock_price_ranges: any;
+          downclock_before_profit: any;
+          downclock_after_profit: any;
         }) => ({
           // 使用 复合键 确保每行唯一，避免 React 重复 key 警告
           key: `${item.venue_id}-${item.date}`,
@@ -110,6 +116,12 @@ export default function CustodyStatisticsTable({
           discount_price: item.discount_price,
           discount_hosting_fee_ratio: item.discount_hosting_fee_ratio,
           discount_cost_ratio: item.discount_cost_ratio,
+          downclock_discount_hosting_fee_ratio: item.downclock_discount_hosting_fee_ratio,
+          downclock_discount_cost_ratio: item.downclock_discount_cost_ratio,
+          downclock_discount: item.downclock_discount,
+          downclock_price_ranges: item.downclock_price_ranges,
+          downclock_before_profit: item.downclock_before_profit,
+          downclock_after_profit: item.downclock_after_profit,
         }),
       );
       setTableData(newData);
@@ -425,6 +437,80 @@ export default function CustodyStatisticsTable({
           return { className: "fee-ratio-low" };
         },
         render: (text: any) => (Number.isFinite(text) && text !== 0 ? `${text.toFixed(2)}%` : `--`),
+      },
+      {
+        title: <span className="fee-ratio-title">降频后托管费占比</span>,
+        width: 140,
+        dataIndex: "downclock_discount_hosting_fee_ratio",
+        key: "downclock_discount_hosting_fee_ratio",
+        onHeaderCell: () => ({ className: "fee-ratio-header" }),
+        onCell: (record: any) => {
+          const val = record?.downclock_discount_hosting_fee_ratio;
+          const num = typeof val === "number" ? val : parseFloat(val);
+          if (!Number.isFinite(num)) return { className: "" };
+          if (num >= 100) return { className: "fee-ratio-loss" };
+          if (num >= 90) return { className: "fee-ratio-high" };
+          if (num < 80) return { className: "fee-ratio-profit" };
+          return { className: "fee-ratio-low" };
+        },
+        render: (text: any) => (Number.isFinite(text) && text !== 0 ? `${text.toFixed(2)}%` : `--`),
+      },
+      {
+        title: <span className="fee-ratio-title">降频后成本比</span>,
+        width: 140,
+        dataIndex: "downclock_discount_cost_ratio",
+        key: "downclock_discount_cost_ratio",
+        onHeaderCell: () => ({ className: "fee-ratio-header" }),
+        onCell: (record: any) => {
+          const val = record?.downclock_discount_hosting_fee_ratio;
+          const num = typeof val === "number" ? val : parseFloat(val);
+          if (!Number.isFinite(num)) return { className: "" };
+          if (num >= 100) return { className: "fee-ratio-loss" };
+          if (num >= 90) return { className: "fee-ratio-high" };
+          if (num < 80) return { className: "fee-ratio-profit" };
+          return { className: "fee-ratio-low" };
+        },
+        render: (text: any) => (Number.isFinite(text) && text !== 0 ? `${text.toFixed(2)}%` : `--`),
+      },
+      {
+        title: <span className="fee-ratio-title">降频后折扣</span>,
+        width: 120,
+        dataIndex: "downclock_discount",
+        key: "downclock_discount",
+        // render: (text: any) => (text === "MONTHLY" ? "月" : "日"),
+      },
+      {
+        title: <span className="fee-ratio-title">降频价格区间</span>,
+        width: 120,
+        dataIndex: "downclock_price_ranges",
+        key: "downclock_price_ranges",
+        render: (text: any) => {
+          if (!Array.isArray(text) || text.length === 0) return `--`;
+          const formatted = text
+            .map((pair: any) => {
+              if (!Array.isArray(pair) || pair.length < 2) return null;
+              const a = Math.round(Number(pair[0]));
+              const b = Math.round(Number(pair[1]));
+              return `[${a},${b}]`;
+            })
+            .filter(Boolean)
+            .join(" ,");
+          return formatted || `--`;
+        },
+      },
+      {
+        title: <span className="fee-ratio-title">降频前利润</span>,
+        width: 120,
+        dataIndex: "downclock_before_profit",
+        key: "downclock_before_profit",
+        render: (text: any) => (Number.isFinite(text) && text !== 0 ? `${text.toFixed(2)}` : `--`),
+      },
+      {
+        title: <span className="fee-ratio-title">降频后利润</span>,
+        width: 120,
+        dataIndex: "downclock_after_profit",
+        key: "downclock_after_profit",
+        render: (text: any) => (Number.isFinite(text) && text !== 0 ? `${text.toFixed(2)}` : `--`),
       },
       {
         title: <span className="fee-ratio-title">周期类型</span>,
