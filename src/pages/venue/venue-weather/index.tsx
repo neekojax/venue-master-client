@@ -11,6 +11,7 @@ import { useSelector, useSettingsStore } from "@/stores";
 const App: React.FC = () => {
   const { poolType } = useSettingsStore(useSelector(["poolType"]));
   const [selectedVenue, setSelectedVenue] = useState<number>(0);
+  const [refresh, setRefresh] = useState<number>(0);
   const [allVenueOptions, setAllVenueOptions] = useState<
     Array<{ id: number; name: string; collection: number }>
   >([]);
@@ -23,6 +24,7 @@ const App: React.FC = () => {
   const [forecasts, setForecasts] = useState<VenueWeatherAlert[]>([]);
   const [systemAlerts, setSystemAlerts] = useState<WeatherAlert[]>([]);
   const [systemAllAlerts, setSystemAllAlerts] = useState<WeatherAlert[]>([]);
+  const [alertsKey, setAlertsKey] = useState<number>(0);
   const [showCollectionOnly, setShowCollectionOnly] = useState(() => {
     // 初始化时从 localStorage 取值
     return localStorage.getItem("showCollectionOnly") === "true";
@@ -42,13 +44,15 @@ const App: React.FC = () => {
   const handleFilterChange = (key: "siteName", value: string) => {
     setFilters((prev) => ({ ...prev, [key]: value }));
   };
+  useEffect(() => {
+    setSelectedVenue(venueOptions.length ? venueOptions[0].id : 0);
+  }, [venueOptions]);
 
   useEffect(() => {
     if (!selectedVenue) return;
-    if (systemAllAlerts && systemAllAlerts.length > 0) {
+    if (systemAllAlerts && systemAllAlerts.length > 0 && refresh == 0) {
       if (showCollectionOnly) {
         setSystemAlerts(systemAllAlerts.filter((a) => a.collection > 0));
-        // setVenueOptions(allVenueOptions.filter((v) => v.collection > 0));
       } else {
         setSystemAlerts(systemAllAlerts);
       }
@@ -85,11 +89,18 @@ const App: React.FC = () => {
         } else {
           setSystemAlerts(alerts);
         }
+        setRefresh(0);
       } catch {
         setSystemAlerts([]);
       }
     })();
-  }, [selectedVenue, showCollectionOnly]);
+  }, [selectedVenue, showCollectionOnly, refresh]);
+
+  useEffect(() => {
+    if (systemAlerts.length === 0) {
+      setAlertsKey((k) => k + 1);
+    }
+  }, [systemAlerts]);
 
   useEffect(() => {
     setSelectedSites(selectedVenue ? [selectedVenue] : []);
@@ -119,7 +130,8 @@ const App: React.FC = () => {
         } else {
           setVenueOptions(opts);
         }
-        setSelectedVenue((prev) => (prev ? prev : opts.length ? opts[0].id : prev));
+        // setSelectedVenue((prev) => (prev ? prev : opts.length ? opts[0].id : prev));
+        setSelectedVenue(opts.length ? opts[0].id : 0);
       } catch {
         setVenueOptions([]);
       }
@@ -162,9 +174,10 @@ const App: React.FC = () => {
         setLoading(false);
       } catch (_e) {
         setLoading(false);
+        setRefresh(0);
       }
     })();
-  }, [selectedVenue]);
+  }, [selectedVenue, refresh]);
 
   return (
     <div className="p-8 mx-auto w-full space-y-8">
@@ -260,6 +273,7 @@ const App: React.FC = () => {
         <button
           onClick={() => {
             setLoading(true);
+            setRefresh(1);
             setTimeout(() => setLoading(false), 500);
           }}
           className="px-6 py-2.5 bg-blue-600 hover:bg-blue-700 text-white text-sm font-bold rounded-lg transition-all flex items-center shadow-lg shadow-blue-500/20 active:scale-95"
@@ -304,6 +318,7 @@ const App: React.FC = () => {
 
         <div className="xl:col-span-1 space-y-8">
           <WeatherAlertList
+            key={alertsKey}
             alerts={systemAlerts}
             onSelectSites={(ids) => setSelectedSites(ids)}
             onSelectVenue={(id) => setSelectedVenue(id)}

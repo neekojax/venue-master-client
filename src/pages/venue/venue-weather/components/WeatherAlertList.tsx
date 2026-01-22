@@ -129,12 +129,12 @@ const WeatherAlertList: React.FC<Props> = ({ alerts, onSelectSites, onSelectVenu
                     </div>
                     <div className="flex items-center mr-4">
                       <i className="fas fa-location-dot mr-1.5 text-gray-400"></i>
-                      <span className="truncate max-w-[100px]">{alert.venue_name}</span>
+                      <span className="truncate max-w-[250px]">{alert.venue_name}</span>
                     </div>
-                    <div className="flex items-center">
+                    {/* <div className="flex items-center">
                       <i className="fas fa-building-columns mr-1.5 text-gray-400"></i>
                       <span className="truncate max-w-[80px]">{alert.source}</span>
-                    </div>
+                    </div> */}
                   </div>
                 </div>
               </div>
@@ -144,9 +144,9 @@ const WeatherAlertList: React.FC<Props> = ({ alerts, onSelectSites, onSelectVenu
       </div>
 
       <div className="px-4 py-2 border-t bg-gray-50 flex justify-center flex-shrink-0">
-        <button className="text-[10px] font-bold text-blue-600 hover:text-blue-800 flex items-center transition-colors">
+        {/* <button className="text-[10px] font-bold text-blue-600 hover:text-blue-800 flex items-center transition-colors">
           查看全部历史记录 <i className="fas fa-arrow-right ml-1"></i>
-        </button>
+        </button> */}
       </div>
 
       <style>{`
