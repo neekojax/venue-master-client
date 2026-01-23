@@ -55,14 +55,14 @@ const WeatherHero: React.FC<Props> = ({ data }) => {
             <div>
               <p className="text-blue-200 text-[10px] font-bold uppercase mb-1">平均风速</p>
               <p className="text-xl font-semibold">
-                {data.wind_speed} <span className="text-xs opacity-70">km/h</span>
+                {data.wind_speed.toFixed(2)} <span className="text-xs opacity-70">km/h</span>
               </p>
               <p className="text-[10px] opacity-60 uppercase">{data.wind_direction}</p>
             </div>
             <div>
               <p className="text-blue-200 text-[10px] font-bold uppercase mb-1">阵风风速</p>
               <p className="text-xl font-semibold">
-                {data.wind_gust_speed} <span className="text-xs opacity-70">km/h</span>
+                {data.wind_gust_speed.toFixed(2)} <span className="text-xs opacity-70">km/h</span>
               </p>
             </div>
             <div>

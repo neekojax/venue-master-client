@@ -25,10 +25,104 @@ const App: React.FC = () => {
   const [systemAlerts, setSystemAlerts] = useState<WeatherAlert[]>([]);
   const [systemAllAlerts, setSystemAllAlerts] = useState<WeatherAlert[]>([]);
   const [alertsKey, setAlertsKey] = useState<number>(0);
+  const alertTypesIndexRef = React.useRef<
+    Record<string, Array<{ id: number; name: string; collection: number }>>
+  >({});
   const [showCollectionOnly, setShowCollectionOnly] = useState(() => {
     // 初始化时从 localStorage 取值
     return localStorage.getItem("showCollectionOnly") === "true";
   });
+
+  const refreshAll = async () => {
+    setLoading(true);
+    try {
+      const [venueResp, monitorResp, detailResp] = await Promise.all([
+        fetchVenueList(poolType),
+        selectedVenue ? fetchWeatherMonitoring(selectedVenue) : Promise.resolve(null),
+        selectedVenue ? fetchWeatherMonitoringDetail(selectedVenue) : Promise.resolve(null),
+      ]);
+      const venueList = venueResp?.data?.data || venueResp?.data || [];
+      const opts = (Array.isArray(venueList) ? venueList : [])
+        .filter((v: any) => Number(v?.is_valid ?? 1) === 1)
+        .map((v: any) => ({
+          id: Number(v?.id ?? v?.venue_id ?? 0),
+          name: String(v?.venue_name ?? v?.name ?? v?.venue_code ?? ""),
+          collection: Number(v?.collection ?? 0),
+        }));
+      setAllVenueOptions(opts);
+      const finalOpts = showCollectionOnly ? opts.filter((v) => v.collection > 0) : opts;
+      setVenueOptions(finalOpts);
+      if (!selectedVenue) {
+        setSelectedVenue(finalOpts.length ? finalOpts[0].id : 0);
+      }
+      if (monitorResp) {
+        const d: any = monitorResp?.data?.data || monitorResp?.data || {};
+        const realtime_weather: any = d?.realtime_weather || {};
+        const forecast_5days: any = d?.forecast_5days || {};
+        const current: VenueWeather = {
+          icon_id: Number(realtime_weather?.icon_id ?? d?.icon_id ?? 0),
+          venue_name: String(realtime_weather?.venue_name ?? d?.venue_name ?? ""),
+          date: String(realtime_weather?.last_updated ?? realtime_weather?.last_updated ?? ""),
+          weather_condition: String(realtime_weather?.weather_condition ?? realtime_weather?.condition ?? ""),
+          data_source: String(realtime_weather?.data_source ?? realtime_weather?.source ?? ""),
+          temperature: Number(realtime_weather?.temperature ?? d?.temp ?? 0),
+          humidity: Number(realtime_weather?.humidity ?? d?.rh ?? 0),
+          wind_speed: Number(realtime_weather?.wind_speed ?? d?.wind_speed ?? d?.wind?.speed ?? 0),
+          wind_gust_speed: Number(
+            realtime_weather?.wind_gust_speed ?? d?.wind_gust_speed ?? d?.wind?.gust ?? 0,
+          ),
+          wind_direction: String(realtime_weather?.wind_direction ?? d?.wind?.direction_text ?? ""),
+          precipitation: Number(realtime_weather?.precipitation ?? d?.rain ?? 0),
+          timezone: String(realtime_weather?.timezone ?? d?.timezone ?? ""),
+        };
+        const forecastDays: ForecastDay[] = forecast_5days.daytime;
+        const forecastNight: ForecastDay[] = forecast_5days.night;
+        setRealtimeWeather(current);
+        setForecastsDay(forecastDays);
+        setForecastsNight(forecastNight);
+        setForecasts(d?.forecast_alerts?.records || []);
+        setGeographicLocation(d?.geographic_location || ({} as GeographicLocation));
+      }
+      if (detailResp) {
+        const raw = detailResp?.data?.data || detailResp?.data || [];
+        const list = Array.isArray(raw) ? raw : Array.isArray(raw?.records) ? raw.records : [];
+        const alerts: WeatherAlert[] = list.map((a: any, i: number) => ({
+          id: Number(a?.id ?? i),
+          venue_id: Number(a?.venue_id ?? selectedVenue),
+          type: String(a?.type ?? a?.alert_type ?? a?.title ?? ""),
+          affected_area: String(a?.affected_area ?? a?.area ?? a?.region ?? ""),
+          start_time: String(a?.start_time ?? a?.start ?? a?.begin_time ?? ""),
+          end_time: String(a?.end_time ?? a?.end ?? a?.finish_time ?? ""),
+          description: String(a?.description ?? a?.desc ?? a?.content ?? ""),
+          summary: String(a?.summary ?? a?.title ?? ""),
+          source: String(a?.source ?? a?.origin ?? ""),
+          url: String(a?.url ?? a?.link ?? ""),
+          created_at: String(a?.created_at ?? ""),
+          updated_at: String(a?.updated_at ?? ""),
+          alert_id: String(a?.alert_id ?? ""),
+          timezone: String(a?.timezone ?? ""),
+          is_notified: Number(a?.is_notified ?? 0),
+          notified_at: a?.notified_at ?? null,
+          venue_name: String(a?.venue_name ?? ""),
+          collection: Number(a?.collection ?? 0),
+        }));
+        setSystemAllAlerts(alerts);
+        setSystemAlerts(showCollectionOnly ? alerts.filter((a) => a.collection > 0) : alerts);
+        const typeMap: Record<string, Array<{ id: number; name: string; collection: number }>> = {};
+        alerts.forEach((a) => {
+          const k = a.type || "";
+          const item = { id: a.venue_id, name: a.venue_name, collection: a.collection };
+          (typeMap[k] ??= []).push(item);
+        });
+        alertTypesIndexRef.current = typeMap;
+      }
+      setRefresh(0);
+    } catch {
+      setSystemAlerts([]);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   // useEffect(() => {
   //   // 每次 showCollectionOnly 变化时，同步更新 localStorage
@@ -40,6 +134,7 @@ const App: React.FC = () => {
   const [showSiteFilter, setShowSiteFilter] = useState(false);
   const [filters, setFilters] = useState<{ siteName: string }>({ siteName: "" });
   const [selectedSites, setSelectedSites] = useState<number[]>([]);
+  const [alertTypeFilter, setAlertTypeFilter] = useState<string | null>(null);
   const selectedVenueName = venueOptions.find((v) => v.id === selectedVenue)?.name || "选择场地";
   const handleFilterChange = (key: "siteName", value: string) => {
     setFilters((prev) => ({ ...prev, [key]: value }));
@@ -89,6 +184,13 @@ const App: React.FC = () => {
         } else {
           setSystemAlerts(alerts);
         }
+        const typeMap: Record<string, Array<{ id: number; name: string; collection: number }>> = {};
+        alerts.forEach((a) => {
+          const k = a.type || "";
+          const item = { id: a.venue_id, name: a.venue_name, collection: a.collection };
+          (typeMap[k] ??= []).push(item);
+        });
+        alertTypesIndexRef.current = typeMap;
         setRefresh(0);
       } catch {
         setSystemAlerts([]);
@@ -107,6 +209,22 @@ const App: React.FC = () => {
   }, [selectedVenue, showSiteFilter]);
 
   useEffect(() => {
+    // 当选择了告警类型筛选时，用该类型下的场地替代列表
+    if (alertTypeFilter) {
+      const items = alertTypesIndexRef.current[alertTypeFilter] || [];
+      let opts = items.map((it) => ({
+        id: Number(it.id),
+        name: String(it.name),
+        collection: Number(it.collection ?? 0),
+      }));
+      if (showCollectionOnly) {
+        opts = opts.filter((v) => v.collection > 0);
+      }
+      setVenueOptions(opts);
+      setSelectedVenue(opts.length ? opts[0].id : 0);
+      return;
+    }
+    // 默认逻辑：使用完整场地列表
     if (allVenueOptions && allVenueOptions.length > 0) {
       if (showCollectionOnly) {
         setVenueOptions(allVenueOptions.filter((v) => v.collection > 0));
@@ -119,24 +237,25 @@ const App: React.FC = () => {
       try {
         const resp = await fetchVenueList(poolType);
         const list = resp?.data?.data || resp?.data || [];
-        const opts = (Array.isArray(list) ? list : []).map((v: any) => ({
-          id: Number(v?.id ?? v?.venue_id ?? 0),
-          name: String(v?.venue_name ?? v?.name ?? v?.venue_code ?? ""),
-          collection: Number(v?.collection ?? 0),
-        }));
+        const opts = (Array.isArray(list) ? list : [])
+          .filter((v: any) => Number(v?.is_valid ?? 1) === 1)
+          .map((v: any) => ({
+            id: Number(v?.id ?? v?.venue_id ?? 0),
+            name: String(v?.venue_name ?? v?.name ?? v?.venue_code ?? ""),
+            collection: Number(v?.collection ?? 0),
+          }));
         setAllVenueOptions(opts);
         if (showCollectionOnly) {
           setVenueOptions(opts.filter((v) => v.collection > 0));
         } else {
           setVenueOptions(opts);
         }
-        // setSelectedVenue((prev) => (prev ? prev : opts.length ? opts[0].id : prev));
         setSelectedVenue(opts.length ? opts[0].id : 0);
       } catch {
         setVenueOptions([]);
       }
     })();
-  }, [poolType, showCollectionOnly]);
+  }, [poolType, showCollectionOnly, alertTypeFilter]);
 
   useEffect(() => {
     if (!selectedVenue) return;
@@ -269,18 +388,63 @@ const App: React.FC = () => {
             )}
           </div>
         </div>
+        <div className="flex items-center justify-between">
+          <div
+            className="rounded text-[11px] bg-red-50 border border-red-200 shadow-sm border border-gray-100 overflow-hidden"
+            style={{ marginRight: "20px" }}
+          >
+            {/* <div className="p-4 border-b bg-gray-50/50 flex items-center justify-between">
+              <h4 className="font-bold text-gray-800 text-sm tracking-tight uppercase">告警类型筛选</h4>
+            </div> */}
+            <div className="p-2 flex flex-wrap gap-2">
+              <button
+                type="button"
+                className="text-xs px-2 py-1 rounded border border-gray-300 hover:bg-gray-100"
+                onClick={() => setAlertTypeFilter(null)}
+              >
+                全部场地
+              </button>
+              {Object.keys(alertTypesIndexRef.current || {}).map((k) => {
+                const isActive = alertTypeFilter === k;
+                const style = isActive
+                  ? "bg-red-600 text-white border-red-600"
+                  : "bg-white text-gray-700 border-gray-300 hover:bg-gray-50";
+                return (
+                  <button
+                    key={k}
+                    type="button"
+                    className={`${style} px-3 py-1.5 text-xs rounded border`}
+                    onClick={() => {
+                      setAlertTypeFilter(k);
+                      const items = alertTypesIndexRef.current[k] || [];
+                      let opts = items.map((it) => ({
+                        id: Number(it.id),
+                        name: String(it.name),
+                        collection: Number(it.collection ?? 0),
+                      }));
+                      if (showCollectionOnly) {
+                        opts = opts.filter((v) => v.collection > 0);
+                      }
+                      console.log(opts);
+                      setVenueOptions(opts);
+                      setSelectedVenue(opts.length ? opts[0].id : 0);
+                    }}
+                  >
+                    {k}预警({alertTypesIndexRef.current?.[k]?.length || 0})
+                  </button>
+                );
+              })}
+            </div>
+          </div>
 
-        <button
-          onClick={() => {
-            setLoading(true);
-            setRefresh(1);
-            setTimeout(() => setLoading(false), 500);
-          }}
-          className="px-6 py-2.5 bg-blue-600 hover:bg-blue-700 text-white text-sm font-bold rounded-lg transition-all flex items-center shadow-lg shadow-blue-500/20 active:scale-95"
-        >
-          <i className={`fas fa-arrows-rotate mr-2 ${loading ? "fa-spin" : ""}`}></i>
-          刷新数据
-        </button>
+          <button
+            onClick={refreshAll}
+            className="px-6 py-2.5 bg-blue-600 hover:bg-blue-700 text-white text-sm font-bold rounded-lg transition-all flex items-center shadow-lg shadow-blue-500/20 active:scale-95"
+          >
+            <i className={`fas fa-arrows-rotate mr-2 ${loading ? "fa-spin" : ""}`}></i>
+            刷新数据
+          </button>
+        </div>
       </div>
 
       <div className="grid grid-cols-1 xl:grid-cols-4 gap-8">
