@@ -112,7 +112,10 @@ const App: React.FC = () => {
         alerts.forEach((a) => {
           const k = a.type || "";
           const item = { id: a.venue_id, name: a.venue_name, collection: a.collection };
-          (typeMap[k] ??= []).push(item);
+          const arr = (typeMap[k] ??= []);
+          if (!arr.some((it) => it.id === item.id)) {
+            arr.push(item);
+          }
         });
         alertTypesIndexRef.current = typeMap;
       }
@@ -425,7 +428,7 @@ const App: React.FC = () => {
                       if (showCollectionOnly) {
                         opts = opts.filter((v) => v.collection > 0);
                       }
-                      console.log(opts);
+                      // console.log(opts);
                       setVenueOptions(opts);
                       setSelectedVenue(opts.length ? opts[0].id : 0);
                     }}

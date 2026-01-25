@@ -66,6 +66,9 @@ const ForecastSection: React.FC<Props> = ({ basicData, forecastDays, forecastNig
             // const weatherDesc = isNight && day.weather === "晴" ? "" : day.weather;
             const dateParts = day.date.split("-");
             const displayDate = `${dateParts[1]} / ${dateParts[2]}`;
+            const weekday = ["周日", "周一", "周二", "周三", "周四", "周五", "周六"][
+              new Date(day.date).getDay()
+            ];
 
             return (
               <div
@@ -73,7 +76,9 @@ const ForecastSection: React.FC<Props> = ({ basicData, forecastDays, forecastNig
                 className={`relative rounded-2xl border bg-white border-gray-100 shadow-sm transition-all duration-300 group flex flex-col cursor-default hover:shadow-md`}
               >
                 <div className="px-4 pt-4 flex justify-between items-start">
-                  <span className="text-[11px] font-bold text-gray-400">{displayDate}</span>
+                  <span className="text-[11px] font-bold text-gray-400">
+                    {displayDate} · {weekday}
+                  </span>
                   <i
                     className={`fas ${isNight ? "fa-moon text-indigo-300" : "fa-sun text-orange-200"} text-[10px]`}
                   ></i>
@@ -140,6 +145,9 @@ const ForecastSection: React.FC<Props> = ({ basicData, forecastDays, forecastNig
             const weatherDesc = isNight && day.weather === "晴" ? "月朗星稀" : day.weather;
             const dateParts = day.date.split("-");
             const displayDate = `${dateParts[1]} / ${dateParts[2]}`;
+            const weekday = ["周日", "周一", "周二", "周三", "周四", "周五", "周六"][
+              new Date(day.date).getDay()
+            ];
 
             return (
               <div
@@ -148,7 +156,9 @@ const ForecastSection: React.FC<Props> = ({ basicData, forecastDays, forecastNig
               >
                 {/* Card Header: Date & Small Icon */}
                 <div className="px-4 pt-4 flex justify-between items-start">
-                  <span className="text-[11px] font-bold text-gray-400">{displayDate}</span>
+                  <span className="text-[11px] font-bold text-gray-400">
+                    {displayDate} · {weekday}
+                  </span>
                   <i
                     className={`fas ${isNight ? "fa-moon text-indigo-300" : "fa-sun text-orange-200"} text-[10px]`}
                   ></i>

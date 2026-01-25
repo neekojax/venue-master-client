@@ -11,6 +11,14 @@ const ForecastAlerts: React.FC<Props> = ({ forecasts }) => {
   // const alertDays = forecasts.filter((f) => f.alert_text);
 
   if (forecasts.length === 0) return null;
+  const formatTime = (timeStr: string) => {
+    // 2026-01-16 06:00:00 -> 01/16 06:00
+    if (!timeStr) return "";
+    const parts = timeStr.split(" ");
+    const dateParts = parts[0].split("-");
+    const timeParts = parts[1].split(":");
+    return `${dateParts[1]}/${dateParts[2]} ${timeParts[0]}:${timeParts[1]}`;
+  };
 
   return (
     <div className="mt-8 space-y-4">
@@ -53,7 +61,8 @@ const ForecastAlerts: React.FC<Props> = ({ forecasts }) => {
                 </div>
                 <p className="text-xs font-bold text-gray-800">{day.start_time.split(" ")[0]}</p>
                 <p className="text-[10px] text-gray-400 font-mono mt-0.5">
-                  {day.start_time.split(" ")[1]} - {day.end_time.split(" ")[1]}
+                  {formatTime(day.start_time)} - {formatTime(day.end_time)}
+                  {/* {day.start_time.split(" ")[1]} - {day.end_time.split(" ")[1]} */}
                 </p>
               </div>
 
