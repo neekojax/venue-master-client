@@ -6,6 +6,7 @@ import {
   LogOut,
   ShieldCheck,
   Thermometer,
+  TrendingDown,
   TrendingUp,
   ZapOff,
 } from "lucide-react";
@@ -64,16 +65,29 @@ const StatCard: React.FC<{ statistics: any | null }> = ({ statistics }) => {
               <span className="text-3xl text-slate-400 ml-1 absolute top-2">%</span>
             </span>
           </div>
-          <div className="mt-4 flex items-center gap-2 bg-emerald-50 border border-emerald-100 text-emerald-700 px-3 py-1.5 rounded-full text-sm font-bold shadow-sm">
-            <TrendingUp className="w-3.5 h-3.5" />
-            {`${(statistics?.WeeklyHashEffectiveRateChange ?? 0) > 0 ? "+" : ""}${formatPercent(
-              Math.abs(statistics?.WeeklyHashEffectiveRateChange ?? 0),
-              1,
-            )} 较上周`}
-          </div>
-          <p className="mt-4 text-xs text-slate-400 max-w-[200px] leading-relaxed">
-            整体运行平稳，较上周效率提升显著，故障率控制在预期范围内。
-          </p>
+          {(() => {
+            const change = Number(statistics?.WeeklyHashEffectiveRateChange ?? 0);
+            const isUp = change > 0;
+            const cls = isUp
+              ? "bg-emerald-50 border border-emerald-100 text-emerald-700"
+              : "bg-rose-50 border border-rose-100 text-rose-700";
+            const val = `${isUp ? "+" : "-"}${formatPercent(Math.abs(change), 1)}`;
+            return (
+              <>
+                <div
+                  className={`mt-4 flex items-center gap-2 ${cls} px-3 py-1.5 rounded-full text-sm font-bold shadow-sm`}
+                >
+                  {isUp ? <TrendingUp className="w-3.5 h-3.5" /> : <TrendingDown className="w-3.5 h-3.5" />}
+                  {isUp ? `${val} 较上周` : `${val} 较上周下降`}
+                </div>
+                <p className="mt-4 text-xs text-slate-400 max-w-[200px] leading-relaxed">
+                  {isUp
+                    ? "整体运行平稳，较上周效率提升显著，故障率控制在预期范围内。"
+                    : "本周效率较上周下降，需关注故障与环境因素并优化运行。"}
+                </p>
+              </>
+            );
+          })()}
         </div>
         <div className="hidden lg:block w-px bg-slate-100 my-2"></div>
         <div className="flex-[2.5] grid grid-cols-2 md:grid-cols-3 gap-y-10 gap-x-8 xl:gap-x-12 content-center">
