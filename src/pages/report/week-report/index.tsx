@@ -118,7 +118,7 @@ const App: React.FC = () => {
   useEffect(() => {
     if (filterMode !== "rolling") return;
     const end = dayjs(selectedDate);
-    const start = end.subtract(7, "day");
+    const start = end.subtract(6, "day");
     setStartDate(start.format("YYYY-MM-DD"));
     setEndDate(end.format("YYYY-MM-DD"));
   }, [filterMode, selectedDate]);
@@ -188,7 +188,7 @@ const App: React.FC = () => {
     setLoading(true);
     try {
       const reportData = await fetchWeeklyReport(poolType, startDate, endDate);
-      console.log(reportData);
+      // console.log(reportData);
       if (reportData && reportData.data) {
         setStatistics(reportData.data.summary);
         setHashEffectiveRate(reportData.data.hash_effective_rate);
