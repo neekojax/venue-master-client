@@ -147,9 +147,9 @@ export const fetchWeatherMonitoring = async (venueID: number) => {
 };
 
 // GET /weather/alert-center?venueId=123
-export const fetchWeatherMonitoringDetail = async (venueID: number) => {
+export const fetchWeatherMonitoringDetail = async (poolType: string) => {
   // return await fetchGet(`/weather/alert-center?venueId=${venueID}`);
-  return await fetchGet(`/weather/all-alerts?venueId=${venueID}`);
+  return await fetchGet(`/weather/all-alerts?venueType=${poolType}`);
 };
 
 // /weather/all-alerts?venueId=123

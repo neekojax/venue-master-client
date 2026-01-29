@@ -39,7 +39,7 @@ const App: React.FC = () => {
       const [venueResp, monitorResp, detailResp] = await Promise.all([
         fetchVenueList(poolType),
         selectedVenue ? fetchWeatherMonitoring(selectedVenue) : Promise.resolve(null),
-        selectedVenue ? fetchWeatherMonitoringDetail(selectedVenue) : Promise.resolve(null),
+        selectedVenue ? fetchWeatherMonitoringDetail(poolType) : Promise.resolve(null),
       ]);
       const venueList = venueResp?.data?.data || venueResp?.data || [];
       const opts = (Array.isArray(venueList) ? venueList : [])
@@ -158,7 +158,7 @@ const App: React.FC = () => {
     }
     (async () => {
       try {
-        const resp = await fetchWeatherMonitoringDetail(selectedVenue);
+        const resp = await fetchWeatherMonitoringDetail(poolType);
         const raw = resp?.data?.data || resp?.data || [];
         const list = Array.isArray(raw) ? raw : Array.isArray(raw?.records) ? raw.records : [];
         const alerts: WeatherAlert[] = list.map((a: any, i: number) => ({
