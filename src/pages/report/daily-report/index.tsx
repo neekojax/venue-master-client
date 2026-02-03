@@ -3,6 +3,7 @@ import React, { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import { DownloadOutlined } from "@ant-design/icons";
 import { InfoCircleOutlined } from "@ant-design/icons";
+import { ReloadOutlined } from "@ant-design/icons";
 import { Button, DatePicker, Select, Switch, Table, Tag, Tooltip } from "antd";
 import type { ColumnsType } from "antd/es/table";
 import { AlertTriangle, BarChart3, Database, ShieldCheck, TrendingUp } from "lucide-react";
@@ -176,6 +177,8 @@ const App: React.FC = () => {
   const formattedDate = yesterday.toISOString().split("T")[0]; // 格式化为 'YYYY-MM-DD'
 
   const [selectedDate, setSelectedDate] = useState<string | string[]>(formattedDate);
+  const [reloadTick, setReloadTick] = useState(0);
+  const [loading, setLoading] = useState(false);
   const [selectedSites, setSelectedSites] = useState<string[]>([]);
   const handleSitesChange = (value: string[]) => {
     setSelectedSites(value);
@@ -617,6 +620,7 @@ const App: React.FC = () => {
     const fetchReportData = async () => {
       const dateToFetch = Array.isArray(selectedDate) ? selectedDate[0] : selectedDate; // formattedDate 是昨天的日期
       try {
+        setLoading(true);
         const reportData = await fetchDailyReport(poolType, dateToFetch);
 
         // 检查 reportData 中的 data 属性是否有效
@@ -689,6 +693,7 @@ const App: React.FC = () => {
             totalPowerImpact: summary.totalPowerImpact || 0,
             totalTheoreticalPower: summary.totalTheoreticalPower || 0,
             totalCloudPower24h: summary.totalCloudPower24h || 0,
+            totalLeasedPower24h: summary.totalLeasedPower24h || 0,
             cloudPowerRatio: summary.cloudPowerRatio || 0,
             totalLimitImpactPower: summary.totalLimitImpactPower || 0,
             totalLowPowerImpactPower: summary.totalLowPowerImpactPower || 0,
@@ -699,11 +704,13 @@ const App: React.FC = () => {
         }
       } catch (error) {
         console.error("获取日报数据失败:", error);
+      } finally {
+        setLoading(false);
       }
     };
 
     fetchReportData();
-  }, [selectedDate, poolType]);
+  }, [selectedDate, poolType, reloadTick]);
 
   // useEffect(() => {
   //   // 筛选数据
@@ -857,13 +864,23 @@ const App: React.FC = () => {
               运营日报
               <span className="text-sm text-gray-500 ml-2"> ({selectedDate || formattedDate})</span>
             </h1>
-            <DatePicker
-              className="w-40"
-              placeholder="选择日期"
-              onChange={(_: any, dateString: string | string[]) => {
-                setSelectedDate(dateString);
-              }}
-            />
+            <div className="flex items-center gap-2">
+              <DatePicker
+                className="w-40"
+                placeholder="选择日期"
+                onChange={(_: any, dateString: string | string[]) => {
+                  setSelectedDate(dateString);
+                }}
+              />
+              <button
+                type="button"
+                title="刷新数据"
+                onClick={() => setReloadTick((n) => n + 1)}
+                className="px-2 py-1 rounded border border-gray-300 hover:bg-gray-100 text-gray-700"
+              >
+                <ReloadOutlined />
+              </button>
+            </div>
           </div>
           <div className="mt-6 flex flex-row gap-5 overflow-x-auto">
             <div className="flex-1 basis-0 bg-white border border-slate-200 rounded-2xl p-5 flex items-center gap-4 hover:border-slate-300 hover:shadow-sm transition-all h-28">
@@ -879,27 +896,39 @@ const App: React.FC = () => {
                     {(statistics.averageEfficiency || 0).toFixed(2)}%
                   </span>
                 </div>
-                <div className="text-[10px] text-slate-400 font-bold truncate mt-2 uppercase tracking-tighter">
-                  包含云算力 {(statistics.totalCloudPower24h || 0).toFixed(2)}E
+                {statistics.totalCloudPower24h != 0 && (
+                  <div className="text-[10px] text-slate-400 font-bold truncate mt-2 uppercase tracking-tighter">
+                    包含云算力 {(statistics.totalCloudPower24h || 0).toFixed(2)}E
+                  </div>
+                )}
+                <div className="text-[10px] text-slate-400 font-bold uppercase tracking-tighter flex items-center justify-between gap-2">
+                  <span className="truncate">
+                    {statistics.totalCloudPower24h != 0 && "剔除"}租赁算力{" "}
+                    {(statistics.totalLeasedPower24h || 0).toFixed(2)}E
+                  </span>
                 </div>
               </div>
             </div>
-            <div className="flex-1 basis-0 bg-white border border-slate-200 rounded-2xl p-5 flex items-center gap-4 hover:border-slate-300 hover:shadow-sm transition-all h-28">
-              <div className="p-3 bg-slate-50 rounded-xl shrink-0 shadow-inner">
-                <BarChart3 className="text-blue-500 w-5 h-5" />
-              </div>
-              <div className="flex-1 min-w-0">
-                <div className="text-[10px] font-black text-slate-400 uppercase tracking-tighter truncate">
-                  总理论算力
+            <div className="flex-1 basis-0 bg-white border border-slate-200 rounded-2xl p-5 flex flex-col justify-between hover:border-slate-300 hover:shadow-sm transition-all h-28">
+              <div className="flex items-center gap-4">
+                <div className="p-3 bg-slate-50 rounded-xl shrink-0 shadow-inner">
+                  <BarChart3 className="text-blue-500 w-5 h-5" />
                 </div>
-                <div className="flex items-baseline gap-0.5 leading-none mt-1.5">
-                  <span className="text-2xl font-black text-slate-800 tracking-tighter">
-                    {(statistics.totalTheoreticalPower || 0).toFixed(2)}
-                  </span>
-                  <span className="text-[11px] font-bold text-slate-400 ml-1.5 uppercase">E</span>
-                </div>
-                <div className="text-[10px] text-slate-400 font-bold truncate mt-2 uppercase tracking-tighter">
-                  24H总算力 {(statistics.totalPower24h || 0).toFixed(2)}E
+                <div className="flex-1 min-w-0">
+                  <div className="text-[10px] font-black text-slate-400 uppercase tracking-tighter truncate">
+                    总理论算力
+                  </div>
+                  <div className="flex items-baseline gap-0.5 leading-none mt-1.5">
+                    <span className="text-2xl font-black text-slate-800 tracking-tighter">
+                      {(statistics.totalTheoreticalPower || 0).toFixed(2)}
+                    </span>
+                    <span className="text-[11px] font-bold text-slate-400 ml-1.5 uppercase">E</span>
+                  </div>
+
+                  <div className="text-[10px] text-slate-400 font-bold uppercase tracking-tighter flex items-center justify-between gap-2">
+                    <span className="truncate">24H总算力 {(statistics.totalPower24h || 0).toFixed(2)}E</span>
+                    {/* <span className="truncate">租赁算力 {(statistics.totalLeasedPower24h || 0).toFixed(2)}E</span> */}
+                  </div>
                 </div>
               </div>
             </div>
@@ -1084,6 +1113,7 @@ const App: React.FC = () => {
             columns={columnsToRender}
             dataSource={filteredData}
             scroll={{ x: 1500 }}
+            loading={loading}
             // sticky={true}
             pagination={{
               position: ["bottomCenter"],
