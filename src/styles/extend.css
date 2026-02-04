@@ -139,6 +139,15 @@
   color: #bbb;
 }
 
+/* lucide 图标在未选中与选中态的可见颜色控制 */
+.ant-menu .ant-menu-item .ant-menu-item-icon .lucide {
+  color: #bbb !important;
+}
+.ant-menu .ant-menu-item.ant-menu-item-selected .ant-menu-item-icon .lucide,
+.ant-menu-submenu-selected .ant-menu-submenu-title .ant-menu-item-icon .lucide {
+  color: #fff !important;
+}
+
 /*选中状态的菜单*/
 .ant-menu-light .ant-menu-submenu-selected > .ant-menu-submenu-title,
 .ant-menu .ant-menu-item.ant-menu-item-selected .ant-menu-item-icon svg,

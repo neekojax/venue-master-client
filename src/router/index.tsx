@@ -13,6 +13,7 @@ import { poolHashHistoryRoute } from "@/router/modules/pool-hash-history.tsx";
 import { poolProfitHistoryRoute } from "@/router/modules/pool-profit-history.tsx";
 import { profitDetailRoute } from "@/router/modules/profit-detail.tsx";
 import { reportRoute } from "@/router/modules/report.tsx";
+import { utilityRoute } from "@/router/modules/utility.tsx";
 import { venueRoute } from "@/router/modules/venue.tsx";
 
 import ErrorBoundary from "@/pages/not-found/errorElement";
@@ -50,6 +51,7 @@ const routes: RouteObject[] = [
       poolHashHistoryRoute,
       custodyMenuRoute,
       electricMenuRoute,
+      utilityRoute,
     ],
   },
   {

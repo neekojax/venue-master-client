@@ -5,6 +5,7 @@ import { SiNginxproxymanager } from "react-icons/si";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { HomeOutlined, ProductOutlined } from "@ant-design/icons"; //<RadiusSettingOutlined />
 import { Layout, Menu, type MenuProps } from "antd";
+import { Wrench } from "lucide-react";
 import { useTheme } from "@/components/theme-provider";
 import logo from "../../../public/logo_middle.png";
 import { ROUTE_PATHS } from "@/constants/common";
@@ -34,7 +35,7 @@ const findSelectedKeys = (items: MenuProps["items"], pathname: string, path: str
   return { selectedKeys, openKeys };
 };
 
-const SiderItems = (permissionIds: string, permissionRoutes: string) => {
+const SiderItems = (permissionIds: string, permissionRoutes: string, selectedKeys?: string[]) => {
   const hasPermission = (route: string) => {
     if (permissionIds == "role-super-admin") {
       return false;
@@ -184,6 +185,15 @@ const SiderItems = (permissionIds: string, permissionRoutes: string) => {
         // },
       ],
     },
+    {
+      icon: selectedKeys?.includes(ROUTE_PATHS.utility) ? (
+        <Wrench size={18} />
+      ) : (
+        <Wrench size={18} style={{ color: "#bbb" }} />
+      ),
+      key: ROUTE_PATHS.utility,
+      label: <Link to={ROUTE_PATHS.utility}>实用工具</Link>,
+    },
     // {
     //   icon: <BiLoaderCircle />,
     //   label: "电网数据",
@@ -243,7 +253,7 @@ export default function SiderBar() {
 
   const { isDarkMode } = useTheme();
 
-  const itemList: any = SiderItems(permissionIds, permissionRoutes);
+  const itemList: any = SiderItems(permissionIds, permissionRoutes, selectedKeys);
 
   useEffect(() => {
     const update = (value?: string) => {
