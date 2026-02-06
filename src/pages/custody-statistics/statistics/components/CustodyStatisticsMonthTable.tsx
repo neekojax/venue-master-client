@@ -101,6 +101,7 @@ export default function CustodyStatisticsMonthTable({
         downclock_price_ranges: item.downclock_price_ranges,
         downclock_before_profit: item.downclock_before_profit,
         downclock_after_profit: item.downclock_after_profit,
+        shutdown_price: item.shutdown_price,
       }));
       setTableData(newData);
     } else {
@@ -434,6 +435,13 @@ export default function CustodyStatisticsMonthTable({
         render: (text: any) => (Number.isFinite(text) && text !== 0 ? `${text.toFixed(2)}%` : `--`),
       },
       {
+        title: <span className="fee-ratio-title">降频后折扣</span>,
+        width: 120,
+        dataIndex: "downclock_discount",
+        key: "downclock_discount",
+        // render: (text: any) => (text === "MONTHLY" ? "月" : "日"),
+      },
+      {
         title: <span className="fee-ratio-title">降频后托管费占比</span>,
         width: 140,
         dataIndex: "downclock_discount_hosting_fee_ratio",
@@ -468,12 +476,18 @@ export default function CustodyStatisticsMonthTable({
         render: (text: any) => (Number.isFinite(text) && text !== 0 ? `${text.toFixed(2)}%` : `--`),
       },
       {
-        title: <span className="fee-ratio-title">降频后折扣</span>,
+        title: <span className="fee-ratio-title">关机币价</span>,
         width: 120,
-        dataIndex: "downclock_discount",
-        key: "downclock_discount",
-        // render: (text: any) => (text === "MONTHLY" ? "月" : "日"),
+        dataIndex: "shutdown_price",
+        key: "shutdown_price",
+        render: (text: any) => {
+          const num = typeof text === "number" ? text : parseFloat(text);
+          return Number.isFinite(num) && num !== 0
+            ? num.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+            : `--`;
+        },
       },
+
       {
         title: <span className="fee-ratio-title">降频价格区间</span>,
         width: 120,
