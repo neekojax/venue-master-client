@@ -54,7 +54,7 @@ const emptyData = {
   name: "",
   pool_type: "",
   country: "",
-  status: 0, // 状态：0 暂停，1 活跃
+  status: 0, // 状态：0 关机，1 活跃
   hosted_machine: 0,
   // pool_category: "",
   theoretical_hashrate: 0,
@@ -226,8 +226,8 @@ export default function MiningSettingPage() {
       statusText = "活跃";
       statusStyle = { color: "green" }; // 活跃状态，绿色
     } else if (status === 0) {
-      statusText = "暂停";
-      statusStyle = { color: "red" }; // 暂停状态，红色
+      statusText = "关机";
+      statusStyle = { color: "red" }; // 关机状态，红色
     } else if (status === 2) {
       statusText = "已撤场";
       statusStyle = { color: "orange" }; // 已撤场状态，红色
@@ -810,7 +810,7 @@ export default function MiningSettingPage() {
                   活跃
                 </Option>
                 <Option value={0} style={{ fontSize: "12px" }}>
-                  暂停
+                  关机
                 </Option>
                 <Option value={2} style={{ fontSize: "12px" }}>
                   已撤场
@@ -972,7 +972,7 @@ export default function MiningSettingPage() {
                 name="radiogroup"
                 defaultValue={1}
                 options={[
-                  { value: 0, label: "暂停" },
+                  { value: 0, label: "关机" },
                   { value: 1, label: "活跃" },
                   { value: 2, label: "已撤场" },
                 ]}
