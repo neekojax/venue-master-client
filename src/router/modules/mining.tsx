@@ -20,8 +20,8 @@ export const miningRoute: RouteObject = {
       }),
       HydrateFallback: ProgressBar,
       handle: {
-        title: "矿池设置",
-        crumb: () => <Link to={ROUTE_PATHS.miningSetting}>矿池设置</Link>,
+        title: "账户列表",
+        crumb: () => <Link to={ROUTE_PATHS.miningSetting}>账户列表</Link>,
       },
     },
     {

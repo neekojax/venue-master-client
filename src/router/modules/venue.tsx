@@ -115,8 +115,8 @@ export const venueRoute: RouteObject = {
       }),
       HydrateFallback: ProgressBar,
       handle: {
-        title: "场地设置",
-        crumb: () => <Link to={ROUTE_PATHS.venueSetting}>场地设置</Link>,
+        title: "场地列表",
+        crumb: () => <Link to={ROUTE_PATHS.venueSetting}>场地列表</Link>,
       },
     },
     {

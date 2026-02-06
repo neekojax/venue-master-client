@@ -69,7 +69,7 @@ const SiderItems = (permissionIds: string, permissionRoutes: string, selectedKey
         {
           key: ROUTE_PATHS.miningSetting,
           hidden: hasPermission(ROUTE_PATHS.miningSetting),
-          label: <Link to={ROUTE_PATHS.miningSetting}>矿池设置</Link>,
+          label: <Link to={ROUTE_PATHS.miningSetting}>账户列表</Link>,
         },
       ],
     },
@@ -110,7 +110,7 @@ const SiderItems = (permissionIds: string, permissionRoutes: string, selectedKey
         {
           key: ROUTE_PATHS.venueSetting,
           hidden: hasPermission(ROUTE_PATHS.venueSetting),
-          label: <Link to={ROUTE_PATHS.venueSetting}>场地设置</Link>,
+          label: <Link to={ROUTE_PATHS.venueSetting}>场地列表</Link>,
         },
       ],
     },
