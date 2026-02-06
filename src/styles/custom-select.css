@@ -65,3 +65,31 @@
 .small-select .ant-select-selector {
   font-size: 12px;
 }
+.small-select .ant-select-selection-item {
+  text-align: left;
+}
+.small-select .ant-select-selector {
+  justify-content: flex-start;
+}
+.small-select-dropdown .ant-select-item-option-content {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  text-align: left;
+  font-size: 12px;
+}
+.status-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 9999px;
+  display: inline-block;
+}
+.status-active {
+  background-color: #22c55e;
+}
+.status-offline {
+  background-color: #64748b;
+}
+.status-removed {
+  background-color: #e70606;
+}

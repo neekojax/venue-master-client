@@ -804,16 +804,20 @@ export default function MiningSettingPage() {
                 allowClear
                 value={statusFilter}
                 onChange={handleStatusFilterChange}
-                style={{ width: 120, fontSize: "12px", marginRight: "15px" }}
+                dropdownClassName="small-select-dropdown"
+                style={{ width: 120, fontSize: "12px", marginRight: "15px", textAlign: "left" }}
               >
-                <Option value={1} style={{ fontSize: "12px" }}>
-                  活跃
+                <Option value={1} style={{ fontSize: "12px", textAlign: "left" }}>
+                  <span className="status-dot status-active" />
+                  <span>活跃</span>
                 </Option>
-                <Option value={0} style={{ fontSize: "12px" }}>
-                  关机
+                <Option value={0} style={{ fontSize: "12px", textAlign: "left" }}>
+                  <span className="status-dot status-removed" />
+                  <span>关机</span>
                 </Option>
-                <Option value={2} style={{ fontSize: "12px" }}>
-                  已撤场
+                <Option value={2} style={{ fontSize: "12px", textAlign: "left" }}>
+                  <span className="status-dot status-offline " />
+                  <span>已撤场</span>
                 </Option>
               </Select>
 
