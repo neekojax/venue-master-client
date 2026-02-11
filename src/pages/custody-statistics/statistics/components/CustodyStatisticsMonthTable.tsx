@@ -478,7 +478,7 @@ export default function CustodyStatisticsMonthTable({
         //   if (num < 80) return { className: "fee-ratio-profit" };
         //   return { className: "fee-ratio-low" };
         // },
-        render: (text: any, record: any) => {
+        render: (_: any, record: any) => {
           const val = record?.discount_hosting_fee_ratio;
           const num = typeof val === "number" ? val : parseFloat(val);
           if (!Number.isFinite(num) || num === 0) return `--`;
@@ -513,7 +513,7 @@ export default function CustodyStatisticsMonthTable({
         //   if (num < 80) return { className: "fee-ratio-profit" };
         //   return { className: "fee-ratio-low" };
         // },
-        render: (text: any, record: any) => {
+        render: (_: any, record: any) => {
           const val = record?.discount_cost_ratio;
           const num = typeof val === "number" ? val : parseFloat(val);
           if (!Number.isFinite(num) || num === 0) return `--`;
@@ -570,7 +570,7 @@ export default function CustodyStatisticsMonthTable({
         //   if (num < 80) return { className: "fee-ratio-profit" };
         //   return { className: "fee-ratio-low" };
         // },
-        render: (text: any, record: any) => {
+        render: (_: any, record: any) => {
           const val = record?.downclock_discount_hosting_fee_ratio;
           const num = typeof val === "number" ? val : parseFloat(val);
           if (!Number.isFinite(num) || num === 0) return `--`;
@@ -602,7 +602,7 @@ export default function CustodyStatisticsMonthTable({
         //   if (num < 80) return { className: "fee-ratio-profit" };
         //   return { className: "fee-ratio-low" };
         // },
-        render: (text: any, record: any) => {
+        render: (_: any, record: any) => {
           const val = record?.downclock_discount_cost_ratio;
           const num = typeof val === "number" ? val : parseFloat(val);
           if (!Number.isFinite(num) || num === 0) return `--`;
