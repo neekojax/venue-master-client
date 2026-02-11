@@ -112,6 +112,70 @@ export default function CustodyStatisticsMonthTable({
 
   // 列定义（分页编号依赖 currentPage/pageSize）
   useEffect(() => {
+    const groupKeys = [
+      "discount_status",
+      "discount_price",
+      "discount_hosting_fee_ratio",
+      "discount_cost_ratio",
+    ];
+    const visibleGroupKeys =
+      Array.isArray(visibleColumns) && visibleColumns.length > 0
+        ? groupKeys.filter((k) => (visibleColumns as string[]).includes(k))
+        : groupKeys;
+    const groupFirstKey = visibleGroupKeys[0];
+    const groupLastKey = visibleGroupKeys[visibleGroupKeys.length - 1];
+    const headerClassFor = (key: string) =>
+      [
+        "fee-blue-header",
+        "border-t",
+        "border-slate-200",
+        groupFirstKey === key ? "border-l border-slate-200" : "",
+        groupLastKey === key ? "border-r border-slate-200" : "",
+      ]
+        .filter(Boolean)
+        .join(" ");
+    const cellClassFor = (key: string) =>
+      [
+        "bg-indigo-50/30",
+        groupFirstKey === key ? "border-l border-slate-200" : "",
+        groupLastKey === key ? "border-r border-slate-200" : "",
+      ]
+        .filter(Boolean)
+        .join(" ");
+    const greenGroupKeys = [
+      "downclock_discount",
+      "downclock_discount_hosting_fee_ratio",
+      "downclock_discount_cost_ratio",
+      "shutdown_price",
+      "downclock_price_ranges",
+      "downclock_before_profit",
+      "downclock_after_profit",
+    ];
+    const visibleGreenGroupKeys =
+      Array.isArray(visibleColumns) && visibleColumns.length > 0
+        ? greenGroupKeys.filter((k) => (visibleColumns as string[]).includes(k))
+        : greenGroupKeys;
+    const greenGroupFirstKey = visibleGreenGroupKeys[0];
+    const greenGroupLastKey = visibleGreenGroupKeys[visibleGreenGroupKeys.length - 1];
+    const headerGreenClassFor = (key: string) =>
+      [
+        "bg-emerald-100/50",
+        "fee-green-header",
+        "border-t",
+        "border-slate-200",
+        greenGroupFirstKey === key ? "border-l border-slate-200" : "",
+        greenGroupLastKey === key ? "border-r border-slate-200" : "",
+      ]
+        .filter(Boolean)
+        .join(" ");
+    const cellGreenClassFor = (key: string) =>
+      [
+        "bg-emerald-50/30",
+        greenGroupFirstKey === key ? "border-l border-slate-200" : "",
+        greenGroupLastKey === key ? "border-r border-slate-200" : "",
+      ]
+        .filter(Boolean)
+        .join(" ");
     const allColumns = [
       // {
       //   title: (
@@ -334,6 +398,8 @@ export default function CustodyStatisticsMonthTable({
         width: 120,
         dataIndex: "discount_status",
         key: "discount_status",
+        onHeaderCell: () => ({ className: headerClassFor("discount_status") }),
+        onCell: () => ({ className: cellClassFor("discount_status") }),
         render: (text: any) => {
           // 允许后端返回英文或中文状态，统一到三类：打折、不变、分润
           const status = String(text || "").toUpperCase();
@@ -379,6 +445,8 @@ export default function CustodyStatisticsMonthTable({
         width: 150,
         dataIndex: "discount_price",
         key: "discount_price",
+        onHeaderCell: () => ({ className: headerClassFor("discount_price") }),
+        onCell: () => ({ className: cellClassFor("discount_price") }),
         // render: (text: any) => ((Number.isFinite(text) && text !== 0 ? "$ " + text.toFixed(4) : "--")),
         render: (text: any, row: any) =>
           Number.isFinite(text) && text !== 0 && row.discount_status !== "不变"
@@ -397,18 +465,29 @@ export default function CustodyStatisticsMonthTable({
         width: 140,
         dataIndex: "discount_hosting_fee_ratio",
         key: "discount_hosting_fee_ratio",
-        onHeaderCell: () => ({ className: "fee-ratio-header" }),
-        onCell: (record: any) => {
+        onHeaderCell: () => ({ className: headerClassFor("discount_hosting_fee_ratio") }),
+        onCell: () => ({ className: cellClassFor("discount_hosting_fee_ratio") }),
+        // onHeaderCell: () => ({ className: "fee-ratio-header" }),
+        // onCell: (record: any) => {
+        //   const val = record?.discount_hosting_fee_ratio;
+        //   const num = typeof val === "number" ? val : parseFloat(val);
+        //   // if (!Number.isFinite(num)) return { className: "" };
+        //   if (!Number.isFinite(num) || num === 0) return { className: "" };
+        //   if (num >= 100) return { className: "fee-ratio-loss" };
+        //   if (num >= 90) return { className: "fee-ratio-high" };
+        //   if (num < 80) return { className: "fee-ratio-profit" };
+        //   return { className: "fee-ratio-low" };
+        // },
+        render: (text: any, record: any) => {
           const val = record?.discount_hosting_fee_ratio;
           const num = typeof val === "number" ? val : parseFloat(val);
-          // if (!Number.isFinite(num)) return { className: "" };
-          if (!Number.isFinite(num) || num === 0) return { className: "" };
-          if (num >= 100) return { className: "fee-ratio-loss" };
-          if (num >= 90) return { className: "fee-ratio-high" };
-          if (num < 80) return { className: "fee-ratio-profit" };
-          return { className: "fee-ratio-low" };
+          if (!Number.isFinite(num) || num === 0) return `--`;
+          let color: any = "#25252D";
+          if (num >= 100) color = "red";
+          else if (num >= 90) color = "orange";
+          else if (num < 80) color = "green";
+          return <span style={{ color }}>{`${num.toFixed(2)}%`}</span>;
         },
-        render: (text: any) => (Number.isFinite(text) && text !== 0 ? `${text.toFixed(2)}%` : `--`),
       },
       {
         title: (
@@ -422,69 +501,136 @@ export default function CustodyStatisticsMonthTable({
         width: 140,
         dataIndex: "discount_cost_ratio",
         key: "discount_cost_ratio",
-        onHeaderCell: () => ({ className: "fee-ratio-header" }),
-        onCell: (record: any) => {
+        onHeaderCell: () => ({ className: headerClassFor("discount_cost_ratio") }),
+        onCell: () => ({ className: cellClassFor("discount_cost_ratio") }),
+        // onHeaderCell: () => ({ className: "fee-ratio-header" }),
+        // onCell: (record: any) => {
+        //   const val = record?.discount_cost_ratio;
+        //   const num = typeof val === "number" ? val : parseFloat(val);
+        //   if (!Number.isFinite(num)) return { className: "" };
+        //   if (num >= 100) return { className: "fee-ratio-loss" };
+        //   if (num >= 90) return { className: "fee-ratio-high" };
+        //   if (num < 80) return { className: "fee-ratio-profit" };
+        //   return { className: "fee-ratio-low" };
+        // },
+        render: (text: any, record: any) => {
           const val = record?.discount_cost_ratio;
           const num = typeof val === "number" ? val : parseFloat(val);
-          if (!Number.isFinite(num)) return { className: "" };
-          if (num >= 100) return { className: "fee-ratio-loss" };
-          if (num >= 90) return { className: "fee-ratio-high" };
-          if (num < 80) return { className: "fee-ratio-profit" };
-          return { className: "fee-ratio-low" };
+          if (!Number.isFinite(num) || num === 0) return `--`;
+          let color: any = "#25252D";
+          if (num >= 100) color = "red";
+          else if (num >= 90) color = "orange";
+          else if (num < 80) color = "green";
+          return <span style={{ color }}>{`${num.toFixed(2)}%`}</span>;
         },
-        render: (text: any) => (Number.isFinite(text) && text !== 0 ? `${text.toFixed(2)}%` : `--`),
       },
       {
         title: <span className="fee-ratio-title">降频后折扣</span>,
         width: 120,
         dataIndex: "downclock_discount",
         key: "downclock_discount",
+        onHeaderCell: () => ({ className: headerGreenClassFor("downclock_discount") }),
+        onCell: () => ({ className: cellGreenClassFor("downclock_discount") }),
         // render: (text: any) => (text === "MONTHLY" ? "月" : "日"),
+        render: (text: any) => {
+          const status = String(text || "").toUpperCase();
+          let label = "不变";
+          let color: any = "default";
+          if (status.includes("DISCOUNT") || text.includes("打折")) {
+            label = text;
+            color = "green";
+          } else if (status.includes("PROFIT") || text === "分润") {
+            label = "分润";
+            color = "geekblue";
+          } else {
+            label = "不变";
+            color = "orange";
+          }
+          return (
+            <div className="">
+              <Tag color={color}>{label}</Tag>
+            </div>
+          );
+        },
       },
       {
         title: <span className="fee-ratio-title">降频后托管费占比</span>,
         width: 140,
         dataIndex: "downclock_discount_hosting_fee_ratio",
         key: "downclock_discount_hosting_fee_ratio",
-        onHeaderCell: () => ({ className: "fee-ratio-header" }),
-        onCell: (record: any) => {
+        onHeaderCell: () => ({ className: headerGreenClassFor("downclock_discount_hosting_fee_ratio") }),
+        onCell: () => ({ className: cellGreenClassFor("downclock_discount_hosting_fee_ratio") }),
+        // onHeaderCell: () => ({ className: "fee-ratio-header" }),
+        // onCell: (record: any) => {
+        //   const val = record?.downclock_discount_hosting_fee_ratio;
+        //   const num = typeof val === "number" ? val : parseFloat(val);
+        //   if (!Number.isFinite(num)) return { className: "" };
+        //   if (num >= 100) return { className: "fee-ratio-loss" };
+        //   if (num >= 90) return { className: "fee-ratio-high" };
+        //   if (num < 80) return { className: "fee-ratio-profit" };
+        //   return { className: "fee-ratio-low" };
+        // },
+        render: (text: any, record: any) => {
           const val = record?.downclock_discount_hosting_fee_ratio;
           const num = typeof val === "number" ? val : parseFloat(val);
-          if (!Number.isFinite(num)) return { className: "" };
-          if (num >= 100) return { className: "fee-ratio-loss" };
-          if (num >= 90) return { className: "fee-ratio-high" };
-          if (num < 80) return { className: "fee-ratio-profit" };
-          return { className: "fee-ratio-low" };
+          if (!Number.isFinite(num) || num === 0) return `--`;
+          let color: any = "#25252D";
+          if (num >= 100) color = "red";
+          else if (num >= 90) color = "orange";
+          else if (num < 80) color = "green";
+          return (
+            <div className="">
+              <span style={{ color }}>{`${num.toFixed(2)}%`}</span>
+            </div>
+          );
         },
-        render: (text: any) => (Number.isFinite(text) && text !== 0 ? `${text.toFixed(2)}%` : `--`),
       },
       {
         title: <span className="fee-ratio-title">降频后成本比</span>,
         width: 140,
         dataIndex: "downclock_discount_cost_ratio",
         key: "downclock_discount_cost_ratio",
-        onHeaderCell: () => ({ className: "fee-ratio-header" }),
-        onCell: (record: any) => {
-          const val = record?.downclock_discount_hosting_fee_ratio;
+        onHeaderCell: () => ({ className: headerGreenClassFor("downclock_discount_cost_ratio") }),
+        onCell: () => ({ className: cellGreenClassFor("downclock_discount_cost_ratio") }),
+        // onHeaderCell: () => ({ className: "fee-ratio-header" }),
+        // onCell: (record: any) => {
+        //   const val = record?.downclock_discount_hosting_fee_ratio;
+        //   const num = typeof val === "number" ? val : parseFloat(val);
+        //   if (!Number.isFinite(num)) return { className: "" };
+        //   if (num >= 100) return { className: "fee-ratio-loss" };
+        //   if (num >= 90) return { className: "fee-ratio-high" };
+        //   if (num < 80) return { className: "fee-ratio-profit" };
+        //   return { className: "fee-ratio-low" };
+        // },
+        render: (text: any, record: any) => {
+          const val = record?.downclock_discount_cost_ratio;
           const num = typeof val === "number" ? val : parseFloat(val);
-          if (!Number.isFinite(num)) return { className: "" };
-          if (num >= 100) return { className: "fee-ratio-loss" };
-          if (num >= 90) return { className: "fee-ratio-high" };
-          if (num < 80) return { className: "fee-ratio-profit" };
-          return { className: "fee-ratio-low" };
+          if (!Number.isFinite(num) || num === 0) return `--`;
+          let color: any = "#25252D";
+          if (num >= 100) color = "red";
+          else if (num >= 90) color = "orange";
+          else if (num < 80) color = "green";
+          return (
+            <div className="">
+              <span style={{ color }}>{`${num.toFixed(2)}%`}</span>
+            </div>
+          );
         },
-        render: (text: any) => (Number.isFinite(text) && text !== 0 ? `${text.toFixed(2)}%` : `--`),
       },
       {
         title: <span className="fee-ratio-title">关机币价</span>,
         width: 120,
         dataIndex: "shutdown_price",
         key: "shutdown_price",
+        onHeaderCell: () => ({ className: headerGreenClassFor("shutdown_price") }),
+        onCell: () => ({ className: cellGreenClassFor("shutdown_price") }),
         render: (text: any) => {
           const num = typeof text === "number" ? text : parseFloat(text);
-          return Number.isFinite(num) && num !== 0
-            ? num.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })
-            : `--`;
+          const content =
+            Number.isFinite(num) && num !== 0
+              ? num.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+              : `--`;
+          return <div className="">{content}</div>;
         },
       },
 
@@ -493,6 +639,8 @@ export default function CustodyStatisticsMonthTable({
         width: 120,
         dataIndex: "downclock_price_ranges",
         key: "downclock_price_ranges",
+        onHeaderCell: () => ({ className: headerGreenClassFor("downclock_price_ranges") }),
+        onCell: () => ({ className: cellGreenClassFor("downclock_price_ranges") }),
         render: (text: any) => {
           if (!Array.isArray(text) || text.length === 0) return `--`;
           const formatted = text
@@ -504,7 +652,8 @@ export default function CustodyStatisticsMonthTable({
             })
             .filter(Boolean)
             .join(" ,");
-          return formatted || `--`;
+          const content = formatted || `--`;
+          return <div className="">{content}</div>;
         },
       },
       {
@@ -512,14 +661,24 @@ export default function CustodyStatisticsMonthTable({
         width: 120,
         dataIndex: "downclock_before_profit",
         key: "downclock_before_profit",
-        render: (text: any) => (Number.isFinite(text) && text !== 0 ? `${text.toFixed(2)}` : `--`),
+        onHeaderCell: () => ({ className: headerGreenClassFor("downclock_before_profit") }),
+        onCell: () => ({ className: cellGreenClassFor("downclock_before_profit") }),
+        render: (text: any) => {
+          const content = Number.isFinite(text) && text !== 0 ? `${text.toFixed(2)}` : `--`;
+          return <div className="">{content}</div>;
+        },
       },
       {
         title: <span className="fee-ratio-title">降频后利润</span>,
         width: 120,
         dataIndex: "downclock_after_profit",
         key: "downclock_after_profit",
-        render: (text: any) => (Number.isFinite(text) && text !== 0 ? `${text.toFixed(2)}` : `--`),
+        onHeaderCell: () => ({ className: headerGreenClassFor("downclock_after_profit") }),
+        onCell: () => ({ className: cellGreenClassFor("downclock_after_profit") }),
+        render: (text: any) => {
+          const content = Number.isFinite(text) && text !== 0 ? `${text.toFixed(2)}` : `--`;
+          return <div className="">{content}</div>;
+        },
       },
       {
         title: <span className="fee-ratio-title">周期类型</span>,

@@ -32,11 +32,28 @@
   padding-bottom: 12px !important; /* 控制高度 */
   vertical-align: middle !important;
 }
+
 .fee-ratio-title {
   font-size: 0.85rem; /* 标题字号略大一些使更醒目 */
   font-weight: 600; /* 加粗 */
   color: #25252D;
 }
+
+/* 预期折扣效果专用浅蓝色表头 */
+.ant-table-wrapper .ant-table-thead >tr> .fee-blue-header {
+  background-color: #edf0fe !important; /* 蓝色 */
+  padding-top: 12px !important;
+  padding-bottom: 12px !important;
+  vertical-align: middle !important;
+}
+
+.ant-table-wrapper .ant-table-thead >tr> .fee-green-header {
+  background-color: #e5faf0 !important; /* 绿色 */
+  padding-top: 12px !important;
+  padding-bottom: 12px !important;
+  vertical-align: middle !important;
+}
+
 .ant-table-wrapper table{
     font-family: XPK, Arial, sans-serif !important;
 }
@@ -49,6 +66,10 @@
 }
 
 /* 托管费占比高/低背景色 */
+.ant-table-wrapper .fee-blue-low {
+  background-color: #bbd9f9 !important; /* 浅绿 */
+}
+
 .fee-ratio-high {
   background-color: #fff1f0 !important; /* 浅红 */
 }

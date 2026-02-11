@@ -140,6 +140,33 @@ export default function CustodyStatisticsTable({
   }, [statisticsData, timeRange]);
 
   useEffect(() => {
+    const groupKeys = [
+      "discount_status",
+      "discount_price",
+      "discount_hosting_fee_ratio",
+      "discount_cost_ratio",
+    ];
+    const visibleGroupKeys =
+      Array.isArray(visibleColumns) && visibleColumns.length > 0
+        ? groupKeys.filter((k) => (visibleColumns as string[]).includes(k))
+        : groupKeys;
+    const groupFirstKey = visibleGroupKeys[0];
+    const groupLastKey = visibleGroupKeys[visibleGroupKeys.length - 1];
+    const greenGroupKeys = [
+      "downclock_discount",
+      "downclock_discount_hosting_fee_ratio",
+      "downclock_discount_cost_ratio",
+      "shutdown_price",
+      "downclock_price_ranges",
+      "downclock_before_profit",
+      "downclock_after_profit",
+    ];
+    const visibleGreenGroupKeys =
+      Array.isArray(visibleColumns) && visibleColumns.length > 0
+        ? greenGroupKeys.filter((k) => (visibleColumns as string[]).includes(k))
+        : greenGroupKeys;
+    const greenGroupFirstKey = visibleGreenGroupKeys[0];
+    const greenGroupLastKey = visibleGreenGroupKeys[visibleGreenGroupKeys.length - 1];
     const allColumns = [
       // {
       //   title: (
@@ -353,6 +380,16 @@ export default function CustodyStatisticsTable({
         width: 130,
         dataIndex: "discount_status",
         key: "discount_status",
+        onHeaderCell: () => ({
+          className: `fee-blue-header border-t border-slate-200 ${
+            groupFirstKey === "discount_status" ? "border-l border-slate-200" : ""
+          } ${groupLastKey === "discount_status" ? "border-r border-slate-200" : ""}`,
+        }),
+        onCell: () => ({
+          className: `bg-indigo-50/30 ${
+            groupFirstKey === "discount_status" ? "border-l border-slate-200" : ""
+          } ${groupLastKey === "discount_status" ? "border-r border-slate-200" : ""}`,
+        }),
         render: (text: any) => {
           // 允许后端返回英文或中文状态，统一到三类：打折、不变、分润
           const status = String(text || "").toUpperCase();
@@ -385,6 +422,16 @@ export default function CustodyStatisticsTable({
         width: 150,
         dataIndex: "discount_price",
         key: "discount_price",
+        onHeaderCell: () => ({
+          className: `fee-blue-header border-t border-slate-200 ${
+            groupFirstKey === "discount_price" ? "border-l border-slate-200" : ""
+          } ${groupLastKey === "discount_price" ? "border-r border-slate-200" : ""}`,
+        }),
+        onCell: () => ({
+          className: `bg-indigo-50/30 ${
+            groupFirstKey === "discount_price" ? "border-l border-slate-200" : ""
+          } ${groupLastKey === "discount_price" ? "border-r border-slate-200" : ""}`,
+        }),
         render: (text: any, row: any) =>
           Number.isFinite(text) && text !== 0 && row.discount_status !== "不变"
             ? "$ " + text.toFixed(4)
@@ -404,17 +451,35 @@ export default function CustodyStatisticsTable({
         width: 140,
         dataIndex: "discount_hosting_fee_ratio",
         key: "discount_hosting_fee_ratio",
-        onHeaderCell: () => ({ className: "fee-ratio-header" }),
-        onCell: (record: any) => {
+        onHeaderCell: () => ({
+          className: `fee-blue-header border-t border-slate-200 ${
+            groupFirstKey === "discount_hosting_fee_ratio" ? "border-l border-slate-200" : ""
+          } ${groupLastKey === "discount_hosting_fee_ratio" ? "border-r border-slate-200" : ""}`,
+        }),
+        onCell: () => ({
+          className: `bg-indigo-50/30 ${
+            groupFirstKey === "discount_hosting_fee_ratio" ? "border-l border-slate-200" : ""
+          } ${groupLastKey === "discount_hosting_fee_ratio" ? "border-r border-slate-200" : ""}`,
+        }),
+        // onCell: (record: any) => {
+        //   const val = record?.discount_hosting_fee_ratio;
+        //   const num = typeof val === "number" ? val : parseFloat(val);
+        //   if (!Number.isFinite(num) || num === 0) return { className: "" };
+        //   if (num >= 100) return { className: "fee-ratio-loss" };
+        //   if (num >= 90) return { className: "fee-ratio-high" };
+        //   if (num < 80) return { className: "fee-ratio-profit" };
+        //   return { className: "fee-ratio-low" };
+        // },
+        render: (text: any, record: any) => {
           const val = record?.discount_hosting_fee_ratio;
           const num = typeof val === "number" ? val : parseFloat(val);
-          if (!Number.isFinite(num) || num === 0) return { className: "" };
-          if (num >= 100) return { className: "fee-ratio-loss" };
-          if (num >= 90) return { className: "fee-ratio-high" };
-          if (num < 80) return { className: "fee-ratio-profit" };
-          return { className: "fee-ratio-low" };
+          if (!Number.isFinite(num) || num === 0) return `--`;
+          let color: any = "#25252D";
+          if (num >= 100) color = "red";
+          else if (num >= 90) color = "orange";
+          else if (num < 80) color = "green";
+          return <span style={{ color }}>{`${num.toFixed(2)}%`}</span>;
         },
-        render: (text: any) => (Number.isFinite(text) && text !== 0 ? `${text.toFixed(2)}%` : `--`),
       },
       {
         title: (
@@ -428,23 +493,86 @@ export default function CustodyStatisticsTable({
         width: 140,
         dataIndex: "discount_cost_ratio",
         key: "discount_cost_ratio",
-        onHeaderCell: () => ({ className: "fee-ratio-header" }),
-        onCell: (record: any) => {
+        onHeaderCell: () => ({
+          className: `fee-blue-header border-t border-slate-200 ${
+            groupFirstKey === "discount_cost_ratio" ? "border-l border-slate-200" : ""
+          } ${groupLastKey === "discount_cost_ratio" ? "border-r border-slate-200" : ""}`,
+        }),
+        onCell: () => ({
+          className: `bg-indigo-50/30 ${
+            groupFirstKey === "discount_cost_ratio" ? "border-l border-slate-200" : ""
+          } ${groupLastKey === "discount_cost_ratio" ? "border-r border-slate-200" : ""}`,
+        }),
+        // onCell: (record: any) => {
+        //   const val = record?.discount_cost_ratio;
+        //   const num = typeof val === "number" ? val : parseFloat(val);
+        //   if (!Number.isFinite(num)) return { className: "" };
+        //   if (num >= 100) return { className: "fee-ratio-loss" };
+        //   if (num >= 90) return { className: "fee-ratio-high" };
+        //   if (num < 80) return { className: "fee-ratio-profit" };
+        //   return { className: "fee-ratio-low" };
+        // },
+        render: (text: any, record: any) => {
           const val = record?.discount_cost_ratio;
           const num = typeof val === "number" ? val : parseFloat(val);
-          if (!Number.isFinite(num)) return { className: "" };
-          if (num >= 100) return { className: "fee-ratio-loss" };
-          if (num >= 90) return { className: "fee-ratio-high" };
-          if (num < 80) return { className: "fee-ratio-profit" };
-          return { className: "fee-ratio-low" };
+          if (!Number.isFinite(num) || num === 0) return `--`;
+          let color: any = "#25252D";
+          if (num >= 100) color = "red";
+          else if (num >= 90) color = "orange";
+          else if (num < 80) color = "green";
+          return <span style={{ color }}>{`${num.toFixed(2)}%`}</span>;
         },
-        render: (text: any) => (Number.isFinite(text) && text !== 0 ? `${text.toFixed(2)}%` : `--`),
       },
+
       {
         title: <span className="fee-ratio-title">降频后折扣</span>,
         width: 120,
         dataIndex: "downclock_discount",
         key: "downclock_discount",
+        onHeaderCell: () => ({
+          className: [
+            "bg-emerald-100/50",
+            "fee-green-header",
+            "border-t",
+            "border-slate-200",
+            greenGroupFirstKey === "downclock_discount" ? "border-l border-slate-200" : "",
+            greenGroupLastKey === "downclock_discount" ? "border-r border-slate-200" : "",
+          ]
+            .filter(Boolean)
+            .join(" "),
+        }),
+        onCell: () => ({
+          className: [
+            "bg-emerald-50/30",
+            greenGroupFirstKey === "downclock_discount" ? "border-l border-slate-200" : "",
+            greenGroupLastKey === "downclock_discount" ? "border-r border-slate-200" : "",
+          ]
+            .filter(Boolean)
+            .join(" "),
+        }),
+        render: (text: any) => {
+          // 允许后端返回英文或中文状态，统一到三类：打折、不变、分润
+          const status = String(text || "").toUpperCase();
+          let label = "不变";
+          let color: any = "default";
+
+          if (status.includes("DISCOUNT") || text.includes("打折")) {
+            label = text;
+            color = "green"; // 打折：绿色
+          } else if (status.includes("PROFIT") || text === "分润") {
+            label = "分润";
+            color = "geekblue"; // 分润：蓝色
+          } else {
+            label = "不变";
+            color = "orange"; // 不变：橙色
+          }
+
+          return (
+            <div className="">
+              <Tag color={color}>{label}</Tag>
+            </div>
+          );
+        },
         // render: (text: any) => (text === "MONTHLY" ? "月" : "日"),
       },
       {
@@ -452,46 +580,136 @@ export default function CustodyStatisticsTable({
         width: 140,
         dataIndex: "downclock_discount_hosting_fee_ratio",
         key: "downclock_discount_hosting_fee_ratio",
-        onHeaderCell: () => ({ className: "fee-ratio-header" }),
-        onCell: (record: any) => {
+        onHeaderCell: () => ({
+          className: [
+            "bg-emerald-100/50",
+            "fee-green-header",
+            "border-t",
+            "border-slate-200",
+            greenGroupFirstKey === "downclock_discount_hosting_fee_ratio" ? "border-l border-slate-200" : "",
+            greenGroupLastKey === "downclock_discount_hosting_fee_ratio" ? "border-r border-slate-200" : "",
+          ]
+            .filter(Boolean)
+            .join(" "),
+        }),
+        onCell: () => ({
+          className: [
+            "bg-emerald-50/30",
+            greenGroupFirstKey === "downclock_discount_hosting_fee_ratio" ? "border-l border-slate-200" : "",
+            greenGroupLastKey === "downclock_discount_hosting_fee_ratio" ? "border-r border-slate-200" : "",
+          ]
+            .filter(Boolean)
+            .join(" "),
+        }),
+        // onHeaderCell: () => ({ className: "fee-ratio-header" }),
+        // onCell: (record: any) => {
+        //   const val = record?.downclock_discount_hosting_fee_ratio;
+        //   const num = typeof val === "number" ? val : parseFloat(val);
+        //   if (!Number.isFinite(num)) return { className: "" };
+        //   if (num >= 100) return { className: "fee-ratio-loss" };
+        //   if (num >= 90) return { className: "fee-ratio-high" };
+        //   if (num < 80) return { className: "fee-ratio-profit" };
+        //   return { className: "fee-ratio-low" };
+        // },
+        render: (text: any, record: any) => {
           const val = record?.downclock_discount_hosting_fee_ratio;
           const num = typeof val === "number" ? val : parseFloat(val);
-          if (!Number.isFinite(num)) return { className: "" };
-          if (num >= 100) return { className: "fee-ratio-loss" };
-          if (num >= 90) return { className: "fee-ratio-high" };
-          if (num < 80) return { className: "fee-ratio-profit" };
-          return { className: "fee-ratio-low" };
+          if (!Number.isFinite(num) || num === 0) return `--`;
+          let color: any = "#25252D";
+          if (num >= 100) color = "red";
+          else if (num >= 90) color = "orange";
+          else if (num < 80) color = "green";
+          return (
+            <div className="">
+              <span style={{ color }}>{`${num.toFixed(2)}%`}</span>
+            </div>
+          );
         },
-        render: (text: any) => (Number.isFinite(text) && text !== 0 ? `${text.toFixed(2)}%` : `--`),
       },
       {
         title: <span className="fee-ratio-title">降频后成本比</span>,
         width: 140,
         dataIndex: "downclock_discount_cost_ratio",
         key: "downclock_discount_cost_ratio",
-        onHeaderCell: () => ({ className: "fee-ratio-header" }),
-        onCell: (record: any) => {
-          const val = record?.downclock_discount_hosting_fee_ratio;
+        onHeaderCell: () => ({
+          className: [
+            "bg-emerald-100/50",
+            "fee-green-header",
+            "border-t",
+            "border-slate-200",
+            greenGroupFirstKey === "downclock_discount_cost_ratio" ? "border-l border-slate-200" : "",
+            greenGroupLastKey === "downclock_discount_cost_ratio" ? "border-r border-slate-200" : "",
+          ]
+            .filter(Boolean)
+            .join(" "),
+        }),
+        onCell: () => ({
+          className: [
+            "bg-emerald-50/30",
+            greenGroupFirstKey === "downclock_discount_cost_ratio" ? "border-l border-slate-200" : "",
+            greenGroupLastKey === "downclock_discount_cost_ratio" ? "border-r border-slate-200" : "",
+          ]
+            .filter(Boolean)
+            .join(" "),
+        }),
+        // onHeaderCell: () => ({ className: "fee-ratio-header" }),
+        // onCell: (record: any) => {
+        //   const val = record?.downclock_discount_hosting_fee_ratio;
+        //   const num = typeof val === "number" ? val : parseFloat(val);
+        //   if (!Number.isFinite(num)) return { className: "" };
+        //   if (num >= 100) return { className: "fee-ratio-loss" };
+        //   if (num >= 90) return { className: "fee-ratio-high" };
+        //   if (num < 80) return { className: "fee-ratio-profit" };
+        //   return { className: "fee-ratio-low" };
+        // },
+        render: (text: any, record: any) => {
+          const val = record?.downclock_discount_cost_ratio;
           const num = typeof val === "number" ? val : parseFloat(val);
-          if (!Number.isFinite(num)) return { className: "" };
-          if (num >= 100) return { className: "fee-ratio-loss" };
-          if (num >= 90) return { className: "fee-ratio-high" };
-          if (num < 80) return { className: "fee-ratio-profit" };
-          return { className: "fee-ratio-low" };
+          if (!Number.isFinite(num) || num === 0) return `--`;
+          let color: any = "#25252D";
+          if (num >= 100) color = "red";
+          else if (num >= 90) color = "orange";
+          else if (num < 80) color = "green";
+          return (
+            <div className="">
+              <span style={{ color }}>{`${num.toFixed(2)}%`}</span>
+            </div>
+          );
         },
-        render: (text: any) => (Number.isFinite(text) && text !== 0 ? `${text.toFixed(2)}%` : `--`),
       },
       {
         title: <span className="fee-ratio-title">关机币价</span>,
         width: 120,
         dataIndex: "shutdown_price",
         key: "shutdown_price",
-        onHeaderCell: () => ({ className: "fee-ratio-header" }),
+        onHeaderCell: () => ({
+          className: [
+            "bg-emerald-100/50",
+            "fee-green-header",
+            "border-t",
+            "border-slate-200",
+            greenGroupFirstKey === "shutdown_price" ? "border-l border-slate-200" : "",
+            greenGroupLastKey === "shutdown_price" ? "border-r border-slate-200" : "",
+          ]
+            .filter(Boolean)
+            .join(" "),
+        }),
+        onCell: () => ({
+          className: [
+            "bg-emerald-50/30",
+            greenGroupFirstKey === "shutdown_price" ? "border-l border-slate-200" : "",
+            greenGroupLastKey === "shutdown_price" ? "border-r border-slate-200" : "",
+          ]
+            .filter(Boolean)
+            .join(" "),
+        }),
         render: (text: any) => {
           const num = typeof text === "number" ? text : parseFloat(text);
-          return Number.isFinite(num) && num !== 0
-            ? num.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })
-            : `--`;
+          const content =
+            Number.isFinite(num) && num !== 0
+              ? num.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+              : `--`;
+          return <div className="">{content}</div>;
         },
       },
 
@@ -500,6 +718,27 @@ export default function CustodyStatisticsTable({
         width: 120,
         dataIndex: "downclock_price_ranges",
         key: "downclock_price_ranges",
+        onHeaderCell: () => ({
+          className: [
+            "bg-emerald-100/50",
+            "fee-green-header",
+            "border-t",
+            "border-slate-200",
+            greenGroupFirstKey === "downclock_price_ranges" ? "border-l border-slate-200" : "",
+            greenGroupLastKey === "downclock_price_ranges" ? "border-r border-slate-200" : "",
+          ]
+            .filter(Boolean)
+            .join(" "),
+        }),
+        onCell: () => ({
+          className: [
+            "bg-emerald-50/30",
+            greenGroupFirstKey === "downclock_price_ranges" ? "border-l border-slate-200" : "",
+            greenGroupLastKey === "downclock_price_ranges" ? "border-r border-slate-200" : "",
+          ]
+            .filter(Boolean)
+            .join(" "),
+        }),
         render: (text: any) => {
           if (!Array.isArray(text) || text.length === 0) return `--`;
           const formatted = text
@@ -511,7 +750,8 @@ export default function CustodyStatisticsTable({
             })
             .filter(Boolean)
             .join(" ,");
-          return formatted || `--`;
+          const content = formatted || `--`;
+          return <div className="">{content}</div>;
         },
       },
       {
@@ -519,14 +759,62 @@ export default function CustodyStatisticsTable({
         width: 120,
         dataIndex: "downclock_before_profit",
         key: "downclock_before_profit",
-        render: (text: any) => (Number.isFinite(text) && text !== 0 ? `${text.toFixed(2)}` : `--`),
+        onHeaderCell: () => ({
+          className: [
+            "bg-emerald-100/50",
+            "fee-green-header",
+            "border-t",
+            "border-slate-200",
+            greenGroupFirstKey === "downclock_before_profit" ? "border-l border-slate-200" : "",
+            greenGroupLastKey === "downclock_before_profit" ? "border-r border-slate-200" : "",
+          ]
+            .filter(Boolean)
+            .join(" "),
+        }),
+        onCell: () => ({
+          className: [
+            "bg-emerald-50/30",
+            greenGroupFirstKey === "downclock_before_profit" ? "border-l border-slate-200" : "",
+            greenGroupLastKey === "downclock_before_profit" ? "border-r border-slate-200" : "",
+          ]
+            .filter(Boolean)
+            .join(" "),
+        }),
+        render: (text: any) => {
+          const content = Number.isFinite(text) && text !== 0 ? `${text.toFixed(2)}` : `--`;
+          return <div className="">{content}</div>;
+        },
       },
       {
         title: <span className="fee-ratio-title">降频后利润</span>,
         width: 120,
         dataIndex: "downclock_after_profit",
         key: "downclock_after_profit",
-        render: (text: any) => (Number.isFinite(text) && text !== 0 ? `${text.toFixed(2)}` : `--`),
+        onHeaderCell: () => ({
+          className: [
+            "bg-emerald-100/50",
+            "fee-green-header",
+            "border-t",
+            "border-slate-200",
+            greenGroupFirstKey === "downclock_after_profit" ? "border-l border-slate-200" : "",
+            greenGroupLastKey === "downclock_after_profit" ? "border-r border-slate-200" : "",
+          ]
+            .filter(Boolean)
+            .join(" "),
+        }),
+        onCell: () => ({
+          className: [
+            "bg-emerald-50/30",
+            greenGroupFirstKey === "downclock_after_profit" ? "border-l border-slate-200" : "",
+            greenGroupLastKey === "downclock_after_profit" ? "border-r border-slate-200" : "",
+          ]
+            .filter(Boolean)
+            .join(" "),
+        }),
+        render: (text: any) => {
+          const content = Number.isFinite(text) && text !== 0 ? `${text.toFixed(2)}` : `--`;
+          return <div className="">{content}</div>;
+        },
       },
       {
         title: <span className="fee-ratio-title">周期类型</span>,
