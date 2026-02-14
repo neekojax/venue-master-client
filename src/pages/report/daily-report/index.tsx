@@ -685,6 +685,11 @@ const App: React.FC = () => {
 
           setStatistics({
             averageEfficiency: summary.averageEffectiveRate || 0,
+            averageForecastEfficiency: summary.averageForecastEfficiency || 0,
+            // formattedData.length > 0
+            //   ? formattedData.reduce((sum, i) => sum + (Number(i.forecastHashEfficiency) || 0), 0) /
+            //   formattedData.length
+            //   : 0,
             totalBtcOutput: summary.totalBtcOutput || 0,
             totalFailures24h: summary.totalFailures24h || 0,
             totalImpactOutput: summary.totalImpactOutput || 0,
@@ -746,7 +751,7 @@ const App: React.FC = () => {
     setFilteredData(filtered);
   }, [selectedSites, data, showCollectionOnly]);
 
-  // 在 CANG 以外的池型隐藏“近有效率”列
+  // 在 CANG 以外的池型隐藏“净有效率”列
   const columnsToRender: ColumnsType<DataType> =
     poolType === "CANG" ? columns : columns.filter((c) => c.key !== "forecastHashEfficiency");
   // 导出数据为 CSV 的函数
@@ -770,7 +775,7 @@ const App: React.FC = () => {
       // 总故障台数: item.totalFailures.toLocaleString(),
       "24小时故障数": item.failures24h.toLocaleString(),
       "24小时故障率": item.failureRate24h.toFixed(2) + "%",
-      ...(poolType === "CANG" ? { 近有效率: item.forecastHashEfficiency.toFixed(2) + "%" } : {}),
+      ...(poolType === "CANG" ? { 净有效率: item.forecastHashEfficiency.toFixed(2) + "%" } : {}),
       "T-1故障数": isUseT2(item)
         ? item.totalFailuresT2.toLocaleString()
         : item.totalFailuresT1.toLocaleString(),
@@ -889,12 +894,15 @@ const App: React.FC = () => {
               </div>
               <div className="flex-1 min-w-0">
                 <div className="text-[10px] font-black text-slate-400 uppercase tracking-tighter truncate">
-                  平均有效率
+                  净有效率
                 </div>
                 <div className="flex items-baseline gap-0.5 leading-none mt-1.5">
                   <span className="text-2xl font-black text-slate-900 tracking-tighter">
-                    {(statistics.averageEfficiency || 0).toFixed(2)}%
+                    {(statistics.averageForecastEfficiency || 0).toFixed(2)}%
                   </span>
+                </div>
+                <div className="text-[10px] text-slate-400 font-bold truncate mt-2 uppercase tracking-tighter">
+                  平均有效率 {(statistics.averageEfficiency || 0).toFixed(2)}%
                 </div>
                 {statistics.totalCloudPower24h != 0 && (
                   <div className="text-[10px] text-slate-400 font-bold truncate mt-2 uppercase tracking-tighter">
