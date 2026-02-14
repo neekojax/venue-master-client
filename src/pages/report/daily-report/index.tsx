@@ -902,8 +902,7 @@ const App: React.FC = () => {
                   </span>
                 </div>
                 <div className="text-[10px] text-slate-400 font-bold truncate mt-2 uppercase tracking-tighter">
-                  净有效率
-                  {(statistics.averageForecastEfficiency || 0).toFixed(2)}%
+                  净有效率 {(statistics.averageForecastEfficiency || 0).toFixed(2)}%
                 </div>
                 {statistics.totalCloudPower24h != 0 && (
                   <div className="text-[10px] text-slate-400 font-bold truncate mt-2 uppercase tracking-tighter">
