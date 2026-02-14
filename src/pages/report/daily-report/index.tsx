@@ -894,15 +894,16 @@ const App: React.FC = () => {
               </div>
               <div className="flex-1 min-w-0">
                 <div className="text-[10px] font-black text-slate-400 uppercase tracking-tighter truncate">
-                  净有效率
+                  平均有效率
                 </div>
                 <div className="flex items-baseline gap-0.5 leading-none mt-1.5">
                   <span className="text-2xl font-black text-slate-900 tracking-tighter">
-                    {(statistics.averageForecastEfficiency || 0).toFixed(2)}%
+                    {(statistics.averageEfficiency || 0).toFixed(2)}%
                   </span>
                 </div>
                 <div className="text-[10px] text-slate-400 font-bold truncate mt-2 uppercase tracking-tighter">
-                  平均有效率 {(statistics.averageEfficiency || 0).toFixed(2)}%
+                  净有效率
+                  {(statistics.averageForecastEfficiency || 0).toFixed(2)}%
                 </div>
                 {statistics.totalCloudPower24h != 0 && (
                   <div className="text-[10px] text-slate-400 font-bold truncate mt-2 uppercase tracking-tighter">
