@@ -421,7 +421,7 @@ const AnalysisView: React.FC = () => {
       limit_hashrate: row.limit_hashrate || 0,
       limit_rate: row.limit_rate.toFixed(2) + "%",
       high_temperature_hashrate: row?.high_temperature_hashrate || 0,
-      high_temperature_rate: row.high_temperature_rate + "%",
+      high_temperature_rate: row.high_temperature_rate.toFixed(2) + "%",
       power_hashrate: row.power_hashrate || 0,
       power_rate: row.power_rate.toFixed(2) + "%",
       device_failure_hashrate: row.device_failure_hashrate || 0,
@@ -536,6 +536,36 @@ const AnalysisView: React.FC = () => {
         const originalMaintenanceRate = venues[rIdx].maintenance_rate;
         if (originalMaintenanceRate > 1) {
           const cell = newRow.getCell(maintenanceRateColIndex);
+          cell.fill = {
+            type: "pattern",
+            pattern: "solid",
+            fgColor: { argb: "FFFFC7CE" }, // Light red background
+          };
+          cell.font = {
+            bold: true,
+          };
+        }
+      }
+      const lowPowerImpactRateColIndex = headers.indexOf("低功耗影响占比 (%)") + 1; // ExcelJS is 1-indexed
+      if (lowPowerImpactRateColIndex > 0) {
+        const originalLowPowerImpactRate = venues[rIdx].low_power_rate;
+        if (originalLowPowerImpactRate > 1) {
+          const cell = newRow.getCell(lowPowerImpactRateColIndex);
+          cell.fill = {
+            type: "pattern",
+            pattern: "solid",
+            fgColor: { argb: "FFFFC7CE" }, // Light red background
+          };
+          cell.font = {
+            bold: true,
+          };
+        }
+      }
+      const otherImpactRateColIndex = headers.indexOf("其他影响占比 (%)") + 1; // ExcelJS is 1-indexed
+      if (otherImpactRateColIndex > 0) {
+        const originalOtherImpactRate = venues[rIdx].other_rate;
+        if (originalOtherImpactRate > 1) {
+          const cell = newRow.getCell(otherImpactRateColIndex);
           cell.fill = {
             type: "pattern",
             pattern: "solid",
