@@ -103,7 +103,7 @@ const ChartPrice: React.FC<{ loading: any; chartDate: string; onLoaded?: () => v
       },
       yAxis: {
         type: "value",
-        min: 85000,
+        min: 50000,
         // min: hashValues.length > 0 ? Math.floor(Math.min(...hashValues) - 30000) : 0,
         // max: 100,
         splitNumber: 4,
