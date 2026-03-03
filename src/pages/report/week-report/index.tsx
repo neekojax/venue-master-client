@@ -360,7 +360,7 @@ const App: React.FC = () => {
                 },
                 {
                   key: "pending_diff",
-                  label: "故障率变化Top 5",
+                  label: "待修率变化Top 5",
                   children: (
                     <ImpactCard
                       title=""
