@@ -68,8 +68,11 @@ const App: React.FC = () => {
   const [top5EffectiveRate, setTop5EffectiveRate] = useState<Top5Rate[]>([]);
   const [top5HighTempImpactRate, setTop5HighTempImpactRate] = useState<Top5Rate[]>([]);
   const [top5LimitImpactRate, setTop5LimitImpactRate] = useState<Top5Rate[]>([]);
-  const [top5FailureRate, setTop5FailureRate] = useState<Top5Rate[]>([]);
-  const [top5PendingRepairRate, setTop5PendingRepairRate] = useState<Top5Rate[]>([]);
+  // const [top5FailureRate, setTop5FailureRate] = useState<Top5Rate[]>([]);
+  // const [top5PendingRepairRate, setTop5PendingRepairRate] = useState<Top5Rate[]>([]);
+  const [top5EffectiveRateDiff, setTop5EffectiveRateDiff] = useState<Top5Rate[]>([]);
+  const [top5FailureRateDiff, setTop5FailureRateDiff] = useState<Top5Rate[]>([]);
+  const [top5PendingRepairRateDiff, setTop5PendingRepairRateDiff] = useState<Top5Rate[]>([]);
 
   const [data, setData] = useState<any[]>([]); // 数据状态
   // const stats = [
@@ -199,8 +202,12 @@ const App: React.FC = () => {
         setTop5EffectiveRate(reportData.data.top_5_effective_rate);
         setTop5HighTempImpactRate(reportData.data.top_5_high_temp_impact_rate);
         setTop5LimitImpactRate(reportData.data.top_5_limit_impact_rate);
-        setTop5FailureRate(reportData.data.top_5_failure_rate);
-        setTop5PendingRepairRate(reportData.data.top_5_pending_repair_rate);
+
+        // setTop5FailureRate(reportData.data.top_5_failure_rate);
+        // setTop5PendingRepairRate(reportData.data.top_5_pending_repair_rate);
+        setTop5EffectiveRateDiff(reportData.data.top_5_effective_rate_diff || []);
+        setTop5FailureRateDiff(reportData.data.top_5_failure_rate_diff || []);
+        setTop5PendingRepairRateDiff(reportData.data.top_5_pending_repair_rate_diff || []);
         setData(reportData.data.detail);
         setLoading(false);
       }
@@ -326,17 +333,42 @@ const App: React.FC = () => {
               defaultActiveKey="fail"
               items={[
                 {
-                  key: "fail",
-                  label: "故障率排名",
+                  key: "effective_diff",
+                  label: "有效率变化Top 5",
                   children: (
-                    <ImpactCard title="" data={top5FailureRate} onReload={handleReload} border="none" />
+                    <ImpactCard
+                      title=""
+                      data={top5EffectiveRateDiff}
+                      onReload={handleReload}
+                      border="none"
+                      diff
+                    />
                   ),
                 },
                 {
-                  key: "pending",
-                  label: "待修率排名",
+                  key: "failure_diff",
+                  label: "故障率变化Top 5",
                   children: (
-                    <ImpactCard title="" data={top5PendingRepairRate} onReload={handleReload} border="none" />
+                    <ImpactCard
+                      title=""
+                      data={top5FailureRateDiff}
+                      onReload={handleReload}
+                      border="none"
+                      diff
+                    />
+                  ),
+                },
+                {
+                  key: "pending_diff",
+                  label: "故障率变化Top 5",
+                  children: (
+                    <ImpactCard
+                      title=""
+                      data={top5PendingRepairRateDiff}
+                      onReload={handleReload}
+                      border="none"
+                      diff
+                    />
                   ),
                 },
               ]}

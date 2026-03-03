@@ -12,9 +12,10 @@ interface HeatImpactCardProps {
   data: DataItem[];
   onReload?: () => void;
   border?: "none" | "default";
+  diff?: boolean;
 }
 
-const ImpactCard: React.FC<HeatImpactCardProps> = ({ title, data, onReload, border }) => {
+const ImpactCard: React.FC<HeatImpactCardProps> = ({ title, data, onReload, border, diff }) => {
   let color = "blue-500";
   if (title == "高温影响率排名") {
     color = "orange-500";
@@ -40,19 +41,29 @@ const ImpactCard: React.FC<HeatImpactCardProps> = ({ title, data, onReload, bord
           .map((item, index) => (
             <div key={item.venue_name} className="flex items-center ">
               <div
-                className={`w-5 h-5  rounded-full text-sm flex items-center justify-center mr-3 ${index < 3 ? `bg-${color} text-white ` : "bg-gray-100 text-gray-500"}`}
+                className={`w-5 h-5  rounded-full text-sm flex items-center justify-center mr-3 ${
+                  index < 3
+                    ? `bg-${diff ? (item.rate > 0 ? "green-500" : item.rate < 0 ? "red-500" : "gray-400") : color} text-white `
+                    : "bg-gray-100 text-gray-500"
+                }`}
               >
                 {index + 1}
               </div>
               <div className="flex-1">
                 <div className="flex justify-between mb-1" style={{ fontSize: "13px" }}>
                   <span className="font-medium">{item.venue_name}</span>
-                  <span className={`text-${color}`}>{item.rate}%</span>
+                  <span
+                    className={`text-${diff ? (item.rate > 0 ? "green-500" : item.rate < 0 ? "red-500" : "gray-500") : color}`}
+                  >
+                    {diff
+                      ? `${item.rate > 0 ? "+" : item.rate < 0 ? "-" : ""}${Math.abs(item.rate).toFixed(2)}%`
+                      : `${item.rate.toFixed(2)}%`}
+                  </span>
                 </div>
                 <div className="w-full bg-gray-100 rounded-full h-1">
                   <div
-                    className={`bg-${color} h-1 rounded-full `}
-                    style={{ width: `${item.rate > 100 ? 100 : item.rate}%` }}
+                    className={`bg-${diff ? (item.rate > 0 ? "green-500" : item.rate < 0 ? "red-500" : "gray-400") : color} h-1 rounded-full `}
+                    style={{ width: `${Math.min(Math.abs(item.rate), 100)}%` }}
                   ></div>
                 </div>
               </div>
