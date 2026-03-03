@@ -316,7 +316,10 @@ const VenuePage: React.FC<VenueTableProps> = ({ data, startDate, endDate, onRequ
         return (
           <div className="flex items-center gap-2">
             <div className="flex-1 bg-gray-200 rounded-full h-2">
-              <div className={`${barColor} h-2 rounded-full`} style={{ width: `${value}%` }}></div>
+              <div
+                className={`${barColor} h-2 rounded-full`}
+                style={{ width: `${Math.min(value, 100)}%` }}
+              ></div>
             </div>
             <span>{value}%</span>
             <span className={`${indicatorColor} text-xs ml-1`}>
@@ -347,19 +350,34 @@ const VenuePage: React.FC<VenueTableProps> = ({ data, startDate, endDate, onRequ
     },
     {
       title: "故障率",
-      width: 150,
+      width: 250,
       dataIndex: "average_failure_rate",
       key: "average_failure_rate",
       align: "center",
       sorter: (a, b) => a.average_failure_rate - b.average_failure_rate,
-      render: (value) => (
-        <div className="flex items-center gap-2">
-          <div className="flex-1 bg-gray-200 rounded-full h-2">
-            <div className="bg-red-500 h-2 rounded-full" style={{ width: `${value}%` }}></div>
+      render: (value: number | undefined, record: any) => {
+        const diff = record?.failure_rate_diff_rate ?? 0;
+        const isIncrease = diff > 0;
+        const barColor = isIncrease ? "bg-green-500" : diff < 0 ? "bg-red-500" : "bg-gray-400";
+        const indicatorColor = isIncrease ? "text-green-600" : diff < 0 ? "text-red-600" : "text-gray-500";
+        const arrow = isIncrease ? "↑ " : diff < 0 ? "↓ " : "→ ";
+
+        return (
+          <div className="flex items-center gap-2">
+            <div className="flex-1 bg-gray-200 rounded-full h-2">
+              <div
+                className={`${barColor} h-2 rounded-full`}
+                style={{ width: `${Math.min(value ?? 0, 100)}%` }}
+              ></div>
+            </div>
+            <span>{value}%</span>
+            <span className={`${indicatorColor} text-xs ml-1`}>
+              {arrow}
+              {Math.abs(diff).toFixed(2)}%
+            </span>
           </div>
-          <span>{value}%</span>
-        </div>
-      ),
+        );
+      },
     },
     {
       title: "待修率",
@@ -368,7 +386,22 @@ const VenuePage: React.FC<VenueTableProps> = ({ data, startDate, endDate, onRequ
       key: "average_pending_repair_rate",
       align: "center",
       sorter: (a, b) => a.average_pending_repair_rate - b.average_pending_repair_rate,
-      render: (value) => <span>{value}%</span>,
+      render: (value: number | undefined, record: any) => {
+        const diff = record?.pending_repair_rate_diff_rate ?? 0;
+        const isIncrease = diff > 0;
+        // const barColor = isIncrease ? "bg-green-500" : diff < 0 ? "bg-red-500" : "bg-gray-400";
+        const indicatorColor = isIncrease ? "text-green-600" : diff < 0 ? "text-red-600" : "text-gray-500";
+        const arrow = isIncrease ? "↑ " : diff < 0 ? "↓ " : "→ ";
+        return (
+          <div className="flex items-center gap-2">
+            <span>{value}%</span>
+            <span className={`${indicatorColor} text-xs ml-1`}>
+              {arrow}
+              {Math.abs(diff).toFixed(2)}%
+            </span>
+          </div>
+        );
+      },
     },
     {
       title: "净故障率",
