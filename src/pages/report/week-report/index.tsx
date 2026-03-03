@@ -1,6 +1,6 @@
 // 代码已包含 CSS：使用 TailwindCSS , 安装 TailwindCSS 后方可看到布局样式效果
 import React, { useEffect, useState } from "react";
-import { DatePicker, Spin } from "antd";
+import { DatePicker, Spin, Tabs } from "antd";
 import dayjs from "dayjs";
 import weekOfYear from "dayjs/plugin/weekOfYear";
 import { Calendar as CalendarIcon, Clock } from "lucide-react";
@@ -68,6 +68,9 @@ const App: React.FC = () => {
   const [top5EffectiveRate, setTop5EffectiveRate] = useState<Top5Rate[]>([]);
   const [top5HighTempImpactRate, setTop5HighTempImpactRate] = useState<Top5Rate[]>([]);
   const [top5LimitImpactRate, setTop5LimitImpactRate] = useState<Top5Rate[]>([]);
+  const [top5FailureRate, setTop5FailureRate] = useState<Top5Rate[]>([]);
+  const [top5PendingRepairRate, setTop5PendingRepairRate] = useState<Top5Rate[]>([]);
+
   const [data, setData] = useState<any[]>([]); // 数据状态
   // const stats = [
   //   {
@@ -196,6 +199,8 @@ const App: React.FC = () => {
         setTop5EffectiveRate(reportData.data.top_5_effective_rate);
         setTop5HighTempImpactRate(reportData.data.top_5_high_temp_impact_rate);
         setTop5LimitImpactRate(reportData.data.top_5_limit_impact_rate);
+        setTop5FailureRate(reportData.data.top_5_failure_rate);
+        setTop5PendingRepairRate(reportData.data.top_5_pending_repair_rate);
         setData(reportData.data.detail);
         setLoading(false);
       }
@@ -290,7 +295,7 @@ const App: React.FC = () => {
           <ImpactCard title="场地运行排名" data={top5EffectiveRate} onReload={handleReload} />
         </div>
         <div className="grid grid-cols-3 gap-4 mb-6">
-          <div className="bg-white p-4 rounded-[4px] border border-[#F0F2F5] shadow-sm">
+          {/* <div className="bg-white p-4 rounded-[4px] border border-[#F0F2F5] shadow-sm">
             <div className="flex justify-between items-start mb-4">
               <h3 className="text-lg font-bold">本周预警事件</h3>
               <span className="text-green-500">0 个未处理</span>
@@ -312,6 +317,30 @@ const App: React.FC = () => {
                 </div>
               ))}
             </div>
+          </div> */}
+          <div className="bg-white">
+            <Tabs
+              type="card"
+              size="small"
+              tabBarStyle={{ borderBottom: "none", paddingTop: "10px" }}
+              defaultActiveKey="fail"
+              items={[
+                {
+                  key: "fail",
+                  label: "故障率排名",
+                  children: (
+                    <ImpactCard title="" data={top5FailureRate} onReload={handleReload} border="none" />
+                  ),
+                },
+                {
+                  key: "pending",
+                  label: "待修率排名",
+                  children: (
+                    <ImpactCard title="" data={top5PendingRepairRate} onReload={handleReload} border="none" />
+                  ),
+                },
+              ]}
+            />
           </div>
           <ImpactCard title="高温影响率排名" data={top5HighTempImpactRate} onReload={handleReload} />
           <ImpactCard title="限电影响率排名" data={top5LimitImpactRate} onReload={handleReload} />
