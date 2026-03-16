@@ -726,9 +726,12 @@ export default function MiningSettingPage() {
   const filteredData = tableData
     .filter((item: { [key: string]: any }) => {
       // 1️⃣ 搜索词过滤
-      const matchesSearch = Object.values(item).some((value) =>
-        String(value).toLowerCase().includes(searchTerm.toLowerCase()),
-      );
+      const search = (searchTerm || "").trim().toLowerCase();
+      const matchesSearch =
+        search === "" ||
+        String(item?.venue_name || "")
+          .toLowerCase()
+          .includes(search);
 
       // 2️⃣ 收藏过滤
       const matchesCollection = !showCollectionOnly || item.collection === 1;
@@ -873,7 +876,6 @@ export default function MiningSettingPage() {
             columns={columns}
             handleDelete={handleDelete}
             handleSave={handleSave}
-            // onSorterChange={setHashrateSortOrder}
           />
         )}
         <Modal

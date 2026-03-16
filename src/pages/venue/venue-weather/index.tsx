@@ -345,7 +345,11 @@ const App: React.FC = () => {
                 />
                 <div className="max-h-60 overflow-y-auto">
                   {(venueOptions || [])
-                    .filter((v) => v.name.includes(filters.siteName))
+                    .filter((v) =>
+                      String(v.name)
+                        .toLowerCase()
+                        .includes(String(filters.siteName || "").toLowerCase()),
+                    )
                     .map((v, index) => (
                       <div key={v.id} className="flex items-center py-2 hover:bg-gray-50 rounded">
                         <input

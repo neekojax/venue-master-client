@@ -41,6 +41,7 @@ interface FailureRate {
   date: string;
   failureRate: number;
 }
+
 interface Top5Rate {
   venue_name: string;
   rate: number;
@@ -383,4 +384,5 @@ const App: React.FC = () => {
     </div>
   );
 };
+
 export default App;

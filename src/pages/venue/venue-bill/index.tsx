@@ -80,7 +80,11 @@ const App: React.FC = () => {
                       />
                       <div className="max-h-60 overflow-y-auto">
                         {powerSites
-                          .filter((site: string) => site.includes(filters.siteName))
+                          .filter((site: string) =>
+                            String(site)
+                              .toLowerCase()
+                              .includes(String(filters.siteName || "").toLowerCase()),
+                          )
                           .map((site: string, index: number) => (
                             <div key={index} className="flex items-center py-2 hover:bg-gray-50 rounded">
                               <input
@@ -167,7 +171,11 @@ const App: React.FC = () => {
                       />
                       <div className="max-h-60 overflow-y-auto">
                         {serviceSites
-                          .filter((site: string) => site.includes(filters.siteName))
+                          .filter((site: string) =>
+                            String(site)
+                              .toLowerCase()
+                              .includes(String(filters.siteName || "").toLowerCase()),
+                          )
                           .map((site: string, index: number) => (
                             <div key={index} className="flex items-center py-2 hover:bg-gray-50 rounded">
                               <input

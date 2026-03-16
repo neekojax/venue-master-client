@@ -80,12 +80,13 @@ const VenueManagement: React.FC = () => {
   useEffect(() => {
     let result = venues;
     if (searchText) {
-      result = result.filter(
-        (item) =>
-          item.venue_name.includes(searchText) ||
-          item.venue_code?.includes(searchText) ||
-          item.address?.includes(searchText),
-      );
+      const q = (searchText || "").toLowerCase();
+      result = result.filter((item) => {
+        const name = String(item.venue_name || "").toLowerCase();
+        const code = String(item.venue_code || "").toLowerCase();
+        const addr = String(item.address || "").toLowerCase();
+        return name.includes(q) || code.includes(q) || addr.includes(q);
+      });
     }
     if (countryFilter) {
       result = result.filter((item) => item.country === countryFilter);
