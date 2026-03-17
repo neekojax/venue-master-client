@@ -244,7 +244,10 @@ const VenueManagement: React.FC = () => {
                 const color = s === 1 ? "green" : s === 0 ? "red" : s === 2 ? "orange" : "#666";
                 const text = s === 1 ? "活跃" : s === 0 ? "关机" : s === 2 ? "已撤场" : "未知";
                 return (
-                  <span key={`${pool.pool_id}-${idx}`} style={{ whiteSpace: "nowrap", display: "block" }}>
+                  <span
+                    key={`${pool.pool_id}-${idx}`}
+                    style={{ whiteSpace: "nowrap", display: "block", width: "100%" }}
+                  >
                     <span style={{ color: "#333" }}>{pool.pool_name}</span>
                     <span style={{ color, marginLeft: 4 }}>（{text}）</span>
                   </span>
