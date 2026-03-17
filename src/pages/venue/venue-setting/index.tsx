@@ -19,6 +19,12 @@ import { VenueInfoParam } from "@/pages/venue/type.tsx";
 const { TextArea } = Input;
 const { Option } = Select;
 
+interface Pool {
+  pool_id: number;
+  pool_type: string;
+  pool_name: string;
+  status: number; // 活跃
+}
 interface Venue {
   id: number;
   venue_type: string;
@@ -29,6 +35,7 @@ interface Venue {
   agent_key: string | null;
   hosted_machine: number;
   miner_type: string | null;
+  pools: Pool[];
 }
 
 const VenueManagement: React.FC = () => {
@@ -43,6 +50,7 @@ const VenueManagement: React.FC = () => {
   // const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([]);
   const [searchText, setSearchText] = useState("");
   const [countryFilter, setCountryFilter] = useState<string | null>(null);
+  const [poolStatusFilter, setPoolStatusFilter] = useState<number | null>(null);
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [currentVenue, setCurrentVenue] = useState<Venue | null>(null);
   const [form] = Form.useForm();
@@ -52,7 +60,7 @@ const VenueManagement: React.FC = () => {
 
   const [pageSize, setPageSize] = useState(20); // 新增状态管理页大小
 
-  // 当获取到数据时更新 venues
+  // 当获取到数据时更新 venues 和 filteredVenues
   useEffect(() => {
     if (data) {
       // console.log(data);
@@ -67,6 +75,7 @@ const VenueManagement: React.FC = () => {
           agent_key: item.agent_key,
           hosted_machine: item.hosted_machine,
           miner_type: item.miner_type,
+          pools: item.pools || [], // 补充池数据，默认空数组
         }));
         setVenues(formattedData);
         setFilteredVenues(formattedData);
@@ -91,8 +100,13 @@ const VenueManagement: React.FC = () => {
     if (countryFilter) {
       result = result.filter((item) => item.country === countryFilter);
     }
+    if (poolStatusFilter !== null) {
+      result = result.filter(
+        (item) => Array.isArray(item.pools) && item.pools.some((p) => Number(p?.status) === poolStatusFilter),
+      );
+    }
     setFilteredVenues(result);
-  }, [searchText, countryFilter, venues]);
+  }, [searchText, countryFilter, poolStatusFilter, venues]);
 
   const handleSearch = (value: string) => {
     setSearchText(value);
@@ -218,6 +232,29 @@ const VenueManagement: React.FC = () => {
       sorter: (a: Venue, b: Venue) => a.venue_name.localeCompare(b.venue_name),
     },
     {
+      title: "矿池",
+      dataIndex: "pools",
+      width: 200,
+      render: (pools: Pool[]) => {
+        return (
+          <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
+            {Array.isArray(pools) &&
+              pools.map((pool, idx) => {
+                const s = Number(pool?.status ?? -1);
+                const color = s === 1 ? "green" : s === 0 ? "red" : s === 2 ? "orange" : "#666";
+                const text = s === 1 ? "活跃" : s === 0 ? "关机" : s === 2 ? "已撤场" : "未知";
+                return (
+                  <span key={`${pool.pool_id}-${idx}`} style={{ whiteSpace: "nowrap" }}>
+                    <span style={{ color: "#333" }}>{pool.pool_name}</span>
+                    <span style={{ color, marginLeft: 4 }}>（{text}）</span>
+                  </span>
+                );
+              })}
+          </div>
+        );
+      },
+    },
+    {
       title: "场地代码",
       dataIndex: "venue_code",
       sorter: (a: Venue, b: Venue) => (a.venue_code || "").localeCompare(b.venue_code || ""),
@@ -334,6 +371,54 @@ const VenueManagement: React.FC = () => {
                 {country}
               </Option>
             ))}
+          </Select>
+          <Select
+            size="small"
+            placeholder="按状态筛选"
+            allowClear
+            value={poolStatusFilter as any}
+            onChange={(v) => setPoolStatusFilter(v ?? null)}
+            className="w-32"
+          >
+            <Option value={1}>
+              <span
+                style={{
+                  display: "inline-block",
+                  width: 6,
+                  height: 6,
+                  borderRadius: "50%",
+                  backgroundColor: "green",
+                  marginRight: 6,
+                }}
+              />
+              活跃
+            </Option>
+            <Option value={0}>
+              <span
+                style={{
+                  display: "inline-block",
+                  width: 6,
+                  height: 6,
+                  borderRadius: "50%",
+                  backgroundColor: "red",
+                  marginRight: 6,
+                }}
+              />
+              关机
+            </Option>
+            <Option value={2}>
+              <span
+                style={{
+                  display: "inline-block",
+                  width: 6,
+                  height: 6,
+                  borderRadius: "50%",
+                  backgroundColor: "#9CA3AF",
+                  marginRight: 6,
+                }}
+              />
+              已撤场
+            </Option>
           </Select>
 
           <Button

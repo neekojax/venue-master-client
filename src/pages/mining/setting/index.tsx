@@ -671,6 +671,11 @@ export default function MiningSettingPage() {
 
   // 处理状态筛选变化
   const handleStatusFilterChange = (value: number | null) => {
+    // console.log("》〉》value", value);
+    if (value === null || String(value).trim() === "" || value === undefined) {
+      setStatusFilter(null);
+      return;
+    }
     setStatusFilter(value);
     // 重置分页到第一页（如果使用了分页组件的话）
     // 这里可以添加重置分页的逻辑
@@ -737,7 +742,8 @@ export default function MiningSettingPage() {
       const matchesCollection = !showCollectionOnly || item.collection === 1;
 
       // 3️⃣ 状态过滤
-      const matchesStatus = statusFilter === null || item.status === statusFilter;
+      const matchesStatus =
+        statusFilter === null || String(item?.status ?? "").trim() === "" || item.status === statusFilter;
 
       return matchesSearch && matchesCollection && matchesStatus;
     })
