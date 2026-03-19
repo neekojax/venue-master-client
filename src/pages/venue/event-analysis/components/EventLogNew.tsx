@@ -4,6 +4,7 @@ import {
   DeleteOutlined,
   DownloadOutlined,
   EditOutlined,
+  FileTextOutlined,
   FilterOutlined,
   PlusOutlined,
   SyncOutlined,
@@ -11,6 +12,7 @@ import {
 import {
   Button,
   DatePicker,
+  Drawer,
   Form,
   Input,
   message,
@@ -32,7 +34,7 @@ import { exportEventLogsToExcel } from "@/utils/excel";
 
 import "@/styles/compact-form.css";
 
-import { fetchEventLogForExport } from "@/pages/venue/api.tsx";
+import { fetchEventLogForExport, fetchEventOperationLogs } from "@/pages/venue/api.tsx";
 // import { getTimeDifference } from "@/utils/date";
 import UploadExcel from "@/pages/venue/components/UploadExcel";
 import {
@@ -416,23 +418,31 @@ const App: React.FC = () => {
     {
       title: "操作",
       key: "action",
-      width: 120,
+      width: 180,
       fixed: "right",
       render: (_, record) => (
-        <Space size="middle">
+        <Space size="small">
           <Button
             type="text"
             icon={<EditOutlined />}
             onClick={() => handleEdit(record)}
             className="!rounded-button"
           />
+          <Tooltip title="操作日志" style={{ display: "none" }}>
+            <Button
+              type="text"
+              icon={<FileTextOutlined />}
+              onClick={() => handleOpenOperationLogs(record)}
+              className="!rounded-button"
+            />
+          </Tooltip>
           <Popconfirm
             title="确定要删除这条记录吗？"
             onConfirm={() => handleDelete(record.id)}
             okText="确定"
             cancelText="取消"
           >
-            <Button type="text" icon={<DeleteOutlined />} className="!rounded-button" />
+            <Button type="text" danger icon={<DeleteOutlined />} className="!rounded-button" />
           </Popconfirm>
         </Space>
       ),
@@ -508,6 +518,74 @@ const App: React.FC = () => {
       setIsModalVisible(false);
     });
   };
+
+  // 操作日志抽屉
+  const [opDrawerOpen, setOpDrawerOpen] = useState(false);
+  const [opLoading, setOpLoading] = useState(false);
+  const [opLogs, setOpLogs] = useState<any[]>([]);
+  const [opEventId, setOpEventId] = useState<number | null>(null);
+
+  const handleOpenOperationLogs = async (record: EventLog) => {
+    setOpEventId(record.id);
+    setOpDrawerOpen(true);
+    setOpLoading(true);
+    try {
+      const res: any = await fetchEventOperationLogs(record.id);
+      // console.log("res", res);
+      const rows = Array.isArray(res?.data.list)
+        ? res.data.list
+        : Array.isArray(res?.data?.data)
+          ? res.data.data
+          : [];
+      setOpLogs(rows || []);
+    } catch (e: any) {
+      message.error("获取操作日志失败");
+      setOpLogs([]);
+    } finally {
+      setOpLoading(false);
+    }
+  };
+
+  const opColumns = React.useMemo(() => {
+    const cols: ColumnsType<any> = [
+      { title: "用户", dataIndex: "username", key: "username", width: 120, ellipsis: true },
+
+      { title: "状态", dataIndex: "response_status", key: "response_status", width: 100, ellipsis: true },
+      { title: "操作类型", dataIndex: "operation_type", key: "operation_type", width: 140, ellipsis: true },
+      {
+        title: "描述",
+        dataIndex: "operation_desc",
+        key: "operation_desc",
+        width: 120,
+        ellipsis: { showTitle: false },
+        render: (text: any) => (
+          <Tooltip placement="topLeft" title={String(text ?? "")}>
+            <span
+              style={{
+                display: "inline-block",
+                maxWidth: "100%",
+                overflow: "hidden",
+                textOverflow: "ellipsis",
+                whiteSpace: "nowrap",
+                verticalAlign: "middle",
+              }}
+            >
+              {text ?? "-"}
+            </span>
+          </Tooltip>
+        ),
+      },
+      { title: "IP", dataIndex: "ip", key: "ip", width: 130, ellipsis: true },
+      {
+        title: "时间",
+        dataIndex: "created_at",
+        key: "created_at",
+        width: 180,
+        render: (text: any) => (text ? dayjs(text).format("YYYY-MM-DD HH:mm:ss") : "-"),
+      },
+    ];
+    return cols;
+  }, [opLogs]);
 
   return (
     <div className="">
@@ -807,6 +885,27 @@ const App: React.FC = () => {
           />
         </div>
       </div>
+      <Drawer
+        title={`操作日志${opEventId ? ` #${opEventId}` : ""}`}
+        placement="right"
+        width={720}
+        onClose={() => setOpDrawerOpen(false)}
+        open={opDrawerOpen}
+        destroyOnClose
+        bodyStyle={{ padding: 0 }}
+      >
+        <div style={{ padding: 16 }}>
+          <Table
+            loading={opLoading}
+            columns={opColumns as any}
+            dataSource={(opLogs || []).map((r: any, idx: number) => ({ key: idx, ...r }))}
+            pagination={false}
+            sticky
+            scroll={{ y: "60vh" }}
+            size="small"
+          />
+        </div>
+      </Drawer>
       <Modal
         title={form.getFieldValue("id") ? "编辑事件" : "新增事件"}
         open={isModalVisible}

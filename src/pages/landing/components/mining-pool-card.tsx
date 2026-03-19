@@ -52,6 +52,7 @@ const MiningPoolCard: React.FC<MiningPoolCardProps> = ({ poolType }) => {
         totalCurrentHashRate: 0, // 默认算力
         totalMasterCurrentHashrate: 0, // 默认主矿池算力
         totalBackUpCurrentHashrate: 0, // 默认备用矿池算力
+        totalLeasedPowerHashrate: 0, // 默认已租算力
         realTimeHashEfficiency: "N/A",
       });
     } finally {
@@ -147,13 +148,49 @@ const MiningPoolCard: React.FC<MiningPoolCardProps> = ({ poolType }) => {
           />
         </Col>
         <Col span={8}>
-          <Statistic
-            title="理论算力"
-            className="fs-6 text-gray-500 fw-semibold"
-            value={realTimeStatus?.totalTheoreticalHashrate}
-            suffix={<span style={{ fontSize: "16px", color: "gray", fontWeight: "normal" }}>PH/s</span>}
-            valueStyle={{ fontSize: "20px", fontWeight: "bold" }}
-          />
+          <div>
+            <Statistic
+              title="理论算力"
+              className="fs-6 text-gray-500 fw-semibold"
+              value={realTimeStatus?.totalTheoreticalHashrate}
+              suffix={<span style={{ fontSize: "16px", color: "gray", fontWeight: "normal" }}>PH/s</span>}
+              valueStyle={{ fontSize: "20px", fontWeight: "bold" }}
+            />
+            <div style={{ marginTop: 6 }}>
+              <Tooltip title="当前正在租赁的算力">
+                <span
+                  style={{
+                    display: "inline-flex",
+                    alignItems: "center",
+                    gap: 6,
+                    background: "#f3f4f6",
+                    color: "#374151",
+                    borderRadius: 12,
+                    padding: "2px 8px",
+                    fontSize: 12,
+                  }}
+                >
+                  <span
+                    style={{
+                      width: 6,
+                      height: 6,
+                      borderRadius: "50%",
+                      backgroundColor: "#10B981",
+                      display: "inline-block",
+                    }}
+                  />
+                  <span>
+                    租赁算力{" "}
+                    {new Intl.NumberFormat("zh-CN", {
+                      minimumFractionDigits: 2,
+                      maximumFractionDigits: 2,
+                    }).format(Number(realTimeStatus?.totalLeasedPowerHashrate ?? 0))}{" "}
+                    PH/s
+                  </span>
+                </span>
+              </Tooltip>
+            </div>
+          </div>
         </Col>
         {/* <Col span={8} style={{ paddingLeft: "16px" }}>
           <Statistic
@@ -173,7 +210,7 @@ const MiningPoolCard: React.FC<MiningPoolCardProps> = ({ poolType }) => {
           />
         </Col>
       </Row>
-      <Row style={{ marginTop: "48px" }} gutter={16}>
+      <Row style={{ marginTop: "18px" }} gutter={16}>
         <Col span={12}>
           <Flex gap="middle" vertical>
             {[

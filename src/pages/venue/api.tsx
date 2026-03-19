@@ -141,6 +141,11 @@ export const fetchEventLogForExport = async (poolType: string, params?: Record<s
   return await fetchGet(`/event/listEventForExport/${poolType}`, params);
 };
 
+// /event/operationLogs/:eventId 获取事件操作日志
+export const fetchEventOperationLogs = async (eventId: number) => {
+  return await fetchGet(`/event/operationLogs/${eventId}`);
+};
+
 // GET 天气监控列表接口 /weather/monitoring/:venueId
 export const fetchWeatherMonitoring = async (venueID: number) => {
   return await fetchGet(`/weather/monitoring/${venueID}`);
