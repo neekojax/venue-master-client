@@ -430,6 +430,7 @@ const App: React.FC = () => {
           />
           <Tooltip title="操作日志" style={{ display: "none" }}>
             <Button
+              style={{ display: "none" }}
               type="text"
               icon={<FileTextOutlined />}
               onClick={() => handleOpenOperationLogs(record)}
