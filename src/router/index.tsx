@@ -8,6 +8,7 @@ import { ROUTE_PATHS } from "@/constants/common";
 import { custodyMenuRoute } from "@/router/modules/custody-statistics.tsx";
 import { electricMenuRoute } from "@/router/modules/electric-data.tsx";
 import { hashDetailRoute } from "@/router/modules/hash-detail.tsx";
+import { logsRoute } from "@/router/modules/logs.tsx";
 import { miningRoute } from "@/router/modules/mining.tsx";
 import { poolHashHistoryRoute } from "@/router/modules/pool-hash-history.tsx";
 import { poolProfitHistoryRoute } from "@/router/modules/pool-profit-history.tsx";
@@ -52,6 +53,7 @@ const routes: RouteObject[] = [
       custodyMenuRoute,
       electricMenuRoute,
       utilityRoute,
+      logsRoute,
     ],
   },
   {

@@ -5,7 +5,7 @@ import { SiNginxproxymanager } from "react-icons/si";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { HomeOutlined, ProductOutlined } from "@ant-design/icons"; //<RadiusSettingOutlined />
 import { Layout, Menu, type MenuProps } from "antd";
-import { Wrench } from "lucide-react";
+import { FileText, Wrench } from "lucide-react";
 import { useTheme } from "@/components/theme-provider";
 import logo from "../../../public/logo_middle.png";
 import { ROUTE_PATHS } from "@/constants/common";
@@ -41,9 +41,9 @@ const SiderItems = (permissionIds: string, permissionRoutes: string, selectedKey
       return false;
     }
     const routerArr = permissionRoutes.split(",");
-    console.log(routerArr);
-    console.log(route);
-    console.log(routerArr.includes(route));
+    // console.log(routerArr);
+    // console.log(route);
+    // console.log(routerArr.includes(route));
     // console.log(permissionRoutes);
     return !routerArr.includes(route);
   };
@@ -194,6 +194,17 @@ const SiderItems = (permissionIds: string, permissionRoutes: string, selectedKey
       key: ROUTE_PATHS.utility,
       label: <Link to={ROUTE_PATHS.utility}>实用工具</Link>,
     },
+    {
+      icon: selectedKeys?.includes(ROUTE_PATHS.logs) ? (
+        <FileText size={18} />
+      ) : (
+        <FileText size={18} style={{ color: "#bbb" }} />
+      ),
+      key: ROUTE_PATHS.logs,
+      hidden: hasPermission(ROUTE_PATHS.logs),
+      label: <Link to={ROUTE_PATHS.logs}>操作日志</Link>,
+    },
+
     // {
     //   icon: <BiLoaderCircle />,
     //   label: "电网数据",

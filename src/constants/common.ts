@@ -3,6 +3,8 @@ export const ROUTE_PATHS = {
   user: "/user", // 用户中心～修改密码
   notFound: "/not-found",
   landing: "/index",
+  logs: "/ops_logs",
+  logsDetail: (id: string | number) => `/ops_logs/detail/${id}`,
   // base: "/base",
   userManagement: "/user-management",
   echartsDemo: "/echarts-demo",

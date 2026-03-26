@@ -29,6 +29,7 @@ import type { ColumnsType } from "antd/es/table";
 import dayjs from "dayjs";
 import isBetween from "dayjs/plugin/isBetween"; // 引入 isBetween 插件
 import { EventLogParam } from "../../type";
+import { ROUTE_PATHS } from "@/constants/common";
 import { useSelector, useSettingsStore } from "@/stores"; // 根据实际路径调整
 import { exportEventLogsToExcel } from "@/utils/excel";
 
@@ -79,6 +80,9 @@ const App: React.FC = () => {
   // 模态框内子账户联动（按场地ID）
   const [modalPoolOptions, setModalPoolOptions] = useState<{ value: number; label: string }[]>([]);
   const selectedVenueId = Form.useWatch("venue_id", form);
+  const permission_routes = localStorage.getItem("permission_routes");
+  const is_log_visible = permission_routes?.includes(ROUTE_PATHS.logs);
+  console.log("is_log_visible", is_log_visible);
   // // 参数对象（在依赖声明之后构建）
   // const params: EventLogParam = useMemo(() => ({
   //   page: currentPage,
@@ -428,15 +432,13 @@ const App: React.FC = () => {
             onClick={() => handleEdit(record)}
             className="!rounded-button"
           />
-          <Tooltip title="操作日志" style={{ display: "none" }}>
-            <Button
-              style={{ display: "none" }}
-              type="text"
-              icon={<FileTextOutlined />}
-              onClick={() => handleOpenOperationLogs(record)}
-              className="!rounded-button"
-            />
-          </Tooltip>
+          {is_log_visible && (
+            <Tooltip title="操作日志">
+              <Link to={ROUTE_PATHS.logsDetail(record.id)}>
+                <Button type="text" icon={<FileTextOutlined />} className="!rounded-button" />
+              </Link>
+            </Tooltip>
+          )}
           <Popconfirm
             title="确定要删除这条记录吗？"
             onConfirm={() => handleDelete(record.id)}
@@ -526,7 +528,7 @@ const App: React.FC = () => {
   const [opLogs, setOpLogs] = useState<any[]>([]);
   const [opEventId, setOpEventId] = useState<number | null>(null);
 
-  const handleOpenOperationLogs = async (record: EventLog) => {
+  const handleOpenOperationLogs = async (record: any) => {
     setOpEventId(record.id);
     setOpDrawerOpen(true);
     setOpLoading(true);
@@ -546,6 +548,7 @@ const App: React.FC = () => {
       setOpLoading(false);
     }
   };
+  handleOpenOperationLogs([]);
 
   const opColumns = React.useMemo(() => {
     const cols: ColumnsType<any> = [
