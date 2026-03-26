@@ -35,7 +35,7 @@ import { exportEventLogsToExcel } from "@/utils/excel";
 
 import "@/styles/compact-form.css";
 
-import { fetchEventLogForExport, fetchEventOperationLogs } from "@/pages/venue/api.tsx";
+import { fetchEventLogForExport } from "@/pages/venue/api.tsx";
 // import { getTimeDifference } from "@/utils/date";
 import UploadExcel from "@/pages/venue/components/UploadExcel";
 import {
@@ -524,31 +524,30 @@ const App: React.FC = () => {
 
   // 操作日志抽屉
   const [opDrawerOpen, setOpDrawerOpen] = useState(false);
-  const [opLoading, setOpLoading] = useState(false);
-  const [opLogs, setOpLogs] = useState<any[]>([]);
-  const [opEventId, setOpEventId] = useState<number | null>(null);
+  const [opLoading] = useState(false);
+  const [opLogs] = useState<any[]>([]);
+  const [opEventId] = useState<number | null>(null);
 
-  const handleOpenOperationLogs = async (record: any) => {
-    setOpEventId(record.id);
-    setOpDrawerOpen(true);
-    setOpLoading(true);
-    try {
-      const res: any = await fetchEventOperationLogs(record.id);
-      // console.log("res", res);
-      const rows = Array.isArray(res?.data.list)
-        ? res.data.list
-        : Array.isArray(res?.data?.data)
-          ? res.data.data
-          : [];
-      setOpLogs(rows || []);
-    } catch (e: any) {
-      message.error("获取操作日志失败");
-      setOpLogs([]);
-    } finally {
-      setOpLoading(false);
-    }
-  };
-  handleOpenOperationLogs([]);
+  // const handleOpenOperationLogs = async (record: any) => {
+  //   setOpEventId(record.id);
+  //   setOpDrawerOpen(true);
+  //   setOpLoading(true);
+  //   try {
+  //     const res: any = await fetchEventOperationLogs(record.id);
+  //     // console.log("res", res);
+  //     const rows = Array.isArray(res?.data.list)
+  //       ? res.data.list
+  //       : Array.isArray(res?.data?.data)
+  //         ? res.data.data
+  //         : [];
+  //     setOpLogs(rows || []);
+  //   } catch (e: any) {
+  //     message.error("获取操作日志失败");
+  //     setOpLogs([]);
+  //   } finally {
+  //     setOpLoading(false);
+  //   }
+  // };
 
   const opColumns = React.useMemo(() => {
     const cols: ColumnsType<any> = [
