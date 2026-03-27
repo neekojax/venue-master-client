@@ -17,15 +17,14 @@ const LogsDetail: React.FC = () => {
 
   const columns: ColumnsType<any> = useMemo(
     () => [
-      { title: "操作者", dataIndex: "username", key: "username", width: 120, ellipsis: true },
-      { title: "IP", dataIndex: "ip", key: "ip", width: 130, ellipsis: true },
-      { title: "状态", dataIndex: "response_status", key: "response_status", width: 100, ellipsis: true },
+      { title: "操作者", dataIndex: "username", key: "username", width: 120 },
+      { title: "IP", dataIndex: "ip", key: "ip", width: 140 },
+      { title: "状态", dataIndex: "response_status", key: "response_status", width: 100 },
       {
         title: "事件行为",
         dataIndex: "operation_desc",
         key: "operation_desc",
-        width: 220,
-        ellipsis: { showTitle: false },
+        width: 120,
         render: (text: any) => (
           <Tooltip placement="topLeft" title={String(text ?? "")}>
             <span
@@ -46,8 +45,7 @@ const LogsDetail: React.FC = () => {
       {
         title: "场地",
         key: "venue_name",
-        width: 200,
-        ellipsis: { showTitle: false },
+        width: 180,
         render: (_: any, record: any) => {
           const raw = record?.request_body_detail ?? record?.request_body;
           const d =
@@ -82,7 +80,7 @@ const LogsDetail: React.FC = () => {
       {
         title: "账户",
         key: "pool_name",
-        width: 160,
+        width: 120,
         render: (_: any, record: any) => {
           const raw = record?.request_body_detail ?? record?.request_body;
           const d =
@@ -101,7 +99,7 @@ const LogsDetail: React.FC = () => {
       {
         title: "事件开始时间",
         key: "start_time",
-        width: 180,
+        width: 150,
         render: (_: any, record: any) => {
           const raw = record?.request_body_detail ?? record?.request_body;
           const d =
@@ -120,7 +118,7 @@ const LogsDetail: React.FC = () => {
       {
         title: "事件结束时间",
         key: "end_time",
-        width: 180,
+        width: 150,
         render: (_: any, record: any) => {
           const raw = record?.request_body_detail ?? record?.request_body;
           const d =
@@ -177,7 +175,7 @@ const LogsDetail: React.FC = () => {
       {
         title: "事件原因",
         key: "event_reason",
-        width: 260,
+        width: 150,
         ellipsis: { showTitle: false },
         render: (_: any, record: any) => {
           const raw = record?.request_body_detail ?? record?.request_body;
@@ -262,27 +260,34 @@ const LogsDetail: React.FC = () => {
     fetchData();
   }, [id]);
 
+  const scrollX = useMemo(() => {
+    const cols = (columns as any[]) || [];
+    const total = cols.reduce((sum, col) => {
+      const w = Number((col as any)?.width);
+      return sum + (Number.isFinite(w) ? w : 160);
+    }, 0);
+    return Math.max(total, 900);
+  }, [columns]);
+
   return (
-    <div className="mx-auto bg-white rounded-lg shadow-sm p-6">
+    <div className=" bg-white rounded-lg shadow-sm p-6">
       <div className="flex items-center justify-between mb-4">
         <Space>
           <Button type="primary" size="small" onClick={() => navigate(-1)}>
             &lt; 返回{" "}
           </Button>
-          {/* <Button type="link" onClick={() => navigate(ROUTE_PATHS.logs)}>
-            返回列表
-          </Button> */}
         </Space>
       </div>
-      <Table
-        loading={loading}
-        columns={columns}
-        dataSource={rows}
-        rowKey={(r) => r.id ?? `${r.username}-${r.created_at}`}
-        sticky
-        scroll={{ y: "65vh", x: 900 }}
-        pagination={false}
-      />
+      <div className="w-full" style={{ overflow: "auto" }}>
+        <Table
+          loading={loading}
+          columns={columns}
+          dataSource={rows}
+          rowKey={(r) => r.id ?? `${r.username}-${r.created_at}`}
+          scroll={{ y: "65vh", x: scrollX }}
+          pagination={false}
+        />
+      </div>
     </div>
   );
 };

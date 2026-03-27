@@ -118,22 +118,42 @@ const LogsPage: React.FC = () => {
         key: "request_body",
         width: 200,
         ellipsis: { showTitle: false },
-        render: (text: any) => (
-          <Tooltip placement="topLeft" title={String(text ?? "")}>
-            <span
-              style={{
-                display: "inline-block",
-                maxWidth: "100%",
-                overflow: "hidden",
-                textOverflow: "ellipsis",
-                whiteSpace: "nowrap",
-                verticalAlign: "middle",
-              }}
+        render: (text: any) => {
+          let formattedText = String(text ?? "");
+          try {
+            if (text) {
+              const parsed = typeof text === "string" ? JSON.parse(text) : text;
+              formattedText = JSON.stringify(parsed, null, 2);
+            }
+          } catch (e) {
+            // keep original text if it's not valid JSON
+          }
+
+          return (
+            <Tooltip
+              placement="topLeft"
+              title={
+                <pre style={{ margin: 0, padding: 0, maxHeight: "400px", overflow: "auto" }}>
+                  {formattedText}
+                </pre>
+              }
+              overlayInnerStyle={{ width: "max-content", maxWidth: "600px" }}
             >
-              {text ?? "-"}
-            </span>
-          </Tooltip>
-        ),
+              <span
+                style={{
+                  display: "inline-block",
+                  maxWidth: "100%",
+                  overflow: "hidden",
+                  textOverflow: "ellipsis",
+                  whiteSpace: "nowrap",
+                  verticalAlign: "middle",
+                }}
+              >
+                {text ?? "-"}
+              </span>
+            </Tooltip>
+          );
+        },
       },
       {
         title: "操作时间",
