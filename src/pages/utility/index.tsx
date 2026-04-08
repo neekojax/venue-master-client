@@ -23,7 +23,7 @@ const UtilityTools: React.FC = () => {
         </div> */}
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         {UTILITY_TOOLS.map((tool) => (
           <a
             key={tool.id}
@@ -38,7 +38,8 @@ const UtilityTools: React.FC = () => {
             <div className="relative z-10 h-full flex flex-col">
               <div className="flex items-start justify-between mb-6">
                 <div className="w-16 h-16 bg-white rounded-2xl shadow-lg border border-gray-100 flex items-center justify-center p-3 group-hover:scale-110 group-hover:rotate-3 transition-transform duration-300">
-                  <img src={tool.icon} alt={tool.name} className="w-full h-full object-contain" />
+                  {/* <img src={tool.icon} alt={tool.name} className="w-full h-full object-contain" /> */}
+                  {tool.icon}
                 </div>
                 <div className="bg-gray-50 p-2 rounded-lg text-gray-400 group-hover:bg-blue-600 group-hover:text-white transition-all duration-300">
                   <ExternalLink size={18} />

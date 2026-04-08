@@ -11,7 +11,7 @@ export interface NavItem {
 export interface UtilityTool {
   id: string;
   name: string;
-  icon: string;
+  icon: string | React.ReactNode;
   url: string;
   description: string;
 }
