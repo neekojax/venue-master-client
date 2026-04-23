@@ -55,3 +55,5 @@ export const ROUTE_PATHS = {
   poolProfitHistory: (poolName: any) => `/pool-profit/history/${encodeURIComponent(poolName)}`, // 定义为函数以接收 poolName
   poolHashHistory: (poolName: any) => `/pool-hash/history/${encodeURIComponent(poolName)}`,
 };
+
+export const COOKIE_DOMAIN = import.meta.env.VITE_COOKIE_DOMAIN || ".test.com";

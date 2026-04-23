@@ -3,8 +3,9 @@ import { useNavigate } from "react-router-dom";
 import { LockOutlined, UserOutlined } from "@ant-design/icons";
 import { Button, Form, type FormProps, Input } from "antd";
 import CryptoJS from "crypto-js"; // 导入 crypto-js
+import Cookies from "js-cookie"; // 导入 js-cookie
 import { useLogin } from "../api";
-import { ROUTE_PATHS } from "@/constants/common";
+import { COOKIE_DOMAIN, ROUTE_PATHS } from "@/constants/common";
 
 import { LoginField } from "@/pages/login/type.ts";
 
@@ -67,8 +68,8 @@ export default function LoginForm() {
         // console.log("values", values);
         localStorage.setItem("user", values?.name || "");
         localStorage.setItem("user_id", data.data.id); //保存用户id
-        localStorage.setItem("access_token", data.data.access_token);
-        localStorage.setItem("refresh_token", data.data.refresh_token);
+        Cookies.set("access_token", data.data.access_token, { domain: COOKIE_DOMAIN, path: "/" });
+        Cookies.set("refresh_token", data.data.refresh_token, { domain: COOKIE_DOMAIN, path: "/" });
         // 权限相关
         localStorage.setItem("user_access_level", data.data.user_access_level);
         localStorage.setItem("user_access_type", data.data.user_access_type);

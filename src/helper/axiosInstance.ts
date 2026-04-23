@@ -1,7 +1,8 @@
 // axiosInstance.ts
 import axios from "axios";
+import Cookies from "js-cookie";
 import eventBus from "@/components/event-bus";
-import { ROUTE_PATHS } from "@/constants/common.ts";
+import { COOKIE_DOMAIN, ROUTE_PATHS } from "@/constants/common.ts";
 
 // 存储当前的请求队列
 let isRefreshing = false;
@@ -28,7 +29,7 @@ const axiosInstance = axios.create({
 // 刷新 token 的函数
 const refreshToken = async () => {
   try {
-    const token = localStorage.getItem("refresh_token");
+    const token = Cookies.get("refresh_token");
     const response = await axiosInstance.put("passport/refresh-token", { refresh_token: token }); // 替换为您的 API 路径
     return response.data; // 返回新的 token 数据
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -41,7 +42,7 @@ const refreshToken = async () => {
 axiosInstance.interceptors.request.use(
   (config) => {
     // 在请求中添加自定义逻辑，比如添加 token
-    const token = localStorage.getItem("access_token");
+    const token = Cookies.get("access_token");
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     } else {
@@ -64,7 +65,7 @@ axiosInstance.interceptors.response.use(
         isRefreshing = true;
         try {
           const newTokenData = await refreshToken();
-          localStorage.setItem("access_token", newTokenData.access_token); // 更新存储的 token
+          Cookies.set("access_token", newTokenData.access_token, { domain: COOKIE_DOMAIN, path: "/" }); // 更新存储的 token
 
           onRefreshed(newTokenData.access_token); // 通知所有订阅者
           isRefreshing = false; // 重新设置为 false
@@ -90,7 +91,7 @@ axiosInstance.interceptors.response.use(
 
     // 处理 token 刷新
     if (response && response.data?.code === 200205) {
-      localStorage.removeItem("access_token");
+      Cookies.remove("access_token", { domain: COOKIE_DOMAIN, path: "/" });
       eventBus.emit("redirect", ROUTE_PATHS.login); // Emit the redirect event
       return Promise.reject(new Error("User needs to log in")); // 直接返回，后续逻辑不再执行
     }

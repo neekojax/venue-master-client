@@ -1,6 +1,7 @@
 import { useNavigate } from "react-router-dom";
 import { EditFilled, LogoutOutlined, UserOutlined } from "@ant-design/icons";
 import { Avatar, Dropdown, type MenuProps } from "antd";
+import Cookies from "js-cookie";
 import { ROUTE_PATHS } from "@/constants/common";
 
 import { loginOut } from "@/pages/login/api.ts";
@@ -31,7 +32,7 @@ export default function UserAvatar() {
         </>
       ),
       onClick: () => {
-        const token = localStorage.getItem("refresh_token");
+        const token = Cookies.get("refresh_token");
         loginOut({ refresh_token: token });
         navigate(ROUTE_PATHS.login);
       },

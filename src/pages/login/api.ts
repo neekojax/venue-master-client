@@ -1,5 +1,7 @@
 import { useState } from "react";
+import Cookies from "js-cookie";
 import { LoginField } from "./type.ts";
+import { COOKIE_DOMAIN } from "@/constants/common.ts";
 
 import { fetchGet, fetchPost } from "@/helper/fetchHelper.ts";
 
@@ -44,5 +46,7 @@ export async function loginOut(data: any) {
   // 清除所有本地存储数据
   localStorage.clear();
   sessionStorage.clear();
+  Cookies.remove("access_token", { domain: COOKIE_DOMAIN, path: "/" });
+  Cookies.remove("refresh_token", { domain: COOKIE_DOMAIN, path: "/" });
   return await fetchPost("/passport/logout", data);
 }
