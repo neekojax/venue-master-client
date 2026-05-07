@@ -10,6 +10,7 @@ export const fetchGet = async (endpoint: string, params?: Record<string, any>, c
       return response; // Blob 下载直接返回完整的 response 对象
     }
     checkSuccess(response);
+    console.log("fetchGet GET API res: ", response);
     return response;
   } catch (error) {
     // @ts-ignore
@@ -26,8 +27,9 @@ export const fetchPost = async (endpoint: string, body: any, customHeaders?: Rec
 
   try {
     const response = await axiosInstance.post(endpoint, body, { headers });
-    checkSuccess(response.data);
-    return response.data;
+    checkSuccess(response);
+    console.log("fetchPost POST API res: ", response);
+    return response;
   } catch (error) {
     // @ts-ignore
     throw new Error(error.message); // 抛出错误信息
@@ -47,8 +49,8 @@ export const fetchPostFile = async (
 
   try {
     const response = await axiosInstance.post(endpoint, body, { headers });
-    checkSuccess(response.data);
-    return response.data;
+    checkSuccess(response);
+    return response;
   } catch (error) {
     // @ts-ignore
     throw new Error(error.message); // 抛出错误信息
@@ -59,8 +61,8 @@ export const fetchPostFile = async (
 export const fetchDelete = async (endpoint: string) => {
   try {
     const response = await axiosInstance.delete(endpoint);
-    checkSuccess(response.data);
-    return response.data;
+    checkSuccess(response);
+    return response;
   } catch (error) {
     // @ts-ignore
     throw new Error(error.message); // 抛出错误信息
