@@ -138,7 +138,7 @@ export const fetchEventLogWithFilter = async (poolType: string, params?: Record<
 
 // /event/listEventForExport/:venueType
 export const fetchEventLogForExport = async (poolType: string, params?: Record<string, any>) => {
-  return await fetchGet(`/event/listEventForExport/${poolType}`, params);
+  return await fetchGet(`/event/listEventForExport/${poolType}`, params, { responseType: "blob" });
 };
 
 // /event/operationLogs/:eventId 获取事件操作日志

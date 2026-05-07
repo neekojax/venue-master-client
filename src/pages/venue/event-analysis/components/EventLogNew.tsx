@@ -765,7 +765,7 @@ const App: React.FC = () => {
                 </Button>
               )}
               <UploadExcel />
-              <Button
+              {/* <Button
                 icon={<DownloadOutlined />}
                 size="middle"
                 loading={exporting}
@@ -798,7 +798,80 @@ const App: React.FC = () => {
                 className="!rounded-button"
               >
                 导出全部事件
+              </Button> */}
+
+              <Button
+                icon={<DownloadOutlined />}
+                size="middle"
+                loading={exporting}
+                disabled={exporting}
+                onClick={async () => {
+                  if (exporting) return;
+                  setExporting(true);
+                  try {
+                    const exportParams = {
+                      startDate,
+                      endDate,
+                      venueIds,
+                      eventStatus:
+                        (Array.isArray(selectedDurationType)
+                          ? selectedDurationType.join(",")
+                          : selectedDurationType) || undefined,
+                      eventTypes:
+                        (Array.isArray(selectedEventType)
+                          ? selectedEventType.join(",")
+                          : selectedEventType) || undefined,
+                    };
+                    const res = await fetchEventLogForExport(poolType, exportParams);
+                    // console.log("Export API res: ", res);
+                    // 创建Blob对象，提取文件流
+                    const blobData = res.data ? res.data : res;
+                    const blob = new Blob([blobData], {
+                      type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                    });
+
+                    // 获取文件名（尝试从 header 中获取）
+                    let filename = `事件日志_${dayjs().format("YYYY-MM-DD")}.xlsx`;
+                    const disposition = res?.headers?.["content-disposition"];
+                    if (!disposition && typeof res?.headers?.get === "function") {
+                      // fetch/axios 特性兼容
+                      const headerVal = res.headers.get("content-disposition");
+                      if (typeof headerVal === "string" && headerVal.indexOf("filename=") !== -1) {
+                        const matches = /filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/.exec(headerVal);
+                        if (matches != null && matches[1])
+                          filename = decodeURIComponent(matches[1].replace(/['"]/g, ""));
+                      }
+                    } else if (typeof disposition === "string" && disposition.indexOf("filename=") !== -1) {
+                      const matches = /filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/.exec(disposition);
+                      if (matches != null && matches[1])
+                        filename = decodeURIComponent(matches[1].replace(/['"]/g, ""));
+                    }
+
+                    // 创建下载链接并触发下载
+                    const url = window.URL.createObjectURL(blob);
+                    const link = document.createElement("a");
+                    link.href = url;
+                    link.setAttribute("download", filename);
+                    document.body.appendChild(link);
+                    link.click();
+
+                    // 清理
+                    link.parentNode?.removeChild(link);
+                    window.URL.revokeObjectURL(url);
+
+                    message.success("导出成功");
+                  } catch (e) {
+                    console.error(e);
+                    message.error("导出失败，请稍后重试");
+                  } finally {
+                    setExporting(false);
+                  }
+                }}
+                className="!rounded-button"
+              >
+                导出全部事件
               </Button>
+
               <Button
                 icon={<DownloadOutlined />}
                 size="middle"
@@ -865,7 +938,7 @@ const App: React.FC = () => {
             dataSource={logData || []} // 使用过滤后的数据
             scroll={{ x: 1300 }}
             rowKey="id"
-            loading={isLoading}
+            // loading={isLoading}
             pagination={{
               total: total,
               pageSize: pageSize,

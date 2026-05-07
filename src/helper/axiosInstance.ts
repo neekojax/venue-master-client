@@ -58,6 +58,16 @@ axiosInstance.interceptors.request.use(
 // 响应拦截器
 axiosInstance.interceptors.response.use(
   async (response) => {
+    // 如果响应是 blob，直接返回完整 response，保留 headers 等信息用于下载
+    if (response.config.responseType === "blob") {
+      return response;
+    }
+
+    // 如果返回的内容真的是 Blob，也可以进行容错拦截
+    if (response.data instanceof Blob) {
+      return response;
+    }
+
     // @ts-ignore
     if (response && response.data?.code == 200204) {
       // 验证码过期，需要刷新验证码
