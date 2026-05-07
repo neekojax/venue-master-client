@@ -10,7 +10,7 @@ export const fetchGet = async (endpoint: string, params?: Record<string, any>, c
       return response; // Blob 下载直接返回完整的 response 对象
     }
     checkSuccess(response);
-    console.log("fetchGet GET API res: ", response);
+    // console.log("fetchGet GET API res: ", response);
     return response;
   } catch (error) {
     // @ts-ignore
@@ -28,7 +28,7 @@ export const fetchPost = async (endpoint: string, body: any, customHeaders?: Rec
   try {
     const response = await axiosInstance.post(endpoint, body, { headers });
     checkSuccess(response);
-    console.log("fetchPost POST API res: ", response);
+    // console.log("fetchPost POST API res: ", response);
     return response;
   } catch (error) {
     // @ts-ignore

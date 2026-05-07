@@ -82,7 +82,7 @@ const App: React.FC = () => {
   const selectedVenueId = Form.useWatch("venue_id", form);
   const permission_routes = localStorage.getItem("permission_routes");
   const is_log_visible = permission_routes?.includes(ROUTE_PATHS.logs);
-  console.log("is_log_visible", is_log_visible);
+  // console.log("is_log_visible", is_log_visible);
   // // 参数对象（在依赖声明之后构建）
   // const params: EventLogParam = useMemo(() => ({
   //   page: currentPage,
@@ -139,6 +139,7 @@ const App: React.FC = () => {
   // 添加分页大小状态
   const [pageSize, setPageSize] = useState<number>(10);
   const [currentPage, setCurrentPage] = useState<number>(1);
+  const [sortOrder, setSortOrder] = useState<string | undefined>(undefined); // 新增排序状态
   // const [total, setTotal] = useState<number>(0);
   // 监听模态框中选择的场地ID，联动加载其 pools 列表
   useEffect(() => {
@@ -166,7 +167,7 @@ const App: React.FC = () => {
       }
     };
     loadVenuePools();
-  }, [selectedVenueId, poolType]);
+  }, [selectedVenueId, poolType, sortOrder]);
 
   // 参数对象（在依赖声明之后构建）
   const startDate = dateRange && dateRange[0] ? dateRange[0].format("YYYY-MM-DD") : undefined;
@@ -189,6 +190,7 @@ const App: React.FC = () => {
     venueIds,
     eventStatus: eventStatus.join(","),
     eventTypes: eventTypes.join(","),
+    ...(sortOrder ? { orderBy: sortOrder } : {}), // 将 orderBy 追加到查询参数
   };
 
   // 在依赖声明之后再调用数据查询 hook，避免在声明前使用变量
@@ -319,8 +321,7 @@ const App: React.FC = () => {
       dataIndex: "start_time",
       width: 280,
       render: (_text, record) => `${record.start_time} - ${record.end_time}`,
-      // sorter: (a, b) => dayjs(a.log_date).unix() - dayjs(b.log_date).unix(),
-      // defaultSortOrder: "descend", // 👈 默认按影响时长从大到小排序
+      // sorter: true, // 移除表头的排序指示器
     },
     {
       title: "事件类型",
@@ -799,7 +800,6 @@ const App: React.FC = () => {
               >
                 导出全部事件
               </Button> */}
-
               <Button
                 icon={<DownloadOutlined />}
                 size="middle"
@@ -871,7 +871,6 @@ const App: React.FC = () => {
               >
                 导出全部事件
               </Button>
-
               <Button
                 icon={<DownloadOutlined />}
                 size="middle"
@@ -909,6 +908,34 @@ const App: React.FC = () => {
               >
                 导出当前页
               </Button>
+              <div className="flex items-center ml-4 bg-gray-100 rounded p-1 text-sm">
+                <div
+                  className={`px-3 py-1 rounded cursor-pointer transition-all ${
+                    sortOrder !== "endTimeDesc"
+                      ? "bg-white text-[#333] shadow-sm font-medium"
+                      : "text-gray-500 hover:text-gray-700"
+                  }`}
+                  onClick={() => {
+                    setSortOrder(undefined);
+                    setCurrentPage(1);
+                  }}
+                >
+                  按开始时间排序
+                </div>
+                <div
+                  className={`px-3 py-1 rounded cursor-pointer transition-all ${
+                    sortOrder === "endTimeDesc"
+                      ? "bg-white text-[#333] shadow-sm font-medium"
+                      : "text-gray-500 hover:text-gray-700"
+                  }`}
+                  onClick={() => {
+                    setSortOrder("endTimeDesc");
+                    setCurrentPage(1);
+                  }}
+                >
+                  按结束时间排序
+                </div>
+              </div>
             </Space>
           </div>
         </div>
@@ -938,7 +965,24 @@ const App: React.FC = () => {
             dataSource={logData || []} // 使用过滤后的数据
             scroll={{ x: 1300 }}
             rowKey="id"
-            // loading={isLoading}
+            loading={isLoading}
+            onChange={(pagination: any, filters: any, sorter: any) => {
+              console.log("pagination，filters，sorter", pagination, filters, sorter);
+              // 这里不需要通过表头触发时间范围排序了，所以注释掉
+              /*
+              if (sorter && sorter.columnKey === "start_time") {
+                // 点击排序时，按照需求，如果点击变为了有排序状态，就传 endTimeDesc / endTimeAsc（取决于 order），
+                // 否则就传 undefined，让后端恢复默认按 start_time 排序。
+                if (sorter.order === "descend") {
+                  setSortOrder("endTimeDesc");
+                } else if (sorter.order === "ascend") {
+                  setSortOrder("");
+                } else {
+                  setSortOrder("");
+                }
+              }
+              */
+            }}
             pagination={{
               total: total,
               pageSize: pageSize,
