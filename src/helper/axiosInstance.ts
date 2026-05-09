@@ -23,7 +23,8 @@ const axiosInstance = axios.create({
   // baseURL: "http://localhost:8080/admin-api/", //  周莹本地测试
   // baseURL: "http://127.0.0.1:8080/admin-api/", // 你的 API 基础 UR
   // baseURL: "http://45.76.191.253:11001/admin-api/", // 你的 API 基础 UR
-  baseURL: "https://datastring.cc/admin-api", // 线上发布
+  // baseURL: "https://datastring.cc/admin-api", // 线上发布
+  baseURL: "/admin-api", // uat  特殊对待
 });
 
 // 刷新 token 的函数

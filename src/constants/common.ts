@@ -56,4 +56,18 @@ export const ROUTE_PATHS = {
   poolHashHistory: (poolName: any) => `/pool-hash/history/${encodeURIComponent(poolName)}`,
 };
 
-export const COOKIE_DOMAIN = import.meta.env.VITE_COOKIE_DOMAIN || ".test.com";
+export const getCookieDomain = () => {
+  const hostname = window.location.hostname;
+  // 处理 IP 和 localhost
+  if (/^(\d{1,3}\.){3}\d{1,3}$/.test(hostname) || hostname === "localhost") {
+    return hostname;
+  }
+  // 获取主域名 (例如 a.test.com 返回 .test.com)
+  const parts = hostname.split(".");
+  if (parts.length >= 2) {
+    return `.${parts.slice(-2).join(".")}`;
+  }
+  return `.${hostname}`;
+};
+
+export const COOKIE_DOMAIN = import.meta.env.VITE_COOKIE_DOMAIN || getCookieDomain();
