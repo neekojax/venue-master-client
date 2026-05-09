@@ -2,11 +2,16 @@ import React, { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import {
   DeleteOutlined,
+  DisconnectOutlined,
   DownloadOutlined,
   EditOutlined,
+  FallOutlined,
   FileTextOutlined,
   FilterOutlined,
+  MinusCircleOutlined,
   PlusOutlined,
+  PoweroffOutlined,
+  RestOutlined,
   SyncOutlined,
 } from "@ant-design/icons";
 import {
@@ -69,6 +74,8 @@ interface EventLog {
   collection: number;
   created_at: string; // 这里使用 created_at 而不是 update_at
   updated_at: string; // 新增 updated_at 字段
+  machine_model?: string;
+  machine_status?: string;
 }
 
 const App: React.FC = () => {
@@ -217,6 +224,8 @@ const App: React.FC = () => {
       created_at: item.created_at,
       updated_at: item.updated_at, // 新增 updated_at 字段
       collection: item.collection,
+      machine_model: item.machine_model,
+      machine_status: item.machine_status,
     })) || [];
   const total = data?.data?.total || 0;
   const columns: ColumnsType<EventLog> = [
@@ -283,6 +292,35 @@ const App: React.FC = () => {
             {record.pool_name}
           </Tooltip>
         );
+      },
+    },
+    {
+      title: "机器型号",
+      dataIndex: "machine_model",
+      width: 120,
+    },
+    {
+      title: "机器状态",
+      dataIndex: "machine_status",
+      width: 120,
+      render: (status: string) => {
+        if (!status) return "-";
+        const statusConfig: Record<string, { color: string; icon: React.ReactNode }> = {
+          低算力: { color: "warning", icon: <FallOutlined /> },
+          休眠: { color: "cyan", icon: <RestOutlined /> },
+          关机: { color: "error", icon: <PoweroffOutlined /> },
+          断网: { color: "purple", icon: <DisconnectOutlined /> },
+          无: { color: "default", icon: <MinusCircleOutlined /> },
+        };
+        const config = statusConfig[status];
+        if (config) {
+          return (
+            <Tag color={config.color} icon={config.icon}>
+              {status}
+            </Tag>
+          );
+        }
+        return <Tag>{status}</Tag>;
       },
     },
     {
@@ -399,7 +437,7 @@ const App: React.FC = () => {
       },
     },
     {
-      title: "解决措施",
+      title: "备注",
       dataIndex: "resolution_measures",
       width: 200,
       ellipsis: true,
@@ -465,6 +503,8 @@ const App: React.FC = () => {
       start_time: record.start_time ? dayjs(record.start_time) : undefined, //dayjs(record.start_time),
       end_time: record.end_time ? dayjs(record.end_time) : undefined, // 如果为 null/undefined，就不传入初始值
       // end_time: dayjs(record.end_time),
+      machine_model: record.machine_model,
+      machine_status: record.machine_status,
     });
     setIsModalVisible(true);
   };
@@ -495,6 +535,8 @@ const App: React.FC = () => {
         resolution_measures: values.resolution_measures,
         is_sleep: values.is_sleep,
         pool_id: values.pool_id,
+        machine_model: values.machine_model,
+        machine_status: values.machine_status,
       };
 
       if (values.id !== undefined) {
@@ -1085,6 +1127,20 @@ const App: React.FC = () => {
               </Select>
             </Form.Item>
 
+            <Form.Item name="machine_model" label="机器型号">
+              <Input size="middle" placeholder="请输入机器型号" allowClear />
+            </Form.Item>
+
+            <Form.Item name="machine_status" label="机器状态">
+              <Select size="middle" placeholder="请选择机器状态" allowClear>
+                {["低算力", "休眠", "关机", "断网", "无"].map((status) => (
+                  <Option key={status} value={status}>
+                    {status}
+                  </Option>
+                ))}
+              </Select>
+            </Form.Item>
+
             {/* <Form.Item name="log_date" label="日期" rules={[{ required: true, message: "请选择日期" }]}>
               <DatePicker className="w-full" />
             </Form.Item> */}
@@ -1150,11 +1206,11 @@ const App: React.FC = () => {
           </Form.Item>
           <Form.Item
             name="resolution_measures"
-            label="解决措施"
+            label="备注"
             style={{ fontSize: "12px" }}
-            rules={[{ required: false, message: "请输入解决措施" }]}
+            rules={[{ required: false, message: "请输入备注" }]}
           >
-            <TextArea size="middle" rows={2} placeholder="请输入解决措施" style={{ fontSize: "12px" }} />
+            <TextArea size="middle" rows={2} placeholder="请输入备注" style={{ fontSize: "12px" }} />
           </Form.Item>
         </Form>
       </Modal>

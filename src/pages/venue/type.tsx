@@ -23,4 +23,6 @@ export type EventLogParam = {
   impact_power_loss: number;
   event_reason: string;
   resolution_measures: string;
+  machine_model?: string;
+  machine_status?: string;
 };
