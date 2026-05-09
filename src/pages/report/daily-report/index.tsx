@@ -685,6 +685,7 @@ const App: React.FC = () => {
 
           setStatistics({
             averageEfficiency: summary.averageEffectiveRate || 0,
+            averageEffectiveRateNoWarehouse: summary.averageEffectiveRateNoWarehouse || 0,
             averageForecastEfficiency: summary.averageForecastEfficiency || 0,
             // formattedData.length > 0
             //   ? formattedData.reduce((sum, i) => sum + (Number(i.forecastHashEfficiency) || 0), 0) /
@@ -703,6 +704,7 @@ const App: React.FC = () => {
             totalLimitImpactPower: summary.totalLimitImpactPower || 0,
             totalLowPowerImpactPower: summary.totalLowPowerImpactPower || 0,
             totalWithdrawImpactPower: summary.totalWithdrawImpactPower || 0,
+            averageForecastEfficiencyNoWarehouse: summary.averageForecastEfficiencyNoWarehouse || 0,
           });
         } else {
           console.error("API 返回的 dailyReportStatistics 无效:", reportData);
@@ -891,30 +893,44 @@ const App: React.FC = () => {
                 <ShieldCheck className="text-emerald-500 w-5 h-5" />
               </div>
               <div className="flex-1 min-w-0">
-                <div className="text-[10px] font-black text-slate-400 uppercase tracking-tighter truncate">
-                  平均有效率
+                <div className="text-[10px] font-black text-slate-400 uppercase tracking-tighter truncate flex justify-between items-center">
+                  <span>平均有效率</span>
+                  <Tooltip
+                    title={
+                      <div className="text-xs">
+                        <div>平均有效率(含仓库)：{(statistics.averageEfficiency || 0).toFixed(2)}%</div>
+                        <div>净有效率(含仓库)：{(statistics.averageForecastEfficiency || 0).toFixed(2)}%</div>
+                      </div>
+                    }
+                  >
+                    <div className="w-3.5 h-3.5 rounded-full border border-slate-300 text-slate-400 flex items-center justify-center text-[9px] font-bold cursor-pointer hover:bg-slate-100 hover:text-slate-600 transition-colors">
+                      !
+                    </div>
+                  </Tooltip>
                 </div>
                 <div className="flex items-baseline gap-0.5 leading-none mt-1.5">
                   <span className="text-2xl font-black text-slate-900 tracking-tighter">
-                    {(statistics.averageEfficiency || 0).toFixed(2)}%
+                    {/* {(statistics.averageEfficiency || 0).toFixed(2)}% */}
+                    {(statistics.averageEffectiveRateNoWarehouse || 0).toFixed(2)}%
                   </span>
                 </div>
                 <div className="text-[10px] text-slate-400 font-bold truncate mt-2 uppercase tracking-tighter">
-                  净有效率 {(statistics.averageForecastEfficiency || 0).toFixed(2)}%
+                  净有效率 {(statistics.averageForecastEfficiencyNoWarehouse || 0).toFixed(2)}%
                 </div>
                 {statistics.totalCloudPower24h != 0 && (
                   <div className="text-[10px] text-slate-400 font-bold truncate mt-2 uppercase tracking-tighter">
                     包含云算力 {(statistics.totalCloudPower24h || 0).toFixed(2)}E
                   </div>
                 )}
-                <div className="text-[10px] text-slate-400 font-bold uppercase tracking-tighter flex items-center justify-between gap-2">
+                {/* <div className="text-[10px] text-slate-400 font-bold uppercase tracking-tighter flex items-center justify-between gap-2">
                   <span className="truncate">
                     {statistics.totalCloudPower24h != 0 && "剔除"}租赁算力{" "}
                     {(statistics.totalLeasedPower24h || 0).toFixed(2)}E
                   </span>
-                </div>
+                </div> */}
               </div>
             </div>
+
             <div className="flex-1 basis-0 bg-white border border-slate-200 rounded-2xl p-5 flex flex-col justify-between hover:border-slate-300 hover:shadow-sm transition-all h-28">
               <div className="flex items-center gap-4">
                 <div className="p-3 bg-slate-50 rounded-xl shrink-0 shadow-inner">
@@ -934,6 +950,12 @@ const App: React.FC = () => {
                   <div className="text-[10px] text-slate-400 font-bold uppercase tracking-tighter flex items-center justify-between gap-2">
                     <span className="truncate">24H总算力 {(statistics.totalPower24h || 0).toFixed(2)}E</span>
                     {/* <span className="truncate">租赁算力 {(statistics.totalLeasedPower24h || 0).toFixed(2)}E</span> */}
+                  </div>
+                  <div className="text-[10px] text-slate-400 font-bold uppercase tracking-tighter flex items-center justify-between gap-2">
+                    <span className="truncate">
+                      {statistics.totalCloudPower24h != 0 && "剔除"}租赁算力{" "}
+                      {(statistics.totalLeasedPower24h || 0).toFixed(2)}E
+                    </span>
                   </div>
                 </div>
               </div>
