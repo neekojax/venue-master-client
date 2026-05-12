@@ -66,8 +66,6 @@ export default function MainLayout() {
         const organizations: string[] = Array.isArray((data as any)?.organizations)
           ? (data as any).organizations
           : [];
-        // 字母从小到大排序
-        organizations.sort((a, b) => a.localeCompare(b));
 
         // 角色列表
         const roles: any[] = Array.isArray((data as any)?.roles) ? (data as any).roles : [];

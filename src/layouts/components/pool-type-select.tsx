@@ -19,7 +19,9 @@ export default function PoolSelect() {
   // 实时读取 organizations 并监听更新（CANGO 的 value 设为 CANG）
   const [orgs, setOrgs] = useState<string[]>(() => {
     try {
-      const parsed = JSON.parse(localStorage.getItem("organizations") || "[]");
+      const parsed = JSON.parse(
+        localStorage.getItem("organizations") || localStorage.getItem("groups") || "[]",
+      );
       return Array.isArray(parsed) ? parsed : [];
     } catch {
       return [];
@@ -30,8 +32,9 @@ export default function PoolSelect() {
     const handlePermissionUpdated = (evt: Event) => {
       const e = evt as CustomEvent<any>;
       const groups = e.detail?.groups;
+      // console.log("groups", groups);
       if (Array.isArray(groups)) {
-        setOrgs(groups.slice().sort((a, b) => a.localeCompare(b)));
+        setOrgs(groups); // 不做排序，保持后端返回的原顺序
       }
     };
     const handleStorage = (evt: StorageEvent) => {
@@ -41,7 +44,7 @@ export default function PoolSelect() {
             localStorage.getItem("organizations") || localStorage.getItem("groups") || "[]",
           );
           if (Array.isArray(parsed)) {
-            setOrgs(parsed.slice().sort((a, b) => a.localeCompare(b)));
+            setOrgs(parsed); // 不做排序，保持缓存中的原顺序
           }
         } catch {
           // ignore
@@ -63,6 +66,18 @@ export default function PoolSelect() {
     value: org === "CANGO" ? "CANG" : org,
     label: org,
   }));
+
+  // 监听 options 和 poolType，如果当前 poolType 不在选项列表中，则默认选中第一个并更新全局状态
+  useEffect(() => {
+    if (options.length > 0) {
+      // console.log("options", options);
+      // console.log("poolType", poolType);
+      const isValid = options.some((opt) => opt.value === poolType);
+      if (!isValid) {
+        setPoolType(options[0].value);
+      }
+    }
+  }, [orgs, poolType]);
 
   // 如果当前路径是 /report/daily/sub-account，只保留 LN、ND
   // const filteredOptions =
