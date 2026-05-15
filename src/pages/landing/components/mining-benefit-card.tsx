@@ -24,6 +24,22 @@ const MiningBenefitCard: React.FC<MiningPoolCardProps> = ({ poolType }) => {
     return num.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",");
   };
 
+  /** BTC：保留 4 位小数，向零截断（不四舍五入），整数部分千分位 */
+  const formatBtcNumber = (value: unknown) => {
+    const num = Number(value);
+    if (isNaN(num)) return "";
+
+    const truncated = Math.trunc(num * 10000) / 10000;
+    const isNeg = truncated < 0;
+    const abs = Math.abs(truncated);
+    const intPart = Math.floor(abs);
+    const scaled = Math.trunc(abs * 10000) - intPart * 10000;
+    const fracStr = scaled.toString().padStart(4, "0");
+    const intStr = intPart.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+
+    return `${isNeg ? "-" : ""}${intStr}.${fracStr}`;
+  };
+
   const navigate = useNavigate();
 
   const handleNavigate = () => {
@@ -112,7 +128,7 @@ const MiningBenefitCard: React.FC<MiningPoolCardProps> = ({ poolType }) => {
         <Col span={12}>
           <Statistic
             title={`昨日总收益`}
-            value={`${formatNumber(lastProfitStatus?.last_day_income_statistics.income_btc)}`} // 假设昨日总收益在状态中
+            value={`${formatBtcNumber(lastProfitStatus?.last_day_income_statistics.income_btc)}`} // 假设昨日总收益在状态中
             valueStyle={{ fontSize: "20px", fontWeight: "bold", color: "#3dbb32" }}
             // prefix={<BiLogoBitcoin style={{ fontSize: "20px", color: "gold" }} />}
             suffix={"BTC"}
@@ -139,7 +155,7 @@ const MiningBenefitCard: React.FC<MiningPoolCardProps> = ({ poolType }) => {
         <Col span={12} style={{ marginTop: "25px" }}>
           <Statistic
             title={`${lastProfitStatus?.month}月产出数量`}
-            value={`${formatNumber(lastProfitStatus?.month_statistics.income_btc)} BTC`} // 假设昨日总收益在状态中
+            value={`${formatBtcNumber(lastProfitStatus?.month_statistics.income_btc)} BTC`} // 假设昨日总收益在状态中
             valueStyle={{ fontSize: "16px", fontWeight: "bold" }}
             // prefix={<BiLogoBitcoin style={{ fontSize: "20px", color: "gold" }} />}
           />
