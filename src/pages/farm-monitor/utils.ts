@@ -94,7 +94,7 @@ function resolveFarmStatus(probe?: BoundSiteItem["latest_probe_task"]): FarmStat
   return "normal";
 }
 
-const TASK_SNAPSHOT_FILTER_KEYS: Array<keyof TaskSnapshotQueryParams> = [
+const TASK_SNAPSHOT_FILTER_KEYS = [
   "minerCode",
   "fullType",
   "ip",
@@ -103,15 +103,17 @@ const TASK_SNAPSHOT_FILTER_KEYS: Array<keyof TaskSnapshotQueryParams> = [
   "hashrateFault",
   "zeroHashrate",
   "loginFailed",
-];
+] as const;
+
+type TaskSnapshotFilterKey = (typeof TASK_SNAPSHOT_FILTER_KEYS)[number];
 
 /** 列表/导出共用的筛选查询参数（不含分页） */
 export function buildTaskSnapshotFilterParams(filters: TaskSnapshotQueryParams): TaskSnapshotQueryParams {
   const params: TaskSnapshotQueryParams = {};
   for (const key of TASK_SNAPSHOT_FILTER_KEYS) {
-    const value = filters[key];
+    const value = filters[key as TaskSnapshotFilterKey];
     if (typeof value === "string" && value.trim() !== "") {
-      params[key] = value.trim();
+      params[key as TaskSnapshotFilterKey] = value.trim();
     }
   }
   if (params.fullType) {
@@ -143,7 +145,7 @@ function parseFilenameFromDisposition(disposition?: string | null, fallback = "e
 export function downloadExcelBlobResponse(
   res: {
     data?: Blob | ArrayBuffer | unknown;
-    headers?: Record<string, string> & { get?: (name: string) => string | null };
+    headers?: Record<string, unknown>;
   },
   fallbackFilename: string,
 ) {
@@ -153,13 +155,9 @@ export function downloadExcelBlobResponse(
   });
 
   let filename = fallbackFilename;
-  const disposition =
-    res.headers?.["content-disposition"] ??
-    (typeof res.headers?.get === "function" ? res.headers.get("content-disposition") : undefined);
-  filename = parseFilenameFromDisposition(
-    typeof disposition === "string" ? disposition : undefined,
-    fallbackFilename,
-  );
+  const rawDisposition = res.headers?.["content-disposition"];
+  const disposition = typeof rawDisposition === "string" ? rawDisposition : undefined;
+  filename = parseFilenameFromDisposition(disposition, fallbackFilename);
 
   const url = window.URL.createObjectURL(blob);
   const link = document.createElement("a");

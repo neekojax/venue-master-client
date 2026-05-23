@@ -5,7 +5,7 @@ import KpiCards from "./components/KpiCards";
 import MinerSnapshotPanel, { type MinerSnapshotSearchValues } from "./components/MinerSnapshotPanel";
 import OverviewChart from "./components/OverviewChart";
 import { useBoundSites, useLatestFinishedProbeTask, useRecentProbeTasks, useTaskSnapshots } from "./hook";
-import type { BoundSiteItem, TaskSnapshotQueryParams, TimeRange } from "./types";
+import type { BoundSiteItem, ProbeTaskItem, TaskSnapshotQueryParams, TimeRange } from "./types";
 import {
   buildTaskSnapshotQueryParams,
   getLastProbeTaskTime,
@@ -70,7 +70,9 @@ export default function FarmMonitorPage() {
 
   const kpiOnShelfCount = useMemo(() => {
     const latestTaskId = latestTaskRes?.data?.task_id;
-    const matched = latestTaskId ? probeTasks.find((t) => t.task_id === latestTaskId) : undefined;
+    const matched = latestTaskId
+      ? probeTasks.find((t: ProbeTaskItem) => t.task_id === latestTaskId)
+      : undefined;
     return matched?.on_shelf_count ?? probeTasks[probeTasks.length - 1]?.on_shelf_count ?? null;
   }, [latestTaskRes, probeTasks]);
 

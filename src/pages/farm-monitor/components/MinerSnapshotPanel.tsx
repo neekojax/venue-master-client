@@ -11,7 +11,6 @@ import type { FormInstance } from "antd/es/form";
 import type { TablePaginationConfig } from "antd/es/table";
 import dayjs from "dayjs";
 import { fetchTaskSnapshotExport } from "../api";
-import type { FarmSite } from "../mockData";
 import {
   buildSnapshotTableColumns,
   loadSnapshotColumnConfigs,
@@ -39,7 +38,6 @@ const BOOL_FILTER_OPTIONS = [
 
 interface MinerSnapshotPanelProps {
   form: FormInstance<MinerSnapshotSearchValues>;
-  selectedFarm: FarmSite | null;
   fullTypeOptions: string[];
   minerCodeOptions: string[];
   snapshotList: TaskSnapshotItem[];
