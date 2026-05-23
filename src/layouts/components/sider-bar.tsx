@@ -71,6 +71,16 @@ const SiderItems = (permissionIds: string, permissionRoutes: string, selectedKey
           hidden: hasPermission(ROUTE_PATHS.miningSetting),
           label: <Link to={ROUTE_PATHS.miningSetting}>账户列表</Link>,
         },
+        {
+          key: ROUTE_PATHS.farmMonitor,
+          hidden: hasPermission(ROUTE_PATHS.farmMonitor),
+          label: <Link to={ROUTE_PATHS.farmMonitor}>矿场监控</Link>,
+        },
+        {
+          key: ROUTE_PATHS.faultMonitor,
+          hidden: hasPermission(ROUTE_PATHS.faultMonitor),
+          label: <Link to={ROUTE_PATHS.faultMonitor}>故障机监控</Link>,
+        },
       ],
     },
     {

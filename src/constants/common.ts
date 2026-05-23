@@ -28,6 +28,9 @@ export const ROUTE_PATHS = {
   miningDetail: (venueId: string | number, poolId: string | number) => `/mining/detail/${venueId}/${poolId}`, // 子账户详情，需传参数
   miningHashRate: "/mining/hash",
 
+  farmMonitor: "/mining/farm-monitor",
+  faultMonitor: "/mining/fault-monitor",
+
   venue: "/venue",
   miningSiteData: "/venue/running-kpi",
   venueEnvironment: "/venue/environment",

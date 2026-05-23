@@ -36,6 +36,28 @@ export const miningRoute: RouteObject = {
       },
     },
     {
+      path: ROUTE_PATHS.farmMonitor,
+      lazy: async () => ({
+        Component: (await import("@/pages/farm-monitor")).default,
+      }),
+      HydrateFallback: ProgressBar,
+      handle: {
+        title: "矿场监控",
+        crumb: () => <Link to={ROUTE_PATHS.farmMonitor}>矿场监控</Link>,
+      },
+    },
+    {
+      path: ROUTE_PATHS.faultMonitor,
+      lazy: async () => ({
+        Component: (await import("@/pages/fault-machine-monitor")).default,
+      }),
+      HydrateFallback: ProgressBar,
+      handle: {
+        title: "故障机监控",
+        crumb: () => <Link to={ROUTE_PATHS.faultMonitor}>故障机监控</Link>,
+      },
+    },
+    {
       path: "/mining/detail/:venueId/:poolId", // 直接使用动态参数
       lazy: async () => ({
         Component: (await import("@/pages/mining/detail")).default,
