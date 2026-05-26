@@ -149,7 +149,9 @@ export function buildFrequencyPointsFromLogs(
     const endH = (i + 1) * 3;
     const label = `${String(startH).padStart(2, "0")}:00`;
     const count = logs.filter((row) => {
-      const h = dayjs(row.logTime).hour();
+      const t = dayjs(row.logTime);
+      if (!t.isSame(day, "day")) return false;
+      const h = t.hour();
       return h >= startH && h < endH;
     }).length;
     points.push({ label, count });

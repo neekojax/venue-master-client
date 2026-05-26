@@ -1,7 +1,5 @@
 import dayjs from "dayjs";
-import type { FaultCode } from "./constants";
-import { getSiteLineColor } from "./constants";
-import { FAULT_CODE_COLOR, type FaultCode, SITE_LINE_COLORS } from "./constants";
+import { FAULT_CODE_COLOR, type FaultCode, getSiteLineColor, SITE_LINE_COLORS } from "./constants";
 import type { CodeDistributionItem, FrequencyPoint, SiteDistributionItem } from "./statsUtils";
 import { formatFrequencyHourLabel } from "./statsUtils";
 import type {
