@@ -13,9 +13,47 @@ export interface SiteDistributionItem {
   siteOnShelfRatio: number;
 }
 
+export interface FrequencyCodeStat {
+  code: string;
+  count: number;
+  color: string;
+}
+
 export interface FrequencyPoint {
   label: string;
   count: number;
+  /** 原始小时键，用于 tooltip 展示 */
+  hour?: string;
+  codeStats: FrequencyCodeStat[];
+}
+
+export function formatFrequencyTooltip(point: FrequencyPoint | undefined, axisLabel?: string) {
+  if (!point) return "";
+  const title = axisLabel ?? point.label;
+  const breakdown = point.codeStats.filter((s) => s.count > 0).sort((a, b) => b.count - a.count);
+
+  const lines: string[] = [`<div style="font-weight:600;margin-bottom:4px">${title}</div>`];
+  lines.push(`<div style="font-size:12px">异常 <span style="font-weight:600">${point.count}</span> 条</div>`);
+
+  if (breakdown.length > 0) {
+    lines.push(
+      '<div style="margin-top:6px;padding-top:4px;border-top:1px solid #f0f0f0;max-height:160px;overflow-y:auto">',
+    );
+    for (const stat of breakdown) {
+      lines.push(
+        `<div style="display:flex;align-items:center;justify-content:space-between;gap:16px;font-size:12px;line-height:1.7">
+          <span style="display:flex;align-items:center;min-width:0">
+            <span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:${stat.color};margin-right:6px;flex-shrink:0"></span>
+            <span style="color:#595959">${stat.code}</span>
+          </span>
+          <span style="font-weight:600;color:#262626;flex-shrink:0">${stat.count}</span>
+        </div>`,
+      );
+    }
+    lines.push("</div>");
+  }
+
+  return lines.join("");
 }
 
 export interface CodeDistributionItem {
@@ -116,47 +154,6 @@ export function formatFrequencyHourLabel(hourKey: string, timeMode: FaultStatsTi
   const d = dayjs(hourKey);
   if (!d.isValid()) return hourKey;
   return timeMode === "customDate" ? d.format("HH:00") : d.format("MM-DD HH:00");
-}
-
-export function buildFrequencyPointsFromLogs(
-  logs: StatsLogRow[],
-  timeMode: FaultStatsTimeMode,
-  selectedDate: string,
-): FrequencyPoint[] {
-  const bucketCount = 8;
-  const points: FrequencyPoint[] = [];
-
-  if (timeMode === "24h") {
-    const now = dayjs();
-    for (let i = bucketCount - 1; i >= 0; i--) {
-      const endOffset = i * 3;
-      const startOffset = (i + 1) * 3;
-      const label = i === 0 ? "现在" : `${endOffset}h前`;
-      const count = logs.filter((row) => {
-        const t = dayjs(row.logTime);
-        const hoursAgo = now.diff(t, "hour", true);
-        if (i === 0) return hoursAgo >= 0 && hoursAgo < 3;
-        return hoursAgo >= endOffset && hoursAgo < startOffset;
-      }).length;
-      points.push({ label, count });
-    }
-    return points;
-  }
-
-  const day = dayjs(selectedDate).startOf("day");
-  for (let i = 0; i < bucketCount; i++) {
-    const startH = i * 3;
-    const endH = (i + 1) * 3;
-    const label = `${String(startH).padStart(2, "0")}:00`;
-    const count = logs.filter((row) => {
-      const t = dayjs(row.logTime);
-      if (!t.isSame(day, "day")) return false;
-      const h = t.hour();
-      return h >= startH && h < endH;
-    }).length;
-    points.push({ label, count });
-  }
-  return points;
 }
 
 export function aggregateCodeDistributionFromLogs(logs: StatsLogRow[]): CodeDistributionItem[] {

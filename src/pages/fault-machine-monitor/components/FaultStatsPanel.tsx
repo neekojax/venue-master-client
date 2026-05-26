@@ -9,7 +9,12 @@ import {
 import { Button, DatePicker, Radio, Spin } from "antd";
 import dayjs from "dayjs";
 import { ReactEcharts } from "@/components/react-echarts";
-import type { CodeDistributionItem, FrequencyPoint, SiteDistributionItem } from "../statsUtils";
+import {
+  type CodeDistributionItem,
+  formatFrequencyTooltip,
+  type FrequencyPoint,
+  type SiteDistributionItem,
+} from "../statsUtils";
 import type { FaultStatsTimeMode } from "../types";
 
 interface FaultStatsPanelProps {
@@ -51,15 +56,18 @@ export default function FaultStatsPanel({
     return {
       tooltip: {
         trigger: "axis",
-        backgroundColor: "rgba(255,255,255,0.96)",
+        backgroundColor: "rgba(255,255,255,0.98)",
         borderColor: "#e8e8e8",
+        padding: [10, 12],
+        extraCssText: "box-shadow:0 4px 12px rgba(0,0,0,0.08);",
         formatter: (params: unknown) => {
           const items = (Array.isArray(params) ? params : [params]) as Array<{
             axisValue?: string;
-            value?: number;
+            dataIndex?: number;
           }>;
           if (!items.length) return "";
-          return `${items[0].axisValue ?? ""}<br/>异常 ${items[0].value ?? 0} 条`;
+          const idx = items[0].dataIndex ?? -1;
+          return formatFrequencyTooltip(frequencyPoints[idx], items[0].axisValue);
         },
       },
       grid: { left: 8, right: 16, top: 20, bottom: 8, containLabel: true },
@@ -194,7 +202,7 @@ export default function FaultStatsPanel({
         </div>
       </div>
 
-      <Spin spinning={loading}>
+      <Spin spinning={loading} tip="加载中...">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
           {/* 场地分布 */}
           <div className="lg:col-span-3 bg-gray-50/80 rounded-lg border border-gray-100 p-4 flex flex-col min-h-[360px]">

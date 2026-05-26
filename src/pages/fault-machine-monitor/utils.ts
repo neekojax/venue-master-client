@@ -56,16 +56,18 @@ export function mapAbnormalLogListItemToRecord(item: AbnormalLogListItem): Abnor
   };
 }
 
-export function mapAbnormalLogListToRecords(list: AbnormalLogListItem[] = []) {
+export function mapAbnormalLogListToRecords(list?: AbnormalLogListItem[] | null) {
+  if (!Array.isArray(list)) return [];
   return list.map(mapAbnormalLogListItemToRecord);
 }
 
 export function mapSiteSummaryToDistribution(payload?: AbnormalLogsSiteSummaryData): SiteDistributionItem[] {
-  if (!payload?.list?.length) return [];
+  const items = Array.isArray(payload?.list) ? payload.list : [];
+  if (items.length === 0) return [];
 
-  const total = Number(payload.totalCount) || payload.list.reduce((sum, item) => sum + Number(item.count), 0);
+  const total = Number(payload?.totalCount) || items.reduce((sum, item) => sum + Number(item.count), 0);
 
-  return payload.list.map((item) => {
+  return items.map((item) => {
     const count = Number(item.count) || 0;
     return {
       siteCode: item.siteCode,
@@ -82,10 +84,23 @@ export function mapSiteDetailToFrequencyPoints(
   payload: AbnormalLogsSiteDetailData | undefined,
   timeMode: FaultStatsTimeMode,
 ): FrequencyPoint[] {
-  return (payload?.hours ?? []).map((item) => ({
-    label: formatFrequencyHourLabel(item.hour, timeMode),
-    count: Number(item.count) || 0,
-  }));
+  return (payload?.hours ?? []).map((item) => {
+    const codeStats = (item.codeStats ?? []).map((stat) => {
+      const code = stat.code?.trim() || "未知";
+      return {
+        code,
+        count: Number(stat.count) || 0,
+        color: FAULT_CODE_COLOR[code as FaultCode] ?? SITE_LINE_COLORS[0],
+      };
+    });
+
+    return {
+      label: formatFrequencyHourLabel(item.hour, timeMode),
+      hour: item.hour,
+      count: Number(item.count) || 0,
+      codeStats,
+    };
+  });
 }
 
 export function mapSiteDetailToCodeDistribution(

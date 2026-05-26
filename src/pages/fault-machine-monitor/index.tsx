@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { Form } from "antd";
+import { Alert, Form } from "antd";
 import dayjs from "dayjs";
 import AbnormalLogPanel, { type AbnormalLogSearchValues } from "./components/AbnormalLogPanel";
 import FaultStatsPanel from "./components/FaultStatsPanel";
@@ -63,14 +63,16 @@ export default function FaultMachineMonitorPage() {
   const {
     data: summaryRes,
     isLoading: isSummaryLoading,
-    isFetching: isSummaryFetching,
+    isError: isSummaryError,
+    error: summaryError,
     refetch: refetchSummary,
   } = useAbnormalLogsSiteSummary(statsTimeMode, statsSelectedDate, !useMock);
 
   const {
     data: detailRes,
     isLoading: isDetailLoading,
-    isFetching: isDetailFetching,
+    isError: isDetailError,
+    error: detailError,
     refetch: refetchDetail,
   } = useAbnormalLogsSiteDetail(selectedStatsSiteCode, statsTimeMode, statsSelectedDate, !useMock);
 
@@ -82,7 +84,8 @@ export default function FaultMachineMonitorPage() {
   const {
     data: logsRes,
     isLoading: isLogsLoading,
-    isFetching: isLogsFetching,
+    isError: isLogsError,
+    error: logsError,
     refetch: refetchLogs,
   } = useAbnormalLogs(listQueryParams, !useMock);
 
@@ -122,7 +125,11 @@ export default function FaultMachineMonitorPage() {
   const apiLogList = useMemo(() => mapAbnormalLogListToRecords(logsRes?.data?.list), [logsRes]);
 
   const logList = useMock ? paginateLogs(mockTableLogs, page, pageSize) : apiLogList;
-  const logTotal = useMock ? mockTableLogs.length : (logsRes?.data?.total ?? 0);
+  const logTotal = useMock
+    ? mockTableLogs.length
+    : typeof logsRes?.data?.total === "number"
+      ? logsRes.data.total
+      : apiLogList.length;
 
   useEffect(() => {
     if (siteDistribution.length === 0) {
@@ -193,10 +200,36 @@ export default function FaultMachineMonitorPage() {
   const statsTimeLabel = statsTimeMode === "24h" ? "24小时内" : statsSelectedDate;
   const statsLoading = useMock
     ? false
-    : isSummaryLoading || isSummaryFetching || isDetailLoading || isDetailFetching;
+    : isSummaryLoading || (Boolean(selectedStatsSiteCode) && isDetailLoading);
+
+  const statsErrorMessage = useMemo(() => {
+    if (useMock) return "";
+    if (isSummaryError) return (summaryError as Error)?.message || "场地汇总加载失败";
+    if (selectedStatsSiteCode && isDetailError) {
+      return (detailError as Error)?.message || "场地明细加载失败";
+    }
+    return "";
+  }, [useMock, isSummaryError, summaryError, selectedStatsSiteCode, isDetailError, detailError]);
+
+  const logsErrorMessage = useMemo(() => {
+    if (useMock || !isLogsError) return "";
+    return (logsError as Error)?.message || "故障日志列表加载失败";
+  }, [useMock, isLogsError, logsError]);
 
   return (
     <div className="min-h-full bg-[#f5f5f5] -m-4 p-4 flex flex-col gap-4">
+      {statsErrorMessage ? (
+        <Alert
+          type="error"
+          showIcon
+          message={statsErrorMessage}
+          action={
+            <button type="button" className="text-[#1677ff]" onClick={() => void handleStatsRefresh()}>
+              重试
+            </button>
+          }
+        />
+      ) : null}
       <FaultStatsPanel
         timeMode={statsTimeMode}
         selectedDate={statsSelectedDate}
@@ -214,6 +247,19 @@ export default function FaultMachineMonitorPage() {
         onRefresh={handleStatsRefresh}
       />
 
+      {logsErrorMessage ? (
+        <Alert
+          type="error"
+          showIcon
+          message={logsErrorMessage}
+          action={
+            <button type="button" className="text-[#1677ff]" onClick={() => void handleTableRefresh()}>
+              重试
+            </button>
+          }
+        />
+      ) : null}
+
       <AbnormalLogPanel
         form={form}
         siteOptions={tableSiteOptions}
@@ -222,7 +268,7 @@ export default function FaultMachineMonitorPage() {
         total={logTotal}
         page={page}
         pageSize={pageSize}
-        loading={useMock ? false : isLogsLoading || isLogsFetching}
+        loading={useMock ? false : isLogsLoading && !isLogsError}
         onSearch={onSearch}
         onReset={onReset}
         onRefresh={handleTableRefresh}
