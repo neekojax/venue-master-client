@@ -2,6 +2,56 @@ import type { FaultCode } from "./constants";
 
 export type FaultTimeRange = "7d" | "30d";
 
+/** 运维大盘时间筛选 */
+export type FaultStatsTimeMode = "24h" | "customDate";
+
+export type AbnormalLogStatsWindow = "24h" | "date";
+
+export interface AbnormalLogSiteSummaryItem {
+  siteCode: string;
+  siteName: string;
+  count: number;
+  onShelfCount: number;
+  siteOnShelfRatio: number;
+}
+
+export interface AbnormalLogsSiteSummaryData {
+  date?: string;
+  window: AbnormalLogStatsWindow;
+  startTime: string;
+  endTime: string;
+  totalCount: number;
+  list: AbnormalLogSiteSummaryItem[];
+}
+
+export interface AbnormalLogTypeStatItem {
+  code: string;
+  count: number;
+}
+
+export interface AbnormalLogHourCodeStat {
+  code: string;
+  count: number;
+}
+
+export interface AbnormalLogHourStat {
+  hour: string;
+  count: number;
+  codeStats: AbnormalLogHourCodeStat[];
+}
+
+export interface AbnormalLogsSiteDetailData {
+  siteCode: string;
+  siteName: string;
+  date?: string;
+  window: AbnormalLogStatsWindow;
+  startTime: string;
+  endTime: string;
+  total: number;
+  typeStats: AbnormalLogTypeStatItem[];
+  hours: AbnormalLogHourStat[];
+}
+
 export interface AbnormalLogRecord {
   id: number;
   siteId: string;

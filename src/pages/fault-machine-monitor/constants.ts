@@ -56,3 +56,7 @@ export const SITE_LINE_COLORS = [
   "#597ef7",
   "#36cfc9",
 ];
+
+export function getSiteLineColor(siteIndex: number) {
+  return SITE_LINE_COLORS[siteIndex % SITE_LINE_COLORS.length];
+}

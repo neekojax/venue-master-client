@@ -1,10 +1,16 @@
 import dayjs from "dayjs";
 import type { FaultCode } from "./constants";
-import { getSiteLineColor } from "./mockData";
+import { getSiteLineColor } from "./constants";
+import { FAULT_CODE_COLOR, type FaultCode, SITE_LINE_COLORS } from "./constants";
+import type { CodeDistributionItem, FrequencyPoint, SiteDistributionItem } from "./statsUtils";
+import { formatFrequencyHourLabel } from "./statsUtils";
 import type {
   AbnormalLogListItem,
   AbnormalLogRecord,
+  AbnormalLogsSiteDetailData,
+  AbnormalLogsSiteSummaryData,
   AbnormalLogsTrendData,
+  FaultStatsTimeMode,
   FaultTrendChartData,
 } from "./types";
 
@@ -54,4 +60,55 @@ export function mapAbnormalLogListItemToRecord(item: AbnormalLogListItem): Abnor
 
 export function mapAbnormalLogListToRecords(list: AbnormalLogListItem[] = []) {
   return list.map(mapAbnormalLogListItemToRecord);
+}
+
+export function mapSiteSummaryToDistribution(payload?: AbnormalLogsSiteSummaryData): SiteDistributionItem[] {
+  if (!payload?.list?.length) return [];
+
+  const total = Number(payload.totalCount) || payload.list.reduce((sum, item) => sum + Number(item.count), 0);
+
+  return payload.list.map((item) => {
+    const count = Number(item.count) || 0;
+    return {
+      siteCode: item.siteCode,
+      siteName: item.siteName,
+      count,
+      onShelfCount: Number(item.onShelfCount) || 0,
+      siteOnShelfRatio: Number(item.siteOnShelfRatio) || 0,
+      percentage: total > 0 ? Math.round((count / total) * 100) : 0,
+    };
+  });
+}
+
+export function mapSiteDetailToFrequencyPoints(
+  payload: AbnormalLogsSiteDetailData | undefined,
+  timeMode: FaultStatsTimeMode,
+): FrequencyPoint[] {
+  return (payload?.hours ?? []).map((item) => ({
+    label: formatFrequencyHourLabel(item.hour, timeMode),
+    count: Number(item.count) || 0,
+  }));
+}
+
+export function mapSiteDetailToCodeDistribution(
+  payload: AbnormalLogsSiteDetailData | undefined,
+): CodeDistributionItem[] {
+  const typeStats = payload?.typeStats ?? [];
+  if (typeStats.length === 0) return [];
+
+  const total = Number(payload?.total) || typeStats.reduce((sum, item) => sum + Number(item.count), 0);
+  if (total <= 0) return [];
+
+  return typeStats
+    .map((item) => {
+      const code = item.code?.trim() || "未知";
+      const count = Number(item.count) || 0;
+      return {
+        code,
+        count,
+        percentage: Math.round((count / total) * 1000) / 10,
+        color: FAULT_CODE_COLOR[code as FaultCode] ?? SITE_LINE_COLORS[0],
+      };
+    })
+    .sort((a, b) => b.count - a.count);
 }

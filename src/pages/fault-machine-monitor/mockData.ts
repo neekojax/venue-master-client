@@ -1,8 +1,26 @@
 import dayjs from "dayjs";
-import { FAULT_CODE_EXPLANATIONS, FAULT_CODES, type FaultCode, SITE_LINE_COLORS } from "./constants";
-import type { AbnormalLogRecord } from "./types";
+import { FAULT_CODE_EXPLANATIONS, FAULT_CODES, type FaultCode, getSiteLineColor } from "./constants";
+import {
+  aggregateCodeDistributionFromLogs,
+  buildSiteDistributionFromLogs,
+  buildStatsLogFilters,
+  toStatsLogRow,
+} from "./statsUtils";
+import type {
+  AbnormalLogFilters,
+  AbnormalLogListItem,
+  AbnormalLogRecord,
+  AbnormalLogsSiteDetailData,
+  AbnormalLogsSiteSummaryData,
+  FaultStatsTimeMode,
+  FaultTimeRange,
+  FaultTrendChartData,
+} from "./types";
 
 import { MOCK_FARM_SITES } from "@/pages/farm-monitor/mockData";
+
+/** 仅当 VITE_FAULT_MONITOR_USE_MOCK=true 时启用 mock，默认走真实接口 */
+export const USE_FAULT_MONITOR_MOCK = import.meta.env.VITE_FAULT_MONITOR_USE_MOCK === "true";
 
 function mulberry32(seed: number) {
   let a = seed;
@@ -72,11 +90,172 @@ function buildMockLogs(): AbnormalLogRecord[] {
     }
   }
 
-  return records.sort((a, b) => dayjs(b.collectTime).valueOf() - dayjs(a.collectTime).valueOf());
+  return records.sort((a, b) => dayjs(b.logTime).valueOf() - dayjs(a.logTime).valueOf());
 }
 
 export const MOCK_ABNORMAL_LOGS: AbnormalLogRecord[] = buildMockLogs();
 
-export function getSiteLineColor(siteIndex: number) {
-  return SITE_LINE_COLORS[siteIndex % SITE_LINE_COLORS.length];
+export function recordToListItem(record: AbnormalLogRecord): AbnormalLogListItem {
+  return {
+    id: record.id,
+    siteCode: record.siteId,
+    siteName: record.siteName,
+    agentCode: record.agentCode,
+    ip: record.ip,
+    mac: record.mac,
+    controlBoardSN: record.controlBoardSN,
+    code: record.code,
+    explanation: record.explanation,
+    logTime: record.logTime,
+    collectTime: record.collectTime,
+    createdAt: record.createdAt,
+  };
+}
+
+export function filterMockAbnormalLogs(
+  logs: AbnormalLogRecord[],
+  filters: AbnormalLogFilters,
+): AbnormalLogRecord[] {
+  return logs.filter((row) => {
+    if (filters.code && row.code !== filters.code) return false;
+    if (filters.siteCode && row.siteId !== filters.siteCode) return false;
+    if (filters.ip && !row.ip.includes(filters.ip)) return false;
+    if (filters.mac && !row.mac.toLowerCase().includes(filters.mac.toLowerCase())) return false;
+    if (
+      filters.controlBoardSN &&
+      !row.controlBoardSN.toLowerCase().includes(filters.controlBoardSN.toLowerCase())
+    ) {
+      return false;
+    }
+    const t = dayjs(row.logTime);
+    if (filters.logTimeFrom && t.isBefore(dayjs(filters.logTimeFrom), "second")) return false;
+    if (filters.logTimeTo && t.isAfter(dayjs(filters.logTimeTo), "second")) return false;
+    return true;
+  });
+}
+
+export function buildMockSiteSummary(
+  timeMode: FaultStatsTimeMode,
+  selectedDate: string,
+): AbnormalLogsSiteSummaryData {
+  const filters = buildStatsLogFilters(timeMode, selectedDate);
+  const logs = filterMockAbnormalLogs(MOCK_ABNORMAL_LOGS, filters);
+  const list = buildSiteDistributionFromLogs(logs.map(toStatsLogRow)).map((item) => ({
+    siteCode: item.siteCode,
+    siteName: item.siteName,
+    count: item.count,
+    onShelfCount: item.onShelfCount,
+    siteOnShelfRatio: item.siteOnShelfRatio,
+  }));
+  const totalCount = list.reduce((sum, item) => sum + item.count, 0);
+  const window = timeMode === "customDate" ? ("date" as const) : ("24h" as const);
+
+  return {
+    date: timeMode === "customDate" ? selectedDate : undefined,
+    window,
+    startTime: filters.logTimeFrom ?? "",
+    endTime: filters.logTimeTo ?? "",
+    totalCount,
+    list,
+  };
+}
+
+export function buildMockSiteDetail(
+  siteCode: string,
+  timeMode: FaultStatsTimeMode,
+  selectedDate: string,
+): AbnormalLogsSiteDetailData {
+  const filters = buildStatsLogFilters(timeMode, selectedDate, siteCode);
+  const logs = filterMockAbnormalLogs(MOCK_ABNORMAL_LOGS, filters).map(toStatsLogRow);
+  const siteName = logs[0]?.siteName ?? siteCode;
+
+  const typeDistribution = aggregateCodeDistributionFromLogs(logs);
+  const typeStats = typeDistribution.map((item) => ({ code: item.code, count: item.count }));
+  const total = logs.length;
+
+  const start = dayjs(filters.logTimeFrom);
+  const end = dayjs(filters.logTimeTo);
+  const hours: AbnormalLogsSiteDetailData["hours"] = [];
+  let cursor = start.startOf("hour");
+  const endCursor = end;
+
+  while (cursor.isBefore(endCursor)) {
+    const next = cursor.add(1, "hour");
+    const inHour = logs.filter((row) => {
+      const t = dayjs(row.logTime);
+      return !t.isBefore(cursor) && t.isBefore(next);
+    });
+    const codeCounts = new Map<string, number>();
+    for (const row of inHour) {
+      const code = row.code?.trim() || "未知";
+      codeCounts.set(code, (codeCounts.get(code) ?? 0) + 1);
+    }
+    hours.push({
+      hour: cursor.format("YYYY-MM-DD HH:mm:ss"),
+      count: inHour.length,
+      codeStats: typeStats.map((item) => ({
+        code: item.code,
+        count: codeCounts.get(item.code) ?? 0,
+      })),
+    });
+    cursor = next;
+  }
+
+  const window = timeMode === "customDate" ? ("date" as const) : ("24h" as const);
+  return {
+    siteCode,
+    siteName,
+    date: timeMode === "customDate" ? selectedDate : undefined,
+    window,
+    startTime: filters.logTimeFrom ?? "",
+    endTime: filters.logTimeTo ?? "",
+    total,
+    typeStats,
+    hours,
+  };
+}
+
+export function buildMockTrendChartData(timeRange: FaultTimeRange): FaultTrendChartData {
+  const days = timeRange === "7d" ? 7 : 30;
+  const now = dayjs();
+  const labels: string[] = [];
+  const dayKeys: string[] = [];
+
+  for (let i = days - 1; i >= 0; i--) {
+    const d = now.subtract(i, "day").startOf("day");
+    labels.push(d.format("MM-DD"));
+    dayKeys.push(d.format("YYYY-MM-DD"));
+  }
+
+  const siteIndexMap = new Map<string, number>();
+  const seriesMap = new Map<string, { siteId: string; siteName: string; points: number[] }>();
+
+  for (const log of MOCK_ABNORMAL_LOGS) {
+    const dayKey = dayjs(log.logTime).format("YYYY-MM-DD");
+    const dayIdx = dayKeys.indexOf(dayKey);
+    if (dayIdx < 0) continue;
+
+    if (!seriesMap.has(log.siteId)) {
+      const idx = siteIndexMap.size;
+      siteIndexMap.set(log.siteId, idx);
+      seriesMap.set(log.siteId, {
+        siteId: log.siteId,
+        siteName: log.siteName,
+        points: Array.from({ length: days }, () => 0),
+      });
+    }
+    const series = seriesMap.get(log.siteId)!;
+    series.points[dayIdx] += 1;
+  }
+
+  const series = Array.from(seriesMap.values()).map((item, index) => ({
+    ...item,
+    color: getSiteLineColor(index),
+  }));
+
+  return {
+    labels,
+    series,
+    lastUpdated: now.format("YYYY-MM-DD"),
+  };
 }

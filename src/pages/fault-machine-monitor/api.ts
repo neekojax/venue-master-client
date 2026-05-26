@@ -1,4 +1,4 @@
-import type { AbnormalLogFilters, AbnormalLogQueryParams, FaultTimeRange } from "./types";
+import type { AbnormalLogFilters, AbnormalLogQueryParams, FaultStatsTimeMode, FaultTimeRange } from "./types";
 
 import { fetchGet } from "@/helper/fetchHelper";
 
@@ -46,4 +46,16 @@ export const fetchAbnormalLogsExport = async (filters: AbnormalLogFilters) => {
   return fetchGet("minerHashrate/abnormalLogs/export", buildAbnormalLogFilterParams(filters), {
     responseType: "blob",
   });
+};
+
+export function buildStatsApiParams(timeMode: FaultStatsTimeMode, selectedDate: string) {
+  return timeMode === "customDate" ? { date: selectedDate } : {};
+}
+
+export const fetchAbnormalLogsSiteSummary = async (params: { date?: string } = {}) => {
+  return fetchGet("minerHashrate/abnormalLogs/siteSummary", params);
+};
+
+export const fetchAbnormalLogsSiteDetail = async (siteCode: string, params: { date?: string } = {}) => {
+  return fetchGet(`minerHashrate/abnormalLogs/siteDetail/${encodeURIComponent(siteCode)}`, params);
 };
