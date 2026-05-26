@@ -19,7 +19,7 @@ import type {
 
 import { MOCK_FARM_SITES } from "@/pages/farm-monitor/mockData";
 
-/** 仅当 VITE_FAULT_MONITOR_USE_MOCK=true 时启用 mock，默认走真实接口 */
+/** 默认走线上真实接口；本地调试 mock 时在 .env.local 设 VITE_FAULT_MONITOR_USE_MOCK=true */
 export const USE_FAULT_MONITOR_MOCK = import.meta.env.VITE_FAULT_MONITOR_USE_MOCK === "true";
 
 function mulberry32(seed: number) {
