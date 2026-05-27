@@ -34,7 +34,26 @@ const DEFAULT_SERIES_VISIBLE = Object.fromEntries(LEGEND_ITEMS.map((item) => [it
 >;
 
 function formatHashrateE(value: number) {
-  return `${Number(value).toFixed(2)} E`;
+  return `${Number(value).toFixed(4)} E`;
+}
+
+/** 算力轴下限为最低算力的 50%，上限略高于最大值 */
+function computeHashrateAxisBounds(values: number[]) {
+  const valid = values.filter((v) => Number.isFinite(v));
+  if (valid.length === 0) return {};
+
+  const min = Math.min(...valid);
+  const max = Math.max(...valid);
+  const span = max - min;
+  const axisMin = min * 0.5;
+
+  if (span === 0) {
+    const pad = Math.max(Math.abs(max) * 0.0005, 0.00005);
+    return { min: axisMin, max: max + pad };
+  }
+
+  const pad = span * 0.03;
+  return { min: axisMin, max: max + pad };
 }
 
 export default function OverviewChart({
@@ -62,6 +81,7 @@ export default function OverviewChart({
       (item) => item.name !== HASHRATE_SERIES_NAME && seriesVisible[item.name],
     );
     const hashrateSeriesVisible = seriesVisible[HASHRATE_SERIES_NAME];
+    const hashrateAxisBounds = computeHashrateAxisBounds(data.map((d) => d.totalHashrate));
 
     const allSeries = [
       {
@@ -165,6 +185,8 @@ export default function OverviewChart({
           name: hashrateSeriesVisible ? "E" : "",
           show: hashrateSeriesVisible,
           position: "right",
+          scale: true,
+          ...hashrateAxisBounds,
           nameLocation: "middle",
           nameRotate: -90,
           nameGap: 44,

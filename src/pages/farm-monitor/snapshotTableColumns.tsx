@@ -24,6 +24,8 @@ export interface SnapshotColumnConfig {
 
 export const SNAPSHOT_COLUMN_STORAGE_KEY = "venue-master:farm-monitor:snapshot-columns:v5";
 
+const AGENT_CODE_DEFAULT_HIDDEN_KEY = "venue-master:farm-monitor:agent-code-default-hidden:v1";
+
 function renderWorkerTag(value?: string) {
   if (!value?.trim()) {
     return <span className="text-gray-400">-</span>;
@@ -55,7 +57,6 @@ function renderHashrateCell(value?: number | null, fractionDigits = 2) {
 export const DEFAULT_SNAPSHOT_COLUMN_CONFIGS: SnapshotColumnConfig[] = [
   { key: "index", title: "序号", visible: true, pin: "left", lockVisible: true },
   { key: "site_code", title: "场地", visible: true, pin: "left" },
-  { key: "agent_code", title: "代理编码", visible: true, pin: false },
   { key: "miner_code", title: "矿工号", visible: true, pin: false },
   { key: "ip", title: "机器IP", visible: true, pin: false },
   { key: "mac_address", title: "MAC地址", visible: true, pin: false },
@@ -78,6 +79,7 @@ export const DEFAULT_SNAPSHOT_COLUMN_CONFIGS: SnapshotColumnConfig[] = [
   { key: "created_at", title: "创建时间", visible: true, pin: false },
   { key: "updated_at", title: "更新时间", visible: true, pin: false },
   // 默认隐藏
+  { key: "agent_code", title: "代理编码", visible: false, pin: false },
   { key: "task_id", title: "任务ID", visible: false, pin: false },
   { key: "hashrate_5s", title: "5秒算力", visible: false, pin: false },
   { key: "hashrate_fault", title: "算力异常", visible: false, pin: false },
@@ -93,16 +95,31 @@ export function cloneColumnConfigs(configs: SnapshotColumnConfig[]) {
 export function loadSnapshotColumnConfigs(): SnapshotColumnConfig[] {
   try {
     const raw = localStorage.getItem(SNAPSHOT_COLUMN_STORAGE_KEY);
-    if (!raw) return cloneColumnConfigs(DEFAULT_SNAPSHOT_COLUMN_CONFIGS);
+    if (!raw) {
+      return migrateAgentCodeDefaultHidden(cloneColumnConfigs(DEFAULT_SNAPSHOT_COLUMN_CONFIGS));
+    }
     const parsed = JSON.parse(raw) as SnapshotColumnConfig[];
-    return migrateHashrateColumnOrder(mergeColumnConfigs(parsed));
+    return migrateAgentCodeDefaultHidden(migrateHashrateColumnOrder(mergeColumnConfigs(parsed)));
   } catch {
-    return migrateHashrateColumnOrder(cloneColumnConfigs(DEFAULT_SNAPSHOT_COLUMN_CONFIGS));
+    return migrateAgentCodeDefaultHidden(
+      migrateHashrateColumnOrder(cloneColumnConfigs(DEFAULT_SNAPSHOT_COLUMN_CONFIGS)),
+    );
   }
 }
 
 export function saveSnapshotColumnConfigs(configs: SnapshotColumnConfig[]) {
   localStorage.setItem(SNAPSHOT_COLUMN_STORAGE_KEY, JSON.stringify(configs));
+}
+
+/** 代理编码改为默认隐藏（仅执行一次，不覆盖用户之后在列设置中重新开启的选择） */
+function migrateAgentCodeDefaultHidden(configs: SnapshotColumnConfig[]) {
+  if (localStorage.getItem(AGENT_CODE_DEFAULT_HIDDEN_KEY)) return configs;
+  localStorage.setItem(AGENT_CODE_DEFAULT_HIDDEN_KEY, "1");
+  const agent = configs.find((c) => c.key === "agent_code");
+  if (!agent?.visible) return configs;
+  const next = configs.map((c) => (c.key === "agent_code" ? { ...c, visible: false } : c));
+  saveSnapshotColumnConfigs(next);
+  return next;
 }
 
 /** 理论算力排在平均算力之后 */

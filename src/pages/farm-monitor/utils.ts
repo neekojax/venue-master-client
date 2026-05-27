@@ -67,17 +67,17 @@ export function mapProbeTasksToOverviewPoints(tasks: ProbeTaskItem[], window: Ti
       online: Number(task.online_total ?? 0),
       lowHashrate: Number(task.fault_total ?? 0),
       zeroHashrate: Number(task.zero_hashrate_total ?? 0),
-      totalHashrate: totalHashrateThToE(task.total_hashrate),
+      totalHashrate: totalHashrateThToE(task.total_hashrate, 4),
     };
   });
 }
 
-/** total_hashrate 为 TH/s，转为 E 数值，保留 2 位小数 */
-export function totalHashrateThToE(totalHashrate?: number | null): number {
+/** total_hashrate 为 TH/s，转为 E 数值 */
+export function totalHashrateThToE(totalHashrate?: number | null, decimals = 2): number {
   if (totalHashrate == null || isNaN(Number(totalHashrate))) {
     return 0;
   }
-  return Number(formatHashrate(Number(totalHashrate), "TH", 2, "EH", false));
+  return Number(formatHashrate(Number(totalHashrate), "TH", decimals, "EH", false));
 }
 
 /** total_hashrate 为 TH/s，展示为 E，保留 2 位小数 */

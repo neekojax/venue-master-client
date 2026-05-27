@@ -14,17 +14,6 @@ export const miningRoute: RouteObject = {
   },
   children: [
     {
-      path: ROUTE_PATHS.miningSetting,
-      lazy: async () => ({
-        Component: (await import("@/pages/mining/setting")).default,
-      }),
-      HydrateFallback: ProgressBar,
-      handle: {
-        title: "账户列表",
-        crumb: () => <Link to={ROUTE_PATHS.miningSetting}>账户列表</Link>,
-      },
-    },
-    {
       path: ROUTE_PATHS.miningHashRate,
       lazy: async () => ({
         Component: (await import("@/pages/mining/hash")).default,
@@ -42,8 +31,8 @@ export const miningRoute: RouteObject = {
       }),
       HydrateFallback: ProgressBar,
       handle: {
-        title: "矿场监控",
-        crumb: () => <Link to={ROUTE_PATHS.farmMonitor}>矿场监控</Link>,
+        title: "矿机监控",
+        crumb: () => <Link to={ROUTE_PATHS.farmMonitor}>矿机监控</Link>,
       },
     },
     {
@@ -55,6 +44,17 @@ export const miningRoute: RouteObject = {
       handle: {
         title: "故障机监控",
         crumb: () => <Link to={ROUTE_PATHS.faultMonitor}>故障机监控</Link>,
+      },
+    },
+    {
+      path: ROUTE_PATHS.miningSetting,
+      lazy: async () => ({
+        Component: (await import("@/pages/mining/setting")).default,
+      }),
+      HydrateFallback: ProgressBar,
+      handle: {
+        title: "账户列表",
+        crumb: () => <Link to={ROUTE_PATHS.miningSetting}>账户列表</Link>,
       },
     },
     {
