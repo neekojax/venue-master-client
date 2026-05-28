@@ -24,8 +24,8 @@ const CARDS: Array<{
   bg: string;
 }> = [
   { key: "theoreticalOnline", label: "理论在架数", icon: ApiOutlined, color: "#1677ff", bg: "#e6f4ff" },
-  { key: "online", label: "在架数", icon: DashboardOutlined, color: "#52c41a", bg: "#f6ffed" },
-  { key: "theoreticalOffline", label: "离架数", icon: DisconnectOutlined, color: "#8c8c8c", bg: "#fafafa" },
+  { key: "online", label: "扫描数", icon: DashboardOutlined, color: "#52c41a", bg: "#f6ffed" },
+  { key: "theoreticalOffline", label: "异常数", icon: DisconnectOutlined, color: "#8c8c8c", bg: "#fafafa" },
   { key: "lowHashrate", label: "低算力", icon: WarningOutlined, color: "#fa8c16", bg: "#fff7e6" },
   { key: "zeroHashrate", label: "零算力", icon: PoweroffOutlined, color: "#ff4d4f", bg: "#fff1f0" },
   { key: "networkEvents", label: "网络事件", icon: CloudOutlined, color: "#13c2c2", bg: "#e6fffb" },

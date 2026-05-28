@@ -20,7 +20,7 @@ interface OverviewChartProps {
 
 const LEGEND_ITEMS = [
   { name: "理论在架数", color: "#1677ff", type: "dashed" as const },
-  { name: "在架数", color: "#52c41a", type: "solid" as const },
+  { name: "扫描数", color: "#52c41a", type: "solid" as const },
   { name: "低算力数量", color: "#fa8c16", type: "solid" as const },
   { name: "零算力数量", color: "#ff4d4f", type: "solid" as const },
   { name: "总算力 E", color: "#722ed1", type: "solid" as const },
@@ -94,7 +94,7 @@ export default function OverviewChart({
         smooth: true,
       },
       {
-        name: "在架数",
+        name: "扫描数",
         type: "line" as const,
         yAxisIndex: 0,
         data: data.map((d) => d.online),

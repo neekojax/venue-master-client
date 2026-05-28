@@ -25,10 +25,10 @@ import {
   Popconfirm,
   Select,
   Space,
+  Switch,
   Table,
   Tag,
   Tooltip,
-  // Switch
 } from "antd";
 import type { ColumnsType } from "antd/es/table";
 import dayjs from "dayjs";
@@ -79,7 +79,7 @@ interface EventLog {
 }
 
 const App: React.FC = () => {
-  // const [showCollectionOnly, setShowCollectionOnly] = useState(true)
+  const [showFavoriteOnly, setShowFavoriteOnly] = useState(false);
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [selectedRowKeys] = useState<React.Key[]>([]);
   const [form] = Form.useForm();
@@ -116,6 +116,18 @@ const App: React.FC = () => {
   const powerSites = useMemo(
     () => Array.from(new Set((venueList?.data || []).map((v: any) => v.venue_name))),
     [venueList],
+  );
+
+  const favoriteSiteNames = useMemo(() => {
+    const list = Array.isArray(venueList?.data) ? (venueList!.data as any[]) : [];
+    return Array.from(
+      new Set(list.filter((v) => Number(v?.collection ?? 0) === 1).map((v) => String(v.venue_name))),
+    );
+  }, [venueList]);
+
+  const effectiveSelectedLocation = useMemo(
+    () => (showFavoriteOnly ? favoriteSiteNames : selectedLocation),
+    [showFavoriteOnly, favoriteSiteNames, selectedLocation],
   );
   const handleFilterChange = (key: keyof typeof filters, value: string) => {
     setFilters((prev) => ({ ...prev, [key]: value }));
@@ -181,8 +193,8 @@ const App: React.FC = () => {
   const endDate = dateRange && dateRange[1] ? dateRange[1].format("YYYY-MM-DD") : undefined;
   // 将场地 ID 转为逗号分隔的字符串（后端期望格式）
   let venueIds: string | undefined = undefined;
-  if (selectedLocation.length && Array.isArray(venueList?.data)) {
-    const ids = selectedLocation
+  if (effectiveSelectedLocation.length && Array.isArray(venueList?.data)) {
+    const ids = effectiveSelectedLocation
       .map((name) => (venueList!.data as any[]).find((v: any) => v.venue_name === name)?.id)
       .filter((id): id is number => typeof id === "number");
     venueIds = ids.join(",");
@@ -660,6 +672,26 @@ const App: React.FC = () => {
                 {showSiteFilter && (
                   <div className="site-filter-dropdown absolute right-0 mt-2 w-80 bg-white rounded-lg shadow-lg z-10 border border-gray-200 p-4">
                     <div className="font-medium text-gray-900 mb-3">选择场地</div>
+                    <div className="flex items-center justify-between gap-3 mb-3">
+                      <div className="flex items-center gap-2">
+                        <Switch
+                          size="small"
+                          checked={showFavoriteOnly}
+                          onChange={(checked) => {
+                            if (checked && favoriteSiteNames.length === 0) {
+                              message.warning("暂无收藏场地");
+                              return;
+                            }
+                            setCurrentPage(1);
+                            setShowFavoriteOnly(checked);
+                          }}
+                        />
+                        <span className="text-sm text-gray-700">我的收藏</span>
+                      </div>
+                      {showFavoriteOnly ? (
+                        <span className="text-[11px] text-gray-400">已选 {favoriteSiteNames.length} 个</span>
+                      ) : null}
+                    </div>
                     <Input
                       size="middle"
                       placeholder="搜索场地..."
@@ -678,8 +710,10 @@ const App: React.FC = () => {
                               type="checkbox"
                               id={`site-${index}`}
                               className="h-4 w-4 text-blue-600 rounded border-gray-300 focus:ring-blue-500"
-                              checked={selectedLocation.includes(site)}
+                              checked={effectiveSelectedLocation.includes(site)}
+                              disabled={showFavoriteOnly}
                               onChange={(e) => {
+                                if (showFavoriteOnly) return;
                                 setSelectedLocation((prev: string[]) => {
                                   const set = new Set(prev);
                                   if (e.target.checked) {
@@ -716,6 +750,21 @@ const App: React.FC = () => {
                     </div>
                   </div>
                 )}
+              </div>
+              <div className="flex items-center gap-2">
+                <Switch
+                  size="small"
+                  checked={showFavoriteOnly}
+                  onChange={(checked) => {
+                    if (checked && favoriteSiteNames.length === 0) {
+                      message.warning("暂无收藏场地");
+                      return;
+                    }
+                    setCurrentPage(1);
+                    setShowFavoriteOnly(checked);
+                  }}
+                />
+                <span className="text-sm text-gray-700 whitespace-nowrap">我的收藏</span>
               </div>
               <RangePicker
                 size="middle"
