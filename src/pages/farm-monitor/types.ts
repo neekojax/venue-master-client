@@ -56,18 +56,61 @@ export interface ProbeTaskItem {
   updated_at?: string;
 }
 
+/** recentProbeTasks 单条 agents 明细 */
+export interface ProbeTaskAgentDetail {
+  agent_code?: string;
+  task_id?: string;
+  collect_time?: string;
+  backfilled?: boolean;
+  present?: boolean;
+  online_total?: number;
+  offline_total?: number;
+  fault_total?: number;
+  zero_hashrate_total?: number;
+  on_shelf_count?: number;
+  avg_hashrate?: number;
+  total_hashrate?: number;
+}
+
+/** recentProbeTasks 算力时间序列点（单 Agent 为原始点，多 Agent 为小时桶） */
+export interface HashrateTimeSeriesPoint {
+  time?: string;
+  online_total?: number;
+  offline_total?: number;
+  fault_total?: number;
+  zero_hashrate_total?: number;
+  on_shelf_count?: number;
+  avg_hashrate?: number;
+  total_hashrate?: number;
+  present_agent_count?: number;
+  agents?: ProbeTaskAgentDetail[];
+}
+
 export interface RecentProbeTasksResponse {
   site_code: string;
   window: TimeRange;
-  list: ProbeTaskItem[];
+  agent_count?: number;
+  agents?: string[];
+  multi_agent?: boolean;
+  list: HashrateTimeSeriesPoint[];
 }
 
-export type LatestFinishedProbeTask = ProbeTaskItem & {
-  schema_version?: string;
-  agent_version?: string;
-  request_id?: string;
-  remark?: string;
-};
+/** GET minerHashrate/latestFinishedProbeTask/{siteCode} 的 data */
+export interface LatestFinishedProbeTask {
+  site_code?: string;
+  agent_count?: number;
+  agents?: ProbeTaskAgentDetail[];
+  present_agent_count?: number;
+  finished_at?: string;
+  updated_at?: string;
+  online_total?: number;
+  offline_total?: number;
+  fault_total?: number;
+  zero_hashrate_total?: number;
+  on_shelf_count?: number;
+  avg_hashrate?: number;
+  total_hashrate?: number;
+}
 
 export interface KpiSummary {
   theoreticalOnline: number | null;
@@ -115,7 +158,9 @@ export interface TaskSnapshotItem {
 
 export interface TaskSnapshotListData {
   site_code?: string;
+  /** 原始入参，可能为逗号分隔的多个 task_id */
   task_id?: string;
+  task_ids?: string[];
   list: TaskSnapshotItem[];
   total: number;
   page: number;

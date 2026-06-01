@@ -2,10 +2,10 @@ import dayjs from "dayjs";
 import type { FarmSite, FarmStatus } from "./mockData";
 import type {
   BoundSiteItem,
+  HashrateTimeSeriesPoint,
   KpiSummary,
   LatestFinishedProbeTask,
   OverviewPoint,
-  ProbeTaskItem,
   TaskSnapshotQueryParams,
   TimeRange,
 } from "./types";
@@ -32,7 +32,8 @@ export function mapLatestTaskToKpiSummary(
   const offlineFromApi = task.offline_total ?? null;
   const theoreticalOnline =
     onShelfCount ??
-    (online != null && offlineFromApi != null ? online + offlineFromApi : (task.planned_total ?? null));
+    task.on_shelf_count ??
+    (online != null && offlineFromApi != null ? online + offlineFromApi : null);
   const theoreticalOffline = theoreticalOnline != null && online != null ? theoreticalOnline - online : null;
 
   return {
@@ -47,29 +48,43 @@ export function mapLatestTaskToKpiSummary(
   };
 }
 
-/** 取列表最后一条任务的时间（优先 finished_at > updated_at > started_at） */
-export function getLastProbeTaskTime(tasks: ProbeTaskItem[]): string | null {
-  const last = tasks[tasks.length - 1];
-  if (!last) return null;
-  const raw = last.finished_at || last.updated_at || last.started_at;
-  if (!raw) return null;
-  const d = dayjs(raw);
+/** 取时间序列最后一点的采集时间 */
+export function getLastProbeTaskTime(points: HashrateTimeSeriesPoint[]): string | null {
+  const last = points[points.length - 1];
+  if (!last?.time) return null;
+  const d = dayjs(last.time);
   return d.isValid() ? d.format("YYYY-MM-DD HH:mm:ss") : null;
 }
 
-export function mapProbeTasksToOverviewPoints(tasks: ProbeTaskItem[], window: TimeRange): OverviewPoint[] {
-  return tasks.map((task) => {
-    const started = dayjs(task.started_at);
-    const time = window === "24h" ? started.format("MM-DD HH:mm") : started.format("MM-DD");
+export function mapProbeTasksToOverviewPoints(
+  points: HashrateTimeSeriesPoint[],
+  window: TimeRange,
+): OverviewPoint[] {
+  return points.map((point) => {
+    const collected = dayjs(point.time);
+    const timeLabel = window === "24h" ? collected.format("MM-DD HH:mm") : collected.format("MM-DD");
     return {
-      time: started.isValid() ? time : "-",
-      theoreticalOnline: Number(task.on_shelf_count ?? 0),
-      online: Number(task.online_total ?? 0),
-      lowHashrate: Number(task.fault_total ?? 0),
-      zeroHashrate: Number(task.zero_hashrate_total ?? 0),
-      totalHashrate: totalHashrateThToE(task.total_hashrate, 4),
+      time: collected.isValid() ? timeLabel : "-",
+      theoreticalOnline: Number(point.on_shelf_count ?? 0),
+      online: Number(point.online_total ?? 0),
+      lowHashrate: Number(point.fault_total ?? 0),
+      zeroHashrate: Number(point.zero_hashrate_total ?? 0),
+      totalHashrate: totalHashrateThToE(point.total_hashrate, 4),
     };
   });
+}
+
+/** 从 latestFinishedProbeTask 的 agents 提取 task_id */
+export function resolveLatestProbeTaskIds(task?: LatestFinishedProbeTask | null): string[] {
+  if (!task) return [];
+  return (task.agents ?? []).filter((a) => a.task_id && a.present !== false).map((a) => a.task_id!);
+}
+
+/** 将多个 task_id 拼为路径参数（后端逗号分隔解析） */
+export function formatTaskIdsForSnapshotApi(taskIds: string[]): string | undefined {
+  const ids = taskIds.map((id) => id.trim()).filter(Boolean);
+  if (ids.length === 0) return undefined;
+  return ids.join(",");
 }
 
 /** total_hashrate 为 TH/s，转为 E 数值 */

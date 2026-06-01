@@ -17,7 +17,7 @@ export const fetchAbnormalLogsTrend = async (params: FetchAbnormalLogsTrendParam
 export function buildAbnormalLogFilterParams(filters: AbnormalLogFilters) {
   return {
     ...(filters.siteCode ? { siteCode: filters.siteCode } : {}),
-    ...(filters.code ? { code: filters.code } : {}),
+    ...(filters.code?.trim() ? { code: filters.code.trim() } : {}),
     ...(filters.ip ? { ip: filters.ip } : {}),
     ...(filters.mac ? { mac: filters.mac } : {}),
     ...(filters.controlBoardSN ? { controlBoardSN: filters.controlBoardSN } : {}),

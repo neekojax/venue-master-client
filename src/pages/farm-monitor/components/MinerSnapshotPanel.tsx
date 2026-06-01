@@ -45,7 +45,8 @@ interface MinerSnapshotPanelProps {
   page: number;
   pageSize: number;
   loading?: boolean;
-  latestTaskId?: string;
+  /** 逗号分隔的 task_id，多 Agent 场地传多个 */
+  snapshotTaskIdsParam?: string;
   siteCode?: string;
   exportFilters: TaskSnapshotQueryParams;
   onSearch: (values: MinerSnapshotSearchValues) => void;
@@ -63,7 +64,7 @@ export default function MinerSnapshotPanel({
   page,
   pageSize,
   loading = false,
-  latestTaskId,
+  snapshotTaskIdsParam,
   siteCode,
   exportFilters,
   onSearch,
@@ -111,7 +112,7 @@ export default function MinerSnapshotPanel({
   };
 
   const handleExport = async () => {
-    if (!latestTaskId) {
+    if (!snapshotTaskIdsParam) {
       message.warning("暂无已完成探测任务，无法导出");
       return;
     }
@@ -119,11 +120,9 @@ export default function MinerSnapshotPanel({
     setExporting(true);
     try {
       const params = buildTaskSnapshotExportParams(exportFilters);
-      const res = await fetchTaskSnapshotExport(latestTaskId, params);
-      downloadExcelBlobResponse(
-        res,
-        `task_snapshots_${latestTaskId}_${dayjs().format("YYYYMMDD_HHmmss")}.xlsx`,
-      );
+      const res = await fetchTaskSnapshotExport(snapshotTaskIdsParam, params);
+      const fileId = snapshotTaskIdsParam.replace(/,/g, "-");
+      downloadExcelBlobResponse(res, `task_snapshots_${fileId}_${dayjs().format("YYYYMMDD_HHmmss")}.xlsx`);
       message.success("导出成功");
     } catch {
       message.error("导出失败，请稍后重试");
@@ -225,7 +224,7 @@ export default function MinerSnapshotPanel({
                 shape="circle"
                 icon={<DownloadOutlined />}
                 loading={exporting}
-                disabled={exporting || !latestTaskId}
+                disabled={exporting || !snapshotTaskIdsParam}
                 onClick={() => void handleExport()}
               />
             </Tooltip>
@@ -259,7 +258,7 @@ export default function MinerSnapshotPanel({
               bordered={false}
               scroll={{ x: scrollX }}
               locale={{
-                emptyText: latestTaskId ? "暂无矿机快照数据" : "暂无已完成探测任务",
+                emptyText: snapshotTaskIdsParam ? "暂无矿机快照数据" : "暂无已完成探测任务",
               }}
               pagination={pagination}
             />
