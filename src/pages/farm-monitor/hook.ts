@@ -30,10 +30,13 @@ export const useLatestFinishedProbeTask = (siteCode: string | null) => {
   });
 };
 
-export const useTaskSnapshots = (taskId: string | null | undefined, params: TaskSnapshotQueryParams) => {
+export const useTaskSnapshots = (
+  taskIdsParam: string | null | undefined,
+  params: TaskSnapshotQueryParams,
+) => {
   return useQuery({
-    queryKey: ["miner-task-snapshots", taskId, params],
-    queryFn: () => fetchTaskSnapshots(taskId!, params),
-    enabled: !!taskId,
+    queryKey: ["miner-task-snapshots", taskIdsParam, params],
+    queryFn: () => fetchTaskSnapshots(taskIdsParam!, params),
+    enabled: !!taskIdsParam,
   });
 };
