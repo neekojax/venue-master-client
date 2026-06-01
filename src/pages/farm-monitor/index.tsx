@@ -5,13 +5,15 @@ import KpiCards from "./components/KpiCards";
 import MinerSnapshotPanel, { type MinerSnapshotSearchValues } from "./components/MinerSnapshotPanel";
 import OverviewChart from "./components/OverviewChart";
 import { useBoundSites, useLatestFinishedProbeTask, useRecentProbeTasks, useTaskSnapshots } from "./hook";
-import type { BoundSiteItem, ProbeTaskItem, TaskSnapshotQueryParams, TimeRange } from "./types";
+import type { BoundSiteItem, HashrateTimeSeriesPoint, TaskSnapshotQueryParams, TimeRange } from "./types";
 import {
   buildTaskSnapshotQueryParams,
+  formatTaskIdsForSnapshotApi,
   getLastProbeTaskTime,
   mapBoundSiteToFarmSite,
   mapLatestTaskToKpiSummary,
   mapProbeTasksToOverviewPoints,
+  resolveLatestProbeTaskIds,
 } from "./utils";
 import useAuthRedirect from "@/hooks/useAuthRedirect";
 
@@ -59,29 +61,27 @@ export default function FarmMonitorPage() {
     [farmSites, selectedFarmId],
   );
 
-  const probeTasks = probeTasksRes?.data?.list ?? [];
+  const hashrateSeries: HashrateTimeSeriesPoint[] = probeTasksRes?.data?.list ?? [];
 
   const overviewData = useMemo(
-    () => mapProbeTasksToOverviewPoints(probeTasks, timeRange),
-    [probeTasks, timeRange],
+    () => mapProbeTasksToOverviewPoints(hashrateSeries, timeRange),
+    [hashrateSeries, timeRange],
   );
 
-  const lastUpdated = useMemo(() => getLastProbeTaskTime(probeTasks) ?? "-", [probeTasks]);
+  const lastUpdated = useMemo(() => getLastProbeTaskTime(hashrateSeries) ?? "-", [hashrateSeries]);
 
-  const kpiOnShelfCount = useMemo(() => {
-    const latestTaskId = latestTaskRes?.data?.task_id;
-    const matched = latestTaskId
-      ? probeTasks.find((t: ProbeTaskItem) => t.task_id === latestTaskId)
-      : undefined;
-    return matched?.on_shelf_count ?? probeTasks[probeTasks.length - 1]?.on_shelf_count ?? null;
-  }, [latestTaskRes, probeTasks]);
+  const latestProbeTask = latestTaskRes?.data;
+
+  const kpiOnShelfCount = latestProbeTask?.on_shelf_count ?? null;
 
   const kpiSummary = useMemo(
-    () => mapLatestTaskToKpiSummary(latestTaskRes?.data, kpiOnShelfCount),
-    [latestTaskRes, kpiOnShelfCount],
+    () => mapLatestTaskToKpiSummary(latestProbeTask, kpiOnShelfCount),
+    [latestProbeTask, kpiOnShelfCount],
   );
 
-  const latestTaskId = latestTaskRes?.data?.task_id;
+  const latestTaskIds = useMemo(() => resolveLatestProbeTaskIds(latestProbeTask), [latestProbeTask]);
+
+  const snapshotTaskIdsParam = useMemo(() => formatTaskIdsForSnapshotApi(latestTaskIds), [latestTaskIds]);
 
   const snapshotQueryParams = useMemo(
     () => buildTaskSnapshotQueryParams(snapshotFilters, page, pageSize),
@@ -93,7 +93,7 @@ export default function FarmMonitorPage() {
     isLoading: isSnapshotsLoading,
     isFetching: isSnapshotsFetching,
     refetch: refetchSnapshots,
-  } = useTaskSnapshots(latestTaskId, snapshotQueryParams);
+  } = useTaskSnapshots(snapshotTaskIdsParam, snapshotQueryParams);
 
   const snapshotData = snapshotsRes?.data;
   const snapshotList = snapshotData?.list ?? [];
@@ -111,7 +111,7 @@ export default function FarmMonitorPage() {
     setPage(1);
     setSnapshotFilters({});
     form.resetFields();
-  }, [selectedFarmId, latestTaskId]);
+  }, [selectedFarmId, snapshotTaskIdsParam]);
 
   const onSearch = (values: MinerSnapshotSearchValues) => {
     setSnapshotFilters({
@@ -168,7 +168,7 @@ export default function FarmMonitorPage() {
         page={page}
         pageSize={pageSize}
         loading={isSnapshotsLoading || isSnapshotsFetching}
-        latestTaskId={latestTaskId}
+        snapshotTaskIdsParam={snapshotTaskIdsParam}
         siteCode={snapshotData?.site_code}
         exportFilters={snapshotFilters}
         onSearch={onSearch}

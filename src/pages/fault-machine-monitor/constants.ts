@@ -1,3 +1,4 @@
+/** 与后端 abnormalLogTrendAllowedCode 白名单保持一致 */
 export const FAULT_CODES = [
   "算力板",
   "传感器",
