@@ -144,6 +144,7 @@ const AnalysisView: React.FC = () => {
             extreme_weather: "extreme_weather",
             low_power: "low_power",
             maintenance: "maintenance",
+            other: "other",
           };
 
           Object.entries(typeMap).forEach(([key, eventType]) => {
