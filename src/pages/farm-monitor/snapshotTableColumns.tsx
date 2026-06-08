@@ -26,17 +26,18 @@ export const SNAPSHOT_COLUMN_STORAGE_KEY = "venue-master:farm-monitor:snapshot-c
 
 const AGENT_CODE_DEFAULT_HIDDEN_KEY = "venue-master:farm-monitor:agent-code-default-hidden:v1";
 const HASH_BOARD_SN_DEFAULT_HIDDEN_KEY = "venue-master:farm-monitor:hash-board-sn-default-hidden:v1";
-const HASH_BOARD_COLUMN_KEYS = [
-  "hash_board_1_sn",
+const HASH_BOARD_METRICS_DEFAULT_HIDDEN_KEY =
+  "venue-master:farm-monitor:hash-board-metrics-default-hidden:v1";
+const HASH_BOARD_SN_COLUMN_KEYS = ["hash_board_1_sn", "hash_board_2_sn", "hash_board_3_sn"] as const;
+const HASH_BOARD_METRIC_COLUMN_KEYS = [
   "hash_board_1_hashrate",
   "hash_board_1_temperature",
-  "hash_board_2_sn",
   "hash_board_2_hashrate",
   "hash_board_2_temperature",
-  "hash_board_3_sn",
   "hash_board_3_hashrate",
   "hash_board_3_temperature",
 ] as const;
+const HASH_BOARD_COLUMN_KEYS = [...HASH_BOARD_SN_COLUMN_KEYS, ...HASH_BOARD_METRIC_COLUMN_KEYS] as const;
 
 type HashBoardInfo = {
   index?: number;
@@ -147,14 +148,14 @@ export const DEFAULT_SNAPSHOT_COLUMN_CONFIGS: SnapshotColumnConfig[] = [
   { key: "temperature", title: "温度", visible: true, pin: false },
   { key: "fans", title: "风扇", visible: true, pin: false },
   { key: "hash_board_1_sn", title: "算力板1序列号", visible: false, pin: false },
-  { key: "hash_board_1_hashrate", title: "算力板1算力", visible: true, pin: false },
-  { key: "hash_board_1_temperature", title: "算力板1温度", visible: true, pin: false },
+  { key: "hash_board_1_hashrate", title: "算力板1算力", visible: false, pin: false },
+  { key: "hash_board_1_temperature", title: "算力板1温度", visible: false, pin: false },
   { key: "hash_board_2_sn", title: "算力板2序列号", visible: false, pin: false },
-  { key: "hash_board_2_hashrate", title: "算力板2算力", visible: true, pin: false },
-  { key: "hash_board_2_temperature", title: "算力板2温度", visible: true, pin: false },
+  { key: "hash_board_2_hashrate", title: "算力板2算力", visible: false, pin: false },
+  { key: "hash_board_2_temperature", title: "算力板2温度", visible: false, pin: false },
   { key: "hash_board_3_sn", title: "算力板3序列号", visible: false, pin: false },
-  { key: "hash_board_3_hashrate", title: "算力板3算力", visible: true, pin: false },
-  { key: "hash_board_3_temperature", title: "算力板3温度", visible: true, pin: false },
+  { key: "hash_board_3_hashrate", title: "算力板3算力", visible: false, pin: false },
+  { key: "hash_board_3_temperature", title: "算力板3温度", visible: false, pin: false },
   { key: "uptime", title: "运行时长", visible: true, pin: false },
   { key: "run_mode", title: "运行模式", visible: true, pin: false },
   { key: "error", title: "错误信息", visible: true, pin: false },
@@ -179,20 +180,26 @@ export function loadSnapshotColumnConfigs(): SnapshotColumnConfig[] {
   try {
     const raw = localStorage.getItem(SNAPSHOT_COLUMN_STORAGE_KEY);
     if (!raw) {
-      return migrateHashBoardSnDefaultHidden(
-        migrateAgentCodeDefaultHidden(
-          migrateSnapshotColumnOrder(cloneColumnConfigs(DEFAULT_SNAPSHOT_COLUMN_CONFIGS)),
+      return migrateHashBoardMetricsDefaultHidden(
+        migrateHashBoardSnDefaultHidden(
+          migrateAgentCodeDefaultHidden(
+            migrateSnapshotColumnOrder(cloneColumnConfigs(DEFAULT_SNAPSHOT_COLUMN_CONFIGS)),
+          ),
         ),
       );
     }
     const parsed = JSON.parse(raw) as SnapshotColumnConfig[];
-    return migrateHashBoardSnDefaultHidden(
-      migrateAgentCodeDefaultHidden(migrateSnapshotColumnOrder(mergeColumnConfigs(parsed))),
+    return migrateHashBoardMetricsDefaultHidden(
+      migrateHashBoardSnDefaultHidden(
+        migrateAgentCodeDefaultHidden(migrateSnapshotColumnOrder(mergeColumnConfigs(parsed))),
+      ),
     );
   } catch {
-    return migrateHashBoardSnDefaultHidden(
-      migrateAgentCodeDefaultHidden(
-        migrateSnapshotColumnOrder(cloneColumnConfigs(DEFAULT_SNAPSHOT_COLUMN_CONFIGS)),
+    return migrateHashBoardMetricsDefaultHidden(
+      migrateHashBoardSnDefaultHidden(
+        migrateAgentCodeDefaultHidden(
+          migrateSnapshotColumnOrder(cloneColumnConfigs(DEFAULT_SNAPSHOT_COLUMN_CONFIGS)),
+        ),
       ),
     );
   }
@@ -217,9 +224,18 @@ function migrateHashBoardSnDefaultHidden(configs: SnapshotColumnConfig[]) {
   if (localStorage.getItem(HASH_BOARD_SN_DEFAULT_HIDDEN_KEY)) return configs;
   localStorage.setItem(HASH_BOARD_SN_DEFAULT_HIDDEN_KEY, "1");
   const next = configs.map((c) =>
-    c.key === "hash_board_1_sn" || c.key === "hash_board_2_sn" || c.key === "hash_board_3_sn"
-      ? { ...c, visible: false }
-      : c,
+    (HASH_BOARD_SN_COLUMN_KEYS as readonly string[]).includes(c.key) ? { ...c, visible: false } : c,
+  );
+  if (next.every((c, index) => c.visible === configs[index]?.visible)) return configs;
+  saveSnapshotColumnConfigs(next);
+  return next;
+}
+
+function migrateHashBoardMetricsDefaultHidden(configs: SnapshotColumnConfig[]) {
+  if (localStorage.getItem(HASH_BOARD_METRICS_DEFAULT_HIDDEN_KEY)) return configs;
+  localStorage.setItem(HASH_BOARD_METRICS_DEFAULT_HIDDEN_KEY, "1");
+  const next = configs.map((c) =>
+    (HASH_BOARD_METRIC_COLUMN_KEYS as readonly string[]).includes(c.key) ? { ...c, visible: false } : c,
   );
   if (next.every((c, index) => c.visible === configs[index]?.visible)) return configs;
   saveSnapshotColumnConfigs(next);
