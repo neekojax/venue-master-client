@@ -23,6 +23,7 @@ import ColumnSettingsPopover from "./ColumnSettingsPopover";
 
 export interface MinerSnapshotSearchValues {
   minerCode?: string;
+  sn?: string;
   fullType?: string;
   ip?: string;
   macAddress?: string;
@@ -181,10 +182,10 @@ export default function MinerSnapshotPanel({
                     options={minerCodeOptions.map((value) => ({ label: value, value }))}
                   />
                 </Form.Item>
-                <Form.Item name="zeroHashrate" label="零算力" className="!mb-0 min-w-0">
-                  <Select allowClear placeholder="请选择" options={BOOL_FILTER_OPTIONS} />
+                <Form.Item name="controlBoardSN" label="控制板序列号" className="!mb-0 min-w-0">
+                  <Input allowClear placeholder="请输入控制板序列号" />
                 </Form.Item>
-                <Form.Item name="hashrateFault" label="低算力" className="!mb-0 min-w-0">
+                <Form.Item name="zeroHashrate" label="零算力" className="!mb-0 min-w-0">
                   <Select allowClear placeholder="请选择" options={BOOL_FILTER_OPTIONS} />
                 </Form.Item>
                 <Form.Item name="ip" label="矿机IP地址" className="!mb-0 min-w-0">
@@ -193,10 +194,13 @@ export default function MinerSnapshotPanel({
                 <Form.Item name="macAddress" label="矿机MAC地址" className="!mb-0 min-w-0">
                   <Input allowClear placeholder="请输入矿机MAC地址" />
                 </Form.Item>
-                <Form.Item name="controlBoardSN" label="矿机序列号" className="!mb-0 min-w-0">
-                  <Input allowClear placeholder="请输入矿机序列号" />
+                <Form.Item name="sn" label="算力板序列号" className="!mb-0 min-w-0">
+                  <Input allowClear placeholder="请输入算力板序列号" />
                 </Form.Item>
-                <div className="flex min-w-0 justify-end gap-2 pb-0.5 md:col-span-2 lg:col-span-1">
+                <Form.Item name="hashrateFault" label="低算力" className="!mb-0 min-w-0">
+                  <Select allowClear placeholder="请选择" options={BOOL_FILTER_OPTIONS} />
+                </Form.Item>
+                <div className="flex min-w-0 justify-end gap-2 pb-0.5 md:col-span-2 lg:col-span-4">
                   <Button onClick={onReset}>重置</Button>
                   <Button type="primary" htmlType="submit">
                     搜索

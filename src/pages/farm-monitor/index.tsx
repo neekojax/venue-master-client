@@ -116,6 +116,7 @@ export default function FarmMonitorPage() {
   const onSearch = (values: MinerSnapshotSearchValues) => {
     setSnapshotFilters({
       minerCode: values.minerCode,
+      sn: values.sn,
       fullType: values.fullType,
       ip: values.ip,
       macAddress: values.macAddress,

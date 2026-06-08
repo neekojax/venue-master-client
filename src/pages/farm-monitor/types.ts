@@ -142,6 +142,7 @@ export interface TaskSnapshotItem {
   hashrate_fault?: boolean;
   temperature?: unknown;
   fans?: unknown;
+  hash_boards?: unknown;
   firmware_version?: string;
   uptime?: number | string;
   run_mode?: string;
@@ -154,6 +155,13 @@ export interface TaskSnapshotItem {
   collect_time?: string;
   created_at?: string;
   updated_at?: string;
+}
+
+export interface HashBoardData {
+  index?: number;
+  serial_number?: string;
+  hashrate?: number;
+  temperature?: string;
 }
 
 export interface TaskSnapshotListData {
@@ -174,6 +182,7 @@ export interface TaskSnapshotQueryParams {
   page?: number;
   pageSize?: number;
   minerCode?: string;
+  sn?: string;
   fullType?: string;
   /** 与 fullType 同值，兼容后端 snake_case 查询参数 */
   full_type?: string;

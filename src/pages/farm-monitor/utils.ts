@@ -111,6 +111,7 @@ function resolveFarmStatus(probe?: BoundSiteItem["latest_probe_task"]): FarmStat
 
 const TASK_SNAPSHOT_FILTER_KEYS = [
   "minerCode",
+  "sn",
   "fullType",
   "ip",
   "macAddress",

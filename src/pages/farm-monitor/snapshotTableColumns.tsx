@@ -1,6 +1,6 @@
 import { Tag, Typography } from "antd";
 import type { ColumnsType } from "antd/es/table";
-import type { TaskSnapshotItem } from "./types";
+import type { HashBoardData, TaskSnapshotItem } from "./types";
 import {
   formatSnapshotHashrate,
   formatSnapshotIp,
@@ -25,6 +25,24 @@ export interface SnapshotColumnConfig {
 export const SNAPSHOT_COLUMN_STORAGE_KEY = "venue-master:farm-monitor:snapshot-columns:v5";
 
 const AGENT_CODE_DEFAULT_HIDDEN_KEY = "venue-master:farm-monitor:agent-code-default-hidden:v1";
+const HASH_BOARD_COLUMN_KEYS = [
+  "hash_board_1_sn",
+  "hash_board_1_hashrate",
+  "hash_board_1_temperature",
+  "hash_board_2_sn",
+  "hash_board_2_hashrate",
+  "hash_board_2_temperature",
+  "hash_board_3_sn",
+  "hash_board_3_hashrate",
+  "hash_board_3_temperature",
+] as const;
+
+type HashBoardInfo = {
+  index?: number;
+  sn?: string;
+  hashrate?: number | string | null;
+  temperature?: number | string | null;
+};
 
 function renderWorkerTag(value?: string) {
   if (!value?.trim()) {
@@ -53,6 +71,61 @@ function renderHashrateCell(value?: number | null, fractionDigits = 2) {
   );
 }
 
+function parseHashBoards(value: unknown): HashBoardInfo[] {
+  const parsed = parseUnknownHashBoards(value);
+  if (!Array.isArray(parsed)) return [];
+  return parsed.map((item) => normalizeHashBoard(item)).filter((item) => item != null);
+}
+
+function parseUnknownHashBoards(value: unknown): unknown {
+  if (typeof value === "string") {
+    const trimmed = value.trim();
+    if (!trimmed) return [];
+    try {
+      return JSON.parse(trimmed);
+    } catch {
+      return [];
+    }
+  }
+  return value;
+}
+
+function normalizeHashBoard(value: unknown): HashBoardInfo | null {
+  if (!value || typeof value !== "object") return null;
+  const row = value as HashBoardData;
+  return {
+    index: typeof row.index === "number" ? row.index : undefined,
+    sn: row.serial_number?.trim() || undefined,
+    hashrate: row.hashrate,
+    temperature: row.temperature,
+  };
+}
+
+function getHashBoardValue(hashBoards: unknown, index: number): HashBoardInfo | null {
+  const boards = parseHashBoards(hashBoards);
+  const boardIndex = index + 1;
+  return boards.find((board) => board.index === boardIndex) ?? boards[index] ?? null;
+}
+
+function renderHashBoardText(hashBoards: unknown, index: number, field: keyof HashBoardInfo) {
+  const board = getHashBoardValue(hashBoards, index);
+  const value = board?.[field];
+  return formatSnapshotText(value == null ? null : String(value));
+}
+
+function renderHashBoardHashrate(hashBoards: unknown, index: number) {
+  const board = getHashBoardValue(hashBoards, index);
+  const value = board?.hashrate;
+  if (value == null || value === "") {
+    return <span className="text-gray-400">-</span>;
+  }
+  const num = Number(value);
+  if (Number.isNaN(num)) {
+    return <span>{String(value)}</span>;
+  }
+  return renderHashrateCell(num, 2);
+}
+
 /** 默认显示列及顺序（列设置可调整） */
 export const DEFAULT_SNAPSHOT_COLUMN_CONFIGS: SnapshotColumnConfig[] = [
   { key: "index", title: "序号", visible: true, pin: "left", lockVisible: true },
@@ -72,6 +145,15 @@ export const DEFAULT_SNAPSHOT_COLUMN_CONFIGS: SnapshotColumnConfig[] = [
   { key: "pool3_worker", title: "矿池3", visible: true, pin: false },
   { key: "temperature", title: "温度", visible: true, pin: false },
   { key: "fans", title: "风扇", visible: true, pin: false },
+  { key: "hash_board_1_sn", title: "算力板1序列号", visible: true, pin: false },
+  { key: "hash_board_1_hashrate", title: "算力板1算力", visible: true, pin: false },
+  { key: "hash_board_1_temperature", title: "算力板1温度", visible: true, pin: false },
+  { key: "hash_board_2_sn", title: "算力板2序列号", visible: true, pin: false },
+  { key: "hash_board_2_hashrate", title: "算力板2算力", visible: true, pin: false },
+  { key: "hash_board_2_temperature", title: "算力板2温度", visible: true, pin: false },
+  { key: "hash_board_3_sn", title: "算力板3序列号", visible: true, pin: false },
+  { key: "hash_board_3_hashrate", title: "算力板3算力", visible: true, pin: false },
+  { key: "hash_board_3_temperature", title: "算力板3温度", visible: true, pin: false },
   { key: "uptime", title: "运行时长", visible: true, pin: false },
   { key: "run_mode", title: "运行模式", visible: true, pin: false },
   { key: "error", title: "错误信息", visible: true, pin: false },
@@ -96,13 +178,15 @@ export function loadSnapshotColumnConfigs(): SnapshotColumnConfig[] {
   try {
     const raw = localStorage.getItem(SNAPSHOT_COLUMN_STORAGE_KEY);
     if (!raw) {
-      return migrateAgentCodeDefaultHidden(cloneColumnConfigs(DEFAULT_SNAPSHOT_COLUMN_CONFIGS));
+      return migrateAgentCodeDefaultHidden(
+        migrateSnapshotColumnOrder(cloneColumnConfigs(DEFAULT_SNAPSHOT_COLUMN_CONFIGS)),
+      );
     }
     const parsed = JSON.parse(raw) as SnapshotColumnConfig[];
-    return migrateAgentCodeDefaultHidden(migrateHashrateColumnOrder(mergeColumnConfigs(parsed)));
+    return migrateAgentCodeDefaultHidden(migrateSnapshotColumnOrder(mergeColumnConfigs(parsed)));
   } catch {
     return migrateAgentCodeDefaultHidden(
-      migrateHashrateColumnOrder(cloneColumnConfigs(DEFAULT_SNAPSHOT_COLUMN_CONFIGS)),
+      migrateSnapshotColumnOrder(cloneColumnConfigs(DEFAULT_SNAPSHOT_COLUMN_CONFIGS)),
     );
   }
 }
@@ -132,6 +216,25 @@ function migrateHashrateColumnOrder(configs: SnapshotColumnConfig[]) {
   const newTotalIdx = next.findIndex((c) => c.key === "total_hashrate");
   next.splice(newTotalIdx + 1, 0, ideal);
   return next;
+}
+
+function migrateHashBoardColumnsAfterFans(configs: SnapshotColumnConfig[]) {
+  const fanIdx = configs.findIndex((c) => c.key === "fans");
+  if (fanIdx === -1) return configs;
+
+  const hashBoardColumns = configs.filter((c) =>
+    (HASH_BOARD_COLUMN_KEYS as readonly string[]).includes(c.key),
+  );
+  if (hashBoardColumns.length === 0) return configs;
+
+  const next = configs.filter((c) => !(HASH_BOARD_COLUMN_KEYS as readonly string[]).includes(c.key));
+  const nextFanIdx = next.findIndex((c) => c.key === "fans");
+  next.splice(nextFanIdx + 1, 0, ...hashBoardColumns);
+  return next;
+}
+
+function migrateSnapshotColumnOrder(configs: SnapshotColumnConfig[]) {
+  return migrateHashBoardColumnsAfterFans(migrateHashrateColumnOrder(configs));
 }
 
 /** 合并本地已存配置与默认列（保留顺序，兼容新增字段，标题以默认为准） */
@@ -322,6 +425,72 @@ function buildColumnMap(
       width: 160,
       ellipsis: true,
       render: (v: unknown) => formatSnapshotJson(v),
+    },
+    hash_board_1_sn: {
+      title: "算力板1序列号",
+      dataIndex: "hash_boards",
+      key: "hash_board_1_sn",
+      width: 180,
+      ellipsis: true,
+      render: (v: unknown) => renderHashBoardText(v, 0, "sn"),
+    },
+    hash_board_1_hashrate: {
+      title: "算力板1算力",
+      dataIndex: "hash_boards",
+      key: "hash_board_1_hashrate",
+      width: 130,
+      render: (v: unknown) => renderHashBoardHashrate(v, 0),
+    },
+    hash_board_1_temperature: {
+      title: "算力板1温度",
+      dataIndex: "hash_boards",
+      key: "hash_board_1_temperature",
+      width: 130,
+      render: (v: unknown) => renderHashBoardText(v, 0, "temperature"),
+    },
+    hash_board_2_sn: {
+      title: "算力板2序列号",
+      dataIndex: "hash_boards",
+      key: "hash_board_2_sn",
+      width: 180,
+      ellipsis: true,
+      render: (v: unknown) => renderHashBoardText(v, 1, "sn"),
+    },
+    hash_board_2_hashrate: {
+      title: "算力板2算力",
+      dataIndex: "hash_boards",
+      key: "hash_board_2_hashrate",
+      width: 130,
+      render: (v: unknown) => renderHashBoardHashrate(v, 1),
+    },
+    hash_board_2_temperature: {
+      title: "算力板2温度",
+      dataIndex: "hash_boards",
+      key: "hash_board_2_temperature",
+      width: 130,
+      render: (v: unknown) => renderHashBoardText(v, 1, "temperature"),
+    },
+    hash_board_3_sn: {
+      title: "算力板3序列号",
+      dataIndex: "hash_boards",
+      key: "hash_board_3_sn",
+      width: 180,
+      ellipsis: true,
+      render: (v: unknown) => renderHashBoardText(v, 2, "sn"),
+    },
+    hash_board_3_hashrate: {
+      title: "算力板3算力",
+      dataIndex: "hash_boards",
+      key: "hash_board_3_hashrate",
+      width: 130,
+      render: (v: unknown) => renderHashBoardHashrate(v, 2),
+    },
+    hash_board_3_temperature: {
+      title: "算力板3温度",
+      dataIndex: "hash_boards",
+      key: "hash_board_3_temperature",
+      width: 130,
+      render: (v: unknown) => renderHashBoardText(v, 2, "temperature"),
     },
     uptime: {
       title: "运行时长",
