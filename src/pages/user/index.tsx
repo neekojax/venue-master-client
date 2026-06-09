@@ -1,10 +1,18 @@
-import React from "react";
+import React, { useState } from "react";
 import { Button, Card, Col, Form, Input, message, Row } from "antd";
+import { resetPassword } from "./api";
+
+type ChangePasswordFormValues = {
+  currentPassword: string;
+  newPassword: string;
+  confirmPassword: string;
+};
 
 const ChangePasswordForm: React.FC = () => {
   const [form] = Form.useForm();
+  const [submitting, setSubmitting] = useState(false);
 
-  const onFinish = (values: any) => {
+  const onFinish = async (values: ChangePasswordFormValues) => {
     const { currentPassword, newPassword, confirmPassword } = values;
     if (currentPassword == "") {
       message.error("原密码不能为空！");
@@ -14,11 +22,24 @@ const ChangePasswordForm: React.FC = () => {
       message.error("两次新密码不一致！");
       return;
     }
+    if (currentPassword === newPassword) {
+      message.error("新密码不能和旧密码相同！");
+      return;
+    }
 
-    // 模拟提交逻辑
-    console.log("修改密码数据：", values);
-    message.success("密码修改成功！");
-    form.resetFields();
+    setSubmitting(true);
+    try {
+      await resetPassword({
+        old_password: currentPassword,
+        new_password: newPassword,
+      });
+      message.success("密码修改成功！");
+      form.resetFields();
+    } catch (error) {
+      message.error(error instanceof Error ? error.message : "密码修改失败");
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   return (
@@ -41,7 +62,12 @@ const ChangePasswordForm: React.FC = () => {
                 name="newPassword"
                 rules={[
                   { required: true, message: "请输入新密码" },
-                  { min: 6, message: "密码不能少于6位" },
+                  { min: 8, message: "密码长度必须为8到20位" },
+                  { max: 20, message: "密码长度必须为8到20位" },
+                  {
+                    pattern: /^(?=.*[A-Za-z])(?=.*\d).+$/,
+                    message: "密码必须同时包含字母和数字",
+                  },
                 ]}
               >
                 <Input.Password placeholder="请输入新密码" />
@@ -67,7 +93,7 @@ const ChangePasswordForm: React.FC = () => {
               </Form.Item>
 
               <Form.Item>
-                <Button type="primary" htmlType="submit" block>
+                <Button type="primary" htmlType="submit" block loading={submitting}>
                   确认修改
                 </Button>
               </Form.Item>
