@@ -14,35 +14,38 @@ import {
 } from "./api";
 import type { AbnormalLogQueryParams, FaultStatsTimeMode, FaultTimeRange } from "./types";
 
-export const useAbnormalLogsTrend = (window: FaultTimeRange, code?: string) => {
+export const useAbnormalLogsTrend = (venueType: string, window: FaultTimeRange, code?: string) => {
   return useQuery({
-    queryKey: ["abnormal-logs-trend", window, code ?? ""],
-    queryFn: () => fetchAbnormalLogsTrend({ window, code }),
+    queryKey: ["abnormal-logs-trend", venueType, window, code ?? ""],
+    queryFn: () => fetchAbnormalLogsTrend({ venueType, window, code }),
+    enabled: Boolean(venueType),
   });
 };
 
-export const useAbnormalLogs = (params: AbnormalLogQueryParams, enabled = true) => {
+export const useAbnormalLogs = (venueType: string, params: AbnormalLogQueryParams, enabled = true) => {
   return useQuery({
-    queryKey: ["abnormal-logs", params],
-    queryFn: () => fetchAbnormalLogs(params),
+    queryKey: ["abnormal-logs", venueType, params],
+    queryFn: () => fetchAbnormalLogs(venueType, params),
     enabled,
   });
 };
 
 export const useAbnormalLogsSiteSummary = (
+  venueType: string,
   timeMode: FaultStatsTimeMode,
   selectedDate: string,
   enabled = true,
 ) => {
   const params = buildStatsApiParams(timeMode, selectedDate);
   return useQuery({
-    queryKey: ["abnormal-logs-site-summary", timeMode, selectedDate],
-    queryFn: () => fetchAbnormalLogsSiteSummary(params),
+    queryKey: ["abnormal-logs-site-summary", venueType, timeMode, selectedDate],
+    queryFn: () => fetchAbnormalLogsSiteSummary(venueType, params),
     enabled,
   });
 };
 
 export const useAbnormalLogsSiteDetail = (
+  venueType: string,
   siteCode: string | undefined,
   timeMode: FaultStatsTimeMode,
   selectedDate: string,
@@ -50,13 +53,14 @@ export const useAbnormalLogsSiteDetail = (
 ) => {
   const params = buildStatsApiParams(timeMode, selectedDate);
   return useQuery({
-    queryKey: ["abnormal-logs-site-detail", siteCode ?? "", timeMode, selectedDate],
-    queryFn: () => fetchAbnormalLogsSiteDetail(siteCode!, params),
-    enabled: enabled && Boolean(siteCode),
+    queryKey: ["abnormal-logs-site-detail", venueType, siteCode ?? "", timeMode, selectedDate],
+    queryFn: () => fetchAbnormalLogsSiteDetail(venueType, siteCode!, params),
+    enabled: enabled && Boolean(venueType) && Boolean(siteCode),
   });
 };
 
 export const useAnomalyManagementHistory = (
+  venueType: string,
   siteName: string | undefined,
   date: string,
   page: number,
@@ -64,34 +68,41 @@ export const useAnomalyManagementHistory = (
   enabled = true,
 ) => {
   return useQuery({
-    queryKey: ["anomaly-management-history", siteName ?? "", date, page, pageSize],
-    queryFn: () => fetchAnomalyManagementHistory({ siteName: siteName!, date, page, pageSize }),
-    enabled: enabled && Boolean(siteName),
+    queryKey: ["anomaly-management-history", venueType, siteName ?? "", date, page, pageSize],
+    queryFn: () => fetchAnomalyManagementHistory(venueType, { siteName: siteName!, date, page, pageSize }),
+    enabled: enabled && Boolean(venueType) && Boolean(siteName),
   });
 };
 
-export const useAbnormalDataDetail = (siteName: string | undefined, date: string, enabled = true) => {
+export const useAbnormalDataDetail = (
+  venueType: string,
+  siteName: string | undefined,
+  date: string,
+  enabled = true,
+) => {
   return useQuery({
-    queryKey: ["abnormal-data-detail", siteName ?? "", date],
-    queryFn: () => fetchAbnormalDataDetail({ siteName: siteName!, date }),
-    enabled: enabled && Boolean(siteName),
+    queryKey: ["abnormal-data-detail", venueType, siteName ?? "", date],
+    queryFn: () => fetchAbnormalDataDetail(venueType, { siteName: siteName!, date }),
+    enabled: enabled && Boolean(venueType) && Boolean(siteName),
   });
 };
 
-export const useCreateAnomalyManagementReport = () => {
+export const useCreateAnomalyManagementReport = (venueType: string) => {
   return useMutation({
-    mutationFn: createAnomalyManagementReport,
+    mutationFn: (params: Parameters<typeof createAnomalyManagementReport>[1]) =>
+      createAnomalyManagementReport(venueType, params),
   });
 };
 
-export const useUpdateAnomalyManagement = () => {
+export const useUpdateAnomalyManagement = (venueType: string) => {
   return useMutation({
-    mutationFn: updateAnomalyManagement,
+    mutationFn: (params: Parameters<typeof updateAnomalyManagement>[1]) =>
+      updateAnomalyManagement(venueType, params),
   });
 };
 
-export const useDeleteAnomalyManagementRecord = () => {
+export const useDeleteAnomalyManagementRecord = (venueType: string) => {
   return useMutation({
-    mutationFn: deleteAnomalyManagementRecord,
+    mutationFn: (id: string) => deleteAnomalyManagementRecord(venueType, id),
   });
 };

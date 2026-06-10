@@ -3,12 +3,13 @@ import type { AbnormalLogFilters, AbnormalLogQueryParams, FaultStatsTimeMode, Fa
 import { fetchDelete, fetchGet, fetchPost, fetchPut } from "@/helper/fetchHelper";
 
 export interface FetchAbnormalLogsTrendParams {
+  venueType: string;
   window: FaultTimeRange;
   code?: string;
 }
 
 export const fetchAbnormalLogsTrend = async (params: FetchAbnormalLogsTrendParams) => {
-  return fetchGet("minerHashrate/abnormalLogs/trend", {
+  return fetchGet(`minerHashrate/abnormalLogs/${params.venueType}/trend`, {
     window: params.window,
     ...(params.code ? { code: params.code } : {}),
   });
@@ -38,12 +39,12 @@ export function buildAbnormalLogQueryParams(
   };
 }
 
-export const fetchAbnormalLogs = async (params: AbnormalLogQueryParams) => {
-  return fetchGet("minerHashrate/abnormalLogs", params);
+export const fetchAbnormalLogs = async (venueType: string, params: AbnormalLogQueryParams) => {
+  return fetchGet(`minerHashrate/abnormalLogs/${venueType}`, params);
 };
 
-export const fetchAbnormalLogsExport = async (filters: AbnormalLogFilters) => {
-  return fetchGet("minerHashrate/abnormalLogs/export", buildAbnormalLogFilterParams(filters), {
+export const fetchAbnormalLogsExport = async (venueType: string, filters: AbnormalLogFilters) => {
+  return fetchGet(`minerHashrate/abnormalLogs/${venueType}/export`, buildAbnormalLogFilterParams(filters), {
     responseType: "blob",
   });
 };
@@ -52,12 +53,19 @@ export function buildStatsApiParams(timeMode: FaultStatsTimeMode, selectedDate: 
   return timeMode === "customDate" ? { date: selectedDate } : {};
 }
 
-export const fetchAbnormalLogsSiteSummary = async (params: { date?: string } = {}) => {
-  return fetchGet("minerHashrate/abnormalLogs/siteSummary", params);
+export const fetchAbnormalLogsSiteSummary = async (venueType: string, params: { date?: string } = {}) => {
+  return fetchGet(`minerHashrate/abnormalLogs/${venueType}/siteSummary`, params);
 };
 
-export const fetchAbnormalLogsSiteDetail = async (siteCode: string, params: { date?: string } = {}) => {
-  return fetchGet(`minerHashrate/abnormalLogs/siteDetail/${encodeURIComponent(siteCode)}`, params);
+export const fetchAbnormalLogsSiteDetail = async (
+  venueType: string,
+  siteCode: string,
+  params: { date?: string } = {},
+) => {
+  return fetchGet(
+    `minerHashrate/abnormalLogs/${venueType}/siteDetail/${encodeURIComponent(siteCode)}`,
+    params,
+  );
 };
 
 export interface AnomalyManagementHistoryParams {
@@ -88,22 +96,28 @@ export interface AbnormalDataDetailParams {
   date: string;
 }
 
-export const fetchAbnormalDataDetail = async (params: AbnormalDataDetailParams) => {
-  return fetchGet("minerHashrate/abnormalData", params);
+export const fetchAbnormalDataDetail = async (venueType: string, params: AbnormalDataDetailParams) => {
+  return fetchGet(`minerHashrate/abnormalData/${venueType}`, params);
 };
 
-export const fetchAnomalyManagementHistory = async (params: AnomalyManagementHistoryParams) => {
-  return fetchGet("minerHashrate/anomalyManagement/history", params);
+export const fetchAnomalyManagementHistory = async (
+  venueType: string,
+  params: AnomalyManagementHistoryParams,
+) => {
+  return fetchGet(`minerHashrate/anomalyManagement/${venueType}/history`, params);
 };
 
-export const createAnomalyManagementReport = async (params: CreateAnomalyManagementReportParams) => {
-  return fetchPost("minerHashrate/anomalyManagement/report", params);
+export const createAnomalyManagementReport = async (
+  venueType: string,
+  params: CreateAnomalyManagementReportParams,
+) => {
+  return fetchPost(`minerHashrate/anomalyManagement/${venueType}/report`, params);
 };
 
-export const updateAnomalyManagement = async (params: UpdateAnomalyManagementParams) => {
-  return fetchPut("minerHashrate/anomalyManagement", params);
+export const updateAnomalyManagement = async (venueType: string, params: UpdateAnomalyManagementParams) => {
+  return fetchPut(`minerHashrate/anomalyManagement/${venueType}`, params);
 };
 
-export const deleteAnomalyManagementRecord = async (id: string) => {
-  return fetchDelete(`minerHashrate/anomalyManagement/${encodeURIComponent(id)}`);
+export const deleteAnomalyManagementRecord = async (venueType: string, id: string) => {
+  return fetchDelete(`minerHashrate/anomalyManagement/${venueType}/${encodeURIComponent(id)}`);
 };

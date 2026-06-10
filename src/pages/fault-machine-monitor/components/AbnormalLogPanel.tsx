@@ -36,6 +36,7 @@ interface AbnormalLogPanelProps {
   form: FormInstance<AbnormalLogSearchValues>;
   siteOptions: SiteOption[];
   exportFilters: AbnormalLogFilters;
+  venueType: string;
   logs: AbnormalLogRecord[];
   total: number;
   page: number;
@@ -52,6 +53,7 @@ export default function AbnormalLogPanel({
   form,
   siteOptions,
   exportFilters,
+  venueType,
   logs,
   total,
   page,
@@ -140,7 +142,7 @@ export default function AbnormalLogPanel({
     if (exporting) return;
     setExporting(true);
     try {
-      const res = await fetchAbnormalLogsExport(exportFilters);
+      const res = await fetchAbnormalLogsExport(venueType, exportFilters);
       downloadExcelBlobResponse(res, `abnormal_logs_${dayjs().format("YYYYMMDD_HHmmss")}.xlsx`);
       message.success("导出成功");
     } catch {

@@ -18,6 +18,8 @@ import {
   resolveLatestProbeTaskIds,
 } from "./utils";
 import useAuthRedirect from "@/hooks/useAuthRedirect";
+import { useSettingsStore } from "@/stores";
+import { useSelector } from "@/stores/selectors";
 import { getAbnormalStatsDate } from "@/utils";
 
 import type { AbnormalLogSearchValues } from "@/pages/fault-machine-monitor/components/AbnormalLogPanel";
@@ -37,6 +39,7 @@ import { mapAbnormalLogListToRecords } from "@/pages/fault-machine-monitor/utils
 
 export default function FarmMonitorPage() {
   useAuthRedirect();
+  const { poolType } = useSettingsStore(useSelector(["poolType"]));
 
   const [form] = Form.useForm<MinerSnapshotSearchValues>();
   const [abnormalForm] = Form.useForm<AbnormalLogSearchValues>();
@@ -48,7 +51,7 @@ export default function FarmMonitorPage() {
   const [abnormalPage, setAbnormalPage] = useState(1);
   const [abnormalPageSize, setAbnormalPageSize] = useState(20);
   const [abnormalTerminalOpen, setAbnormalTerminalOpen] = useState(false);
-  const { data: boundSitesRes, isLoading: isSitesLoading } = useBoundSites();
+  const { data: boundSitesRes, isLoading: isSitesLoading } = useBoundSites(poolType);
 
   const farmSites = useMemo(() => {
     const list: BoundSiteItem[] = boundSitesRes?.data?.list ?? [];
@@ -70,14 +73,14 @@ export default function FarmMonitorPage() {
     isLoading: isProbeTasksLoading,
     isFetching: isProbeTasksFetching,
     refetch: refetchProbeTasks,
-  } = useRecentProbeTasks(selectedFarmId, timeRange);
+  } = useRecentProbeTasks(poolType, selectedFarmId, timeRange);
 
   const {
     data: latestTaskRes,
     isLoading: isLatestTaskLoading,
     isFetching: isLatestTaskFetching,
     refetch: refetchLatestTask,
-  } = useLatestFinishedProbeTask(selectedFarmId);
+  } = useLatestFinishedProbeTask(poolType, selectedFarmId);
 
   const selectedFarm = useMemo(
     () => farmSites.find((s) => s.id === selectedFarmId) ?? null,
@@ -137,14 +140,14 @@ export default function FarmMonitorPage() {
     isLoading: isSnapshotsLoading,
     isFetching: isSnapshotsFetching,
     refetch: refetchSnapshots,
-  } = useTaskSnapshots(snapshotTaskIdsParam, snapshotQueryParams);
+  } = useTaskSnapshots(poolType, snapshotTaskIdsParam, snapshotQueryParams);
 
   const {
     data: abnormalLogsRes,
     isLoading: isAbnormalLogsLoading,
     isFetching: isAbnormalLogsFetching,
     refetch: refetchAbnormalLogs,
-  } = useAbnormalLogs(abnormalQueryParams, abnormalTerminalOpen && Boolean(selectedFarmId));
+  } = useAbnormalLogs(poolType, abnormalQueryParams, abnormalTerminalOpen && Boolean(selectedFarmId));
 
   const abnormalStatsDate = getAbnormalStatsDate().format("YYYY-MM-DD");
   const {
@@ -153,6 +156,7 @@ export default function FarmMonitorPage() {
     isFetching: isAnomalyHistoryFetching,
     refetch: refetchAnomalyHistory,
   } = useAnomalyManagementHistory(
+    poolType,
     selectedFarm?.name,
     abnormalStatsDate,
     abnormalPage,
@@ -165,7 +169,7 @@ export default function FarmMonitorPage() {
     isLoading: isAbnormalDataLoading,
     isFetching: isAbnormalDataFetching,
     refetch: refetchAbnormalData,
-  } = useAbnormalDataDetail(selectedFarm?.name, abnormalStatsDate, abnormalTerminalOpen);
+  } = useAbnormalDataDetail(poolType, selectedFarm?.name, abnormalStatsDate, abnormalTerminalOpen);
 
   const snapshotData = snapshotsRes?.data;
   const snapshotList = snapshotData?.list ?? [];
@@ -331,6 +335,7 @@ export default function FarmMonitorPage() {
             <AbnormalManagementDrawer
               open={abnormalTerminalOpen}
               mode="inline"
+              venueType={poolType}
               selectedSiteValue={selectedFarmId ?? undefined}
               siteCode={selectedFarmId ?? undefined}
               siteName={selectedFarm?.name}
@@ -391,6 +396,7 @@ export default function FarmMonitorPage() {
         pageSize={pageSize}
         loading={isSnapshotsLoading || isSnapshotsFetching}
         snapshotTaskIdsParam={snapshotTaskIdsParam}
+        venueType={poolType}
         siteCode={snapshotData?.site_code}
         exportFilters={snapshotFilters}
         onSearch={onSearch}

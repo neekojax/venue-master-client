@@ -73,6 +73,7 @@ function formatSiteBadge(siteName?: string, siteCode?: string) {
 interface AbnormalManagementDrawerProps {
   open: boolean;
   mode?: "drawer" | "inline";
+  venueType: string;
   selectedSiteValue?: string;
   siteCode?: string;
   siteName?: string;
@@ -104,6 +105,7 @@ interface AbnormalManagementDrawerProps {
 export default function AbnormalManagementDrawer({
   open,
   mode = "drawer",
+  venueType,
   selectedSiteValue,
   siteCode,
   siteName,
@@ -143,9 +145,9 @@ export default function AbnormalManagementDrawer({
   const [newOwner, setNewOwner] = useState("");
   const [newAbnormalCount, setNewAbnormalCount] = useState(0);
   const [newStatus, setNewStatus] = useState<AnomalyManagementStatus>("pending");
-  const createReportMutation = useCreateAnomalyManagementReport();
-  const updateAnomalyManagementMutation = useUpdateAnomalyManagement();
-  const deleteRecordMutation = useDeleteAnomalyManagementRecord();
+  const createReportMutation = useCreateAnomalyManagementReport(venueType);
+  const updateAnomalyManagementMutation = useUpdateAnomalyManagement(venueType);
+  const deleteRecordMutation = useDeleteAnomalyManagementRecord(venueType);
   const currentRecords = useMemo(() => historyRecords, [historyRecords]);
 
   useEffect(() => {
@@ -876,6 +878,7 @@ export default function AbnormalManagementDrawer({
             form={form}
             siteOptions={siteOptions}
             exportFilters={exportFilters}
+            venueType={venueType}
             logs={logs}
             total={total}
             page={page}

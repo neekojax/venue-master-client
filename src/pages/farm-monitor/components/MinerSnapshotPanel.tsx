@@ -48,6 +48,7 @@ interface MinerSnapshotPanelProps {
   loading?: boolean;
   /** 逗号分隔的 task_id，多 Agent 场地传多个 */
   snapshotTaskIdsParam?: string;
+  venueType: string;
   siteCode?: string;
   exportFilters: TaskSnapshotQueryParams;
   onSearch: (values: MinerSnapshotSearchValues) => void;
@@ -66,6 +67,7 @@ export default function MinerSnapshotPanel({
   pageSize,
   loading = false,
   snapshotTaskIdsParam,
+  venueType,
   siteCode,
   exportFilters,
   onSearch,
@@ -121,7 +123,7 @@ export default function MinerSnapshotPanel({
     setExporting(true);
     try {
       const params = buildTaskSnapshotExportParams(exportFilters);
-      const res = await fetchTaskSnapshotExport(snapshotTaskIdsParam, params);
+      const res = await fetchTaskSnapshotExport(venueType, snapshotTaskIdsParam, params);
       const fileId = snapshotTaskIdsParam.replace(/,/g, "-");
       downloadExcelBlobResponse(res, `task_snapshots_${fileId}_${dayjs().format("YYYYMMDD_HHmmss")}.xlsx`);
       message.success("导出成功");

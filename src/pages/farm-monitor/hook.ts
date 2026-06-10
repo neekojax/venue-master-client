@@ -7,36 +7,38 @@ import {
 } from "./api";
 import type { TaskSnapshotQueryParams, TimeRange } from "./types";
 
-export const useBoundSites = () => {
+export const useBoundSites = (venueType: string) => {
   return useQuery({
-    queryKey: ["miner-bound-sites"],
-    queryFn: fetchBoundSites,
+    queryKey: ["miner-bound-sites", venueType],
+    queryFn: () => fetchBoundSites(venueType),
+    enabled: Boolean(venueType),
   });
 };
 
-export const useRecentProbeTasks = (siteCode: string | null, window: TimeRange) => {
+export const useRecentProbeTasks = (venueType: string, siteCode: string | null, window: TimeRange) => {
   return useQuery({
-    queryKey: ["miner-recent-probe-tasks", siteCode, window],
-    queryFn: () => fetchRecentProbeTasks(siteCode!, window),
-    enabled: !!siteCode,
+    queryKey: ["miner-recent-probe-tasks", venueType, siteCode, window],
+    queryFn: () => fetchRecentProbeTasks(venueType, siteCode!, window),
+    enabled: Boolean(venueType) && !!siteCode,
   });
 };
 
-export const useLatestFinishedProbeTask = (siteCode: string | null) => {
+export const useLatestFinishedProbeTask = (venueType: string, siteCode: string | null) => {
   return useQuery({
-    queryKey: ["miner-latest-finished-probe-task", siteCode],
-    queryFn: () => fetchLatestFinishedProbeTask(siteCode!),
-    enabled: !!siteCode,
+    queryKey: ["miner-latest-finished-probe-task", venueType, siteCode],
+    queryFn: () => fetchLatestFinishedProbeTask(venueType, siteCode!),
+    enabled: Boolean(venueType) && !!siteCode,
   });
 };
 
 export const useTaskSnapshots = (
+  venueType: string,
   taskIdsParam: string | null | undefined,
   params: TaskSnapshotQueryParams,
 ) => {
   return useQuery({
-    queryKey: ["miner-task-snapshots", taskIdsParam, params],
-    queryFn: () => fetchTaskSnapshots(taskIdsParam!, params),
-    enabled: !!taskIdsParam,
+    queryKey: ["miner-task-snapshots", venueType, taskIdsParam, params],
+    queryFn: () => fetchTaskSnapshots(venueType, taskIdsParam!, params),
+    enabled: Boolean(venueType) && !!taskIdsParam,
   });
 };

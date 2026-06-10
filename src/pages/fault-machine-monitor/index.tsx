@@ -26,6 +26,8 @@ import {
   mapSiteSummaryToDistribution,
 } from "./utils";
 import useAuthRedirect from "@/hooks/useAuthRedirect";
+import { useSettingsStore } from "@/stores";
+import { useSelector } from "@/stores/selectors";
 
 import { useBoundSites } from "@/pages/farm-monitor/hook";
 import type { BoundSiteItem } from "@/pages/farm-monitor/types";
@@ -45,6 +47,7 @@ function searchValuesToFilters(values: AbnormalLogSearchValues): AbnormalLogFilt
 
 export default function FaultMachineMonitorPage() {
   useAuthRedirect();
+  const { poolType } = useSettingsStore(useSelector(["poolType"]));
 
   const [form] = Form.useForm<AbnormalLogSearchValues>();
   const [statsTimeMode, setStatsTimeMode] = useState<FaultStatsTimeMode>("24h");
@@ -58,7 +61,7 @@ export default function FaultMachineMonitorPage() {
 
   const useMock = USE_FAULT_MONITOR_MOCK;
 
-  const { data: boundSitesRes } = useBoundSites();
+  const { data: boundSitesRes } = useBoundSites(poolType);
 
   const {
     data: summaryRes,
@@ -66,7 +69,7 @@ export default function FaultMachineMonitorPage() {
     isError: isSummaryError,
     error: summaryError,
     refetch: refetchSummary,
-  } = useAbnormalLogsSiteSummary(statsTimeMode, statsSelectedDate, !useMock);
+  } = useAbnormalLogsSiteSummary(poolType, statsTimeMode, statsSelectedDate, !useMock);
 
   const {
     data: detailRes,
@@ -74,7 +77,7 @@ export default function FaultMachineMonitorPage() {
     isError: isDetailError,
     error: detailError,
     refetch: refetchDetail,
-  } = useAbnormalLogsSiteDetail(selectedStatsSiteCode, statsTimeMode, statsSelectedDate, !useMock);
+  } = useAbnormalLogsSiteDetail(poolType, selectedStatsSiteCode, statsTimeMode, statsSelectedDate, !useMock);
 
   const listQueryParams = useMemo(
     () => buildAbnormalLogQueryParams(tableFilters, page, pageSize),
@@ -87,7 +90,7 @@ export default function FaultMachineMonitorPage() {
     isError: isLogsError,
     error: logsError,
     refetch: refetchLogs,
-  } = useAbnormalLogs(listQueryParams, !useMock);
+  } = useAbnormalLogs(poolType, listQueryParams, !useMock);
 
   const siteSummaryData = useMemo((): AbnormalLogsSiteSummaryData | undefined => {
     void mockRefreshTick;
@@ -265,6 +268,7 @@ export default function FaultMachineMonitorPage() {
         form={form}
         siteOptions={tableSiteOptions}
         exportFilters={tableFilters}
+        venueType={poolType}
         logs={logList}
         total={logTotal}
         page={page}
