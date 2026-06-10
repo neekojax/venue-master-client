@@ -604,9 +604,7 @@ export default function AbnormalManagementDrawer({
                         </span>
                         <span>
                           波及:{" "}
-                          <strong className="text-red-500 font-bold">
-                            {record.abnormalCount ?? record.devicesAffected} 台
-                          </strong>
+                          <strong className="text-red-500 font-bold">{record.devicesAffected} 台</strong>
                         </span>
                       </div>
                     </div>
