@@ -224,14 +224,14 @@ export default function FaultStatsPanel({
                       key={dist.siteCode}
                       type="button"
                       onClick={() => onSiteSelect(dist.siteCode, dist.siteName)}
-                      className={`w-full text-left p-2.5 rounded-lg border transition-all ${
+                      className={`w-full p-2.5 rounded-lg border transition-all ${
                         isSelected
                           ? "bg-blue-50 border-blue-200 shadow-sm"
                           : "bg-transparent border-transparent hover:bg-white"
                       }`}
                     >
                       <div className="flex justify-between items-center text-xs mb-1.5 gap-2">
-                        <span className="font-semibold flex items-center gap-2 min-w-0">
+                        <span className="font-semibold flex items-center gap-2 min-w-0 text-left">
                           <span
                             className={`w-2 h-2 rounded-full shrink-0 ${isSelected ? "bg-blue-600" : "bg-gray-300"}`}
                           />

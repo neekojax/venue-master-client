@@ -7,6 +7,7 @@ dayjs.extend(utc);
 dayjs.extend(timezone);
 
 type DateFormat = "YYYY-MM-DD HH:mm:ss" | "YYYY-MM-DD";
+const SHANGHAI_TIMEZONE = "Asia/Shanghai";
 
 /**
  * 将UTC时间转换为本地时间
@@ -78,7 +79,16 @@ export function getBuildTime() {
   // dayjs.extend(utc);
   // dayjs.extend(timezone);
 
-  const buildTime = dayjs.tz(Date.now(), "Asia/Shanghai").format("YYYY-MM-DD HH:mm:ss");
+  const buildTime = dayjs.tz(Date.now(), SHANGHAI_TIMEZONE).format("YYYY-MM-DD HH:mm:ss");
 
   return buildTime;
+}
+
+/**
+ * 异常设备数统计日:
+ * 北京时间 08:00 之前取前天，08:00 及之后取昨天。
+ */
+export function getAbnormalStatsDate(now: dayjs.ConfigType = dayjs()) {
+  const beijingNow = dayjs(now).tz(SHANGHAI_TIMEZONE);
+  return beijingNow.hour() < 8 ? beijingNow.subtract(2, "day") : beijingNow.subtract(1, "day");
 }

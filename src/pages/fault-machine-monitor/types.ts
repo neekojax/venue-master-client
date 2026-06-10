@@ -7,6 +7,53 @@ export type FaultStatsTimeMode = "24h" | "customDate";
 
 export type AbnormalLogStatsWindow = "24h" | "date";
 
+export type AnomalyManagementStatus = "pending" | "monitoring" | "resolved" | "fixed";
+
+export interface AnomalyManagementRecord {
+  id: string;
+  time: string;
+  reason: string;
+  operator: string;
+  devicesAffected: number;
+  abnormalCount?: number;
+  status: AnomalyManagementStatus;
+}
+
+export interface AnomalyManagementHistoryData {
+  list: AnomalyManagementRecord[];
+  total: number;
+  page: number;
+  pageSize: number;
+}
+
+export interface AbnormalDataDetail {
+  id: number;
+  siteName: string;
+  date: string;
+  reason: string;
+  scanMachineCount: number;
+  onShelfCount: number;
+  affectedMachineCount: number;
+  abnormalCount: number;
+  status: string;
+  owner: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface AnomalyManagementRecordDTO {
+  id: number | string;
+  siteName: string;
+  date: string;
+  reason: string;
+  affectedMachineCount: number;
+  abnormalCount: number;
+  status: AnomalyManagementStatus;
+  owner: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
 export interface AbnormalLogSiteSummaryItem {
   siteCode: string;
   siteName: string;

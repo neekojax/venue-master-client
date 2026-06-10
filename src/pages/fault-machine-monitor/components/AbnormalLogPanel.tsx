@@ -45,6 +45,7 @@ interface AbnormalLogPanelProps {
   onReset: () => void;
   onRefresh: () => void;
   onPageChange: (page: number, pageSize: number) => void;
+  title?: string;
 }
 
 export default function AbnormalLogPanel({
@@ -60,6 +61,7 @@ export default function AbnormalLogPanel({
   onReset,
   onRefresh,
   onPageChange,
+  title = "故障机信息管理",
 }: AbnormalLogPanelProps) {
   const [filterExpanded, setFilterExpanded] = useState(true);
   const [isFullscreen, setIsFullscreen] = useState(false);
@@ -165,7 +167,7 @@ export default function AbnormalLogPanel({
         className="bg-white min-w-0 [&:fullscreen]:flex [&:fullscreen]:flex-col [&:fullscreen]:h-screen [&:fullscreen]:overflow-auto"
       >
         <div className="px-5 pt-4 pb-3 border-b border-gray-200 bg-white">
-          <h2 className="text-lg font-semibold text-gray-800 m-0">故障机信息管理</h2>
+          <h2 className="text-lg font-semibold text-gray-800 m-0">{title}</h2>
         </div>
 
         {filterExpanded ? (

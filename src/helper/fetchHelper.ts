@@ -36,6 +36,23 @@ export const fetchPost = async (endpoint: string, body: any, customHeaders?: Rec
   }
 };
 
+// PUT 请求
+export const fetchPut = async (endpoint: string, body: any, customHeaders?: Record<string, string>) => {
+  const headers = {
+    "Content-Type": "application/json",
+    ...customHeaders,
+  };
+
+  try {
+    const response = await axiosInstance.put(endpoint, body, { headers });
+    checkSuccess(response);
+    return response;
+  } catch (error) {
+    // @ts-ignore
+    throw new Error(error.message);
+  }
+};
+
 // POST 请求
 export const fetchPostFile = async (
   endpoint: string,

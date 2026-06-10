@@ -14,6 +14,7 @@ import type { KpiSummary } from "../types";
 interface KpiCardsProps {
   data: KpiSummary;
   loading?: boolean;
+  onAbnormalClick?: () => void;
 }
 
 const CARDS: Array<{
@@ -37,16 +38,21 @@ function formatKpiValue(value: number | null) {
   return value == null ? "-" : String(value);
 }
 
-export default function KpiCards({ data, loading = false }: KpiCardsProps) {
+export default function KpiCards({ data, loading = false, onAbnormalClick }: KpiCardsProps) {
   return (
     <Spin spinning={loading}>
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
         {CARDS.map((card) => {
           const Icon = card.icon;
+          const clickable = card.key === "theoreticalOffline" && onAbnormalClick;
           return (
-            <div
+            <button
               key={card.key}
-              className="bg-white rounded-lg border border-gray-200 px-4 py-3 flex items-center gap-3"
+              type="button"
+              onClick={clickable ? onAbnormalClick : undefined}
+              className={`bg-white rounded-lg border border-gray-200 px-4 py-3 flex items-center gap-3 w-full text-left ${
+                clickable ? "hover:border-blue-300 hover:shadow-sm cursor-pointer" : "cursor-default"
+              }`}
             >
               <div
                 className="flex items-center justify-center w-10 h-10 rounded-lg shrink-0"
@@ -56,11 +62,15 @@ export default function KpiCards({ data, loading = false }: KpiCardsProps) {
               </div>
               <div className="flex-1 min-w-0 text-right">
                 <div className="text-xs text-gray-500 truncate">{card.label}</div>
-                <div className="text-2xl font-semibold text-gray-800 leading-tight">
+                <div
+                  className={`text-2xl font-semibold text-gray-800 leading-tight ${
+                    clickable ? "hover:underline underline-offset-4" : ""
+                  }`}
+                >
                   {formatKpiValue(data[card.key])}
                 </div>
               </div>
-            </div>
+            </button>
           );
         })}
       </div>

@@ -1,10 +1,16 @@
 import { useQuery } from "@tanstack/react-query";
+import { useMutation } from "@tanstack/react-query";
 import {
   buildStatsApiParams,
+  createAnomalyManagementReport,
+  deleteAnomalyManagementRecord,
+  fetchAbnormalDataDetail,
   fetchAbnormalLogs,
   fetchAbnormalLogsSiteDetail,
   fetchAbnormalLogsSiteSummary,
   fetchAbnormalLogsTrend,
+  fetchAnomalyManagementHistory,
+  updateAnomalyManagement,
 } from "./api";
 import type { AbnormalLogQueryParams, FaultStatsTimeMode, FaultTimeRange } from "./types";
 
@@ -47,5 +53,45 @@ export const useAbnormalLogsSiteDetail = (
     queryKey: ["abnormal-logs-site-detail", siteCode ?? "", timeMode, selectedDate],
     queryFn: () => fetchAbnormalLogsSiteDetail(siteCode!, params),
     enabled: enabled && Boolean(siteCode),
+  });
+};
+
+export const useAnomalyManagementHistory = (
+  siteName: string | undefined,
+  date: string,
+  page: number,
+  pageSize: number,
+  enabled = true,
+) => {
+  return useQuery({
+    queryKey: ["anomaly-management-history", siteName ?? "", date, page, pageSize],
+    queryFn: () => fetchAnomalyManagementHistory({ siteName: siteName!, date, page, pageSize }),
+    enabled: enabled && Boolean(siteName),
+  });
+};
+
+export const useAbnormalDataDetail = (siteName: string | undefined, date: string, enabled = true) => {
+  return useQuery({
+    queryKey: ["abnormal-data-detail", siteName ?? "", date],
+    queryFn: () => fetchAbnormalDataDetail({ siteName: siteName!, date }),
+    enabled: enabled && Boolean(siteName),
+  });
+};
+
+export const useCreateAnomalyManagementReport = () => {
+  return useMutation({
+    mutationFn: createAnomalyManagementReport,
+  });
+};
+
+export const useUpdateAnomalyManagement = () => {
+  return useMutation({
+    mutationFn: updateAnomalyManagement,
+  });
+};
+
+export const useDeleteAnomalyManagementRecord = () => {
+  return useMutation({
+    mutationFn: deleteAnomalyManagementRecord,
   });
 };
