@@ -189,6 +189,7 @@ export default function FaultMachineMonitorPage() {
   const onSearch = (values: AbnormalLogSearchValues) => {
     setTableFilters(searchValuesToFilters(values));
     setPage(1);
+    form.setFieldsValue(values);
   };
 
   const onReset = () => {

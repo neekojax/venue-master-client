@@ -1,7 +1,7 @@
 import { forwardRef, useEffect, useImperativeHandle, useRef } from "react";
 import { CanvasRenderer, SVGRenderer } from "echarts/renderers";
 import echarts from "./library";
-import { cn, debounce } from "@/utils";
+import { cn } from "@/utils";
 
 interface ReactEchartsProps {
   theme?: string;
@@ -19,7 +19,7 @@ export const ReactEcharts = forwardRef<RefProps, ReactEchartsProps>(function (
   { theme = "light", option, renderer, className, style },
   ref,
 ) {
-  const eleRef = useRef(null);
+  const eleRef = useRef<HTMLDivElement | null>(null);
   const chartInstance = useRef<echarts.ECharts | null>(null);
 
   echarts.use(renderer === "svg" ? SVGRenderer : CanvasRenderer);
@@ -29,23 +29,33 @@ export const ReactEcharts = forwardRef<RefProps, ReactEchartsProps>(function (
   }));
 
   useEffect(() => {
-    if (eleRef.current) {
-      chartInstance.current = echarts.init(eleRef.current, theme, { renderer });
-      chartInstance.current.setOption(option);
+    if (!eleRef.current) return;
 
-      const onResize = debounce(() => {
-        chartInstance.current?.resize();
-      }, 500);
+    chartInstance.current = echarts.init(eleRef.current, theme, { renderer });
 
-      const resizeObserver = new ResizeObserver(onResize);
-      resizeObserver.observe(eleRef.current);
+    const resizeChart = () => {
+      chartInstance.current?.resize();
+    };
 
-      return () => {
-        resizeObserver.disconnect();
-        chartInstance.current?.dispose();
-      };
-    }
-  }, [option, theme, renderer]);
+    const resizeObserver = new ResizeObserver(() => {
+      resizeChart();
+    });
+
+    resizeObserver.observe(eleRef.current);
+    window.addEventListener("resize", resizeChart);
+
+    return () => {
+      resizeObserver.disconnect();
+      window.removeEventListener("resize", resizeChart);
+      chartInstance.current?.dispose();
+      chartInstance.current = null;
+    };
+  }, [theme, renderer]);
+
+  useEffect(() => {
+    chartInstance.current?.setOption(option, true);
+    chartInstance.current?.resize();
+  }, [option]);
 
   return <div ref={eleRef} className={cn("w-full h-full", className)} style={style} />;
 });
