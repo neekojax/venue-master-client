@@ -42,6 +42,10 @@ export const fetchTotalLastProfitStatus = async (poolType: string) => {
   return await fetchGet(`miningPool/getTotalLastProfitStatus/${poolType}`);
 };
 
+export const fetchRecentSubAccountStatus = async (venueType: string, poolId: string) => {
+  return await fetchGet(`/venue/getRecentSubAccountStatus/${venueType}/${poolId}`);
+};
+
 export const fetchLastestHashRateEfficiency = async (poolType: string, day: string) => {
   return await fetchGet(`miningPool/getHashRateEfficiency/${poolType}/${day}`);
 };

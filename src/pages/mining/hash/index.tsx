@@ -2,11 +2,12 @@ import { useEffect, useState } from "react";
 import { FaAdn, FaFish } from "react-icons/fa6";
 import { WiDirectionUpRight } from "react-icons/wi";
 import { Link } from "react-router-dom";
-import { ExportOutlined, SearchOutlined } from "@ant-design/icons";
+import { ExportOutlined, LineChartOutlined, SearchOutlined } from "@ant-design/icons";
 import { Button, Col, Input, Radio, Row, Spin, Switch, Table, Tag, Tooltip } from "antd";
 import {} from "antd";
 // import EditTable from "@/components/edit-table";
 import { FavoriteButton } from "@/components/FavoriteButton";
+import { ROUTE_PATHS } from "@/constants/common";
 import useAuthRedirect from "@/hooks/useAuthRedirect.ts";
 import { useSelector, useSettingsStore } from "@/stores";
 import { exportHashRateToExcel } from "@/utils/excel";
@@ -47,6 +48,10 @@ export default function MiningHashRatePage() {
       const newData = hashData.data.map(
         (
           item: {
+            id: any;
+            pool_id?: any;
+            poolId?: any;
+            "Pool ID"?: any;
             venue_id: any;
             venue_name: any;
             pool_name: any;
@@ -65,25 +70,31 @@ export default function MiningHashRatePage() {
             collection: any;
           },
           index: any,
-        ) => ({
-          venue_id: item.venue_id,
-          serialNumber: index + 1,
-          venue_name: item.venue_name,
-          pool_name: item.pool_name,
-          current_hash: item.current_hash,
-          online: item.online,
-          offline: item.offline,
-          last_hash: item.last_hash,
-          last_settlement_hash: item.last_settlement_hash,
-          theoretical: item.theoretical,
-          last_hash_rate_effective: item.last_hash_rate_effective,
-          last_settlement_profit_btc: item.last_settlement_profit_btc,
-          last_settlement_profit_fb: item.last_settlement_profit_fb,
-          last_settlement_date: item.last_settlement_date,
-          update_time: item.update_time,
-          link: item.link,
-          collection: item.collection,
-        }),
+        ) => {
+          const resolvedPoolId = item.pool_id ?? item.poolId ?? item["Pool ID"] ?? item.id;
+
+          return {
+            key: resolvedPoolId ?? `${item.venue_id}-${item.pool_name}-${index}`,
+            pool_id: resolvedPoolId,
+            venue_id: item.venue_id,
+            serialNumber: index + 1,
+            venue_name: item.venue_name,
+            pool_name: item.pool_name,
+            current_hash: item.current_hash,
+            online: item.online,
+            offline: item.offline,
+            last_hash: item.last_hash,
+            last_settlement_hash: item.last_settlement_hash,
+            theoretical: item.theoretical,
+            last_hash_rate_effective: item.last_hash_rate_effective,
+            last_settlement_profit_btc: item.last_settlement_profit_btc,
+            last_settlement_profit_fb: item.last_settlement_profit_fb,
+            last_settlement_date: item.last_settlement_date,
+            update_time: item.update_time,
+            link: item.link,
+            collection: item.collection,
+          };
+        },
       );
       setTableData(newData); // 设置表格数据源
     } else {
@@ -337,8 +348,25 @@ export default function MiningHashRatePage() {
           </a>
         ),
       },
+      {
+        title: "历史状态",
+        key: "recentStatus",
+        width: 90,
+        render: (_text: any, record: { pool_id?: any; pool_name?: any; venue_name?: any }) => (
+          <Tooltip title="查看历史状态">
+            <Link
+              to={ROUTE_PATHS.recentSubAccountStatus(poolType, record.pool_id)}
+              state={{ poolName: record.pool_name, venueName: record.venue_name }}
+              style={{ color: "#2563eb", display: "inline-flex", alignItems: "center" }}
+            >
+              <LineChartOutlined style={{ marginRight: 4 }} />
+              历史
+            </Link>
+          </Tooltip>
+        ),
+      },
     ]);
-  }, []);
+  }, [poolType]);
 
   // 搜索处理函数
   const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {

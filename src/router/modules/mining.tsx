@@ -58,7 +58,7 @@ export const miningRoute: RouteObject = {
       },
     },
     {
-      path: "/mining/detail/:venueId/:poolId", // 直接使用动态参数
+      path: "detail/:venueId/:poolId",
       lazy: async () => ({
         Component: (await import("@/pages/mining/detail")).default,
       }),
