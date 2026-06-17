@@ -5,7 +5,7 @@ import { ROUTE_PATHS } from "@/constants/common";
 import useAuthRedirect from "@/hooks/useAuthRedirect.ts";
 import { useSelector, useSettingsStore } from "@/stores";
 
-import { getVenueBasicInfo, getWeeklyReportPage } from "@/pages/venue/api.tsx";
+import { downloadAllWeeklyReports, getVenueBasicInfo, getWeeklyReportPage } from "@/pages/venue/api.tsx";
 import WeeklyBusinessReport from "@/pages/venue/venue-detail/components/WeeklyBusinessReport";
 import {
   normalizeWeeklyPageResponse,
@@ -30,6 +30,7 @@ export default function VenueWeeklyReportPage() {
   const [rows, setRows] = useState<WeeklyReportRow[]>([]);
   const [total, setTotal] = useState(0);
   const [basicInfo, setBasicInfo] = useState<VenueBasicInfo | null>(null);
+  const [downloading, setDownloading] = useState(false);
 
   useEffect(() => {
     const fetchBasicInfo = async () => {
@@ -90,6 +91,26 @@ export default function VenueWeeklyReportPage() {
     fetchData();
   }, [venueId, poolType, page, pageSize]);
 
+  const handleDownload = async () => {
+    if (!venueId) return;
+
+    try {
+      setDownloading(true);
+      const response: any = await downloadAllWeeklyReports(poolType, Number(venueId));
+      const blob = response?.data instanceof Blob ? response.data : response;
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.setAttribute("download", `${basicInfo?.venue_name || "场地"}_运营周报.xlsx`);
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+    } finally {
+      setDownloading(false);
+    }
+  };
+
   return (
     <div className="p-6 min-h-screen bg-slate-50">
       <div className="mb-6 flex items-center justify-between">
@@ -99,9 +120,14 @@ export default function VenueWeeklyReportPage() {
           </Title>
           {basicInfo?.venue_name ? <Text type="secondary">{basicInfo.venue_name}</Text> : null}
         </div>
-        <Link to={ROUTE_PATHS.miningSiteDetail(Number(venueId || 0))}>
-          <Button>返回场地详情</Button>
-        </Link>
+        <div className="flex items-center gap-3">
+          <Button type="primary" loading={downloading} onClick={handleDownload}>
+            下载周报
+          </Button>
+          <Link to={ROUTE_PATHS.miningSiteDetail(Number(venueId || 0))}>
+            <Button>返回场地详情</Button>
+          </Link>
+        </div>
       </div>
 
       <Spin spinning={loading}>

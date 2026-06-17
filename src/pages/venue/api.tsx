@@ -106,6 +106,12 @@ export const getWeeklyReportPage = async (
   });
 };
 
+export const downloadAllWeeklyReports = async (poolType: string, venueID: number) => {
+  return await fetchGet(`/venue/downloadAllWeeklyReports/${poolType}/${venueID}`, undefined, {
+    responseType: "blob",
+  });
+};
+
 ///venue/getAllVEvent
 export const getAllVEvent = async (poolType: string, venueID: number) => {
   return await fetchGet(`/venue/getAllVEvent/${poolType}/${venueID}`);
