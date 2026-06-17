@@ -1,10 +1,19 @@
 import React, { useEffect, useRef, useState } from "react";
-// import { Radio } from 'antd';
 import { useParams } from "react-router-dom";
 import { LineChart } from "echarts/charts";
 import { GridComponent, TitleComponent, TooltipComponent } from "echarts/components";
 import * as echarts from "echarts/core";
 import { CanvasRenderer } from "echarts/renderers";
+import {
+  chartRangeBadge,
+  chartTitleStyle,
+  commonAxisLabel,
+  commonAxisLine,
+  commonGrid,
+  commonSplitLine,
+  commonTooltip,
+} from "./chartTheme";
+import type { WeeklyChartPoint } from "./weeklyMock";
 import { useSelector, useSettingsStore } from "@/stores";
 
 import { getLast30DaysHighTemperatureImpactRate } from "@/pages/venue/api.tsx";
@@ -22,7 +31,10 @@ interface ApiResponse {
   data: HashRecord[];
 }
 
-const WaveLineCard: React.FC = () => {
+const WaveLineCard: React.FC<{ mode?: "day" | "week"; weeklyData?: WeeklyChartPoint[] }> = ({
+  mode = "day",
+  weeklyData = [],
+}) => {
   const { poolType } = useSettingsStore(useSelector(["poolType"]));
   const domRef = useRef<HTMLDivElement | null>(null);
   const { venueId } = useParams<{ venueId: string }>();
@@ -33,6 +45,11 @@ const WaveLineCard: React.FC = () => {
 
   // 获取数据
   const fetchData = async () => {
+    if (mode === "week") {
+      setDates(weeklyData.map((item) => item.date));
+      setHashValues(weeklyData.map((item) => item.value));
+      return;
+    }
     try {
       const response: ApiResponse = await getLast30DaysHighTemperatureImpactRate(poolType, Number(venueId));
 
@@ -48,24 +65,21 @@ const WaveLineCard: React.FC = () => {
 
   useEffect(() => {
     fetchData();
-  }, [venueId]);
+  }, [venueId, mode, weeklyData]);
   // 获取当前日期
 
   useEffect(() => {
     if (!domRef.current) return;
-    // console.log(dates, hashValues)
 
     const chart = echarts.init(domRef.current);
     chartRef.current = chart;
 
     const option = {
-      title: { text: "", left: "center", top: 6, textStyle: { fontSize: 14, fontWeight: 600 } },
-      grid: { left: 12, right: 12, top: 10, bottom: 16, containLabel: true },
+      grid: commonGrid,
       tooltip: {
         trigger: "axis",
-        axisPointer: { type: "line" },
+        ...commonTooltip,
         formatter: (params: any) => {
-          // params 是数组，因为 trigger: "axis"
           return params
             .map((item: any) => `${item.name || ""}<br>${item.marker}高温影响：${item.value.toFixed(2)}%`)
             .join("<br/>");
@@ -75,18 +89,21 @@ const WaveLineCard: React.FC = () => {
         type: "category",
         boundaryGap: false,
         axisTick: { show: false },
-        axisLine: { show: false },
+        axisLine: commonAxisLine,
         axisLabel: {
           show: true,
+          ...commonAxisLabel,
           formatter: (value: string) => {
-            // 假设 value = "2025-08-23"
+            if (mode === "week") {
+              const week = weeklyData.find((item) => item.date === value)?.weekNo;
+              return week ? `第${week}周` : value;
+            }
             const d = new Date(value);
             if (!isNaN(d.getTime())) {
               const month = d.getMonth() + 1;
               const day = d.getDate();
               return `${month}-${day}`;
             }
-            // 如果不是标准日期字符串，比如 "2025/08/23"
             const parts = value.split(/[-/]/);
             if (parts.length >= 3) {
               return `${parts[1]}-${parts[2]}`;
@@ -99,32 +116,27 @@ const WaveLineCard: React.FC = () => {
       },
       yAxis: {
         type: "value",
-        // min: 0,
-        // max: 100,
         splitNumber: 4,
         axisLine: { show: false },
         axisTick: { show: false },
-        axisLabel: { formatter: "{value}" },
-        splitLine: { lineStyle: { type: "dashed" } },
+        axisLabel: { formatter: "{value}", ...commonAxisLabel },
+        splitLine: commonSplitLine,
       },
       series: [
         {
           type: "line",
           smooth: true,
-          // symbol: 'none',
+          showSymbol: false,
           data: hashValues,
-          itemStyle: {
-            color: "rgb(216, 70, 70)", //rgb(216, 70, 70) 点的颜色
-          },
-          // data: makeWave(0),
-          lineStyle: { width: 2, color: "#ea580c" }, // #ea580c
-          // areaStyle: { opacity: 0.35 }
+          itemStyle: { color: "rgb(216, 70, 70)" },
+          lineStyle: { width: 2, color: "#ea580c" },
           areaStyle: {
             color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
               { offset: 0, color: "rgba(234, 88, 12, 0.2)" },
               { offset: 1, color: "rgba(234, 88, 12, 0)" },
             ]),
           },
+          emphasis: { focus: "series" },
         },
       ],
     };
@@ -147,19 +159,12 @@ const WaveLineCard: React.FC = () => {
   return (
     <>
       <div className="flex justify-between items-center mb-4">
-        <h3 className="text-lg font-semibold">高温影响曲线</h3>
-        {/* <Radio.Group
-                    value={chart.period}
-                    onChange={(e) => {
-                        const newCharts = [...charts];
-                        newCharts[index].period = e.target.value;
-                        setCharts(newCharts);
-                    }}
-                    size="small"
-                >
-                    <Radio.Button value="day">日</Radio.Button>
-                    <Radio.Button value="month">月</Radio.Button>
-                </Radio.Group> */}
+        <div className="flex items-center gap-3">
+          <div>
+            <h3 style={chartTitleStyle}>高温影响曲线</h3>
+          </div>
+          <span style={chartRangeBadge("#ea580c")}>{mode === "week" ? "近10周" : "近30日"}</span>
+        </div>
       </div>
       <div ref={domRef} style={{ width: "100%", height: 320 }} />
     </>

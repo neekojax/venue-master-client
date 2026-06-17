@@ -1,20 +1,28 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { CalendarOutlined, CloudOutlined, EnvironmentOutlined, ThunderboltOutlined } from "@ant-design/icons";
-import { Select } from "antd";
+import { Segmented, Select, Tag } from "antd";
 import BasicDataChart from "./components/BasicDataChart";
 import BusinessReport from "./components/Business";
 import ChartFail from "./components/ChartFail";
 import ChartHighTemperatureImpact from "./components/ChartHighTemperatureImpact";
 import ChartLimitImpact from "./components/ChartLimitImpact";
 import ChartSuanli from "./components/ChartSuanli";
+import {
+  mapWeeklyCurvePoints,
+  mapWeeklyReportItemsToRows,
+  normalizeWeeklyReportResponse,
+  type VenueWeeklyReportResponse,
+  type WeeklyChartPoint,
+  type WeeklyReportRow,
+} from "./components/weeklyMock";
 import type { VenueStats } from "./types";
 import { useSelector, useSettingsStore } from "@/stores";
 
 import "./index.css";
 
 import ChartFee from "@/pages/custody-statistics/statisticsDetail/components/chartFee";
-import { getVenueBasicInfo, getVenueDailyStat } from "@/pages/venue/api.tsx";
+import { getRecent10WeeksWeeklyReport, getVenueBasicInfo, getVenueDailyStat } from "@/pages/venue/api.tsx";
 import { useVenueList } from "@/pages/venue/hook/hook";
 
 interface SubAccount {
@@ -41,6 +49,8 @@ const VenueDetail: React.FC = () => {
   const venueId = params.venueId!;
   const navigate = useNavigate();
   const [basicInfo, setBasicInfo] = useState<VenueData | null>(null);
+  const [curveMode, setCurveMode] = useState<"day" | "week">("day");
+  const [weeklyReport, setWeeklyReport] = useState<VenueWeeklyReportResponse | null>(null);
 
   // 获取场地列表数据
   const { data: venueListData } = useVenueList(poolType);
@@ -76,14 +86,43 @@ const VenueDetail: React.FC = () => {
     }
   };
 
+  const fetchWeeklyStat = async () => {
+    try {
+      const response = await getRecent10WeeksWeeklyReport(poolType, Number(venueId));
+      setWeeklyReport(normalizeWeeklyReportResponse(response.data));
+    } catch (error) {
+      console.log("weekly error", error);
+      setWeeklyReport(null);
+    }
+  };
+
   useEffect(() => {
     setLoading(true);
     fetchData();
     fetchDailyStat();
+    fetchWeeklyStat();
   }, [venueId]);
 
   const yesterday = new Date(Date.now() - 864e5);
   const formattedDate = yesterday.toISOString().split("T")[0];
+  const weeklyEffectiveRateData: WeeklyChartPoint[] = weeklyReport
+    ? mapWeeklyCurvePoints(weeklyReport.hashEffectiveRateCurve || [])
+    : [];
+  const weeklyFailureRateData: WeeklyChartPoint[] = weeklyReport
+    ? mapWeeklyCurvePoints(
+        weeklyReport.failureRateCurve || [],
+        (weeklyReport.list || []).map((item) => item.averageFailureRate),
+      )
+    : [];
+  const weeklyHighTemperatureData: WeeklyChartPoint[] = weeklyReport
+    ? mapWeeklyCurvePoints(weeklyReport.highTemperatureImpactRateCurve || [])
+    : [];
+  const weeklyLimitImpactData: WeeklyChartPoint[] = weeklyReport
+    ? mapWeeklyCurvePoints(weeklyReport.limitImpactRateCurve || [])
+    : [];
+  const weeklyRows: WeeklyReportRow[] = weeklyReport
+    ? mapWeeklyReportItemsToRows(weeklyReport.list || [])
+    : [];
 
   return (
     <div className=" mx-auto  min-h-screen">
@@ -158,26 +197,49 @@ const VenueDetail: React.FC = () => {
       {/* 图表区域 */}
       {localStorage.getItem("user_access_level") != "special" && <ChartFee />}
 
+      <div className="venue-trend-header flex items-center justify-between mb-5 rounded-2xl border border-slate-200 bg-white px-5 py-4 shadow-sm">
+        <div className="flex items-center gap-3">
+          <div className="venue-trend-accent" />
+          <div>
+            <h2 className="text-xl font-semibold text-gray-900">运行趋势分析</h2>
+            <p className="text-sm text-slate-500 mt-1">从日维度与周维度观察场地运行稳定性与影响因素</p>
+          </div>
+          {curveMode === "week" ? <Tag color="processing">周维度预览</Tag> : null}
+        </div>
+        <Segmented
+          className="venue-trend-segmented"
+          value={curveMode}
+          onChange={(value) => setCurveMode(value as "day" | "week")}
+          options={[
+            { label: "日", value: "day" },
+            { label: "周", value: "week" },
+          ]}
+        />
+      </div>
+
       <div className="grid grid-cols-2 gap-4 mb-8">
-        <div className="bg-white p-4 rounded-lg shadow-sm">
-          <ChartSuanli></ChartSuanli>
+        <div className="venue-trend-card venue-trend-card-blue bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
+          <ChartSuanli mode={curveMode} weeklyData={weeklyEffectiveRateData}></ChartSuanli>
         </div>
 
-        <div className="bg-white p-4 rounded-lg shadow-sm">
-          <ChartFail></ChartFail>
+        <div className="venue-trend-card venue-trend-card-red bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
+          <ChartFail mode={curveMode} weeklyData={weeklyFailureRateData}></ChartFail>
         </div>
 
-        <div className="bg-white p-4 rounded-lg shadow-sm">
-          <ChartHighTemperatureImpact></ChartHighTemperatureImpact>
+        <div className="venue-trend-card venue-trend-card-orange bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
+          <ChartHighTemperatureImpact
+            mode={curveMode}
+            weeklyData={weeklyHighTemperatureData}
+          ></ChartHighTemperatureImpact>
         </div>
 
-        <div className="bg-white p-4 rounded-lg shadow-sm">
-          <ChartLimitImpact></ChartLimitImpact>
+        <div className="venue-trend-card venue-trend-card-violet bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
+          <ChartLimitImpact mode={curveMode} weeklyData={weeklyLimitImpactData}></ChartLimitImpact>
         </div>
       </div>
 
       {/* 数据表格 */}
-      <BusinessReport venueName={basicInfo?.venue_name || ""}></BusinessReport>
+      <BusinessReport venueName={basicInfo?.venue_name || ""} weeklyRows={weeklyRows}></BusinessReport>
     </div>
   );
 };

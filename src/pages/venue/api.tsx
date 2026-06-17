@@ -1,5 +1,9 @@
 import { fetchDelete, fetchGet, fetchPost, fetchPostFile } from "@/helper/fetchHelper.ts";
 import { EventLogParam, VenueInfoParam } from "@/pages/venue/type.tsx";
+import type {
+  RawVenueWeeklyPageResponse,
+  RawVenueWeeklyReportResponse,
+} from "@/pages/venue/venue-detail/components/weeklyMock";
 
 export const fetchMiningPoolRunningData = async (poolType: string) => {
   return await fetchGet(`miningPool/listMiningPoolRunningData/${poolType}`);
@@ -80,6 +84,26 @@ export const getLast30DaysHighTemperatureImpactRate = async (poolType: string, v
 // 获取近30天限电影响曲线图
 export const getLast30DaysLimitImpactRate = async (poolType: string, venueID: number) => {
   return await fetchGet(`/venue/getLast30DaysLimitImpactRate/${poolType}/${venueID}`);
+};
+
+// 获取最近10周场地周报数据（包含4条周曲线 + 周报明细）
+export const getRecent10WeeksWeeklyReport = async (
+  poolType: string,
+  venueID: number,
+): Promise<{ data: RawVenueWeeklyReportResponse }> => {
+  return await fetchGet(`/venue/getRecent10WeeksWeeklyReport/${poolType}/${venueID}`);
+};
+
+export const getWeeklyReportPage = async (
+  poolType: string,
+  venueID: number,
+  page = 1,
+  pageSize = 10,
+): Promise<{ data: RawVenueWeeklyPageResponse }> => {
+  return await fetchGet(`/venue/getWeeklyReportPage/${poolType}/${venueID}`, {
+    page,
+    pageSize,
+  });
 };
 
 ///venue/getAllVEvent

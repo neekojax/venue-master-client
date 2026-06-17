@@ -2,8 +2,10 @@ import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { useParams } from "react-router-dom";
 import { SyncOutlined } from "@ant-design/icons";
-import { Button, Spin, Table, Tag } from "antd";
+import { Button, Segmented, Spin, Table, Tag } from "antd";
 import type { ColumnsType } from "antd/es/table";
+import WeeklyBusinessReport from "./WeeklyBusinessReport";
+import type { WeeklyReportRow } from "./weeklyMock";
 import { useSelector, useSettingsStore } from "@/stores";
 import { getTimeDifference } from "@/utils/date";
 
@@ -56,11 +58,12 @@ interface AbnormalRecord {
 }
 interface BusinessReportProps {
   venueName: string;
+  weeklyRows?: WeeklyReportRow[];
 }
 
-const BusinessReport: React.FC<BusinessReportProps> = ({ venueName }) => {
+const BusinessReport: React.FC<BusinessReportProps> = ({ venueName, weeklyRows = [] }) => {
   const { poolType } = useSettingsStore(useSelector(["poolType"]));
-  const [showDaily, setShowDaily] = useState(true);
+  const [viewMode, setViewMode] = useState<"daily" | "events" | "weekly">("daily");
   const [dailyData, setDailyData] = useState<DailyRecord[]>([]);
   const [abnormalData, setAbnormalData] = useState<AbnormalRecord[]>([]);
   const [loading, setLoading] = useState(false);
@@ -91,7 +94,7 @@ const BusinessReport: React.FC<BusinessReportProps> = ({ venueName }) => {
       key: "power24h",
       width: 145,
       align: "right",
-      render: (value) => value.toFixed(2),
+      render: (value) => <span className="font-semibold text-blue-600">{value.toFixed(2)}</span>,
     },
     {
       title: "24小时有效率",
@@ -99,7 +102,9 @@ const BusinessReport: React.FC<BusinessReportProps> = ({ venueName }) => {
       key: "effectiveRate24h",
       width: 140,
       align: "right",
-      render: (value) => `${value.toFixed(2)}%`,
+      render: (value) => (
+        <Tag color={value >= 95 ? "green" : value >= 90 ? "gold" : "red"}>{value.toFixed(2)}%</Tag>
+      ),
     },
     {
       title: "在架有效率",
@@ -116,7 +121,13 @@ const BusinessReport: React.FC<BusinessReportProps> = ({ venueName }) => {
       dataIndex: "totalFailuresRate",
       key: "totalFailuresRate",
       width: 120,
-      render: (value) => `${value.toFixed(2)}%`,
+      render: (value) => (
+        <span
+          className={`font-medium ${value >= 1 ? "text-rose-600" : value >= 0.5 ? "text-amber-600" : "text-emerald-600"}`}
+        >
+          {value.toFixed(2)}%
+        </span>
+      ),
     },
     {
       title: "24小时故障数",
@@ -124,14 +135,20 @@ const BusinessReport: React.FC<BusinessReportProps> = ({ venueName }) => {
       key: "failures24h",
       width: 138,
       align: "right",
-      render: (value) => value.toLocaleString(),
+      render: (value) => <span className="font-medium text-amber-600">{value.toLocaleString()}</span>,
     },
     {
       title: "24小时故障率",
       dataIndex: "failureRate24h",
       key: "failureRate24h",
       width: 138,
-      render: (value) => `${value.toFixed(2)}%`,
+      render: (value) => (
+        <span
+          className={`font-medium ${value >= 1 ? "text-rose-600" : value >= 0.5 ? "text-amber-600" : "text-emerald-600"}`}
+        >
+          {value.toFixed(2)}%
+        </span>
+      ),
     },
     {
       title: "影响占比",
@@ -146,7 +163,7 @@ const BusinessReport: React.FC<BusinessReportProps> = ({ venueName }) => {
       key: "limitImpactRate",
       width: 140,
       align: "right",
-      render: (value) => `${value.toFixed(2)}%`,
+      render: (value) => <span className="font-medium text-violet-600">{value.toFixed(2)}%</span>,
     },
     {
       title: "高温影响",
@@ -154,7 +171,7 @@ const BusinessReport: React.FC<BusinessReportProps> = ({ venueName }) => {
       key: "highTemperatureRate",
       width: 140,
       align: "right",
-      render: (value) => `${value.toFixed(2)}%`,
+      render: (value) => <span className="font-medium text-orange-600">{value.toFixed(2)}%</span>,
     },
   ];
 
@@ -181,7 +198,7 @@ const BusinessReport: React.FC<BusinessReportProps> = ({ venueName }) => {
       key: "power24h",
       width: 145,
       align: "right",
-      render: (value) => value.toFixed(2).toLocaleString(),
+      render: (value) => <span className="font-semibold text-blue-600">{value.toFixed(2)}</span>,
     },
     {
       title: "24小时有效率",
@@ -189,7 +206,9 @@ const BusinessReport: React.FC<BusinessReportProps> = ({ venueName }) => {
       key: "effectiveRate24h",
       width: 140,
       align: "right",
-      render: (value) => `${value.toFixed(2)}%`,
+      render: (value) => (
+        <Tag color={value >= 95 ? "green" : value >= 90 ? "gold" : "red"}>{value.toFixed(2)}%</Tag>
+      ),
     },
     {
       title: "在架有效率",
@@ -218,7 +237,13 @@ const BusinessReport: React.FC<BusinessReportProps> = ({ venueName }) => {
       dataIndex: "totalFailuresRate",
       key: "totalFailuresRate",
       width: 120,
-      render: (value) => `${value.toFixed(2)}%`,
+      render: (value) => (
+        <span
+          className={`font-medium ${value >= 1 ? "text-rose-600" : value >= 0.5 ? "text-amber-600" : "text-emerald-600"}`}
+        >
+          {value.toFixed(2)}%
+        </span>
+      ),
     },
     {
       title: "24小时故障数",
@@ -226,14 +251,20 @@ const BusinessReport: React.FC<BusinessReportProps> = ({ venueName }) => {
       key: "failures24h",
       width: 138,
       align: "right",
-      render: (value) => value.toLocaleString(),
+      render: (value) => <span className="font-medium text-amber-600">{value.toLocaleString()}</span>,
     },
     {
       title: "24小时故障率",
       dataIndex: "failureRate24h",
       key: "failureRate24h",
       width: 138,
-      render: (value) => `${value.toFixed(2)}%`,
+      render: (value) => (
+        <span
+          className={`font-medium ${value >= 1 ? "text-rose-600" : value >= 0.5 ? "text-amber-600" : "text-emerald-600"}`}
+        >
+          {value.toFixed(2)}%
+        </span>
+      ),
     },
     {
       title: "影响占比",
@@ -248,7 +279,7 @@ const BusinessReport: React.FC<BusinessReportProps> = ({ venueName }) => {
       key: "limitImpactRate",
       width: 140,
       align: "right",
-      render: (value) => `${value.toFixed(2)}%`,
+      render: (value) => <span className="font-medium text-violet-600">{value.toFixed(2)}%</span>,
     },
     {
       title: "高温影响",
@@ -256,7 +287,7 @@ const BusinessReport: React.FC<BusinessReportProps> = ({ venueName }) => {
       key: "highTemperatureRate",
       width: 140,
       align: "right",
-      render: (value) => `${value.toFixed(2)}%`,
+      render: (value) => <span className="font-medium text-orange-600">{value.toFixed(2)}%</span>,
     },
   ];
 
@@ -320,9 +351,14 @@ const BusinessReport: React.FC<BusinessReportProps> = ({ venueName }) => {
       dataIndex: "impact_count",
       key: "impact_count",
       width: 105,
-      render: (value) => value.toLocaleString(),
+      render: (value) => <span className="font-medium text-amber-600">{value.toLocaleString()}</span>,
     },
-    { title: "影响算力", dataIndex: "impact_power_loss", key: "impact_power_loss" },
+    {
+      title: "影响算力",
+      dataIndex: "impact_power_loss",
+      key: "impact_power_loss",
+      render: (value) => <span className="font-semibold text-blue-600">{value}</span>,
+    },
     { title: "事件原因", dataIndex: "event_reason", key: "event_reason" },
   ];
 
@@ -374,28 +410,36 @@ const BusinessReport: React.FC<BusinessReportProps> = ({ venueName }) => {
   return (
     <div className="bg-white rounded-lg shadow-sm p-6">
       <div className="flex justify-between items-center mb-4">
-        <div className="flex gap-2">
-          <Button type={showDaily ? "primary" : "default"} onClick={() => setShowDaily(true)}>
-            经营日报
-          </Button>
-          <Button type={!showDaily ? "primary" : "default"} onClick={() => setShowDaily(false)}>
-            异常事件
-          </Button>
+        <div className="rounded-2xl bg-slate-50 p-1.5 shadow-inner">
+          <Segmented
+            value={viewMode}
+            onChange={(value) => setViewMode(value as "daily" | "events" | "weekly")}
+            className="venue-detail-segmented"
+            options={[
+              { label: "经营日报", value: "daily" },
+              { label: "异常事件", value: "events" },
+              { label: "运营周报", value: "weekly" },
+            ]}
+          />
         </div>
 
-        {showDaily ? (
+        {viewMode === "daily" ? (
           <Link to={`/report/daily-list/${venueId}/${venueName}`}>
             <Button type="primary">查看更多日报</Button>
           </Link>
-        ) : (
+        ) : viewMode === "events" ? (
           <Link to={`/venue/event-log-list/${venueId}/${venueName}`}>
             <Button type="primary">查看更多事件</Button>
+          </Link>
+        ) : (
+          <Link to={`/venue/weekly-report/${venueId}`}>
+            <Button type="primary">查看更多周报</Button>
           </Link>
         )}
       </div>
 
       <Spin spinning={loading}>
-        {showDaily ? (
+        {viewMode === "daily" ? (
           <Table<DailyRecord>
             columns={dailyColumns}
             dataSource={dailyData}
@@ -420,13 +464,15 @@ const BusinessReport: React.FC<BusinessReportProps> = ({ venueName }) => {
               rowExpandable: (record) => (record.subAccountStats?.length ?? 0) > 1,
             }}
           />
-        ) : (
+        ) : viewMode === "events" ? (
           <Table<AbnormalRecord>
             columns={abnormalColumns}
             dataSource={abnormalData}
             pagination={false}
             rowKey="key"
           />
+        ) : (
+          <WeeklyBusinessReport data={weeklyRows} />
         )}
       </Spin>
     </div>

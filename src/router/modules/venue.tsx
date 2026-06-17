@@ -149,5 +149,24 @@ export const venueRoute: RouteObject = {
         ),
       },
     },
+    {
+      path: "/venue/weekly-report/:venueId",
+      lazy: async () => ({
+        Component: (await import("@/pages/venue/venue-weekly-report")).default,
+      }),
+      HydrateFallback: ProgressBar,
+      handle: {
+        title: "场地运营周报",
+        crumb: (params: { venueId?: string }) => (
+          <Link
+            to={
+              params?.venueId ? ROUTE_PATHS.venueWeeklyReportDetail(params.venueId) : "/venue/weekly-report/0"
+            }
+          >
+            场地运营周报
+          </Link>
+        ),
+      },
+    },
   ],
 };
