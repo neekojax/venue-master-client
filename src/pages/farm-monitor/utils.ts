@@ -42,9 +42,9 @@ export function mapLatestTaskToKpiSummary(
     theoreticalOffline,
     lowHashrate: task.fault_total ?? null,
     zeroHashrate: task.zero_hashrate_total ?? null,
-    networkEvents: null,
-    powerLimitEvents: null,
-    highTempEvents: null,
+    networkEvents: task.event_impact?.network_impact_count ?? null,
+    powerLimitEvents: task.event_impact?.limit_impact_count ?? null,
+    highTempEvents: task.event_impact?.high_temperature_impact_count ?? null,
   };
 }
 

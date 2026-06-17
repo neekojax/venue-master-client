@@ -100,6 +100,12 @@ export interface LatestFinishedProbeTask {
   site_code?: string;
   agent_count?: number;
   agents?: ProbeTaskAgentDetail[];
+  event_impact?: {
+    high_temperature_impact_count?: number;
+    limit_impact_count?: number;
+    network_impact_count?: number;
+    reference_time?: string;
+  };
   present_agent_count?: number;
   finished_at?: string;
   updated_at?: string;
