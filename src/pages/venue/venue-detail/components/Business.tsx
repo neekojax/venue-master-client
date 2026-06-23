@@ -416,9 +416,9 @@ const BusinessReport: React.FC<BusinessReportProps> = ({ venueName, weeklyRows =
             onChange={(value) => setViewMode(value as "daily" | "events" | "weekly")}
             className="venue-detail-segmented"
             options={[
-              { label: "经营日报", value: "daily" },
-              { label: "异常事件", value: "events" },
+              { label: "运营日报", value: "daily" },
               { label: "运营周报", value: "weekly" },
+              { label: "异常事件", value: "events" },
             ]}
           />
         </div>
