@@ -73,6 +73,18 @@ function renderHashrateCell(value?: number | null, fractionDigits = 2) {
   );
 }
 
+function renderPowerCell(value?: number | string | null) {
+  if (value == null || value === "" || Number.isNaN(Number(value))) {
+    return <span className="text-gray-400">-</span>;
+  }
+  return (
+    <span>
+      {Number(value)}
+      <span className="text-gray-400"> w</span>
+    </span>
+  );
+}
+
 function parseHashBoards(value: unknown): HashBoardInfo[] {
   const parsed = parseUnknownHashBoards(value);
   if (!Array.isArray(parsed)) return [];
@@ -137,6 +149,7 @@ export const DEFAULT_SNAPSHOT_COLUMN_CONFIGS: SnapshotColumnConfig[] = [
   { key: "mac_address", title: "MAC地址", visible: true, pin: false },
   { key: "control_board_sn", title: "控制板序列号", visible: true, pin: false },
   { key: "full_type", title: "机型", visible: true, pin: false },
+  { key: "power", title: "功耗", visible: true, pin: false },
   { key: "hashrate", title: "算力", visible: true, pin: false },
   { key: "hashrate_30m", title: "30分钟算力", visible: true, pin: false },
   { key: "total_hashrate", title: "平均算力", visible: true, pin: false },
@@ -385,6 +398,13 @@ function buildColumnMap(
       width: 150,
       ellipsis: true,
       render: (v: string | undefined) => renderWorkerTag(v),
+    },
+    power: {
+      title: "功耗",
+      dataIndex: "power",
+      key: "power",
+      width: 110,
+      render: (v: number | string | undefined) => renderPowerCell(v),
     },
     hashrate: {
       title: "算力",

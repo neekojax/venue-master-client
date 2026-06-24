@@ -140,6 +140,7 @@ export interface TaskSnapshotItem {
   control_board_sn?: string;
   error?: string;
   full_type?: string;
+  power?: number | string;
   hashrate?: number;
   hashrate_5s?: number;
   hashrate_30m?: number;
