@@ -2,10 +2,15 @@
 export interface DailyData {
   Date: string; // 日期
   VenueName: string; // 场馆名称
+  IsOverclocked?: number;
+  isOverclocked?: number;
+  is_overclocked?: number;
   TheoreticalPower: number; // 理论算力
+  OverclockTheoreticalPower?: number; // 超频后理论算力
   HostedMachine: number; // 托管机器数量
   Power24h: number; // 24小时算力
   HashEffectiveRate: number; // 算力有效率（%）
+  OverclockHashEffectiveRate?: number; // 超频后24H有效率（%）
   HighTemperatureImpactPower: number; // 高温影响算力
   HighTemperatureImpactRate: number; // 高温影响率（%）
   LimitImpactPower: number; // 限电影响算力
@@ -32,9 +37,14 @@ export interface DataItem {
   venue_id: number; // 场馆 ID
   venue_name: string; // 场馆名称
   collection: number; // 是否收藏
+  IsOverclocked?: number;
+  isOverclocked?: number;
+  is_overclocked?: number;
   average_thermal_power: number; // 平均理论算力
+  average_overclock_theoretical_power?: number; // 平均超频后理论算力
   average_power_24h: number; // 平均24小时算力
   average_hash_effective_rate: number; // 平均算力有效率（%）
+  average_overclock_hash_effective_rate?: number; // 平均超频后24H有效率（%）
   average_failure_rate: number; // 平均故障率（%）
   average_high_temperature_impact_rate: number; // 平均高温影响率（%）
   average_limit_impact_rate: number; // 平均限电影响率（%）

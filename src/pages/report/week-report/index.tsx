@@ -23,6 +23,8 @@ const { WeekPicker } = DatePicker;
 
 interface StatisticData {
   TotalHashEffectiveRate: number;
+  TotalOverclockTheoreticalPower?: number;
+  TotalOverclockHashEffectiveRate?: number;
   TotalFailureRate: number;
   TotalHighTemperatureImpactRate: number;
   TotalLimitImpactRate: number;

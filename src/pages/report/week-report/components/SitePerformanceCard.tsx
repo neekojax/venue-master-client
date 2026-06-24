@@ -18,6 +18,54 @@ interface SitePerformanceCardProps {
   // onFilterBottom?: () => void;
 }
 
+const OVERCLOCK_TEXT_COLOR = "#1677ff";
+
+function renderOverclockMetric(
+  primary: number,
+  secondary: number,
+  isOverclocked: number,
+  digits: number,
+  suffix = "",
+) {
+  return (
+    <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: "8px" }}>
+      <div
+        style={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          backgroundColor: "#f6f6f6",
+          padding: "2px 10px",
+          borderRadius: "8px",
+          minWidth: "96px",
+          fontWeight: "bold",
+          fontSize: "12px",
+        }}
+      >
+        {Number(primary ?? 0).toFixed(digits)}
+        {suffix}
+      </div>
+      {isOverclocked === 1 ? (
+        <div
+          style={{
+            border: `1px solid ${OVERCLOCK_TEXT_COLOR}`,
+            color: OVERCLOCK_TEXT_COLOR,
+            backgroundColor: "#f0f8ff",
+            padding: "1px 10px",
+            borderRadius: "999px",
+            fontSize: "12px",
+            fontWeight: "bold",
+            whiteSpace: "nowrap",
+          }}
+        >
+          {Number(secondary ?? 0).toFixed(digits)}
+          {suffix}
+        </div>
+      ) : null}
+    </div>
+  );
+}
+
 const SitePerformanceCard: React.FC<SitePerformanceCardProps> = ({
   title = "场地算力表现",
   columns,
@@ -44,6 +92,18 @@ const SitePerformanceCard: React.FC<SitePerformanceCardProps> = ({
     () => columns.map((c: any) => String(c.key)).filter((k) => k !== "venue_name"),
     [columns],
   );
+
+  const getColumnLabel = (column: any) => {
+    if (typeof column.title === "string") return column.title;
+    switch (String(column.key)) {
+      case "average_thermal_power":
+        return "理论算力 (PH/s) / 超频";
+      case "average_hash_effective_rate":
+        return "算力有效率 / 超频";
+      default:
+        return String(column.key);
+    }
+  };
   // const columnOptions = useMemo(
   //   () =>
   //     columns
@@ -84,7 +144,7 @@ const SitePerformanceCard: React.FC<SitePerformanceCardProps> = ({
         .filter((c: any) => c.key !== "venue_name")
         .map((c: any) => ({
           key: String(c.key),
-          label: typeof c.title === "string" ? c.title : String(c.title),
+          label: getColumnLabel(c),
         })),
     [columns],
   );
@@ -314,12 +374,28 @@ const SitePerformanceCard: React.FC<SitePerformanceCardProps> = ({
                 width: 120,
               },
               {
-                title: "理论算力 (PH/s)",
+                title: (
+                  <span>
+                    理论算力 (PH/s)
+                    <span style={{ marginLeft: 4 }}>/ 超频</span>
+                  </span>
+                ),
                 dataIndex: "TheoreticalPower",
                 key: "TheoreticalPower",
                 align: "center",
-                width: 150,
-                render: (value: number) => value?.toFixed(3),
+                width: 220,
+                render: (_value: number, dailyRecord: DailyData) =>
+                  renderOverclockMetric(
+                    dailyRecord.TheoreticalPower,
+                    Number(dailyRecord.OverclockTheoreticalPower ?? 0),
+                    Number(
+                      dailyRecord.IsOverclocked ??
+                        dailyRecord.isOverclocked ??
+                        dailyRecord.is_overclocked ??
+                        0,
+                    ),
+                    3,
+                  ),
               },
               {
                 title: "实际算力 (PH/s)",
@@ -338,19 +414,35 @@ const SitePerformanceCard: React.FC<SitePerformanceCardProps> = ({
                 render: (value: number) => value?.toFixed(4),
               },
               {
-                title: "算力有效率",
+                title: (
+                  <span>
+                    算力有效率
+                    <span style={{ marginLeft: 4 }}>/ 超频</span>
+                  </span>
+                ),
                 dataIndex: "HashEffectiveRate",
                 key: "HashEffectiveRate",
                 align: "center",
-                width: 220,
+                width: 280,
                 sorter: (a, b) => a.HashEffectiveRate - b.HashEffectiveRate,
-                render: (value: number) => (
+                render: (value: number, dailyRecord: DailyData) => (
                   <div className="flex items-center gap-2">
                     <div className="flex-1 bg-gray-200 rounded-full h-2">
                       <div className="bg-green-500 h-2 rounded-full" style={{ width: `${value}%` }} />
                     </div>
-                    <span style={{ width: "80px", color: value >= 90 ? "green" : "red", fontSize: "12px" }}>
-                      {value}%
+                    <span style={{ minWidth: "130px", fontSize: "12px" }}>
+                      {renderOverclockMetric(
+                        value,
+                        Number(dailyRecord.OverclockHashEffectiveRate ?? 0),
+                        Number(
+                          dailyRecord.IsOverclocked ??
+                            dailyRecord.isOverclocked ??
+                            dailyRecord.is_overclocked ??
+                            0,
+                        ),
+                        2,
+                        "%",
+                      )}
                     </span>
                   </div>
                 ),

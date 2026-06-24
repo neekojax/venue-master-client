@@ -58,6 +58,8 @@ const emptyData = {
   hosted_machine: 0,
   // pool_category: "",
   theoretical_hashrate: 0,
+  is_overclocked: 0,
+  overclock_hashrate_per_machine: null,
   // energy_ratio: 0,
   // basic_hosting_fee: 0,
   master_link: "",
@@ -171,6 +173,8 @@ export default function MiningSettingPage() {
     hosted_machine: number;
     pool_category?: string;
     theoretical_hashrate?: number;
+    is_overclocked?: number;
+    overclock_hashrate_per_machine?: number | null;
     // energy_ratio?: number;
     // basic_hosting_fee?: number;
     heat_diss_mode?: number;
@@ -250,6 +254,8 @@ export default function MiningSettingPage() {
             status: any;
             pool_category: any;
             theoretical_hashrate: any;
+            is_overclocked: any;
+            overclock_hashrate_per_machine: any;
             // energy_ratio: any;
             // basic_hosting_fee: any;
             heat_diss_mode: any;
@@ -271,6 +277,8 @@ export default function MiningSettingPage() {
           status: item.status,
           pool_category: item.pool_category,
           theoretical_hashrate: item.theoretical_hashrate,
+          is_overclocked: item.is_overclocked,
+          overclock_hashrate_per_machine: item.overclock_hashrate_per_machine,
           // energy_ratio: item.energy_ratio,
           // basic_hosting_fee: item.basic_hosting_fee,
           heat_diss_mode: item.heat_diss_mode,
@@ -466,6 +474,33 @@ export default function MiningSettingPage() {
         key: "theoretical_hashrate",
         width: 140,
       },
+      {
+        title: "是否超频",
+        dataIndex: "is_overclocked",
+        key: "is_overclocked",
+        width: 100,
+        render: (value: number | null | undefined) => {
+          if (value === 1) {
+            return <Tag color="processing">是</Tag>;
+          }
+          if (value === 0) {
+            return <Tag color="default">否</Tag>;
+          }
+          return <span>-</span>;
+        },
+      },
+      {
+        title: "超频单机算力",
+        dataIndex: "overclock_hashrate_per_machine",
+        key: "overclock_hashrate_per_machine",
+        width: 140,
+        render: (value: number | null | undefined) => {
+          if (value == null) {
+            return <span>-</span>;
+          }
+          return value;
+        },
+      },
       // {
       //   title: "理论算力(PH/s)",
       //   dataIndex: "theoretical_hashrate",
@@ -599,8 +634,17 @@ export default function MiningSettingPage() {
   }
 
   const handleNewMiningPool = async (values: MiningPool) => {
+    const payload: MiningPool = {
+      ...values,
+      theoretical_hashrate: String(values.theoretical_hashrate),
+      is_overclocked: values.is_overclocked ?? 0,
+      overclock_hashrate_per_machine:
+        values.is_overclocked === 1 && values.overclock_hashrate_per_machine != null
+          ? Number(values.overclock_hashrate_per_machine)
+          : null,
+    };
     setIsLoadingNewPool(true); // 开始加载
-    newMutation.mutate(values, {
+    newMutation.mutate(payload, {
       onSuccess: () => {
         message.success("添加成功");
         setIsLoadingNewPool(false); // 请求成功，停止加载
@@ -636,6 +680,11 @@ export default function MiningSettingPage() {
       status: data.status,
       pool_category: data.pool_category,
       theoretical_hashrate: String(data.theoretical_hashrate),
+      is_overclocked: data.is_overclocked ?? 0,
+      overclock_hashrate_per_machine:
+        data.is_overclocked === 1 && data.overclock_hashrate_per_machine != null
+          ? Number(data.overclock_hashrate_per_machine)
+          : null,
       // energy_ratio: String(data.energy_ratio),
       // basic_hosting_fee: String(data.basic_hosting_fee),
       heat_diss_mode: Number(data.heat_diss_mode),
@@ -1021,6 +1070,38 @@ export default function MiningSettingPage() {
                 step="0.01"
                 stringMode
               />
+            </Form.Item>
+
+            <Form.Item<FieldType>
+              label="是否超频"
+              name="is_overclocked"
+              rules={[{ required: true, message: "请选择是否超频!" }]}
+            >
+              <Radio.Group
+                options={[
+                  { value: 0, label: "否" },
+                  { value: 1, label: "是" },
+                ]}
+                onChange={(e) => {
+                  if (e.target.value !== 1) {
+                    form.setFieldValue("overclock_hashrate_per_machine", null);
+                  }
+                }}
+              />
+            </Form.Item>
+
+            <Form.Item noStyle shouldUpdate={(prev, curr) => prev.is_overclocked !== curr.is_overclocked}>
+              {({ getFieldValue }) =>
+                getFieldValue("is_overclocked") === 1 ? (
+                  <Form.Item<FieldType>
+                    label="超频单机算力"
+                    name="overclock_hashrate_per_machine"
+                    rules={[{ required: true, message: "Please input your overclock hashrate!" }]}
+                  >
+                    <InputNumber style={{ width: 200 }} min={0} max={100000} step="0.01" />
+                  </Form.Item>
+                ) : null
+              }
             </Form.Item>
 
             {/* <Form.Item<FieldType>

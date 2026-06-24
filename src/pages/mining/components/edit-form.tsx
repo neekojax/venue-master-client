@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import { Form, type FormInstance, Input, Select } from "antd";
+import { Form, type FormInstance, Input, InputNumber, Radio, Select } from "antd";
 import type { MiningPool } from "../type.tsx";
 import { useSelector, useSettingsStore } from "@/stores";
 
@@ -59,6 +59,7 @@ const formFields = [
 
 export default function EditForm({ initialValues, onFormInstanceReady }: EditFormProps) {
   const [form] = Form.useForm();
+  const isOverclocked = Form.useWatch("is_overclocked", form);
   const showNDPoolType = useSettingsStore((state) => state.poolType);
   useEffect(() => {
     form.setFieldsValue({ pool_type: showNDPoolType });
@@ -129,6 +130,34 @@ export default function EditForm({ initialValues, onFormInstanceReady }: EditFor
           )}
         </Form.Item>
       ))}
+
+      <Form.Item
+        label="是否超频"
+        name="is_overclocked"
+        rules={[{ required: true, message: "请选择是否超频" }]}
+      >
+        <Radio.Group
+          options={[
+            { label: "否", value: 0 },
+            { label: "是", value: 1 },
+          ]}
+          onChange={(e) => {
+            if (e.target.value !== 1) {
+              form.setFieldValue("overclock_hashrate_per_machine", null);
+            }
+          }}
+        />
+      </Form.Item>
+
+      {isOverclocked === 1 ? (
+        <Form.Item
+          label="超频单机算力"
+          name="overclock_hashrate_per_machine"
+          rules={[{ required: true, message: "请输入超频单机算力" }]}
+        >
+          <InputNumber className="w-full" min={0} step={0.01} placeholder="请输入超频单机算力" />
+        </Form.Item>
+      ) : null}
     </Form>
   );
 }

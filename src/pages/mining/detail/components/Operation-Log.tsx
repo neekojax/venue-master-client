@@ -1,6 +1,6 @@
 import React, { useMemo, useState } from "react";
 import { useParams } from "react-router-dom";
-import { Button, DatePicker, Form, Input, message, Modal, Popconfirm, Table } from "antd";
+import { Button, DatePicker, Form, InputNumber, message, Modal, Popconfirm, Radio, Table } from "antd";
 import type { ColumnsType } from "antd/es/table";
 import dayjs from "dayjs";
 
@@ -20,7 +20,23 @@ type PoolRecord = {
   end_time: string;
   theoretical_hashrate: number;
   hosted_machine: number;
+  is_cloud_power?: number;
+  leased_power?: number;
+  is_overclocked?: number;
+  overclock_hashrate_per_machine?: number;
 };
+
+const CLOUD_POWER_OPTIONS = [
+  { label: "否", value: 0 },
+  { label: "云算力", value: 1 },
+  { label: "整条租赁", value: 2 },
+  { label: "含租赁算力", value: 3 },
+];
+
+const OVERCLOCK_OPTIONS = [
+  { label: "否", value: 0 },
+  { label: "是", value: 1 },
+];
 
 const OperationLog: React.FC = () => {
   const params = useParams<{ venueId: string; poolId: string }>();
@@ -35,6 +51,8 @@ const OperationLog: React.FC = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingRecord, setEditingRecord] = useState<PoolRecord | null>(null);
   const [form] = Form.useForm<PoolRecordCreate | PoolRecordUpdate>();
+  const isCloudPower = Form.useWatch("is_cloud_power", form);
+  const isOverclocked = Form.useWatch("is_overclocked", form);
 
   const records: PoolRecord[] = useMemo(() => (data?.data ?? []) as PoolRecord[], [data]);
 
@@ -42,7 +60,14 @@ const OperationLog: React.FC = () => {
     setEditingRecord(null);
     setIsModalOpen(true);
     form.resetFields();
-    form.setFieldsValue({ venue_id: Number(venueId), pool_id: Number(poolId) } as any);
+    form.setFieldsValue({
+      venue_id: Number(venueId),
+      pool_id: Number(poolId),
+      is_cloud_power: 0,
+      leased_power: 0,
+      is_overclocked: 0,
+      overclock_hashrate_per_machine: 0,
+    } as any);
   };
 
   const openEdit = (record: PoolRecord) => {
@@ -56,6 +81,10 @@ const OperationLog: React.FC = () => {
       end_time: dayjs(record.end_time),
       theoretical_hashrate: record.theoretical_hashrate,
       hosted_machine: record.hosted_machine,
+      is_cloud_power: record.is_cloud_power ?? 0,
+      leased_power: record.leased_power ?? 0,
+      is_overclocked: record.is_overclocked ?? 0,
+      overclock_hashrate_per_machine: record.overclock_hashrate_per_machine ?? 0,
     } as any);
   };
 
@@ -67,6 +96,10 @@ const OperationLog: React.FC = () => {
       pool_id: Number(poolId),
       hosted_machine: Number(values.hosted_machine),
       theoretical_hashrate: Number(values.theoretical_hashrate),
+      is_cloud_power: Number(values.is_cloud_power ?? 0),
+      leased_power: Number(values.leased_power ?? 0),
+      is_overclocked: Number(values.is_overclocked ?? 0),
+      overclock_hashrate_per_machine: Number(values.overclock_hashrate_per_machine ?? 0),
       start_time:
         typeof values.start_time === "string"
           ? values.start_time
@@ -108,6 +141,33 @@ const OperationLog: React.FC = () => {
     { title: "结束时间", dataIndex: "end_time", key: "end_time" },
     { title: "理论算力", dataIndex: "theoretical_hashrate", key: "theoretical_hashrate" },
     { title: "托管机器", dataIndex: "hosted_machine", key: "hosted_machine", align: "right" },
+    {
+      title: "是否云算力区间",
+      dataIndex: "is_cloud_power",
+      key: "is_cloud_power",
+      render: (value: number | undefined) =>
+        CLOUD_POWER_OPTIONS.find((item) => item.value === value)?.label ?? "否",
+    },
+    {
+      title: "租赁算力(P)",
+      dataIndex: "leased_power",
+      key: "leased_power",
+      align: "right",
+      render: (value: number | undefined) => value ?? 0,
+    },
+    {
+      title: "是否超频",
+      dataIndex: "is_overclocked",
+      key: "is_overclocked",
+      render: (value: number | undefined) => (Number(value ?? 0) === 1 ? "是" : "否"),
+    },
+    {
+      title: "超频后单机算力(T)",
+      dataIndex: "overclock_hashrate_per_machine",
+      key: "overclock_hashrate_per_machine",
+      align: "right",
+      render: (value: number | undefined) => value ?? 0,
+    },
     {
       title: "操作",
       key: "action",
@@ -172,14 +232,58 @@ const OperationLog: React.FC = () => {
             name="theoretical_hashrate"
             rules={[{ required: true, message: "请输入理论算力" }]}
           >
-            <Input type="number" placeholder="请输入理论算力" />
+            <InputNumber className="w-full" min={0} placeholder="请输入理论算力" />
           </Form.Item>
           <Form.Item
             label="托管机器"
             name="hosted_machine"
             rules={[{ required: true, message: "请输入托管机器" }]}
           >
-            <Input type="number" placeholder="请输入托管机器" />
+            <InputNumber className="w-full" min={0} placeholder="请输入托管机器" />
+          </Form.Item>
+          <Form.Item
+            label="是否云算力区间"
+            name="is_cloud_power"
+            rules={[{ required: true, message: "请选择是否云算力区间" }]}
+          >
+            <Radio.Group
+              options={CLOUD_POWER_OPTIONS}
+              onChange={(e) => {
+                if (e.target.value !== 3) {
+                  form.setFieldValue("leased_power", 0);
+                }
+              }}
+            />
+          </Form.Item>
+          <Form.Item label="租赁算力(P)" name="leased_power">
+            <InputNumber
+              className="w-full"
+              min={0}
+              disabled={Number(isCloudPower ?? 0) !== 3}
+              placeholder="请输入租赁算力"
+            />
+          </Form.Item>
+          <Form.Item
+            label="是否超频"
+            name="is_overclocked"
+            rules={[{ required: true, message: "请选择是否超频" }]}
+          >
+            <Radio.Group
+              options={OVERCLOCK_OPTIONS}
+              onChange={(e) => {
+                if (e.target.value !== 1) {
+                  form.setFieldValue("overclock_hashrate_per_machine", 0);
+                }
+              }}
+            />
+          </Form.Item>
+          <Form.Item label="超频后单机算力(T)" name="overclock_hashrate_per_machine">
+            <InputNumber
+              className="w-full"
+              min={0}
+              disabled={Number(isOverclocked ?? 0) !== 1}
+              placeholder="请输入超频后单机算力"
+            />
           </Form.Item>
         </Form>
       </Modal>

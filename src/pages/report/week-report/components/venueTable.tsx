@@ -95,6 +95,54 @@ interface VenueTableProps {
   onRequestRefresh?: () => void; // 通知主界面刷新数据
 }
 
+const OVERCLOCK_TEXT_COLOR = "#1677ff";
+
+function renderOverclockMetric(
+  primary: number,
+  secondary: number,
+  isOverclocked: number,
+  digits: number,
+  suffix = "",
+) {
+  return (
+    <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: "8px" }}>
+      <div
+        style={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          backgroundColor: "#f6f6f6",
+          padding: "2px 10px",
+          borderRadius: "8px",
+          minWidth: "96px",
+          fontWeight: "bold",
+          fontSize: "12px",
+        }}
+      >
+        {Number(primary ?? 0).toFixed(digits)}
+        {suffix}
+      </div>
+      {isOverclocked === 1 ? (
+        <div
+          style={{
+            border: `1px solid ${OVERCLOCK_TEXT_COLOR}`,
+            color: OVERCLOCK_TEXT_COLOR,
+            backgroundColor: "#f0f8ff",
+            padding: "1px 10px",
+            borderRadius: "999px",
+            fontSize: "12px",
+            fontWeight: "bold",
+            whiteSpace: "nowrap",
+          }}
+        >
+          {Number(secondary ?? 0).toFixed(digits)}
+          {suffix}
+        </div>
+      ) : null}
+    </div>
+  );
+}
+
 const formats = [
   "header",
   "bold",
@@ -277,12 +325,23 @@ const VenuePage: React.FC<VenueTableProps> = ({ data, startDate, endDate, onRequ
       },
     },
     {
-      title: "理论算力 (PH/s)",
+      title: (
+        <span>
+          理论算力 (PH/s)
+          <span style={{ marginLeft: 4 }}>/ 超频</span>
+        </span>
+      ),
       dataIndex: "average_thermal_power",
       key: "average_thermal_power",
       align: "center",
-      width: 150,
-      render: (value: number) => value?.toFixed(3),
+      width: 220,
+      render: (_value: number, record: DataItem) =>
+        renderOverclockMetric(
+          record.average_thermal_power,
+          Number(record.average_overclock_theoretical_power ?? 0),
+          Number(record.IsOverclocked ?? record.isOverclocked ?? record.is_overclocked ?? 0),
+          3,
+        ),
     },
     {
       title: "实际算力 (PH/s)",
@@ -301,13 +360,18 @@ const VenuePage: React.FC<VenueTableProps> = ({ data, startDate, endDate, onRequ
       render: (value: number) => value?.toFixed(4),
     },
     {
-      title: "算力有效率",
+      title: (
+        <span>
+          算力有效率
+          <span style={{ marginLeft: 4 }}>/ 超频</span>
+        </span>
+      ),
       dataIndex: "average_hash_effective_rate",
       key: "average_hash_effective_rate",
       align: "center",
-      width: 250,
+      width: 300,
       sorter: (a, b) => a.average_hash_effective_rate - b.average_hash_effective_rate,
-      render: (value: number, record: { hash_effective_diff_rate?: number }) => {
+      render: (value: number, record: DataItem & { hash_effective_diff_rate?: number }) => {
         const diff = record?.hash_effective_diff_rate ?? 0;
         const isIncrease = diff > 0;
         const barColor = isIncrease ? "bg-green-500" : diff < 0 ? "bg-red-500" : "bg-gray-400";
@@ -321,7 +385,15 @@ const VenuePage: React.FC<VenueTableProps> = ({ data, startDate, endDate, onRequ
                 style={{ width: `${Math.min(value, 100)}%` }}
               ></div>
             </div>
-            <span>{value}%</span>
+            <span>
+              {renderOverclockMetric(
+                value,
+                Number(record.average_overclock_hash_effective_rate ?? 0),
+                Number(record.IsOverclocked ?? record.isOverclocked ?? record.is_overclocked ?? 0),
+                2,
+                "%",
+              )}
+            </span>
             <span className={`${indicatorColor} text-xs ml-1`}>
               {arrow}
               {Math.abs(diff).toFixed(2)}%

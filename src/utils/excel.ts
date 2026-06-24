@@ -410,6 +410,8 @@ export const exportMiningPoolListToExcel = (data: any) => {
     },
 
     { header: "理论算力（PH/s）", key: "theoretical_hashrate" },
+    { header: "是否超频", key: "is_overclocked" },
+    { header: "超频单机算力（T）", key: "overclock_hashrate_per_machine" },
     {
       header: "散热模式",
       key: "heat_diss_mode",
@@ -440,6 +442,8 @@ export const exportMiningPoolListToExcel = (data: any) => {
     hosted_machine: item.hosted_machine,
     status: StatusColumn({ status: item.status }).statusText,
     theoretical_hashrate: item.theoretical_hashrate,
+    is_overclocked: Number(item.is_overclocked ?? 0) === 1 ? "是" : "否",
+    overclock_hashrate_per_machine: item.overclock_hashrate_per_machine ?? 0,
     heat_diss_mode: item.heat_diss_mode === 1 ? "风冷" : item.heat_diss_mode === 2 ? "水冷" : "未知",
     // energy_ratio: item.energy_ratio,
     // basic_hosting_fee: item.basic_hosting_fee,
@@ -463,6 +467,8 @@ export const exportMiningPoolListToExcel = (data: any) => {
     { wch: 20 },
     { wch: 20 },
     { wch: 20 },
+    { wch: 20 },
+    { wch: 14 },
     { wch: 20 },
     { wch: 20 },
     { wch: 20 },

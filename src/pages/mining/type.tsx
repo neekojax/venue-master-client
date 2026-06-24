@@ -6,6 +6,8 @@ export type MiningPool = {
   country: string;
   // pool_category: string;
   theoretical_hashrate: string;
+  is_overclocked?: number | null;
+  overclock_hashrate_per_machine?: number | null;
   // energy_ratio: string;
   // basic_hosting_fee: string;
   master_link: string;
@@ -22,6 +24,8 @@ export type MiningPoolUpdate = {
   status: number;
   pool_category: string;
   theoretical_hashrate: string;
+  is_overclocked?: number | null;
+  overclock_hashrate_per_machine?: number | null;
   // energy_ratio: string;
   // basic_hosting_fee: string;
   heat_diss_mode: number;
@@ -35,6 +39,10 @@ export type PoolRecordCreate = {
   end_time: string;
   theoretical_hashrate: number;
   hosted_machine: number;
+  is_cloud_power?: number;
+  leased_power?: number;
+  is_overclocked?: number;
+  overclock_hashrate_per_machine?: number;
 };
 
 export type PoolRecordUpdate = {
@@ -45,6 +53,10 @@ export type PoolRecordUpdate = {
   end_time: string;
   theoretical_hashrate: number;
   hosted_machine: number;
+  is_cloud_power?: number;
+  leased_power?: number;
+  is_overclocked?: number;
+  overclock_hashrate_per_machine?: number;
 };
 
 export type HostRecordCreate = {

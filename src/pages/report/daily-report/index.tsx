@@ -23,9 +23,12 @@ interface DataType {
   siteId: string;
   siteName: string;
   btcOutput24h: number;
+  isOverclocked: number;
   theoreticalPower: number;
+  overclockTheoreticalPower: number;
   power24h: number;
   effectiveRate24h: number;
+  overclockEffectiveRate24h: number;
   effectiveRateT2: number;
   totalFailuresT1: number;
   totalFailuresT2: number;
@@ -52,6 +55,54 @@ interface DataType {
   pendingRepairT2: number;
   forecastHashEfficiency: number;
   outputEfficiency: number;
+}
+
+const OVERCLOCK_TEXT_COLOR = "#1677ff";
+
+function renderOverclockMetric(
+  primary: number,
+  secondary: number,
+  isOverclocked: number,
+  digits: number,
+  suffix = "",
+) {
+  return (
+    <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: "8px" }}>
+      <div
+        style={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          backgroundColor: "#f6f6f6",
+          padding: "2px 10px",
+          borderRadius: "8px",
+          minWidth: "96px",
+          fontWeight: "bold",
+          fontSize: "12px",
+        }}
+      >
+        {primary.toFixed(digits)}
+        {suffix}
+      </div>
+      {isOverclocked === 1 ? (
+        <div
+          style={{
+            border: `1px solid ${OVERCLOCK_TEXT_COLOR}`,
+            color: OVERCLOCK_TEXT_COLOR,
+            backgroundColor: "#f0f8ff",
+            padding: "1px 10px",
+            borderRadius: "999px",
+            fontSize: "12px",
+            fontWeight: "bold",
+            whiteSpace: "nowrap",
+          }}
+        >
+          {secondary.toFixed(digits)}
+          {suffix}
+        </div>
+      ) : null}
+    </div>
+  );
 }
 // 是否启用T2
 function isUseT2(record: DataType) {
@@ -277,12 +328,23 @@ const App: React.FC = () => {
       sorter: (a, b) => a.outputEfficiency - b.outputEfficiency,
     },
     {
-      title: "理论算力(E)",
+      title: (
+        <span>
+          理论算力(E)
+          <span style={{ marginLeft: 4 }}>/ 超频</span>
+        </span>
+      ),
       dataIndex: "theoreticalPower",
       key: "theoreticalPower",
-      width: 125,
+      width: 210,
       align: "left",
-      render: (value) => value.toFixed(6),
+      render: (_value, record) =>
+        renderOverclockMetric(
+          record.theoreticalPower,
+          record.overclockTheoreticalPower,
+          record.isOverclocked,
+          6,
+        ),
       sorter: (a, b) => a.theoreticalPower - b.theoreticalPower,
     },
     {
@@ -295,12 +357,24 @@ const App: React.FC = () => {
       sorter: (a, b) => a.power24h - b.power24h,
     },
     {
-      title: "24H有效率",
+      title: (
+        <span>
+          24H有效率
+          <span style={{ marginLeft: 4 }}>/ 超频</span>
+        </span>
+      ),
       dataIndex: "effectiveRate24h",
       key: "effectiveRate24h",
-      width: 140,
+      width: 210,
       align: "left",
-      render: (value) => `${value.toFixed(2)}%`,
+      render: (_value, record) =>
+        renderOverclockMetric(
+          record.effectiveRate24h,
+          record.overclockEffectiveRate24h,
+          record.isOverclocked,
+          2,
+          "%",
+        ),
       sorter: (a, b) => a.effectiveRate24h - b.effectiveRate24h,
     },
     {
@@ -636,9 +710,12 @@ const App: React.FC = () => {
               siteId: venue.venue_code,
               siteName: venue.venue_name,
               btcOutput24h: venue.btcOutput24h || 0,
+              isOverclocked: Number(venue.isOverclocked ?? venue.is_overclocked ?? 0),
               theoreticalPower: venue.theoreticalPower || 0,
+              overclockTheoreticalPower: venue.overclockTheoreticalPower || 0,
               power24h: venue.power24h || 0,
               effectiveRate24h: venue.effectiveRate24h || 0, // 转换为小数形式
+              overclockEffectiveRate24h: venue.overclockEffectiveRate24h || 0,
               forecastHashEfficiency: venue.forecastHashEfficiency || 0, // 转换为小数形式
               effectiveRateT2: venue.effectiveRateT2 || 0,
               effectiveRateT3: venue.effectiveRateT3 || 0,
@@ -763,9 +840,9 @@ const App: React.FC = () => {
       场地名: item.siteName,
       "24小时产出（BTC）": item.btcOutput24h.toFixed(8),
       "产出效率(BTC/EH)": item.outputEfficiency.toFixed(4),
-      "理论算力（E）": item.theoreticalPower.toFixed(6),
+      "理论算力/超频（E）": `${item.theoreticalPower.toFixed(6)} / ${(item.isOverclocked === 1 ? item.overclockTheoreticalPower : 0).toFixed(6)}`,
       "24小时算力（E）": item.power24h.toFixed(8),
-      "24小时有效率": item.effectiveRate24h.toFixed(2) + "%",
+      "24小时有效率/超频": `${item.effectiveRate24h.toFixed(2)}% / ${(item.isOverclocked === 1 ? item.overclockEffectiveRate24h : 0).toFixed(2)}%`,
       // "T-2日有效率": item.effectiveRateT2.toFixed(2) + "%",
       // "T-3日有效率": item.effectiveRateT3.toFixed(2) + "%",
       托管台数: item.totalMachines.toLocaleString(),
@@ -832,9 +909,9 @@ const App: React.FC = () => {
       // { wch: 10 }, // 场地编号
       { wch: 30 }, // 场地名
       { wch: 20 }, // 24小时产出（BTC）
-      { wch: 20 }, // 理论算力（E）
+      { wch: 28 }, // 理论算力/超频（E）
       { wch: 20 }, // 24小时算力（E）
-      { wch: 15 }, // 24小时有效率
+      { wch: 22 }, // 24小时有效率/超频
       { wch: 15 }, // T-2日有效率
       { wch: 15 }, // T-3日有效率
       { wch: 15 }, // 托管台数
