@@ -840,9 +840,9 @@ const App: React.FC = () => {
       场地名: item.siteName,
       "24小时产出（BTC）": item.btcOutput24h.toFixed(8),
       "产出效率(BTC/EH)": item.outputEfficiency.toFixed(4),
-      "理论算力/超频（E）": `${item.theoreticalPower.toFixed(6)} / ${(item.isOverclocked === 1 ? item.overclockTheoreticalPower : 0).toFixed(6)}`,
+      "理论算力（E）": item.theoreticalPower.toFixed(6),
       "24小时算力（E）": item.power24h.toFixed(8),
-      "24小时有效率/超频": `${item.effectiveRate24h.toFixed(2)}% / ${(item.isOverclocked === 1 ? item.overclockEffectiveRate24h : 0).toFixed(2)}%`,
+      "24小时有效率": item.effectiveRate24h.toFixed(2) + "%",
       // "T-2日有效率": item.effectiveRateT2.toFixed(2) + "%",
       // "T-3日有效率": item.effectiveRateT3.toFixed(2) + "%",
       托管台数: item.totalMachines.toLocaleString(),
@@ -876,6 +876,8 @@ const App: React.FC = () => {
       限电算力: ((item.theoreticalPower * 1e6 * item.limitImpactRate) / 100).toFixed(2) + "Th/s", //record.theoreticalPower * 1e6 * value / 100
       高温算力: ((item.theoreticalPower * 1e6 * item.highTemperatureRate) / 100).toFixed(2) + "Th/s", //item.highTemperatureRate,
       事件描述: item.events,
+      超频理论算力: (item.isOverclocked === 1 ? item.overclockTheoreticalPower : 0).toFixed(6),
+      超频24小时有效率: (item.isOverclocked === 1 ? item.overclockEffectiveRate24h : 0).toFixed(2) + "%",
     }));
 
     const worksheet = XLSX.utils.json_to_sheet(data);
@@ -909,9 +911,9 @@ const App: React.FC = () => {
       // { wch: 10 }, // 场地编号
       { wch: 30 }, // 场地名
       { wch: 20 }, // 24小时产出（BTC）
-      { wch: 28 }, // 理论算力/超频（E）
+      { wch: 28 }, // 理论算力（E）
       { wch: 20 }, // 24小时算力（E）
-      { wch: 22 }, // 24小时有效率/超频
+      { wch: 22 }, // 24小时有效率
       { wch: 15 }, // T-2日有效率
       { wch: 15 }, // T-3日有效率
       { wch: 15 }, // 托管台数
@@ -929,6 +931,8 @@ const App: React.FC = () => {
       { wch: 15 }, // 高温算力
       { wch: 15 }, // ***遗漏
       { wch: 50 }, // 事件描述
+      { wch: 20 }, // 超频理论算力
+      { wch: 20 }, // 超频24小时有效率
     ];
 
     worksheet["!cols"] = columnWidths;
