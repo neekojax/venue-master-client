@@ -475,7 +475,7 @@ export default function MiningSettingPage() {
         width: 140,
       },
       {
-        title: "是否超频",
+        title: "是否变频",
         dataIndex: "is_overclocked",
         key: "is_overclocked",
         width: 100,
@@ -490,7 +490,7 @@ export default function MiningSettingPage() {
         },
       },
       {
-        title: "超频单机算力",
+        title: "变频单机算力",
         dataIndex: "overclock_hashrate_per_machine",
         key: "overclock_hashrate_per_machine",
         width: 140,
@@ -1073,9 +1073,9 @@ export default function MiningSettingPage() {
             </Form.Item>
 
             <Form.Item<FieldType>
-              label="是否超频"
+              label="是否变频"
               name="is_overclocked"
-              rules={[{ required: true, message: "请选择是否超频!" }]}
+              rules={[{ required: true, message: "请选择是否变频!" }]}
             >
               <Radio.Group
                 options={[
@@ -1094,9 +1094,9 @@ export default function MiningSettingPage() {
               {({ getFieldValue }) =>
                 getFieldValue("is_overclocked") === 1 ? (
                   <Form.Item<FieldType>
-                    label="超频单机算力"
+                    label="变频单机算力"
                     name="overclock_hashrate_per_machine"
-                    rules={[{ required: true, message: "Please input your overclock hashrate!" }]}
+                    rules={[{ required: true, message: "Please input your variable-frequency hashrate!" }]}
                   >
                     <InputNumber style={{ width: 200 }} min={0} max={100000} step="0.01" />
                   </Form.Item>

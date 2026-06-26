@@ -149,7 +149,7 @@ export const DEFAULT_SNAPSHOT_COLUMN_CONFIGS: SnapshotColumnConfig[] = [
   { key: "mac_address", title: "MAC地址", visible: true, pin: false },
   { key: "control_board_sn", title: "控制板序列号", visible: true, pin: false },
   { key: "full_type", title: "机型", visible: true, pin: false },
-  { key: "power", title: "功耗", visible: true, pin: false },
+  { key: "power", title: "功耗比", visible: true, pin: false },
   { key: "hashrate", title: "算力", visible: true, pin: false },
   { key: "hashrate_30m", title: "30分钟算力", visible: true, pin: false },
   { key: "total_hashrate", title: "平均算力", visible: true, pin: false },
@@ -400,7 +400,7 @@ function buildColumnMap(
       render: (v: string | undefined) => renderWorkerTag(v),
     },
     power: {
-      title: "功耗",
+      title: "功耗比",
       dataIndex: "power",
       key: "power",
       width: 110,

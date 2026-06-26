@@ -97,9 +97,9 @@ const SitePerformanceCard: React.FC<SitePerformanceCardProps> = ({
     if (typeof column.title === "string") return column.title;
     switch (String(column.key)) {
       case "average_thermal_power":
-        return "理论算力 (PH/s) / 超频";
+        return "理论算力 (PH/s) / 变频";
       case "average_hash_effective_rate":
-        return "算力有效率 / 超频";
+        return "算力有效率 / 变频";
       default:
         return String(column.key);
     }
@@ -377,7 +377,7 @@ const SitePerformanceCard: React.FC<SitePerformanceCardProps> = ({
                 title: (
                   <span>
                     理论算力 (PH/s)
-                    <span style={{ marginLeft: 4 }}>/ 超频</span>
+                    <span style={{ marginLeft: 4 }}>/ 变频</span>
                   </span>
                 ),
                 dataIndex: "TheoreticalPower",
@@ -417,7 +417,7 @@ const SitePerformanceCard: React.FC<SitePerformanceCardProps> = ({
                 title: (
                   <span>
                     算力有效率
-                    <span style={{ marginLeft: 4 }}>/ 超频</span>
+                    <span style={{ marginLeft: 4 }}>/ 变频</span>
                   </span>
                 ),
                 dataIndex: "HashEffectiveRate",

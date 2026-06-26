@@ -328,7 +328,7 @@ const VenuePage: React.FC<VenueTableProps> = ({ data, startDate, endDate, onRequ
       title: (
         <span>
           理论算力 (PH/s)
-          <span style={{ marginLeft: 4 }}>/ 超频</span>
+          <span style={{ marginLeft: 4 }}>/ 变频</span>
         </span>
       ),
       dataIndex: "average_thermal_power",
@@ -363,7 +363,7 @@ const VenuePage: React.FC<VenueTableProps> = ({ data, startDate, endDate, onRequ
       title: (
         <span>
           算力有效率
-          <span style={{ marginLeft: 4 }}>/ 超频</span>
+          <span style={{ marginLeft: 4 }}>/ 变频</span>
         </span>
       ),
       dataIndex: "average_hash_effective_rate",

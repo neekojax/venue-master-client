@@ -410,8 +410,8 @@ export const exportMiningPoolListToExcel = (data: any) => {
     },
 
     { header: "理论算力（PH/s）", key: "theoretical_hashrate" },
-    { header: "是否超频", key: "is_overclocked" },
-    { header: "超频单机算力（T）", key: "overclock_hashrate_per_machine" },
+    { header: "是否变频", key: "is_overclocked" },
+    { header: "变频单机算力（T）", key: "overclock_hashrate_per_machine" },
     {
       header: "散热模式",
       key: "heat_diss_mode",

@@ -156,13 +156,13 @@ const OperationLog: React.FC = () => {
       render: (value: number | undefined) => value ?? 0,
     },
     {
-      title: "是否超频",
+      title: "是否变频",
       dataIndex: "is_overclocked",
       key: "is_overclocked",
       render: (value: number | undefined) => (Number(value ?? 0) === 1 ? "是" : "否"),
     },
     {
-      title: "超频后单机算力(T)",
+      title: "变频后单机算力(T)",
       dataIndex: "overclock_hashrate_per_machine",
       key: "overclock_hashrate_per_machine",
       align: "right",
@@ -264,9 +264,9 @@ const OperationLog: React.FC = () => {
             />
           </Form.Item>
           <Form.Item
-            label="是否超频"
+            label="是否变频"
             name="is_overclocked"
-            rules={[{ required: true, message: "请选择是否超频" }]}
+            rules={[{ required: true, message: "请选择是否变频" }]}
           >
             <Radio.Group
               options={OVERCLOCK_OPTIONS}
@@ -277,12 +277,12 @@ const OperationLog: React.FC = () => {
               }}
             />
           </Form.Item>
-          <Form.Item label="超频后单机算力(T)" name="overclock_hashrate_per_machine">
+          <Form.Item label="变频后单机算力(T)" name="overclock_hashrate_per_machine">
             <InputNumber
               className="w-full"
               min={0}
               disabled={Number(isOverclocked ?? 0) !== 1}
-              placeholder="请输入超频后单机算力"
+              placeholder="请输入变频后单机算力"
             />
           </Form.Item>
         </Form>

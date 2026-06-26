@@ -132,9 +132,9 @@ export default function EditForm({ initialValues, onFormInstanceReady }: EditFor
       ))}
 
       <Form.Item
-        label="是否超频"
+        label="是否变频"
         name="is_overclocked"
-        rules={[{ required: true, message: "请选择是否超频" }]}
+        rules={[{ required: true, message: "请选择是否变频" }]}
       >
         <Radio.Group
           options={[
@@ -151,11 +151,11 @@ export default function EditForm({ initialValues, onFormInstanceReady }: EditFor
 
       {isOverclocked === 1 ? (
         <Form.Item
-          label="超频单机算力"
+          label="变频单机算力"
           name="overclock_hashrate_per_machine"
-          rules={[{ required: true, message: "请输入超频单机算力" }]}
+          rules={[{ required: true, message: "请输入变频单机算力" }]}
         >
-          <InputNumber className="w-full" min={0} step={0.01} placeholder="请输入超频单机算力" />
+          <InputNumber className="w-full" min={0} step={0.01} placeholder="请输入变频单机算力" />
         </Form.Item>
       ) : null}
     </Form>

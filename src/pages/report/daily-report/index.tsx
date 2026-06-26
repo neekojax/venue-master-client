@@ -331,7 +331,7 @@ const App: React.FC = () => {
       title: (
         <span>
           理论算力(E)
-          <span style={{ marginLeft: 4 }}>/ 超频</span>
+          <span style={{ marginLeft: 4 }}>/ 变频</span>
         </span>
       ),
       dataIndex: "theoreticalPower",
@@ -360,7 +360,7 @@ const App: React.FC = () => {
       title: (
         <span>
           24H有效率
-          <span style={{ marginLeft: 4 }}>/ 超频</span>
+          <span style={{ marginLeft: 4 }}>/ 变频</span>
         </span>
       ),
       dataIndex: "effectiveRate24h",
@@ -876,8 +876,8 @@ const App: React.FC = () => {
       限电算力: ((item.theoreticalPower * 1e6 * item.limitImpactRate) / 100).toFixed(2) + "Th/s", //record.theoreticalPower * 1e6 * value / 100
       高温算力: ((item.theoreticalPower * 1e6 * item.highTemperatureRate) / 100).toFixed(2) + "Th/s", //item.highTemperatureRate,
       事件描述: item.events,
-      超频理论算力: (item.isOverclocked === 1 ? item.overclockTheoreticalPower : 0).toFixed(6),
-      超频24小时有效率: (item.isOverclocked === 1 ? item.overclockEffectiveRate24h : 0).toFixed(2) + "%",
+      变频理论算力: (item.isOverclocked === 1 ? item.overclockTheoreticalPower : 0).toFixed(6),
+      变频24小时有效率: (item.isOverclocked === 1 ? item.overclockEffectiveRate24h : 0).toFixed(2) + "%",
     }));
 
     const worksheet = XLSX.utils.json_to_sheet(data);
@@ -931,8 +931,8 @@ const App: React.FC = () => {
       { wch: 15 }, // 高温算力
       { wch: 15 }, // ***遗漏
       { wch: 50 }, // 事件描述
-      { wch: 20 }, // 超频理论算力
-      { wch: 20 }, // 超频24小时有效率
+      { wch: 20 }, // 变频理论算力
+      { wch: 20 }, // 变频24小时有效率
     ];
 
     worksheet["!cols"] = columnWidths;
