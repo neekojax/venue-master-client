@@ -443,7 +443,10 @@ const BusinessReport: React.FC<BusinessReportProps> = ({
         )}
       </div>
 
-      <Spin spinning={loading || (viewMode === "weekly" && weeklyLoading)} tip="周报加载中...">
+      <Spin
+        spinning={loading || (viewMode === "weekly" && weeklyLoading)}
+        tip={viewMode === "weekly" && weeklyLoading ? "周报加载中..." : "数据加载中..."}
+      >
         {viewMode === "daily" ? (
           <Table<DailyRecord>
             columns={dailyColumns}

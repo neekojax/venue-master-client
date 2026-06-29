@@ -274,7 +274,7 @@ const VenueDetail: React.FC = () => {
         venueName={basicInfo?.venue_name || ""}
         weeklyRows={weeklyRows}
         onRequireWeekly={fetchWeeklyStat}
-        weeklyLoading={curveMode === "week" && weeklyLoading}
+        weeklyLoading={weeklyLoading}
       ></BusinessReport>
     </div>
   );
