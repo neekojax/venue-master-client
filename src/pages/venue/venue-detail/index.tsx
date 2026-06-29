@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { CalendarOutlined, CloudOutlined, EnvironmentOutlined, ThunderboltOutlined } from "@ant-design/icons";
-import { Segmented, Select, Tag } from "antd";
+import { Segmented, Select, Skeleton, Spin, Tag } from "antd";
 import BasicDataChart from "./components/BasicDataChart";
 import BusinessReport from "./components/Business";
 import ChartFail from "./components/ChartFail";
@@ -46,6 +46,7 @@ const VenueDetail: React.FC = () => {
   const params = useParams<{ venueId: string }>();
   const [loading, setLoading] = useState(true);
   const [stats, setStats] = useState<VenueStats | null>(null);
+  const [weeklyLoading, setWeeklyLoading] = useState(false);
   const venueId = params.venueId!;
   const navigate = useNavigate();
   const [basicInfo, setBasicInfo] = useState<VenueData | null>(null);
@@ -92,6 +93,7 @@ const VenueDetail: React.FC = () => {
     // 已加载则跳过，避免重复请求；失败时放开以便重试
     if (weeklyLoadedRef.current) return;
     weeklyLoadedRef.current = true;
+    setWeeklyLoading(true);
     try {
       const response = await getRecent10WeeksWeeklyReport(poolType, Number(venueId));
       setWeeklyReport(normalizeWeeklyReportResponse(response.data));
@@ -99,6 +101,8 @@ const VenueDetail: React.FC = () => {
       console.log("weekly error", error);
       setWeeklyReport(null);
       weeklyLoadedRef.current = false;
+    } finally {
+      setWeeklyLoading(false);
     }
   };
 
@@ -208,9 +212,19 @@ const VenueDetail: React.FC = () => {
           </div>
         </div>
       </header>
-      {stats && <BasicDataChart stats={stats} loading={loading} />}
+      {stats ? (
+        <BasicDataChart stats={stats} loading={loading} />
+      ) : (
+        <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-6 mb-8">
+          <Skeleton active paragraph={{ rows: 5 }} />
+        </div>
+      )}
       {/* 图表区域 */}
-      {localStorage.getItem("user_access_level") != "special" && <ChartFee />}
+      {localStorage.getItem("user_access_level") != "special" && (
+        <Spin spinning={loading}>
+          <ChartFee />
+        </Spin>
+      )}
 
       <div className="venue-trend-header flex items-center justify-between mb-5 rounded-2xl border border-slate-200 bg-white px-5 py-4 shadow-sm">
         <div className="flex items-center gap-3">
@@ -232,32 +246,35 @@ const VenueDetail: React.FC = () => {
         />
       </div>
 
-      <div className="grid grid-cols-2 gap-4 mb-8">
-        <div className="venue-trend-card venue-trend-card-blue bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
-          <ChartSuanli mode={curveMode} weeklyData={weeklyEffectiveRateData}></ChartSuanli>
-        </div>
+      <Spin spinning={curveMode === "week" && weeklyLoading} tip="周报加载中...">
+        <div className="grid grid-cols-2 gap-4 mb-8">
+          <div className="venue-trend-card venue-trend-card-blue bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
+            <ChartSuanli mode={curveMode} weeklyData={weeklyEffectiveRateData}></ChartSuanli>
+          </div>
 
-        <div className="venue-trend-card venue-trend-card-red bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
-          <ChartFail mode={curveMode} weeklyData={weeklyFailureRateData}></ChartFail>
-        </div>
+          <div className="venue-trend-card venue-trend-card-red bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
+            <ChartFail mode={curveMode} weeklyData={weeklyFailureRateData}></ChartFail>
+          </div>
 
-        <div className="venue-trend-card venue-trend-card-orange bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
-          <ChartHighTemperatureImpact
-            mode={curveMode}
-            weeklyData={weeklyHighTemperatureData}
-          ></ChartHighTemperatureImpact>
-        </div>
+          <div className="venue-trend-card venue-trend-card-orange bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
+            <ChartHighTemperatureImpact
+              mode={curveMode}
+              weeklyData={weeklyHighTemperatureData}
+            ></ChartHighTemperatureImpact>
+          </div>
 
-        <div className="venue-trend-card venue-trend-card-violet bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
-          <ChartLimitImpact mode={curveMode} weeklyData={weeklyLimitImpactData}></ChartLimitImpact>
+          <div className="venue-trend-card venue-trend-card-violet bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
+            <ChartLimitImpact mode={curveMode} weeklyData={weeklyLimitImpactData}></ChartLimitImpact>
+          </div>
         </div>
-      </div>
+      </Spin>
 
       {/* 数据表格 */}
       <BusinessReport
         venueName={basicInfo?.venue_name || ""}
         weeklyRows={weeklyRows}
         onRequireWeekly={fetchWeeklyStat}
+        weeklyLoading={curveMode === "week" && weeklyLoading}
       ></BusinessReport>
     </div>
   );

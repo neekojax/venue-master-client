@@ -60,9 +60,15 @@ interface BusinessReportProps {
   venueName: string;
   weeklyRows?: WeeklyReportRow[];
   onRequireWeekly?: () => void;
+  weeklyLoading?: boolean;
 }
 
-const BusinessReport: React.FC<BusinessReportProps> = ({ venueName, weeklyRows = [], onRequireWeekly }) => {
+const BusinessReport: React.FC<BusinessReportProps> = ({
+  venueName,
+  weeklyRows = [],
+  onRequireWeekly,
+  weeklyLoading = false,
+}) => {
   const { poolType } = useSettingsStore(useSelector(["poolType"]));
   const [viewMode, setViewMode] = useState<"daily" | "events" | "weekly">("daily");
   const [dailyData, setDailyData] = useState<DailyRecord[]>([]);
@@ -365,16 +371,10 @@ const BusinessReport: React.FC<BusinessReportProps> = ({ venueName, weeklyRows =
 
   // 获取数据
   const fetch10EventData = async () => {
-    setLoading(true);
     try {
       const response = await getLast10Event(poolType, Number(venueId));
-      // console.log(response);
       setAbnormalData(response.data);
-      setLoading(false);
-      // 处理响应数据
     } catch (error) {
-      // 处理错误
-
       console.log(error);
     }
   };
@@ -383,17 +383,13 @@ const BusinessReport: React.FC<BusinessReportProps> = ({ venueName, weeklyRows =
   const fetch10DailyData = async () => {
     try {
       const response = await getLast10DaysDailyStat(poolType, Number(venueId));
-      // console.log(response)
       // 为每条记录添加key属性
       const processedData = response.data.map((item: DailyRecord, index: number) => ({
         ...item,
         key: item.key || `${item.date}-${index}`,
       }));
       setDailyData(processedData);
-
-      // 处理响应数据
     } catch (error) {
-      // 处理错误
       console.log(error);
     }
   };
@@ -402,9 +398,12 @@ const BusinessReport: React.FC<BusinessReportProps> = ({ venueName, weeklyRows =
   const mockData: DailyRecord[] = [];
 
   useEffect(() => {
-    fetch10EventData();
-    fetch10DailyData();
-    // 临时使用模拟数据进行测试
+    // 日报与异常事件并行拉取，统一用一个 loading 态覆盖两个 tab
+    setLoading(true);
+    Promise.all([fetch10EventData(), fetch10DailyData()]).finally(() => {
+      setLoading(false);
+    });
+    // 先清空，避免切换场地时短暂残留上一场地数据
     setDailyData(mockData);
   }, [venueId]);
 
@@ -444,7 +443,7 @@ const BusinessReport: React.FC<BusinessReportProps> = ({ venueName, weeklyRows =
         )}
       </div>
 
-      <Spin spinning={loading}>
+      <Spin spinning={loading || (viewMode === "weekly" && weeklyLoading)} tip="周报加载中...">
         {viewMode === "daily" ? (
           <Table<DailyRecord>
             columns={dailyColumns}

@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
 import { useParams } from "react-router-dom";
+import { Spin } from "antd";
 import { LineChart } from "echarts/charts";
 import { GridComponent, TitleComponent, TooltipComponent } from "echarts/components";
 import * as echarts from "echarts/core";
@@ -42,13 +43,16 @@ const WaveLineCard: React.FC<{ mode?: "day" | "week"; weeklyData?: WeeklyChartPo
   const chartRef = useRef<echarts.EChartsType | null>(null);
   const [dates, setDates] = useState<string[]>([]);
   const [hashValues, setHashValues] = useState<number[]>([]);
+  const [loading, setLoading] = useState(true);
   // const [dailyData, setDailyData] = useState<string[]>([]);
 
   // 获取数据
   const fetchData = async () => {
+    setLoading(true);
     if (mode === "week") {
       setDates(weeklyData.map((item) => item.date));
       setHashValues(weeklyData.map((item) => item.value));
+      setLoading(false);
       return;
     }
     try {
@@ -60,6 +64,8 @@ const WaveLineCard: React.FC<{ mode?: "day" | "week"; weeklyData?: WeeklyChartPo
     } catch (error) {
       // 处理错误
       console.log(error);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -165,7 +171,9 @@ const WaveLineCard: React.FC<{ mode?: "day" | "week"; weeklyData?: WeeklyChartPo
           <span style={chartRangeBadge("#2563eb")}>{mode === "week" ? "近10周" : "近30日"}</span>
         </div>
       </div>
-      <div ref={domRef} style={{ width: "100%", height: 320 }} />
+      <Spin spinning={loading}>
+        <div ref={domRef} style={{ width: "100%", height: 320 }} />
+      </Spin>
     </>
   );
 };
