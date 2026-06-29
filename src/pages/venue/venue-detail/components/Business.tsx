@@ -59,9 +59,10 @@ interface AbnormalRecord {
 interface BusinessReportProps {
   venueName: string;
   weeklyRows?: WeeklyReportRow[];
+  onRequireWeekly?: () => void;
 }
 
-const BusinessReport: React.FC<BusinessReportProps> = ({ venueName, weeklyRows = [] }) => {
+const BusinessReport: React.FC<BusinessReportProps> = ({ venueName, weeklyRows = [], onRequireWeekly }) => {
   const { poolType } = useSettingsStore(useSelector(["poolType"]));
   const [viewMode, setViewMode] = useState<"daily" | "events" | "weekly">("daily");
   const [dailyData, setDailyData] = useState<DailyRecord[]>([]);
@@ -413,7 +414,12 @@ const BusinessReport: React.FC<BusinessReportProps> = ({ venueName, weeklyRows =
         <div className="rounded-2xl bg-slate-50 p-1.5 shadow-inner">
           <Segmented
             value={viewMode}
-            onChange={(value) => setViewMode(value as "daily" | "events" | "weekly")}
+            onChange={(value) => {
+              const mode = value as "daily" | "events" | "weekly";
+              setViewMode(mode);
+              // 切到「运营周报」时按需拉取周报数据
+              if (mode === "weekly") onRequireWeekly?.();
+            }}
             className="venue-detail-segmented"
             options={[
               { label: "运营日报", value: "daily" },

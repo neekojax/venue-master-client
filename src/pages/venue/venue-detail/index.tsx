@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { CalendarOutlined, CloudOutlined, EnvironmentOutlined, ThunderboltOutlined } from "@ant-design/icons";
 import { Segmented, Select, Tag } from "antd";
@@ -51,6 +51,8 @@ const VenueDetail: React.FC = () => {
   const [basicInfo, setBasicInfo] = useState<VenueData | null>(null);
   const [curveMode, setCurveMode] = useState<"day" | "week">("day");
   const [weeklyReport, setWeeklyReport] = useState<VenueWeeklyReportResponse | null>(null);
+  // 周报数据按需懒加载：进入页面不拉取，切到周视图时才请求
+  const weeklyLoadedRef = useRef(false);
 
   // 获取场地列表数据
   const { data: venueListData } = useVenueList(poolType);
@@ -87,21 +89,34 @@ const VenueDetail: React.FC = () => {
   };
 
   const fetchWeeklyStat = async () => {
+    // 已加载则跳过，避免重复请求；失败时放开以便重试
+    if (weeklyLoadedRef.current) return;
+    weeklyLoadedRef.current = true;
     try {
       const response = await getRecent10WeeksWeeklyReport(poolType, Number(venueId));
       setWeeklyReport(normalizeWeeklyReportResponse(response.data));
     } catch (error) {
       console.log("weekly error", error);
       setWeeklyReport(null);
+      weeklyLoadedRef.current = false;
     }
   };
 
   useEffect(() => {
     setLoading(true);
+    // 切换场地时重置周报懒加载状态，清掉上一场地的陈旧数据
+    weeklyLoadedRef.current = false;
+    setWeeklyReport(null);
     fetchData();
     fetchDailyStat();
-    fetchWeeklyStat();
   }, [venueId]);
+
+  // 切到「运行趋势分析」周维度时按需拉取周报数据
+  useEffect(() => {
+    if (curveMode === "week") {
+      fetchWeeklyStat();
+    }
+  }, [curveMode]);
 
   const yesterday = new Date(Date.now() - 864e5);
   const formattedDate = yesterday.toISOString().split("T")[0];
@@ -239,7 +254,11 @@ const VenueDetail: React.FC = () => {
       </div>
 
       {/* 数据表格 */}
-      <BusinessReport venueName={basicInfo?.venue_name || ""} weeklyRows={weeklyRows}></BusinessReport>
+      <BusinessReport
+        venueName={basicInfo?.venue_name || ""}
+        weeklyRows={weeklyRows}
+        onRequireWeekly={fetchWeeklyStat}
+      ></BusinessReport>
     </div>
   );
 };
