@@ -32,6 +32,7 @@ export const ROUTE_PATHS = {
 
   farmMonitor: "/mining/farm-monitor",
   faultMonitor: "/mining/fault-monitor",
+  abnormalAnalysis: "/mining/abnormal-analysis",
 
   venue: "/venue",
   miningSiteData: "/venue/running-kpi",

@@ -47,6 +47,17 @@ export const miningRoute: RouteObject = {
       },
     },
     {
+      path: ROUTE_PATHS.abnormalAnalysis,
+      lazy: async () => ({
+        Component: (await import("@/pages/abnormal-analysis")).default,
+      }),
+      HydrateFallback: ProgressBar,
+      handle: {
+        title: "异常数分析",
+        crumb: () => <Link to={ROUTE_PATHS.abnormalAnalysis}>异常数分析</Link>,
+      },
+    },
+    {
       path: ROUTE_PATHS.miningSetting,
       lazy: async () => ({
         Component: (await import("@/pages/mining/setting")).default,
