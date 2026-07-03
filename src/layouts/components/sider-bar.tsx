@@ -77,6 +77,10 @@ const SiderItems = (permissionIds: string, permissionRoutes: string, selectedKey
           label: <Link to={ROUTE_PATHS.faultMonitor}>故障机监控</Link>,
         },
         {
+          key: ROUTE_PATHS.abnormalAnalysis,
+          label: <Link to={ROUTE_PATHS.abnormalAnalysis}>异常数分析</Link>,
+        },
+        {
           key: ROUTE_PATHS.miningSetting,
           hidden: hasPermission(ROUTE_PATHS.miningSetting),
           label: <Link to={ROUTE_PATHS.miningSetting}>账户列表</Link>,
