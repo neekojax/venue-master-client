@@ -78,6 +78,7 @@ const SiderItems = (permissionIds: string, permissionRoutes: string, selectedKey
         },
         {
           key: ROUTE_PATHS.abnormalAnalysis,
+          hidden: hasPermission(ROUTE_PATHS.abnormalAnalysis),
           label: <Link to={ROUTE_PATHS.abnormalAnalysis}>异常数分析</Link>,
         },
         {
