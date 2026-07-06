@@ -93,8 +93,8 @@ export interface AbnormalAnalysisDetailItem {
   mac: string;
   controlBoardSN: string;
   model: string;
-  minerId: string;
-  ip: string;
+  minerCode: string[];
+  ipAddress: string[];
   refreshTime: string;
   isDismantled: "在架" | "下架" | "未知";
   dismantledTime: string;

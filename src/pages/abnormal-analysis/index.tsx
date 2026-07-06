@@ -60,13 +60,19 @@ function safeDailyPoints(data: AllSiteAnomalyStatsResponse | null) {
   return Array.isArray(data?.dailyLast30Days) ? data.dailyLast30Days : [];
 }
 
+function safeStringArray(value: unknown): string[] {
+  return Array.isArray(value)
+    ? value.filter((item): item is string => typeof item === "string" && item.length > 0)
+    : [];
+}
+
 function statsCards(stats: SiteInfo["abnormalStats"]) {
   return [
-    { label: "昨日异常", val: stats.yesterday, color: "text-rose-600", bg: "bg-rose-50" },
-    { label: "7日异常", val: stats.day7, color: "text-orange-600", bg: "bg-orange-50" },
-    { label: "15日异常", val: stats.day15, color: "text-indigo-600", bg: "bg-indigo-50" },
-    { label: "30日异常", val: stats.day30, color: "text-slate-600", bg: "bg-slate-100" },
-    { label: "全部", val: stats.all, color: "text-purple-600", bg: "bg-purple-50" },
+    { label: "最近1日异常", val: stats.yesterday, color: "text-rose-600", bg: "bg-rose-50" },
+    { label: "最近7日异常", val: stats.day7, color: "text-orange-600", bg: "bg-orange-50" },
+    { label: "最近15日异常", val: stats.day15, color: "text-indigo-600", bg: "bg-indigo-50" },
+    { label: "最近30日异常", val: stats.day30, color: "text-slate-600", bg: "bg-slate-100" },
+    { label: "累计异常", val: stats.all, color: "text-purple-600", bg: "bg-purple-50" },
   ].map((item, idx) => (
     <div
       key={idx}
@@ -364,26 +370,31 @@ export default function AbnormalAnalysisPage() {
     if (selectedSiteData?.stats) {
       const stats = selectedSiteData.stats;
       const windows = [
-        { label: "昨日异常", val: stats.yesterday?.anomaly ?? 0, color: "text-rose-600", bg: "bg-rose-50" },
         {
-          label: "7日异常",
+          label: "最近1日异常",
+          val: stats.yesterday?.anomaly ?? 0,
+          color: "text-rose-600",
+          bg: "bg-rose-50",
+        },
+        {
+          label: "最近7日异常",
           val: stats.last7Days?.anomaly ?? 0,
           color: "text-orange-600",
           bg: "bg-orange-50",
         },
         {
-          label: "15日异常",
+          label: "最近15日异常",
           val: stats.last15Days?.anomaly ?? 0,
           color: "text-indigo-600",
           bg: "bg-indigo-50",
         },
         {
-          label: "30日异常",
+          label: "最近30日异常",
           val: stats.last30Days?.anomaly ?? 0,
           color: "text-slate-600",
           bg: "bg-slate-100",
         },
-        { label: "全部", val: stats.allTime?.anomaly ?? 0, color: "text-purple-600", bg: "bg-purple-50" },
+        { label: "累计异常", val: stats.allTime?.anomaly ?? 0, color: "text-purple-600", bg: "bg-purple-50" },
       ];
       return windows.map((item, idx) => (
         <div
@@ -493,15 +504,45 @@ export default function AbnormalAnalysisPage() {
     },
     {
       title: "矿工号",
-      dataIndex: "minerId",
-      key: "minerId",
-      render: (text: string) => <span className="font-semibold text-slate-800">{text}</span>,
+      dataIndex: "minerCode",
+      key: "minerCode",
+      render: (value: string[]) => {
+        const list = safeStringArray(value);
+        if (list.length === 0) return <span className="text-slate-400">-</span>;
+        const text = list.join(", ");
+        return (
+          <span className="font-semibold text-slate-800 flex items-center justify-between gap-2 group max-w-[220px]">
+            <span className="truncate">{text}</span>
+            <Tooltip title="复制矿工号">
+              <CopyOutlined
+                className="text-slate-400 hover:text-blue-500 cursor-pointer opacity-0 group-hover:opacity-100 transition-opacity"
+                onClick={() => handleCopyText(text, "矿工号")}
+              />
+            </Tooltip>
+          </span>
+        );
+      },
     },
     {
       title: "IP 地址",
-      dataIndex: "ip",
-      key: "ip",
-      render: (text: string) => <span className="font-mono text-xs text-slate-600">{text}</span>,
+      dataIndex: "ipAddress",
+      key: "ipAddress",
+      render: (value: string[]) => {
+        const list = safeStringArray(value);
+        if (list.length === 0) return <span className="text-slate-400">-</span>;
+        const text = list.join(", ");
+        return (
+          <span className="font-mono text-xs text-slate-600 flex items-center justify-between gap-2 group max-w-[220px]">
+            <span className="truncate">{text}</span>
+            <Tooltip title="复制 IP">
+              <CopyOutlined
+                className="text-slate-400 hover:text-blue-500 cursor-pointer opacity-0 group-hover:opacity-100 transition-opacity"
+                onClick={() => handleCopyText(text, "IP 地址")}
+              />
+            </Tooltip>
+          </span>
+        );
+      },
     },
     {
       title: "刷新时间",
@@ -573,21 +614,26 @@ export default function AbnormalAnalysisPage() {
   // 全场统计卡片：基于真实接口的五个时间窗口（anomaly 为异常矿机数）
   const allSiteStatsCards = (stats?: AnomalyStats) => {
     const windows = [
-      { label: "昨日异常", val: stats?.yesterday?.anomaly ?? 0, color: "text-rose-600", bg: "bg-rose-50" },
-      { label: "7日异常", val: stats?.last7Days?.anomaly ?? 0, color: "text-orange-600", bg: "bg-orange-50" },
+      { label: "最近1日异常", val: stats?.yesterday?.anomaly ?? 0, color: "text-rose-600", bg: "bg-rose-50" },
       {
-        label: "15日异常",
+        label: "最近7日异常",
+        val: stats?.last7Days?.anomaly ?? 0,
+        color: "text-orange-600",
+        bg: "bg-orange-50",
+      },
+      {
+        label: "最近15日异常",
         val: stats?.last15Days?.anomaly ?? 0,
         color: "text-indigo-600",
         bg: "bg-indigo-50",
       },
       {
-        label: "30日异常",
+        label: "最近30日异常",
         val: stats?.last30Days?.anomaly ?? 0,
         color: "text-slate-600",
         bg: "bg-slate-100",
       },
-      { label: "全部", val: stats?.allTime?.anomaly ?? 0, color: "text-purple-600", bg: "bg-purple-50" },
+      { label: "累计异常", val: stats?.allTime?.anomaly ?? 0, color: "text-purple-600", bg: "bg-purple-50" },
     ];
     return windows.map((item, idx) => (
       <div
