@@ -80,8 +80,10 @@ export interface AbnormalAnalysisDetailParams {
   mac?: string;
   controlBoardSN?: string;
   minerId?: string;
+  refreshTimeFrom?: string;
   isDismantled?: "在架" | "下架" | "未知";
   assetOwnership?: "自有" | "非自有" | "未知";
+  orderBy?: "refreshTimeDesc" | "refreshTimeAsc";
   page?: number;
   pageSize?: number;
 }
@@ -116,4 +118,14 @@ export const fetchAbnormalAnalysisDetail = async (
   params: AbnormalAnalysisDetailParams = {},
 ) => {
   return await fetchGet(`minerHashrate/abnormalAnalysisDetail/${venueType}`, params);
+};
+
+/** 异常信息详情栏导出：按当前筛选条件下载 Excel */
+export const fetchAbnormalAnalysisDetailExport = async (
+  venueType: string,
+  params: AbnormalAnalysisDetailParams = {},
+) => {
+  return await fetchGet(`minerHashrate/abnormalAnalysisDetail/${venueType}/export`, params, {
+    responseType: "blob",
+  });
 };

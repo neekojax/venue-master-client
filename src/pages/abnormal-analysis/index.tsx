@@ -4,6 +4,7 @@ import {
   CheckCircleOutlined,
   CloseCircleOutlined,
   CopyOutlined,
+  DownloadOutlined,
   EnvironmentOutlined,
   QuestionCircleOutlined,
   ReloadOutlined,
@@ -14,6 +15,7 @@ import {
   Badge,
   Button,
   Col,
+  DatePicker,
   Empty,
   Input,
   message,
@@ -26,13 +28,17 @@ import {
   Tooltip,
   Typography,
 } from "antd";
+import type { ColumnsType, SorterResult, SortOrder } from "antd/es/table/interface";
+import { type Dayjs } from "dayjs";
 import { ReactEcharts } from "@/components/react-echarts";
 import {
   type AbnormalAnalysisDetailItem,
+  type AbnormalAnalysisDetailParams,
   type AbnormalAnalysisDetailResponse,
   type AllSiteAnomalyStatsResponse,
   type AnomalyStats,
   fetchAbnormalAnalysisDetail,
+  fetchAbnormalAnalysisDetailExport,
   fetchAllSiteAnomalyStats,
   fetchSiteAnomalySiteList,
   fetchSiteAnomalyStats,
@@ -46,11 +52,16 @@ import { useSelector, useSettingsStore } from "@/stores";
 
 import "./index.css";
 
+import { downloadExcelBlobResponse } from "@/pages/farm-monitor/utils";
+
 const { Text } = Typography;
 
 type HistoryPoint = { date: string; abnormalCount: number; onShelfMax?: number; refreshedCount?: number };
 type DismantledFilter = "all" | "在架" | "下架" | "未知";
 type AssetFilter = "all" | "自有" | "非自有" | "未知";
+type DetailOrderBy = "refreshTimeDesc" | "refreshTimeAsc";
+
+const refreshTimeSortDirections: SortOrder[] = ["descend", "ascend", "descend"];
 
 function safeSiteAnomalyList(data: SiteAnomalySiteListResponse | null): SiteAnomalySiteListItem[] {
   return Array.isArray(data?.list) ? data.list : [];
@@ -151,8 +162,10 @@ export default function AbnormalAnalysisPage() {
   const [selectedSiteLoading, setSelectedSiteLoading] = useState(false);
   const [detailData, setDetailData] = useState<AbnormalAnalysisDetailResponse | null>(null);
   const [detailLoading, setDetailLoading] = useState(false);
+  const [detailExporting, setDetailExporting] = useState(false);
   const [detailPage, setDetailPage] = useState(1);
   const [detailPageSize, setDetailPageSize] = useState(10);
+  const [detailOrderBy, setDetailOrderBy] = useState<DetailOrderBy>("refreshTimeDesc");
 
   useEffect(() => {
     if (!poolType) return;
@@ -210,6 +223,7 @@ export default function AbnormalAnalysisPage() {
   const [searchMac, setSearchMac] = useState<string>("");
   const [searchSN, setSearchSN] = useState<string>("");
   const [searchMinerId, setSearchMinerId] = useState<string>("");
+  const [searchRefreshTimeFrom, setSearchRefreshTimeFrom] = useState<Dayjs | null>(null);
   const [searchDismantled, setSearchDismantled] = useState<DismantledFilter>("all");
   const [searchAsset, setSearchAsset] = useState<AssetFilter>("all");
 
@@ -219,6 +233,7 @@ export default function AbnormalAnalysisPage() {
     mac: "",
     sn: "",
     minerId: "",
+    refreshTimeFrom: "",
     dismantled: "all" as DismantledFilter,
     asset: "all" as AssetFilter,
   });
@@ -230,6 +245,7 @@ export default function AbnormalAnalysisPage() {
       mac: searchMac.trim(),
       sn: searchSN.trim(),
       minerId: searchMinerId.trim(),
+      refreshTimeFrom: searchRefreshTimeFrom ? searchRefreshTimeFrom.format("YYYY-MM-DD HH:mm:ss") : "",
       dismantled: searchDismantled,
       asset: searchAsset,
     });
@@ -242,6 +258,7 @@ export default function AbnormalAnalysisPage() {
     setSearchMac("");
     setSearchSN("");
     setSearchMinerId("");
+    setSearchRefreshTimeFrom(null);
     setSearchDismantled("all");
     setSearchAsset("all");
     setFilters({
@@ -249,6 +266,7 @@ export default function AbnormalAnalysisPage() {
       mac: "",
       sn: "",
       minerId: "",
+      refreshTimeFrom: "",
       dismantled: "all",
       asset: "all",
     });
@@ -259,16 +277,7 @@ export default function AbnormalAnalysisPage() {
     if (!poolType) return;
     let active = true;
     setDetailLoading(true);
-    fetchAbnormalAnalysisDetail(poolType, {
-      ...(filters.site !== "all" ? { siteName: filters.site } : {}),
-      ...(filters.mac ? { mac: filters.mac } : {}),
-      ...(filters.sn ? { controlBoardSN: filters.sn } : {}),
-      ...(filters.minerId ? { minerId: filters.minerId } : {}),
-      ...(filters.dismantled !== "all" ? { isDismantled: filters.dismantled } : {}),
-      ...(filters.asset !== "all" ? { assetOwnership: filters.asset } : {}),
-      page: detailPage,
-      pageSize: detailPageSize,
-    })
+    fetchAbnormalAnalysisDetail(poolType, buildDetailQueryParams())
       .then((res) => {
         if (active) setDetailData((res?.data as AbnormalAnalysisDetailResponse) ?? null);
       })
@@ -282,7 +291,7 @@ export default function AbnormalAnalysisPage() {
     return () => {
       active = false;
     };
-  }, [detailPage, detailPageSize, filters, poolType]);
+  }, [detailOrderBy, detailPage, detailPageSize, filters, poolType]);
 
   const detailList = useMemo<AbnormalAnalysisDetailItem[]>(
     () => (Array.isArray(detailData?.list) ? detailData!.list : []),
@@ -328,6 +337,46 @@ export default function AbnormalAnalysisPage() {
   const handleCopyText = (text: string, type: string) => {
     navigator.clipboard.writeText(text);
     message.success(`${type} 已复制到剪贴板`);
+  };
+
+  const buildDetailQueryParams = (options?: {
+    includePagination?: boolean;
+  }): AbnormalAnalysisDetailParams => {
+    const includePagination = options?.includePagination ?? true;
+    return {
+      ...(filters.site !== "all" ? { siteName: filters.site } : {}),
+      ...(filters.mac ? { mac: filters.mac } : {}),
+      ...(filters.sn ? { controlBoardSN: filters.sn } : {}),
+      ...(filters.minerId ? { minerId: filters.minerId } : {}),
+      ...(filters.refreshTimeFrom ? { refreshTimeFrom: filters.refreshTimeFrom } : {}),
+      ...(filters.dismantled !== "all" ? { isDismantled: filters.dismantled } : {}),
+      ...(filters.asset !== "all" ? { assetOwnership: filters.asset } : {}),
+      orderBy: detailOrderBy,
+      ...(includePagination ? { page: detailPage, pageSize: detailPageSize } : {}),
+    };
+  };
+
+  const handleDownloadCurrentPage = async () => {
+    if (detailExporting || !poolType) {
+      return;
+    }
+    setDetailExporting(true);
+    try {
+      const res = await fetchAbnormalAnalysisDetailExport(
+        poolType,
+        buildDetailQueryParams({ includePagination: false }),
+      );
+      downloadExcelBlobResponse(
+        res,
+        `abnormal_analysis_detail_${new Date().toISOString().slice(0, 10)}.xlsx`,
+      );
+      message.success("下载成功");
+    } catch (error) {
+      console.error("abnormalAnalysisDetail export error", error);
+      message.error("下载失败，请稍后重试");
+    } finally {
+      setDetailExporting(false);
+    }
   };
 
   // 全场折线图：基于真实接口的 dailyLast30Days（逐日 anomaly）
@@ -452,7 +501,7 @@ export default function AbnormalAnalysisPage() {
     return statsCards(selectedSite.abnormalStats);
   }, [selectedSite.abnormalStats, selectedSiteData, selectedSiteSummary]);
 
-  const columns = [
+  const columns: ColumnsType<AbnormalAnalysisDetailItem> = [
     {
       title: "场地",
       dataIndex: "site",
@@ -548,9 +597,9 @@ export default function AbnormalAnalysisPage() {
       title: "刷新时间",
       dataIndex: "refreshTime",
       key: "refreshTime",
-      sorter: (a: AbnormalAnalysisDetailItem, b: AbnormalAnalysisDetailItem) =>
-        String(a.refreshTime || "").localeCompare(String(b.refreshTime || "")),
-      defaultSortOrder: "descend" as const,
+      sorter: true,
+      sortDirections: refreshTimeSortDirections,
+      sortOrder: detailOrderBy === "refreshTimeDesc" ? ("descend" as const) : ("ascend" as const),
       render: (text: string, record: AbnormalAnalysisDetailItem) => {
         if (record.isDismantled === "下架") {
           return <span className="text-slate-400">-</span>;
@@ -946,6 +995,17 @@ export default function AbnormalAnalysisPage() {
                 />
               </Col>
               <Col xs={24} sm={12} md={6} lg={4}>
+                <div className="text-xs text-slate-500 mb-1.5 font-medium">统计起始时间</div>
+                <DatePicker
+                  showTime
+                  style={{ width: "100%" }}
+                  placeholder="选择统计起始时间"
+                  value={searchRefreshTimeFrom}
+                  onChange={(value) => setSearchRefreshTimeFrom(value)}
+                  allowClear
+                />
+              </Col>
+              <Col xs={24} sm={12} md={6} lg={4}>
                 <div className="text-xs text-slate-500 mb-1.5 font-medium">下架</div>
                 <Select
                   style={{ width: "100%" }}
@@ -989,6 +1049,13 @@ export default function AbnormalAnalysisPage() {
               >
                 搜索
               </Button>
+              <Button
+                icon={<DownloadOutlined />}
+                loading={detailExporting}
+                onClick={handleDownloadCurrentPage}
+              >
+                下载明细
+              </Button>
             </div>
           </div>
 
@@ -997,6 +1064,38 @@ export default function AbnormalAnalysisPage() {
             columns={columns}
             dataSource={detailList}
             rowKey="id"
+            onChange={(
+              pagination: any,
+              _filters: any,
+              sorter: SorterResult<AbnormalAnalysisDetailItem> | SorterResult<AbnormalAnalysisDetailItem>[],
+              extra: { action?: "paginate" | "sort" | "filter" },
+            ) => {
+              const activeSorter = Array.isArray(sorter) ? sorter[0] : sorter;
+              const nextPage = pagination?.current ?? 1;
+              const nextPageSize = pagination?.pageSize ?? 10;
+
+              if (extra?.action === "paginate") {
+                if (nextPage !== detailPage) setDetailPage(nextPage);
+                if (nextPageSize !== detailPageSize) setDetailPageSize(nextPageSize);
+                return;
+              }
+
+              if (extra?.action === "sort" && activeSorter?.columnKey === "refreshTime") {
+                const nextOrderBy =
+                  activeSorter.order === "ascend"
+                    ? "refreshTimeAsc"
+                    : activeSorter.order === "descend"
+                      ? "refreshTimeDesc"
+                      : detailOrderBy;
+
+                if (nextOrderBy !== detailOrderBy) {
+                  setDetailOrderBy(nextOrderBy);
+                }
+                if (detailPage !== 1) {
+                  setDetailPage(1);
+                }
+              }
+            }}
             pagination={{
               current: detailPage,
               pageSize: detailPageSize,
@@ -1005,10 +1104,6 @@ export default function AbnormalAnalysisPage() {
               pageSizeOptions: ["10", "20", "50", "100"],
               showTotal: (total: number) => `共 ${total} 项`,
               className: "px-6 py-4",
-              onChange: (page: number, pageSize: number) => {
-                setDetailPage(page);
-                setDetailPageSize(pageSize);
-              },
             }}
             locale={{
               emptyText: (
