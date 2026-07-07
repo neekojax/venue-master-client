@@ -107,6 +107,7 @@ export interface AbnormalAnalysisDetailItem {
 export interface AbnormalAnalysisDetailResponse {
   venueType: string;
   total: number;
+  minerCode: string[];
   list: AbnormalAnalysisDetailItem[];
   page: number;
   pageSize: number;

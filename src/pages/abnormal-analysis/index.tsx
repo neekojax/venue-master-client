@@ -72,7 +72,10 @@ function safeDailyPoints(data: AllSiteAnomalyStatsResponse | null) {
 
 function safeStringArray(value: unknown): string[] {
   return Array.isArray(value)
-    ? value.filter((item): item is string => typeof item === "string" && item.length > 0)
+    ? value
+        .filter((item): item is string => typeof item === "string")
+        .map((item) => item.trim())
+        .filter((item) => item.length > 0 && item !== "null" && item !== "undefined" && item !== "-")
     : [];
 }
 
@@ -295,6 +298,14 @@ export default function AbnormalAnalysisPage() {
   const detailList = useMemo<AbnormalAnalysisDetailItem[]>(
     () => (Array.isArray(detailData?.list) ? detailData!.list : []),
     [detailData],
+  );
+  const detailMinerCodeOptions = useMemo(
+    () =>
+      safeStringArray(detailData?.minerCode).map((item) => ({
+        value: item,
+        label: item,
+      })),
+    [detailData?.minerCode],
   );
   const detailTotal = typeof detailData?.total === "number" ? detailData.total : detailList.length;
 
@@ -986,11 +997,15 @@ export default function AbnormalAnalysisPage() {
               </Col>
               <Col xs={24} sm={12} md={6} lg={4}>
                 <div className="text-xs text-slate-500 mb-1.5 font-medium">矿工号</div>
-                <Input
-                  placeholder="矿工号"
-                  value={searchMinerId}
-                  onChange={(e) => setSearchMinerId(e.target.value)}
+                <Select
+                  showSearch
                   allowClear
+                  style={{ width: "100%" }}
+                  placeholder="选择矿工号"
+                  value={searchMinerId}
+                  onChange={(val) => setSearchMinerId(val || "")}
+                  optionFilterProp="label"
+                  options={detailMinerCodeOptions}
                 />
               </Col>
               <Col xs={24} sm={12} md={6} lg={4}>

@@ -69,6 +69,18 @@ export const miningRoute: RouteObject = {
       },
     },
     {
+      path: ROUTE_PATHS.miningAgentSetting,
+      lazy: async () => ({
+        Component: (await import("@/pages/mining/agent-setting")).default,
+      }),
+      HydrateFallback: ProgressBar,
+      handle: {
+        title: "矿机代理设置",
+        crumb: () => <Link to={ROUTE_PATHS.miningAgentSetting}>矿机代理设置</Link>,
+        permission: ROUTE_PATHS.miningAgentSetting,
+      },
+    },
+    {
       path: "detail/:venueId/:poolId",
       lazy: async () => ({
         Component: (await import("@/pages/mining/detail")).default,
