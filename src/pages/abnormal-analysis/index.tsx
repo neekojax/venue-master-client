@@ -21,7 +21,6 @@ import {
   message,
   Row,
   Select,
-  Space,
   Spin,
   Table,
   Tag,
@@ -943,13 +942,13 @@ export default function AbnormalAnalysisPage() {
               <div className="w-1.5 h-5 bg-slate-900 rounded-full"></div>
               <span className="text-base font-bold text-slate-800">异常信息详情栏</span>
             </div>
-            <Space>
+            <div className="flex items-center gap-2">
               <span className="text-xs text-slate-500">
                 检索到 <span className="font-bold text-slate-900 font-mono">{detailTotal}</span> 台矿机
               </span>
               <span className="inline-block w-px h-3 bg-slate-200 align-middle mx-1.5"></span>
               <Tag color="cyan">最新时间可按排序</Tag>
-            </Space>
+            </div>
           </div>
 
           <div className="p-5 border-b border-slate-100 bg-slate-50/30">
