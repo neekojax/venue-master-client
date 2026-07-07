@@ -32,6 +32,7 @@ import { type Dayjs } from "dayjs";
 import { ReactEcharts } from "@/components/react-echarts";
 import {
   type AbnormalAnalysisDetailItem,
+  type AbnormalAnalysisDetailMinerCodeGroup,
   type AbnormalAnalysisDetailParams,
   type AbnormalAnalysisDetailResponse,
   type AllSiteAnomalyStatsResponse,
@@ -77,6 +78,21 @@ function safeStringArray(value: unknown): string[] {
         .map((item) => item.trim())
         .filter((item) => item.length > 0 && item !== "null" && item !== "undefined" && item !== "-")
     : [];
+}
+
+function safeMinerCodeGroups(value: unknown): AbnormalAnalysisDetailMinerCodeGroup[] {
+  if (!Array.isArray(value)) return [];
+
+  return value
+    .map((item) => {
+      if (!item || typeof item !== "object") return null;
+      const site =
+        typeof (item as { site?: unknown }).site === "string" ? (item as { site: string }).site.trim() : "";
+      const minerCode = safeStringArray((item as { minerCode?: unknown }).minerCode);
+      if (!site) return null;
+      return { site, minerCode };
+    })
+    .filter((item): item is AbnormalAnalysisDetailMinerCodeGroup => Boolean(item));
 }
 
 function statsCards(stats: SiteInfo["abnormalStats"]) {
@@ -164,6 +180,10 @@ export default function AbnormalAnalysisPage() {
   const [selectedSiteLoading, setSelectedSiteLoading] = useState(false);
   const [detailData, setDetailData] = useState<AbnormalAnalysisDetailResponse | null>(null);
   const [detailLoading, setDetailLoading] = useState(false);
+  const [detailMinerCodeSource, setDetailMinerCodeSource] = useState<AbnormalAnalysisDetailMinerCodeGroup[]>(
+    [],
+  );
+  const [detailMinerCodeLoading, setDetailMinerCodeLoading] = useState(false);
   const [detailExporting, setDetailExporting] = useState(false);
   const [detailPage, setDetailPage] = useState(1);
   const [detailPageSize, setDetailPageSize] = useState(10);
@@ -295,19 +315,62 @@ export default function AbnormalAnalysisPage() {
     };
   }, [detailOrderBy, detailPage, detailPageSize, filters, poolType]);
 
+  useEffect(() => {
+    if (!poolType) {
+      setDetailMinerCodeSource([]);
+      setDetailMinerCodeLoading(false);
+      return;
+    }
+    let active = true;
+    setDetailMinerCodeLoading(true);
+    setDetailMinerCodeSource([]);
+    fetchAbnormalAnalysisDetail(poolType, {
+      ...(searchSite !== "all" ? { siteName: searchSite } : {}),
+      page: 1,
+      pageSize: 1,
+    })
+      .then((res) => {
+        if (active) {
+          const data = (res?.data as AbnormalAnalysisDetailResponse) ?? null;
+          setDetailMinerCodeSource(safeMinerCodeGroups(data?.minerCode));
+        }
+      })
+      .catch((err) => {
+        console.log("abnormalAnalysisDetail minerCode source error", err);
+        if (active) setDetailMinerCodeSource([]);
+      })
+      .finally(() => {
+        if (active) setDetailMinerCodeLoading(false);
+      });
+    return () => {
+      active = false;
+    };
+  }, [poolType, searchSite]);
+
   const detailList = useMemo<AbnormalAnalysisDetailItem[]>(
     () => (Array.isArray(detailData?.list) ? detailData!.list : []),
     [detailData],
   );
-  const detailMinerCodeOptions = useMemo(
-    () =>
-      safeStringArray(detailData?.minerCode).map((item) => ({
-        value: item,
-        label: item,
-      })),
-    [detailData?.minerCode],
-  );
+  const detailMinerCodeOptions = useMemo(() => {
+    const codes =
+      searchSite === "all"
+        ? detailMinerCodeSource.flatMap((item) => item.minerCode)
+        : detailMinerCodeSource.filter((item) => item.site === searchSite).flatMap((item) => item.minerCode);
+
+    return Array.from(new Set(codes)).map((item) => ({
+      value: item,
+      label: item,
+    }));
+  }, [detailMinerCodeSource, searchSite]);
   const detailTotal = typeof detailData?.total === "number" ? detailData.total : detailList.length;
+
+  useEffect(() => {
+    if (!searchMinerId) return;
+    const exists = detailMinerCodeOptions.some((item) => item.value === searchMinerId);
+    if (!exists) {
+      setSearchMinerId("");
+    }
+  }, [detailMinerCodeOptions, searchMinerId]);
 
   const selectedSite = useMemo((): SiteInfo => {
     return SITES.find((s) => s.name === selectedSiteName) || SITES[0];
@@ -1002,6 +1065,7 @@ export default function AbnormalAnalysisPage() {
                   allowClear
                   style={{ width: "100%" }}
                   placeholder="选择矿工号"
+                  loading={detailMinerCodeLoading}
                   value={searchMinerId}
                   onChange={(val) => setSearchMinerId(val || "")}
                   optionFilterProp="label"

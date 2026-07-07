@@ -103,11 +103,16 @@ export interface AbnormalAnalysisDetailItem {
   assetOwnership: "自有" | "非自有" | "未知";
 }
 
+export interface AbnormalAnalysisDetailMinerCodeGroup {
+  site: string;
+  minerCode: string[];
+}
+
 /** GET minerHashrate/abnormalAnalysisDetail/:venueType 的响应 data */
 export interface AbnormalAnalysisDetailResponse {
   venueType: string;
   total: number;
-  minerCode: string[];
+  minerCode: AbnormalAnalysisDetailMinerCodeGroup[];
   list: AbnormalAnalysisDetailItem[];
   page: number;
   pageSize: number;
