@@ -75,6 +75,7 @@ export const miningRoute: RouteObject = {
       }),
       HydrateFallback: ProgressBar,
       handle: {
+        name: "miningAgentSetting",
         title: "矿机代理设置",
         crumb: () => <Link to={ROUTE_PATHS.miningAgentSetting}>矿机代理设置</Link>,
         permission: ROUTE_PATHS.miningAgentSetting,
