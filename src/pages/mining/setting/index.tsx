@@ -47,7 +47,7 @@ import {
   useMiningPoolNew,
   useMiningPoolUpdate,
 } from "@/pages/mining/hook.ts";
-import { MiningPool, MiningPoolUpdate } from "@/pages/mining/type.tsx";
+import { AccountLeaseStatus, MiningPool, MiningPoolUpdate } from "@/pages/mining/type.tsx";
 import { useVenueList } from "@/pages/venue/hook/hook.ts";
 
 const emptyData = {
@@ -67,6 +67,40 @@ const emptyData = {
 };
 
 const StoragePrefix = "mining-setting";
+const LEASE_STATUS_PARTIAL = "部分租赁" as const;
+const LEASE_STATUS_FULL = "全部租赁" as const;
+const LEASE_STATUS_PARTIAL_POWER = "部分租赁算力" as const;
+const LEASE_STATUS_NONE = "非租赁" as const;
+
+type StatusFilterValue = number | typeof LEASE_STATUS_PARTIAL | typeof LEASE_STATUS_FULL | null;
+
+const LEASE_STATUS_COLOR_MAP: Record<AccountLeaseStatus, string> = {
+  全部租赁: "#7c3aed",
+  部分租赁: "#d97706",
+  部分租赁算力: "#0891b2",
+  非租赁: "#6b7280",
+};
+
+const getOperationalStatusMeta = (status?: number) => {
+  if (status === 1) {
+    return { text: "活跃", color: "green" };
+  }
+  if (status === 0) {
+    return { text: "关机", color: "red" };
+  }
+  if (status === 2) {
+    return { text: "已撤场", color: "orange" };
+  }
+  return { text: "-", color: "#999" };
+};
+
+const formatLeasePower = (leasedPower?: number | null) => {
+  if (leasedPower == null || Number.isNaN(Number(leasedPower))) {
+    return "";
+  }
+
+  return `${Number(leasedPower)}P`;
+};
 
 export default function MiningSettingPage() {
   useAuthRedirect();
@@ -144,7 +178,7 @@ export default function MiningSettingPage() {
   const [isLoadingNewPool, setIsLoadingNewPool] = useState(false);
 
   const [searchTerm, setSearchTerm] = useState(""); // 新增搜索状态;
-  const [statusFilter, setStatusFilter] = useState<number | null>(null); // 状态筛选
+  const [statusFilter, setStatusFilter] = useState<StatusFilterValue>(null); // 状态筛选
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [excelUploadModalVisible, setExcelUploadModalVisible] = useState(false);
@@ -221,23 +255,36 @@ export default function MiningSettingPage() {
   const handleCancel = () => {
     setIsModalOpen(false);
   };
-  // @ts-ignore
-  const StatusColumn = ({ status }) => {
-    let statusText = "";
-    let statusStyle = {};
+  const StatusColumn = ({
+    status,
+    accountLeaseStatus,
+    leasedPower,
+  }: {
+    status?: number;
+    accountLeaseStatus?: AccountLeaseStatus;
+    leasedPower?: number | null;
+  }) => {
+    const operationalStatus = getOperationalStatusMeta(status);
+    const shouldShowLeaseStatus =
+      accountLeaseStatus &&
+      accountLeaseStatus !== LEASE_STATUS_NONE &&
+      accountLeaseStatus !== LEASE_STATUS_PARTIAL_POWER;
+    const leasePowerText =
+      accountLeaseStatus === LEASE_STATUS_PARTIAL && formatLeasePower(leasedPower)
+        ? ` 租赁算力 ${formatLeasePower(leasedPower)}`
+        : "";
 
-    if (status === 1) {
-      statusText = "活跃";
-      statusStyle = { color: "green" }; // 活跃状态，绿色
-    } else if (status === 0) {
-      statusText = "关机";
-      statusStyle = { color: "red" }; // 关机状态，红色
-    } else if (status === 2) {
-      statusText = "已撤场";
-      statusStyle = { color: "orange" }; // 已撤场状态，红色
-    }
-
-    return <span style={statusStyle}>{statusText}</span>;
+    return (
+      <div style={{ display: "flex", flexDirection: "column", lineHeight: 1.4 }}>
+        <span style={{ color: operationalStatus.color }}>{operationalStatus.text}</span>
+        {shouldShowLeaseStatus ? (
+          <span style={{ color: LEASE_STATUS_COLOR_MAP[accountLeaseStatus], fontSize: 12 }}>
+            {accountLeaseStatus}
+            {leasePowerText}
+          </span>
+        ) : null}
+      </div>
+    );
   };
 
   useEffect(() => {
@@ -256,11 +303,13 @@ export default function MiningSettingPage() {
             theoretical_hashrate: any;
             is_overclocked: any;
             overclock_hashrate_per_machine: any;
+            leased_power: any;
             // energy_ratio: any;
             // basic_hosting_fee: any;
             heat_diss_mode: any;
             link: any;
             collection: any;
+            account_lease_status: AccountLeaseStatus;
           },
           index: any,
         ) => ({
@@ -279,11 +328,13 @@ export default function MiningSettingPage() {
           theoretical_hashrate: item.theoretical_hashrate,
           is_overclocked: item.is_overclocked,
           overclock_hashrate_per_machine: item.overclock_hashrate_per_machine,
+          leased_power: item.leased_power,
           // energy_ratio: item.energy_ratio,
           // basic_hosting_fee: item.basic_hosting_fee,
           heat_diss_mode: item.heat_diss_mode,
           link: item.link,
           collection: item.collection,
+          account_lease_status: item.account_lease_status,
         }),
       );
       setTableData(newData); // 设置表格数据源
@@ -455,8 +506,21 @@ export default function MiningSettingPage() {
         title: "状态",
         dataIndex: "status",
         key: "status",
-        width: 75,
-        render: (_text: any, record: { status: unknown }) => <StatusColumn status={record.status} />,
+        width: 170,
+        render: (
+          _text: any,
+          record: {
+            status?: number;
+            account_lease_status?: AccountLeaseStatus;
+            leased_power?: number | null;
+          },
+        ) => (
+          <StatusColumn
+            status={record.status}
+            accountLeaseStatus={record.account_lease_status}
+            leasedPower={record.leased_power}
+          />
+        ),
       },
       {
         title: (
@@ -719,7 +783,7 @@ export default function MiningSettingPage() {
   };
 
   // 处理状态筛选变化
-  const handleStatusFilterChange = (value: number | null) => {
+  const handleStatusFilterChange = (value: StatusFilterValue) => {
     // console.log("》〉》value", value);
     if (value === null || String(value).trim() === "" || value === undefined) {
       setStatusFilter(null);
@@ -792,7 +856,11 @@ export default function MiningSettingPage() {
 
       // 3️⃣ 状态过滤
       const matchesStatus =
-        statusFilter === null || String(item?.status ?? "").trim() === "" || item.status === statusFilter;
+        statusFilter === null
+          ? true
+          : typeof statusFilter === "number"
+            ? String(item?.status ?? "").trim() === "" || item.status === statusFilter
+            : item.account_lease_status === statusFilter;
 
       return matchesSearch && matchesCollection && matchesStatus;
     })
@@ -876,6 +944,12 @@ export default function MiningSettingPage() {
                 <Option value={2} style={{ fontSize: "12px", textAlign: "left" }}>
                   <span className="status-dot status-offline " />
                   <span>已撤场</span>
+                </Option>
+                <Option value={LEASE_STATUS_PARTIAL} style={{ fontSize: "12px", textAlign: "left" }}>
+                  <span style={{ color: LEASE_STATUS_COLOR_MAP[LEASE_STATUS_PARTIAL] }}>部分租赁</span>
+                </Option>
+                <Option value={LEASE_STATUS_FULL} style={{ fontSize: "12px", textAlign: "left" }}>
+                  <span style={{ color: LEASE_STATUS_COLOR_MAP[LEASE_STATUS_FULL] }}>全部租赁</span>
                 </Option>
               </Select>
 

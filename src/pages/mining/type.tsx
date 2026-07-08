@@ -1,3 +1,5 @@
+export type AccountLeaseStatus = "全部租赁" | "部分租赁" | "部分租赁算力" | "非租赁";
+
 export type MiningPool = {
   id: number;
   venue_id: number;
