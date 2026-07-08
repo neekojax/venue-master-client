@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { DeleteOutlined, FormOutlined } from "@ant-design/icons";
 import { EditableProTable } from "@ant-design/pro-components";
 import { message, Pagination, Popconfirm } from "antd";
@@ -21,6 +21,14 @@ export default function EditTable({ tableData, columns, handleDelete, handleSave
   const [editableKeys, setEditableRowKeys] = useState<React.Key[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
+
+  useEffect(() => {
+    const totalPages = Math.max(1, Math.ceil(tableData.length / pageSize));
+
+    if (currentPage > totalPages) {
+      setCurrentPage(totalPages);
+    }
+  }, [currentPage, pageSize, tableData.length]);
 
   // 渲染操作列的函数
   const renderActions = (record: { key: number }, action: { startEditable: (arg0: any) => void }) => [
