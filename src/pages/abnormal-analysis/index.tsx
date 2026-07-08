@@ -673,10 +673,8 @@ export default function AbnormalAnalysisPage() {
       sorter: true,
       sortDirections: refreshTimeSortDirections,
       sortOrder: detailOrderBy === "refreshTimeDesc" ? ("descend" as const) : ("ascend" as const),
-      render: (text: string, record: AbnormalAnalysisDetailItem) => {
-        if (record.isDismantled === "下架") {
-          return <span className="text-slate-400">-</span>;
-        }
+      render: (text: string) => {
+        if (!text) return <span className="text-slate-400">-</span>;
         return (
           <div className="flex items-center gap-1.5">
             <span className="relative flex h-2 w-2">
