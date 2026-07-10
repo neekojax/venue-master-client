@@ -155,13 +155,13 @@ export default function AbnormalManagementDrawer({
       logDate: getDefaultReportDate(),
       reason: "",
       owner: summary?.owner || "",
-      abnormalCount: summary?.abnormalCount ?? 0,
+      abnormalCount: summary?.abnormalCount ?? abnormalCount,
       status: "pending",
     });
     setNewLogDate(getDefaultReportDate().format("YYYY-MM-DD"));
     setNewReason("");
     setNewOwner(summary?.owner || "");
-    setNewAbnormalCount(summary?.abnormalCount ?? 0);
+    setNewAbnormalCount(summary?.abnormalCount ?? abnormalCount);
     setNewStatus("pending");
   }, [abnormalCount, managementForm, siteCode, summary]);
 
@@ -234,7 +234,7 @@ export default function AbnormalManagementDrawer({
       .then(() => {
         setNewLogDate(getDefaultReportDate().format("YYYY-MM-DD"));
         setNewReason("");
-        setNewAbnormalCount(summary?.abnormalCount ?? 0);
+        setNewAbnormalCount(summary?.abnormalCount ?? abnormalCount);
         onHistoryRefresh?.();
         message.success("异常处理记录已添加");
       })
@@ -298,7 +298,7 @@ export default function AbnormalManagementDrawer({
       ? `${logRange[0].format("YYYY-MM-DD HH:mm")} - ${logRange[1].format("YYYY-MM-DD HH:mm")}`
       : "未限定时间范围";
   const siteBadge = formatSiteBadge(siteName, siteCode);
-  const summaryAbnormalCount = summary?.abnormalCount;
+  const summaryAbnormalCount = summary?.abnormalCount ?? abnormalCount;
   const abnormalRatio =
     summary?.onShelfCount && summary.onShelfCount > 0
       ? ((summary.abnormalCount / summary.onShelfCount) * 100).toFixed(2)

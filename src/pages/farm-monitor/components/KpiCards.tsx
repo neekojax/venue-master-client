@@ -3,7 +3,6 @@ import {
   CloudOutlined,
   DashboardOutlined,
   DisconnectOutlined,
-  FireOutlined,
   PoweroffOutlined,
   ThunderboltOutlined,
   WarningOutlined,
@@ -26,12 +25,12 @@ const CARDS: Array<{
 }> = [
   { key: "theoreticalOnline", label: "理论在架数", icon: ApiOutlined, color: "#1677ff", bg: "#e6f4ff" },
   { key: "online", label: "扫描数", icon: DashboardOutlined, color: "#52c41a", bg: "#f6ffed" },
-  { key: "theoreticalOffline", label: "异常数", icon: DisconnectOutlined, color: "#8c8c8c", bg: "#fafafa" },
+  { key: "theoreticalOffline", label: "最新异常", icon: DisconnectOutlined, color: "#8c8c8c", bg: "#fafafa" },
   { key: "lowHashrate", label: "低算力", icon: WarningOutlined, color: "#fa8c16", bg: "#fff7e6" },
   { key: "zeroHashrate", label: "零算力", icon: PoweroffOutlined, color: "#ff4d4f", bg: "#fff1f0" },
   { key: "networkEvents", label: "网络事件", icon: CloudOutlined, color: "#13c2c2", bg: "#e6fffb" },
   { key: "powerLimitEvents", label: "限电事件", icon: ThunderboltOutlined, color: "#faad14", bg: "#fffbe6" },
-  { key: "highTempEvents", label: "高温事件", icon: FireOutlined, color: "#eb2f96", bg: "#fff0f6" },
+  { key: "yesterdayAbnormal", label: "昨日异常", icon: DisconnectOutlined, color: "#8c8c8c", bg: "#fafafa" },
 ];
 
 function formatKpiValue(value: number | null) {
@@ -44,7 +43,7 @@ export default function KpiCards({ data, loading = false, onAbnormalClick }: Kpi
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
         {CARDS.map((card) => {
           const Icon = card.icon;
-          const clickable = card.key === "theoreticalOffline" && onAbnormalClick;
+          const clickable = card.key === "yesterdayAbnormal" && onAbnormalClick;
           return (
             <button
               key={card.key}

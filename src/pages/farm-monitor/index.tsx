@@ -100,11 +100,6 @@ export default function FarmMonitorPage() {
 
   const kpiOnShelfCount = latestProbeTask?.on_shelf_count ?? null;
 
-  const kpiSummary = useMemo(
-    () => mapLatestTaskToKpiSummary(latestProbeTask, kpiOnShelfCount),
-    [latestProbeTask, kpiOnShelfCount],
-  );
-
   const latestTaskIds = useMemo(() => resolveLatestProbeTaskIds(latestProbeTask), [latestProbeTask]);
 
   const snapshotTaskIdsParam = useMemo(() => formatTaskIdsForSnapshotApi(latestTaskIds), [latestTaskIds]);
@@ -169,7 +164,7 @@ export default function FarmMonitorPage() {
     isLoading: isAbnormalDataLoading,
     isFetching: isAbnormalDataFetching,
     refetch: refetchAbnormalData,
-  } = useAbnormalDataDetail(poolType, selectedFarm?.name, abnormalStatsDate, abnormalTerminalOpen);
+  } = useAbnormalDataDetail(poolType, selectedFarm?.name, abnormalStatsDate);
 
   const snapshotData = snapshotsRes?.data;
   const snapshotList = snapshotData?.list ?? [];
@@ -201,15 +196,19 @@ export default function FarmMonitorPage() {
     () => (abnormalDataRes?.data ?? undefined) as AbnormalDataDetail | undefined,
     [abnormalDataRes],
   );
+  const kpiSummary = useMemo(
+    () => mapLatestTaskToKpiSummary(latestProbeTask, kpiOnShelfCount, abnormalDataSummary?.abnormalCount),
+    [abnormalDataSummary?.abnormalCount, kpiOnShelfCount, latestProbeTask],
+  );
 
   const handleRefresh = useCallback(() => {
     void refetchProbeTasks();
     void refetchLatestTask();
     void refetchSnapshots();
+    void refetchAbnormalData();
     if (abnormalTerminalOpen) {
       void refetchAbnormalLogs();
       void refetchAnomalyHistory();
-      void refetchAbnormalData();
     }
   }, [
     abnormalTerminalOpen,
@@ -326,7 +325,9 @@ export default function FarmMonitorPage() {
           />
           <KpiCards
             data={kpiSummary}
-            loading={isLatestTaskLoading || isLatestTaskFetching}
+            loading={
+              isLatestTaskLoading || isLatestTaskFetching || isAbnormalDataLoading || isAbnormalDataFetching
+            }
             onAbnormalClick={openAbnormalManagementTerminal}
           />
         </div>
@@ -339,7 +340,7 @@ export default function FarmMonitorPage() {
               selectedSiteValue={selectedFarmId ?? undefined}
               siteCode={selectedFarmId ?? undefined}
               siteName={selectedFarm?.name}
-              abnormalCount={kpiSummary.theoreticalOffline ?? 0}
+              abnormalCount={kpiSummary.yesterdayAbnormal ?? 0}
               scannedCount={kpiSummary.online}
               theoreticalCount={kpiSummary.theoreticalOnline}
               summary={abnormalDataSummary}

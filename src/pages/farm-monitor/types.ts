@@ -127,6 +127,7 @@ export interface KpiSummary {
   networkEvents: number | null;
   powerLimitEvents: number | null;
   highTempEvents: number | null;
+  yesterdayAbnormal: number | null;
 }
 
 export interface TaskSnapshotItem {

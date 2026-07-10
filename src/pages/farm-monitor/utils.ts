@@ -20,13 +20,20 @@ const EMPTY_KPI_SUMMARY: KpiSummary = {
   networkEvents: null,
   powerLimitEvents: null,
   highTempEvents: null,
+  yesterdayAbnormal: null,
 };
 
 export function mapLatestTaskToKpiSummary(
   task?: LatestFinishedProbeTask | null,
   onShelfCount?: number | null,
+  yesterdayAbnormal?: number | null,
 ): KpiSummary {
-  if (!task) return EMPTY_KPI_SUMMARY;
+  if (!task) {
+    return {
+      ...EMPTY_KPI_SUMMARY,
+      yesterdayAbnormal: yesterdayAbnormal ?? null,
+    };
+  }
 
   const online = task.online_total ?? null;
   const offlineFromApi = task.offline_total ?? null;
@@ -45,6 +52,7 @@ export function mapLatestTaskToKpiSummary(
     networkEvents: task.event_impact?.network_impact_count ?? null,
     powerLimitEvents: task.event_impact?.limit_impact_count ?? null,
     highTempEvents: task.event_impact?.high_temperature_impact_count ?? null,
+    yesterdayAbnormal: yesterdayAbnormal ?? null,
   };
 }
 
