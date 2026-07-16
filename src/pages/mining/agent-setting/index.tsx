@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
+  CopyOutlined,
   DeleteOutlined,
   EditOutlined,
   PlusOutlined,
@@ -89,21 +90,28 @@ function normalizeRecord(item: any): SiteAgentBindingRecord {
     assetSiteId: normalizeNumber(pickValue(item?.assetSiteID, item?.assetSiteId, item?.asset_site_id)),
     minerCodeBlacklist: normalizeList(pickValue(item?.minerCodeBlacklist, item?.miner_code_blacklist)),
     machineTypeBlacklist: normalizeList(pickValue(item?.machineTypeBlacklist, item?.machine_type_blacklist)),
+    ipRanges: normalizeList(pickValue(item?.ipRanges, item?.ip_ranges)),
     createdAt: pickValue(item?.createdAt, item?.created_at),
     updatedAt: pickValue(item?.updatedAt, item?.updated_at),
   };
 }
 
-function buildPayload(values: SiteAgentBindingFormValues): SiteAgentBindingPayload {
+function buildPayload(
+  values: SiteAgentBindingFormValues,
+  options?: {
+    version?: string;
+  },
+): SiteAgentBindingPayload {
   return {
     siteCode: values.siteCode.trim(),
     siteName: values.siteName.trim(),
     agentCode: values.agentCode?.trim() || undefined,
     agentName: values.agentName.trim(),
-    version: values.version?.trim() || undefined,
+    version: options?.version,
     assetSiteID: normalizeNumber(values.assetSiteId),
     minerCodeBlacklist: normalizeList(values.minerCodeBlacklist),
     machineTypeBlacklist: normalizeList(values.machineTypeBlacklist),
+    ipRanges: normalizeList(values.ipRanges),
   };
 }
 
@@ -112,7 +120,7 @@ function formatDateTime(value?: string) {
   return value.replace("T", " ").replace("Z", "");
 }
 
-function renderBlacklistTags(items: string[]) {
+function renderBlacklistTags(items: string[], tagClassName?: string) {
   if (!items.length) {
     return <span className="text-gray-400">-</span>;
   }
@@ -120,7 +128,7 @@ function renderBlacklistTags(items: string[]) {
   return (
     <div className="flex flex-wrap gap-1">
       {items.map((item) => (
-        <Tag key={item} className="!mr-0">
+        <Tag key={item} className={tagClassName ? `!mr-0 ${tagClassName}` : "!mr-0"}>
           {item}
         </Tag>
       ))}
@@ -161,6 +169,10 @@ export default function MiningAgentSettingPage() {
   const [refreshTaskSnapshot, setRefreshTaskSnapshot] = useState<SiteDailyAnomalyRefreshTask | null>(null);
   const [submittingRefreshSiteCode, setSubmittingRefreshSiteCode] = useState<string | null>(null);
   const [submittingRefreshAll, setSubmittingRefreshAll] = useState(false);
+  const [ipRangesPreview, setIpRangesPreview] = useState<{
+    agentName: string;
+    items: string[];
+  } | null>(null);
   const notifyTaskStatusRef = useRef<string>("");
 
   const listQuery = useSiteAgentBindings(poolType, query);
@@ -259,10 +271,10 @@ export default function MiningAgentSettingPage() {
         siteName: record.siteName,
         agentCode: record.agentCode,
         agentName: record.agentName,
-        version: record.version,
         assetSiteId: record.assetSiteId,
         minerCodeBlacklist: listToText(record.minerCodeBlacklist),
         machineTypeBlacklist: listToText(record.machineTypeBlacklist),
+        ipRanges: listToText(record.ipRanges),
       });
       setIsModalOpen(true);
     },
@@ -337,10 +349,24 @@ export default function MiningAgentSettingPage() {
     setQuery({ page: 1, pageSize: query.pageSize ?? 20 });
   }, [query.pageSize, searchForm]);
 
+  const handleCopyIpRanges = useCallback(async (record: SiteAgentBindingRecord) => {
+    if (!record.ipRanges.length) {
+      message.info("当前没有可复制的 IP 范围");
+      return;
+    }
+
+    try {
+      await navigator.clipboard.writeText(record.ipRanges.join("\n"));
+      message.success(`已复制 ${record.agentName} 的 IP 范围`);
+    } catch (error) {
+      message.error((error as Error).message || "复制 IP 范围失败");
+    }
+  }, []);
+
   const handleSubmit = useCallback(async () => {
     try {
       const values = await modalForm.validateFields();
-      const payload = buildPayload(values);
+      const payload = buildPayload(values, { version: editingRecord?.version });
 
       if (editingRecord) {
         await updateMutation.mutateAsync({ agentName: editingRecord.agentName, payload });
@@ -394,32 +420,66 @@ export default function MiningAgentSettingPage() {
         ),
       },
       {
-        title: "版本",
-        dataIndex: "version",
-        key: "version",
-        width: 120,
-        render: (value: string | undefined) => value || "-",
-      },
-      {
-        title: "assetSiteID",
-        dataIndex: "assetSiteId",
-        key: "assetSiteId",
-        width: 120,
-        render: (value: number | undefined) => value ?? "-",
-      },
-      {
         title: "矿机编号黑名单",
         dataIndex: "minerCodeBlacklist",
         key: "minerCodeBlacklist",
         width: 240,
-        render: (value: string[]) => renderBlacklistTags(value),
+        render: (value: string[]) =>
+          renderBlacklistTags(value, "!border-rose-200 !bg-rose-50 !text-rose-700"),
       },
       {
         title: "机型黑名单",
         dataIndex: "machineTypeBlacklist",
         key: "machineTypeBlacklist",
         width: 220,
-        render: (value: string[]) => renderBlacklistTags(value),
+        render: (value: string[]) =>
+          renderBlacklistTags(value, "!border-amber-200 !bg-amber-50 !text-amber-700"),
+      },
+      {
+        title: "IP 范围",
+        dataIndex: "ipRanges",
+        key: "ipRanges",
+        width: 260,
+        render: (value: string[], record: SiteAgentBindingRecord) => {
+          if (!value.length) {
+            return <span className="text-gray-400">-</span>;
+          }
+
+          return (
+            <div className="space-y-2">
+              <div className="text-xs text-gray-500">共 {value.length} 段</div>
+              <Space size="small" wrap>
+                <Button
+                  size="small"
+                  className="!border-indigo-200 !bg-indigo-50 !text-indigo-600 hover:!border-indigo-300 hover:!bg-indigo-100 hover:!text-indigo-700"
+                  onClick={() =>
+                    setIpRangesPreview({
+                      agentName: record.agentName,
+                      items: value,
+                    })
+                  }
+                >
+                  查看
+                </Button>
+                <Button
+                  size="small"
+                  icon={<CopyOutlined />}
+                  className="!border-emerald-200 !bg-emerald-50 !text-emerald-600 hover:!border-emerald-300 hover:!bg-emerald-100 hover:!text-emerald-700"
+                  onClick={() => void handleCopyIpRanges(record)}
+                >
+                  复制
+                </Button>
+              </Space>
+            </div>
+          );
+        },
+      },
+      {
+        title: "资产场地ID",
+        dataIndex: "assetSiteId",
+        key: "assetSiteId",
+        width: 120,
+        render: (value: number | undefined) => value ?? "-",
       },
       {
         title: "更新时间",
@@ -432,7 +492,7 @@ export default function MiningAgentSettingPage() {
         title: "操作",
         key: "action",
         fixed: "right",
-        width: 190,
+        width: 260,
         render: (_: unknown, record: SiteAgentBindingRecord) => {
           const siteRefreshLoading =
             (refreshSiteMutation.isPending && submittingRefreshSiteCode === record.siteCode) ||
@@ -440,24 +500,40 @@ export default function MiningAgentSettingPage() {
           const refreshDisabled = isRefreshTaskActive && activeRefreshSiteCode !== record.siteCode;
 
           return (
-            <Space size="small">
+            <Space size="small" wrap>
               <Button
-                type="text"
+                size="small"
                 icon={<ReloadOutlined />}
+                className="!border-sky-200 !bg-sky-50 !text-sky-700 hover:!border-sky-300 hover:!bg-sky-100 hover:!text-sky-800"
                 onClick={() => void handleRefreshSite(record)}
                 loading={siteRefreshLoading}
                 disabled={refreshDisabled}
               >
                 刷新异常数
               </Button>
-              <Button type="text" icon={<EditOutlined />} onClick={() => handleEdit(record)} />
+              <Button
+                size="small"
+                icon={<EditOutlined />}
+                className="!border-sky-200 !bg-sky-50 !text-sky-700 hover:!border-sky-300 hover:!bg-sky-100 hover:!text-sky-800"
+                onClick={() => handleEdit(record)}
+              >
+                编辑
+              </Button>
               <Popconfirm
                 title="确认删除该代理设置？"
                 okText="删除"
                 cancelText="取消"
                 onConfirm={() => handleDelete(record)}
               >
-                <Button danger type="text" icon={<DeleteOutlined />} loading={deleteMutation.isPending} />
+                <Button
+                  danger
+                  size="small"
+                  icon={<DeleteOutlined />}
+                  className="!border-rose-200 !bg-rose-50 !text-rose-600 hover:!border-rose-300 hover:!bg-rose-100 hover:!text-rose-700"
+                  loading={deleteMutation.isPending}
+                >
+                  删除
+                </Button>
               </Popconfirm>
             </Space>
           );
@@ -468,6 +544,7 @@ export default function MiningAgentSettingPage() {
       activeRefreshSiteCode,
       deleteMutation.isPending,
       handleDelete,
+      handleCopyIpRanges,
       handleEdit,
       handleRefreshSite,
       isRefreshTaskActive,
@@ -706,12 +783,6 @@ export default function MiningAgentSettingPage() {
             >
               <Input placeholder="请输入代理名称" />
             </Form.Item>
-            <Form.Item name="version" label="版本" className="!mb-3">
-              <Input placeholder="请输入版本号" />
-            </Form.Item>
-            <Form.Item name="assetSiteId" label="资产场地 ID" className="!mb-3">
-              <InputNumber className="!w-full" min={0} precision={0} placeholder="请输入资产场地 ID" />
-            </Form.Item>
           </div>
 
           <Form.Item name="minerCodeBlacklist" label="矿机编号黑名单" className="!mb-3">
@@ -721,7 +792,57 @@ export default function MiningAgentSettingPage() {
           <Form.Item name="machineTypeBlacklist" label="机型黑名单" className="!mb-0">
             <Input.TextArea rows={4} placeholder="每行或逗号分隔一个机型" />
           </Form.Item>
+
+          <Form.Item name="ipRanges" label="IP 范围" className="!mb-0">
+            <Input.TextArea rows={4} placeholder="每行或逗号分隔一个 IP 范围" />
+          </Form.Item>
+
+          <Form.Item name="assetSiteId" label="资产场地ID" className="!mb-0">
+            <InputNumber className="!w-full" min={0} precision={0} placeholder="请输入资产场地ID" />
+          </Form.Item>
         </Form>
+      </Modal>
+
+      <Modal
+        title={ipRangesPreview ? `${ipRangesPreview.agentName} 的 IP 范围` : "IP 范围"}
+        open={Boolean(ipRangesPreview)}
+        footer={[
+          <Button
+            key="copy"
+            icon={<CopyOutlined />}
+            onClick={() => {
+              if (!ipRangesPreview) return;
+              void navigator.clipboard
+                .writeText(ipRangesPreview.items.join("\n"))
+                .then(() => {
+                  message.success("IP 范围已复制");
+                })
+                .catch((error: Error) => {
+                  message.error(error.message || "复制 IP 范围失败");
+                });
+            }}
+          >
+            复制
+          </Button>,
+          <Button key="close" type="primary" onClick={() => setIpRangesPreview(null)}>
+            关闭
+          </Button>,
+        ]}
+        onCancel={() => setIpRangesPreview(null)}
+        destroyOnHidden
+        width={720}
+      >
+        {ipRangesPreview?.items.length ? (
+          <div className="max-h-[420px] overflow-auto flex flex-wrap gap-2">
+            {ipRangesPreview.items.map((item) => (
+              <Tag key={item} className="!mr-0">
+                {item}
+              </Tag>
+            ))}
+          </div>
+        ) : (
+          <span className="text-gray-400">-</span>
+        )}
       </Modal>
     </div>
   );
