@@ -79,6 +79,7 @@ export interface AbnormalAnalysisDetailParams {
   siteName?: string;
   mac?: string;
   controlBoardSN?: string;
+  hashBoardSN?: string;
   minerId?: string;
   refreshTimeFrom?: string;
   isDismantled?: "在架" | "下架" | "未知";
@@ -94,6 +95,7 @@ export interface AbnormalAnalysisDetailItem {
   site: string;
   mac: string;
   controlBoardSN: string;
+  hashBoardSN: string[];
   model: string;
   minerCode: string[];
   ipAddress: string[];

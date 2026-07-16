@@ -86,13 +86,20 @@ function safeMinerCodeGroups(value: unknown): AbnormalAnalysisDetailMinerCodeGro
   return value
     .map((item) => {
       if (!item || typeof item !== "object") return null;
-      const site =
-        typeof (item as { site?: unknown }).site === "string" ? (item as { site: string }).site.trim() : "";
+      const siteValue = pickValue(
+        (item as { site?: unknown }).site,
+        (item as { siteName?: unknown }).siteName,
+      );
+      const site = typeof siteValue === "string" ? siteValue.trim() : "";
       const minerCode = safeStringArray((item as { minerCode?: unknown }).minerCode);
       if (!site) return null;
       return { site, minerCode };
     })
     .filter((item): item is AbnormalAnalysisDetailMinerCodeGroup => Boolean(item));
+}
+
+function pickValue<T>(...values: T[]): T | undefined {
+  return values.find((value) => value !== undefined && value !== null);
 }
 
 function statsCards(stats: SiteInfo["abnormalStats"]) {
@@ -244,6 +251,7 @@ export default function AbnormalAnalysisPage() {
   const [searchSite, setSearchSite] = useState<string>("all");
   const [searchMac, setSearchMac] = useState<string>("");
   const [searchSN, setSearchSN] = useState<string>("");
+  const [searchHashBoardSN, setSearchHashBoardSN] = useState<string>("");
   const [searchMinerId, setSearchMinerId] = useState<string>("");
   const [searchRefreshTimeFrom, setSearchRefreshTimeFrom] = useState<Dayjs | null>(null);
   const [searchDismantled, setSearchDismantled] = useState<DismantledFilter>("all");
@@ -254,6 +262,7 @@ export default function AbnormalAnalysisPage() {
     site: "all" as string,
     mac: "",
     sn: "",
+    hashBoardSN: "",
     minerId: "",
     refreshTimeFrom: "",
     dismantled: "all" as DismantledFilter,
@@ -266,6 +275,7 @@ export default function AbnormalAnalysisPage() {
       site: searchSite,
       mac: searchMac.trim(),
       sn: searchSN.trim(),
+      hashBoardSN: searchHashBoardSN.trim(),
       minerId: searchMinerId.trim(),
       refreshTimeFrom: searchRefreshTimeFrom ? searchRefreshTimeFrom.format("YYYY-MM-DD HH:mm:ss") : "",
       dismantled: searchDismantled,
@@ -279,6 +289,7 @@ export default function AbnormalAnalysisPage() {
     setSearchSite("all");
     setSearchMac("");
     setSearchSN("");
+    setSearchHashBoardSN("");
     setSearchMinerId("");
     setSearchRefreshTimeFrom(null);
     setSearchDismantled("all");
@@ -287,6 +298,7 @@ export default function AbnormalAnalysisPage() {
       site: "all",
       mac: "",
       sn: "",
+      hashBoardSN: "",
       minerId: "",
       refreshTimeFrom: "",
       dismantled: "all",
@@ -420,6 +432,7 @@ export default function AbnormalAnalysisPage() {
       ...(filters.site !== "all" ? { siteName: filters.site } : {}),
       ...(filters.mac ? { mac: filters.mac } : {}),
       ...(filters.sn ? { controlBoardSN: filters.sn } : {}),
+      ...(filters.hashBoardSN ? { hashBoardSN: filters.hashBoardSN } : {}),
       ...(filters.minerId ? { minerId: filters.minerId } : {}),
       ...(filters.refreshTimeFrom ? { refreshTimeFrom: filters.refreshTimeFrom } : {}),
       ...(filters.dismantled !== "all" ? { isDismantled: filters.dismantled } : {}),
@@ -579,6 +592,8 @@ export default function AbnormalAnalysisPage() {
       title: "场地",
       dataIndex: "site",
       key: "site",
+      width: 220,
+      fixed: "left",
       render: (text: string) => (
         <span className="font-medium text-slate-700 flex items-center gap-1.5">
           <EnvironmentOutlined className="text-slate-400" />
@@ -590,6 +605,8 @@ export default function AbnormalAnalysisPage() {
       title: "MAC 地址",
       dataIndex: "mac",
       key: "mac",
+      width: 180,
+      fixed: "left",
       render: (text: string) => (
         <span className="font-mono text-xs bg-slate-100 px-1.5 py-0.5 rounded text-slate-600 flex items-center justify-between group max-w-[170px]">
           <span>{text}</span>
@@ -606,6 +623,8 @@ export default function AbnormalAnalysisPage() {
       title: "控制板 SN",
       dataIndex: "controlBoardSN",
       key: "controlBoardSN",
+      width: 180,
+      fixed: "left",
       render: (text: string) => (
         <span className="font-mono text-xs text-slate-500 flex items-center justify-between group max-w-[150px]">
           <span>{text}</span>
@@ -622,12 +641,41 @@ export default function AbnormalAnalysisPage() {
       title: "机型",
       dataIndex: "model",
       key: "model",
+      width: 260,
       render: (text: string) => <Tag color="blue">{text}</Tag>,
+    },
+    {
+      title: "算力板序列号",
+      dataIndex: "hashBoardSN",
+      key: "hashBoardSN",
+      width: 560,
+      render: (value: string[]) => {
+        const list = safeStringArray(value);
+        if (list.length === 0) return <span className="text-slate-400">-</span>;
+        return (
+          <div className="flex items-start justify-between gap-2 group">
+            <div className="flex flex-nowrap gap-1 overflow-x-auto whitespace-nowrap pb-1 max-w-[500px]">
+              {list.map((item) => (
+                <Tag key={item} color="cyan">
+                  {item}
+                </Tag>
+              ))}
+            </div>
+            <Tooltip title="复制算力板序列号">
+              <CopyOutlined
+                className="text-slate-400 hover:text-blue-500 cursor-pointer opacity-0 group-hover:opacity-100 transition-opacity mt-1"
+                onClick={() => handleCopyText(list.join(", "), "算力板序列号")}
+              />
+            </Tooltip>
+          </div>
+        );
+      },
     },
     {
       title: "矿工号",
       dataIndex: "minerCode",
       key: "minerCode",
+      width: 220,
       render: (value: string[]) => {
         const list = safeStringArray(value);
         if (list.length === 0) return <span className="text-slate-400">-</span>;
@@ -649,6 +697,7 @@ export default function AbnormalAnalysisPage() {
       title: "IP 地址",
       dataIndex: "ipAddress",
       key: "ipAddress",
+      width: 220,
       render: (value: string[]) => {
         const list = safeStringArray(value);
         if (list.length === 0) return <span className="text-slate-400">-</span>;
@@ -670,6 +719,7 @@ export default function AbnormalAnalysisPage() {
       title: "刷新时间",
       dataIndex: "refreshTime",
       key: "refreshTime",
+      width: 180,
       sorter: true,
       sortDirections: refreshTimeSortDirections,
       sortOrder: detailOrderBy === "refreshTimeDesc" ? ("descend" as const) : ("ascend" as const),
@@ -690,6 +740,7 @@ export default function AbnormalAnalysisPage() {
       title: "是否下架",
       dataIndex: "isDismantled",
       key: "isDismantled",
+      width: 110,
       render: (text: string) => {
         if (text === "下架") {
           return (
@@ -716,12 +767,14 @@ export default function AbnormalAnalysisPage() {
       title: "下架时间",
       dataIndex: "dismantledTime",
       key: "dismantledTime",
+      width: 180,
       render: (text: string) => <span className="text-xs text-slate-500">{text}</span>,
     },
     {
       title: "产权",
       dataIndex: "assetOwnership",
       key: "assetOwnership",
+      width: 100,
       render: (text: string) => {
         let color = "default";
         if (text === "自有") color = "processing";
@@ -1057,6 +1110,15 @@ export default function AbnormalAnalysisPage() {
                 />
               </Col>
               <Col xs={24} sm={12} md={6} lg={4}>
+                <div className="text-xs text-slate-500 mb-1.5 font-medium">算力板序列号</div>
+                <Input
+                  placeholder="搜索算力板序列号"
+                  value={searchHashBoardSN}
+                  onChange={(e) => setSearchHashBoardSN(e.target.value)}
+                  allowClear
+                />
+              </Col>
+              <Col xs={24} sm={12} md={6} lg={4}>
                 <div className="text-xs text-slate-500 mb-1.5 font-medium">矿工号</div>
                 <Select
                   showSearch
@@ -1140,6 +1202,7 @@ export default function AbnormalAnalysisPage() {
             columns={columns}
             dataSource={detailList}
             rowKey="id"
+            scroll={{ x: 2000 }}
             onChange={(
               pagination: any,
               _filters: any,
