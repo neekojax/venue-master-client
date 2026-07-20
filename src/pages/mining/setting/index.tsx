@@ -71,14 +71,21 @@ const LEASE_STATUS_PARTIAL = "部分租赁" as const;
 const LEASE_STATUS_FULL = "全部租赁" as const;
 const LEASE_STATUS_PARTIAL_POWER = "部分租赁算力" as const;
 const LEASE_STATUS_NONE = "非租赁" as const;
+const LEASE_STATUS_PENDING_REMOVAL = "待撤场" as const;
 
-type StatusFilterValue = number | typeof LEASE_STATUS_PARTIAL | typeof LEASE_STATUS_FULL | null;
+type StatusFilterValue =
+  | number
+  | typeof LEASE_STATUS_PARTIAL
+  | typeof LEASE_STATUS_FULL
+  | typeof LEASE_STATUS_PENDING_REMOVAL
+  | null;
 
 const LEASE_STATUS_COLOR_MAP: Record<AccountLeaseStatus, string> = {
   全部租赁: "#7c3aed",
   部分租赁: "#d97706",
   部分租赁算力: "#0891b2",
   非租赁: "#6b7280",
+  待撤场: "#d9480f",
 };
 
 const getOperationalStatusMeta = (status?: number) => {
@@ -951,6 +958,9 @@ export default function MiningSettingPage() {
                 <Option value={3} style={{ fontSize: "12px", textAlign: "left" }}>
                   <span className="status-dot status-active" />
                   <span>入库</span>
+                </Option>
+                <Option value={LEASE_STATUS_PENDING_REMOVAL} style={{ fontSize: "12px", textAlign: "left" }}>
+                  <span style={{ color: LEASE_STATUS_COLOR_MAP[LEASE_STATUS_PENDING_REMOVAL] }}>待撤场</span>
                 </Option>
                 <Option value={LEASE_STATUS_PARTIAL} style={{ fontSize: "12px", textAlign: "left" }}>
                   <span style={{ color: LEASE_STATUS_COLOR_MAP[LEASE_STATUS_PARTIAL] }}>部分租赁</span>
