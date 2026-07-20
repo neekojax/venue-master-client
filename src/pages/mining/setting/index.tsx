@@ -54,7 +54,7 @@ const emptyData = {
   name: "",
   pool_type: "",
   country: "",
-  status: 0, // 状态：0 关机，1 活跃
+  status: 0, // 状态：0 关机，1 活跃，2 已撤场，3 入库
   hosted_machine: 0,
   // pool_category: "",
   theoretical_hashrate: 0,
@@ -90,6 +90,9 @@ const getOperationalStatusMeta = (status?: number) => {
   }
   if (status === 2) {
     return { text: "已撤场", color: "orange" };
+  }
+  if (status === 3) {
+    return { text: "入库", color: "#1677ff" };
   }
   return { text: "-", color: "#999" };
 };
@@ -945,6 +948,10 @@ export default function MiningSettingPage() {
                   <span className="status-dot status-offline " />
                   <span>已撤场</span>
                 </Option>
+                <Option value={3} style={{ fontSize: "12px", textAlign: "left" }}>
+                  <span className="status-dot status-active" />
+                  <span>入库</span>
+                </Option>
                 <Option value={LEASE_STATUS_PARTIAL} style={{ fontSize: "12px", textAlign: "left" }}>
                   <span style={{ color: LEASE_STATUS_COLOR_MAP[LEASE_STATUS_PARTIAL] }}>部分租赁</span>
                 </Option>
@@ -1110,6 +1117,7 @@ export default function MiningSettingPage() {
                   { value: 0, label: "关机" },
                   { value: 1, label: "活跃" },
                   { value: 2, label: "已撤场" },
+                  { value: 3, label: "入库" },
                 ]}
               />
             </Form.Item>

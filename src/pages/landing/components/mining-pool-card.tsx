@@ -17,6 +17,12 @@ const twoColors: ProgressProps["strokeColor"] = {
   "100%": "#108ee9",
 };
 
+const formatHashrate = (value: unknown) =>
+  new Intl.NumberFormat("zh-CN", {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  }).format(Number(value ?? 0));
+
 const MiningPoolCard: React.FC<MiningPoolCardProps> = ({ poolType }) => {
   const [realTimeStatus, setRealTimeStatus] = useState<any>(null); // 状态数据
   const [lastHashStatus, setLastHashStatus] = useState<any>(null); // 状态数据
@@ -53,6 +59,7 @@ const MiningPoolCard: React.FC<MiningPoolCardProps> = ({ poolType }) => {
         totalMasterCurrentHashrate: 0, // 默认主矿池算力
         totalBackUpCurrentHashrate: 0, // 默认备用矿池算力
         totalLeasedPowerHashrate: 0, // 默认已租算力
+        totalRawTheoreticalHashrate: 0, // 默认原始理论算力
         realTimeHashEfficiency: "N/A",
       });
     } finally {
@@ -153,7 +160,16 @@ const MiningPoolCard: React.FC<MiningPoolCardProps> = ({ poolType }) => {
               title="理论算力"
               className="fs-6 text-gray-500 fw-semibold"
               value={realTimeStatus?.totalTheoreticalHashrate}
-              suffix={<span style={{ fontSize: "16px", color: "gray", fontWeight: "normal" }}>PH/s</span>}
+              suffix={
+                <span style={{ fontSize: "16px", color: "gray", fontWeight: "normal" }}>
+                  PH/s
+                  <Tooltip
+                    title={`原始理论算力: ${formatHashrate(realTimeStatus?.totalRawTheoreticalHashrate)} PH/s`}
+                  >
+                    <InfoCircleOutlined style={{ fontSize: "12px", marginLeft: "8px", cursor: "pointer" }} />
+                  </Tooltip>
+                </span>
+              }
               valueStyle={{ fontSize: "20px", fontWeight: "bold" }}
             />
             <div style={{ marginTop: 6 }}>
@@ -179,14 +195,7 @@ const MiningPoolCard: React.FC<MiningPoolCardProps> = ({ poolType }) => {
                       display: "inline-block",
                     }}
                   />
-                  <span>
-                    租赁算力{" "}
-                    {new Intl.NumberFormat("zh-CN", {
-                      minimumFractionDigits: 2,
-                      maximumFractionDigits: 2,
-                    }).format(Number(realTimeStatus?.totalLeasedPowerHashrate ?? 0))}{" "}
-                    PH/s
-                  </span>
+                  <span>租赁算力 {formatHashrate(realTimeStatus?.totalLeasedPowerHashrate)} PH/s</span>
                 </span>
               </Tooltip>
             </div>

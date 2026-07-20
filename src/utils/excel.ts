@@ -387,6 +387,8 @@ export const exportMiningPoolListToExcel = (data: any) => {
     } else if (status === 2) {
       statusText = "已撤场";
       // statusStyle = { color: "orange" }; // 已撤场状态，红色
+    } else if (status === 3) {
+      statusText = "入库";
     }
 
     return { statusText };

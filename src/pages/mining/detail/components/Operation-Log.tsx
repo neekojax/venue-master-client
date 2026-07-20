@@ -1,6 +1,6 @@
 import React, { useMemo, useState } from "react";
 import { useParams } from "react-router-dom";
-import { Button, DatePicker, Form, InputNumber, message, Modal, Popconfirm, Radio, Table } from "antd";
+import { Button, DatePicker, Form, InputNumber, message, Modal, Popconfirm, Radio, Table, Tag } from "antd";
 import type { ColumnsType } from "antd/es/table";
 import dayjs from "dayjs";
 
@@ -27,16 +27,37 @@ type PoolRecord = {
 };
 
 const CLOUD_POWER_OPTIONS = [
-  { label: "否", value: 0 },
+  { label: "正常", value: 0 },
   { label: "云算力", value: 1 },
-  { label: "整条租赁", value: 2 },
+  { label: "租赁算力（整条为租赁）", value: 2 },
   { label: "含租赁算力", value: 3 },
+  { label: "待撤场", value: 4 },
 ];
 
 const OVERCLOCK_OPTIONS = [
   { label: "否", value: 0 },
   { label: "是", value: 1 },
 ];
+
+function renderCloudPowerTag(value: number | undefined) {
+  const normalizedValue = Number(value ?? 0);
+  const matchedOption = CLOUD_POWER_OPTIONS.find((item) => item.value === normalizedValue);
+
+  const colorMap: Record<number, string> = {
+    0: "default",
+    1: "blue",
+    2: "purple",
+    3: "cyan",
+    4: "volcano",
+  };
+
+  return <Tag color={colorMap[normalizedValue] ?? "default"}>{matchedOption?.label ?? "正常"}</Tag>;
+}
+
+function renderOverclockTag(value: number | undefined) {
+  const normalizedValue = Number(value ?? 0);
+  return <Tag color={normalizedValue === 1 ? "gold" : "default"}>{normalizedValue === 1 ? "是" : "否"}</Tag>;
+}
 
 const OperationLog: React.FC = () => {
   const params = useParams<{ venueId: string; poolId: string }>();
@@ -142,11 +163,10 @@ const OperationLog: React.FC = () => {
     { title: "理论算力", dataIndex: "theoretical_hashrate", key: "theoretical_hashrate" },
     { title: "托管机器", dataIndex: "hosted_machine", key: "hosted_machine", align: "right" },
     {
-      title: "是否云算力区间",
+      title: "算力区间类型",
       dataIndex: "is_cloud_power",
       key: "is_cloud_power",
-      render: (value: number | undefined) =>
-        CLOUD_POWER_OPTIONS.find((item) => item.value === value)?.label ?? "否",
+      render: (value: number | undefined) => renderCloudPowerTag(value),
     },
     {
       title: "租赁算力(P)",
@@ -159,7 +179,7 @@ const OperationLog: React.FC = () => {
       title: "是否变频",
       dataIndex: "is_overclocked",
       key: "is_overclocked",
-      render: (value: number | undefined) => (Number(value ?? 0) === 1 ? "是" : "否"),
+      render: (value: number | undefined) => renderOverclockTag(value),
     },
     {
       title: "变频后单机算力(T)",
@@ -242,18 +262,35 @@ const OperationLog: React.FC = () => {
             <InputNumber className="w-full" min={0} placeholder="请输入托管机器" />
           </Form.Item>
           <Form.Item
-            label="是否云算力区间"
+            label="算力区间类型"
             name="is_cloud_power"
-            rules={[{ required: true, message: "请选择是否云算力区间" }]}
+            rules={[{ required: true, message: "请选择算力区间类型" }]}
           >
             <Radio.Group
-              options={CLOUD_POWER_OPTIONS}
+              className="w-full"
               onChange={(e) => {
                 if (e.target.value !== 3) {
                   form.setFieldValue("leased_power", 0);
                 }
               }}
-            />
+            >
+              <div className="flex flex-col gap-3">
+                <div className="flex flex-wrap gap-x-8 gap-y-2">
+                  {CLOUD_POWER_OPTIONS.slice(0, 3).map((option) => (
+                    <Radio key={option.value} value={option.value}>
+                      {option.label}
+                    </Radio>
+                  ))}
+                </div>
+                <div className="flex flex-wrap gap-x-8 gap-y-2">
+                  {CLOUD_POWER_OPTIONS.slice(3).map((option) => (
+                    <Radio key={option.value} value={option.value}>
+                      {option.label}
+                    </Radio>
+                  ))}
+                </div>
+              </div>
+            </Radio.Group>
           </Form.Item>
           <Form.Item label="租赁算力(P)" name="leased_power">
             <InputNumber
