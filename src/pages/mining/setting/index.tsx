@@ -859,6 +859,9 @@ export default function MiningSettingPage() {
         search === "" ||
         String(item?.venue_name || "")
           .toLowerCase()
+          .includes(search) ||
+        String(item?.pool_name || "")
+          .toLowerCase()
           .includes(search);
 
       // 2️⃣ 收藏过滤
@@ -926,7 +929,7 @@ export default function MiningSettingPage() {
             <div style={{ marginBottom: 16, marginRight: "0px", color: "#000" }}>
               <Input
                 prefix={<SearchOutlined style={{ color: "rgba(0, 0, 0, 0.25)" }} size={18} />}
-                placeholder="请输入搜索字段"
+                placeholder="请输入场地或子账户名"
                 value={searchTerm}
                 size="middle"
                 onChange={handleSearch}
