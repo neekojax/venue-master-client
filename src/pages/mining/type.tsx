@@ -73,6 +73,23 @@ export type HostRecordCreate = {
   is_in_consignment: boolean; // 是否在寄售期
 };
 
+export type AssetSiteInfo = {
+  id: number;
+  name: string;
+  group_id: string;
+  status: string;
+  venue_id: number;
+  pool_id: number;
+  created_at: string;
+  updated_at: string;
+};
+
+export type AssetSiteMappingUpdate = {
+  id: number;
+  venue_id?: number;
+  pool_id?: number;
+};
+
 export type HostRecordUpdate = {
   id: number; // ID
   venue_id: number; // 场馆ID

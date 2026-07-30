@@ -7,6 +7,7 @@ import {
   ExportOutlined,
   FormOutlined,
   ImportOutlined,
+  LinkOutlined,
   SearchOutlined,
 } from "@ant-design/icons";
 import { CaretDownOutlined, CaretUpOutlined } from "@ant-design/icons";
@@ -42,12 +43,14 @@ import ExcelUpload from "@/components/excel-upload";
 import { uploadMiningPoolExcel } from "@/pages/mining/api.tsx";
 import EditForm from "@/pages/mining/components/edit-form.tsx";
 import {
+  useAssetSiteInfoList,
+  useAssetSiteInfoUpdateMapping,
   useMiningPoolDelete,
   useMiningPoolList,
   useMiningPoolNew,
   useMiningPoolUpdate,
 } from "@/pages/mining/hook.ts";
-import { AccountLeaseStatus, MiningPool, MiningPoolUpdate } from "@/pages/mining/type.tsx";
+import { AccountLeaseStatus, AssetSiteInfo, MiningPool, MiningPoolUpdate } from "@/pages/mining/type.tsx";
 import { useVenueList } from "@/pages/venue/hook/hook.ts";
 
 const emptyData = {
@@ -112,6 +115,27 @@ const formatLeasePower = (leasedPower?: number | null) => {
   return `${Number(leasedPower)}P`;
 };
 
+type MiningPoolTableRow = {
+  key: number;
+  pool_id: number;
+  venue_id: number;
+  venue_name: string;
+  pool_name: string;
+  country?: string;
+  hosted_machine?: number;
+  status?: number;
+  pool_category?: string;
+  theoretical_hashrate?: number | string;
+  is_overclocked?: number | null;
+  overclock_hashrate_per_machine?: number | null;
+  leased_power?: number | null;
+  heat_diss_mode?: number;
+  link?: string;
+  collection?: 0 | 1;
+  asset_site_bound?: boolean;
+  account_lease_status?: AccountLeaseStatus;
+};
+
 export default function MiningSettingPage() {
   useAuthRedirect();
 
@@ -168,6 +192,11 @@ export default function MiningSettingPage() {
   );
 
   const { data: poolsData, isLoading: isLoadingPools } = useMiningPoolList(poolType, poolCategory);
+  const [isAssetBindModalOpen, setIsAssetBindModalOpen] = useState(false);
+  const [assetBindingRow, setAssetBindingRow] = useState<MiningPoolTableRow | null>(null);
+  const [selectedAssetSiteId, setSelectedAssetSiteId] = useState<number | undefined>();
+  const { data: assetSiteInfoData, isLoading: isLoadingAssetSiteInfo } = useAssetSiteInfoList();
+  const assetSiteMappingMutation = useAssetSiteInfoUpdateMapping();
 
   const [columns, setColumns] = useState<any>([]);
   const [tableData, setTableData] = useState<any>([]);
@@ -175,11 +204,36 @@ export default function MiningSettingPage() {
     // 初始化时从 localStorage 取值
     return localStorage.getItem("showCollectionOnly") === "true";
   });
+  const [permissionIds, setPermissionIds] = useState<string>(localStorage.getItem("permission_ids") || "");
 
   // 当值变化时写入 localStorage
   useEffect(() => {
     localStorage.setItem("showCollectionOnly", String(showCollectionOnly));
   }, [showCollectionOnly]);
+
+  useEffect(() => {
+    const updatePermissionIds = () => {
+      setPermissionIds(localStorage.getItem("permission_ids") || "");
+    };
+
+    const onStorage = (event: StorageEvent) => {
+      if (event.key === "permission_ids") {
+        updatePermissionIds();
+      }
+    };
+
+    const onPermissionUpdated = () => {
+      updatePermissionIds();
+    };
+
+    window.addEventListener("storage", onStorage);
+    window.addEventListener("permission_ids_updated", onPermissionUpdated as EventListener);
+
+    return () => {
+      window.removeEventListener("storage", onStorage);
+      window.removeEventListener("permission_ids_updated", onPermissionUpdated as EventListener);
+    };
+  }, []);
 
   const newMutation = useMiningPoolNew();
   const updateMutation = useMiningPoolUpdate();
@@ -198,6 +252,12 @@ export default function MiningSettingPage() {
   const { data: venueList } = useVenueList(poolType);
 
   const [form] = Form.useForm();
+  const assetSiteList: AssetSiteInfo[] = assetSiteInfoData?.data?.list ?? [];
+  const isSuperAdmin = permissionIds
+    .split(",")
+    .map((item) => item.trim())
+    .filter(Boolean)
+    .includes("role-super-admin");
 
   const showModal = (record: any) => {
     setCurrentRow(record);
@@ -265,6 +325,51 @@ export default function MiningSettingPage() {
   const handleCancel = () => {
     setIsModalOpen(false);
   };
+
+  const openAssetBindModal = (record: MiningPoolTableRow) => {
+    if (record.pool_category !== "主矿池") {
+      message.warning("只能为主矿池绑定资产系统场地");
+      return;
+    }
+
+    setAssetBindingRow(record);
+    setSelectedAssetSiteId(undefined);
+    setIsAssetBindModalOpen(true);
+  };
+
+  const closeAssetBindModal = () => {
+    setIsAssetBindModalOpen(false);
+    setAssetBindingRow(null);
+    setSelectedAssetSiteId(undefined);
+  };
+
+  const handleAssetSiteBind = async () => {
+    if (!assetBindingRow) {
+      message.warning("未找到当前账户信息");
+      return;
+    }
+
+    if (!selectedAssetSiteId) {
+      message.warning("请选择资产系统场地");
+      return;
+    }
+
+    try {
+      const result = await assetSiteMappingMutation.mutateAsync({
+        id: selectedAssetSiteId,
+        venue_id: Number(assetBindingRow.venue_id),
+        pool_id: Number(assetBindingRow.pool_id),
+      });
+
+      setTableData((prev: MiningPoolTableRow[]) =>
+        prev.map((item) => (item.key === assetBindingRow.key ? { ...item, asset_site_bound: true } : item)),
+      );
+      message.success(`已绑定资产场地：${result?.data?.name ?? selectedAssetSiteId}`);
+      closeAssetBindModal();
+    } catch (error: any) {
+      message.error(`绑定失败: ${error.message}`);
+    }
+  };
   const StatusColumn = ({
     status,
     accountLeaseStatus,
@@ -314,6 +419,7 @@ export default function MiningSettingPage() {
             is_overclocked: any;
             overclock_hashrate_per_machine: any;
             leased_power: any;
+            asset_site_bound: any;
             // energy_ratio: any;
             // basic_hosting_fee: any;
             heat_diss_mode: any;
@@ -339,6 +445,7 @@ export default function MiningSettingPage() {
           is_overclocked: item.is_overclocked,
           overclock_hashrate_per_machine: item.overclock_hashrate_per_machine,
           leased_power: item.leased_power,
+          asset_site_bound: Boolean(item.asset_site_bound),
           // energy_ratio: item.energy_ratio,
           // basic_hosting_fee: item.basic_hosting_fee,
           heat_diss_mode: item.heat_diss_mode,
@@ -661,25 +768,53 @@ export default function MiningSettingPage() {
         title: "操作",
         valueType: "option1",
         key: "operation",
-        width: 100,
-        render: (_text: any, record: any) => (
-          <>
-            <a key={`edit-${record.key}`} onClick={() => showModal(record)} style={{ marginRight: "7px" }}>
-              <FormOutlined />
-            </a>
-            <Popconfirm
-              title="确认删除此记录吗？"
-              onConfirm={() => handleDelete(record.key)} // 调用 onDelete
-              okText="是"
-              cancelText="否"
-            >
-              <a key={`delete-${record.key}`}>
-                {/* 删除 */}
-                <DeleteOutlined style={{ color: "red" }} />
+        width: 190,
+        render: (_text: any, record: MiningPoolTableRow) => {
+          const isBound = Boolean(record.asset_site_bound);
+
+          return (
+            <div className="flex items-center gap-2">
+              <a key={`edit-${record.key}`} onClick={() => showModal(record)}>
+                <FormOutlined />
               </a>
-            </Popconfirm>
-          </>
-        ),
+              <Popconfirm
+                title="确认删除此记录吗？"
+                onConfirm={() => handleDelete(record.key)}
+                okText="是"
+                cancelText="否"
+              >
+                <a key={`delete-${record.key}`}>
+                  <DeleteOutlined style={{ color: "red" }} />
+                </a>
+              </Popconfirm>
+              {isSuperAdmin ? (
+                <Tooltip
+                  title={
+                    record.pool_category !== "主矿池"
+                      ? "仅主矿池支持绑定"
+                      : isBound
+                        ? "已绑定资产系统场地"
+                        : "当前未绑定资产系统场地"
+                  }
+                >
+                  <Button
+                    type="link"
+                    size="small"
+                    icon={<LinkOutlined />}
+                    style={{
+                      padding: 0,
+                      height: "auto",
+                      color: record.pool_category !== "主矿池" ? "#94a3b8" : isBound ? "#16a34a" : "#d97706",
+                    }}
+                    onClick={() => openAssetBindModal(record)}
+                  >
+                    资产绑定
+                  </Button>
+                </Tooltip>
+              ) : null}
+            </div>
+          );
+        },
         // render: (record: { key: number }, action: { startEditable: (arg0: any) => void }) => [
         //   <a key={`edit-${record.key}`} onClick={() => showModal(record.key, record)}>
         //     {/* // <a key={`edit-${record.key}`} onClick={() => showModal(record.key)}> */}
@@ -889,6 +1024,8 @@ export default function MiningSettingPage() {
       return nameA.localeCompare(nameB);
     });
 
+  const selectedAssetSite = assetSiteList.find((item) => Number(item.id) === Number(selectedAssetSiteId));
+
   // @ts-ignore
   return (
     <div>
@@ -1027,6 +1164,70 @@ export default function MiningSettingPage() {
             handleSave={handleSave}
           />
         )}
+        <Modal
+          title="绑定资产系统场地"
+          open={isAssetBindModalOpen}
+          onOk={handleAssetSiteBind}
+          onCancel={closeAssetBindModal}
+          okText="确认绑定"
+          cancelText="取消"
+          confirmLoading={assetSiteMappingMutation.isPending}
+          destroyOnClose
+        >
+          <div className="flex flex-col gap-4">
+            <div className="rounded-lg border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-700">
+              <div className="mb-2 text-sm font-medium text-slate-900">当前账户</div>
+              <div>场地：{assetBindingRow?.venue_name || "-"}</div>
+              <div>子账户：{assetBindingRow?.pool_name || "-"}</div>
+              <div>系统场地 ID：{assetBindingRow?.venue_id ?? "-"}</div>
+              <div>系统主矿池 ID：{assetBindingRow?.pool_id ?? "-"}</div>
+            </div>
+
+            <div>
+              <div className="mb-2 text-sm font-medium text-slate-900">选择资产系统场地</div>
+              <Select
+                showSearch
+                className="w-full"
+                placeholder="请选择资产系统场地"
+                value={selectedAssetSiteId}
+                loading={isLoadingAssetSiteInfo}
+                optionFilterProp="label"
+                onChange={(value) => setSelectedAssetSiteId(value)}
+                options={assetSiteList.map((item) => ({
+                  value: item.id,
+                  label: `${item.name}（ID: ${item.id}）`,
+                }))}
+                notFoundContent={isLoadingAssetSiteInfo ? "加载中..." : "暂无资产场地"}
+              />
+            </div>
+
+            <div className="rounded-lg border border-slate-200 px-4 py-3 text-sm text-slate-700">
+              <div className="mb-2 text-sm font-medium text-slate-900">当前绑定情况</div>
+              {assetBindingRow?.asset_site_bound ? (
+                <div>当前已绑定资产系统场地</div>
+              ) : (
+                <div>当前未绑定资产系统场地</div>
+              )}
+            </div>
+
+            {selectedAssetSite ? (
+              <div className="rounded-lg border border-blue-200 bg-blue-50 px-4 py-3 text-sm text-slate-700">
+                <div className="mb-2 text-sm font-medium text-slate-900">待绑定资产场地</div>
+                <div>名称：{selectedAssetSite.name}</div>
+                <div>资产场地 ID：{selectedAssetSite.id}</div>
+                <div>组织 ID：{selectedAssetSite.group_id || "-"}</div>
+                <div className="flex items-center gap-2">
+                  <span>状态：</span>
+                  <Tag color={selectedAssetSite.status === "active" ? "green" : "default"}>
+                    {selectedAssetSite.status || "-"}
+                  </Tag>
+                </div>
+                <div>当前映射场地 ID：{selectedAssetSite.venue_id ?? 0}</div>
+                <div>当前映射主矿池 ID：{selectedAssetSite.pool_id ?? 0}</div>
+              </div>
+            ) : null}
+          </div>
+        </Modal>
         <Modal
           title="修改矿池"
           className="editModal"

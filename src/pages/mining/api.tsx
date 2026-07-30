@@ -1,6 +1,7 @@
 // 增加矿池
 import { fetchDelete, fetchGet, fetchPost, fetchPostFile } from "@/helper/fetchHelper.ts";
 import {
+  AssetSiteMappingUpdate,
   HostRecordCreate,
   HostRecordUpdate,
   MiningPool,
@@ -105,4 +106,12 @@ export const uploadMiningPoolExcel = async (file: File) => {
     }
     return response;
   });
+};
+
+export const fetchAssetSiteInfoList = async () => {
+  return await fetchGet("/asset/site-info");
+};
+
+export const submitAssetSiteInfoMappingUpdate = async (data: AssetSiteMappingUpdate) => {
+  return await fetchPost("/asset/site-info/update-mapping", data);
 };

@@ -5,10 +5,12 @@ import {
   createPoolRecord,
   deleteHostRecord,
   deletePoolRecord,
+  fetchAssetSiteInfoList,
   fetchHostRecordList,
   fetchMiningHashRateList,
   fetchMiningPoolList,
   fetchPoolRecordList,
+  submitAssetSiteInfoMappingUpdate,
   submitMiningPoolDelete,
   submitMiningPoolNew,
   submitMiningPoolUpdate,
@@ -78,6 +80,29 @@ export const useMiningHashRateList = (poolType: string, poolCategory: string) =>
   return useQuery({
     queryKey: ["mining-hash-list", poolType, poolCategory],
     queryFn: () => fetchMiningHashRateList(poolType, poolCategory),
+  });
+};
+
+export const useAssetSiteInfoList = (enabled = true) => {
+  return useQuery({
+    queryKey: ["asset-site-info-list"],
+    queryFn: fetchAssetSiteInfoList,
+    enabled,
+  });
+};
+
+export const useAssetSiteInfoUpdateMapping = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: submitAssetSiteInfoMappingUpdate,
+    onSuccess: () => {
+      // @ts-ignore
+      queryClient.invalidateQueries(["asset-site-info-list"]);
+    },
+    onError: (error) => {
+      console.error("更新资产场地映射出错:", error);
+    },
   });
 };
 
