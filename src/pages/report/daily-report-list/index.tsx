@@ -1,7 +1,7 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import { useParams } from "react-router-dom";
 import { DownloadOutlined } from "@ant-design/icons";
-import { Button, DatePicker, Table } from "antd";
+import { Button, DatePicker, message, Progress, Table, Tag } from "antd";
 import type { RangePickerProps } from "antd/es/date-picker";
 import type { ColumnsType } from "antd/es/table";
 import dayjs from "dayjs";
@@ -10,7 +10,11 @@ import isSameOrBefore from "dayjs/plugin/isSameOrBefore";
 import * as XLSX from "xlsx";
 import { useSelector, useSettingsStore } from "@/stores";
 
-import { fetchAllDailyStat } from "@/pages/report/api.tsx";
+import {
+  fetchAllDailyStatTask,
+  fetchAllDailyStatTaskResult,
+  submitAllDailyStatTask,
+} from "@/pages/report/api.tsx";
 // 必须扩展 dayjs，否则会报 “不存在属性”
 dayjs.extend(isSameOrAfter);
 dayjs.extend(isSameOrBefore);
@@ -52,6 +56,51 @@ interface DataType {
   subAccountStats: SubAccountStat[];
 }
 
+interface DailyStatTaskPayload {
+  taskId: string;
+  status: "pending" | "running" | "success" | "failed";
+  progress: number;
+  totalDays: number;
+  resultCount: number;
+  startDate: string;
+  endDate: string;
+  errorMessage: string;
+}
+
+const TASK_STATUS_TEXT: Record<DailyStatTaskPayload["status"], string> = {
+  pending: "等待执行",
+  running: "执行中",
+  success: "执行成功",
+  failed: "执行失败",
+};
+
+const TASK_STATUS_COLOR_MAP: Record<DailyStatTaskPayload["status"], string> = {
+  pending: "default",
+  running: "processing",
+  success: "green",
+  failed: "red",
+};
+
+const formatDailyRecords = (rawList: any[] = []): DataType[] =>
+  rawList.map((venue: any) => ({
+    date: venue.date || "",
+    btcOutput24h: venue.btcOutput24h || 0,
+    theoreticalPower: venue.theoreticalPower || 0,
+    power24h: venue.power24h || 0,
+    effectiveRate24h: venue.effectiveRate24h || 0,
+    totalMachines: venue.totalMachines || 0,
+    totalFailures: venue.totalFailures || 0,
+    impactMachine: venue.impactMachine || 0,
+    failures24h: venue.failures24h || 0,
+    failureRate24h: venue.failureRate24h || 0,
+    impactRatio: venue.impactRatio || 0,
+    onlineRatio: venue.onlineRatio || 0,
+    limitImpactRate: venue.limitImpactRate || 0,
+    highTemperatureRate: venue.highTemperatureRate || 0,
+    subAccountStats: venue.subAccountStats || [],
+    totalFailuresRate: venue.totalFailuresRate || 0,
+  }));
+
 const App: React.FC = () => {
   const params = useParams<{ venueId: string; venueName: string }>();
   const venueId = params.venueId!;
@@ -66,6 +115,17 @@ const App: React.FC = () => {
 
   const [filteredData, setFilteredData] = useState<DataType[]>([]);
   const [pageSize, setPageSize] = useState(20);
+  const [taskInfo, setTaskInfo] = useState<DailyStatTaskPayload | null>(null);
+  const [isSubmittingTask, setIsSubmittingTask] = useState(false);
+  const pollTimerRef = useRef<number | null>(null);
+  const requestSerialRef = useRef(0);
+
+  const clearPollTimer = useCallback(() => {
+    if (pollTimerRef.current != null) {
+      window.clearTimeout(pollTimerRef.current);
+      pollTimerRef.current = null;
+    }
+  }, []);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -77,6 +137,12 @@ const App: React.FC = () => {
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
+
+  useEffect(() => {
+    return () => {
+      clearPollTimer();
+    };
+  }, [clearPollTimer]);
 
   // 子账户统计表格列配置
   const subAccountColumns: ColumnsType<SubAccountStat> = [
@@ -287,63 +353,6 @@ const App: React.FC = () => {
     },
   ];
 
-  const fetchReportData = async () => {
-    setLoading(true); // 👈 开始加载
-    setFilteredData([]);
-
-    try {
-      // 检查 dateRange 是否存在
-      if (!dateRange) {
-        console.error("dateRange is null");
-        setLoading(false);
-        return;
-      }
-
-      const reportData = await fetchAllDailyStat(
-        poolType,
-        Number(venueId),
-        dateRange[0].format("YYYY-MM-DD"),
-        dateRange[1].format("YYYY-MM-DD"),
-      );
-      if (reportData && reportData.data) {
-        console.log("reportData:", reportData);
-        const formattedData: DataType[] = reportData.data.map((venue: any) => ({
-          date: venue.date || "",
-          btcOutput24h: venue.btcOutput24h || 0,
-          theoreticalPower: venue.theoreticalPower || 0,
-          power24h: venue.power24h || 0,
-          effectiveRate24h: venue.effectiveRate24h || 0,
-          totalMachines: venue.totalMachines || 0,
-          totalFailures: venue.totalFailures || 0,
-          impactMachine: venue.impactMachine || 0,
-          failures24h: venue.failures24h || 0,
-          failureRate24h: venue.failureRate24h || 0,
-          impactRatio: venue.impactRatio || 0,
-          onlineRatio: venue.onlineRatio || 0,
-          limitImpactRate: venue.limitImpactRate || 0,
-          highTemperatureRate: venue.highTemperatureRate || 0,
-          subAccountStats: venue.subAccountStats || [],
-          totalFailuresRate: venue.totalFailuresRate || 0,
-        }));
-        // setData(formattedData);
-        // 应用默认的日期筛选（最近1个月）
-        // const defaultStart = dayjs().subtract(1, "months");
-        // const defaultEnd = dayjs();
-        // const defaultFiltered = formattedData.filter((item) => {
-        //   const d = dayjs(item.date);
-        //   return d.isValid() && d.isSameOrAfter(defaultStart, "day") && d.isSameOrBefore(defaultEnd, "day");
-        // });
-        setFilteredData(formattedData);
-      } else {
-        console.error("API 返回无效:", reportData);
-      }
-    } catch (error) {
-      console.error("获取日报数据失败:", error);
-    } finally {
-      setLoading(false); // 👈 请求结束，关闭加载
-    }
-  };
-
   // 日期筛选
   // 先定义日期范围 state，默认为最近1个月
   const [dateRange, setDateRange] = useState<[dayjs.Dayjs, dayjs.Dayjs] | null>([
@@ -351,15 +360,122 @@ const App: React.FC = () => {
     dayjs(),
   ]);
 
-  // 拉取数据
-  useEffect(() => {
-    // 检查 dateRange 是否存在
+  const fetchTaskResult = useCallback(
+    async (taskId: string, requestSerial: number) => {
+      const result = await fetchAllDailyStatTaskResult(poolType, taskId);
+
+      if (requestSerial !== requestSerialRef.current) {
+        return;
+      }
+
+      setFilteredData(formatDailyRecords(result?.data));
+    },
+    [poolType],
+  );
+
+  const pollTaskStatus = useCallback(
+    async (taskId: string, requestSerial: number) => {
+      try {
+        const response = await fetchAllDailyStatTask(poolType, taskId);
+
+        if (requestSerial !== requestSerialRef.current) {
+          return;
+        }
+
+        const task = response?.data as DailyStatTaskPayload | undefined;
+        if (!task) {
+          throw new Error("任务状态返回为空");
+        }
+
+        setTaskInfo(task);
+
+        if (task.status === "success") {
+          await fetchTaskResult(taskId, requestSerial);
+          setLoading(false);
+          return;
+        }
+
+        if (task.status === "failed") {
+          throw new Error(task.errorMessage || "日报任务执行失败");
+        }
+
+        pollTimerRef.current = window.setTimeout(() => {
+          pollTaskStatus(taskId, requestSerial);
+        }, 2000);
+      } catch (error: any) {
+        if (requestSerial !== requestSerialRef.current) {
+          return;
+        }
+        setLoading(false);
+        message.error(error.message || "获取日报任务状态失败");
+      }
+    },
+    [fetchTaskResult, poolType],
+  );
+
+  const fetchReportData = useCallback(async () => {
     if (!dateRange) {
-      console.error("dateRange is null");
+      setLoading(false);
       return;
     }
-    fetchReportData();
-  }, [venueId, dateRange]);
+
+    requestSerialRef.current += 1;
+    const requestSerial = requestSerialRef.current;
+    clearPollTimer();
+    setIsSubmittingTask(true);
+    setLoading(true);
+    setFilteredData([]);
+    setTaskInfo(null);
+
+    try {
+      const submitResult = await submitAllDailyStatTask(
+        poolType,
+        Number(venueId),
+        dateRange[0].format("YYYY-MM-DD"),
+        dateRange[1].format("YYYY-MM-DD"),
+      );
+
+      if (requestSerial !== requestSerialRef.current) {
+        return;
+      }
+
+      const task = submitResult?.data?.task as DailyStatTaskPayload | undefined;
+      if (!task?.taskId) {
+        throw new Error("日报任务提交失败");
+      }
+
+      setIsSubmittingTask(false);
+      setTaskInfo(task);
+
+      if (task.status === "success") {
+        await fetchTaskResult(task.taskId, requestSerial);
+        setLoading(false);
+        return;
+      }
+
+      if (task.status === "failed") {
+        throw new Error(task.errorMessage || "日报任务执行失败");
+      }
+
+      pollTimerRef.current = window.setTimeout(() => {
+        pollTaskStatus(task.taskId, requestSerial);
+      }, 2000);
+    } catch (error) {
+      setIsSubmittingTask(false);
+      message.error((error as Error).message || "获取日报数据失败");
+      setTaskInfo(null);
+      setFilteredData([]);
+      clearPollTimer();
+      setLoading(false);
+    }
+  }, [clearPollTimer, dateRange, fetchTaskResult, pollTaskStatus, poolType, venueId]);
+
+  // 拉取数据
+  useEffect(() => {
+    if (dateRange) {
+      fetchReportData();
+    }
+  }, [dateRange, fetchReportData]);
 
   const onDateChange: RangePickerProps["onChange"] = (dates) => {
     setDateRange(dates as [dayjs.Dayjs, dayjs.Dayjs] | null);
@@ -369,9 +485,28 @@ const App: React.FC = () => {
   const handleReset = () => {
     const defaultStart = dayjs().subtract(1, "months");
     const defaultEnd = dayjs();
+    clearPollTimer();
+    setIsSubmittingTask(false);
     setDateRange([defaultStart, defaultEnd]);
+    setTaskInfo(null);
     setFilteredData([]); // 立即清空，触发表格重新渲染，随后 useEffect 会重新拉取
   };
+
+  const visibleTaskInfo = taskInfo;
+  const shouldShowTaskPanel =
+    isSubmittingTask ||
+    visibleTaskInfo?.status === "pending" ||
+    visibleTaskInfo?.status === "running" ||
+    visibleTaskInfo?.status === "failed";
+  const progressPercent = visibleTaskInfo
+    ? Math.min(
+        100,
+        Math.max(
+          0,
+          visibleTaskInfo.totalDays > 0 ? (visibleTaskInfo.progress / visibleTaskInfo.totalDays) * 100 : 0,
+        ),
+      )
+    : 0;
 
   // 导出 Excel
   const exportToCSV = () => {
@@ -605,17 +740,19 @@ const App: React.FC = () => {
         }`}
       >
         <div className="mb-6 flex items-center justify-between gap-4">
-          <RangePicker
-            value={dateRange}
-            onChange={onDateChange}
-            disabledDate={(current, { from }) => {
-              if (!from) return false;
-              // 限制最大选择范围为2个月
-              const maxRange = 2;
-              const diffMonths = Math.abs(current.diff(from, "month", true));
-              return diffMonths > maxRange;
-            }}
-          />
+          <div className="flex items-center gap-2">
+            <RangePicker
+              value={dateRange}
+              onChange={onDateChange}
+              disabledDate={(current, { from }) => {
+                if (!from) return false;
+                // 限制最大选择范围为2个月
+                const maxRange = 2;
+                const diffMonths = Math.abs(current.diff(from, "month", true));
+                return diffMonths > maxRange;
+              }}
+            />
+          </div>
           <div className="flex items-center gap-2">
             <Button onClick={handleReset} className="!rounded-button">
               重置
@@ -624,12 +761,51 @@ const App: React.FC = () => {
               type="primary"
               icon={<DownloadOutlined />}
               onClick={exportToCSV}
+              disabled={!filteredData.length}
               className="!rounded-button"
             >
               导出报表
             </Button>
           </div>
         </div>
+        {shouldShowTaskPanel ? (
+          <div className="mb-6 rounded-2xl border border-slate-200 bg-slate-50 px-5 py-4 shadow-sm">
+            <div className="mb-3 flex flex-wrap items-center gap-3">
+              <span className="text-sm font-semibold text-slate-900">日报生成状态</span>
+              {visibleTaskInfo ? (
+                <>
+                  <Tag color={TASK_STATUS_COLOR_MAP[visibleTaskInfo.status]}>
+                    {TASK_STATUS_TEXT[visibleTaskInfo.status]}
+                  </Tag>
+                  <span className="text-sm text-slate-600">
+                    已处理 {visibleTaskInfo.progress}/{visibleTaskInfo.totalDays} 天
+                  </span>
+                  {visibleTaskInfo.status !== "failed" ? (
+                    <span className="text-sm text-slate-500">系统每 2 秒自动刷新一次状态</span>
+                  ) : null}
+                </>
+              ) : (
+                <>
+                  <Tag color="processing">提交中</Tag>
+                  <span className="text-sm text-slate-600">正在提交日报任务，请稍候...</span>
+                </>
+              )}
+            </div>
+            {visibleTaskInfo ? (
+              <>
+                <Progress
+                  percent={Number(progressPercent.toFixed(0))}
+                  status={visibleTaskInfo.status === "failed" ? "exception" : "active"}
+                  strokeColor={visibleTaskInfo.status === "failed" ? "#dc2626" : "#1677ff"}
+                  showInfo={false}
+                />
+                {visibleTaskInfo.errorMessage ? (
+                  <div className="mt-2 text-sm text-rose-600">错误信息：{visibleTaskInfo.errorMessage}</div>
+                ) : null}
+              </>
+            ) : null}
+          </div>
+        ) : null}
         <div className="mx-auto">
           <Table
             loading={loading} // 👈 表格自带 loading 效果

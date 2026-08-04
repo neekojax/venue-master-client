@@ -24,8 +24,21 @@ export const fetchWeeklyReport = async (poolType: string, start: string, end: st
 };
 
 // /venue/getAllDailyStat/:venueID"
-export const fetchAllDailyStat = async (poolType: string, venueID: number, start: string, end: string) => {
+export const submitAllDailyStatTask = async (
+  poolType: string,
+  venueID: number,
+  start: string,
+  end: string,
+) => {
   return await fetchGet(`/venue/getAllDailyStat/${poolType}/${venueID}/${start}/${end}`);
+};
+
+export const fetchAllDailyStatTask = async (poolType: string, taskId: string) => {
+  return await fetchGet(`/venue/getAllDailyStatTask/${poolType}/${taskId}`);
+};
+
+export const fetchAllDailyStatTaskResult = async (poolType: string, taskId: string) => {
+  return await fetchGet(`/venue/getAllDailyStatTaskResult/${poolType}/${taskId}`);
 };
 
 // 数据看板～相关接口，基础信息
