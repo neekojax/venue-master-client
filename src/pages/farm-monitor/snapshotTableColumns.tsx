@@ -73,14 +73,25 @@ function renderHashrateCell(value?: number | null, fractionDigits = 2) {
   );
 }
 
-function renderPowerCell(value?: number | string | null) {
-  if (value == null || value === "" || Number.isNaN(Number(value))) {
+function renderPowerRatioCell(power?: number | string | null, hashrate30m?: number | string | null) {
+  if (power == null || power === "" || Number.isNaN(Number(power))) {
     return <span className="text-gray-400">-</span>;
   }
+  if (
+    hashrate30m == null ||
+    hashrate30m === "" ||
+    Number.isNaN(Number(hashrate30m)) ||
+    Number(hashrate30m) <= 0
+  ) {
+    return <span className="text-gray-400">-</span>;
+  }
+
+  const ratio = Number(power) / Number(hashrate30m);
+
   return (
     <span>
-      {Number(value)}
-      <span className="text-gray-400"> w</span>
+      {ratio.toFixed(2)}
+      <span className="text-gray-400"> J/T</span>
     </span>
   );
 }
@@ -404,7 +415,8 @@ function buildColumnMap(
       dataIndex: "power",
       key: "power",
       width: 110,
-      render: (v: number | string | undefined) => renderPowerCell(v),
+      render: (v: number | string | undefined, record: TaskSnapshotItem) =>
+        renderPowerRatioCell(v, record.hashrate_30m),
     },
     hashrate: {
       title: "算力",
