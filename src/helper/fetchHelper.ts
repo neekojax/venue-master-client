@@ -75,9 +75,9 @@ export const fetchPostFile = async (
 };
 
 // DELETE 请求
-export const fetchDelete = async (endpoint: string) => {
+export const fetchDelete = async (endpoint: string, data?: any) => {
   try {
-    const response = await axiosInstance.delete(endpoint);
+    const response = await axiosInstance.delete(endpoint, data ? { data } : undefined);
     checkSuccess(response);
     return response;
   } catch (error) {

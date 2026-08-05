@@ -81,18 +81,21 @@ export default function MainLayout() {
         //   .join(",");
 
         // 汇总接口权限
-        const frontend_routes = roles
-          .flatMap((role: any) => (Array.isArray(role?.frontend_routes) ? role.frontend_routes : []))
-          .map((item: any) => item?.path)
-          .filter((p: any) => typeof p === "string" && p.length > 0)
-          .join(",");
+        const frontend_routes = Array.from(
+          new Set(
+            roles
+              .flatMap((role: any) => (Array.isArray(role?.frontend_routes) ? role.frontend_routes : []))
+              .map((item: any) => item?.path)
+              .filter((p: any) => typeof p === "string" && p.length > 0),
+          ),
+        ).join(",");
 
         // 汇总接口权限
         const apiPermissions = roles.flatMap((role: any) =>
           Array.isArray(role?.api_permissions) ? role.api_permissions : [],
         );
         const api_permissions_paths = apiPermissions
-          .map((item: any) => item?.path)
+          .map((item: any) => item?.path_pattern || item?.path)
           .filter((p: any) => typeof p === "string" && p.length > 0)
           .join(",");
 

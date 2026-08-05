@@ -5,7 +5,7 @@ import { SiNginxproxymanager } from "react-icons/si";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { HomeOutlined, ProductOutlined } from "@ant-design/icons"; //<RadiusSettingOutlined />
 import { Layout, Menu, type MenuProps } from "antd";
-import { FileText, Wrench } from "lucide-react";
+import { FileText, ShieldCheck, Wrench } from "lucide-react";
 import { useTheme } from "@/components/theme-provider";
 import logo from "../../../public/logo_middle.png";
 import { ROUTE_PATHS } from "@/constants/common";
@@ -36,8 +36,14 @@ const findSelectedKeys = (items: MenuProps["items"], pathname: string, path: str
 };
 
 const SiderItems = (permissionIds: string, permissionRoutes: string, selectedKeys?: string[]) => {
+  const roleIds = permissionIds
+    .split(",")
+    .map((item) => item.trim())
+    .filter(Boolean);
+  const isSuperAdmin = roleIds.includes("role-super-admin");
+
   const hasPermission = (route: string) => {
-    if (permissionIds == "role-super-admin") {
+    if (isSuperAdmin) {
       return false;
     }
     const routerArr = permissionRoutes.split(",");
@@ -213,6 +219,16 @@ const SiderItems = (permissionIds: string, permissionRoutes: string, selectedKey
       ),
       key: ROUTE_PATHS.utility,
       label: <Link to={ROUTE_PATHS.utility}>实用工具</Link>,
+    },
+    {
+      icon: selectedKeys?.includes(ROUTE_PATHS.rbacCenter) ? (
+        <ShieldCheck size={18} />
+      ) : (
+        <ShieldCheck size={18} style={{ color: "#bbb" }} />
+      ),
+      key: ROUTE_PATHS.rbacCenter,
+      hidden: hasPermission(ROUTE_PATHS.rbacCenter),
+      label: <Link to={ROUTE_PATHS.rbacCenter}>权限管理</Link>,
     },
     {
       icon: selectedKeys?.includes(ROUTE_PATHS.logs) ? (
