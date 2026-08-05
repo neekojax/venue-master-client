@@ -1,6 +1,7 @@
 export const ROUTE_PATHS = {
   login: "/login",
   user: "/user", // 用户中心～修改密码
+  userManagement: "/user-management",
   notFound: "/not-found",
   landing: "/index",
   logs: "/ops_logs",
