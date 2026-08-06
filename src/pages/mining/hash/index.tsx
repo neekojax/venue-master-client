@@ -4,7 +4,6 @@ import { WiDirectionUpRight } from "react-icons/wi";
 import { Link } from "react-router-dom";
 import { ExportOutlined, LineChartOutlined, SearchOutlined } from "@ant-design/icons";
 import { Button, Col, Input, Radio, Row, Spin, Switch, Table, Tag, Tooltip } from "antd";
-import {} from "antd";
 // import EditTable from "@/components/edit-table";
 import { FavoriteButton } from "@/components/FavoriteButton";
 import { ROUTE_PATHS } from "@/constants/common";
@@ -14,6 +13,7 @@ import { exportHashRateToExcel } from "@/utils/excel";
 
 import "./VenueTabs.css";
 
+import ResizableHeaderCell from "@/pages/custody-statistics/statistics/components/ResizableHeaderCell";
 import { useMiningHashRateList } from "@/pages/mining/hook.ts";
 
 const StoragePrefix = "mining-hash";
@@ -29,6 +29,10 @@ export default function MiningHashRatePage() {
   const { data: hashData, isLoading: isLoadingPools } = useMiningHashRateList(poolType, poolCategory);
 
   const [columns, setColumns] = useState<any>([]);
+  const [venueNameColumnWidth, setVenueNameColumnWidth] = useState<number>(() => {
+    const storedWidth = localStorage.getItem("mining-hash-venue-name-column-width");
+    return storedWidth ? Number(storedWidth) || 160 : 160;
+  });
 
   const [showCollectionOnly, setShowCollectionOnly] = useState(() => {
     // 初始化时从 localStorage 取值
@@ -126,7 +130,14 @@ export default function MiningHashRatePage() {
         title: "场地",
         dataIndex: "venue_name",
         key: "venue_name",
-        width: 160,
+        width: venueNameColumnWidth,
+        onHeaderCell: () => ({
+          width: venueNameColumnWidth,
+          onResize: (nextWidth: number) => {
+            setVenueNameColumnWidth(nextWidth);
+            localStorage.setItem("mining-hash-venue-name-column-width", String(nextWidth));
+          },
+        }),
         // render: (text: any) => <span style={{ color: "#333" }}>{text}</span>,
         render: (text: string, record: { venue_id?: any; collection?: any }) => {
           const isSpecialVenue = text === "Arct-HF01-J XP-AR-US" || text === "ARCT Technologies-HF02-AR-US";
@@ -366,7 +377,7 @@ export default function MiningHashRatePage() {
         ),
       },
     ]);
-  }, [poolType]);
+  }, [poolType, venueNameColumnWidth]);
 
   // 搜索处理函数
   const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -458,6 +469,7 @@ export default function MiningHashRatePage() {
           <Spin style={{ width: "100%", textAlign: "center", marginTop: "50%" }} />
         ) : (
           <Table
+            components={{ header: { cell: ResizableHeaderCell } }}
             pagination={{
               position: ["bottomCenter"],
               showSizeChanger: true,

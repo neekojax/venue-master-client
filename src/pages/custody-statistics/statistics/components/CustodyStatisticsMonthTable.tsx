@@ -2,15 +2,19 @@ import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { InfoCircleOutlined } from "@ant-design/icons";
 import { Alert, Spin, Table, Tag, Tooltip } from "antd";
+import ResizableHeaderCell from "./ResizableHeaderCell";
 import { useSelector, useSettingsStore } from "@/stores";
 import { formatAmount } from "@/utils/num";
 
 import { useMonthlyHostingFeeRatioList } from "@/pages/custody-statistics/hook/hook.ts";
 
+const VENUE_COLUMN_WIDTH_STORAGE_KEY = "custody-statistics-venue-column-width";
+
 type Props = {
   month: string; // YYYY-MM
   selectedVenues: string[];
   showHighFeeOnly: boolean;
+  showCollectionOnly?: boolean;
   discountFilter?: "全部状态" | "打折" | "不变" | "分润";
   visibleColumns?: string[];
   onVenueOptionsReady?: (options: { label: string; value: string }[]) => void;
@@ -22,6 +26,7 @@ export default function CustodyStatisticsMonthTable({
   month,
   selectedVenues,
   showHighFeeOnly,
+  showCollectionOnly = false,
   discountFilter,
   visibleColumns,
   onVenueOptionsReady,
@@ -55,6 +60,10 @@ export default function CustodyStatisticsMonthTable({
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(20);
   const [alertMessage, setAlertMessage] = useState("");
+  const [venueColumnWidth, setVenueColumnWidth] = useState<number>(() => {
+    const storedWidth = localStorage.getItem(VENUE_COLUMN_WIDTH_STORAGE_KEY);
+    return storedWidth ? Number(storedWidth) || 200 : 200;
+  });
 
   const venueOptions = useMemo(() => {
     const names = Array.from(new Set(tableData.map((i: any) => i.venue_name))).filter(Boolean) as string[];
@@ -102,6 +111,7 @@ export default function CustodyStatisticsMonthTable({
         downclock_before_profit: item.downclock_before_profit,
         downclock_after_profit: item.downclock_after_profit,
         shutdown_price: item.shutdown_price,
+        collection: Number(item.collection ?? 0),
       }));
       setTableData(newData);
     } else {
@@ -195,8 +205,15 @@ export default function CustodyStatisticsMonthTable({
         title: <span className="fee-ratio-title">场地名</span>,
         dataIndex: "venue_name",
         key: "venue_name",
-        onHeaderCell: () => ({ className: "fee-ratio-header" }),
-        width: 200,
+        onHeaderCell: () => ({
+          className: "fee-ratio-header",
+          width: venueColumnWidth,
+          onResize: (nextWidth: number) => {
+            setVenueColumnWidth(nextWidth);
+            localStorage.setItem(VENUE_COLUMN_WIDTH_STORAGE_KEY, String(nextWidth));
+          },
+        }),
+        width: venueColumnWidth,
         sorter: (a: any, b: any) => a.venue_name.localeCompare(b.venue_name),
         render: (text: string) => {
           const isSpecialVenue = text === "Arct-HF01-J XP-AR-US" || text === "ARCT Technologies-HF02-AR-US";
@@ -209,7 +226,7 @@ export default function CustodyStatisticsMonthTable({
             >
               <div
                 style={{
-                  width: "200px",
+                  width: `${Math.max(120, venueColumnWidth - 24)}px`,
                   overflow: "hidden",
                   color: isSpecialVenue ? "red" : "#333",
                   textOverflow: "ellipsis",
@@ -707,7 +724,7 @@ export default function CustodyStatisticsMonthTable({
         ? allColumns.filter((c: any) => !c.key || visibleColumns.includes(c.key))
         : allColumns;
     setColumns(cols);
-  }, [startDate, endDate, currentPage, pageSize, visibleColumns]);
+  }, [startDate, endDate, currentPage, pageSize, venueColumnWidth, visibleColumns]);
 
   // 父驱动的筛选条件联动刷新 filteredData
   useEffect(() => {
@@ -729,10 +746,11 @@ export default function CustodyStatisticsMonthTable({
       const df = discountFilter ?? "全部状态";
       const matchesDiscount =
         df === "全部状态" ? true : normalizeDiscountStatus(item?.discount_status) === df;
-      return matchesHighFee && matchesSelectedVenues && matchesDiscount;
+      const matchesCollection = !showCollectionOnly || Number(item?.collection ?? 0) === 1;
+      return matchesHighFee && matchesSelectedVenues && matchesDiscount && matchesCollection;
     });
     setFilteredData(filtered);
-  }, [tableData, showHighFeeOnly, selectedVenues, discountFilter]);
+  }, [tableData, showHighFeeOnly, showCollectionOnly, selectedVenues, discountFilter]);
 
   // 通知父组件：过滤后的数据
   useEffect(() => {
@@ -759,6 +777,7 @@ export default function CustodyStatisticsMonthTable({
       ) : (
         <>
           <Table
+            components={{ header: { cell: ResizableHeaderCell } }}
             pagination={{
               position: ["bottomCenter"],
               showSizeChanger: true,

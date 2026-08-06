@@ -2,11 +2,14 @@ import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { InfoCircleOutlined } from "@ant-design/icons";
 import { Alert, Spin, Table, Tag, Tooltip } from "antd";
+import ResizableHeaderCell from "./ResizableHeaderCell";
 import { useSelector, useSettingsStore } from "@/stores";
 import { formatAmount, formatHashrate } from "@/utils/num";
 
 import { useDailyHostingFeeRatioList } from "@/pages/custody-statistics/hook/hook.ts";
 // import { exportCustodyStatisticsToExcel } from "@/utils/excel";
+
+const VENUE_COLUMN_WIDTH_STORAGE_KEY = "custody-statistics-venue-column-width";
 
 // 读取默认时间范围（与 dailyData.tsx 保持一致）
 // const getInitialTimeRange = () => {
@@ -19,6 +22,7 @@ type Props = {
   dayRange: string; // 例如 "1"、"7"、"30"、"90"
   selectedVenues: string[];
   showHighFeeOnly: boolean;
+  showCollectionOnly?: boolean;
   discountFilter?: "全部状态" | "打折" | "不变" | "分润";
   visibleColumns?: string[];
   onVenueOptionsReady?: (options: { label: string; value: string }[]) => void;
@@ -30,6 +34,7 @@ export default function CustodyStatisticsTable({
   dayRange,
   selectedVenues,
   showHighFeeOnly,
+  showCollectionOnly = false,
   discountFilter,
   visibleColumns,
   onVenueOptionsReady,
@@ -50,6 +55,10 @@ export default function CustodyStatisticsTable({
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(20);
   const [alertMessage, setAlertMessage] = useState("");
+  const [venueColumnWidth, setVenueColumnWidth] = useState<number>(() => {
+    const storedWidth = localStorage.getItem(VENUE_COLUMN_WIDTH_STORAGE_KEY);
+    return storedWidth ? Number(storedWidth) || 200 : 200;
+  });
   // remove local selectedVenues/showHighFeeOnly state
   const venueOptions = useMemo(() => {
     const names = Array.from(new Set(tableData.map((i: any) => i.venue_name))).filter(Boolean) as string[];
@@ -95,6 +104,7 @@ export default function CustodyStatisticsTable({
           downclock_before_profit: any;
           downclock_after_profit: any;
           shutdown_price: any;
+          collection: any;
         }) => ({
           // 使用 复合键 确保每行唯一，避免 React 重复 key 警告
           key: `${item.venue_id}-${item.date}`,
@@ -124,6 +134,7 @@ export default function CustodyStatisticsTable({
           downclock_before_profit: item.downclock_before_profit,
           downclock_after_profit: item.downclock_after_profit,
           shutdown_price: item.shutdown_price,
+          collection: Number(item.collection ?? 0),
         }),
       );
       setTableData(newData);
@@ -186,8 +197,15 @@ export default function CustodyStatisticsTable({
         title: <span className="fee-ratio-title">场地名</span>,
         dataIndex: "venue_name",
         key: "venue_name",
-        onHeaderCell: () => ({ className: "fee-ratio-header" }),
-        width: 200,
+        onHeaderCell: () => ({
+          className: "fee-ratio-header",
+          width: venueColumnWidth,
+          onResize: (nextWidth: number) => {
+            setVenueColumnWidth(nextWidth);
+            localStorage.setItem(VENUE_COLUMN_WIDTH_STORAGE_KEY, String(nextWidth));
+          },
+        }),
+        width: venueColumnWidth,
         sorter: (a: any, b: any) => a.venue_name.localeCompare(b.venue_name),
         render: (text: string) => {
           const isSpecialVenue = text === "Arct-HF01-J XP-AR-US" || text === "ARCT Technologies-HF02-AR-US";
@@ -200,7 +218,7 @@ export default function CustodyStatisticsTable({
             >
               <div
                 style={{
-                  width: "200px",
+                  width: `${Math.max(120, venueColumnWidth - 24)}px`,
                   overflow: "hidden",
                   color: isSpecialVenue ? "red" : "#333",
                   textOverflow: "ellipsis",
@@ -842,7 +860,7 @@ export default function CustodyStatisticsTable({
         ? allColumns.filter((c: any) => !c.key || visibleColumns.includes(c.key))
         : allColumns;
     setColumns(cols);
-  }, [timeRange, currentPage, pageSize, visibleColumns]);
+  }, [timeRange, currentPage, pageSize, venueColumnWidth, visibleColumns]);
 
   // apply filtering based on parent props
   useEffect(() => {
@@ -919,14 +937,15 @@ export default function CustodyStatisticsTable({
         discountFilter === "全部状态"
           ? true
           : normalizeDiscountStatus(item?.discount_status) === discountFilter;
+      const matchesCollection = !showCollectionOnly || Number(item?.collection ?? 0) === 1;
 
-      return matchesSelectedVenues && passesHighFee && matchesDiscount;
+      return matchesSelectedVenues && passesHighFee && matchesDiscount && matchesCollection;
     });
 
     setFilteredData(filtered);
     // 重置到第一页，避免切换场地名后仍停留在旧页码
     setCurrentPage(1);
-  }, [tableData, showHighFeeOnly, selectedVenues, discountFilter]);
+  }, [tableData, showHighFeeOnly, showCollectionOnly, selectedVenues, discountFilter]);
 
   // notify parent of filtered data changes
   useEffect(() => {
@@ -960,6 +979,7 @@ export default function CustodyStatisticsTable({
         </div>
       ) : (
         <Table
+          components={{ header: { cell: ResizableHeaderCell } }}
           pagination={{
             position: ["bottomCenter"],
             showSizeChanger: true,

@@ -40,6 +40,7 @@ import { getShortenedLink } from "@/utils/short-link.ts";
 const { Option } = Select;
 import ExcelUpload from "@/components/excel-upload";
 
+import ResizableHeaderCell from "@/pages/custody-statistics/statistics/components/ResizableHeaderCell";
 import { uploadMiningPoolExcel } from "@/pages/mining/api.tsx";
 import EditForm from "@/pages/mining/components/edit-form.tsx";
 import {
@@ -186,6 +187,10 @@ export default function MiningSettingPage() {
   };
 
   const [hashrateSortOrder, setHashrateSortOrder] = useState<"ascend" | "descend" | null>(null);
+  const [venueNameColumnWidth, setVenueNameColumnWidth] = useState<number>(() => {
+    const storedWidth = localStorage.getItem("mining-setting-venue-name-column-width");
+    return storedWidth ? Number(storedWidth) || 200 : 200;
+  });
 
   const [poolCategory, setPoolCategoryType] = useState<string>(
     localStorage.getItem(`${StoragePrefix}_poolCategory`) || "主矿池",
@@ -486,7 +491,14 @@ export default function MiningSettingPage() {
         title: "场地",
         dataIndex: "venue_name",
         key: "venue_name",
-        width: 200,
+        width: venueNameColumnWidth,
+        onHeaderCell: () => ({
+          width: venueNameColumnWidth,
+          onResize: (nextWidth: number) => {
+            setVenueNameColumnWidth(nextWidth);
+            localStorage.setItem("mining-setting-venue-name-column-width", String(nextWidth));
+          },
+        }),
         // render: (text: any) => <span style={{ color: "#333" }}>{text}</span>,
         render: (text: string, record: { venue_id?: any; collection?: any }) => {
           const isSpecialVenue = text === "Arct-HF01-J XP-AR-US"; // 判断是否为特殊场地
@@ -835,7 +847,7 @@ export default function MiningSettingPage() {
         // ],
       },
     ]);
-  }, [hashrateSortOrder]);
+  }, [hashrateSortOrder, venueNameColumnWidth]);
 
   // Loading 状态
   if (isLoadingPools) {
@@ -1160,6 +1172,7 @@ export default function MiningSettingPage() {
             tableData={filteredData}
             setTableData={setTableData}
             columns={columns}
+            components={{ header: { cell: ResizableHeaderCell } }}
             handleDelete={handleDelete}
             handleSave={handleSave}
           />

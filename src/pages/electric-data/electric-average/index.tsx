@@ -1,4 +1,5 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { message, Space, Switch } from "antd";
 import EditTable from "@/components/edit-table";
 import { exportElectricAverageToExcel } from "@/utils/excel.ts";
 
@@ -12,9 +13,19 @@ export default function ElectricAverage() {
   const [selectedType, setSelectedType] = useState<string>(
     localStorage.getItem(`${StoragePrefix}_selectedType`) || PRICE_TYPE_REAL_TIME,
   );
+  const [showCollectionOnly, setShowCollectionOnly] = useState<boolean>(
+    localStorage.getItem(`${StoragePrefix}_showCollectionOnly`) === "1",
+  );
 
   const [columns, setColumns] = useState<any>([]);
   const [tableData, setTableData] = useState<any>([]);
+
+  const filteredTableData = useMemo(() => {
+    if (!showCollectionOnly) {
+      return tableData;
+    }
+    return tableData.filter((item: any) => Number(item?.collection ?? 0) === 1);
+  }, [showCollectionOnly, tableData]);
 
   // 表头定义
   useEffect(() => {
@@ -56,17 +67,27 @@ export default function ElectricAverage() {
     try {
       if (Object.keys(params.name).length > 0 && params.start != "" && params.end != "") {
         const result = await fetchSettlementAverage(params);
-        setTableData(result.data || []);
+        setTableData(
+          (result.data || []).map((item: any) => ({
+            ...item,
+            collection: Number(item?.collection ?? 0),
+          })),
+        );
       } else {
         setTableData([]);
       }
-    } catch (error) {
-      console.error("Error fetching settlement data:", error);
+    } catch (_error) {
+      message.error("获取月均费用统计数据失败");
     }
   };
 
   const handleDownload = () => {
-    exportElectricAverageToExcel(tableData);
+    exportElectricAverageToExcel(filteredTableData);
+  };
+
+  const onCollectionChange = (checked: boolean) => {
+    setShowCollectionOnly(checked);
+    localStorage.setItem(`${StoragePrefix}_showCollectionOnly`, checked ? "1" : "0");
   };
 
   return (
@@ -78,10 +99,17 @@ export default function ElectricAverage() {
         onDownload={handleDownload}
         storagePrefix={StoragePrefix}
       />
+      <div style={{ marginTop: "20px" }}>
+        <Space size={12}>
+          <span style={{ color: "#000" }}>
+            <Switch size="small" checked={showCollectionOnly} onChange={onCollectionChange} /> 我的收藏
+          </span>
+        </Space>
+      </div>
       <div style={{ marginTop: "20px", minWidth: "300px" }}>
-        {tableData.length > 0 ? (
+        {filteredTableData.length > 0 ? (
           <EditTable
-            tableData={tableData}
+            tableData={filteredTableData}
             setTableData={setTableData}
             columns={columns}
             // @ts-ignore

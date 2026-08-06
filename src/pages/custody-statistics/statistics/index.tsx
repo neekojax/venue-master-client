@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { ExportOutlined, FilterOutlined, SettingOutlined } from "@ant-design/icons";
-import { Button, Input, Select } from "antd";
+import { Button, Input, Select, Switch } from "antd";
 import CustodyStatisticsMonthTable from "./components/CustodyStatisticsMonthTable";
 import CustodyStatisticsTable from "./components/CustodyStatisticsTable";
 
@@ -35,6 +35,7 @@ export default function DateModeHeader() {
   // 提升的筛选与导出相关状态
   const [selectedVenues, setSelectedVenues] = useState<string[]>([]);
   const [showHighFeeOnly, setShowHighFeeOnly] = useState(false);
+  const [showCollectionOnly, setShowCollectionOnly] = useState(false);
   const [venueOptions, setVenueOptions] = useState<{ label: string; value: string }[]>([]);
   const [filteredData, setFilteredData] = useState<any[]>([]);
   // 场地筛选弹层状态
@@ -293,6 +294,19 @@ export default function DateModeHeader() {
               </span>
             </div>
             <div style={{ display: "flex", justifyContent: "flex-end", marginTop: -20 }}>
+              <span
+                style={{
+                  display: "inline-flex",
+                  alignItems: "center",
+                  color: "#000",
+                  marginRight: 10,
+                  whiteSpace: "nowrap",
+                }}
+              >
+                <Switch size="small" checked={showCollectionOnly} onChange={setShowCollectionOnly} />
+                <span style={{ marginLeft: 8 }}>我的收藏</span>
+              </span>
+
               <div className="relative" style={{ marginRight: 10 }}>
                 <Button
                   size="middle"
@@ -481,6 +495,7 @@ export default function DateModeHeader() {
                 dayRange={dayRange}
                 selectedVenues={selectedVenues}
                 showHighFeeOnly={showHighFeeOnly}
+                showCollectionOnly={showCollectionOnly}
                 discountFilter={discountFilter}
                 visibleColumns={visibleColumns}
                 onVenueOptionsReady={(opts: { label: string; value: string }[]) => setVenueOptions(opts)}
@@ -492,6 +507,7 @@ export default function DateModeHeader() {
                 month={month}
                 selectedVenues={selectedVenues}
                 showHighFeeOnly={showHighFeeOnly}
+                showCollectionOnly={showCollectionOnly}
                 discountFilter={discountFilter}
                 visibleColumns={visibleColumns}
                 onVenueOptionsReady={(opts: { label: string; value: string }[]) => setVenueOptions(opts)}

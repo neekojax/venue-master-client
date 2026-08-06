@@ -9,6 +9,7 @@ type EditTableProps = {
   tableData: any[];
   setTableData: React.Dispatch<React.SetStateAction<any[]>>;
   columns: any;
+  components?: any;
   handleDelete: (recordId: number) => Promise<void>; // 添加 handleDelete 作为参数
   handleSave: (rowKey: number, data: { [x: string]: string }) => Promise<void>; // 添加 handleSave 作为参数
 };
@@ -17,7 +18,13 @@ type EditTableProps = {
 //   return index % 2 === 0 ? "even-row" : "odd-row";
 // };
 
-export default function EditTable({ tableData, columns, handleDelete, handleSave }: EditTableProps) {
+export default function EditTable({
+  tableData,
+  columns,
+  components,
+  handleDelete,
+  handleSave,
+}: EditTableProps) {
   const [editableKeys, setEditableRowKeys] = useState<React.Key[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
@@ -63,6 +70,7 @@ export default function EditTable({ tableData, columns, handleDelete, handleSave
         rowKey="key"
         maxLength={5}
         scroll={{ x: 960 }}
+        components={components}
         value={paginatedData}
         // onChange={(newData) => setTableData([...newData])} // 处理只读数组并转换为可变数组
         editable={{

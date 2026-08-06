@@ -12,6 +12,7 @@ import ExcelUpload from "@/components/excel-upload";
 import useAuthRedirect from "@/hooks/useAuthRedirect.ts";
 import { useSelector, useSettingsStore } from "@/stores";
 
+import ResizableHeaderCell from "@/pages/custody-statistics/statistics/components/ResizableHeaderCell";
 import { uploadVenueExcel } from "@/pages/venue/api.tsx";
 import { useVenueList, useVenueNew, useVenueUpdate } from "@/pages/venue/hook/hook.ts";
 import { VenueInfoParam } from "@/pages/venue/type.tsx";
@@ -41,6 +42,10 @@ interface Venue {
 const VenueManagement: React.FC = () => {
   useAuthRedirect();
   const { poolType } = useSettingsStore(useSelector(["poolType"]));
+  const [venueNameColumnWidth, setVenueNameColumnWidth] = useState<number>(() => {
+    const storedWidth = localStorage.getItem("venue-setting-venue-name-column-width");
+    return storedWidth ? Number(storedWidth) || 220 : 220;
+  });
 
   const { data } = useVenueList(poolType);
   const [excelUploadModalVisible, setExcelUploadModalVisible] = useState(false);
@@ -213,20 +218,27 @@ const VenueManagement: React.FC = () => {
       dataIndex: "id",
       width: 60,
       render(text: string, record: any, index: number) {
-        if (record.id == -1) {
-          console.log(text, record.id);
-        }
         return index + 1;
       },
     },
     {
       title: "场地名称",
       dataIndex: "venue_name",
+      width: venueNameColumnWidth,
+      onHeaderCell: () => ({
+        width: venueNameColumnWidth,
+        onResize: (nextWidth: number) => {
+          setVenueNameColumnWidth(nextWidth);
+          localStorage.setItem("venue-setting-venue-name-column-width", String(nextWidth));
+        },
+      }),
       render: (text: string, record: { id?: any }) => {
         return (
-          <Link to={`/venue/detail/${record.id}`} className="text-blue-500 hover:underline">
-            {text}
-          </Link>
+          <div style={{ width: "100%", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+            <Link to={`/venue/detail/${record.id}`} className="text-blue-500 hover:underline">
+              {text}
+            </Link>
+          </div>
         );
       },
       sorter: (a: Venue, b: Venue) => a.venue_name.localeCompare(b.venue_name),
@@ -438,6 +450,7 @@ const VenueManagement: React.FC = () => {
       </div>
 
       <Table
+        components={{ header: { cell: ResizableHeaderCell } }}
         columns={columns}
         dataSource={filteredVenues}
         rowKey="id"
@@ -446,12 +459,10 @@ const VenueManagement: React.FC = () => {
           pageSize: pageSize, // 使用动态 pageSize
           showSizeChanger: true,
           onShowSizeChange: (current, size) => {
-            console.log("onShowSizeChange", current, size);
             setPageSize(size); // 更新 pageSize 状态（注意：第2个参数才是 pageSize）
           },
           onChange: (_page, size) => {
             // 兼容某些版本只触发 onChange 的情况
-            console.log("onChange", _page, size);
             if (size && size !== pageSize) setPageSize(size);
           },
           showQuickJumper: true,

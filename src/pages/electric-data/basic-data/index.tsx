@@ -1,5 +1,5 @@
-import { useEffect, useRef, useState } from "react";
-import { message, Pagination, Radio, Spin, Table } from "antd";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { message, Pagination, Radio, Space, Spin, Switch, Table } from "antd";
 import { exportElectricBasicToExcel } from "@/utils/excel.ts";
 
 import { downloadSettlementData, fetchSettlementDataWithPagination } from "@/pages/electric-data/api.tsx";
@@ -27,13 +27,23 @@ export default function ElectricBasic() {
 
   const [columns, setColumns] = useState<any>([]);
   const [tableData, setTableData] = useState<any>([]);
+  const [showCollectionOnly, setShowCollectionOnly] = useState<boolean>(
+    localStorage.getItem(`${StoragePrefix}_showCollectionOnly`) === "1",
+  );
 
   const electricSelectRef = useRef<any>(null); // 创建 ref 用于访问子组件
-  const [isInitialMount, setIsInitialMount] = useState(true); // 标识是否初次挂载
+  const hasMountedRef = useRef(false);
 
   const [queryParam, setQueryParam] = useState<SettlementQueryWithPageParam | null>(null); // 新增状态保存 queryParam
 
   const [loading, setLoading] = useState<boolean>(false); // 新增加载状态
+
+  const filteredTableData = useMemo(() => {
+    if (!showCollectionOnly) {
+      return tableData;
+    }
+    return tableData.filter((item: any) => Number(item?.collection ?? 0) === 1);
+  }, [showCollectionOnly, tableData]);
 
   // 表头定义
   useEffect(() => {
@@ -86,11 +96,15 @@ export default function ElectricBasic() {
       };
       setQueryParam(queryParam); // 保存 queryParam
       const result = await fetchSettlementDataWithPagination(queryParam);
-      setTableData(result.data.data || []); // 假设 result.data 是您需要的数组
+      setTableData(
+        (result.data.data || []).map((item: any) => ({
+          ...item,
+          collection: Number(item?.collection ?? 0),
+        })),
+      );
       setTotal(result.data.total); // 假设 result.data.total 是总条目数
-    } catch (error) {
-      setLoading(false); // 结束加载
-      console.error("Error fetching settlement data:", error);
+    } catch (_error) {
+      message.error("获取费用统计数据失败");
     } finally {
       setLoading(false); // 结束加载
     }
@@ -101,12 +115,18 @@ export default function ElectricBasic() {
     try {
       if (queryParam) {
         const result = await downloadSettlementData(queryParam);
-        exportElectricBasicToExcel(result.data.data);
+        const exportRows = (result.data.data || []).map((item: any) => ({
+          ...item,
+          collection: Number(item?.collection ?? 0),
+        }));
+        exportElectricBasicToExcel(
+          showCollectionOnly ? exportRows.filter((item: any) => item.collection === 1) : exportRows,
+        );
       } else {
         message.error("无效的下载参数");
       }
-    } catch (error) {
-      console.error("Error fetching settlement data:", error);
+    } catch (_error) {
+      message.error("导出费用统计数据失败");
     }
   };
 
@@ -123,16 +143,20 @@ export default function ElectricBasic() {
     localStorage.setItem(`${StoragePrefix}_priceType`, newPriceType); // 将新的价格类型存储到 localStorage
   };
 
+  const onCollectionChange = (checked: boolean) => {
+    setShowCollectionOnly(checked);
+    localStorage.setItem(`${StoragePrefix}_showCollectionOnly`, checked ? "1" : "0");
+  };
+
   // 使用 useEffect 监听 currentPage 和 pageSize 的变化
   useEffect(() => {
-    if (!isInitialMount) {
+    if (hasMountedRef.current) {
       // 当 currentPage 或 pageSize 变化时，调用 handleSearch
       if (electricSelectRef.current) {
         electricSelectRef.current.triggerSearch(); // 触发电力选择组件中的搜索
       }
     } else {
-      // 在首次挂载后，将 isInitialMount 设为 false
-      setIsInitialMount(false);
+      hasMountedRef.current = true;
     }
   }, [currentPage, pageSize, priceType]); // 仅在 currentPage 或 pageSize 改变时调用
 
@@ -148,29 +172,34 @@ export default function ElectricBasic() {
       />
 
       <div className={"mt-5"}>
-        <Radio.Group
-          name="priceType"
-          value={priceType}
-          onChange={onPriceTypeChange} // 处理变化的回调
-          options={[
-            { value: "all", label: "全部" },
-            { value: "greaterThan7.5", label: "大于7.5" },
-            { value: "lessThanEqual7.5", label: "小于7.5" },
-          ]}
-        />
+        <Space size={20} wrap>
+          <Radio.Group
+            name="priceType"
+            value={priceType}
+            onChange={onPriceTypeChange} // 处理变化的回调
+            options={[
+              { value: "all", label: "全部" },
+              { value: "greaterThan7.5", label: "大于7.5" },
+              { value: "lessThanEqual7.5", label: "小于7.5" },
+            ]}
+          />
+          <span style={{ color: "#000" }}>
+            <Switch size="small" checked={showCollectionOnly} onChange={onCollectionChange} /> 我的收藏
+          </span>
+        </Space>
       </div>
 
       <div style={{ marginTop: "20px", minWidth: "300px" }}>
         <Spin spinning={loading}>
           {/* 包裹内容以实现加载效果 */}
-          {tableData.length > 0 ? (
+          {filteredTableData.length > 0 ? (
             <div>
-              <Table columns={columns} dataSource={tableData} pagination={false} />
+              <Table columns={columns} dataSource={filteredTableData} pagination={false} />
               <Pagination
                 className={"mt-5"}
                 current={currentPage}
                 pageSize={pageSize}
-                total={total}
+                total={showCollectionOnly ? filteredTableData.length : total}
                 onChange={onPageChange}
                 showSizeChanger
                 showQuickJumper

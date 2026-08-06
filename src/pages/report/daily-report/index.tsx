@@ -16,6 +16,7 @@ import FormulaTooltip from "@/components/tooltip/FormulaTooltip";
 import FormulaYouxiaolvTooltip from "@/components/tooltip/FormulaYouxiaolvTooltip";
 import { useSelector, useSettingsStore } from "@/stores";
 
+import ResizableHeaderCell from "@/pages/custody-statistics/statistics/components/ResizableHeaderCell";
 import { fetchDailyReport } from "@/pages/report/api.tsx";
 
 interface DataType {
@@ -231,6 +232,10 @@ const App: React.FC = () => {
   const [reloadTick, setReloadTick] = useState(0);
   const [loading, setLoading] = useState(false);
   const [selectedSites, setSelectedSites] = useState<string[]>([]);
+  const [siteNameColumnWidth, setSiteNameColumnWidth] = useState<number>(() => {
+    const storedWidth = localStorage.getItem("daily-report-site-name-column-width");
+    return storedWidth ? Number(storedWidth) || 250 : 250;
+  });
   const handleSitesChange = (value: string[]) => {
     setSelectedSites(value);
   };
@@ -275,7 +280,14 @@ const App: React.FC = () => {
       dataIndex: "siteName",
       key: "siteName",
       fixed: "left",
-      width: 250,
+      width: siteNameColumnWidth,
+      onHeaderCell: () => ({
+        width: siteNameColumnWidth,
+        onResize: (nextWidth: number) => {
+          setSiteNameColumnWidth(nextWidth);
+          localStorage.setItem("daily-report-site-name-column-width", String(nextWidth));
+        },
+      }),
       render: (text: string, record: { key?: any }) => {
         const isSpecialVenue = text === "Arct-HF01-J XP-AR-US" || text === "ARCT Technologies-HF02-AR-US";
         return (
@@ -783,11 +795,9 @@ const App: React.FC = () => {
             totalWithdrawImpactPower: summary.totalWithdrawImpactPower || 0,
             averageForecastEfficiencyNoWarehouse: summary.averageForecastEfficiencyNoWarehouse || 0,
           });
-        } else {
-          console.error("API 返回的 dailyReportStatistics 无效:", reportData);
         }
-      } catch (error) {
-        console.error("获取日报数据失败:", error);
+      } catch (_error) {
+        void _error;
       } finally {
         setLoading(false);
       }
@@ -1219,6 +1229,7 @@ const App: React.FC = () => {
             </div>
           </div>
           <Table
+            components={{ header: { cell: ResizableHeaderCell } }}
             columns={columnsToRender}
             dataSource={filteredData}
             scroll={{ x: 1500 }}
