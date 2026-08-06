@@ -197,14 +197,15 @@ export default function CustodyStatisticsTable({
         title: <span className="fee-ratio-title">场地名</span>,
         dataIndex: "venue_name",
         key: "venue_name",
-        onHeaderCell: () => ({
-          className: "fee-ratio-header",
-          width: venueColumnWidth,
-          onResize: (nextWidth: number) => {
-            setVenueColumnWidth(nextWidth);
-            localStorage.setItem(VENUE_COLUMN_WIDTH_STORAGE_KEY, String(nextWidth));
-          },
-        }),
+        onHeaderCell: () =>
+          ({
+            className: "fee-ratio-header",
+            width: venueColumnWidth,
+            onColumnResize: (nextWidth: number) => {
+              setVenueColumnWidth(nextWidth);
+              localStorage.setItem(VENUE_COLUMN_WIDTH_STORAGE_KEY, String(nextWidth));
+            },
+          }) as any,
         width: venueColumnWidth,
         sorter: (a: any, b: any) => a.venue_name.localeCompare(b.venue_name),
         render: (text: string) => {

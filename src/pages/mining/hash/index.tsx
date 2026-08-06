@@ -131,13 +131,14 @@ export default function MiningHashRatePage() {
         dataIndex: "venue_name",
         key: "venue_name",
         width: venueNameColumnWidth,
-        onHeaderCell: () => ({
-          width: venueNameColumnWidth,
-          onResize: (nextWidth: number) => {
-            setVenueNameColumnWidth(nextWidth);
-            localStorage.setItem("mining-hash-venue-name-column-width", String(nextWidth));
-          },
-        }),
+        onHeaderCell: () =>
+          ({
+            width: venueNameColumnWidth,
+            onColumnResize: (nextWidth: number) => {
+              setVenueNameColumnWidth(nextWidth);
+              localStorage.setItem("mining-hash-venue-name-column-width", String(nextWidth));
+            },
+          }) as any,
         // render: (text: any) => <span style={{ color: "#333" }}>{text}</span>,
         render: (text: string, record: { venue_id?: any; collection?: any }) => {
           const isSpecialVenue = text === "Arct-HF01-J XP-AR-US" || text === "ARCT Technologies-HF02-AR-US";

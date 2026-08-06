@@ -674,18 +674,19 @@ export default function MiningAgentSettingPage() {
                 wrapperCol={{ flex: "1 1 0" }}
                 className="[&_.ant-form-item]:!mb-0 [&_.ant-form-item-label>label]:!font-semibold [&_.ant-form-item-label>label]:!text-gray-800"
               >
+                <div className="mb-3 text-xs text-gray-500">以下筛选项均支持模糊搜索</div>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-x-6 gap-y-4 items-end">
                   <Form.Item name="siteCode" label="场地编码" className="!mb-0 min-w-0">
-                    <Input allowClear placeholder="请输入场地编码" />
+                    <Input allowClear placeholder="请输入场地编码关键词" />
                   </Form.Item>
                   <Form.Item name="siteName" label="场地名称" className="!mb-0 min-w-0">
-                    <Input allowClear placeholder="请输入场地名称" />
+                    <Input allowClear placeholder="请输入场地名称关键词" />
                   </Form.Item>
                   <Form.Item name="agentCode" label="代理编码" className="!mb-0 min-w-0">
-                    <Input allowClear placeholder="请输入代理编码" />
+                    <Input allowClear placeholder="请输入代理编码关键词" />
                   </Form.Item>
                   <Form.Item name="agentName" label="代理名称" className="!mb-0 min-w-0">
-                    <Input allowClear placeholder="请输入代理名称" />
+                    <Input allowClear placeholder="请输入代理名称关键词" />
                   </Form.Item>
                   <div className="flex min-w-0 justify-end gap-2 pb-0.5 md:col-span-2 lg:col-span-4">
                     <Button onClick={handleReset}>重置</Button>

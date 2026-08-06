@@ -3,14 +3,14 @@ import { useState } from "react";
 
 type ResizableHeaderCellProps = ThHTMLAttributes<HTMLTableCellElement> & {
   width?: number;
-  onResize?: (nextWidth: number) => void;
+  onColumnResize?: (nextWidth: number) => void;
 };
 
 const MIN_WIDTH = 160;
 
 export default function ResizableHeaderCell({
   width,
-  onResize,
+  onColumnResize,
   style,
   children,
   ...restProps
@@ -18,7 +18,7 @@ export default function ResizableHeaderCell({
   const [hovered, setHovered] = useState(false);
 
   const handleMouseDown = (event: ReactMouseEvent<HTMLDivElement>) => {
-    if (!onResize) return;
+    if (!onColumnResize) return;
 
     event.preventDefault();
     event.stopPropagation();
@@ -28,7 +28,7 @@ export default function ResizableHeaderCell({
 
     const handleMouseMove = (moveEvent: MouseEvent) => {
       const deltaX = moveEvent.clientX - startX;
-      onResize(Math.max(MIN_WIDTH, startWidth + deltaX));
+      onColumnResize(Math.max(MIN_WIDTH, startWidth + deltaX));
     };
 
     const handleMouseUp = () => {
@@ -54,7 +54,7 @@ export default function ResizableHeaderCell({
       }}
     >
       {children}
-      {onResize ? (
+      {onColumnResize ? (
         <div
           onClick={(event) => event.stopPropagation()}
           onMouseDown={handleMouseDown}

@@ -217,7 +217,7 @@ const VenueManagement: React.FC = () => {
       title: "序号",
       dataIndex: "id",
       width: 60,
-      render(text: string, record: any, index: number) {
+      render(_text: string, _record: any, index: number) {
         return index + 1;
       },
     },
@@ -225,13 +225,14 @@ const VenueManagement: React.FC = () => {
       title: "场地名称",
       dataIndex: "venue_name",
       width: venueNameColumnWidth,
-      onHeaderCell: () => ({
-        width: venueNameColumnWidth,
-        onResize: (nextWidth: number) => {
-          setVenueNameColumnWidth(nextWidth);
-          localStorage.setItem("venue-setting-venue-name-column-width", String(nextWidth));
-        },
-      }),
+      onHeaderCell: () =>
+        ({
+          width: venueNameColumnWidth,
+          onColumnResize: (nextWidth: number) => {
+            setVenueNameColumnWidth(nextWidth);
+            localStorage.setItem("venue-setting-venue-name-column-width", String(nextWidth));
+          },
+        }) as any,
       render: (text: string, record: { id?: any }) => {
         return (
           <div style={{ width: "100%", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
@@ -458,7 +459,7 @@ const VenueManagement: React.FC = () => {
         pagination={{
           pageSize: pageSize, // 使用动态 pageSize
           showSizeChanger: true,
-          onShowSizeChange: (current, size) => {
+          onShowSizeChange: (_current, size) => {
             setPageSize(size); // 更新 pageSize 状态（注意：第2个参数才是 pageSize）
           },
           onChange: (_page, size) => {

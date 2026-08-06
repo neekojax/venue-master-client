@@ -281,13 +281,14 @@ const App: React.FC = () => {
       key: "siteName",
       fixed: "left",
       width: siteNameColumnWidth,
-      onHeaderCell: () => ({
-        width: siteNameColumnWidth,
-        onResize: (nextWidth: number) => {
-          setSiteNameColumnWidth(nextWidth);
-          localStorage.setItem("daily-report-site-name-column-width", String(nextWidth));
-        },
-      }),
+      onHeaderCell: () =>
+        ({
+          width: siteNameColumnWidth,
+          onColumnResize: (nextWidth: number) => {
+            setSiteNameColumnWidth(nextWidth);
+            localStorage.setItem("daily-report-site-name-column-width", String(nextWidth));
+          },
+        }) as any,
       render: (text: string, record: { key?: any }) => {
         const isSpecialVenue = text === "Arct-HF01-J XP-AR-US" || text === "ARCT Technologies-HF02-AR-US";
         return (
