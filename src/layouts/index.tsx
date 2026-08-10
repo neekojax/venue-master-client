@@ -129,6 +129,7 @@ export default function MainLayout() {
             new CustomEvent("permission_ids_updated", {
               detail: {
                 groups: organizations,
+                permission_ids: access_level,
                 access_level,
                 frontend_routes,
                 api_permissions_paths,

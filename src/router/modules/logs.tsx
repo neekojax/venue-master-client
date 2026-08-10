@@ -1,13 +1,10 @@
-import { type RouteObject } from "react-router-dom";
-import { Link } from "react-router-dom";
+import { Link, Outlet, type RouteObject } from "react-router-dom";
 import { ProgressBar } from "@/components/progress-bar";
 import { ROUTE_PATHS } from "@/constants/common";
 
 export const logsRoute: RouteObject = {
   path: ROUTE_PATHS.logs,
-  // lazy: async () => ({
-  // Component: (await import("@/pages/ops-logs")).default,
-  // }),
+  element: <Outlet />,
   HydrateFallback: ProgressBar,
   handle: {
     title: "用户操作日志",
@@ -15,7 +12,7 @@ export const logsRoute: RouteObject = {
   },
   children: [
     {
-      path: ROUTE_PATHS.logs,
+      index: true,
       lazy: async () => ({
         Component: (await import("@/pages/ops-logs/list")).default,
       }),
@@ -26,7 +23,7 @@ export const logsRoute: RouteObject = {
       },
     },
     {
-      path: "/ops_logs/detail/:id",
+      path: "detail/:id",
       lazy: async () => ({
         Component: (await import("@/pages/ops-logs/detail")).default,
       }),

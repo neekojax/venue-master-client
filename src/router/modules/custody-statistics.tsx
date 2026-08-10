@@ -1,4 +1,4 @@
-import { Link, type RouteObject } from "react-router-dom";
+import { Link, Navigate, type RouteObject } from "react-router-dom";
 import { ProgressBar } from "@/components/progress-bar";
 import { ROUTE_PATHS } from "@/constants/common";
 
@@ -13,6 +13,10 @@ export const custodyMenuRoute: RouteObject = {
     crumb: () => "电费监控",
   },
   children: [
+    {
+      index: true,
+      element: <Navigate replace to={ROUTE_PATHS.statistics} />,
+    },
     {
       path: ROUTE_PATHS.setting,
       lazy: async () => ({
