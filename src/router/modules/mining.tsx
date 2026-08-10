@@ -82,6 +82,19 @@ export const miningRoute: RouteObject = {
       },
     },
     {
+      path: ROUTE_PATHS.assetHashrateHistory,
+      lazy: async () => ({
+        Component: (await import("@/pages/mining/asset-hashrate-history")).default,
+      }),
+      HydrateFallback: ProgressBar,
+      handle: {
+        name: "assetHashrateHistory",
+        title: "资产变更历史",
+        crumb: () => <Link to={ROUTE_PATHS.assetHashrateHistory}>资产变更历史</Link>,
+        permission: ROUTE_PATHS.assetHashrateHistory,
+      },
+    },
+    {
       path: "detail/:venueId/:poolId",
       lazy: async () => ({
         Component: (await import("@/pages/mining/detail")).default,
