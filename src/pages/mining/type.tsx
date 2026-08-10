@@ -61,6 +61,49 @@ export type PoolRecordUpdate = {
   overclock_hashrate_per_machine?: number;
 };
 
+export type AssetPoolRecord = {
+  id: number;
+  venue_id: number;
+  pool_id: number;
+  start_time: string;
+  end_time: string;
+  theoretical_hashrate: number;
+  hosted_machine: number;
+  is_overclocked?: number;
+  overclock_hashrate_per_machine?: number;
+  leased_power?: number;
+  is_cloud_power?: number;
+  asset_record_id?: number;
+  source_updated_at?: string;
+  base_record_id?: number;
+  source_type?: number;
+};
+
+export type AssetPoolRecordCreate = {
+  venue_id: number;
+  pool_id: number;
+  start_time: string;
+  theoretical_hashrate: number;
+  hosted_machine: number;
+  is_overclocked?: number;
+  overclock_hashrate_per_machine?: number;
+  leased_power?: number;
+  is_cloud_power?: number;
+  asset_record_id?: number;
+  source_updated_at?: string;
+  base_record_id?: number;
+  source_type?: number;
+};
+
+export type AssetPoolRecordUpdate = AssetPoolRecordCreate & {
+  id: number;
+};
+
+export type AssetPoolRecordRebuild = {
+  venue_id: number;
+  pool_id: number;
+};
+
 export type HostRecordCreate = {
   venue_id: number; // 场馆ID
   pool_id: number; // 矿池ID
@@ -80,6 +123,8 @@ export type AssetSiteInfo = {
   status: string;
   venue_id: number;
   pool_id: number;
+  asset_switch_enabled?: number;
+  asset_switch_at?: string;
   created_at: string;
   updated_at: string;
 };
@@ -88,6 +133,8 @@ export type AssetSiteMappingUpdate = {
   id: number;
   venue_id?: number;
   pool_id?: number;
+  asset_switch_enabled?: number;
+  asset_switch_at?: string;
 };
 
 export type HostRecordUpdate = {

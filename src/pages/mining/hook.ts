@@ -1,19 +1,24 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 import {
+  createAssetPoolRecord,
   createHostRecord,
   createPoolRecord,
+  deleteAssetPoolRecord,
   deleteHostRecord,
   deletePoolRecord,
+  fetchAssetPoolRecordList,
   fetchAssetSiteInfoList,
   fetchHostRecordList,
   fetchMiningHashRateList,
   fetchMiningPoolList,
   fetchPoolRecordList,
+  rebuildAssetPoolRecord,
   submitAssetSiteInfoMappingUpdate,
   submitMiningPoolDelete,
   submitMiningPoolNew,
   submitMiningPoolUpdate,
+  updateAssetPoolRecord,
   updateHostRecord,
   updatePoolRecord,
 } from "@/pages/mining/api.tsx";
@@ -220,6 +225,73 @@ export const useHostRecordDelete = () => {
     onError: (error) => {
       // 错误处理
       console.error("删除出错:", error);
+    },
+  });
+};
+
+export const useAssetPoolRecordList = (poolId: string) => {
+  return useQuery({
+    queryKey: ["asset-pool-record-list", poolId],
+    queryFn: () => fetchAssetPoolRecordList(poolId),
+  });
+};
+
+export const useAssetPoolRecordCreate = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: createAssetPoolRecord,
+    onSuccess: () => {
+      // @ts-ignore
+      queryClient.invalidateQueries(["asset-pool-record-list"]);
+    },
+    onError: (error) => {
+      console.error("新增资产接管记录出错:", error);
+    },
+  });
+};
+
+export const useAssetPoolRecordUpdate = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: updateAssetPoolRecord,
+    onSuccess: () => {
+      // @ts-ignore
+      queryClient.invalidateQueries(["asset-pool-record-list"]);
+    },
+    onError: (error) => {
+      console.error("更新资产接管记录出错:", error);
+    },
+  });
+};
+
+export const useAssetPoolRecordDelete = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: deleteAssetPoolRecord,
+    onSuccess: () => {
+      // @ts-ignore
+      queryClient.invalidateQueries(["asset-pool-record-list"]);
+    },
+    onError: (error) => {
+      console.error("删除资产接管记录出错:", error);
+    },
+  });
+};
+
+export const useAssetPoolRecordRebuild = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: rebuildAssetPoolRecord,
+    onSuccess: () => {
+      // @ts-ignore
+      queryClient.invalidateQueries(["asset-pool-record-list"]);
+    },
+    onError: (error) => {
+      console.error("重建资产接管记录出错:", error);
     },
   });
 };

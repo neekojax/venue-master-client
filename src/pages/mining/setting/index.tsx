@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { FaAdn, FaFish } from "react-icons/fa6";
 import { Link } from "react-router-dom";
 import {
@@ -8,12 +8,14 @@ import {
   FormOutlined,
   ImportOutlined,
   LinkOutlined,
+  RedoOutlined,
   SearchOutlined,
 } from "@ant-design/icons";
 import { CaretDownOutlined, CaretUpOutlined } from "@ant-design/icons";
 import {
   Button,
   Col,
+  DatePicker,
   Form,
   Input,
   InputNumber,
@@ -28,9 +30,11 @@ import {
   Tag,
   Tooltip,
 } from "antd";
+import dayjs, { Dayjs } from "dayjs";
 import ActionButton, { ActionButtonMode } from "@/components/action-button";
 import EditTable from "@/components/edit-table";
 import { FavoriteButton } from "@/components/FavoriteButton";
+import { ROUTE_PATHS } from "@/constants/common";
 import useAuthRedirect from "@/hooks/useAuthRedirect.ts";
 // import PoolSwitcher from "./components/select.tsx";
 import { useSelector, useSettingsStore } from "@/stores";
@@ -44,6 +48,7 @@ import ResizableHeaderCell from "@/pages/custody-statistics/statistics/component
 import { uploadMiningPoolExcel } from "@/pages/mining/api.tsx";
 import EditForm from "@/pages/mining/components/edit-form.tsx";
 import {
+  useAssetPoolRecordRebuild,
   useAssetSiteInfoList,
   useAssetSiteInfoUpdateMapping,
   useMiningPoolDelete,
@@ -200,8 +205,11 @@ export default function MiningSettingPage() {
   const [isAssetBindModalOpen, setIsAssetBindModalOpen] = useState(false);
   const [assetBindingRow, setAssetBindingRow] = useState<MiningPoolTableRow | null>(null);
   const [selectedAssetSiteId, setSelectedAssetSiteId] = useState<number | undefined>();
+  const [assetSwitchEnabled, setAssetSwitchEnabled] = useState<number>(0);
+  const [assetSwitchAt, setAssetSwitchAt] = useState<Dayjs | null | undefined>(undefined);
   const { data: assetSiteInfoData, isLoading: isLoadingAssetSiteInfo } = useAssetSiteInfoList();
   const assetSiteMappingMutation = useAssetSiteInfoUpdateMapping();
+  const assetPoolRecordRebuildMutation = useAssetPoolRecordRebuild();
 
   const [columns, setColumns] = useState<any>([]);
   const [tableData, setTableData] = useState<any>([]);
@@ -253,16 +261,47 @@ export default function MiningSettingPage() {
   const [excelUploadModalVisible, setExcelUploadModalVisible] = useState(false);
   const [currentRow, setCurrentRow] = useState<MiningPoolUpdate | null>(null);
   const [editableKey, setEditableRowKey] = useState<number>(0);
+  const [rebuildingPoolId, setRebuildingPoolId] = useState<number | null>(null);
 
   const { data: venueList } = useVenueList(poolType);
 
   const [form] = Form.useForm();
-  const assetSiteList: AssetSiteInfo[] = assetSiteInfoData?.data?.list ?? [];
+  const assetSiteList: AssetSiteInfo[] = useMemo(
+    () => assetSiteInfoData?.data?.list ?? [],
+    [assetSiteInfoData],
+  );
   const isSuperAdmin = permissionIds
     .split(",")
     .map((item) => item.trim())
     .filter(Boolean)
     .includes("role-super-admin");
+  const currentBoundAssetSite = assetBindingRow
+    ? assetSiteList.find(
+        (item) =>
+          Number(item.venue_id) === Number(assetBindingRow.venue_id) &&
+          Number(item.pool_id) === Number(assetBindingRow.pool_id),
+      )
+    : undefined;
+
+  useEffect(() => {
+    if (!isAssetBindModalOpen || !currentBoundAssetSite) return;
+
+    setSelectedAssetSiteId((prev) => prev ?? currentBoundAssetSite.id);
+  }, [currentBoundAssetSite, isAssetBindModalOpen]);
+
+  useEffect(() => {
+    if (!isAssetBindModalOpen) return;
+
+    const selectedSite = assetSiteList.find((item) => Number(item.id) === Number(selectedAssetSiteId));
+    if (!selectedSite) {
+      setAssetSwitchEnabled(0);
+      setAssetSwitchAt(undefined);
+      return;
+    }
+
+    setAssetSwitchEnabled(Number(selectedSite.asset_switch_enabled ?? 0));
+    setAssetSwitchAt(selectedSite.asset_switch_at ? dayjs(selectedSite.asset_switch_at) : null);
+  }, [assetSiteList, isAssetBindModalOpen, selectedAssetSiteId]);
 
   const showModal = (record: any) => {
     setCurrentRow(record);
@@ -339,6 +378,8 @@ export default function MiningSettingPage() {
 
     setAssetBindingRow(record);
     setSelectedAssetSiteId(undefined);
+    setAssetSwitchEnabled(0);
+    setAssetSwitchAt(undefined);
     setIsAssetBindModalOpen(true);
   };
 
@@ -346,7 +387,48 @@ export default function MiningSettingPage() {
     setIsAssetBindModalOpen(false);
     setAssetBindingRow(null);
     setSelectedAssetSiteId(undefined);
+    setAssetSwitchEnabled(0);
+    setAssetSwitchAt(undefined);
   };
+
+  const handleRebuildAssetHistory = useCallback(
+    async (record: MiningPoolTableRow) => {
+      if (record.pool_category !== "主矿池") {
+        message.warning("仅主矿池支持重建资产变更历史");
+        return;
+      }
+
+      setRebuildingPoolId(record.pool_id);
+      try {
+        await assetPoolRecordRebuildMutation.mutateAsync({
+          venue_id: record.venue_id,
+          pool_id: record.pool_id,
+        });
+        message.success(`已触发 ${record.pool_name} 的资产变更历史重建`);
+      } catch (error) {
+        message.error((error as Error).message || "重建资产变更历史失败");
+      } finally {
+        setRebuildingPoolId(null);
+      }
+    },
+    [assetPoolRecordRebuildMutation],
+  );
+
+  const handleDelete = useCallback(
+    (recordId: number): Promise<void> => {
+      return new Promise(() => {
+        deleteMutation.mutate(recordId, {
+          onSuccess: () => {
+            message.success("删除记录成功");
+          },
+          onError: (error) => {
+            message.error(`删除记录失败: ${error.message}`);
+          },
+        });
+      });
+    },
+    [deleteMutation],
+  );
 
   const handleAssetSiteBind = async () => {
     if (!assetBindingRow) {
@@ -364,6 +446,8 @@ export default function MiningSettingPage() {
         id: selectedAssetSiteId,
         venue_id: Number(assetBindingRow.venue_id),
         pool_id: Number(assetBindingRow.pool_id),
+        asset_switch_enabled: Number(assetSwitchEnabled ?? 0),
+        asset_switch_at: assetSwitchAt ? dayjs(assetSwitchAt).format("YYYY-MM-DD HH:mm:ss") : "",
       });
 
       setTableData((prev: MiningPoolTableRow[]) =>
@@ -603,10 +687,10 @@ export default function MiningSettingPage() {
               }}
             >
               <Link
-                to={`/mining/detail/${record.venue_id}/${record.pool_id}`}
+                reloadDocument
+                to={ROUTE_PATHS.miningDetail(record.venue_id, record.pool_id)}
                 className="text-blue-500 hover:underline"
               >
-                {" "}
                 {text}
               </Link>
               {/* {text} */}
@@ -781,9 +865,10 @@ export default function MiningSettingPage() {
         title: "操作",
         valueType: "option1",
         key: "operation",
-        width: 190,
+        width: 290,
         render: (_text: any, record: MiningPoolTableRow) => {
           const isBound = Boolean(record.asset_site_bound);
+          const isMainPool = record.pool_category === "主矿池";
 
           return (
             <div className="flex items-center gap-2">
@@ -801,9 +886,34 @@ export default function MiningSettingPage() {
                 </a>
               </Popconfirm>
               {isSuperAdmin ? (
+                <Popconfirm
+                  title="确认重建该账户的资产变更历史？"
+                  description="将按当前资产数据重新生成该主矿池的资产变更历史。"
+                  onConfirm={() => handleRebuildAssetHistory(record)}
+                  okText="重建"
+                  cancelText="取消"
+                  disabled={!isMainPool}
+                >
+                  <Button
+                    type="link"
+                    size="small"
+                    icon={<RedoOutlined />}
+                    loading={assetPoolRecordRebuildMutation.isPending && rebuildingPoolId === record.pool_id}
+                    disabled={!isMainPool}
+                    style={{
+                      padding: 0,
+                      height: "auto",
+                      color: isMainPool ? "#2563eb" : "#94a3b8",
+                    }}
+                  >
+                    重建历史
+                  </Button>
+                </Popconfirm>
+              ) : null}
+              {isSuperAdmin ? (
                 <Tooltip
                   title={
-                    record.pool_category !== "主矿池"
+                    !isMainPool
                       ? "仅主矿池支持绑定"
                       : isBound
                         ? "已绑定资产系统场地"
@@ -817,7 +927,7 @@ export default function MiningSettingPage() {
                     style={{
                       padding: 0,
                       height: "auto",
-                      color: record.pool_category !== "主矿池" ? "#94a3b8" : isBound ? "#16a34a" : "#d97706",
+                      color: !isMainPool ? "#94a3b8" : isBound ? "#16a34a" : "#d97706",
                     }}
                     onClick={() => openAssetBindModal(record)}
                   >
@@ -848,7 +958,15 @@ export default function MiningSettingPage() {
         // ],
       },
     ]);
-  }, [hashrateSortOrder, venueNameColumnWidth]);
+  }, [
+    assetPoolRecordRebuildMutation.isPending,
+    handleDelete,
+    handleRebuildAssetHistory,
+    hashrateSortOrder,
+    isSuperAdmin,
+    rebuildingPoolId,
+    venueNameColumnWidth,
+  ]);
 
   // Loading 状态
   if (isLoadingPools) {
@@ -875,19 +993,6 @@ export default function MiningSettingPage() {
         message.error(`添加失败: ${error.message}`);
         setIsLoadingNewPool(false); // 请求成功，停止加载
       },
-    });
-  };
-
-  const handleDelete = (recordId: number): Promise<void> => {
-    return new Promise(() => {
-      deleteMutation.mutate(recordId, {
-        onSuccess: () => {
-          message.success("删除记录成功");
-        },
-        onError: (error) => {
-          message.error(`删除记录失败: ${error.message}`);
-        },
-      });
     });
   };
 
@@ -1038,6 +1143,8 @@ export default function MiningSettingPage() {
     });
 
   const selectedAssetSite = assetSiteList.find((item) => Number(item.id) === Number(selectedAssetSiteId));
+  const isSelectedCurrentBoundAssetSite =
+    Boolean(currentBoundAssetSite) && Number(currentBoundAssetSite?.id) === Number(selectedAssetSite?.id);
 
   // @ts-ignore
   return (
@@ -1217,16 +1324,86 @@ export default function MiningSettingPage() {
 
             <div className="rounded-lg border border-slate-200 px-4 py-3 text-sm text-slate-700">
               <div className="mb-2 text-sm font-medium text-slate-900">当前绑定情况</div>
-              {assetBindingRow?.asset_site_bound ? (
-                <div>当前已绑定资产系统场地</div>
+              {currentBoundAssetSite ? (
+                <div className="space-y-1">
+                  <div className="flex items-center gap-2">
+                    <span>当前已绑定资产场地：</span>
+                    <Tag color="green">{currentBoundAssetSite.name}</Tag>
+                  </div>
+                  <div>资产场地 ID：{currentBoundAssetSite.id}</div>
+                  <div>组织 ID：{currentBoundAssetSite.group_id || "-"}</div>
+                  <div className="flex items-center gap-2">
+                    <span>状态：</span>
+                    <Tag color={currentBoundAssetSite.status === "active" ? "green" : "default"}>
+                      {currentBoundAssetSite.status || "-"}
+                    </Tag>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span>资产接管：</span>
+                    <Tag
+                      color={
+                        Number(currentBoundAssetSite.asset_switch_enabled ?? 0) === 1 ? "blue" : "default"
+                      }
+                    >
+                      {Number(currentBoundAssetSite.asset_switch_enabled ?? 0) === 1 ? "已开启" : "未开启"}
+                    </Tag>
+                  </div>
+                  <div>切换时间：{currentBoundAssetSite.asset_switch_at || "-"}</div>
+                </div>
+              ) : assetBindingRow?.asset_site_bound && isLoadingAssetSiteInfo ? (
+                <div>当前已绑定资产系统场地，正在加载绑定详情...</div>
               ) : (
                 <div>当前未绑定资产系统场地</div>
               )}
             </div>
 
+            <div className="rounded-lg border border-slate-200 px-4 py-3 text-sm text-slate-700">
+              <div className="mb-3 text-sm font-medium text-slate-900">资产接管配置</div>
+              <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                <div>
+                  <div className="mb-2 text-xs text-slate-500">是否启用资产接管</div>
+                  <Switch
+                    checked={Number(assetSwitchEnabled ?? 0) === 1}
+                    checkedChildren="开启"
+                    unCheckedChildren="关闭"
+                    onChange={(checked) => setAssetSwitchEnabled(checked ? 1 : 0)}
+                  />
+                </div>
+                <div>
+                  <div className="mb-2 text-xs text-slate-500">查询切换时间</div>
+                  <DatePicker
+                    showTime
+                    allowClear
+                    className="w-full"
+                    value={assetSwitchAt ?? null}
+                    onChange={(value) => setAssetSwitchAt(value)}
+                    placeholder="未设置则为空"
+                  />
+                </div>
+              </div>
+              <div className="mt-3 text-xs text-slate-400">
+                未设置切换时间时，新表仍会继续同步；切换配置只影响查询读取口径。
+              </div>
+            </div>
+
             {selectedAssetSite ? (
-              <div className="rounded-lg border border-blue-200 bg-blue-50 px-4 py-3 text-sm text-slate-700">
-                <div className="mb-2 text-sm font-medium text-slate-900">待绑定资产场地</div>
+              <div
+                className={`rounded-lg px-4 py-3 text-sm ${
+                  isSelectedCurrentBoundAssetSite
+                    ? "border border-emerald-200 bg-emerald-50 text-emerald-900"
+                    : "border border-blue-200 bg-blue-50 text-slate-700"
+                }`}
+              >
+                <div
+                  className={`mb-2 flex items-center gap-2 text-sm font-medium ${
+                    isSelectedCurrentBoundAssetSite ? "text-emerald-900" : "text-slate-900"
+                  }`}
+                >
+                  <span>{isSelectedCurrentBoundAssetSite ? "当前绑定资产场地" : "待绑定资产场地"}</span>
+                  <Tag color={isSelectedCurrentBoundAssetSite ? "green" : "blue"}>
+                    {isSelectedCurrentBoundAssetSite ? "已绑定" : "待切换"}
+                  </Tag>
+                </div>
                 <div>名称：{selectedAssetSite.name}</div>
                 <div>资产场地 ID：{selectedAssetSite.id}</div>
                 <div>组织 ID：{selectedAssetSite.group_id || "-"}</div>
@@ -1235,6 +1412,15 @@ export default function MiningSettingPage() {
                   <Tag color={selectedAssetSite.status === "active" ? "green" : "default"}>
                     {selectedAssetSite.status || "-"}
                   </Tag>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span>资产接管：</span>
+                  <Tag color={Number(assetSwitchEnabled ?? 0) === 1 ? "blue" : "default"}>
+                    {Number(assetSwitchEnabled ?? 0) === 1 ? "已开启" : "未开启"}
+                  </Tag>
+                </div>
+                <div>
+                  切换时间：{assetSwitchAt ? dayjs(assetSwitchAt).format("YYYY-MM-DD HH:mm:ss") : "-"}
                 </div>
                 <div>当前映射场地 ID：{selectedAssetSite.venue_id ?? 0}</div>
                 <div>当前映射主矿池 ID：{selectedAssetSite.pool_id ?? 0}</div>

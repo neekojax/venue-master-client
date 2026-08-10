@@ -4,6 +4,7 @@ import { Button, DatePicker, Form, InputNumber, message, Modal, Popconfirm, Radi
 import type { ColumnsType } from "antd/es/table";
 import dayjs from "dayjs";
 
+import AssetPoolRecordHistory from "@/pages/mining/detail/components/Asset-Pool-Record-History.tsx";
 import {
   usePoolRecordCreate,
   usePoolRecordDelete,
@@ -227,6 +228,8 @@ const OperationLog: React.FC = () => {
         dataSource={records}
         pagination={{ pageSize: 20 }}
       />
+
+      <AssetPoolRecordHistory />
 
       <Modal
         title={editingRecord ? "编辑记录" : "新增记录"}
