@@ -6,6 +6,10 @@ import { ReactEcharts } from "@/components/react-echarts";
 
 import { fetchMiningBenefitLine } from "@/pages/landing/api.ts";
 
+const landingCardStyle = {
+  minHeight: 432,
+};
+
 // @ts-ignore
 const MiningBenefitCard = ({ poolType }) => {
   const [data, setData] = useState([]);
@@ -13,6 +17,7 @@ const MiningBenefitCard = ({ poolType }) => {
   const [loading, setLoading] = useState<boolean>(true); // 加载状态
 
   const fetchData = async (timeFrame: string) => {
+    setLoading(true);
     try {
       const Result = await fetchMiningBenefitLine(poolType, timeFrame);
 
@@ -219,6 +224,7 @@ const MiningBenefitCard = ({ poolType }) => {
       // style={{ background: "#f7f9fc" }}
       // size={"small"}
       loading={loading}
+      style={landingCardStyle}
       title={
         <Row align="middle">
           <Col>

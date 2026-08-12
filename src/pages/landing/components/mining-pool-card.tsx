@@ -17,6 +17,10 @@ const twoColors: ProgressProps["strokeColor"] = {
   "100%": "#108ee9",
 };
 
+const landingCardStyle: React.CSSProperties = {
+  minHeight: 432,
+};
+
 const formatHashrate = (value: unknown) =>
   new Intl.NumberFormat("zh-CN", {
     minimumFractionDigits: 2,
@@ -36,11 +40,13 @@ const MiningPoolCard: React.FC<MiningPoolCardProps> = ({ poolType }) => {
   };
 
   const fetchData = async (poolType: string) => {
+    setLoading(true);
     try {
-      const realTimeStatusResult = await fetchTotalRealTimeStatus(poolType);
+      const [realTimeStatusResult, lastHashStatusResult] = await Promise.all([
+        fetchTotalRealTimeStatus(poolType),
+        fetchTotalLastHashStatus(poolType),
+      ]);
       setRealTimeStatus(realTimeStatusResult.data); // 假设返回数据在 result.data 中
-
-      const lastHashStatusResult = await fetchTotalLastHashStatus(poolType);
       setLastHashStatus(lastHashStatusResult.data); // 假设返回数据在 result.data 中
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (err) {
@@ -98,6 +104,7 @@ const MiningPoolCard: React.FC<MiningPoolCardProps> = ({ poolType }) => {
   return (
     <Card
       className="card-wapper"
+      style={landingCardStyle}
       title={
         <Row align="middle">
           <Col>

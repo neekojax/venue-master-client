@@ -6,6 +6,10 @@ import { ReactEcharts } from "@/components/react-echarts";
 
 import { fetchLastestHashRateEfficiency } from "@/pages/mining/api.tsx";
 
+const landingCardStyle = {
+  minHeight: 432,
+};
+
 // @ts-ignore
 const MiningEfficiencyCard = ({ poolType }) => {
   const [data, setData] = useState([]);
@@ -14,6 +18,7 @@ const MiningEfficiencyCard = ({ poolType }) => {
   const [timeFrame, setTimeFrame] = useState("30");
 
   const fetchData = async (timeFrame: string) => {
+    setLoading(true);
     try {
       const Result = await fetchLastestHashRateEfficiency(poolType, timeFrame);
 
@@ -133,6 +138,7 @@ const MiningEfficiencyCard = ({ poolType }) => {
       bordered={false}
       className="card-wapper"
       loading={loading}
+      style={landingCardStyle}
       // style={{ background: "#f7f9fc" }}
       // size={"small"}
       title={

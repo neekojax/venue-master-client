@@ -11,6 +11,10 @@ interface MiningPoolCardProps {
   poolType: string; // 接收矿池类型作为 props
 }
 
+const landingCardStyle: React.CSSProperties = {
+  minHeight: 432,
+};
+
 const MiningBenefitCard: React.FC<MiningPoolCardProps> = ({ poolType }) => {
   const [lastProfitStatus, setLastProfitStatus] = useState<any>(null); // 状态数据
   const [loading, setLoading] = useState<boolean>(true); // 加载状态
@@ -47,29 +51,17 @@ const MiningBenefitCard: React.FC<MiningPoolCardProps> = ({ poolType }) => {
   };
 
   const fetchData = async (poolType: string) => {
+    setLoading(true);
     try {
-      const lastProfitStatusResult = await fetchTotalLastProfitStatus(poolType);
-      setLastProfitStatus(lastProfitStatusResult.data); // 假设返回数据在 result.data 中
-
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    } catch (err) {
-      /* empty */
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const fetchSuanlilvData = async (poolType: string) => {
-    try {
-      // const currentDate = dayjs().subtract(1, 'day').format('YYYY-MM-DD');
-      // 获取昨天的日期
-      // const yesterday = dayjs().subtract(1, "day").format("YYYY-MM-DD");
-
       const targetDate = dayjs()
         .subtract(dayjs().hour() < 10 ? 2 : 1, "day")
         .format("YYYY-MM-DD");
+      const [lastProfitStatusResult, suanlilv] = await Promise.all([
+        fetchTotalLastProfitStatus(poolType),
+        fetchHomesuanli(poolType, targetDate),
+      ]);
 
-      const suanlilv = await fetchHomesuanli(poolType, targetDate);
+      setLastProfitStatus(lastProfitStatusResult.data); // 假设返回数据在 result.data 中
       setSuanlilv(suanlilv.data); // 假设返回数据在 result.data 中
       localStorage.setItem("suanlilv", JSON.stringify(suanlilv.data));
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -82,7 +74,6 @@ const MiningBenefitCard: React.FC<MiningPoolCardProps> = ({ poolType }) => {
 
   useEffect(() => {
     fetchData(poolType);
-    fetchSuanlilvData(poolType);
   }, [poolType]);
 
   if (error) {
@@ -92,6 +83,7 @@ const MiningBenefitCard: React.FC<MiningPoolCardProps> = ({ poolType }) => {
   return (
     <Card
       className="card-wapper"
+      style={landingCardStyle}
       title={
         <Row align="middle">
           <Col>
