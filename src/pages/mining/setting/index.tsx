@@ -513,6 +513,8 @@ export default function MiningSettingPage() {
             overclock_hashrate_per_machine: any;
             leased_power: any;
             asset_site_bound: any;
+            asset_switch_enabled?: any;
+            asset_switch_at?: any;
             // energy_ratio: any;
             // basic_hosting_fee: any;
             heat_diss_mode: any;
