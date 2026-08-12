@@ -1,7 +1,9 @@
 // import { useLocation } from "react-router-dom";
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { GlobalOutlined } from "@ant-design/icons";
 import { Select } from "antd";
+import { ROUTE_PATHS } from "@/constants/common";
 import { useSelector } from "@/stores";
 import { setPoolType, useSettingsStore } from "@/stores"; // 引入自定义选择器
 
@@ -9,11 +11,11 @@ const { Option } = Select;
 
 export default function PoolSelect() {
   const { poolType } = useSettingsStore(useSelector(["poolType"]));
+  const navigate = useNavigate();
 
   const handleChange = (value: string) => {
     setPoolType(value); // 更新语言
-    window.location.href = "/";
-    // localStorage.setItem("poolType", value);
+    navigate(ROUTE_PATHS.landing);
   };
 
   // 实时读取 organizations 并监听更新（CANGO 的 value 设为 CANG）
