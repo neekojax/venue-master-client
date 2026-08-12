@@ -81,12 +81,14 @@ const LEASE_STATUS_FULL = "全部租赁" as const;
 const LEASE_STATUS_PARTIAL_POWER = "部分租赁算力" as const;
 const LEASE_STATUS_NONE = "非租赁" as const;
 const LEASE_STATUS_PENDING_REMOVAL = "待撤场" as const;
+const ASSET_SWITCH_ENABLED_FILTER = "资产接管已开启" as const;
 
 type StatusFilterValue =
   | number
   | typeof LEASE_STATUS_PARTIAL
   | typeof LEASE_STATUS_FULL
   | typeof LEASE_STATUS_PENDING_REMOVAL
+  | typeof ASSET_SWITCH_ENABLED_FILTER
   | null;
 
 const LEASE_STATUS_COLOR_MAP: Record<AccountLeaseStatus, string> = {
@@ -139,6 +141,8 @@ type MiningPoolTableRow = {
   link?: string;
   collection?: 0 | 1;
   asset_site_bound?: boolean;
+  asset_switch_enabled?: number;
+  asset_switch_at?: string;
   account_lease_status?: AccountLeaseStatus;
 };
 
@@ -517,31 +521,43 @@ export default function MiningSettingPage() {
             account_lease_status: AccountLeaseStatus;
           },
           index: any,
-        ) => ({
-          serialNumber: index + 1,
-          key: item.id, // 使用 ID 作为唯一 key
-          pool_id: item.id,
+        ) => {
           // @ts-ignore
-          venue_id: item.venue_info.id,
-          // @ts-ignore
-          venue_name: item.venue_info.venue_name,
-          pool_name: item.pool_name,
-          country: item.country,
-          hosted_machine: item.hosted_machine,
-          status: item.status,
-          pool_category: item.pool_category,
-          theoretical_hashrate: item.theoretical_hashrate,
-          is_overclocked: item.is_overclocked,
-          overclock_hashrate_per_machine: item.overclock_hashrate_per_machine,
-          leased_power: item.leased_power,
-          asset_site_bound: Boolean(item.asset_site_bound),
-          // energy_ratio: item.energy_ratio,
-          // basic_hosting_fee: item.basic_hosting_fee,
-          heat_diss_mode: item.heat_diss_mode,
-          link: item.link,
-          collection: item.collection,
-          account_lease_status: item.account_lease_status,
-        }),
+          const venueId = Number(item.venue_info.id);
+          const poolId = Number(item.id);
+          const matchedAssetSite = assetSiteList.find(
+            (assetSite) => Number(assetSite.venue_id) === venueId && Number(assetSite.pool_id) === poolId,
+          );
+
+          return {
+            serialNumber: index + 1,
+            key: item.id, // 使用 ID 作为唯一 key
+            pool_id: item.id,
+            venue_id: venueId,
+            // @ts-ignore
+            venue_name: item.venue_info.venue_name,
+            pool_name: item.pool_name,
+            country: item.country,
+            hosted_machine: item.hosted_machine,
+            status: item.status,
+            pool_category: item.pool_category,
+            theoretical_hashrate: item.theoretical_hashrate,
+            is_overclocked: item.is_overclocked,
+            overclock_hashrate_per_machine: item.overclock_hashrate_per_machine,
+            leased_power: item.leased_power,
+            asset_site_bound: Boolean(item.asset_site_bound),
+            asset_switch_enabled: Number(
+              item.asset_switch_enabled ?? matchedAssetSite?.asset_switch_enabled ?? 0,
+            ),
+            asset_switch_at: item.asset_switch_at ?? matchedAssetSite?.asset_switch_at,
+            // energy_ratio: item.energy_ratio,
+            // basic_hosting_fee: item.basic_hosting_fee,
+            heat_diss_mode: item.heat_diss_mode,
+            link: item.link,
+            collection: item.collection,
+            account_lease_status: item.account_lease_status,
+          };
+        },
       );
       setTableData(newData); // 设置表格数据源
     }
@@ -549,7 +565,7 @@ export default function MiningSettingPage() {
       //console.log("56565", currentRow?.id);
       form.setFieldsValue(currentRow); // 设置表单初始值
     }
-  }, [poolsData, currentRow, editableKey]);
+  }, [assetSiteList, poolsData, currentRow, editableKey]);
 
   // 表头定义
   useEffect(() => {
@@ -814,6 +830,48 @@ export default function MiningSettingPage() {
             return <Tag color="geekblue">水冷</Tag>;
           }
           return <Tag color="default">未知</Tag>;
+        },
+      },
+      {
+        title: "资产接管",
+        dataIndex: "asset_switch_enabled",
+        key: "asset_switch_enabled",
+        width: 110,
+        render: (value: number | undefined) => {
+          if (Number(value) === 1) {
+            return <Tag color="blue">已开启</Tag>;
+          }
+          return <span>-</span>;
+        },
+      },
+      {
+        title: "生效时间",
+        dataIndex: "asset_switch_at",
+        key: "asset_switch_at",
+        width: 210,
+        render: (value: string | undefined, record: MiningPoolTableRow) => {
+          if (Number(record.asset_switch_enabled) !== 1) {
+            return <span>-</span>;
+          }
+          if (!value) {
+            return <Tag color="default">未设置</Tag>;
+          }
+          const effectiveAt = dayjs(value);
+          if (!effectiveAt.isValid()) {
+            return <span>{value}</span>;
+          }
+
+          const isEffective = effectiveAt.isBefore(dayjs()) || effectiveAt.isSame(dayjs());
+          return (
+            <div className="flex flex-col leading-[1.3]">
+              <span style={{ color: isEffective ? "#16a34a" : "#d97706", fontWeight: 500 }}>
+                {effectiveAt.format("YYYY-MM-DD HH:mm:ss")}
+              </span>
+              <span style={{ color: isEffective ? "#16a34a" : "#d97706", fontSize: 12 }}>
+                {isEffective ? "已生效" : "待生效"}
+              </span>
+            </div>
+          );
         },
       },
       {
@@ -1126,7 +1184,9 @@ export default function MiningSettingPage() {
           ? true
           : typeof statusFilter === "number"
             ? String(item?.status ?? "").trim() === "" || item.status === statusFilter
-            : item.account_lease_status === statusFilter;
+            : statusFilter === ASSET_SWITCH_ENABLED_FILTER
+              ? Number(item.asset_switch_enabled) === 1
+              : item.account_lease_status === statusFilter;
 
       return matchesSearch && matchesCollection && matchesStatus;
     })
@@ -1227,6 +1287,9 @@ export default function MiningSettingPage() {
                 </Option>
                 <Option value={LEASE_STATUS_FULL} style={{ fontSize: "12px", textAlign: "left" }}>
                   <span style={{ color: LEASE_STATUS_COLOR_MAP[LEASE_STATUS_FULL] }}>全部租赁</span>
+                </Option>
+                <Option value={ASSET_SWITCH_ENABLED_FILTER} style={{ fontSize: "12px", textAlign: "left" }}>
+                  <span style={{ color: "#2563eb" }}>资产接管已开启</span>
                 </Option>
               </Select>
 
