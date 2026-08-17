@@ -164,14 +164,30 @@ const MiningPoolCard: React.FC<MiningPoolCardProps> = ({ poolType }) => {
         <Col span={8}>
           <div>
             <Statistic
-              title="理论算力"
+              title={
+                <span>
+                  理论算力
+                  <Tooltip
+                    title={
+                      <span style={{ fontSize: "11px", lineHeight: 1.6, letterSpacing: 0.2 }}>
+                        理论算力：
+                        <br />
+                        总理论算力-租赁算力-仓库算力-待撤场算力
+                      </span>
+                    }
+                    overlayInnerStyle={{ minWidth: 260, maxWidth: 360, padding: "8px 12px" }}
+                  >
+                    <InfoCircleOutlined style={{ fontSize: "12px", marginLeft: "6px", cursor: "pointer" }} />
+                  </Tooltip>
+                </span>
+              }
               className="fs-6 text-gray-500 fw-semibold"
               value={realTimeStatus?.totalTheoreticalHashrate}
               suffix={
                 <span style={{ fontSize: "16px", color: "gray", fontWeight: "normal" }}>
                   PH/s
                   <Tooltip
-                    title={`原始理论算力: ${formatHashrate(realTimeStatus?.totalRawTheoreticalHashrate)} PH/s`}
+                    title={`总理论算力: ${formatHashrate(realTimeStatus?.totalRawTheoreticalHashrate)} PH/s`}
                   >
                     <InfoCircleOutlined style={{ fontSize: "12px", marginLeft: "8px", cursor: "pointer" }} />
                   </Tooltip>

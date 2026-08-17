@@ -6,7 +6,7 @@ import { InfoCircleOutlined } from "@ant-design/icons";
 import { ReloadOutlined } from "@ant-design/icons";
 import { Button, DatePicker, Select, Switch, Table, Tag, Tooltip } from "antd";
 import type { ColumnsType } from "antd/es/table";
-import { AlertTriangle, BarChart3, Database, ShieldCheck, TrendingUp } from "lucide-react";
+import { AlertTriangle, BarChart3, Database, ShieldCheck, TrendingUp, Warehouse } from "lucide-react";
 import * as XLSX from "xlsx";
 import antIcon from "@/assets/ant-icon.png";
 import emptyAntIcon from "@/assets/empty-ant.png";
@@ -980,14 +980,21 @@ const App: React.FC = () => {
             </div>
           </div>
           <div className="mt-6 flex flex-row gap-5 overflow-x-auto">
-            <div className="flex-1 basis-0 bg-white border border-slate-200 rounded-2xl p-5 flex items-center gap-4 hover:border-slate-300 hover:shadow-sm transition-all h-28">
+            <div className="relative flex-1 basis-0 bg-white border border-slate-200 rounded-2xl p-5 flex items-center gap-4 hover:border-slate-300 hover:shadow-sm transition-all h-28">
               <div className="p-3 bg-slate-50 rounded-xl shrink-0 shadow-inner">
                 <ShieldCheck className="text-emerald-500 w-5 h-5" />
               </div>
               <div className="flex-1 min-w-0">
                 <div className="text-[10px] font-black text-slate-400 uppercase tracking-tighter truncate flex justify-between items-center">
-                  <span>平均有效率</span>
-                  <Tooltip
+                  <span className="flex items-center gap-1">
+                    平均有效率
+                    <Tooltip title="不含租赁算力、仓库算力、待撤场算力">
+                      <span className="w-3.5 h-3.5 rounded-full border border-slate-300 text-slate-400 flex items-center justify-center text-[9px] font-bold cursor-pointer hover:bg-slate-100 hover:text-slate-600 transition-colors">
+                        !
+                      </span>
+                    </Tooltip>
+                  </span>
+                  {/* <Tooltip
                     title={
                       <div className="text-xs">
                         <div>平均有效率(含仓库)：{(statistics.averageEfficiency || 0).toFixed(2)}%</div>
@@ -998,7 +1005,7 @@ const App: React.FC = () => {
                     <div className="w-3.5 h-3.5 rounded-full border border-slate-300 text-slate-400 flex items-center justify-center text-[9px] font-bold cursor-pointer hover:bg-slate-100 hover:text-slate-600 transition-colors">
                       !
                     </div>
-                  </Tooltip>
+                  </Tooltip> */}
                 </div>
                 <div className="flex items-baseline gap-0.5 leading-none mt-1.5">
                   <span className="text-2xl font-black text-slate-900 tracking-tighter">
@@ -1021,6 +1028,24 @@ const App: React.FC = () => {
                   </span>
                 </div> */}
               </div>
+              <Tooltip
+                title={
+                  <div className="text-xs">
+                    <div>平均有效率(含仓库)：{(statistics.averageEfficiency || 0).toFixed(2)}%</div>
+                    <div>净有效率(含仓库)：{(statistics.averageForecastEfficiency || 0).toFixed(2)}%</div>
+                  </div>
+                }
+              >
+                <div className="absolute bottom-3 right-5 inline-flex items-center gap-1 px-2 py-0.5 rounded-full border border-amber-300 bg-amber-50 text-amber-600 text-[10px] font-bold cursor-pointer hover:bg-amber-100 hover:text-amber-700 transition-colors">
+                  <Warehouse className="w-3 h-3" />
+                  <span>含仓库</span>
+                </div>
+              </Tooltip>
+              {/* <Tooltip title="不含租赁算力、仓库算力、待撤场算力">
+                <div className="absolute bottom-3 right-5 w-3.5 h-3.5 rounded-full border border-slate-300 text-slate-400 flex items-center justify-center text-[9px] font-bold cursor-pointer hover:bg-slate-100 hover:text-slate-600 transition-colors">
+                  !
+                </div>
+              </Tooltip> */}
             </div>
 
             <div className="flex-1 basis-0 bg-white border border-slate-200 rounded-2xl p-5 flex flex-col justify-between hover:border-slate-300 hover:shadow-sm transition-all h-28">
