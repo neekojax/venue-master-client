@@ -172,7 +172,7 @@ const MiningPoolCard: React.FC<MiningPoolCardProps> = ({ poolType }) => {
                       <span style={{ fontSize: "11px", lineHeight: 1.6, letterSpacing: 0.2 }}>
                         理论算力：
                         <br />
-                        总理论算力-仓库算力-待撤场算力
+                        总理论算力-租赁算力-仓库算力-待撤场算力
                       </span>
                     }
                     overlayInnerStyle={{ minWidth: 260, maxWidth: 360, padding: "8px 12px" }}
