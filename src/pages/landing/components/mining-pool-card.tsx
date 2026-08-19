@@ -172,7 +172,7 @@ const MiningPoolCard: React.FC<MiningPoolCardProps> = ({ poolType }) => {
                       <span style={{ fontSize: "11px", lineHeight: 1.6, letterSpacing: 0.2 }}>
                         理论算力：
                         <br />
-                        总理论算力-租赁算力-仓库算力-待撤场算力
+                        总理论算力-仓库算力-待撤场算力
                       </span>
                     }
                     overlayInnerStyle={{ minWidth: 260, maxWidth: 360, padding: "8px 12px" }}
@@ -195,33 +195,7 @@ const MiningPoolCard: React.FC<MiningPoolCardProps> = ({ poolType }) => {
               }
               valueStyle={{ fontSize: "20px", fontWeight: "bold" }}
             />
-            <div style={{ marginTop: 6 }}>
-              <Tooltip title="当前正在租赁的算力">
-                <span
-                  style={{
-                    display: "inline-flex",
-                    alignItems: "center",
-                    gap: 6,
-                    background: "#f3f4f6",
-                    color: "#374151",
-                    borderRadius: 12,
-                    padding: "2px 8px",
-                    fontSize: 12,
-                  }}
-                >
-                  <span
-                    style={{
-                      width: 6,
-                      height: 6,
-                      borderRadius: "50%",
-                      backgroundColor: "#10B981",
-                      display: "inline-block",
-                    }}
-                  />
-                  <span>租赁算力 {formatHashrate(realTimeStatus?.totalLeasedPowerHashrate)} PH/s</span>
-                </span>
-              </Tooltip>
-            </div>
+            <div style={{ marginTop: 6 }} />
           </div>
         </Col>
         {/* <Col span={8} style={{ paddingLeft: "16px" }}>
