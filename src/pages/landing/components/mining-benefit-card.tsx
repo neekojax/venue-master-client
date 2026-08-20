@@ -126,7 +126,7 @@ const MiningBenefitCard: React.FC<MiningPoolCardProps> = ({ poolType }) => {
             <div className="flex justify-between items-center py-1.5 border-b border-slate-50">
               <span className="text-sm text-slate-500">托管运维</span>
               <span className="text-sm font-bold text-slate-900">
-                {formatInt(lastProfitStatus?.month_statistics?.hosting_fee)}
+                ${formatInt(lastProfitStatus?.month_statistics?.hosting_fee)}
               </span>
             </div>
             <div className="flex justify-between items-center py-1.5 border-b border-slate-50">

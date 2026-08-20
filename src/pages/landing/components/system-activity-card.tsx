@@ -46,6 +46,7 @@ const LogItem: React.FC<LogItemProps> = ({
   impactDuration,
   time,
 }) => {
+  const impactCountNum = Number(impactCount || 0);
   const toneStyles = {
     success: "bg-green-50 ring-green-100 text-green-500",
     error: "bg-red-50 ring-red-100 text-red-500",
@@ -54,6 +55,12 @@ const LogItem: React.FC<LogItemProps> = ({
     info: "bg-cyan-50 ring-cyan-100 text-cyan-500",
     neutral: "bg-slate-50 ring-slate-100 text-slate-500",
   };
+  const impactCountStyles =
+    impactCountNum >= 500
+      ? "text-red-600 bg-red-50 border-red-200"
+      : impactCountNum >= 100
+        ? "text-amber-600 bg-amber-50 border-amber-200"
+        : "text-slate-500 bg-slate-100 border-slate-200";
 
   return (
     <div className="flex items-center gap-3 py-3 border-b border-slate-50 last:border-0 hover:bg-slate-50/50 rounded-lg px-2 transition-colors cursor-default group">
@@ -77,7 +84,9 @@ const LogItem: React.FC<LogItemProps> = ({
             </span>
           </div>
           <div className="flex items-center gap-2 min-w-0">
-            <span className="shrink-0">影响 {impactCount || "0"} 台</span>
+            <span className={`shrink-0 px-1.5 py-0.5 rounded-full border font-semibold ${impactCountStyles}`}>
+              影响 {impactCount || "0"} 台
+            </span>
             <span className="shrink-0">·</span>
             <span className="truncate">影响时长 {impactDuration || "--"}</span>
           </div>
@@ -202,7 +211,7 @@ const SystemActivityCard = () => {
             <Scroll size={20} className="text-blue-600" />
           </div>
           <div>
-            <h2 className="text-lg font-bold text-slate-900 tracking-tight">系统活动</h2>
+            <h2 className="text-lg font-bold text-slate-900 tracking-tight">异常事件</h2>
             <p className="text-xs text-slate-400">最新事件日志</p>
           </div>
         </div>
@@ -220,7 +229,7 @@ const SystemActivityCard = () => {
             <div className="p-4 bg-slate-50 rounded-full mb-3">
               <Inbox size={24} />
             </div>
-            <span className="text-sm">暂无活动日志</span>
+            <span className="text-sm">暂无异常事件</span>
           </div>
         ) : (
           <>

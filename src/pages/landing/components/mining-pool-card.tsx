@@ -71,17 +71,7 @@ const MiningPoolCard: React.FC<MiningPoolCardProps> = ({ poolType }) => {
     return { ring: "text-red-500", text: "text-red-700" };
   };
 
-  const getEfficiencyStatus = (efficiency: number) => {
-    if (!efficiency && efficiency !== 0) return { text: "数据加载中", color: "text-slate-400" };
-    if (efficiency >= 80) return { text: "运行状态优秀", color: "text-green-600" };
-    if (efficiency >= 60) return { text: "运行状态良好", color: "text-blue-600" };
-    if (efficiency >= 50) return { text: "运行状态一般", color: "text-yellow-600" };
-    if (efficiency >= 40) return { text: "运行状态较弱", color: "text-orange-600" };
-    return { text: "运行状态较差", color: "text-red-600" };
-  };
-
   const efficiencyValue = Number(realTimeStatus?.realTimeHashEfficiency) || 0;
-  const status = getEfficiencyStatus(efficiencyValue);
   const palette = getEfficiencyPalette(efficiencyValue);
 
   if (loading) {
@@ -213,7 +203,6 @@ const MiningPoolCard: React.FC<MiningPoolCardProps> = ({ poolType }) => {
         </div>
         <div>
           <div className="text-sm font-bold text-slate-900">实时算力达成率</div>
-          <div className={`text-xs mt-0.5 font-medium ${status.color}`}>{status.text}</div>
         </div>
       </div>
 
