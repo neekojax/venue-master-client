@@ -1,11 +1,12 @@
-import { Col, Row } from "antd";
 import useAuthRedirect from "@/hooks/useAuthRedirect.ts";
 import { useSelector, useSettingsStore } from "@/stores";
 
+import FaultMonitoringCard from "@/pages/landing/components/fault-monitoring-card.tsx";
 import MiningBenefitCard from "@/pages/landing/components/mining-benefit-card.tsx";
 import MiningBenefitLine from "@/pages/landing/components/mining-benefit-line.tsx";
 import MiningEfficiencyCard from "@/pages/landing/components/mining-efficiency-card.tsx";
 import MiningPoolCard from "@/pages/landing/components/mining-pool-card.tsx";
+import SystemActivityCard from "@/pages/landing/components/system-activity-card.tsx";
 
 export default function LandingPage() {
   useAuthRedirect();
@@ -14,23 +15,29 @@ export default function LandingPage() {
 
   return (
     <div>
-      <Row gutter={24} style={{ marginTop: "16px" }}>
-        <Col xs={24} sm={24} md={12}>
+      <div className="max-w-[1920px] mx-auto grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
+        {/* Row 1: Key Metrics Cards */}
+        <div className="h-full">
           <MiningPoolCard poolType={poolType} />
-        </Col>
-        <Col xs={24} sm={24} md={12}>
-          <MiningEfficiencyCard poolType={poolType} />
-        </Col>
-      </Row>
-
-      <Row gutter={24} style={{ marginTop: "12px" }}>
-        <Col xs={24} sm={24} md={12}>
+        </div>
+        <div className="h-full">
           <MiningBenefitCard poolType={poolType} />
-        </Col>
-        <Col xs={24} sm={24} md={12}>
+        </div>
+        <div className="h-full">
+          <FaultMonitoringCard />
+        </div>
+
+        {/* Row 2: Charts & Logs */}
+        <div className="h-[420px]">
+          <MiningEfficiencyCard poolType={poolType} />
+        </div>
+        <div className="h-[420px]">
           <MiningBenefitLine poolType={poolType} />
-        </Col>
-      </Row>
+        </div>
+        <div className="h-[420px]">
+          <SystemActivityCard />
+        </div>
+      </div>
     </div>
   );
 }

@@ -1,73 +1,59 @@
 import React, { useEffect, useState } from "react";
-import { BsChevronRight } from "react-icons/bs";
-import { FaCogs } from "react-icons/fa";
-import { useNavigate } from "react-router-dom";
-import { ArrowDownOutlined, ArrowUpOutlined, InfoCircleOutlined } from "@ant-design/icons";
-import { Card, Col, Flex, Progress, ProgressProps, Row, Statistic, Tooltip } from "antd";
-import { ROUTE_PATHS } from "@/constants/common.ts";
+import { InfoCircleOutlined } from "@ant-design/icons";
+import { Tooltip } from "antd";
+import { Activity, TrendingDown, TrendingUp } from "lucide-react";
 
 import { fetchTotalLastHashStatus, fetchTotalRealTimeStatus } from "@/pages/mining/api.tsx";
 
-interface MiningPoolCardProps {
-  poolType: string; // 接收矿池类型作为 props
+interface MetricRowProps {
+  label: string;
+  value: string;
+  trend?: "up" | "down" | "neutral";
+  trendValue?: string;
+  highlight?: boolean;
 }
 
-const twoColors: ProgressProps["strokeColor"] = {
-  "0%": "#87d068",
-  "100%": "#108ee9",
-};
+const MetricRow: React.FC<MetricRowProps> = ({ label, value, trend, trendValue, highlight }) => (
+  <div className="flex justify-between items-center py-2.5 border-b border-slate-50 last:border-0">
+    <span className="text-sm text-slate-500 font-medium">{label}</span>
+    <div className="flex items-center gap-3">
+      <span className={`text-sm font-bold ${highlight ? "text-slate-900" : "text-slate-700"}`}>{value}</span>
+      {trend && (
+        <span
+          className={`text-xs px-1.5 py-0.5 rounded flex items-center gap-0.5 ${
+            trend === "up"
+              ? "bg-green-100 text-green-700"
+              : trend === "down"
+                ? "bg-red-100 text-red-700"
+                : "bg-slate-100 text-slate-600"
+          }`}
+        >
+          {trend === "up" ? <TrendingUp size={10} /> : <TrendingDown size={10} />}
+          {trendValue}
+        </span>
+      )}
+    </div>
+  </div>
+);
 
-const landingCardStyle: React.CSSProperties = {
-  minHeight: 432,
-};
-
-const formatHashrate = (value: unknown) =>
-  new Intl.NumberFormat("zh-CN", {
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
-  }).format(Number(value ?? 0));
+interface MiningPoolCardProps {
+  poolType: string;
+}
 
 const MiningPoolCard: React.FC<MiningPoolCardProps> = ({ poolType }) => {
-  const [realTimeStatus, setRealTimeStatus] = useState<any>(null); // 状态数据
-  const [lastHashStatus, setLastHashStatus] = useState<any>(null); // 状态数据
-  const [loading, setLoading] = useState<boolean>(true); // 加载状态
-  const [error] = useState<string | null>(null); // 错误信息
-
-  const navigate = useNavigate();
-
-  const handleNavigate = () => {
-    navigate(ROUTE_PATHS.hashDetail);
-  };
+  const [realTimeStatus, setRealTimeStatus] = useState<any>(null);
+  const [lastHashStatus, setLastHashStatus] = useState<any>(null);
+  const [loading, setLoading] = useState<boolean>(true);
 
   const fetchData = async (poolType: string) => {
-    setLoading(true);
     try {
-      const [realTimeStatusResult, lastHashStatusResult] = await Promise.all([
-        fetchTotalRealTimeStatus(poolType),
-        fetchTotalLastHashStatus(poolType),
-      ]);
-      setRealTimeStatus(realTimeStatusResult.data); // 假设返回数据在 result.data 中
-      setLastHashStatus(lastHashStatusResult.data); // 假设返回数据在 result.data 中
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    } catch (err) {
-      setLastHashStatus({
-        last24HourEfficiency: "N/A",
-        lastWeekEfficiency: "N/A",
-        lastMonth: "N/A",
-        lastMonthEfficiency: "N/A",
-        last2Month: "N/A",
-        last2MonthEfficiency: "N/A",
-      });
-      // setError("获取状态失败");
+      const realTimeStatusResult = await fetchTotalRealTimeStatus(poolType);
+      setRealTimeStatus(realTimeStatusResult.data);
 
-      setRealTimeStatus({
-        totalCurrentHashRate: 0, // 默认算力
-        totalMasterCurrentHashrate: 0, // 默认主矿池算力
-        totalBackUpCurrentHashrate: 0, // 默认备用矿池算力
-        totalLeasedPowerHashrate: 0, // 默认已租算力
-        totalRawTheoreticalHashrate: 0, // 默认原始理论算力
-        realTimeHashEfficiency: "N/A",
-      });
+      const lastHashStatusResult = await fetchTotalLastHashStatus(poolType);
+      setLastHashStatus(lastHashStatusResult.data);
+    } catch {
+      // Error handling
     } finally {
       setLoading(false);
     }
@@ -77,281 +63,185 @@ const MiningPoolCard: React.FC<MiningPoolCardProps> = ({ poolType }) => {
     fetchData(poolType);
   }, [poolType]);
 
-  if (error) {
-    return <div>{error}</div>;
-  }
-
-  const diffColor = (diff: number) => {
-    if (diff > 0) {
-      // 增加向上绿色箭头+数字百分比
-      return (
-        <span style={{ color: "green" }}>
-          <ArrowUpOutlined style={{ color: "green" }} />+ {diff.toFixed(2)}%
-        </span>
-      );
-    }
-    if (diff < 0) {
-      return (
-        <span style={{ color: "red" }}>
-          <ArrowDownOutlined style={{ color: "red" }} />
-          {diff.toFixed(2)}%
-        </span>
-      );
-    }
-    return "";
+  const getEfficiencyPalette = (efficiency: number) => {
+    if (efficiency >= 80) return { ring: "text-green-500", text: "text-green-700" };
+    if (efficiency >= 60) return { ring: "text-blue-500", text: "text-blue-700" };
+    if (efficiency >= 50) return { ring: "text-yellow-500", text: "text-yellow-700" };
+    if (efficiency >= 40) return { ring: "text-orange-500", text: "text-orange-700" };
+    return { ring: "text-red-500", text: "text-red-700" };
   };
 
-  return (
-    <Card
-      className="card-wapper"
-      style={landingCardStyle}
-      title={
-        <Row align="middle">
-          <Col>
-            <FaCogs style={{ fontSize: "24px", marginRight: "8px", fontWeight: "bold", color: "#1890ff" }} />
-          </Col>
-          <Col>
-            <h3 style={{ marginLeft: 2, fontSize: "18px", color: "#333" }}>效率</h3>
-          </Col>
-        </Row>
-      }
-      loading={loading}
-      bordered={false}
-      extra={
-        <span
-          onClick={handleNavigate}
-          style={{
-            cursor: "pointer",
-            display: "flex",
-            alignItems: "center",
-            fontSize: "14px",
-            color: "rgba(0, 0, 0, 0.45)",
-            transition: "color 0.3s ease", // 添加过渡效果
-          }}
-          onMouseEnter={(e) => (e.currentTarget.style.color = "#40a9ff")} // 鼠标悬停变蓝色
-          onMouseLeave={(e) => (e.currentTarget.style.color = "#1890ff")} // 鼠标离开恢复颜色
-        >
-          <BsChevronRight style={{ marginLeft: "8px" }} />
-        </span>
-      }
-    >
-      <Row gutter={24}>
-        <Col span={8}>
-          <Statistic
-            title="实时总算力"
-            className="text-gray-500 fw-semibold"
-            style={{ fontSize: "12px" }}
-            value={realTimeStatus?.totalCurrentHashRate}
-            suffix={
-              <span style={{ fontSize: "16px", color: "gray", fontWeight: "normal" }}>
-                PH/s
-                <Tooltip
-                  title={
-                    <>
-                      主矿池算力: {realTimeStatus?.totalMasterCurrentHashrate} PH/s
-                      <br />
-                      备用矿池算力: {realTimeStatus?.totalBackUpCurrentHashrate} PH/s
-                    </>
-                  }
-                >
-                  <InfoCircleOutlined style={{ fontSize: "12px", marginLeft: "8px", cursor: "pointer" }} />
-                </Tooltip>
-              </span>
-            }
-            valueStyle={{ fontSize: "22px", fontWeight: "bold" }}
-          />
-        </Col>
-        <Col span={8}>
-          <div>
-            <Statistic
-              title={
-                <span>
-                  理论算力
-                  <Tooltip
-                    title={
-                      <span style={{ fontSize: "11px", lineHeight: 1.6, letterSpacing: 0.2 }}>
-                        理论算力：
-                        <br />
-                        总理论算力-租赁算力-仓库算力-待撤场算力
-                      </span>
-                    }
-                    overlayInnerStyle={{ minWidth: 260, maxWidth: 360, padding: "8px 12px" }}
-                  >
-                    <InfoCircleOutlined style={{ fontSize: "12px", marginLeft: "6px", cursor: "pointer" }} />
-                  </Tooltip>
-                </span>
-              }
-              className="fs-6 text-gray-500 fw-semibold"
-              value={realTimeStatus?.totalTheoreticalHashrate}
-              suffix={
-                <span style={{ fontSize: "16px", color: "gray", fontWeight: "normal" }}>
-                  PH/s
-                  <Tooltip
-                    title={`总理论算力: ${formatHashrate(realTimeStatus?.totalRawTheoreticalHashrate)} PH/s`}
-                  >
-                    <InfoCircleOutlined style={{ fontSize: "12px", marginLeft: "8px", cursor: "pointer" }} />
-                  </Tooltip>
-                </span>
-              }
-              valueStyle={{ fontSize: "20px", fontWeight: "bold" }}
-            />
-            <div style={{ marginTop: 6 }} />
+  const getEfficiencyStatus = (efficiency: number) => {
+    if (!efficiency && efficiency !== 0) return { text: "数据加载中", color: "text-slate-400" };
+    if (efficiency >= 80) return { text: "运行状态优秀", color: "text-green-600" };
+    if (efficiency >= 60) return { text: "运行状态良好", color: "text-blue-600" };
+    if (efficiency >= 50) return { text: "运行状态一般", color: "text-yellow-600" };
+    if (efficiency >= 40) return { text: "运行状态较弱", color: "text-orange-600" };
+    return { text: "运行状态较差", color: "text-red-600" };
+  };
+
+  const efficiencyValue = Number(realTimeStatus?.realTimeHashEfficiency) || 0;
+  const status = getEfficiencyStatus(efficiencyValue);
+  const palette = getEfficiencyPalette(efficiencyValue);
+
+  if (loading) {
+    return (
+      <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 h-full flex flex-col animate-pulse">
+        <div className="flex justify-between items-center mb-6">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 bg-slate-100 rounded-lg"></div>
+            <div className="w-24 h-6 bg-slate-100 rounded"></div>
           </div>
-        </Col>
-        {/* <Col span={8} style={{ paddingLeft: "16px" }}>
-          <Statistic
-            title={`理论算力`}
-            value={realTimeStatus?.totalTheoreticalHashrate} // 假设效率值在状态中
-            valueStyle={{ fontSize: "20px", fontWeight: "bold" }}
-            suffix={<span style={{ fontSize: "16px", color: "gray", fontWeight: "normal" }}>PH/s</span>}
-          />
-        </Col> */}
-        <Col span={8} style={{ borderLeft: "1px solid #f0f0f0", paddingLeft: "16px" }}>
-          <Statistic
-            title={`实时算力达成率`}
-            className="fs-6 text-gray-500 fw-semibold"
-            value={realTimeStatus?.realTimeHashEfficiency} // 假设效率值在状态中
-            valueStyle={{ fontSize: "20px", fontWeight: "bold", color: "#3dbb32" }}
-            suffix="%"
-          />
-        </Col>
-      </Row>
-      <Row style={{ marginTop: "18px" }} gutter={16}>
-        <Col span={12}>
-          <Flex gap="middle" vertical>
-            {[
-              {
-                title: "昨日算力达成率",
-                color: "red",
-                value: lastHashStatus?.last24HourEfficiency,
-                diff: lastHashStatus?.last24HourEfficiencyDiff,
-              },
-              // { title: "近一周平均算力达成率", value: lastHashStatus?.lastWeekEfficiency },
-              {
-                title: `${lastHashStatus?.lastMonth}月算力达成率`,
-                color: "#09f119",
-                diff: lastHashStatus?.lastMonthEfficiencyDiff,
-                value: lastHashStatus?.lastMonthEfficiency,
-              },
-              // {
-              //   title: `${lastHashStatus?.last2Month}月算力达成率`,
-              //   value: lastHashStatus?.last2MonthEfficiency,
-              // },
-            ].map((item, index) => (
-              <Flex key={index} justify="space-between" align="center">
-                <Row
-                  style={{
-                    background: "#f9fafb",
-                    padding: "0.625rem",
-                    borderRadius: "0.375rem",
-                    width: "100%",
-                    boxShadow: "0 4px 12px rgba(0, 0, 0, 0.5);",
-                  }}
-                >
-                  {/* <Col span={24}>
-                    <span className="text-gray-500 fs-8 fw-semibold">{item.title}</span>
-                  </Col> */}
-                  <Col span={12}>
-                    <span className="text-gray-500 fs-8 fw-semibold">{item.title}</span>
-                  </Col>
-                  <Col span={12} style={{ textAlign: "right" }}>
-                    <span className="text-gray-500 fs-8 fw-semibold">{diffColor(item.diff)}</span>
-                  </Col>
-                  <Col span={24}>
-                    <span className="text-gray-800 fs-4 fw-bold">{item.value}%</span>
-                  </Col>
-                  <Col span={24}>
-                    <Progress
-                      percent={Number(item.value) || 0}
-                      status="active"
-                      strokeColor={item.color}
-                      style={{ flex: 1 }}
-                      percentPosition={{ align: "start", type: "outer" }}
-                      size="small"
-                    />
-                  </Col>
-                </Row>
-              </Flex>
-            ))}
-          </Flex>
-        </Col>
-        <Col span={12}>
-          <Flex gap="middle" vertical>
-            {[
-              // { title: "24小时算力达成率", color: "red", value: lastHashStatus?.last24HourEfficiency },
-              {
-                title: "近一周平均算力达成率",
-                color: twoColors,
-                value: lastHashStatus?.lastWeekEfficiency,
-                diff: lastHashStatus?.lastWeekEfficiencyDiff,
-              },
-              {
-                title: `${lastHashStatus?.last2Month}月算力达成率`,
-                value: lastHashStatus?.last2MonthEfficiency,
-                diff: lastHashStatus?.last2MonthEfficiencyDiff,
-              },
-            ].map((item, index) => (
-              <Flex key={index} justify="space-between" align="center">
-                <Row
-                  style={{
-                    background: "#f9fafb",
-                    padding: "0.625rem",
-                    borderRadius: "0.375rem",
-                    width: "100%",
-                  }}
-                >
-                  <Col span={12}>
-                    <span className="text-gray-500 fs-8 fw-semibold">{item.title}</span>
-                  </Col>
-                  <Col span={12} style={{ textAlign: "right" }}>
-                    <span className="text-gray-500 fs-8 fw-semibold">{diffColor(item.diff)}</span>
-                  </Col>
-                  <Col span={24}>
-                    <span className="text-gray-800 fs-4 fw-bold">{item.value}%</span>
-                  </Col>
-                  <Col span={24}>
-                    <Progress
-                      percent={Number(item.value) || 0}
-                      status="active"
-                      strokeColor={item.color}
-                      style={{ flex: 1 }}
-                      percentPosition={{ align: "start", type: "outer" }}
-                      size="small"
-                    />
-                  </Col>
-                </Row>
-              </Flex>
-            ))}
-          </Flex>
-        </Col>
-        {/* <Col span={12}>
-          <Flex gap="middle" vertical>
-            {[
-              { title: "24小时算力达成率", value: lastHashStatus?.last24HourEfficiency },
-              { title: "近一周平均算力达成率", value: lastHashStatus?.lastWeekEfficiency },
-              {
-                title: `${lastHashStatus?.lastMonth}月算力达成率`,
-                value: lastHashStatus?.lastMonthEfficiency,
-              },
-              {
-                title: `${lastHashStatus?.last2Month}月算力达成率`,
-                value: lastHashStatus?.last2MonthEfficiency,
-              },
-            ].map((item, index) => (
-              <Flex key={index} justify="space-between" align="center">
-                <span style={{ width: "200px", fontSize: "14px" }}>{item.title}</span>
-                <Progress
-                  percent={Number(item.value) || 0}
-                  status="active"
-                  strokeColor={twoColors}
-                  style={{ flex: 1 }}
-                />
-              </Flex>
-            ))}
-          </Flex>
-        </Col> */}
-      </Row>
-    </Card>
+        </div>
+        <div className="grid grid-cols-2 gap-4 mb-6">
+          <div className="h-20 bg-slate-100 rounded-xl"></div>
+          <div className="h-20 bg-slate-100 rounded-xl"></div>
+        </div>
+        <div className="h-24 bg-slate-100 rounded-xl mb-6"></div>
+        <div className="space-y-4 flex-1">
+          <div className="h-6 bg-slate-100 rounded w-full"></div>
+          <div className="h-6 bg-slate-100 rounded w-full"></div>
+          <div className="h-6 bg-slate-100 rounded w-full"></div>
+          <div className="h-6 bg-slate-100 rounded w-full"></div>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 h-full flex flex-col hover:shadow-md transition-shadow duration-300">
+      <div className="flex justify-between items-center mb-6">
+        <div className="flex items-center gap-3">
+          <div className="p-2.5 bg-blue-50 rounded-xl ring-1 ring-blue-100/50">
+            <Activity size={20} className="text-blue-600" />
+          </div>
+          <div>
+            <h2 className="text-lg font-bold text-slate-900 tracking-tight">效率</h2>
+          </div>
+        </div>
+      </div>
+
+      {/* Main Stats */}
+      <div className="grid grid-cols-2 gap-4 mb-6">
+        <div className="bg-slate-50/80 p-4 rounded-2xl border border-slate-100 hover:border-blue-200 transition-colors group">
+          <div className="text-xs text-slate-500 mb-1.5 font-semibold uppercase tracking-wider group-hover:text-blue-600 transition-colors flex items-center gap-1.5">
+            <span>实时总算力</span>
+            <Tooltip
+              title={
+                <>
+                  主矿池算力: {realTimeStatus?.totalMasterCurrentHashrate} PH/s
+                  <br />
+                  备用矿池算力: {realTimeStatus?.totalBackUpCurrentHashrate} PH/s
+                </>
+              }
+            >
+              <InfoCircleOutlined style={{ fontSize: 12, cursor: "pointer" }} />
+            </Tooltip>
+          </div>
+          <div className="text-2xl font-bold text-slate-900 flex items-center gap-2 flex-wrap">
+            <span>{realTimeStatus?.totalCurrentHashRate}</span>
+            <span className="text-sm font-normal text-slate-500 flex items-center gap-1">
+              PH/s
+              <Tooltip
+                title={
+                  <>
+                    主矿池算力: {realTimeStatus?.totalMasterCurrentHashrate} PH/s
+                    <br />
+                    备用矿池算力: {realTimeStatus?.totalBackUpCurrentHashrate} PH/s
+                  </>
+                }
+              >
+                <InfoCircleOutlined style={{ fontSize: 12, cursor: "pointer" }} />
+              </Tooltip>
+            </span>
+          </div>
+        </div>
+        <div className="bg-slate-50/80 p-4 rounded-2xl border border-slate-100 hover:border-blue-200 transition-colors group">
+          <div className="text-xs text-slate-500 mb-1.5 font-semibold uppercase tracking-wider group-hover:text-blue-600 transition-colors flex items-center gap-1.5">
+            <span>理论算力</span>
+            <Tooltip
+              title={
+                <span style={{ fontSize: 11, lineHeight: 1.6, letterSpacing: 0.2 }}>
+                  理论算力：
+                  <br />
+                  总理论算力-租赁算力-仓库算力-待撤场算力
+                </span>
+              }
+              overlayInnerStyle={{ minWidth: 260, maxWidth: 360, padding: "8px 12px" }}
+            >
+              <InfoCircleOutlined style={{ fontSize: 12, cursor: "pointer" }} />
+            </Tooltip>
+          </div>
+          <div className="text-2xl font-bold text-slate-900 flex items-center gap-2 flex-wrap">
+            <span>{realTimeStatus?.totalTheoreticalHashrate}</span>
+            <span className="text-sm font-normal text-slate-500 flex items-center gap-1">
+              PH/s
+              <Tooltip title={`原始理论算力: ${realTimeStatus?.totalRawTheoreticalHashrate} PH/s`}>
+                <InfoCircleOutlined style={{ fontSize: 12, cursor: "pointer" }} />
+              </Tooltip>
+            </span>
+          </div>
+        </div>
+      </div>
+
+      {/* Main Compliance Circle */}
+      <div className="flex items-center gap-6 mb-6 bg-gradient-to-r from-blue-50 to-white p-4 rounded-2xl border border-blue-100">
+        <div className="relative w-20 h-20 flex-shrink-0">
+          <svg className="w-full h-full transform -rotate-90" viewBox="0 0 36 36">
+            <path
+              className="text-blue-100"
+              d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="3"
+            />
+            <path
+              className={`${palette.ring} drop-shadow-sm transition-colors duration-300`}
+              strokeDasharray={`${efficiencyValue}, 100`}
+              strokeLinecap="round"
+              d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="3"
+            />
+          </svg>
+          <div
+            className={`absolute inset-0 flex items-center justify-center text-[13px] font-bold ${palette.text}`}
+          >
+            {efficiencyValue}%
+          </div>
+        </div>
+        <div>
+          <div className="text-sm font-bold text-slate-900">实时算力达成率</div>
+          <div className={`text-xs mt-0.5 font-medium ${status.color}`}>{status.text}</div>
+        </div>
+      </div>
+
+      {/* Detailed List */}
+      <div className="flex-1 flex flex-col justify-center">
+        <MetricRow
+          label="昨天算力达成率"
+          value={`${lastHashStatus?.last24HourEfficiency}%`}
+          trend={lastHashStatus?.last24HourEfficiencyDiff > 0 ? "up" : "down"}
+          trendValue={`${Math.abs(lastHashStatus?.last24HourEfficiencyDiff || 0).toFixed(2)}%`}
+        />
+        <MetricRow
+          label="近一周平均算力达成率"
+          value={`${lastHashStatus?.lastWeekEfficiency}%`}
+          trend={lastHashStatus?.lastWeekEfficiencyDiff > 0 ? "up" : "down"}
+          trendValue={`${Math.abs(lastHashStatus?.lastWeekEfficiencyDiff || 0).toFixed(2)}%`}
+        />
+        <MetricRow
+          label={`${lastHashStatus?.lastMonth}月算力达成率`}
+          value={`${lastHashStatus?.lastMonthEfficiency}%`}
+          highlight
+        />
+        <MetricRow
+          label={`${lastHashStatus?.last2Month}月算力达成率`}
+          value={`${lastHashStatus?.last2MonthEfficiency}%`}
+        />
+      </div>
+    </div>
   );
 };
 
