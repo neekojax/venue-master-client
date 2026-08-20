@@ -166,7 +166,7 @@ const MiningPoolCard: React.FC<MiningPoolCardProps> = ({ poolType }) => {
             <span>{realTimeStatus?.totalTheoreticalHashrate}</span>
             <span className="text-sm font-normal text-slate-500 flex items-center gap-1">
               PH/s
-              <Tooltip title={`原始理论算力: ${realTimeStatus?.totalRawTheoreticalHashrate} PH/s`}>
+              <Tooltip title={`总理论算力: ${realTimeStatus?.totalRawTheoreticalHashrate} PH/s`}>
                 <InfoCircleOutlined style={{ fontSize: 12, cursor: "pointer" }} />
               </Tooltip>
             </span>
