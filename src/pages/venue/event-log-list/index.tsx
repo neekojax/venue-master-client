@@ -52,6 +52,7 @@ interface EventLog {
   end_time: string;
   log_type: string;
   impact_count: number;
+  actual_loss_hashrate?: number;
   event_reason: string;
   resolution_measures: string;
   created_at: string; // 这里使用 created_at 而不是 update_at
@@ -91,6 +92,7 @@ const App: React.FC = () => {
       end_time: item.end_time,
       log_type: item.log_type,
       impact_count: item.impact_count,
+      actual_loss_hashrate: item.actual_loss_hashrate,
       impact_power_loss: item.impact_power_loss,
       event_reason: item.event_reason,
       resolution_measures: item.resolution_measures,
@@ -240,9 +242,21 @@ const App: React.FC = () => {
       width: 120,
       // sorter: (a, b) => a.impact_count - b.impact_count,
       render: (text) => {
-        if (text) {
+        if (text || text === 0) {
           return `${text} T`;
         }
+        return "-";
+      },
+    },
+    {
+      title: "影响算力（小智测算）",
+      dataIndex: "actual_loss_hashrate",
+      width: 150,
+      render: (text) => {
+        if (text || text === 0) {
+          return `${text} T`;
+        }
+        return "-";
       },
     },
     {
@@ -464,6 +478,7 @@ const App: React.FC = () => {
                         "影响台数",
                         "事件原因",
                         "解决措施",
+                        "影响算力（小智测算）",
                         "记录人",
                         "记录时间",
                       ];
@@ -475,6 +490,8 @@ const App: React.FC = () => {
                         item.impact_count,
                         item.event_reason,
                         item.resolution_measures,
+                        item.actual_loss_hashrate ?? "",
+                        "-",
                         item.created_at,
                       ]);
                       const csvContent = [headers, ...data].map((row) => row.join(",")).join("\n");
@@ -498,7 +515,7 @@ const App: React.FC = () => {
           loading={isLoading}
           columns={columns}
           dataSource={filteredData} // 使用过滤后的数据
-          scroll={{ x: 1300 }}
+          scroll={{ x: 1450 }}
           rowKey="id"
           onChange={(_: any, filters: any) => {
             setSelectedEventType(filters.log_type || []); // 设置选中的事件类型数组

@@ -71,6 +71,7 @@ interface EventLog {
   impact_count: number;
   event_reason: string;
   resolution_measures: string;
+  actual_loss_hashrate?: number;
   collection: number;
   created_at: string; // 这里使用 created_at 而不是 update_at
   updated_at: string; // 新增 updated_at 字段
@@ -231,6 +232,7 @@ const App: React.FC = () => {
       log_type: item.log_type,
       impact_count: item.impact_count,
       impact_power_loss: item.impact_power_loss,
+      actual_loss_hashrate: item.actual_loss_hashrate,
       event_reason: item.event_reason,
       resolution_measures: item.resolution_measures,
       created_at: item.created_at,
@@ -404,9 +406,21 @@ const App: React.FC = () => {
       width: 120,
       // sorter: (a, b) => a.impact_count - b.impact_count,
       render: (text) => {
-        if (text) {
+        if (text || text === 0) {
           return `${text} T`;
         }
+        return "-";
+      },
+    },
+    {
+      title: "影响算力（小智测算）",
+      dataIndex: "actual_loss_hashrate",
+      width: 150,
+      render: (text) => {
+        if (text || text === 0) {
+          return `${text} T`;
+        }
+        return "-";
       },
     },
     {
@@ -1054,7 +1068,7 @@ const App: React.FC = () => {
             // rowSelection={rowSelection}
             columns={columns}
             dataSource={logData || []} // 使用过滤后的数据
-            scroll={{ x: 1300 }}
+            scroll={{ x: 1450 }}
             rowKey="id"
             loading={isLoading}
             onChange={(pagination: any, filters: any, sorter: any) => {

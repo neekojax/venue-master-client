@@ -724,6 +724,7 @@ export const exportEventLogsToExcel = (
     start_time: string;
     end_time: string | null;
     impact_count: number;
+    actual_loss_hashrate?: number;
     event_reason: string;
     resolution_measures: string;
     created_at: string;
@@ -745,6 +746,7 @@ export const exportEventLogsToExcel = (
     "结束时间",
     "影响时长（小时）",
     "影响台数",
+    "影响算力（小智测算）",
     "事件原因",
     "解决措施",
     "创建时间",
@@ -764,6 +766,7 @@ export const exportEventLogsToExcel = (
       item.end_time ? dayjs(item.end_time).toDate() : null,
       item.end_time ? (dayjs(item.end_time).diff(dayjs(item.start_time), "minute") / 60).toFixed(2) : "--",
       item.impact_count ?? "",
+      item.actual_loss_hashrate ?? "",
       item.event_reason ?? "",
       item.resolution_measures ?? "",
       item.created_at ? dayjs(item.created_at).toDate() : null,
@@ -776,7 +779,7 @@ export const exportEventLogsToExcel = (
   if (worksheet["!ref"]) {
     const range = XLSX.utils.decode_range(worksheet["!ref"] as string);
     for (let R = range.s.r + 1; R <= range.e.r; R++) {
-      for (const C of [4, 5, 10, 11]) {
+      for (const C of [4, 5, 11, 12]) {
         // 0:场地,1:事件类型,2:开始时间,3:结束时间
         const addr = XLSX.utils.encode_cell({ r: R, c: C });
         const cell = (worksheet as any)[addr];
