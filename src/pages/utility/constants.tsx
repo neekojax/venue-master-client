@@ -26,7 +26,7 @@ export const UTILITY_TOOLS: UtilityTool[] = [
     name: "全网算力",
     description: "查看比特币全网平均算力波动。",
     icon: <Search className="w-6 h-6 text-blue-500" />,
-    url: "https://explorer.cloverpool.com/zh-CN/btc/insights-hashrate",
+    url: "https://mempool.space/graphs/mining/hashrate-difficulty",
   },
   {
     id: "global-difficulty",
@@ -34,7 +34,7 @@ export const UTILITY_TOOLS: UtilityTool[] = [
     description: "预测下一次挖矿难度调整的时间与幅度，辅助运营决策。",
     icon: <Cpu className="w-6 h-6 text-cyan-500" />,
     // icon: "https://cdn-icons-png.flaticon.com/512/2092/2092663.png",
-    url: "https://explorer.cloverpool.com/zh-CN/btc/insights-difficulty",
+    url: "https://www.antpool.com/coinInfo?coinType=BTC&currency=USD",
   },
   {
     id: "maintenance",
