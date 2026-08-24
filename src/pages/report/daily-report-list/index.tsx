@@ -31,6 +31,7 @@ interface SubAccountStat {
   totalFailures: number;
   totalFailuresRate: number;
   failures24h: number;
+  shelved?: number;
   failureRate24h: number;
   impactRatio: number;
   limitImpactRate: number;
@@ -48,6 +49,7 @@ interface DataType {
   totalFailures: number;
   totalFailuresRate: number;
   failures24h: number;
+  shelved: number;
   failureRate24h: number;
   impactRatio: number;
   limitImpactRate: number;
@@ -92,6 +94,7 @@ const formatDailyRecords = (rawList: any[] = []): DataType[] =>
     totalFailures: venue.totalFailures || 0,
     impactMachine: venue.impactMachine || 0,
     failures24h: venue.failures24h || 0,
+    shelved: Number(venue.shelved ?? 0),
     failureRate24h: venue.failureRate24h || 0,
     impactRatio: venue.impactRatio || 0,
     onlineRatio: venue.onlineRatio || 0,
@@ -202,6 +205,14 @@ const App: React.FC = () => {
       width: 138,
       align: "right",
       render: (value) => value.toLocaleString(),
+    },
+    {
+      title: "24小时上架数",
+      dataIndex: "shelved",
+      key: "shelved",
+      width: 138,
+      align: "right",
+      render: (value) => (value ?? 0).toLocaleString(),
     },
     {
       title: "24小时故障率",
@@ -318,6 +329,14 @@ const App: React.FC = () => {
       align: "right",
       render: (value: number) => value.toLocaleString(),
       sorter: (a, b) => a.failures24h - b.failures24h,
+    },
+    {
+      title: "24小时上架数",
+      dataIndex: "shelved",
+      key: "shelved",
+      width: 138,
+      align: "right",
+      render: (value: number) => value.toLocaleString(),
     },
     {
       title: "24小时故障率",
@@ -525,6 +544,7 @@ const App: React.FC = () => {
       totalFailures: "总故障数",
       totalFailuresRate: "总故障率",
       failures24h: "24小时故障数",
+      shelved: "24小时上架数",
       failureRate24h: "24小时故障率",
       impactRatio: "影响占比",
       limitImpactRate: "限电影响",
@@ -544,6 +564,7 @@ const App: React.FC = () => {
       totalFailures: "总故障数",
       totalFailuresRate: "总故障率",
       failures24h: "24小时故障数",
+      shelved: "24小时上架数",
       failureRate24h: "24小时故障率",
       impactRatio: "影响占比",
       limitImpactRate: "限电影响",

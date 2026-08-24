@@ -47,7 +47,7 @@ interface DataType {
   limitImpactRate: number;
   highTemperatureRate: number;
   events: string;
-  shelved: string;
+  shelved: number;
   pendingRepair: string;
   anget_key: string;
   collection: number;
@@ -520,6 +520,14 @@ const App: React.FC = () => {
       sorter: (a, b) => a.failures24h - b.failures24h,
     },
     {
+      title: "24H上架数",
+      dataIndex: "shelved",
+      key: "shelved",
+      width: 138,
+      align: "left",
+      render: (value) => value.toLocaleString(),
+    },
+    {
       title: "T-2故障数/占比",
       dataIndex: "totalFailuresT2",
       key: "totalFailuresT2",
@@ -635,14 +643,6 @@ const App: React.FC = () => {
       },
     },
     {
-      title: "24H上架数",
-      dataIndex: "shelved",
-      key: "shelved",
-      width: 138,
-      align: "left",
-      render: (value) => value.toLocaleString(),
-    },
-    {
       title: "影响算力(E)",
       dataIndex: "powerImpact",
       key: "powerImpact",
@@ -750,7 +750,7 @@ const App: React.FC = () => {
               // "限电影响": item.limitImpactRate,
               // "高温影响": item.highTemperatureRate,
               events: venue.events || "",
-              shelved: venue.shelved || 0,
+              shelved: Number(venue.shelved ?? 0),
               pendingRepair: venue.pendingRepair || 0,
               anget_key: venue.anget_key || "",
               collection: venue.collection || 0,
@@ -864,6 +864,7 @@ const App: React.FC = () => {
       ).toFixed(6),
       // 总故障台数: item.totalFailures.toLocaleString(),
       "24小时故障数": item.failures24h.toLocaleString(),
+      "24小时上架数": item.shelved.toLocaleString(),
       "24小时故障率": item.failureRate24h.toFixed(2) + "%",
       ...(poolType === "CANG" ? { 净有效率: item.forecastHashEfficiency.toFixed(2) + "%" } : {}),
       "T-1故障数": isUseT2(item)
@@ -876,7 +877,6 @@ const App: React.FC = () => {
       "T-2故障率": `${((item.totalFailuresT2 / item.totalMachines) * 100).toFixed(2)}%`,
       // "T-2故障情况": `${item.totalFailuresT2.toLocaleString()} 台 (${item.failureRateT2.toFixed(2)}%)`,
       // "T-3日故障率": item.failureRateT3.toFixed(2) + "%",
-      "24小时上架数": item.shelved,
       待修数: isUseT2(item) ? item.pendingRepairT2.toLocaleString() : item.pendingRepair.toLocaleString(),
       待修情况: `${((Number(item.pendingRepair) / item.totalMachines) * 100).toFixed(2)}%`,
       "影响算力（E）": item.powerImpact.toFixed(8),

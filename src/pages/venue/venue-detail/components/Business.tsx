@@ -21,6 +21,7 @@ interface SubAccountStat {
   totalFailures: number;
   totalFailuresRate: number;
   failures24h: number;
+  shelved?: number;
   failureRate24h: number;
   onlineRatio: number;
   impactRatio: number;
@@ -40,6 +41,7 @@ interface DailyRecord {
   totalFailuresRate: number;
   onlineRatio: number;
   failures24h: number;
+  shelved: number;
   failureRate24h: number;
   impactRatio: number;
   limitImpactRate: number;
@@ -259,6 +261,16 @@ const BusinessReport: React.FC<BusinessReportProps> = ({
       width: 138,
       align: "right",
       render: (value) => <span className="font-medium text-amber-600">{value.toLocaleString()}</span>,
+    },
+    {
+      title: "24小时上架数",
+      dataIndex: "shelved",
+      key: "shelved",
+      width: 138,
+      align: "right",
+      render: (value) => (
+        <span className="font-medium text-emerald-600">{(value ?? 0).toLocaleString()}</span>
+      ),
     },
     {
       title: "24小时故障率",
