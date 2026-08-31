@@ -88,6 +88,7 @@ function normalizeRecord(item: any): SiteAgentBindingRecord {
     agentName,
     version: pickValue(item?.version),
     assetSiteId: normalizeNumber(pickValue(item?.assetSiteID, item?.assetSiteId, item?.asset_site_id)),
+    minerCodeWhitelist: normalizeList(pickValue(item?.minerCodeWhitelist, item?.miner_code_whitelist)),
     minerCodeBlacklist: normalizeList(pickValue(item?.minerCodeBlacklist, item?.miner_code_blacklist)),
     machineTypeBlacklist: normalizeList(pickValue(item?.machineTypeBlacklist, item?.machine_type_blacklist)),
     ipRanges: normalizeList(pickValue(item?.ipRanges, item?.ip_ranges)),
@@ -109,6 +110,7 @@ function buildPayload(
     agentName: values.agentName.trim(),
     version: options?.version,
     assetSiteID: normalizeNumber(values.assetSiteId),
+    minerCodeWhitelist: normalizeList(values.minerCodeWhitelist),
     minerCodeBlacklist: normalizeList(values.minerCodeBlacklist),
     machineTypeBlacklist: normalizeList(values.machineTypeBlacklist),
     ipRanges: normalizeList(values.ipRanges),
@@ -272,6 +274,7 @@ export default function MiningAgentSettingPage() {
         agentCode: record.agentCode,
         agentName: record.agentName,
         assetSiteId: record.assetSiteId,
+        minerCodeWhitelist: listToText(record.minerCodeWhitelist),
         minerCodeBlacklist: listToText(record.minerCodeBlacklist),
         machineTypeBlacklist: listToText(record.machineTypeBlacklist),
         ipRanges: listToText(record.ipRanges),
@@ -418,6 +421,14 @@ export default function MiningAgentSettingPage() {
             <div className="text-xs text-gray-500 mt-1 break-all">{record.agentCode || "-"}</div>
           </div>
         ),
+      },
+      {
+        title: "矿工号白名单",
+        dataIndex: "minerCodeWhitelist",
+        key: "minerCodeWhitelist",
+        width: 240,
+        render: (value: string[]) =>
+          renderBlacklistTags(value, "!border-emerald-200 !bg-emerald-50 !text-emerald-700"),
       },
       {
         title: "矿机编号黑名单",
@@ -788,6 +799,10 @@ export default function MiningAgentSettingPage() {
 
           <Form.Item name="minerCodeBlacklist" label="矿机编号黑名单" className="!mb-3">
             <Input.TextArea rows={4} placeholder="每行或逗号分隔一个矿机编号" />
+          </Form.Item>
+
+          <Form.Item name="minerCodeWhitelist" label="矿工号白名单" className="!mb-3">
+            <Input.TextArea rows={4} placeholder="每行或逗号分隔一个矿工号" />
           </Form.Item>
 
           <Form.Item name="machineTypeBlacklist" label="机型黑名单" className="!mb-0">

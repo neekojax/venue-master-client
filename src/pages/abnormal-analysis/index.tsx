@@ -1078,20 +1078,28 @@ export default function AbnormalAnalysisPage() {
 
           <div className="p-5 border-b border-slate-100 bg-slate-50/30">
             <Row gutter={[16, 16]}>
-              <Col xs={24} sm={12} md={6} lg={4}>
+              <Col xs={24} sm={12} md={6} lg={6}>
                 <div className="text-xs text-slate-500 mb-1.5 font-medium">场地</div>
                 <Select
+                  showSearch
+                  allowClear={false}
                   style={{ width: "100%" }}
                   placeholder="选择场地"
                   value={searchSite}
                   onChange={(val) => setSearchSite(val)}
+                  optionFilterProp="label"
+                  filterOption={(input, option) =>
+                    String(option?.label ?? "")
+                      .toLowerCase()
+                      .includes(input.toLowerCase())
+                  }
                   options={[
                     { value: "all", label: "全部场地" },
                     ...siteAnomalyList.map((s) => ({ value: s.siteName, label: s.siteName })),
                   ]}
                 />
               </Col>
-              <Col xs={24} sm={12} md={6} lg={4}>
+              <Col xs={24} sm={12} md={6} lg={6}>
                 <div className="text-xs text-slate-500 mb-1.5 font-medium">MAC 地址</div>
                 <Input
                   placeholder="搜索 MAC 模糊匹配"
@@ -1100,7 +1108,7 @@ export default function AbnormalAnalysisPage() {
                   allowClear
                 />
               </Col>
-              <Col xs={24} sm={12} md={6} lg={4}>
+              <Col xs={24} sm={12} md={6} lg={6}>
                 <div className="text-xs text-slate-500 mb-1.5 font-medium">控制板 SN</div>
                 <Input
                   placeholder="控制板 SN"
@@ -1109,7 +1117,7 @@ export default function AbnormalAnalysisPage() {
                   allowClear
                 />
               </Col>
-              <Col xs={24} sm={12} md={6} lg={4}>
+              <Col xs={24} sm={12} md={6} lg={6}>
                 <div className="text-xs text-slate-500 mb-1.5 font-medium">算力板序列号</div>
                 <Input
                   placeholder="搜索算力板序列号"
@@ -1118,7 +1126,7 @@ export default function AbnormalAnalysisPage() {
                   allowClear
                 />
               </Col>
-              <Col xs={24} sm={12} md={6} lg={4}>
+              <Col xs={24} sm={12} md={6} lg={6}>
                 <div className="text-xs text-slate-500 mb-1.5 font-medium">矿工号</div>
                 <Select
                   showSearch
@@ -1132,7 +1140,7 @@ export default function AbnormalAnalysisPage() {
                   options={detailMinerCodeOptions}
                 />
               </Col>
-              <Col xs={24} sm={12} md={6} lg={4}>
+              <Col xs={24} sm={12} md={6} lg={6}>
                 <div className="text-xs text-slate-500 mb-1.5 font-medium">统计起始时间</div>
                 <DatePicker
                   showTime
@@ -1143,7 +1151,7 @@ export default function AbnormalAnalysisPage() {
                   allowClear
                 />
               </Col>
-              <Col xs={24} sm={12} md={6} lg={4}>
+              <Col xs={24} sm={12} md={6} lg={6}>
                 <div className="text-xs text-slate-500 mb-1.5 font-medium">下架</div>
                 <Select
                   style={{ width: "100%" }}
@@ -1158,7 +1166,7 @@ export default function AbnormalAnalysisPage() {
                   ]}
                 />
               </Col>
-              <Col xs={24} sm={12} md={6} lg={4}>
+              <Col xs={24} sm={12} md={6} lg={6}>
                 <div className="text-xs text-slate-500 mb-1.5 font-medium">产权</div>
                 <Select
                   style={{ width: "100%" }}

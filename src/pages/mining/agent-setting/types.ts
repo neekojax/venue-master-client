@@ -14,6 +14,7 @@ export interface SiteAgentBindingPayload {
   agentName: string;
   version?: string;
   assetSiteID?: number;
+  minerCodeWhitelist?: string[];
   minerCodeBlacklist?: string[];
   machineTypeBlacklist?: string[];
   ipRanges?: string[];
@@ -28,6 +29,7 @@ export interface SiteAgentBindingRecord {
   agentName: string;
   version?: string;
   assetSiteId?: number;
+  minerCodeWhitelist: string[];
   minerCodeBlacklist: string[];
   machineTypeBlacklist: string[];
   ipRanges: string[];
@@ -56,6 +58,7 @@ export interface SiteAgentBindingFormValues {
   agentCode?: string;
   agentName: string;
   assetSiteId?: number;
+  minerCodeWhitelist?: string;
   minerCodeBlacklist?: string;
   machineTypeBlacklist?: string;
   ipRanges?: string;
