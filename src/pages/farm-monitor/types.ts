@@ -13,6 +13,7 @@ export interface LatestProbeTask {
 export interface BoundSiteItem {
   site_code: string;
   site_name: string;
+  status?: string;
   asset_site_id?: number;
   agent_code?: string;
   agent_name?: string;

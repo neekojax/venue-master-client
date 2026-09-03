@@ -117,6 +117,18 @@ function resolveFarmStatus(probe?: BoundSiteItem["latest_probe_task"]): FarmStat
   return "normal";
 }
 
+function resolveBoundSiteStatus(
+  status?: string | null,
+  probe?: BoundSiteItem["latest_probe_task"],
+): FarmStatus {
+  const normalized = String(status ?? "")
+    .trim()
+    .toLowerCase();
+  if (normalized === "online") return "normal";
+  if (normalized === "offline") return "error";
+  return resolveFarmStatus(probe);
+}
+
 const TASK_SNAPSHOT_FILTER_KEYS = [
   "minerCode",
   "sn",
@@ -235,6 +247,6 @@ export function mapBoundSiteToFarmSite(item: BoundSiteItem): FarmSite {
     id: item.site_code,
     name: item.site_name,
     hashrate: isNaN(totalHashrate) ? 0 : totalHashrate,
-    status: resolveFarmStatus(probe),
+    status: resolveBoundSiteStatus(item.status, probe),
   };
 }

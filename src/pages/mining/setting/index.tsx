@@ -473,6 +473,10 @@ export default function MiningSettingPage() {
     leasedPower?: number | null;
   }) => {
     const operationalStatus = getOperationalStatusMeta(status);
+    const shouldHideOperationalStatus =
+      accountLeaseStatus === LEASE_STATUS_PENDING_REMOVAL ||
+      accountLeaseStatus === LEASE_STATUS_PARTIAL ||
+      accountLeaseStatus === LEASE_STATUS_FULL;
     const shouldShowLeaseStatus =
       accountLeaseStatus &&
       accountLeaseStatus !== LEASE_STATUS_NONE &&
@@ -484,7 +488,9 @@ export default function MiningSettingPage() {
 
     return (
       <div style={{ display: "flex", flexDirection: "column", lineHeight: 1.4 }}>
-        <span style={{ color: operationalStatus.color }}>{operationalStatus.text}</span>
+        {!shouldHideOperationalStatus ? (
+          <span style={{ color: operationalStatus.color }}>{operationalStatus.text}</span>
+        ) : null}
         {shouldShowLeaseStatus ? (
           <span style={{ color: LEASE_STATUS_COLOR_MAP[accountLeaseStatus], fontSize: 12 }}>
             {accountLeaseStatus}
@@ -1185,7 +1191,11 @@ export default function MiningSettingPage() {
         statusFilter === null
           ? true
           : typeof statusFilter === "number"
-            ? String(item?.status ?? "").trim() === "" || item.status === statusFilter
+            ? (String(item?.status ?? "").trim() === "" || item.status === statusFilter) &&
+              (statusFilter !== 1 ||
+                (item.account_lease_status !== LEASE_STATUS_PENDING_REMOVAL &&
+                  item.account_lease_status !== LEASE_STATUS_PARTIAL &&
+                  item.account_lease_status !== LEASE_STATUS_FULL))
             : statusFilter === ASSET_SWITCH_ENABLED_FILTER
               ? Number(item.asset_switch_enabled) === 1
               : item.account_lease_status === statusFilter;

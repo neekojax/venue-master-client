@@ -10,8 +10,8 @@ const { Text } = Typography;
 const DOT_ACTIVE = "#52c41a";
 const DOT_ZERO = "#ff4d4f";
 
-function siteDotColor(hashrate: number) {
-  return hashrate > 0 ? DOT_ACTIVE : DOT_ZERO;
+function siteDotColor(status: FarmSite["status"]) {
+  return status === "normal" ? DOT_ACTIVE : DOT_ZERO;
 }
 
 interface FarmSiteListProps {
@@ -92,7 +92,7 @@ export default function FarmSiteList({ sites, selectedId, loading, onSelect }: F
               >
                 <span
                   className="w-2 h-2 rounded-full shrink-0"
-                  style={{ backgroundColor: siteDotColor(site.hashrate) }}
+                  style={{ backgroundColor: siteDotColor(site.status) }}
                 />
                 <Tooltip title={site.name} placement="topLeft" mouseEnterDelay={0.3}>
                   <span
