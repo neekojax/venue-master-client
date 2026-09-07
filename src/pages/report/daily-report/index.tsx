@@ -6,6 +6,9 @@ import { InfoCircleOutlined } from "@ant-design/icons";
 import { ReloadOutlined } from "@ant-design/icons";
 import { Button, DatePicker, Select, Switch, Table, Tag, Tooltip } from "antd";
 import type { ColumnsType } from "antd/es/table";
+import dayjs from "dayjs";
+import timezone from "dayjs/plugin/timezone";
+import utc from "dayjs/plugin/utc";
 import { AlertTriangle, BarChart3, Database, ShieldCheck, TrendingUp, Warehouse } from "lucide-react";
 import * as XLSX from "xlsx";
 import antIcon from "@/assets/ant-icon.png";
@@ -18,6 +21,9 @@ import { useSelector, useSettingsStore } from "@/stores";
 
 import ResizableHeaderCell from "@/pages/custody-statistics/statistics/components/ResizableHeaderCell";
 import { fetchDailyReport } from "@/pages/report/api.tsx";
+
+dayjs.extend(utc);
+dayjs.extend(timezone);
 
 interface DataType {
   key: string;
@@ -59,6 +65,7 @@ interface DataType {
 }
 
 const OVERCLOCK_TEXT_COLOR = "#1677ff";
+const SHANGHAI_TIMEZONE = "Asia/Shanghai";
 
 function renderOverclockMetric(
   primary: number,
@@ -105,18 +112,23 @@ function renderOverclockMetric(
     </div>
   );
 }
-// 是否启用T2
-function isUseT2(record: DataType) {
-  // 北京时间（UTC+8）
-  const beijingHour = (new Date().getUTCHours() + 8) % 24;
-  // console.log("beijingHour:", beijingHour);
-  const useT2 = record.anget_key === "" && record.status_of_filling === 0 && beijingHour > 14; // 大于14点使用T2
-  return useT2;
+// 是否启用T2：日报日期结束 38 小时后仍未填写，使用前一天数据。
+function isUseT2(record: DataType, reportDate: string) {
+  if (record.anget_key !== "" || record.status_of_filling !== 0) {
+    return false;
+  }
+
+  const reportDay = dayjs.tz(reportDate, SHANGHAI_TIMEZONE).startOf("day");
+  if (!reportDay.isValid()) {
+    return false;
+  }
+
+  return !dayjs().tz(SHANGHAI_TIMEZONE).isBefore(reportDay.add(38, "hour"));
 }
 
 // 新增：封装 T1/T2 故障显示渲染函数（模块级别）
-function renderFailureRateCell(text: number, record: DataType) {
-  const useT2 = isUseT2(record);
+function renderFailureRateCell(text: number, record: DataType, reportDate: string) {
+  const useT2 = isUseT2(record, reportDate);
   const failureCount = useT2 ? record.totalFailuresT2 : text;
   const rateStr = ((failureCount / record.totalMachines) * 100).toFixed(2);
   const isHighRate = parseFloat(rateStr) > 10;
@@ -236,6 +248,9 @@ const App: React.FC = () => {
     const storedWidth = localStorage.getItem("daily-report-site-name-column-width");
     return storedWidth ? Number(storedWidth) || 250 : 250;
   });
+  const reportDate = Array.isArray(selectedDate)
+    ? selectedDate[0] || formattedDate
+    : selectedDate || formattedDate;
   const handleSitesChange = (value: string[]) => {
     setSelectedSites(value);
   };
@@ -473,7 +488,7 @@ const App: React.FC = () => {
       key: "totalFailuresT1",
       width: 170,
       align: "center",
-      render: (text: number, record: DataType) => renderFailureRateCell(text, record),
+      render: (text: number, record: DataType) => renderFailureRateCell(text, record, reportDate),
       sorter: (a, b) => a.totalFailuresT1 - b.totalFailuresT1,
     },
     {
@@ -582,7 +597,7 @@ const App: React.FC = () => {
       width: 150,
       align: "center",
       render: (value, record) => {
-        const useT2 = isUseT2(record);
+        const useT2 = isUseT2(record, reportDate);
         const pendingRepairNum = useT2 ? record.pendingRepairT2 : value;
         const repairRate = ((pendingRepairNum / record.totalMachines) * 100).toFixed(2);
         const isHighRate = parseFloat(repairRate) > 10; // 待修率超过5%标红
@@ -867,17 +882,19 @@ const App: React.FC = () => {
       "24小时上架数": item.shelved.toLocaleString(),
       "24小时故障率": item.failureRate24h.toFixed(2) + "%",
       ...(poolType === "CANG" ? { 净有效率: item.forecastHashEfficiency.toFixed(2) + "%" } : {}),
-      "T-1故障数": isUseT2(item)
+      "T-1故障数": isUseT2(item, reportDate)
         ? item.totalFailuresT2.toLocaleString()
         : item.totalFailuresT1.toLocaleString(),
-      "T-1故障率": isUseT2(item)
+      "T-1故障率": isUseT2(item, reportDate)
         ? `${((item.totalFailuresT2 / item.totalMachines) * 100).toFixed(2)}%`
         : `${((item.totalFailuresT1 / item.totalMachines) * 100).toFixed(2)}%`,
       "T-2故障数": item.totalFailuresT2.toLocaleString(),
       "T-2故障率": `${((item.totalFailuresT2 / item.totalMachines) * 100).toFixed(2)}%`,
       // "T-2故障情况": `${item.totalFailuresT2.toLocaleString()} 台 (${item.failureRateT2.toFixed(2)}%)`,
       // "T-3日故障率": item.failureRateT3.toFixed(2) + "%",
-      待修数: isUseT2(item) ? item.pendingRepairT2.toLocaleString() : item.pendingRepair.toLocaleString(),
+      待修数: isUseT2(item, reportDate)
+        ? item.pendingRepairT2.toLocaleString()
+        : item.pendingRepair.toLocaleString(),
       待修情况: `${((Number(item.pendingRepair) / item.totalMachines) * 100).toFixed(2)}%`,
       "影响算力（E）": item.powerImpact.toFixed(8),
       影响占比: item.impactRatio.toFixed(2) + "%",
