@@ -28,6 +28,10 @@ interface StatisticData {
   TotalFailureRate: number;
   TotalHighTemperatureImpactRate: number;
   TotalLimitImpactRate: number;
+  TotalPowerEventImpactRate?: number;
+  TotalDeviceFaultImpactRate?: number;
+  TotalWithdrawImpactRate?: number;
+  TotalCloudPowerRate?: number;
   WeeklyFailureRateChange: number;
   WeeklyHashEffectiveRateChange: number;
   WeeklyHighTemperatureImpactRateChange: number;

@@ -2,8 +2,6 @@ import React from "react";
 import {
   AlertTriangle,
   BatteryLow,
-  Cloud,
-  LogOut,
   ShieldCheck,
   Thermometer,
   TrendingDown,
@@ -123,18 +121,20 @@ const StatCard: React.FC<{ statistics: any | null }> = ({ statistics }) => {
             color="blue"
           />
           <StatItem
-            label="撤场比例"
-            value={formatPercent(statistics?.TotalWithdrawImpactRate)}
+            label="电力影响率"
+            value={formatPercent(
+              statistics?.TotalPowerEventImpactRate ?? statistics?.TotalWithdrawImpactRate,
+            )}
             trend=""
-            icon={LogOut}
-            color="slate"
+            icon={ZapOff}
+            color="amber"
           />
           <StatItem
-            label="云算力比例"
-            value={formatPercent(statistics?.TotalCloudPowerRate)}
+            label="设备故障影响率"
+            value={formatPercent(statistics?.TotalDeviceFaultImpactRate ?? statistics?.TotalCloudPowerRate)}
             trend=""
-            icon={Cloud}
-            color="violet"
+            icon={AlertTriangle}
+            color="rose"
           />
         </div>
       </div>
