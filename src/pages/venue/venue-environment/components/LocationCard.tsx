@@ -7,6 +7,7 @@ export type LocationCardProps = {
     name: string;
     temperature: number;
     humidity: number;
+    dew_point: number | null;
     last_update: string;
     status: string;
   };
@@ -109,6 +110,12 @@ const LocationCard: React.FC<LocationCardProps> = ({ location, getTemperatureCol
           <span>0%</span>
           <span>100%</span>
         </div>
+      </div>
+      <div className="flex justify-between items-center gap-2 mt-5 pt-4 border-t border-gray-100">
+        <span className="text-gray-600">凝露值</span>
+        <span className="font-medium text-gray-800 whitespace-nowrap">
+          {location.dew_point == null ? "--" : `${location.dew_point.toFixed(1)} ℃`}
+        </span>
       </div>
     </div>
   );

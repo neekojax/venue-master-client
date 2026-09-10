@@ -15,6 +15,7 @@ interface LocationData {
   humidity: number;
   location: string;
   temperature: number;
+  dew_point: number | null;
   last_update: string;
   status: string;
 }
@@ -244,6 +245,7 @@ const App: React.FC = () => {
                         name: location.location,
                         temperature: location.temperature,
                         humidity: location.humidity,
+                        dew_point: location.dew_point,
                         last_update: location.last_update,
                         status: location.status,
                       }}
