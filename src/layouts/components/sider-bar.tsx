@@ -160,7 +160,7 @@ const SiderItems = (permissionIds: string, permissionRoutes: string, selectedKey
               },
             ]
           : []),
-        ...(showNDPoolType !== "LN" && showNDPoolType !== "ND1" && showNDPoolType !== "ND2"
+        ...(showNDPoolType !== "ND1" && showNDPoolType !== "ND2"
           ? [
               {
                 key: ROUTE_PATHS.dailyReport,
