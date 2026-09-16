@@ -91,7 +91,6 @@ const App: React.FC = () => {
   const selectedVenueId = Form.useWatch("venue_id", form);
   const permission_routes = localStorage.getItem("permission_routes");
   const is_log_visible = permission_routes?.includes(ROUTE_PATHS.logs);
-  const isAdminAccount = localStorage.getItem("user") === "admin";
   // console.log("is_log_visible", is_log_visible);
   // // 参数对象（在依赖声明之后构建）
   // const params: EventLogParam = useMemo(() => ({
@@ -426,16 +425,12 @@ const App: React.FC = () => {
         return "-";
       },
     },
-    ...(isAdminAccount
-      ? [
-          {
-            title: "系统测算（根据算力曲线）",
-            dataIndex: "calculated_loss_hashrate",
-            width: 200,
-            render: (text: number | null | undefined) => (text == null ? "-" : `${text} T`),
-          },
-        ]
-      : []),
+    {
+      title: "系统测算（根据算力曲线）",
+      dataIndex: "calculated_loss_hashrate",
+      width: 200,
+      render: (text: number | null | undefined) => (text == null ? "-" : `${text} T`),
+    },
     {
       title: "是否休眠",
       dataIndex: "is_sleep",

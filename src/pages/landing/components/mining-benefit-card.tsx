@@ -15,8 +15,11 @@ const MiningBenefitCard: React.FC<MiningPoolCardProps> = ({ poolType }) => {
 
   const formatNumber = (value: any) => {
     const num = Number(value);
-    if (isNaN(num)) return "0.00";
-    return num.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+    if (!Number.isFinite(num)) return "0.0000";
+    return num.toLocaleString("en-US", {
+      minimumFractionDigits: 4,
+      maximumFractionDigits: 4,
+    });
   };
 
   const formatInt = (value: any) => {
