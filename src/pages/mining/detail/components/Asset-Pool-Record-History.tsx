@@ -36,7 +36,7 @@ type AssetPoolRecordFormValues = {
   leased_power?: number;
   is_cloud_power?: number;
   asset_record_id?: number;
-  source_updated_at?: Dayjs;
+  end_time?: Dayjs;
   base_record_id?: number;
   source_type?: number;
 };
@@ -103,6 +103,7 @@ const AssetPoolRecordHistory: React.FC = () => {
   const [form] = Form.useForm<AssetPoolRecordFormValues>();
   const isCloudPower = Form.useWatch("is_cloud_power", form);
   const isOverclocked = Form.useWatch("is_overclocked", form);
+  const sourceType = Form.useWatch("source_type", form);
 
   const records: AssetPoolRecord[] = useMemo(() => {
     const list = Array.isArray(data?.data) ? (data.data as AssetPoolRecord[]) : [];
@@ -137,7 +138,7 @@ const AssetPoolRecordHistory: React.FC = () => {
       is_overclocked: record.is_overclocked ?? 0,
       overclock_hashrate_per_machine: record.overclock_hashrate_per_machine ?? 0,
       asset_record_id: record.asset_record_id,
-      source_updated_at: record.source_updated_at ? dayjs(record.source_updated_at) : undefined,
+      end_time: record.end_time ? dayjs(record.end_time) : undefined,
       base_record_id: record.base_record_id,
       source_type: record.source_type ?? 1,
     });
@@ -152,6 +153,7 @@ const AssetPoolRecordHistory: React.FC = () => {
   const handleSubmit = async () => {
     try {
       const values = await form.validateFields();
+      const isManual = Number(values.source_type ?? 2) === 2;
       const payload: AssetPoolRecordCreate = {
         venue_id: venueId,
         pool_id: Number(poolId),
@@ -162,11 +164,17 @@ const AssetPoolRecordHistory: React.FC = () => {
         leased_power: Number(values.leased_power ?? 0),
         is_overclocked: Number(values.is_overclocked ?? 0),
         overclock_hashrate_per_machine: Number(values.overclock_hashrate_per_machine ?? 0),
-        asset_record_id: values.asset_record_id == null ? undefined : Number(values.asset_record_id),
-        source_updated_at: values.source_updated_at
-          ? dayjs(values.source_updated_at).format("YYYY-MM-DD HH:mm:ss")
-          : undefined,
-        base_record_id: values.base_record_id == null ? undefined : Number(values.base_record_id),
+        asset_record_id: isManual
+          ? 0
+          : values.asset_record_id == null
+            ? undefined
+            : Number(values.asset_record_id),
+        end_time: values.end_time ? dayjs(values.end_time).format("YYYY-MM-DD HH:mm:ss") : "",
+        base_record_id: isManual
+          ? 0
+          : values.base_record_id == null
+            ? undefined
+            : Number(values.base_record_id),
         source_type: Number(values.source_type ?? 2),
       };
 
@@ -384,11 +392,7 @@ const AssetPoolRecordHistory: React.FC = () => {
             >
               <DatePicker className="w-full" />
             </Form.Item>
-            <Form.Item
-              label="来源更新时间"
-              name="source_updated_at"
-              tooltip="可选，通常用于记录资产系统同步时间"
-            >
+            <Form.Item label="结束时间" name="end_time">
               <DatePicker className="w-full" showTime />
             </Form.Item>
             <Form.Item
@@ -468,10 +472,10 @@ const AssetPoolRecordHistory: React.FC = () => {
             >
               <Radio.Group options={SOURCE_TYPE_OPTIONS} />
             </Form.Item>
-            <Form.Item label="资产记录ID" name="asset_record_id">
+            <Form.Item label="资产记录ID" name="asset_record_id" hidden={Number(sourceType ?? 2) === 2}>
               <InputNumber className="w-full" min={0} />
             </Form.Item>
-            <Form.Item label="基线记录ID" name="base_record_id">
+            <Form.Item label="基线记录ID" name="base_record_id" hidden={Number(sourceType ?? 2) === 2}>
               <InputNumber className="w-full" min={0} />
             </Form.Item>
           </div>

@@ -83,6 +83,7 @@ export type AssetPoolRecordCreate = {
   venue_id: number;
   pool_id: number;
   start_time: string;
+  end_time: string;
   theoretical_hashrate: number;
   hosted_machine: number;
   is_overclocked?: number;
