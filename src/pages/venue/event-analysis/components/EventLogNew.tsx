@@ -72,6 +72,7 @@ interface EventLog {
   event_reason: string;
   resolution_measures: string;
   actual_loss_hashrate?: number;
+  calculated_loss_hashrate?: number | null;
   collection: number;
   created_at: string; // 这里使用 created_at 而不是 update_at
   updated_at: string; // 新增 updated_at 字段
@@ -90,6 +91,7 @@ const App: React.FC = () => {
   const selectedVenueId = Form.useWatch("venue_id", form);
   const permission_routes = localStorage.getItem("permission_routes");
   const is_log_visible = permission_routes?.includes(ROUTE_PATHS.logs);
+  const isAdminAccount = localStorage.getItem("user") === "admin";
   // console.log("is_log_visible", is_log_visible);
   // // 参数对象（在依赖声明之后构建）
   // const params: EventLogParam = useMemo(() => ({
@@ -233,6 +235,7 @@ const App: React.FC = () => {
       impact_count: item.impact_count,
       impact_power_loss: item.impact_power_loss,
       actual_loss_hashrate: item.actual_loss_hashrate,
+      calculated_loss_hashrate: item.calculated_loss_hashrate,
       event_reason: item.event_reason,
       resolution_measures: item.resolution_measures,
       created_at: item.created_at,
@@ -423,6 +426,16 @@ const App: React.FC = () => {
         return "-";
       },
     },
+    ...(isAdminAccount
+      ? [
+          {
+            title: "系统测算（根据算力曲线）",
+            dataIndex: "calculated_loss_hashrate",
+            width: 200,
+            render: (text: number | null | undefined) => (text == null ? "-" : `${text} T`),
+          },
+        ]
+      : []),
     {
       title: "是否休眠",
       dataIndex: "is_sleep",
