@@ -477,10 +477,7 @@ export default function MiningSettingPage() {
       accountLeaseStatus === LEASE_STATUS_PENDING_REMOVAL ||
       accountLeaseStatus === LEASE_STATUS_PARTIAL ||
       accountLeaseStatus === LEASE_STATUS_FULL;
-    const shouldShowLeaseStatus =
-      accountLeaseStatus &&
-      accountLeaseStatus !== LEASE_STATUS_NONE &&
-      accountLeaseStatus !== LEASE_STATUS_PARTIAL_POWER;
+    const shouldShowLeaseStatus = accountLeaseStatus && accountLeaseStatus !== LEASE_STATUS_NONE;
     const leasePowerText =
       accountLeaseStatus === LEASE_STATUS_PARTIAL && formatLeasePower(leasedPower)
         ? ` 租赁算力 ${formatLeasePower(leasedPower)}`
@@ -563,7 +560,11 @@ export default function MiningSettingPage() {
             heat_diss_mode: item.heat_diss_mode,
             link: item.link,
             collection: item.collection,
-            account_lease_status: item.account_lease_status,
+            // 两种接口值统一按“部分租赁”展示和筛选。
+            account_lease_status:
+              item.account_lease_status === LEASE_STATUS_PARTIAL_POWER
+                ? LEASE_STATUS_PARTIAL
+                : item.account_lease_status,
           };
         },
       );
