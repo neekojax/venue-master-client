@@ -15,6 +15,7 @@ import DashboardCardsV2 from "./components/dashboardV2";
 // import DashboardCards from "./components/dashboard";
 import { useSelector, useSettingsStore } from "@/stores";
 
+import { t } from "@/locales";
 import { fetchSubAccountDailyReport } from "@/pages/report/api.tsx";
 
 interface DataType {
@@ -89,7 +90,7 @@ const App: React.FC = () => {
     //   width: 100,
     // },
     {
-      title: "场地名",
+      title: t("场地名"),
       dataIndex: "venueName",
       key: "venueName",
       fixed: "left",
@@ -111,7 +112,7 @@ const App: React.FC = () => {
             >
               {isSpecialVenue && (
                 <Tag color="red" style={{ marginLeft: 2 }}>
-                  补充
+                  {t("补充")}
                 </Tag>
               )}
 
@@ -126,7 +127,7 @@ const App: React.FC = () => {
       defaultSortOrder: "ascend", // 默认升序
     },
     {
-      title: "账户名",
+      title: t("账户名"),
       dataIndex: "accountName",
       key: "accountName",
       fixed: "left",
@@ -135,11 +136,11 @@ const App: React.FC = () => {
         const ownname =
           record.ownerType === 0 ? (
             <Tag color="blue" style={{ padding: "0px 2px" }}>
-              自营
+              {t("自营")}
             </Tag>
           ) : (
             <Tag color="green" style={{ padding: "0px 2px" }}>
-              客户
+              {t("客户")}
             </Tag>
           );
         // return { text, ownname };
@@ -165,7 +166,7 @@ const App: React.FC = () => {
       },
     },
     {
-      title: "24小时产出(BTC)",
+      title: t("24小时产出(BTC)"),
       dataIndex: "btcOutput24h",
       key: "btcOutput24h",
       width: 165,
@@ -174,7 +175,7 @@ const App: React.FC = () => {
       sorter: (a, b) => a.btcOutput24h - b.btcOutput24h,
     },
     {
-      title: "产出效率(BTC/EH)",
+      title: t("产出效率(BTC/EH)"),
       dataIndex: "outputEfficiency",
       key: "outputEfficiency",
       width: 170,
@@ -183,7 +184,7 @@ const App: React.FC = () => {
       sorter: (a, b) => a.outputEfficiency - b.outputEfficiency,
     },
     {
-      title: "理论算力(E)",
+      title: t("理论算力(E)"),
       dataIndex: "theoreticalPower",
       key: "theoreticalPower",
       width: 125,
@@ -192,7 +193,7 @@ const App: React.FC = () => {
       sorter: (a, b) => a.theoreticalPower - b.theoreticalPower,
     },
     {
-      title: "24小时算力(E)",
+      title: t("24小时算力(E)"),
       dataIndex: "power24h",
       key: "power24h",
       width: 145,
@@ -201,7 +202,7 @@ const App: React.FC = () => {
       sorter: (a, b) => a.power24h - b.power24h,
     },
     {
-      title: "24小时有效率",
+      title: t("24小时有效率"),
       dataIndex: "effectiveRate24h",
       key: "effectiveRate24h",
       width: 140,
@@ -210,7 +211,7 @@ const App: React.FC = () => {
       sorter: (a, b) => a.effectiveRate24h - b.effectiveRate24h,
     },
     {
-      title: "托管台数",
+      title: t("托管台数"),
       dataIndex: "totalMachines",
       key: "totalMachines",
       width: 105,
@@ -228,7 +229,7 @@ const App: React.FC = () => {
     {
       title: (
         <div style={{ display: "flex", alignItems: "center", justifyContent: "flex-end" }}>
-          <span>在架有效率</span>
+          <span>{t("在架有效率")}</span>
           <FormulaTooltip />
         </div>
       ),
@@ -247,23 +248,23 @@ const App: React.FC = () => {
               <div style={{ maxWidth: 250 }}>
                 <div style={{ fontSize: "13px", lineHeight: 1.6 }}>
                   <div>
-                    <b>24小时算力：</b>
+                    <b>{t("24小时算力：")}</b>
                     {record.power24h}
                   </div>
                   <div>
-                    <b>托管台数：</b>
+                    <b>{t("托管台数：")}</b>
                     {record.totalMachines}
                   </div>
                   <div>
-                    <b>理论算力：</b>
+                    <b>{t("理论算力：")}</b>
                     {record.theoreticalPower}
                   </div>
                   <div>
-                    <b>总故障数：</b>
+                    <b>{t("总故障数：")}</b>
                     {record.totalFailures}
                   </div>
                   <div>
-                    <b>不可抗力影响台数：</b>
+                    <b>{t("不可抗力影响台数：")}</b>
                     {record.impactMachine}
                   </div>
                 </div>
@@ -285,7 +286,7 @@ const App: React.FC = () => {
     {
       title: (
         <div style={{ display: "flex" }}>
-          <span>净有效率</span>
+          <span>{t("净有效率")}</span>
           <FormulaYouxiaolvTooltip />
         </div>
       ),
@@ -297,7 +298,7 @@ const App: React.FC = () => {
       sorter: (a, b) => a.forecastHashEfficiency - b.forecastHashEfficiency,
     },
     {
-      title: "总故障台数",
+      title: t("总故障台数"),
       dataIndex: "totalFailures",
       key: "totalFailures",
       width: 120,
@@ -328,7 +329,7 @@ const App: React.FC = () => {
       sorter: (a, b) => a.totalFailures - b.totalFailures,
     },
     {
-      title: "总故障率",
+      title: t("总故障率"),
       dataIndex: "totalFailures",
       key: "totalMachines",
       width: 100,
@@ -342,7 +343,7 @@ const App: React.FC = () => {
       },
     },
     {
-      title: "24小时故障数",
+      title: t("24小时故障数"),
       dataIndex: "failures24h",
       key: "failures24h",
       width: 138,
@@ -351,7 +352,7 @@ const App: React.FC = () => {
       sorter: (a, b) => a.failures24h - b.failures24h,
     },
     {
-      title: "24小时故障率",
+      title: t("24小时故障率"),
       dataIndex: "failureRate24h",
       key: "failureRate24h",
       width: 138,
@@ -366,7 +367,7 @@ const App: React.FC = () => {
       sorter: (a, b) => a.failureRate24h - b.failureRate24h,
     },
     {
-      title: "影响算力(E)",
+      title: t("影响算力(E)"),
       dataIndex: "powerImpact",
       key: "powerImpact",
       width: 130,
@@ -375,7 +376,7 @@ const App: React.FC = () => {
       sorter: (a, b) => a.powerImpact - b.powerImpact,
     },
     {
-      title: "影响占比",
+      title: t("影响占比"),
       dataIndex: "impactRatio",
       key: "impactRatio",
       width: 105,
@@ -383,7 +384,7 @@ const App: React.FC = () => {
       sorter: (a, b) => a.impactRatio - b.impactRatio,
     },
     {
-      title: "影响产出(BTC)",
+      title: t("影响产出(BTC)"),
       dataIndex: "outputImpact",
       key: "outputImpact",
       width: 145,
@@ -392,7 +393,7 @@ const App: React.FC = () => {
       sorter: (a, b) => a.outputImpact - b.outputImpact,
     },
     {
-      title: "限电影响",
+      title: t("限电影响"),
       dataIndex: "limitImpactRate",
       key: "limitImpactRate",
       width: 140,
@@ -402,7 +403,7 @@ const App: React.FC = () => {
       sorter: (a, b) => a.limitImpactRate - b.limitImpactRate,
     },
     {
-      title: "高温影响",
+      title: t("高温影响"),
       dataIndex: "highTemperatureRate",
       key: "highTemperatureRate",
       width: 140,
@@ -438,7 +439,7 @@ const App: React.FC = () => {
     //   }
     // },
     {
-      title: "事件描述",
+      title: t("事件描述"),
       dataIndex: "events",
       key: "events",
       width: 400,
@@ -556,7 +557,7 @@ const App: React.FC = () => {
     const data = filteredData.map((item) => ({
       场地名: item.venueName,
       账户名: item.accountName,
-      账户类型: item.ownerType === 0 ? "自营" : "客户",
+      账户类型: item.ownerType === 0 ? t("自营") : t("客户"),
       "24小时产出（BTC）": item.btcOutput24h.toFixed(8),
       "产出效率(BTC/EH)": item.outputEfficiency.toFixed(4),
       "理论算力（E）": item.theoreticalPower.toFixed(6),
@@ -642,8 +643,8 @@ const App: React.FC = () => {
 
     worksheet["!cols"] = columnWidths;
 
-    XLSX.utils.book_append_sheet(workbook, worksheet, "账户日报");
-    XLSX.writeFile(workbook, `账户日报_${selectedDate}.xlsx`);
+    XLSX.utils.book_append_sheet(workbook, worksheet, t("账户日报"));
+    XLSX.writeFile(workbook, t("账户日报_{{selectedDate}}.xlsx", { selectedDate: selectedDate }));
   };
   // const [dashboardData, setDashboardData] =
 
@@ -664,12 +665,12 @@ const App: React.FC = () => {
         <div className="mb-6">
           <div className="flex items-center justify-between mb-6">
             <h1 className="text-2xl font-bold text-gray-800">
-              账户日报
+              {t("账户日报")}
               <span className="text-sm text-gray-500 ml-2"> ({selectedDate || formattedDate})</span>
             </h1>
             <DatePicker
               className="w-40"
-              placeholder="选择日期"
+              placeholder={t("选择日期")}
               onChange={(_: any, dateString: string | string[]) => {
                 setSelectedDate(dateString);
               }}
@@ -699,7 +700,7 @@ const App: React.FC = () => {
             <Select
               mode="multiple"
               size={"middle"}
-              placeholder="选择账户"
+              placeholder={t("选择账户")}
               // className="w-80"
               style={{ minWidth: "200px" }}
               options={siteOptions}
@@ -712,7 +713,7 @@ const App: React.FC = () => {
               onClick={exportToCSV}
               className="!rounded-button"
             >
-              导出报表
+              {t("导出报表")}
             </Button>
           </div>
           <Table
@@ -728,7 +729,7 @@ const App: React.FC = () => {
                 setPageSize(size); // 更新 pageSize 状态
               },
               showQuickJumper: true,
-              showTotal: (total) => `共 ${total} 条`,
+              showTotal: (total) => t("共 {{total}} 条", { total: total }),
             }}
             className="custom-table"
           />

@@ -6,7 +6,7 @@ import {
   LineChartOutlined,
   ReloadOutlined,
 } from "@ant-design/icons";
-import { Button, DatePicker, Radio, Spin } from "antd";
+import { Button, DatePicker, Radio, Spin, Tooltip } from "antd";
 import dayjs from "dayjs";
 import { ReactEcharts } from "@/components/react-echarts";
 import {
@@ -16,6 +16,8 @@ import {
   type SiteDistributionItem,
 } from "../statsUtils";
 import type { FaultStatsTimeMode } from "../types";
+
+import { t } from "@/locales";
 
 interface FaultStatsPanelProps {
   timeMode: FaultStatsTimeMode;
@@ -70,7 +72,7 @@ export default function FaultStatsPanel({
           return formatFrequencyTooltip(frequencyPoints[idx], items[0].axisValue);
         },
       },
-      grid: { left: 8, right: 16, top: 20, bottom: 8, containLabel: true },
+      grid: { left: 8, right: 24, top: 16, bottom: 0, containLabel: true },
       xAxis: {
         type: "category",
         data: frequencyPoints.map((p) => p.label),
@@ -85,7 +87,8 @@ export default function FaultStatsPanel({
       yAxis: {
         type: "value",
         minInterval: 1,
-        name: "异常条数",
+        boundaryGap: ["0%", "6%"],
+        name: t("异常条数"),
         nameLocation: "middle",
         nameRotate: 90,
         nameGap: 42,
@@ -125,7 +128,7 @@ export default function FaultStatsPanel({
     return {
       tooltip: {
         trigger: "item",
-        formatter: "{b}: {c} 条 ({d}%)",
+        formatter: t("{b}: {c} 条 ({d}%)"),
       },
       series: [
         {
@@ -152,7 +155,7 @@ export default function FaultStatsPanel({
       const item = codeDistribution[hoveredCodeIndex];
       return { main: `${item.percentage}%`, sub: item.code };
     }
-    return { main: `${selectedSiteCount}`, sub: "异常条数" };
+    return { main: `${selectedSiteCount}`, sub: t("异常条数") };
   }, [codeDistribution, hoveredCodeIndex, selectedSiteCount]);
 
   return (
@@ -161,9 +164,9 @@ export default function FaultStatsPanel({
         <div className="min-w-0">
           <h2 className="text-lg font-semibold m-0 text-gray-800 flex items-center gap-2 flex-wrap">
             <span className="w-2 h-2 rounded-full bg-red-500 shrink-0" aria-hidden />
-            运维监控大盘
+            {t("运维监控大盘")}
             <span className="text-[11px] font-medium text-emerald-700 bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded-md shrink-0">
-              数据实时更新
+              {t("数据实时更新")}
             </span>
             {selectedSiteName ? (
               <span className="text-xs font-normal text-blue-700 bg-blue-50 border border-blue-100 px-2 py-0.5 rounded-full">
@@ -172,7 +175,7 @@ export default function FaultStatsPanel({
             ) : null}
           </h2>
           <p className="text-xs text-gray-500 mt-1.5 mb-0 leading-relaxed max-w-3xl">
-            智能汇总及动态监测所辖各矿池设备的在线运行异常
+            {t("智能汇总及动态监测所辖各矿池设备的在线运行异常")}
           </p>
         </div>
         <div className="flex flex-wrap items-center gap-2">
@@ -183,8 +186,8 @@ export default function FaultStatsPanel({
             buttonStyle="solid"
             size="small"
             options={[
-              { label: "24小时内", value: "24h" },
-              { label: "按特定日期", value: "customDate" },
+              { label: t("24小时内"), value: "24h" },
+              { label: t("按特定日期"), value: "customDate" },
             ]}
           />
           {timeMode === "customDate" ? (
@@ -202,20 +205,20 @@ export default function FaultStatsPanel({
         </div>
       </div>
 
-      <Spin spinning={loading} tip="加载中...">
+      <Spin spinning={loading} tip={t("加载中...")}>
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
           {/* 场地分布 */}
           <div className="lg:col-span-3 bg-gray-50/80 rounded-lg border border-gray-100 p-4 flex flex-col min-h-[360px]">
             <div className="flex items-center justify-between mb-3 pb-2 border-b border-gray-200/80">
               <h3 className="text-xs font-bold text-gray-800 m-0 flex items-center gap-1.5">
                 <EnvironmentOutlined className="text-gray-500" />
-                场地分布
+                {t("场地分布")}
               </h3>
-              <span className="text-[10px] text-gray-400">点击切换场地</span>
+              <span className="text-[10px] text-gray-400">{t("点击切换场地")}</span>
             </div>
             <div className="space-y-2 flex-1 max-h-[280px] overflow-y-auto pr-1">
               {siteDistribution.length === 0 ? (
-                <div className="text-xs text-gray-400 text-center py-8">暂无数据</div>
+                <div className="text-xs text-gray-400 text-center py-8">{t("暂无数据")}</div>
               ) : (
                 siteDistribution.map((dist) => {
                   const isSelected = dist.siteCode === selectedSiteCode;
@@ -235,14 +238,19 @@ export default function FaultStatsPanel({
                           <span
                             className={`w-2 h-2 rounded-full shrink-0 ${isSelected ? "bg-blue-600" : "bg-gray-300"}`}
                           />
-                          <span className={`truncate ${isSelected ? "text-blue-900" : "text-gray-700"}`}>
-                            {dist.siteName}
-                          </span>
+                          <Tooltip title={dist.siteName} mouseEnterDelay={0.2}>
+                            <span className={`truncate ${isSelected ? "text-blue-900" : "text-gray-700"}`}>
+                              {dist.siteName}
+                            </span>
+                          </Tooltip>
                         </span>
                         <span
                           className={`shrink-0 font-mono text-[11px] ${isSelected ? "text-blue-700" : "text-gray-800"}`}
                         >
-                          {dist.count} 条 (在架 {dist.siteOnShelfRatio}%)
+                          {t("{{count}} 条 (在架 {{siteOnShelfRatio}}%)", {
+                            count: dist.count,
+                            siteOnShelfRatio: dist.siteOnShelfRatio,
+                          })}
                         </span>
                       </div>
                       <div className="w-full bg-gray-200/70 h-1.5 rounded-full overflow-hidden">
@@ -260,10 +268,17 @@ export default function FaultStatsPanel({
               <div className="flex items-center gap-2 min-w-0">
                 <AlertOutlined className="text-rose-400 shrink-0" />
                 <div className="min-w-0">
-                  <div className="text-[10px] text-gray-400 truncate">
-                    {selectedSiteName ?? "当前场地"} 异常计次
+                  <Tooltip
+                    title={t("{{value}} 异常计次", { value: selectedSiteName ?? t("当前场地") })}
+                    mouseEnterDelay={0.2}
+                  >
+                    <div className="text-[10px] text-gray-400 truncate cursor-default">
+                      {t("{{value}} 异常计次", { value: selectedSiteName ?? t("当前场地") })}
+                    </div>
+                  </Tooltip>
+                  <div className="text-base font-bold font-mono">
+                    {t("{{selectedSiteCount}} 条", { selectedSiteCount: selectedSiteCount })}
                   </div>
-                  <div className="text-base font-bold font-mono">{selectedSiteCount} 条</div>
                 </div>
               </div>
               <span className="text-[10px] bg-gray-700 px-2 py-1 rounded shrink-0">{timeLabel}</span>
@@ -275,19 +290,25 @@ export default function FaultStatsPanel({
             <div className="flex items-center justify-between mb-2 pb-2 border-b border-gray-200/80">
               <h3 className="text-xs font-bold text-gray-800 m-0 flex items-center gap-1.5">
                 <LineChartOutlined className="text-gray-500" />
-                异常频次变化曲线
+                {t("异常频次变化曲线")}
               </h3>
               <span className="text-[10px] text-gray-400 font-mono">
-                {timeMode === "24h" ? "近24小时" : timeLabel}
+                {timeMode === "24h" ? t("近24小时") : timeLabel}
               </span>
             </div>
             {frequencyPoints.every((p) => p.count === 0) ? (
               <div className="flex-1 flex flex-col items-center justify-center text-gray-400 text-xs min-h-[240px]">
                 <BarChartOutlined className="text-3xl mb-2 text-gray-300" />
-                该时段暂无异常记录
+                {t("该时段暂无异常记录")}
               </div>
             ) : (
-              <ReactEcharts option={lineOption} style={{ height: 260, width: "100%" }} />
+              <div className="relative flex-1 min-h-[240px]">
+                <ReactEcharts
+                  option={lineOption}
+                  style={{ height: "100%", width: "100%" }}
+                  className="!absolute !inset-0"
+                />
+              </div>
             )}
           </div>
 
@@ -296,18 +317,24 @@ export default function FaultStatsPanel({
             <div className="flex items-center justify-between mb-2 pb-2 border-b border-gray-200/80">
               <h3 className="text-xs font-bold text-gray-800 m-0 flex items-center gap-1.5">
                 <BarChartOutlined className="text-gray-500" />
-                异常原因分布
+                {t("异常原因分布")}
               </h3>
-              <span className="text-[10px] text-gray-400">{codeDistribution.length} 类</span>
+              <span className="text-[10px] text-gray-400">
+                {t("{{length}} 类", { length: codeDistribution.length })}
+              </span>
             </div>
             {codeDistribution.length === 0 ? (
               <div className="flex-1 flex items-center justify-center text-xs text-gray-400 min-h-[240px]">
-                暂无故障编码数据
+                {t("暂无故障编码数据")}
               </div>
             ) : (
               <div className="flex flex-col flex-1 gap-3">
-                <div className="relative h-[140px]">
-                  <ReactEcharts option={pieOption} style={{ height: 140, width: "100%" }} />
+                <div className="relative flex-1 min-h-[140px]">
+                  <ReactEcharts
+                    option={pieOption}
+                    style={{ height: "100%", width: "100%" }}
+                    className="!absolute !inset-0"
+                  />
                   <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
                     <span className="text-lg font-bold text-gray-900 font-mono leading-none">
                       {pieCenterText.main}

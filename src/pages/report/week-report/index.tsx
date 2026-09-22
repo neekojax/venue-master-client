@@ -12,6 +12,7 @@ import { useSelector, useSettingsStore } from "@/stores";
 // import { formatPercent, getIconColor, getNumberColor } from "@/utils/format.ts";
 import "./report.css";
 
+import { t } from "@/locales";
 import { fetchWeeklyReport } from "@/pages/report/api.tsx";
 import ChartFail from "@/pages/report/week-report/components/ChartFail";
 import ChartSuanli from "@/pages/report/week-report/components/ChartSuanli";
@@ -166,10 +167,10 @@ const App: React.FC = () => {
 
     return (
       <div className="flex items-center gap-2">
-        <span className="text-blue-500 font-semibold">第{week}周</span>
+        <span className="text-blue-500 font-semibold">{t("第{{week}}周", { week: week })}</span>
         <span className="text-gray-400">|</span>
         <span className="text-gray-500">
-          {year}年{month}月第{monthWeek}周
+          {t("{{year}}年{{month}}月第{{monthWeek}}周", { year: year, month: month, monthWeek: monthWeek })}
         </span>
         <span className="text-gray-500">
           {monday.format("YYYY-MM-DD")}~~{sunday.format("YYYY-MM-DD")}
@@ -240,30 +241,32 @@ const App: React.FC = () => {
     <div className="weekReport">
       <div className="flex justify-between items-center mb-0">
         <div>
-          <h1 className="text-2xl font-bold mb-2">矿池周报</h1>
+          <h1 className="text-2xl font-bold mb-2">{t("矿池周报")}</h1>
           {filterMode === "rolling" ? renderRollingLabel(startDate, endDate) : renderLabel(labelDate)}
-          <p className="text-gray-500">全面监控和分析矿池算力表现</p>
+          <p className="text-gray-500">{t("全面监控和分析矿池算力表现")}</p>
         </div>
         <div className="flex items-center gap-4">
           <div className="flex items-center w-[400px] rounded-xl p-1 border border-slate-700/50 shadow-inner">
             <button
               onClick={() => setFilterMode("rolling")}
-              title="选择日期并回溯7天"
+              title={t("选择日期并回溯7天")}
               className={`flex items-center gap-1.5 px-4 py-1.5 rounded-lg text-xs font-medium transition-all ${filterMode === "rolling" ? "bg-blue-600 text-white shadow-lg" : "text-slate-400 hover:text-slate-200 hover:bg-slate-700/30"}`}
             >
-              <Clock size={14} /> 滚动回溯
+              <Clock size={14} /> {t("滚动回溯")}
             </button>
             <button
               onClick={() => setFilterMode("calendar")}
-              title="按日历完整周次查看"
+              title={t("按日历完整周次查看")}
               className={`flex items-center gap-1.5 px-4 py-1.5 rounded-lg text-xs font-medium transition-all ${filterMode === "calendar" ? "bg-blue-600 text-white shadow-lg" : "text-slate-400 hover:text-slate-200 hover:bg-slate-700/30"}`}
             >
-              <CalendarIcon size={14} /> 自然周
+              <CalendarIcon size={14} /> {t("自然周")}
             </button>
 
             {filterMode && filterMode === "rolling" && (
               <div className="ml-2 pr-2 border-l border-slate-200 pl-3 flex items-center gap-2">
-                <span className="text-[10px] text-slate-500 uppercase tracking-wider font-bold">日期</span>
+                <span className="text-[10px] text-slate-500 uppercase tracking-wider font-bold">
+                  {t("日期")}
+                </span>
                 <input
                   type="date"
                   value={selectedDate}
@@ -274,7 +277,9 @@ const App: React.FC = () => {
             )}
             {filterMode && filterMode === "calendar" && (
               <div className="ml-2 pr-2 border-l border-slate-200 pl-3 flex items-center gap-2">
-                <span className="text-[10px] text-slate-500 uppercase tracking-wider font-bold">日期</span>
+                <span className="text-[10px] text-slate-500 uppercase tracking-wider font-bold">
+                  {t("日期")}
+                </span>
                 <WeekPicker
                   size="small"
                   value={selectedWeek}
@@ -297,7 +302,7 @@ const App: React.FC = () => {
         </div>
       </div>
 
-      <Spin spinning={loading} tip="加载中..." size="large">
+      <Spin spinning={loading} tip={t("加载中...")} size="large">
         <StatCard statistics={statistics} />
         <div className="grid grid-cols-3 gap-4 mb-6">
           <div className="bg-white p-4 rounded-[4px] border border-[#F0F2F5] shadow-sm">
@@ -306,7 +311,7 @@ const App: React.FC = () => {
           <div className="bg-white p-4 rounded-[4px] border border-[#F0F2F5] shadow-sm">
             <ChartFail failureRate={failureRate} />
           </div>
-          <ImpactCard title="场地运行排名" data={top5EffectiveRate} onReload={handleReload} />
+          <ImpactCard title={t("场地运行排名")} data={top5EffectiveRate} onReload={handleReload} />
         </div>
         <div className="grid grid-cols-3 gap-4 mb-6">
           {/* <div className="bg-white p-4 rounded-[4px] border border-[#F0F2F5] shadow-sm">
@@ -341,7 +346,7 @@ const App: React.FC = () => {
               items={[
                 {
                   key: "effective_diff",
-                  label: "有效率变化Top 5",
+                  label: t("有效率变化Top 5"),
                   children: (
                     <ImpactCard
                       title=""
@@ -354,7 +359,7 @@ const App: React.FC = () => {
                 },
                 {
                   key: "failure_diff",
-                  label: "故障率变化Top 5",
+                  label: t("故障率变化Top 5"),
                   children: (
                     <ImpactCard
                       title=""
@@ -367,7 +372,7 @@ const App: React.FC = () => {
                 },
                 {
                   key: "pending_diff",
-                  label: "待修率变化Top 5",
+                  label: t("待修率变化Top 5"),
                   children: (
                     <ImpactCard
                       title=""
@@ -381,8 +386,8 @@ const App: React.FC = () => {
               ]}
             />
           </div>
-          <ImpactCard title="高温影响率排名" data={top5HighTempImpactRate} onReload={handleReload} />
-          <ImpactCard title="限电影响率排名" data={top5LimitImpactRate} onReload={handleReload} />
+          <ImpactCard title={t("高温影响率排名")} data={top5HighTempImpactRate} onReload={handleReload} />
+          <ImpactCard title={t("限电影响率排名")} data={top5LimitImpactRate} onReload={handleReload} />
         </div>
 
         <VenueTable data={data} startDate={startDate} endDate={endDate} onRequestRefresh={fetchReportData} />

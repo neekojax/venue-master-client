@@ -3,6 +3,8 @@ import { useNavigate } from "react-router-dom";
 import { Button, Result } from "antd";
 import { ROUTE_PATHS } from "@/constants/common";
 
+import { t } from "@/locales";
+
 export default function NotFound() {
   const navigate = useNavigate();
   return (
@@ -13,10 +15,10 @@ export default function NotFound() {
       <Result
         status="404"
         title="404"
-        subTitle="您访问的页面不存在。"
+        subTitle={t("您访问的页面不存在。")}
         extra={
           <Button type="primary" onClick={() => navigate(ROUTE_PATHS.landing)}>
-            返回首页
+            {t("返回首页")}
           </Button>
         }
       />

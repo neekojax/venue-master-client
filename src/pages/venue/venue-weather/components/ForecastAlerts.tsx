@@ -1,6 +1,8 @@
 import React from "react";
 import { VenueWeatherAlert } from "../types";
 
+import { t } from "@/locales";
+
 interface Props {
   forecasts: VenueWeatherAlert[];
 }
@@ -25,10 +27,10 @@ const ForecastAlerts: React.FC<Props> = ({ forecasts }) => {
       <div className="flex justify-between items-center">
         <h3 className="text-sm font-bold text-gray-800 flex items-center uppercase tracking-wider">
           <i className="fas fa-triangle-exclamation mr-2 text-orange-500"></i>
-          预报时段气象预警记录
+          {t("预报时段气象预警记录")}
         </h3>
         <span className="text-[10px] font-bold text-gray-400 bg-gray-100 px-2 py-0.5 rounded">
-          共 {forecasts.length} 条记录
+          {t("共 {{length}} 条记录", { length: forecasts.length })}
         </span>
       </div>
 
@@ -55,7 +57,7 @@ const ForecastAlerts: React.FC<Props> = ({ forecasts }) => {
                       day.level > 7 ? "bg-red-100 text-red-700" : "bg-orange-100 text-orange-700"
                     }`}
                   >
-                    {day.type || "常规预警"}
+                    {day.type || t("常规预警")}
                   </span>
                   <span className="text-[9px] font-bold text-gray-400">LV.{day.level}</span>
                 </div>
@@ -79,7 +81,7 @@ const ForecastAlerts: React.FC<Props> = ({ forecasts }) => {
                   rel="noopener noreferrer"
                   className="text-[10px] font-bold text-blue-600 hover:text-blue-800 flex items-center bg-blue-50 px-2.5 py-1.5 rounded-lg transition-colors border border-blue-100/50"
                 >
-                  详情 <i className="fas fa-chevron-right ml-1.5 text-[8px]"></i>
+                  {t("详情")} <i className="fas fa-chevron-right ml-1.5 text-[8px]"></i>
                 </a>
               </div>
             </div>

@@ -19,6 +19,7 @@ import FormulaTooltip from "@/components/tooltip/FormulaTooltip";
 import FormulaYouxiaolvTooltip from "@/components/tooltip/FormulaYouxiaolvTooltip";
 import { useSelector, useSettingsStore } from "@/stores";
 
+import { t } from "@/locales";
 import ResizableHeaderCell from "@/pages/custody-statistics/statistics/components/ResizableHeaderCell";
 import { fetchDailyReport } from "@/pages/report/api.tsx";
 
@@ -291,7 +292,7 @@ const App: React.FC = () => {
     //   width: 100,
     // },
     {
-      title: "场地名",
+      title: t("场地名"),
       dataIndex: "siteName",
       key: "siteName",
       fixed: "left",
@@ -325,7 +326,7 @@ const App: React.FC = () => {
             >
               {isSpecialVenue && (
                 <Tag color="red" style={{ marginLeft: 2 }}>
-                  补充
+                  {t("补充")}
                 </Tag>
               )}
               {/* {text} */}
@@ -338,7 +339,7 @@ const App: React.FC = () => {
       },
     },
     {
-      title: "24H产出(BTC)",
+      title: t("24H产出(BTC)"),
       dataIndex: "btcOutput24h",
       key: "btcOutput24h",
       width: 165,
@@ -347,7 +348,7 @@ const App: React.FC = () => {
       sorter: (a, b) => a.btcOutput24h - b.btcOutput24h,
     },
     {
-      title: "产出效率(BTC/EH)",
+      title: t("产出效率(BTC/EH)"),
       dataIndex: "outputEfficiency",
       key: "outputEfficiency",
       width: 170,
@@ -358,8 +359,8 @@ const App: React.FC = () => {
     {
       title: (
         <span>
-          理论算力(E)
-          <span style={{ marginLeft: 4 }}>/ 变频</span>
+          {t("理论算力(E)")}
+          <span style={{ marginLeft: 4 }}>{t("/ 变频")}</span>
         </span>
       ),
       dataIndex: "theoreticalPower",
@@ -376,7 +377,7 @@ const App: React.FC = () => {
       sorter: (a, b) => a.theoreticalPower - b.theoreticalPower,
     },
     {
-      title: "24H算力(E)",
+      title: t("24H算力(E)"),
       dataIndex: "power24h",
       key: "power24h",
       width: 145,
@@ -387,8 +388,8 @@ const App: React.FC = () => {
     {
       title: (
         <span>
-          24H有效率
-          <span style={{ marginLeft: 4 }}>/ 变频</span>
+          {t("24H有效率")}
+          <span style={{ marginLeft: 4 }}>{t("/ 变频")}</span>
         </span>
       ),
       dataIndex: "effectiveRate24h",
@@ -406,7 +407,7 @@ const App: React.FC = () => {
       sorter: (a, b) => a.effectiveRate24h - b.effectiveRate24h,
     },
     {
-      title: "托管台数",
+      title: t("托管台数"),
       dataIndex: "totalMachines",
       key: "totalMachines",
       width: 105,
@@ -417,7 +418,7 @@ const App: React.FC = () => {
     {
       title: (
         <div style={{ display: "flex" }}>
-          <span>在架有效率</span>
+          <span>{t("在架有效率")}</span>
           <FormulaTooltip />
         </div>
       ),
@@ -437,23 +438,23 @@ const App: React.FC = () => {
                 <div style={{ maxWidth: 250 }}>
                   <div style={{ fontSize: "14px", lineHeight: 1.6 }}>
                     <div>
-                      <b>24小时算力：</b>
+                      <b>{t("24小时算力：")}</b>
                       {record.power24h}
                     </div>
                     <div>
-                      <b>托管台数：</b>
+                      <b>{t("托管台数：")}</b>
                       {record.totalMachines}
                     </div>
                     <div>
-                      <b>理论算力：</b>
+                      <b>{t("理论算力：")}</b>
                       {record.theoreticalPower}
                     </div>
                     <div>
-                      <b>总故障数：</b>
+                      <b>{t("总故障数：")}</b>
                       {record.totalFailuresT1}
                     </div>
                     <div>
-                      <b>不可抗力影响台数：</b>
+                      <b>{t("不可抗力影响台数：")}</b>
                       {record.impactMachine}
                     </div>
                   </div>
@@ -471,7 +472,7 @@ const App: React.FC = () => {
     {
       title: (
         <div style={{ display: "flex" }}>
-          <span>净有效率</span>
+          <span>{t("净有效率")}</span>
           <FormulaYouxiaolvTooltip />
         </div>
       ),
@@ -483,7 +484,7 @@ const App: React.FC = () => {
       sorter: (a, b) => a.forecastHashEfficiency - b.forecastHashEfficiency,
     },
     {
-      title: "T-1总故障数/占比",
+      title: t("T-1总故障数/占比"),
       dataIndex: "totalFailuresT1",
       key: "totalFailuresT1",
       width: 170,
@@ -492,7 +493,7 @@ const App: React.FC = () => {
       sorter: (a, b) => a.totalFailuresT1 - b.totalFailuresT1,
     },
     {
-      title: "24H故障数/占比",
+      title: t("24H故障数/占比"),
       dataIndex: "failures24h",
       key: "failures24h",
       width: 170,
@@ -535,7 +536,7 @@ const App: React.FC = () => {
       sorter: (a, b) => a.failures24h - b.failures24h,
     },
     {
-      title: "24H上架数",
+      title: t("24H上架数"),
       dataIndex: "shelved",
       key: "shelved",
       width: 138,
@@ -543,7 +544,7 @@ const App: React.FC = () => {
       render: (value) => value.toLocaleString(),
     },
     {
-      title: "T-2故障数/占比",
+      title: t("T-2故障数/占比"),
       dataIndex: "totalFailuresT2",
       key: "totalFailuresT2",
       width: 150,
@@ -591,7 +592,7 @@ const App: React.FC = () => {
       sorter: (a, b) => a.failureRateT2 - b.failureRateT2,
     },
     {
-      title: "待修数/占比",
+      title: t("待修数/占比"),
       dataIndex: "pendingRepair",
       key: "pendingRepair",
       width: 150,
@@ -658,7 +659,7 @@ const App: React.FC = () => {
       },
     },
     {
-      title: "影响算力(E)",
+      title: t("影响算力(E)"),
       dataIndex: "powerImpact",
       key: "powerImpact",
       width: 130,
@@ -667,7 +668,7 @@ const App: React.FC = () => {
       sorter: (a, b) => a.powerImpact - b.powerImpact,
     },
     {
-      title: "影响占比",
+      title: t("影响占比"),
       dataIndex: "impactRatio",
       key: "impactRatio",
       width: 105,
@@ -676,7 +677,7 @@ const App: React.FC = () => {
       sorter: (a, b) => a.impactRatio - b.impactRatio,
     },
     {
-      title: "影响产出(BTC)",
+      title: t("影响产出(BTC)"),
       dataIndex: "outputImpact",
       key: "outputImpact",
       width: 145,
@@ -685,7 +686,7 @@ const App: React.FC = () => {
       sorter: (a, b) => a.outputImpact - b.outputImpact,
     },
     {
-      title: "限电影响",
+      title: t("限电影响"),
       dataIndex: "limitImpactRate",
       key: "limitImpactRate",
       width: 140,
@@ -695,7 +696,7 @@ const App: React.FC = () => {
       sorter: (a, b) => a.limitImpactRate - b.limitImpactRate,
     },
     {
-      title: "高温影响",
+      title: t("高温影响"),
       dataIndex: "highTemperatureRate",
       key: "highTemperatureRate",
       width: 140,
@@ -705,7 +706,7 @@ const App: React.FC = () => {
       sorter: (a, b) => a.highTemperatureRate - b.highTemperatureRate,
     },
     {
-      title: "事件描述",
+      title: t("事件描述"),
       dataIndex: "events",
       key: "events",
       width: 400,
@@ -965,8 +966,8 @@ const App: React.FC = () => {
 
     worksheet["!cols"] = columnWidths;
 
-    XLSX.utils.book_append_sheet(workbook, worksheet, "运营日报");
-    XLSX.writeFile(workbook, `运营日报_${selectedDate}.xlsx`);
+    XLSX.utils.book_append_sheet(workbook, worksheet, t("运营日报"));
+    XLSX.writeFile(workbook, t("运营日报_{{selectedDate}}.xlsx", { selectedDate: selectedDate }));
   };
 
   return (
@@ -975,20 +976,20 @@ const App: React.FC = () => {
         <div className="mb-6">
           <div className="flex items-center justify-between mb-6">
             <h1 className="text-2xl font-bold text-gray-800">
-              运营日报
+              {t("运营日报")}
               <span className="text-sm text-gray-500 ml-2"> ({selectedDate || formattedDate})</span>
             </h1>
             <div className="flex items-center gap-2">
               <DatePicker
                 className="w-40"
-                placeholder="选择日期"
+                placeholder={t("选择日期")}
                 onChange={(_: any, dateString: string | string[]) => {
                   setSelectedDate(dateString);
                 }}
               />
               <button
                 type="button"
-                title="刷新数据"
+                title={t("刷新数据")}
                 onClick={() => setReloadTick((n) => n + 1)}
                 className="px-2 py-1 rounded border border-gray-300 hover:bg-gray-100 text-gray-700"
               >
@@ -1004,8 +1005,8 @@ const App: React.FC = () => {
               <div className="flex-1 min-w-0">
                 <div className="text-[10px] font-black text-slate-400 uppercase tracking-tighter truncate flex justify-between items-center">
                   <span className="flex items-center gap-1">
-                    平均有效率
-                    <Tooltip title="不含租赁算力、仓库算力、待撤场算力">
+                    {t("平均有效率")}
+                    <Tooltip title={t("不含租赁算力、仓库算力、待撤场算力")}>
                       <span className="w-3.5 h-3.5 rounded-full border border-slate-300 text-slate-400 flex items-center justify-center text-[9px] font-bold cursor-pointer hover:bg-slate-100 hover:text-slate-600 transition-colors">
                         !
                       </span>
@@ -1031,11 +1032,13 @@ const App: React.FC = () => {
                   </span>
                 </div>
                 <div className="text-[10px] text-slate-400 font-bold truncate mt-2 uppercase tracking-tighter">
-                  净有效率 {(statistics.averageForecastEfficiencyNoWarehouse || 0).toFixed(2)}%
+                  {t("净有效率 {{value}}%", {
+                    value: (statistics.averageForecastEfficiencyNoWarehouse || 0).toFixed(2),
+                  })}
                 </div>
                 {statistics.totalCloudPower24h != 0 && (
                   <div className="text-[10px] text-slate-400 font-bold truncate mt-2 uppercase tracking-tighter">
-                    包含云算力 {(statistics.totalCloudPower24h || 0).toFixed(2)}E
+                    {t("包含云算力 {{value}}E", { value: (statistics.totalCloudPower24h || 0).toFixed(2) })}
                   </div>
                 )}
                 {/* <div className="text-[10px] text-slate-400 font-bold uppercase tracking-tighter flex items-center justify-between gap-2">
@@ -1048,14 +1051,22 @@ const App: React.FC = () => {
               <Tooltip
                 title={
                   <div className="text-xs">
-                    <div>平均有效率(含仓库)：{(statistics.averageEfficiency || 0).toFixed(2)}%</div>
-                    <div>净有效率(含仓库)：{(statistics.averageForecastEfficiency || 0).toFixed(2)}%</div>
+                    <div>
+                      {t("平均有效率(含仓库)：{{value}}%", {
+                        value: (statistics.averageEfficiency || 0).toFixed(2),
+                      })}
+                    </div>
+                    <div>
+                      {t("净有效率(含仓库)：{{value}}%", {
+                        value: (statistics.averageForecastEfficiency || 0).toFixed(2),
+                      })}
+                    </div>
                   </div>
                 }
               >
                 <div className="absolute bottom-3 right-5 inline-flex items-center gap-1 px-2 py-0.5 rounded-full border border-amber-300 bg-amber-50 text-amber-600 text-[10px] font-bold cursor-pointer hover:bg-amber-100 hover:text-amber-700 transition-colors">
                   <Warehouse className="w-3 h-3" />
-                  <span>含仓库</span>
+                  <span>{t("含仓库")}</span>
                 </div>
               </Tooltip>
               {/* <Tooltip title="不含租赁算力、仓库算力、待撤场算力">
@@ -1072,7 +1083,7 @@ const App: React.FC = () => {
                 </div>
                 <div className="flex-1 min-w-0">
                   <div className="text-[10px] font-black text-slate-400 uppercase tracking-tighter truncate">
-                    总理论算力
+                    {t("总理论算力")}
                   </div>
                   <div className="flex items-baseline gap-0.5 leading-none mt-1.5">
                     <span className="text-2xl font-black text-slate-800 tracking-tighter">
@@ -1082,13 +1093,18 @@ const App: React.FC = () => {
                   </div>
 
                   <div className="text-[10px] text-slate-400 font-bold uppercase tracking-tighter flex items-center justify-between gap-2">
-                    <span className="truncate">24H总算力 {(statistics.totalPower24h || 0).toFixed(2)}E</span>
+                    <span className="truncate">
+                      {t("24H总算力 {{value}}E", { value: (statistics.totalPower24h || 0).toFixed(2) })}
+                    </span>
                     {/* <span className="truncate">租赁算力 {(statistics.totalLeasedPower24h || 0).toFixed(2)}E</span> */}
                   </div>
                   <div className="text-[10px] text-slate-400 font-bold uppercase tracking-tighter flex items-center justify-between gap-2">
                     <span className="truncate">
-                      {statistics.totalCloudPower24h != 0 && "剔除"}租赁算力{" "}
-                      {(statistics.totalLeasedPower24h || 0).toFixed(2)}E
+                      {t("{{value}}租赁算力{{value2}} {{value3}}E", {
+                        value: statistics.totalCloudPower24h != 0 && t("剔除"),
+                        value2: " ",
+                        value3: (statistics.totalLeasedPower24h || 0).toFixed(2),
+                      })}
                     </span>
                   </div>
                 </div>
@@ -1100,7 +1116,7 @@ const App: React.FC = () => {
               </div>
               <div className="flex-1 min-w-0">
                 <div className="text-[10px] font-black text-slate-400 uppercase tracking-tighter truncate">
-                  24H 产出
+                  {t("24H 产出")}
                 </div>
                 <div className="flex items-baseline gap-0.5 leading-none mt-1.5">
                   <span className="text-2xl font-black text-slate-900 tracking-tighter">
@@ -1119,23 +1135,23 @@ const App: React.FC = () => {
               </div>
               <div className="flex-1 min-w-0">
                 <div className="text-[10px] font-black text-slate-400 uppercase tracking-tighter truncate">
-                  托管设备
+                  {t("托管设备")}
                 </div>
                 <div className="flex items-baseline gap-0.5 leading-none mt-1.5">
                   <span className="text-2xl font-black text-slate-900 tracking-tighter">
                     {(statistics.totalMachines || 0).toLocaleString()}
                   </span>
-                  <span className="text-[11px] font-bold text-slate-400 ml-1.5 uppercase">台</span>
+                  <span className="text-[11px] font-bold text-slate-400 ml-1.5 uppercase">{t("台")}</span>
                 </div>
                 <div className="text-[10px] text-slate-400 font-bold truncate mt-2 uppercase tracking-tighter">
-                  总故障数 {(statistics.totalFailures24h || 0).toLocaleString()}
+                  {t("总故障数 {{value}}", { value: (statistics.totalFailures24h || 0).toLocaleString() })}
                 </div>
               </div>
             </div>
             <div className="bg-white border border-slate-200 rounded-xl flex items-stretch shadow-sm overflow-hidden h-28 basis-0 grow-[2]">
               <div className="bg-[#0f172a] px-5 flex flex-col justify-center border-r border-slate-800 shrink-0 min-w-[100px]">
                 <div className="flex items-center gap-1.5 text-rose-500 text-[10px] font-black uppercase tracking-tighter mb-1">
-                  <AlertTriangle className="w-3.5 h-3.5" /> 影响分析
+                  <AlertTriangle className="w-3.5 h-3.5" /> {t("影响分析")}
                 </div>
                 <div className="text-2xl font-black text-white leading-none">
                   {(statistics.totalPowerImpact || 0).toFixed(2)}
@@ -1148,7 +1164,7 @@ const App: React.FC = () => {
               <div className="flex-1 flex flex-col justify-center px-2 py-1 gap-1">
                 <div className="flex items-center gap-3">
                   <span className="text-[10px] font-bold text-slate-500 w-14 truncate shrink-0">
-                    限电影响
+                    {t("限电影响")}
                   </span>
                   <div className="flex-1 h-1 bg-slate-100 rounded-full overflow-hidden">
                     <div
@@ -1167,7 +1183,9 @@ const App: React.FC = () => {
                   </div>
                 </div>
                 <div className="flex items-center gap-3 ">
-                  <span className="text-[10px] font-bold text-slate-500 w-14 truncate shrink-0">低功耗</span>
+                  <span className="text-[10px] font-bold text-slate-500 w-14 truncate shrink-0">
+                    {t("低功耗")}
+                  </span>
                   <div className="flex-1 h-1 bg-slate-100 rounded-full overflow-hidden">
                     <div
                       className="h-full bg-amber-500 rounded-full"
@@ -1187,7 +1205,7 @@ const App: React.FC = () => {
                 </div>
                 <div className="flex items-center gap-3">
                   <span className="text-[10px] font-bold text-slate-500 w-14 truncate shrink-0">
-                    撤场影响
+                    {t("撤场影响")}
                   </span>
                   <div className="flex-1 h-1 bg-slate-100 rounded-full overflow-hidden">
                     <div
@@ -1207,7 +1225,9 @@ const App: React.FC = () => {
                   </div>
                 </div>
                 <div className="flex items-center gap-3">
-                  <span className="text-[10px] font-bold text-slate-500 w-14 truncate shrink-0">其他</span>
+                  <span className="text-[10px] font-bold text-slate-500 w-14 truncate shrink-0">
+                    {t("其他")}
+                  </span>
                   <div className="flex-1 h-1 bg-slate-100 rounded-full overflow-hidden">
                     <div
                       className="h-full bg-slate-300 rounded-full"
@@ -1245,14 +1265,14 @@ const App: React.FC = () => {
             <span>
               <Switch size="small" checked={showCollectionOnly} onChange={setShowCollectionOnly} />
               {"  "}
-              <span style={{ marginRight: "10px" }}>我的自选</span>
+              <span style={{ marginRight: "10px" }}>{t("我的自选")}</span>
             </span>
 
             <div style={{ color: "#000" }}>
               <Select
                 mode="multiple"
                 size={"middle"}
-                placeholder="选择场地"
+                placeholder={t("选择场地")}
                 // className="w-80"
                 style={{ minWidth: "300px", marginRight: "15px" }}
                 options={siteOptions}
@@ -1267,7 +1287,7 @@ const App: React.FC = () => {
                 onClick={exportToCSV}
                 className="!rounded-button"
               >
-                导出报表
+                {t("导出报表")}
               </Button>
             </div>
           </div>
@@ -1283,7 +1303,7 @@ const App: React.FC = () => {
               showSizeChanger: true,
               pageSizeOptions: ["10", "20", "30", "50"],
               defaultPageSize: 10,
-              showTotal: (total) => `共 ${total} 条`,
+              showTotal: (total) => t("共 {{total}} 条", { total: total }),
               total: filteredData?.length,
               onChange: () => {
                 const tableBody = document.querySelector(".ant-table-body");

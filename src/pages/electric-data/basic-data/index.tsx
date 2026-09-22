@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { message, Pagination, Radio, Space, Spin, Switch, Table } from "antd";
 import { exportElectricBasicToExcel } from "@/utils/excel.ts";
 
+import { t } from "@/locales";
 import { downloadSettlementData, fetchSettlementDataWithPagination } from "@/pages/electric-data/api.tsx";
 import ElectricSelectComponent from "@/pages/electric-data/components/electric-select.tsx";
 import {
@@ -49,24 +50,24 @@ export default function ElectricBasic() {
   useEffect(() => {
     setColumns([
       {
-        title: "电力接入点",
+        title: t("电力接入点"),
         dataIndex: "name",
         key: "name",
         width: 300,
       },
       {
-        title: "数据口径",
+        title: t("数据口径"),
         dataIndex: "type",
         key: "type",
         width: 200,
       },
       {
-        title: "限电时间范围",
+        title: t("限电时间范围"),
         dataIndex: "time",
         key: "time",
       },
       {
-        title: "电力价格",
+        title: t("电力价格"),
         dataIndex: "price",
         key: "price",
         width: 300,
@@ -104,7 +105,7 @@ export default function ElectricBasic() {
       );
       setTotal(result.data.total); // 假设 result.data.total 是总条目数
     } catch (_error) {
-      message.error("获取费用统计数据失败");
+      message.error(t("获取费用统计数据失败"));
     } finally {
       setLoading(false); // 结束加载
     }
@@ -123,10 +124,10 @@ export default function ElectricBasic() {
           showCollectionOnly ? exportRows.filter((item: any) => item.collection === 1) : exportRows,
         );
       } else {
-        message.error("无效的下载参数");
+        message.error(t("无效的下载参数"));
       }
     } catch (_error) {
-      message.error("导出费用统计数据失败");
+      message.error(t("导出费用统计数据失败"));
     }
   };
 
@@ -178,13 +179,13 @@ export default function ElectricBasic() {
             value={priceType}
             onChange={onPriceTypeChange} // 处理变化的回调
             options={[
-              { value: "all", label: "全部" },
-              { value: "greaterThan7.5", label: "大于7.5" },
-              { value: "lessThanEqual7.5", label: "小于7.5" },
+              { value: "all", label: t("全部") },
+              { value: "greaterThan7.5", label: t("大于7.5") },
+              { value: "lessThanEqual7.5", label: t("小于7.5") },
             ]}
           />
           <span style={{ color: "#000" }}>
-            <Switch size="small" checked={showCollectionOnly} onChange={onCollectionChange} /> 我的收藏
+            <Switch size="small" checked={showCollectionOnly} onChange={onCollectionChange} /> {t("我的收藏")}
           </span>
         </Space>
       </div>
@@ -211,7 +212,7 @@ export default function ElectricBasic() {
             <div style={{ textAlign: "center", marginTop: "60px" }}>
               <p style={{ fontSize: "16px" }}>
                 <i className="fas fa-exclamation-circle" style={{ marginRight: "8px", color: "#f39c12" }}></i>
-                请选择电网场地搜索数据
+                {t("请选择电网场地搜索数据")}
               </p>
             </div>
           )}

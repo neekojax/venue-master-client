@@ -17,6 +17,7 @@ import {
 import type { WeeklyChartPoint } from "./weeklyMock";
 import { useSelector, useSettingsStore } from "@/stores";
 
+import { t } from "@/locales";
 import { getLast30DaysLimitImpactRate } from "@/pages/venue/api.tsx";
 
 // 注册 ECharts 组件
@@ -87,7 +88,13 @@ const WaveLineCard: React.FC<{ mode?: "day" | "week"; weeklyData?: WeeklyChartPo
         ...commonTooltip,
         formatter: (params: any) => {
           return params
-            .map((item: any) => `${item.name || ""}<br>${item.marker}限电影响：${item.value.toFixed(2)}%`)
+            .map((item: any) =>
+              t("{{value}}<br>{{marker}}限电影响：{{value2}}%", {
+                value: item.name || "",
+                marker: item.marker,
+                value2: item.value.toFixed(2),
+              }),
+            )
             .join("<br/>");
         },
       },
@@ -102,7 +109,7 @@ const WaveLineCard: React.FC<{ mode?: "day" | "week"; weeklyData?: WeeklyChartPo
           formatter: (value: string) => {
             if (mode === "week") {
               const week = weeklyData.find((item) => item.date === value)?.weekNo;
-              return week ? `第${week}周` : value;
+              return week ? t("第{{week}}周", { week: week }) : value;
             }
             const d = new Date(value);
             if (!isNaN(d.getTime())) {
@@ -167,9 +174,9 @@ const WaveLineCard: React.FC<{ mode?: "day" | "week"; weeklyData?: WeeklyChartPo
       <div className="flex justify-between items-center mb-4">
         <div className="flex items-center gap-3">
           <div>
-            <h3 style={chartTitleStyle}>限电影响曲线</h3>
+            <h3 style={chartTitleStyle}>{t("限电影响曲线")}</h3>
           </div>
-          <span style={chartRangeBadge("#7c3aed")}>{mode === "week" ? "近10周" : "近30日"}</span>
+          <span style={chartRangeBadge("#7c3aed")}>{mode === "week" ? t("近10周") : t("近30日")}</span>
         </div>
       </div>
       <Spin spinning={loading}>

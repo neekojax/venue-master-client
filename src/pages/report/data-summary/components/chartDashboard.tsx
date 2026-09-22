@@ -3,6 +3,8 @@ import React from "react";
 import ChartPrice from "./chartPrice";
 import ChartSuanli from "./chartSuanli";
 
+import { t } from "@/locales";
+
 export type ChartPanel = {
   title: string;
   id: string;
@@ -23,12 +25,12 @@ const ChartDashboard: React.FC<ChartDashboardProps & { chartDate: string }> = ({
     <>
       <div className="grid grid-cols-2 gap-6">
         <div className="bg-white rounded-lg p-6 shadow-sm" style={{ border: "solid 1px #e5e5e5" }}>
-          <div className="text-gray-500 mb-2">全网算力(EH/s)</div>
+          <div className="text-gray-500 mb-2">{t("全网算力(EH/s)")}</div>
           <ChartSuanli loading={loading} chartDate={chartDate} />
           {/* <div id="powerTrend" className="h-64"></div> */}
         </div>
         <div className="bg-white rounded-lg p-6 shadow-sm" style={{ border: "solid 1px #e5e5e5" }}>
-          <div className="text-gray-500 mb-2">币价趋势（USD）</div>
+          <div className="text-gray-500 mb-2">{t("币价趋势（USD）")}</div>
           <ChartPrice loading={loading} chartDate={chartDate} />
           {/* <div id="priceTrend" className="h-64"></div> */}
         </div>

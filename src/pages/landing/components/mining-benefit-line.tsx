@@ -3,6 +3,7 @@ import * as echarts from "echarts";
 import { Inbox, TrendingUp } from "lucide-react";
 import { ReactEcharts } from "@/components/react-echarts";
 
+import { t as i18nT } from "@/locales";
 import { fetchMiningBenefitLine } from "@/pages/landing/api.ts";
 
 // @ts-ignore
@@ -79,7 +80,7 @@ const MiningBenefitCard = ({ poolType }) => {
       yAxis: [
         {
           type: "value",
-          name: "金额 (USD)",
+          name: i18nT("金额 (USD)"),
           splitLine: {
             lineStyle: {
               color: "#f1f5f9",
@@ -94,7 +95,7 @@ const MiningBenefitCard = ({ poolType }) => {
         },
         {
           type: "value",
-          name: "占比 (%)",
+          name: i18nT("占比 (%)"),
           min: 0,
           max: 100,
           splitLine: { show: false },
@@ -107,7 +108,7 @@ const MiningBenefitCard = ({ poolType }) => {
       ],
       series: [
         {
-          name: "收益",
+          name: i18nT("收益"),
           data: income_usd,
           type: "line",
           smooth: true,
@@ -115,7 +116,7 @@ const MiningBenefitCard = ({ poolType }) => {
           lineStyle: { width: 3, color: "#3b82f6" },
         },
         {
-          name: "支出",
+          name: i18nT("支出"),
           data: hosting_fee,
           type: "line",
           smooth: true,
@@ -129,7 +130,7 @@ const MiningBenefitCard = ({ poolType }) => {
           },
         },
         {
-          name: "托管费占比",
+          name: i18nT("托管费占比"),
           data: fee_percentage,
           type: "line",
           yAxisIndex: 1,
@@ -160,7 +161,7 @@ const MiningBenefitCard = ({ poolType }) => {
           <div className="p-1.5 bg-orange-50 rounded-lg ring-1 ring-orange-100/50">
             <TrendingUp size={18} className="text-orange-600" />
           </div>
-          <h2 className="text-lg font-bold text-slate-800 tracking-tight">收益+支出</h2>
+          <h2 className="text-lg font-bold text-slate-800 tracking-tight">{i18nT("收益+支出")}</h2>
         </div>
         <div className="flex items-center gap-4">
           <div className="hidden xl:flex gap-3 text-xs font-medium">
@@ -185,7 +186,7 @@ const MiningBenefitCard = ({ poolType }) => {
                     : "text-slate-500 hover:text-slate-800 hover:bg-slate-200/50"
                 }`}
               >
-                {t}天
+                {i18nT("{{t}}天", { t: t })}
               </button>
             ))}
           </div>
@@ -198,7 +199,7 @@ const MiningBenefitCard = ({ poolType }) => {
             <div className="p-4 bg-slate-50 rounded-full mb-3">
               <Inbox size={24} />
             </div>
-            <span className="text-sm">暂无数据</span>
+            <span className="text-sm">{i18nT("暂无数据")}</span>
           </div>
         ) : (
           <ReactEcharts option={getOption()} style={{ height: "100%", width: "100%" }} />

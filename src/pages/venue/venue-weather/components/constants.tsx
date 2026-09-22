@@ -122,6 +122,8 @@ import FortyTwoSvg from "@/assets/svg/42.png";
 import FortyThreeSvg from "@/assets/svg/43.png";
 import FortyFourSvg from "@/assets/svg/44.png";
 
+import { t } from "@/locales";
+
 export const WEATHER_ICONS_BY_ID: Record<number, React.ReactNode> = {
   1: <img src={OneSvg} alt="1" className="w-12 h-12" />,
   2: <img src={TwoSvg} alt="2" className="w-12 h-12" />,
@@ -198,7 +200,7 @@ export const WEATHER_ICONS: Record<string, React.ReactNode> = {
 };
 
 export const MOCK_VENUES = [
-  { id: 1, name: "哈萨克斯坦 - KZ_01", location: "Astana" },
-  { id: 2, name: "埃塞俄比亚 - ET_03", location: "Addis Ababa" },
-  { id: 3, name: "美国 - TX_01", location: "Texas" },
+  { id: 1, name: t("哈萨克斯坦 - KZ_01"), location: "Astana" },
+  { id: 2, name: t("埃塞俄比亚 - ET_03"), location: "Addis Ababa" },
+  { id: 3, name: t("美国 - TX_01"), location: "Texas" },
 ];

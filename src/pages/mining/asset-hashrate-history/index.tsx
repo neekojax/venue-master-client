@@ -14,6 +14,8 @@ import type {
 } from "./types";
 import useAuthRedirect from "@/hooks/useAuthRedirect";
 
+import { t } from "@/locales";
+
 const { RangePicker } = DatePicker;
 
 function formatDateTime(value?: string) {
@@ -124,14 +126,14 @@ export default function AssetHashrateHistoryPage() {
   const columns = useMemo<ColumnsType<AssetHashrateChangeRecord>>(
     () => [
       {
-        title: "序号",
+        title: t("序号"),
         key: "index",
         width: 76,
         render: (_: unknown, __: AssetHashrateChangeRecord, index: number) =>
           (listData.pageNum - 1) * listData.pageSize + index + 1,
       },
       {
-        title: "场地",
+        title: t("场地"),
         dataIndex: "venue_name",
         key: "venue_name",
         width: 220,
@@ -140,7 +142,7 @@ export default function AssetHashrateHistoryPage() {
         ),
       },
       {
-        title: "子账户",
+        title: t("子账户"),
         dataIndex: "pool_name",
         key: "pool_name",
         width: 240,
@@ -149,7 +151,7 @@ export default function AssetHashrateHistoryPage() {
         ),
       },
       {
-        title: "托管机器",
+        title: t("托管机器"),
         dataIndex: "hosted_machine",
         key: "hosted_machine",
         width: 120,
@@ -159,7 +161,7 @@ export default function AssetHashrateHistoryPage() {
         ),
       },
       {
-        title: "理论算力",
+        title: t("理论算力"),
         dataIndex: "theoretical_hashrate",
         key: "theoretical_hashrate",
         width: 140,
@@ -169,7 +171,7 @@ export default function AssetHashrateHistoryPage() {
         ),
       },
       {
-        title: "算力变更时间",
+        title: t("算力变更时间"),
         dataIndex: "hashrate_changed_at",
         key: "hashrate_changed_at",
         width: 180,
@@ -178,7 +180,7 @@ export default function AssetHashrateHistoryPage() {
         ),
       },
       {
-        title: "更新时间",
+        title: t("更新时间"),
         dataIndex: "updated_at",
         key: "updated_at",
         width: 180,
@@ -196,8 +198,8 @@ export default function AssetHashrateHistoryPage() {
     total: listData.total,
     showSizeChanger: true,
     pageSizeOptions: [20, 50, 100, 200],
-    showTotal: (total) => `共 ${total} 条记录`,
-    locale: { items_per_page: "条/页" },
+    showTotal: (total) => t("共 {{total}} 条记录", { total: total }),
+    locale: { items_per_page: t("条/页") },
     onChange: (page, pageSize) => {
       setQuery((prev) => ({
         ...prev,
@@ -211,7 +213,7 @@ export default function AssetHashrateHistoryPage() {
     emptyText: (
       <Empty
         image={Empty.PRESENTED_IMAGE_SIMPLE}
-        description={query.venue_id || query.pool_id ? "暂无匹配数据" : "暂无资产变更历史数据"}
+        description={query.venue_id || query.pool_id ? t("暂无匹配数据") : t("暂无资产变更历史数据")}
       />
     ),
   };
@@ -230,36 +232,36 @@ export default function AssetHashrateHistoryPage() {
                 className="[&_.ant-form-item]:!mb-0 [&_.ant-form-item-label]:!pb-2 [&_.ant-form-item-label>label]:!text-[13px] [&_.ant-form-item-label>label]:!font-semibold [&_.ant-form-item-label>label]:!text-slate-700"
               >
                 <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4">
-                  <Form.Item name="venue_id" label="场地">
+                  <Form.Item name="venue_id" label={t("场地")}>
                     <Select
                       allowClear
                       showSearch
-                      placeholder="请选择场地"
+                      placeholder={t("请选择场地")}
                       optionFilterProp="label"
                       options={venueOptions}
                     />
                   </Form.Item>
-                  <Form.Item name="pool_id" label="子账户">
+                  <Form.Item name="pool_id" label={t("子账户")}>
                     <Select
                       allowClear
                       showSearch
-                      placeholder={selectedVenueId ? "请选择该场地下的子账户" : "请选择子账户"}
+                      placeholder={selectedVenueId ? t("请选择该场地下的子账户") : t("请选择子账户")}
                       optionFilterProp="label"
                       options={poolOptions}
                     />
                   </Form.Item>
-                  <Form.Item name="hashrate_changed_at" label="变更时间">
+                  <Form.Item name="hashrate_changed_at" label={t("变更时间")}>
                     <RangePicker showTime className="!w-full" />
                   </Form.Item>
-                  <Form.Item name="updated_at" label="更新时间">
+                  <Form.Item name="updated_at" label={t("更新时间")}>
                     <RangePicker showTime className="!w-full" />
                   </Form.Item>
                 </div>
 
                 <div className="mt-4 flex justify-end gap-2 border-t border-slate-200/80 pt-4">
-                  <Button onClick={handleReset}>重置</Button>
+                  <Button onClick={handleReset}>{t("重置")}</Button>
                   <Button type="primary" htmlType="submit" icon={<SearchOutlined />}>
-                    查询记录
+                    {t("查询记录")}
                   </Button>
                 </div>
               </Form>
@@ -271,7 +273,7 @@ export default function AssetHashrateHistoryPage() {
               className="m-4"
               type="error"
               showIcon
-              message={(listQuery.error as Error)?.message || "资产变更历史列表加载失败"}
+              message={(listQuery.error as Error)?.message || t("资产变更历史列表加载失败")}
             />
           ) : null}
 

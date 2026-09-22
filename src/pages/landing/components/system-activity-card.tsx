@@ -21,6 +21,7 @@ import { ROUTE_PATHS } from "@/constants/common";
 import { useSelector, useSettingsStore } from "@/stores";
 import { getTimeDifference } from "@/utils/date";
 
+import { t } from "@/locales";
 import { fetchEventLogWithFilter } from "@/pages/venue/api.tsx";
 
 dayjs.extend(relativeTime);
@@ -77,18 +78,18 @@ const LogItem: React.FC<LogItemProps> = ({
         </div>
         <div className="mt-1 space-y-1 text-[11px] text-slate-400 min-w-0">
           <div className="flex items-center gap-2 min-w-0">
-            <span className="shrink-0">场地</span>
-            <span className="truncate">{venueName || "未知场地"}</span>
+            <span className="shrink-0">{t("场地")}</span>
+            <span className="truncate">{venueName || t("未知场地")}</span>
             <span className="shrink-0 text-[10px] px-1.5 py-0.5 rounded-full bg-slate-100 text-slate-500 border border-slate-200">
               {eventTypeLabel}
             </span>
           </div>
           <div className="flex items-center gap-2 min-w-0">
             <span className={`shrink-0 px-1.5 py-0.5 rounded-full border font-semibold ${impactCountStyles}`}>
-              影响 {impactCount || "0"} 台
+              {t("影响 {{value}} 台", { value: impactCount || "0" })}
             </span>
             <span className="shrink-0">·</span>
-            <span className="truncate">影响时长 {impactDuration || "--"}</span>
+            <span className="truncate">{t("影响时长 {{value}}", { value: impactDuration || "--" })}</span>
           </div>
         </div>
       </div>
@@ -109,7 +110,7 @@ const SystemActivityCard = () => {
     item?.log_type ||
     item?.description ||
     item?.content ||
-    "未知事件";
+    t("未知事件");
 
   const getLogTime = (item: any) => item?.event_date || item?.created_at || item?.createdAt || "";
   const getImpactDuration = (item: any) => getTimeDifference(item?.start_time, item?.end_time);
@@ -151,35 +152,35 @@ const SystemActivityCard = () => {
     const content = getLogText(item);
     const joined = `${rawType} ${content}`;
 
-    if (joined.includes("限电")) {
-      return { eventTypeLabel: "限电", tone: "warning" as const, icon: <Zap size={16} /> };
+    if (joined.includes(t("限电"))) {
+      return { eventTypeLabel: t("限电"), tone: "warning" as const, icon: <Zap size={16} /> };
     }
-    if (joined.includes("高温")) {
-      return { eventTypeLabel: "高温", tone: "error" as const, icon: <Thermometer size={16} /> };
+    if (joined.includes(t("高温"))) {
+      return { eventTypeLabel: t("高温"), tone: "error" as const, icon: <Thermometer size={16} /> };
     }
-    if (joined.includes("极端天气")) {
-      return { eventTypeLabel: "极端天气", tone: "info" as const, icon: <CloudLightning size={16} /> };
+    if (joined.includes(t("极端天气"))) {
+      return { eventTypeLabel: t("极端天气"), tone: "info" as const, icon: <CloudLightning size={16} /> };
     }
-    if (joined.includes("日常维护") || joined.includes("维护")) {
-      return { eventTypeLabel: "日常维护", tone: "success" as const, icon: <Wrench size={16} /> };
+    if (joined.includes(t("日常维护")) || joined.includes(t("维护"))) {
+      return { eventTypeLabel: t("日常维护"), tone: "success" as const, icon: <Wrench size={16} /> };
     }
-    if (joined.includes("设备故障") || joined.includes("故障")) {
-      return { eventTypeLabel: "设备故障", tone: "error" as const, icon: <AlertOctagon size={16} /> };
+    if (joined.includes(t("设备故障")) || joined.includes(t("故障"))) {
+      return { eventTypeLabel: t("设备故障"), tone: "error" as const, icon: <AlertOctagon size={16} /> };
     }
-    if (joined.includes("网络")) {
-      return { eventTypeLabel: "网络", tone: "primary" as const, icon: <Wifi size={16} /> };
+    if (joined.includes(t("网络"))) {
+      return { eventTypeLabel: t("网络"), tone: "primary" as const, icon: <Wifi size={16} /> };
     }
-    if (joined.includes("电力")) {
-      return { eventTypeLabel: "电力", tone: "primary" as const, icon: <Power size={16} /> };
+    if (joined.includes(t("电力"))) {
+      return { eventTypeLabel: t("电力"), tone: "primary" as const, icon: <Power size={16} /> };
     }
-    if (content.includes("成功") || content.includes("完成")) {
+    if (content.includes(t("成功")) || content.includes(t("完成"))) {
       return {
-        eventTypeLabel: rawType || "其他",
+        eventTypeLabel: rawType || t("其他"),
         tone: "success" as const,
         icon: <CheckCircle2 size={16} />,
       };
     }
-    return { eventTypeLabel: rawType || "其他", tone: "neutral" as const, icon: <Settings size={16} /> };
+    return { eventTypeLabel: rawType || t("其他"), tone: "neutral" as const, icon: <Settings size={16} /> };
   };
 
   if (loading) {
@@ -211,15 +212,15 @@ const SystemActivityCard = () => {
             <Scroll size={20} className="text-blue-600" />
           </div>
           <div>
-            <h2 className="text-lg font-bold text-slate-900 tracking-tight">异常事件</h2>
-            <p className="text-xs text-slate-400">最新事件日志</p>
+            <h2 className="text-lg font-bold text-slate-900 tracking-tight">{t("异常事件")}</h2>
+            <p className="text-xs text-slate-400">{t("最新事件日志")}</p>
           </div>
         </div>
         <Link
           to={ROUTE_PATHS.eventLog}
           className="text-xs font-medium text-blue-600 hover:text-blue-700 bg-blue-50 hover:bg-blue-100 px-2.5 py-1 rounded-md transition-colors"
         >
-          查看全部
+          {t("查看全部")}
         </Link>
       </div>
 
@@ -229,7 +230,7 @@ const SystemActivityCard = () => {
             <div className="p-4 bg-slate-50 rounded-full mb-3">
               <Inbox size={24} />
             </div>
-            <span className="text-sm">暂无异常事件</span>
+            <span className="text-sm">{t("暂无异常事件")}</span>
           </div>
         ) : (
           <>

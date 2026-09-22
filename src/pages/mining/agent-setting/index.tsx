@@ -44,6 +44,8 @@ import type {
 import useAuthRedirect from "@/hooks/useAuthRedirect";
 import { useSelector, useSettingsStore } from "@/stores";
 
+import { t } from "@/locales";
+
 function pickValue<T>(...values: T[]): T | undefined {
   return values.find((value) => value !== undefined && value !== null);
 }
@@ -150,10 +152,10 @@ function getRefreshTaskAlertType(
 
 function getRefreshTaskStatusText(task?: SiteDailyAnomalyRefreshTask) {
   if (!task) return "";
-  if (task.status === "pending") return "排队中";
-  if (task.status === "running") return "执行中";
-  if (task.status === "success") return "执行成功";
-  if (task.status === "failed") return "执行失败";
+  if (task.status === "pending") return t("排队中");
+  if (task.status === "running") return t("执行中");
+  if (task.status === "success") return t("执行成功");
+  if (task.status === "failed") return t("执行失败");
   return task.status;
 }
 
@@ -227,7 +229,12 @@ export default function MiningAgentSettingPage() {
     if (currentRefreshTask.status === "success") {
       notifyTaskStatusRef.current = notifyKey;
       message.success(
-        `${currentRefreshTask.scopeType === "all_site" ? "全场" : currentRefreshTask.siteCode || "场地"}异常数刷新完成`,
+        t("{{value}}异常数刷新完成", {
+          value:
+            currentRefreshTask.scopeType === "all_site"
+              ? t("全场")
+              : currentRefreshTask.siteCode || t("场地"),
+        }),
       );
       void listQuery.refetch();
       return;
@@ -235,7 +242,7 @@ export default function MiningAgentSettingPage() {
 
     if (currentRefreshTask.status === "failed") {
       notifyTaskStatusRef.current = notifyKey;
-      message.error(currentRefreshTask.errorMessage || "异常数刷新任务执行失败");
+      message.error(currentRefreshTask.errorMessage || t("异常数刷新任务执行失败"));
     }
   }, [currentRefreshTask, listQuery]);
 
@@ -251,7 +258,7 @@ export default function MiningAgentSettingPage() {
       notifyTaskStatusRef.current = "";
 
       if (data.existingTask) {
-        message.info("检测到已有同类任务在执行，已复用现有任务");
+        message.info(t("检测到已有同类任务在执行，已复用现有任务"));
       } else {
         message.success(successMessage);
       }
@@ -288,9 +295,9 @@ export default function MiningAgentSettingPage() {
     async (record: SiteAgentBindingRecord) => {
       try {
         await deleteMutation.mutateAsync(record.agentName);
-        message.success("删除成功");
+        message.success(t("删除成功"));
       } catch (error) {
-        message.error((error as Error).message || "删除失败");
+        message.error((error as Error).message || t("删除失败"));
       }
     },
     [deleteMutation],
@@ -298,24 +305,24 @@ export default function MiningAgentSettingPage() {
 
   const handleRefreshAll = useCallback(async () => {
     if (isRefreshTaskActive) {
-      message.warning("当前已有异常数刷新任务执行中，请等待完成后再提交");
+      message.warning(t("当前已有异常数刷新任务执行中，请等待完成后再提交"));
       return;
     }
 
     setSubmittingRefreshAll(true);
     try {
       const res = (await refreshAllMutation.mutateAsync()) as { data?: SiteDailyAnomalyRefreshSubmitData };
-      handleRefreshTaskSubmitResult(res.data, "全场异常数刷新任务已提交");
+      handleRefreshTaskSubmitResult(res.data, t("全场异常数刷新任务已提交"));
     } catch (error) {
       setSubmittingRefreshAll(false);
-      message.error((error as Error).message || "提交全场异常数刷新任务失败");
+      message.error((error as Error).message || t("提交全场异常数刷新任务失败"));
     }
   }, [handleRefreshTaskSubmitResult, isRefreshTaskActive, refreshAllMutation]);
 
   const handleRefreshSite = useCallback(
     async (record: SiteAgentBindingRecord) => {
       if (isRefreshTaskActive) {
-        message.warning("当前已有异常数刷新任务执行中，请等待完成后再提交");
+        message.warning(t("当前已有异常数刷新任务执行中，请等待完成后再提交"));
         return;
       }
 
@@ -324,10 +331,13 @@ export default function MiningAgentSettingPage() {
         const res = (await refreshSiteMutation.mutateAsync(record.siteCode)) as {
           data?: SiteDailyAnomalyRefreshSubmitData;
         };
-        handleRefreshTaskSubmitResult(res.data, `场地 ${record.siteCode} 异常数刷新任务已提交`);
+        handleRefreshTaskSubmitResult(
+          res.data,
+          t("场地 {{siteCode}} 异常数刷新任务已提交", { siteCode: record.siteCode }),
+        );
       } catch (error) {
         setSubmittingRefreshSiteCode(null);
-        message.error((error as Error).message || "提交场地异常数刷新任务失败");
+        message.error((error as Error).message || t("提交场地异常数刷新任务失败"));
       }
     },
     [handleRefreshTaskSubmitResult, isRefreshTaskActive, refreshSiteMutation],
@@ -354,15 +364,15 @@ export default function MiningAgentSettingPage() {
 
   const handleCopyIpRanges = useCallback(async (record: SiteAgentBindingRecord) => {
     if (!record.ipRanges.length) {
-      message.info("当前没有可复制的 IP 范围");
+      message.info(t("当前没有可复制的 IP 范围"));
       return;
     }
 
     try {
       await navigator.clipboard.writeText(record.ipRanges.join("\n"));
-      message.success(`已复制 ${record.agentName} 的 IP 范围`);
+      message.success(t("已复制 {{agentName}} 的 IP 范围", { agentName: record.agentName }));
     } catch (error) {
-      message.error((error as Error).message || "复制 IP 范围失败");
+      message.error((error as Error).message || t("复制 IP 范围失败"));
     }
   }, []);
 
@@ -373,10 +383,10 @@ export default function MiningAgentSettingPage() {
 
       if (editingRecord) {
         await updateMutation.mutateAsync({ agentName: editingRecord.agentName, payload });
-        message.success("更新成功");
+        message.success(t("更新成功"));
       } else {
         await createMutation.mutateAsync(payload);
-        message.success("创建成功");
+        message.success(t("创建成功"));
       }
 
       setIsModalOpen(false);
@@ -386,21 +396,21 @@ export default function MiningAgentSettingPage() {
       if ((error as { errorFields?: unknown[] })?.errorFields) {
         return;
       }
-      message.error((error as Error).message || "保存失败");
+      message.error((error as Error).message || t("保存失败"));
     }
   }, [createMutation, editingRecord, modalForm, updateMutation]);
 
   const columns = useMemo<ColumnsType<SiteAgentBindingRecord>>(
     () => [
       {
-        title: "序号",
+        title: t("序号"),
         key: "index",
         width: 70,
         render: (_: unknown, __: SiteAgentBindingRecord, index: number) =>
           (listData.page - 1) * listData.pageSize + index + 1,
       },
       {
-        title: "场地名称",
+        title: t("场地名称"),
         dataIndex: "siteName",
         key: "siteName",
         width: 220,
@@ -412,7 +422,7 @@ export default function MiningAgentSettingPage() {
         ),
       },
       {
-        title: "代理信息",
+        title: t("代理信息"),
         key: "agentInfo",
         width: 240,
         render: (_: unknown, record: SiteAgentBindingRecord) => (
@@ -423,7 +433,7 @@ export default function MiningAgentSettingPage() {
         ),
       },
       {
-        title: "矿工号白名单",
+        title: t("矿工号白名单"),
         dataIndex: "minerCodeWhitelist",
         key: "minerCodeWhitelist",
         width: 240,
@@ -431,7 +441,7 @@ export default function MiningAgentSettingPage() {
           renderBlacklistTags(value, "!border-emerald-200 !bg-emerald-50 !text-emerald-700"),
       },
       {
-        title: "矿机编号黑名单",
+        title: t("矿机编号黑名单"),
         dataIndex: "minerCodeBlacklist",
         key: "minerCodeBlacklist",
         width: 240,
@@ -439,7 +449,7 @@ export default function MiningAgentSettingPage() {
           renderBlacklistTags(value, "!border-rose-200 !bg-rose-50 !text-rose-700"),
       },
       {
-        title: "机型黑名单",
+        title: t("机型黑名单"),
         dataIndex: "machineTypeBlacklist",
         key: "machineTypeBlacklist",
         width: 220,
@@ -447,7 +457,7 @@ export default function MiningAgentSettingPage() {
           renderBlacklistTags(value, "!border-amber-200 !bg-amber-50 !text-amber-700"),
       },
       {
-        title: "IP 范围",
+        title: t("IP 范围"),
         dataIndex: "ipRanges",
         key: "ipRanges",
         width: 260,
@@ -458,7 +468,7 @@ export default function MiningAgentSettingPage() {
 
           return (
             <div className="space-y-2">
-              <div className="text-xs text-gray-500">共 {value.length} 段</div>
+              <div className="text-xs text-gray-500">{t("共 {{length}} 段", { length: value.length })}</div>
               <Space size="small" wrap>
                 <Button
                   size="small"
@@ -470,7 +480,7 @@ export default function MiningAgentSettingPage() {
                     })
                   }
                 >
-                  查看
+                  {t("查看")}
                 </Button>
                 <Button
                   size="small"
@@ -478,7 +488,7 @@ export default function MiningAgentSettingPage() {
                   className="!border-emerald-200 !bg-emerald-50 !text-emerald-600 hover:!border-emerald-300 hover:!bg-emerald-100 hover:!text-emerald-700"
                   onClick={() => void handleCopyIpRanges(record)}
                 >
-                  复制
+                  {t("复制")}
                 </Button>
               </Space>
             </div>
@@ -486,21 +496,21 @@ export default function MiningAgentSettingPage() {
         },
       },
       {
-        title: "资产场地ID",
+        title: t("资产场地ID"),
         dataIndex: "assetSiteId",
         key: "assetSiteId",
         width: 120,
         render: (value: number | undefined) => value ?? "-",
       },
       {
-        title: "更新时间",
+        title: t("更新时间"),
         dataIndex: "updatedAt",
         key: "updatedAt",
         width: 180,
         render: (value: string | undefined) => formatDateTime(value),
       },
       {
-        title: "操作",
+        title: t("操作"),
         key: "action",
         fixed: "right",
         width: 260,
@@ -520,7 +530,7 @@ export default function MiningAgentSettingPage() {
                 loading={siteRefreshLoading}
                 disabled={refreshDisabled}
               >
-                刷新异常数
+                {t("刷新异常数")}
               </Button>
               <Button
                 size="small"
@@ -528,12 +538,12 @@ export default function MiningAgentSettingPage() {
                 className="!border-sky-200 !bg-sky-50 !text-sky-700 hover:!border-sky-300 hover:!bg-sky-100 hover:!text-sky-800"
                 onClick={() => handleEdit(record)}
               >
-                编辑
+                {t("编辑")}
               </Button>
               <Popconfirm
-                title="确认删除该代理设置？"
-                okText="删除"
-                cancelText="取消"
+                title={t("确认删除该代理设置？")}
+                okText={t("删除")}
+                cancelText={t("取消")}
                 onConfirm={() => handleDelete(record)}
               >
                 <Button
@@ -543,7 +553,7 @@ export default function MiningAgentSettingPage() {
                   className="!border-rose-200 !bg-rose-50 !text-rose-600 hover:!border-rose-300 hover:!bg-rose-100 hover:!text-rose-700"
                   loading={deleteMutation.isPending}
                 >
-                  删除
+                  {t("删除")}
                 </Button>
               </Popconfirm>
             </Space>
@@ -572,8 +582,8 @@ export default function MiningAgentSettingPage() {
     total: listData.total,
     showSizeChanger: true,
     pageSizeOptions: [10, 20, 50, 100, 200],
-    showTotal: (total) => `共 ${total} 条记录`,
-    locale: { items_per_page: "条/页" },
+    showTotal: (total) => t("共 {{total}} 条记录", { total: total }),
+    locale: { items_per_page: t("条/页") },
     onChange: (page, pageSize) => {
       setQuery((prev) => ({
         ...prev,
@@ -591,18 +601,18 @@ export default function MiningAgentSettingPage() {
         image={Empty.PRESENTED_IMAGE_SIMPLE}
         description={
           query.siteCode || query.siteName || query.agentCode || query.agentName
-            ? "暂无匹配数据"
-            : "暂无代理绑定数据"
+            ? t("暂无匹配数据")
+            : t("暂无代理绑定数据")
         }
       />
     ),
   };
 
   const refreshAllButtonText = activeRefreshAllSite
-    ? `全场异常数${getRefreshTaskStatusText(currentRefreshTask)}`
+    ? t("全场异常数{{value}}", { value: getRefreshTaskStatusText(currentRefreshTask) })
     : isRefreshTaskActive
-      ? "已有场地任务执行中"
-      : "刷新全场异常数";
+      ? t("已有场地任务执行中")
+      : t("刷新全场异常数");
 
   return (
     <div className="min-h-full bg-[#f5f5f5] -m-4 p-4">
@@ -610,8 +620,10 @@ export default function MiningAgentSettingPage() {
         <div className="bg-white">
           <div className="px-5 pt-4 pb-3 border-b border-gray-200 bg-white flex flex-wrap items-center justify-between gap-3">
             <div>
-              <h2 className="text-lg font-semibold text-gray-800 m-0">矿机代理设置</h2>
-              <div className="text-xs text-gray-500 mt-1">当前场地类型：{poolType || "-"}</div>
+              <h2 className="text-lg font-semibold text-gray-800 m-0">{t("矿机代理设置")}</h2>
+              <div className="text-xs text-gray-500 mt-1">
+                {t("当前场地类型：{{value}}", { value: poolType || "-" })}
+              </div>
             </div>
             <Space>
               <Button
@@ -622,7 +634,7 @@ export default function MiningAgentSettingPage() {
                 {refreshAllButtonText}
               </Button>
               <Button type="primary" icon={<PlusOutlined />} onClick={handleAdd}>
-                新增代理设置
+                {t("新增代理设置")}
               </Button>
             </Space>
           </div>
@@ -638,34 +650,56 @@ export default function MiningAgentSettingPage() {
                   setRefreshTaskSnapshot(null);
                   notifyTaskStatusRef.current = "";
                 }}
-                message={`${currentRefreshTask.scopeType === "all_site" ? "全场" : currentRefreshTask.siteCode || "场地"}异常数刷新${getRefreshTaskStatusText(currentRefreshTask)}`}
+                message={t("{{value}}异常数刷新{{value2}}", {
+                  value:
+                    currentRefreshTask.scopeType === "all_site"
+                      ? t("全场")
+                      : currentRefreshTask.siteCode || t("场地"),
+                  value2: getRefreshTaskStatusText(currentRefreshTask),
+                })}
                 description={
                   <div className="text-xs leading-6">
                     <div>
-                      任务 ID：<span className="font-mono">{currentRefreshTask.taskId}</span>
+                      {t("任务 ID：")}
+                      <span className="font-mono">{currentRefreshTask.taskId}</span>
                     </div>
                     <div>
-                      时间窗口：{currentRefreshTask.dateFrom} 至 {currentRefreshTask.dateTo}，共{" "}
-                      {currentRefreshTask.windowDays} 天
+                      {t("时间窗口：{{dateFrom}} 至 {{dateTo}}，共{{value}} {{windowDays}} 天", {
+                        dateFrom: currentRefreshTask.dateFrom,
+                        dateTo: currentRefreshTask.dateTo,
+                        value: " ",
+                        windowDays: currentRefreshTask.windowDays,
+                      })}
                     </div>
                     <div>
-                      场地数：{currentRefreshTask.siteCount}，删除：{currentRefreshTask.deletedRows}，写入：
-                      {currentRefreshTask.upsertedRows}
+                      {t("场地数：{{siteCount}}，删除：{{deletedRows}}，写入： {{upsertedRows}}", {
+                        siteCount: currentRefreshTask.siteCount,
+                        deletedRows: currentRefreshTask.deletedRows,
+                        upsertedRows: currentRefreshTask.upsertedRows,
+                      })}
                     </div>
                     <div>
-                      创建时间：{formatDateTime(currentRefreshTask.createdAt)}，更新时间：
-                      {formatDateTime(currentRefreshTask.updatedAt)}
+                      {t("创建时间：{{value}}，更新时间： {{value2}}", {
+                        value: formatDateTime(currentRefreshTask.createdAt),
+                        value2: formatDateTime(currentRefreshTask.updatedAt),
+                      })}
                     </div>
                     {currentRefreshTask.startedAt ? (
                       <div>
-                        开始时间：{formatDateTime(currentRefreshTask.startedAt)}
-                        {currentRefreshTask.finishedAt
-                          ? `，完成时间：${formatDateTime(currentRefreshTask.finishedAt)}`
-                          : ""}
+                        {t("开始时间：{{value}} {{value2}}", {
+                          value: formatDateTime(currentRefreshTask.startedAt),
+                          value2: currentRefreshTask.finishedAt
+                            ? t("，完成时间：{{value}}", {
+                                value: formatDateTime(currentRefreshTask.finishedAt),
+                              })
+                            : "",
+                        })}
                       </div>
                     ) : null}
                     {currentRefreshTask.errorMessage ? (
-                      <div className="text-red-500">错误信息：{currentRefreshTask.errorMessage}</div>
+                      <div className="text-red-500">
+                        {t("错误信息：{{errorMessage}}", { errorMessage: currentRefreshTask.errorMessage })}
+                      </div>
                     ) : null}
                   </div>
                 }
@@ -685,24 +719,24 @@ export default function MiningAgentSettingPage() {
                 wrapperCol={{ flex: "1 1 0" }}
                 className="[&_.ant-form-item]:!mb-0 [&_.ant-form-item-label>label]:!font-semibold [&_.ant-form-item-label>label]:!text-gray-800"
               >
-                <div className="mb-3 text-xs text-gray-500">以下筛选项均支持模糊搜索</div>
+                <div className="mb-3 text-xs text-gray-500">{t("以下筛选项均支持模糊搜索")}</div>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-x-6 gap-y-4 items-end">
-                  <Form.Item name="siteCode" label="场地编码" className="!mb-0 min-w-0">
-                    <Input allowClear placeholder="请输入场地编码关键词" />
+                  <Form.Item name="siteCode" label={t("场地编码")} className="!mb-0 min-w-0">
+                    <Input allowClear placeholder={t("请输入场地编码关键词")} />
                   </Form.Item>
-                  <Form.Item name="siteName" label="场地名称" className="!mb-0 min-w-0">
-                    <Input allowClear placeholder="请输入场地名称关键词" />
+                  <Form.Item name="siteName" label={t("场地名称")} className="!mb-0 min-w-0">
+                    <Input allowClear placeholder={t("请输入场地名称关键词")} />
                   </Form.Item>
-                  <Form.Item name="agentCode" label="代理编码" className="!mb-0 min-w-0">
-                    <Input allowClear placeholder="请输入代理编码关键词" />
+                  <Form.Item name="agentCode" label={t("代理编码")} className="!mb-0 min-w-0">
+                    <Input allowClear placeholder={t("请输入代理编码关键词")} />
                   </Form.Item>
-                  <Form.Item name="agentName" label="代理名称" className="!mb-0 min-w-0">
-                    <Input allowClear placeholder="请输入代理名称关键词" />
+                  <Form.Item name="agentName" label={t("代理名称")} className="!mb-0 min-w-0">
+                    <Input allowClear placeholder={t("请输入代理名称关键词")} />
                   </Form.Item>
                   <div className="flex min-w-0 justify-end gap-2 pb-0.5 md:col-span-2 lg:col-span-4">
-                    <Button onClick={handleReset}>重置</Button>
+                    <Button onClick={handleReset}>{t("重置")}</Button>
                     <Button type="primary" htmlType="submit">
-                      搜索
+                      {t("搜索")}
                     </Button>
                   </div>
                 </div>
@@ -733,7 +767,7 @@ export default function MiningAgentSettingPage() {
                 className="m-4"
                 type="error"
                 showIcon
-                message={(listQuery.error as Error)?.message || "矿机代理设置列表加载失败"}
+                message={(listQuery.error as Error)?.message || t("矿机代理设置列表加载失败")}
               />
             ) : null}
 
@@ -755,7 +789,7 @@ export default function MiningAgentSettingPage() {
       </div>
 
       <Modal
-        title={editingRecord ? "编辑代理设置" : "新增代理设置"}
+        title={editingRecord ? t("编辑代理设置") : t("新增代理设置")}
         open={isModalOpen}
         onOk={() => void handleSubmit()}
         onCancel={() => {
@@ -770,57 +804,61 @@ export default function MiningAgentSettingPage() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <Form.Item
               name="siteCode"
-              label="场地编码"
-              rules={[{ required: true, message: "请输入场地编码" }]}
+              label={t("场地编码")}
+              rules={[{ required: true, message: t("请输入场地编码") }]}
               className="!mb-3"
             >
-              <Input placeholder="请输入场地编码" />
+              <Input placeholder={t("请输入场地编码")} />
             </Form.Item>
             <Form.Item
               name="siteName"
-              label="场地名称"
-              rules={[{ required: true, message: "请输入场地名称" }]}
+              label={t("场地名称")}
+              rules={[{ required: true, message: t("请输入场地名称") }]}
               className="!mb-3"
             >
-              <Input placeholder="请输入场地名称" />
+              <Input placeholder={t("请输入场地名称")} />
             </Form.Item>
-            <Form.Item name="agentCode" label="代理编码" className="!mb-3">
-              <Input placeholder="请输入代理编码" />
+            <Form.Item name="agentCode" label={t("代理编码")} className="!mb-3">
+              <Input placeholder={t("请输入代理编码")} />
             </Form.Item>
             <Form.Item
               name="agentName"
-              label="代理名称"
-              rules={[{ required: true, message: "请输入代理名称" }]}
+              label={t("代理名称")}
+              rules={[{ required: true, message: t("请输入代理名称") }]}
               className="!mb-3"
             >
-              <Input placeholder="请输入代理名称" />
+              <Input placeholder={t("请输入代理名称")} />
             </Form.Item>
           </div>
 
-          <Form.Item name="minerCodeBlacklist" label="矿机编号黑名单" className="!mb-3">
-            <Input.TextArea rows={4} placeholder="每行或逗号分隔一个矿机编号" />
+          <Form.Item name="minerCodeBlacklist" label={t("矿机编号黑名单")} className="!mb-3">
+            <Input.TextArea rows={4} placeholder={t("每行或逗号分隔一个矿机编号")} />
           </Form.Item>
 
-          <Form.Item name="minerCodeWhitelist" label="矿工号白名单" className="!mb-3">
-            <Input.TextArea rows={4} placeholder="每行或逗号分隔一个矿工号" />
+          <Form.Item name="minerCodeWhitelist" label={t("矿工号白名单")} className="!mb-3">
+            <Input.TextArea rows={4} placeholder={t("每行或逗号分隔一个矿工号")} />
           </Form.Item>
 
-          <Form.Item name="machineTypeBlacklist" label="机型黑名单" className="!mb-0">
-            <Input.TextArea rows={4} placeholder="每行或逗号分隔一个机型" />
+          <Form.Item name="machineTypeBlacklist" label={t("机型黑名单")} className="!mb-0">
+            <Input.TextArea rows={4} placeholder={t("每行或逗号分隔一个机型")} />
           </Form.Item>
 
-          <Form.Item name="ipRanges" label="IP 范围" className="!mb-0">
-            <Input.TextArea rows={4} placeholder="每行或逗号分隔一个 IP 范围" />
+          <Form.Item name="ipRanges" label={t("IP 范围")} className="!mb-0">
+            <Input.TextArea rows={4} placeholder={t("每行或逗号分隔一个 IP 范围")} />
           </Form.Item>
 
-          <Form.Item name="assetSiteId" label="资产场地ID" className="!mb-0">
-            <InputNumber className="!w-full" min={0} precision={0} placeholder="请输入资产场地ID" />
+          <Form.Item name="assetSiteId" label={t("资产场地ID")} className="!mb-0">
+            <InputNumber className="!w-full" min={0} precision={0} placeholder={t("请输入资产场地ID")} />
           </Form.Item>
         </Form>
       </Modal>
 
       <Modal
-        title={ipRangesPreview ? `${ipRangesPreview.agentName} 的 IP 范围` : "IP 范围"}
+        title={
+          ipRangesPreview
+            ? t("{{agentName}} 的 IP 范围", { agentName: ipRangesPreview.agentName })
+            : t("IP 范围")
+        }
         open={Boolean(ipRangesPreview)}
         footer={[
           <Button
@@ -831,17 +869,17 @@ export default function MiningAgentSettingPage() {
               void navigator.clipboard
                 .writeText(ipRangesPreview.items.join("\n"))
                 .then(() => {
-                  message.success("IP 范围已复制");
+                  message.success(t("IP 范围已复制"));
                 })
                 .catch((error: Error) => {
-                  message.error(error.message || "复制 IP 范围失败");
+                  message.error(error.message || t("复制 IP 范围失败"));
                 });
             }}
           >
-            复制
+            {t("复制")}
           </Button>,
           <Button key="close" type="primary" onClick={() => setIpRangesPreview(null)}>
-            关闭
+            {t("关闭")}
           </Button>,
         ]}
         onCancel={() => setIpRangesPreview(null)}

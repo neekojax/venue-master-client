@@ -4,6 +4,7 @@ import { useLocation } from "react-router-dom";
 import { MenuFoldOutlined, MenuUnfoldOutlined } from "@ant-design/icons";
 import { Button, Flex, Layout } from "antd";
 import { AppHelmet } from "@/components/helmet";
+import LanguageSwitch from "@/components/language-switch";
 import Breadcrumb from "./components/bread-crumb";
 import Content from "./components/main-content";
 import NetworkEfficiencyCard from "./components/NetworkEfficiencyCard.tsx";
@@ -14,6 +15,7 @@ import { setCollapsed, useSelector, useSettingsStore } from "@/stores";
 import { setPoolType } from "@/stores"; // 引入自定义选择器
 
 import PoolTypeSelect from "@/layouts/components/pool-type-select.tsx";
+import { t } from "@/locales";
 import { checkPermission } from "@/service/api/auth";
 
 export default function MainLayout() {
@@ -214,13 +216,14 @@ export default function MainLayout() {
               {localStorage.getItem("user_access_level") != "special" && (
                 <>
                   <NetworkEfficiencyCard
-                    title="昨日全网产出效率："
+                    title={t("昨日全网产出效率：")}
                     value={suanlilv?.BTCNetworkPerEPower}
                     unit="BTC/EH"
                   />
                   <PoolTypeSelect />
                 </>
               )}
+              <LanguageSwitch />
               <UserAvatar />
             </Flex>
           </Layout.Header>

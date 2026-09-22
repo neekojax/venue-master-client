@@ -13,6 +13,7 @@ import { exportHashRateToExcel } from "@/utils/excel";
 
 import "./VenueTabs.css";
 
+import { t } from "@/locales";
 import ResizableHeaderCell from "@/pages/custody-statistics/statistics/components/ResizableHeaderCell";
 import { useMiningHashRateList } from "@/pages/mining/hook.ts";
 
@@ -22,9 +23,11 @@ export default function MiningHashRatePage() {
   useAuthRedirect();
 
   const { poolType } = useSettingsStore(useSelector(["poolType"]));
-  const [poolCategory, setPoolCategoryType] = useState<string>(
-    localStorage.getItem(`${StoragePrefix}_poolCategory`) || "主矿池",
-  );
+  const [poolCategory, setPoolCategoryType] = useState<string>(() => {
+    // 矿池类别是与后端约定的数据值，必须保持中文，不随界面语言切换
+    const saved = localStorage.getItem(`${StoragePrefix}_poolCategory`);
+    return saved === "主矿池" || saved === "备用矿池" ? saved : "主矿池";
+  });
 
   const { data: hashData, isLoading: isLoadingPools } = useMiningHashRateList(poolType, poolCategory);
 
@@ -127,7 +130,7 @@ export default function MiningHashRatePage() {
         },
       },
       {
-        title: "场地",
+        title: t("场地"),
         dataIndex: "venue_name",
         key: "venue_name",
         width: venueNameColumnWidth,
@@ -189,7 +192,7 @@ export default function MiningHashRatePage() {
                 {/* 特殊场地标记 */}
                 {isSpecialVenue && (
                   <Tag color="red" style={{ marginLeft: 4 }}>
-                    补充
+                    {t("补充")}
                   </Tag>
                 )}
               </div>
@@ -198,7 +201,7 @@ export default function MiningHashRatePage() {
         },
       },
       {
-        title: "子账户",
+        title: t("子账户"),
         dataIndex: "pool_name",
         key: "pool_name",
         responsive: ["xs", "sm", "md"], // 适配所有屏幕
@@ -226,7 +229,7 @@ export default function MiningHashRatePage() {
         ),
       },
       {
-        title: "实时算力",
+        title: t("实时算力"),
         dataIndex: "current_hash",
         key: "current_hash",
         render: (text: any) => {
@@ -240,7 +243,7 @@ export default function MiningHashRatePage() {
         },
       },
       {
-        title: "理论算力",
+        title: t("理论算力"),
         dataIndex: "theoretical",
         key: "theoretical",
         render: (text: any) => {
@@ -286,7 +289,7 @@ export default function MiningHashRatePage() {
       //   // ],
       // },
       {
-        title: "在线/离线",
+        title: t("在线/离线"),
         key: "status",
         render: (_text: any, record: any) => (
           <span>
@@ -301,7 +304,7 @@ export default function MiningHashRatePage() {
       },
       {
         title: () => (
-          <Tooltip title="昨日算力达成率">
+          <Tooltip title={t("昨日算力达成率")}>
             <span
               style={{
                 display: "inline-block",
@@ -311,7 +314,7 @@ export default function MiningHashRatePage() {
                 whiteSpace: "nowrap",
               }}
             >
-              达成率
+              {t("达成率")}
             </span>
           </Tooltip>
         ),
@@ -330,7 +333,7 @@ export default function MiningHashRatePage() {
         },
       },
       {
-        title: "刷新时间",
+        title: t("刷新时间"),
         dataIndex: "update_time",
         key: "update_time",
         render: (text: any) => {
@@ -342,7 +345,7 @@ export default function MiningHashRatePage() {
         },
       },
       {
-        title: "链接",
+        title: t("链接"),
         dataIndex: "link",
         key: "link",
         width: 50,
@@ -361,18 +364,18 @@ export default function MiningHashRatePage() {
         ),
       },
       {
-        title: "历史状态",
+        title: t("历史状态"),
         key: "recentStatus",
         width: 90,
         render: (_text: any, record: { pool_id?: any; pool_name?: any; venue_name?: any }) => (
-          <Tooltip title="查看历史状态">
+          <Tooltip title={t("查看历史状态")}>
             <Link
               to={ROUTE_PATHS.recentSubAccountStatus(poolType, record.pool_id)}
               state={{ poolName: record.pool_name, venueName: record.venue_name }}
               style={{ color: "#2563eb", display: "inline-flex", alignItems: "center" }}
             >
               <LineChartOutlined style={{ marginRight: 4 }} />
-              历史
+              {t("历史")}
             </Link>
           </Tooltip>
         ),
@@ -387,7 +390,7 @@ export default function MiningHashRatePage() {
 
   // Loading 状态
   if (isLoadingPools) {
-    return <Spin tip="加载中..." />;
+    return <Spin tip={t("加载中...")} />;
   }
 
   const onDownload = () => {
@@ -432,7 +435,7 @@ export default function MiningHashRatePage() {
                 checked={showCollectionOnly}
                 onChange={(checked) => setShowCollectionOnly(checked)}
               />{" "}
-              我的自选
+              {t("我的自选")}
             </span>
 
             <Radio.Group
@@ -442,10 +445,10 @@ export default function MiningHashRatePage() {
               style={{ marginLeft: "10px", fontSize: "13px" }}
             >
               <Radio.Button value="主矿池" style={{ fontSize: "12px" }}>
-                主矿池
+                {t("主矿池")}
               </Radio.Button>
               <Radio.Button value="备用矿池" style={{ fontSize: "12px" }}>
-                备用矿池
+                {t("备用矿池")}
               </Radio.Button>
             </Radio.Group>
           </Col>
@@ -453,7 +456,7 @@ export default function MiningHashRatePage() {
           <Col xs={24} sm={24} md={12} style={{ textAlign: "right" }}>
             <Input
               prefix={<SearchOutlined />}
-              placeholder="搜索"
+              placeholder={t("搜索")}
               size="middle"
               value={searchTerm}
               onChange={handleSearch}
@@ -461,7 +464,7 @@ export default function MiningHashRatePage() {
             />
 
             <Button size="middle" icon={<ExportOutlined />} onClick={onDownload}>
-              导出
+              {t("导出")}
             </Button>
           </Col>
         </Row>
@@ -476,7 +479,7 @@ export default function MiningHashRatePage() {
               showSizeChanger: true,
               pageSizeOptions: ["10", "20", "30", "50"],
               defaultPageSize: 10,
-              showTotal: (total) => `共 ${total} 条`,
+              showTotal: (total) => t("共 {{total}} 条", { total: total }),
               total: filteredData?.length,
               onChange: () => {
                 const tableBody = document.querySelector(".ant-table-body");

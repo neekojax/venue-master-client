@@ -3,6 +3,7 @@ import * as echarts from "echarts";
 import { BarChart2, Inbox } from "lucide-react";
 import { ReactEcharts } from "@/components/react-echarts";
 
+import { t as i18nT } from "@/locales";
 import { fetchLastestHashRateEfficiency } from "@/pages/mining/api.tsx";
 
 // @ts-ignore
@@ -131,7 +132,7 @@ const MiningEfficiencyCard = ({ poolType }) => {
           <div className="p-1.5 bg-green-50 rounded-lg ring-1 ring-green-100/50">
             <BarChart2 size={18} className="text-green-600" />
           </div>
-          <h2 className="text-lg font-bold text-slate-800 tracking-tight">算力达成率</h2>
+          <h2 className="text-lg font-bold text-slate-800 tracking-tight">{i18nT("算力达成率")}</h2>
         </div>
         <div className="flex bg-slate-50 rounded-lg p-1 border border-slate-100">
           {["7", "30", "90"].map((t) => (
@@ -144,7 +145,7 @@ const MiningEfficiencyCard = ({ poolType }) => {
                   : "text-slate-500 hover:text-slate-800 hover:bg-slate-200/50"
               }`}
             >
-              {t}天
+              {i18nT("{{t}}天", { t: t })}
             </button>
           ))}
         </div>
@@ -156,7 +157,7 @@ const MiningEfficiencyCard = ({ poolType }) => {
             <div className="p-4 bg-slate-50 rounded-full mb-3">
               <Inbox size={24} />
             </div>
-            <span className="text-sm">暂无数据</span>
+            <span className="text-sm">{i18nT("暂无数据")}</span>
           </div>
         ) : (
           <ReactEcharts option={getOption()} style={{ height: "100%", width: "100%" }} />

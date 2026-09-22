@@ -4,6 +4,8 @@ import Cookies from "js-cookie";
 import eventBus from "@/components/event-bus";
 import { COOKIE_DOMAIN, ROUTE_PATHS } from "@/constants/common.ts";
 
+import { t } from "@/locales";
+
 // 存储当前的请求队列
 let isRefreshing = false;
 let subscribers: Array<(token: string) => void> = [];
@@ -34,7 +36,7 @@ const refreshToken = async () => {
     return response.data; // 返回新的 token 数据
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
   } catch (error) {
-    throw new Error("刷新 token 失败");
+    throw new Error(t("刷新 token 失败"));
   }
 };
 
@@ -86,7 +88,7 @@ axiosInstance.interceptors.response.use(
         } catch (error) {
           isRefreshing = false;
           eventBus.emit("redirect", ROUTE_PATHS.login); // Emit the redirect event
-          return Promise.reject(new Error("刷新 token 失败，用户请重新登录。"));
+          return Promise.reject(new Error(t("刷新 token 失败，用户请重新登录。")));
         }
       }
 
@@ -119,7 +121,7 @@ axiosInstance.interceptors.response.use(
 
 // 提取错误信息
 const getErrorMessage = (response: any) => {
-  let errorMessage = "网络响应不正常";
+  let errorMessage = t("网络响应不正常");
   try {
     const errorData = response.data;
     if (errorData && errorData.error) {

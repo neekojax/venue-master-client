@@ -34,25 +34,26 @@ import {
 import { useSelector, useSettingsStore } from "@/stores"; // 根据实际路径调整
 import { formatThousands } from "@/utils/format";
 
+import { t } from "@/locales";
 import { fetchEventImpactDaily } from "@/pages/venue/api";
 
 const EVENT_CONFIG: Record<EventType, { label: string; color: string; bg: string; icon: React.ReactNode }> = {
-  limit: { label: "限电", color: "#f59e0b", bg: "bg-amber-50", icon: <Zap size={14} /> }, // Amber
-  high_temperature: { label: "高温", color: "#ef4444", bg: "bg-red-50", icon: <Thermometer size={14} /> }, // Red
-  power: { label: "电力", color: "#8b5cf6", bg: "bg-purple-50", icon: <AlertTriangle size={14} /> }, // Purple
-  device_failure: { label: "设备故障", color: "#6b7280", bg: "bg-gray-50", icon: <Server size={14} /> }, // Gray
-  network: { label: "网络", color: "#3b82f6", bg: "bg-blue-50", icon: <Wifi size={14} /> }, // Blue
+  limit: { label: t("限电"), color: "#f59e0b", bg: "bg-amber-50", icon: <Zap size={14} /> }, // Amber
+  high_temperature: { label: t("高温"), color: "#ef4444", bg: "bg-red-50", icon: <Thermometer size={14} /> }, // Red
+  power: { label: t("电力"), color: "#8b5cf6", bg: "bg-purple-50", icon: <AlertTriangle size={14} /> }, // Purple
+  device_failure: { label: t("设备故障"), color: "#6b7280", bg: "bg-gray-50", icon: <Server size={14} /> }, // Gray
+  network: { label: t("网络"), color: "#3b82f6", bg: "bg-blue-50", icon: <Wifi size={14} /> }, // Blue
   extreme_weather: {
-    label: "极端天气",
+    label: t("极端天气"),
     color: "#10b981",
     bg: "bg-emerald-50",
     icon: <CloudRain size={14} />,
   }, // Emerald
   // low_power: { label: "低功耗", color: "#f4b359ff", bg: "bg-red-300", icon: <LayoutList size={14} /> }, // Red
-  maintenance: { label: "日常维护", color: "#f4b092ff", bg: "bg-red-100", icon: <LayoutList size={14} /> }, // Blue
+  maintenance: { label: t("日常维护"), color: "#f4b092ff", bg: "bg-red-100", icon: <LayoutList size={14} /> }, // Blue
   // other: { label: "其他", color: "#a2f492ff", bg: "bg-green-100", icon: <LayoutList size={14} /> }, // Blue
-  low_power: { label: "低功耗", color: "#a2f492ff", bg: "bg-green-50", icon: <Zap size={14} /> }, // Green
-  other: { label: "其他", color: "#cdcecdff", bg: "bg-gray-100", icon: <LayoutList size={14} /> }, // Green
+  low_power: { label: t("低功耗"), color: "#a2f492ff", bg: "bg-green-50", icon: <Zap size={14} /> }, // Green
+  other: { label: t("其他"), color: "#cdcecdff", bg: "bg-gray-100", icon: <LayoutList size={14} /> }, // Green
 };
 
 const EVENT_CONFIG_NAME = (type: string) => {
@@ -391,28 +392,28 @@ const AnalysisView: React.FC = () => {
 
   const handleExport = async () => {
     const workbook = new ExcelJS.Workbook();
-    const worksheet = workbook.addWorksheet("事件影响分析");
+    const worksheet = workbook.addWorksheet(t("事件影响分析"));
 
     const headers = [
-      "场地名称",
-      "限电影响算力 (T)",
-      "限电影响算力 (%)",
-      "高温影响算力 (T)",
-      "高温影响算力 (%)",
-      "电力影响算力 (T)",
-      "电力影响占比 (%)",
-      "设备故障影响算力 (T)",
-      "设备故障影响占比 (%)",
-      "网络影响算力 (T)",
-      "网络影响占比 (%)",
-      "极端天气影响算力 (T)",
-      "极端天气影响占比 (%)",
-      "日常维护影响算力 (T)",
-      "日常维护影响占比 (%)",
-      "低功耗影响算力 (T)",
-      "低功耗影响占比 (%)",
-      "其他影响算力 (T)",
-      "其他影响占比 (%)",
+      t("场地名称"),
+      t("限电影响算力 (T)"),
+      t("限电影响算力 (%)"),
+      t("高温影响算力 (T)"),
+      t("高温影响算力 (%)"),
+      t("电力影响算力 (T)"),
+      t("电力影响占比 (%)"),
+      t("设备故障影响算力 (T)"),
+      t("设备故障影响占比 (%)"),
+      t("网络影响算力 (T)"),
+      t("网络影响占比 (%)"),
+      t("极端天气影响算力 (T)"),
+      t("极端天气影响占比 (%)"),
+      t("日常维护影响算力 (T)"),
+      t("日常维护影响占比 (%)"),
+      t("低功耗影响算力 (T)"),
+      t("低功耗影响占比 (%)"),
+      t("其他影响算力 (T)"),
+      t("其他影响占比 (%)"),
     ];
 
     worksheet.addRow(headers);
@@ -442,7 +443,7 @@ const AnalysisView: React.FC = () => {
     data.forEach((row, rIdx) => {
       const newRow = worksheet.addRow(Object.values(row));
       // Apply conditional styling for limit_rate column
-      const limitRateColIndex = headers.indexOf("限电影响算力 (%)") + 1; // ExcelJS is 1-indexed
+      const limitRateColIndex = headers.indexOf(t("限电影响算力 (%)")) + 1; // ExcelJS is 1-indexed
       if (limitRateColIndex > 0) {
         const originalLimitRate = venues[rIdx].limit_rate;
         if (originalLimitRate > 1) {
@@ -457,7 +458,7 @@ const AnalysisView: React.FC = () => {
           };
         }
       }
-      const highTemperatureRateColIndex = headers.indexOf("高温影响算力 (%)") + 1; // ExcelJS is 1-indexed
+      const highTemperatureRateColIndex = headers.indexOf(t("高温影响算力 (%)")) + 1; // ExcelJS is 1-indexed
       if (highTemperatureRateColIndex > 0) {
         const originalHighTemperatureRate = venues[rIdx].high_temperature_rate;
         if (originalHighTemperatureRate > 1) {
@@ -472,7 +473,7 @@ const AnalysisView: React.FC = () => {
           };
         }
       }
-      const powerRateColIndex = headers.indexOf("电力影响占比 (%)") + 1; // ExcelJS is 1-indexed
+      const powerRateColIndex = headers.indexOf(t("电力影响占比 (%)")) + 1; // ExcelJS is 1-indexed
       if (powerRateColIndex > 0) {
         const originalPowerRate = venues[rIdx].power_rate;
         if (originalPowerRate > 1) {
@@ -487,7 +488,7 @@ const AnalysisView: React.FC = () => {
           };
         }
       }
-      const deviceFailureRateColIndex = headers.indexOf("设备故障影响占比 (%)") + 1; // ExcelJS is 1-indexed
+      const deviceFailureRateColIndex = headers.indexOf(t("设备故障影响占比 (%)")) + 1; // ExcelJS is 1-indexed
       if (deviceFailureRateColIndex > 0) {
         const originalDeviceFailureRate = venues[rIdx].device_failure_rate;
         if (originalDeviceFailureRate > 1) {
@@ -502,7 +503,7 @@ const AnalysisView: React.FC = () => {
           };
         }
       }
-      const networkRateColIndex = headers.indexOf("网络影响占比 (%)") + 1; // ExcelJS is 1-indexed
+      const networkRateColIndex = headers.indexOf(t("网络影响占比 (%)")) + 1; // ExcelJS is 1-indexed
       if (networkRateColIndex > 0) {
         const originalNetworkRate = venues[rIdx].network_rate;
         if (originalNetworkRate > 1) {
@@ -517,7 +518,7 @@ const AnalysisView: React.FC = () => {
           };
         }
       }
-      const extremeWeatherRateColIndex = headers.indexOf("极端天气影响占比 (%)") + 1; // ExcelJS is 1-indexed
+      const extremeWeatherRateColIndex = headers.indexOf(t("极端天气影响占比 (%)")) + 1; // ExcelJS is 1-indexed
       if (extremeWeatherRateColIndex > 0) {
         const originalExtremeWeatherRate = venues[rIdx].extreme_weather_rate;
         if (originalExtremeWeatherRate > 1) {
@@ -532,7 +533,7 @@ const AnalysisView: React.FC = () => {
           };
         }
       }
-      const maintenanceRateColIndex = headers.indexOf("日常维护影响占比 (%)") + 1; // ExcelJS is 1-indexed
+      const maintenanceRateColIndex = headers.indexOf(t("日常维护影响占比 (%)")) + 1; // ExcelJS is 1-indexed
       if (maintenanceRateColIndex > 0) {
         const originalMaintenanceRate = venues[rIdx].maintenance_rate;
         if (originalMaintenanceRate > 1) {
@@ -547,7 +548,7 @@ const AnalysisView: React.FC = () => {
           };
         }
       }
-      const lowPowerImpactRateColIndex = headers.indexOf("低功耗影响占比 (%)") + 1; // ExcelJS is 1-indexed
+      const lowPowerImpactRateColIndex = headers.indexOf(t("低功耗影响占比 (%)")) + 1; // ExcelJS is 1-indexed
       if (lowPowerImpactRateColIndex > 0) {
         const originalLowPowerImpactRate = venues[rIdx].low_power_rate;
         if (originalLowPowerImpactRate > 1) {
@@ -562,7 +563,7 @@ const AnalysisView: React.FC = () => {
           };
         }
       }
-      const otherImpactRateColIndex = headers.indexOf("其他影响占比 (%)") + 1; // ExcelJS is 1-indexed
+      const otherImpactRateColIndex = headers.indexOf(t("其他影响占比 (%)")) + 1; // ExcelJS is 1-indexed
       if (otherImpactRateColIndex > 0) {
         const originalOtherImpactRate = venues[rIdx].other_rate;
         if (originalOtherImpactRate > 1) {
@@ -591,7 +592,10 @@ const AnalysisView: React.FC = () => {
     });
 
     const buffer = await workbook.xlsx.writeBuffer();
-    const fileName = `事件影响_${viewMode}_${viewMode === "daily" ? selectedDate : selectedMonth}.xlsx`;
+    const fileName = t("事件影响_{{viewMode}}_{{value}}.xlsx", {
+      viewMode: viewMode,
+      value: viewMode === "daily" ? selectedDate : selectedMonth,
+    });
     saveAs(new Blob([buffer]), fileName);
   };
 
@@ -611,7 +615,10 @@ const AnalysisView: React.FC = () => {
         },
       });
       const link = document.createElement("a");
-      const fileName = `事件影响_图片_${viewMode}_${viewMode === "daily" ? selectedDate : selectedMonth}.png`;
+      const fileName = t("事件影响_图片_{{viewMode}}_{{value}}.png", {
+        viewMode: viewMode,
+        value: viewMode === "daily" ? selectedDate : selectedMonth,
+      });
       link.download = fileName;
       link.href = dataUrl;
       link.click();
@@ -621,7 +628,7 @@ const AnalysisView: React.FC = () => {
   };
 
   return (
-    <Spin spinning={loading} tip="加载中...">
+    <Spin spinning={loading} tip={t("加载中...")}>
       <div className="flex flex-col h-full bg-gray-50 overflow-hidden">
         {/* Header Controls for Analysis */}
         <div className="px-6 py-4 flex flex-col md:flex-row md:items-center justify-between shrink-0 z-20 gap-4 bg-white border-b border-gray-100">
@@ -631,13 +638,13 @@ const AnalysisView: React.FC = () => {
                 onClick={() => setViewMode("daily")}
                 className={`px-3 py-1.5 rounded-md transition-all ${viewMode === "daily" ? "bg-white text-blue-600 shadow-sm" : "text-gray-500 hover:text-gray-700"}`}
               >
-                日维度
+                {t("日维度")}
               </button>
               <button
                 onClick={() => setViewMode("monthly")}
                 className={`px-3 py-1.5 rounded-md transition-all ${viewMode === "monthly" ? "bg-white text-blue-600 shadow-sm" : "text-gray-500 hover:text-gray-700"}`}
               >
-                月维度
+                {t("月维度")}
               </button>
             </div>
 
@@ -669,14 +676,14 @@ const AnalysisView: React.FC = () => {
                 className="bg-white border border-gray-300 hover:bg-gray-50 text-gray-700 px-3 py-1.5 rounded-md text-sm font-medium flex items-center gap-2 transition-colors shadow-sm"
               >
                 <Download size={16} />
-                <span className="hidden sm:inline">导出表格</span>
+                <span className="hidden sm:inline">{t("导出表格")}</span>
               </button>
               <button
                 onClick={handleExportImage}
                 className="bg-white border border-gray-300 hover:bg-gray-50 text-gray-700 px-3 py-1.5 rounded-md text-sm font-medium flex items-center gap-2 transition-colors shadow-sm"
               >
                 <ImageDown size={16} />
-                <span className="hidden sm:inline">导出图片</span>
+                <span className="hidden sm:inline">{t("导出图片")}</span>
               </button>
             </div>
           </div>
@@ -686,14 +693,16 @@ const AnalysisView: React.FC = () => {
           {/* Top Metrics Cards */}
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
             <div className="bg-white p-4 rounded-xl border border-gray-200 shadow-sm">
-              <div className="text-xs text-gray-500 font-medium uppercase mb-1">筛选范围总损失 (PH/s)</div>
+              <div className="text-xs text-gray-500 font-medium uppercase mb-1">
+                {t("筛选范围总损失 (PH/s)")}
+              </div>
               <div className="text-2xl font-bold text-gray-900 font-mono">
                 {formatThousands(statistics.total_loss_hashrate)}
               </div>
             </div>
 
             <div className="bg-white p-4 rounded-xl border border-gray-200 shadow-sm">
-              <div className="text-xs text-gray-500 font-medium uppercase mb-1">主要影响类别</div>
+              <div className="text-xs text-gray-500 font-medium uppercase mb-1">{t("主要影响类别")}</div>
               <div className="text-lg font-bold text-gray-900 flex items-center gap-2">
                 <>
                   <div className="p-1 rounded bg-gray-100">
@@ -705,7 +714,7 @@ const AnalysisView: React.FC = () => {
             </div>
 
             <div className="bg-white p-4 rounded-xl border border-gray-200 shadow-sm">
-              <div className="text-xs text-gray-500 font-medium uppercase mb-1">受影响场地数</div>
+              <div className="text-xs text-gray-500 font-medium uppercase mb-1">{t("受影响场地数")}</div>
               <div className="text-2xl font-bold text-gray-900 font-mono">
                 {statistics.affected_venue_count}
                 {/* {pivotData.filter((p) => (Object.values(p.values) as number[]).some((v) => v > 0)).length} */}
@@ -713,7 +722,7 @@ const AnalysisView: React.FC = () => {
             </div>
 
             <div className="bg-white p-4 rounded-xl border border-gray-200 shadow-sm">
-              <div className="text-xs text-gray-500 font-medium uppercase mb-1">记录条数</div>
+              <div className="text-xs text-gray-500 font-medium uppercase mb-1">{t("记录条数")}</div>
               <div className="text-2xl font-bold text-gray-900 font-mono">
                 {formatThousands(statistics.record_count)}
               </div>
@@ -724,7 +733,7 @@ const AnalysisView: React.FC = () => {
             <div className="lg:col-span-2 bg-white p-5 rounded-xl border border-gray-200 shadow-sm flex flex-col">
               <h3 className="font-bold text-gray-800 mb-4 flex items-center gap-2">
                 <BarChart3 size={16} className="text-blue-500" />
-                {viewMode === "daily" ? "各场地影响对比" : "月度趋势分析"}
+                {viewMode === "daily" ? t("各场地影响对比") : t("月度趋势分析")}
               </h3>
               <div className="flex-1 min-h-0">
                 <StackedBarChart data={chartData} mode={viewMode} />
@@ -734,7 +743,7 @@ const AnalysisView: React.FC = () => {
             <div className="bg-white p-5 rounded-xl border border-gray-200 shadow-sm flex flex-col">
               <h3 className="font-bold text-gray-800 mb-4 flex items-center gap-2">
                 <PieChart size={16} className="text-purple-500" />
-                损失原因占比
+                {t("损失原因占比")}
               </h3>
               <div className="flex-1 min-h-0 flex items-center justify-center">
                 <SimplePieChart data={causeShare} />
@@ -749,20 +758,20 @@ const AnalysisView: React.FC = () => {
                 <div className="bg-blue-50 p-1.5 rounded text-blue-600">
                   <LayoutList size={16} />
                 </div>
-                <h3 className="font-bold text-gray-800">各场地事件影响分布表</h3>
+                <h3 className="font-bold text-gray-800">{t("各场地事件影响分布表")}</h3>
               </div>
               <div className="flex items-center gap-3">
-                <div className="text-xs text-gray-400">单位: 影响比例 (%)</div>
+                <div className="text-xs text-gray-400">{t("单位: 影响比例 (%)")}</div>
                 <div className="flex items-center gap-2 text-xs text-gray-600">
-                  <span>显示所有</span>
+                  <span>{t("显示所有")}</span>
                   <Switch size="small" checked={showAll} onChange={setShowAll} />
                 </div>
                 <div className="flex items-center gap-2 text-xs text-gray-600">
-                  <span>场地</span>
+                  <span>{t("场地")}</span>
                   <Select
                     mode="multiple"
                     allowClear
-                    placeholder="筛选场地（多选）"
+                    placeholder={t("筛选场地（多选）")}
                     options={tableSiteOptions}
                     value={selectedTableSites}
                     onChange={(vals) => setSelectedTableSites(vals as string[])}
@@ -782,8 +791,7 @@ const AnalysisView: React.FC = () => {
                       onClick={() => handleSort("siteName")}
                     >
                       <div className="flex items-center gap-1">
-                        场地名称
-                        {renderSortIcon("siteName")}
+                        {t("场地名称 {{value}}", { value: renderSortIcon("siteName") })}
                       </div>
                     </th>
 
@@ -826,7 +834,7 @@ const AnalysisView: React.FC = () => {
                   {data.length === 0 && (
                     <tr>
                       <td colSpan={EVENT_TYPES.length + 2} className="px-6 py-10 text-center text-gray-500">
-                        暂无数据
+                        {t("暂无数据")}
                       </td>
                     </tr>
                   )}
@@ -838,20 +846,21 @@ const AnalysisView: React.FC = () => {
             {sortedPivotData.length > 0 && (
               <div className="px-6 py-4 border-t border-gray-100 flex flex-col sm:flex-row items-center justify-between gap-4 bg-gray-50">
                 <div className="text-sm text-gray-500">
-                  显示{" "}
+                  {t("显示")}{" "}
                   <span className="font-medium text-gray-900">
                     {visibleData.length === 0 ? 0 : (currentPage - 1) * itemsPerPage + 1}
                   </span>{" "}
-                  到{" "}
+                  {t("到")}{" "}
                   <span className="font-medium text-gray-900">
                     {Math.min(currentPage * itemsPerPage, visibleData.length)}
                   </span>{" "}
-                  条，共 <span className="font-medium text-gray-900">{visibleData.length}</span> 条
+                  {t("条，共")} <span className="font-medium text-gray-900">{visibleData.length}</span>{" "}
+                  {t("条")}
                 </div>
 
                 <div className="flex items-center gap-4">
                   <div className="flex items-center gap-2">
-                    <span className="text-sm text-gray-500">每页:</span>
+                    <span className="text-sm text-gray-500">{t("每页:")}</span>
                     <select
                       value={itemsPerPage}
                       onChange={(e) => {
@@ -860,12 +869,12 @@ const AnalysisView: React.FC = () => {
                       }}
                       className="bg-white border border-gray-300 text-gray-700 text-sm rounded-md focus:ring-blue-500 focus:border-blue-500 p-1 pr-6 cursor-pointer shadow-sm outline-none"
                     >
-                      <option value={5}>5 条</option>
-                      <option value={10}>10 条</option>
-                      <option value={20}>20 条</option>
-                      <option value={50}>50 条</option>
-                      <option value={100}>100 条</option>
-                      <option value={200}>200 条</option>
+                      <option value={5}>{t("5 条")}</option>
+                      <option value={10}>{t("10 条")}</option>
+                      <option value={20}>{t("20 条")}</option>
+                      <option value={50}>{t("50 条")}</option>
+                      <option value={100}>{t("100 条")}</option>
+                      <option value={200}>{t("200 条")}</option>
                     </select>
                   </div>
 

@@ -4,18 +4,19 @@ import { Avatar, Dropdown, type MenuProps } from "antd";
 import Cookies from "js-cookie";
 import { ROUTE_PATHS } from "@/constants/common";
 
+import { t } from "@/locales";
 import { loginOut } from "@/pages/login/api.ts";
 
 export default function UserAvatar() {
   const navigate = useNavigate();
-  const username = localStorage.getItem("user") || localStorage.getItem("username") || "用户";
+  const username = localStorage.getItem("user") || localStorage.getItem("username") || t("用户");
   const hour = new Date().getHours();
   const greeting =
     hour < 12
-      ? { text: "上午好", textClass: "text-sky-600", bgClass: "bg-sky-50" }
+      ? { text: t("上午好"), textClass: "text-sky-600", bgClass: "bg-sky-50" }
       : hour < 18
-        ? { text: "下午好", textClass: "text-amber-600", bgClass: "bg-amber-50" }
-        : { text: "晚上好", textClass: "text-violet-600", bgClass: "bg-violet-50" };
+        ? { text: t("下午好"), textClass: "text-amber-600", bgClass: "bg-amber-50" }
+        : { text: t("晚上好"), textClass: "text-violet-600", bgClass: "bg-violet-50" };
 
   const items: MenuProps["items"] = [
     {
@@ -23,7 +24,7 @@ export default function UserAvatar() {
       label: (
         <div className={`min-w-0 rounded-xl px-3 py-2 ${greeting.bgClass}`}>
           <div className="flex items-center gap-2 min-w-0">
-            <span className={`text-[11px] font-medium ${greeting.textClass}`}>欢迎回来</span>
+            <span className={`text-[11px] font-medium ${greeting.textClass}`}>{t("欢迎回来")}</span>
             <span className="text-[11px] text-slate-300">·</span>
             <span className={`text-[11px] font-medium ${greeting.textClass}`}>{greeting.text}</span>
             <span className="text-sm font-semibold text-slate-800 truncate">{username}</span>
@@ -37,7 +38,7 @@ export default function UserAvatar() {
       key: "password",
       label: (
         <>
-          <EditFilled className="mr-2" /> 修改密码
+          <EditFilled className="mr-2" /> {t("修改密码")}
         </>
       ),
       onClick: () => {
@@ -51,7 +52,7 @@ export default function UserAvatar() {
       key: "logout",
       label: (
         <>
-          <LogoutOutlined className="mr-2" /> 退出登录
+          <LogoutOutlined className="mr-2" /> {t("退出登录")}
         </>
       ),
       onClick: () => {

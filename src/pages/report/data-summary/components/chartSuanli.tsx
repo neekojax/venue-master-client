@@ -7,6 +7,7 @@ import { GridComponent, TitleComponent, TooltipComponent } from "echarts/compone
 import * as echarts from "echarts/core";
 import { CanvasRenderer } from "echarts/renderers";
 
+import { t } from "@/locales";
 import { fetchHashRateTrend } from "@/pages/report/api.tsx";
 
 // 注册 ECharts 组件
@@ -64,7 +65,13 @@ const ChartSuanli: React.FC<{ loading: any; chartDate: string }> = ({ loading, c
         formatter: (params: any) => {
           // params 是数组，因为 trigger: "axis"
           return params
-            .map((item: any) => `${item.name || ""}<br>${item.marker}全网算力：${item.value.toFixed(2)} EH/s`)
+            .map((item: any) =>
+              t("{{value}}<br>{{marker}}全网算力：{{value2}} EH/s", {
+                value: item.name || "",
+                marker: item.marker,
+                value2: item.value.toFixed(2),
+              }),
+            )
             .join("<br/>");
         },
       },

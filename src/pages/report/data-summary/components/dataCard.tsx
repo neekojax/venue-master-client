@@ -3,6 +3,8 @@ import { Spin } from "antd";
 import { fetchBtcMarketInfo } from "../../api";
 import { formatAmount } from "@/utils/num";
 
+import { t } from "@/locales";
+
 export type DataCardItem = {
   dailyYield: number;
   hashRate: number;
@@ -46,7 +48,9 @@ const DataCardGrid: React.FC<{ chartDate: string; loading?: boolean; onLoaded?: 
       <div className={["grid", colsClass, "gap-4", "mb-6"].join(" ").trim()}>
         <div className="bg-gray-50 rounded-lg p-4 border border-gray-100 flex items-stretch gap-4">
           <div className="flex-none w-55">
-            <div className="text-gray-500 mb-2">全网算力（{data.hashRateDate}）</div>
+            <div className="text-gray-500 mb-2">
+              {t("全网算力（{{hashRateDate}}）", { hashRateDate: data.hashRateDate })}
+            </div>
             <div className="text-2xl">
               {formatAmount(data.hashRate, 2, "", false)}
 
@@ -72,7 +76,7 @@ const DataCardGrid: React.FC<{ chartDate: string; loading?: boolean; onLoaded?: 
           </div> */}
         </div>
         <div className="bg-gray-50 rounded-lg p-4 border border-gray-100">
-          <div className="text-gray-500 mb-2">全网日产出</div>
+          <div className="text-gray-500 mb-2">{t("全网日产出")}</div>
           <div className="text-2xl">
             {formatAmount(data.dailyYield, 2, "", false)}
             {data.yieldDiffPercent > 0 ? (
@@ -88,7 +92,9 @@ const DataCardGrid: React.FC<{ chartDate: string; loading?: boolean; onLoaded?: 
         </div>
         <div className="bg-gray-50 rounded-lg p-4 border border-gray-100 flex  items-stretch gap-4">
           <div className="flex-none w-55">
-            <div className="text-gray-500 mb-2">币价 $（{data.btcPriceDate}）</div>
+            <div className="text-gray-500 mb-2">
+              {t("币价 $（{{btcPriceDate}}）", { btcPriceDate: data.btcPriceDate })}
+            </div>
             <div className="text-2xl">
               {formatAmount(data.price, 2, "", false)}
 

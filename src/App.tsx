@@ -15,13 +15,11 @@ export default function App() {
       "error",
       (event: any) => {
         // 专门针对 JS 脚本加载失败的情况
-        // alert(event.target?.tagName)
-        // console.log(event.target?.tagName);
         if (event.target?.tagName === "SCRIPT" && event.target.src?.includes(".js")) {
-          // console.error("检测到 JS 资源加载失败:", event.target.src);
-          // 避免死循环，加个标志
-          if (!sessionStorage.getItem("reload-once")) {
-            sessionStorage.setItem("reload-once", "true");
+          // 避免死循环，按「路径」记录标志，单个路由的 chunk 失败只自动重载一次
+          const reloadKey = `reload-once:${window.location.pathname}`;
+          if (!sessionStorage.getItem(reloadKey)) {
+            sessionStorage.setItem(reloadKey, "true");
             window.location.reload();
           }
         }
@@ -30,12 +28,11 @@ export default function App() {
     ); // ⚠️ 注意这里必须用捕获阶段 true
 
     window.addEventListener("unhandledrejection", (event) => {
-      // alert(event.reason?.message);
       if (event.reason?.message?.includes("Failed to fetch dynamically imported module")) {
         console.error("动态模块加载失败:", event.reason);
-
-        if (!sessionStorage.getItem("reload-once")) {
-          sessionStorage.setItem("reload-once", "true");
+        const reloadKey = `reload-once:${window.location.pathname}`;
+        if (!sessionStorage.getItem(reloadKey)) {
+          sessionStorage.setItem(reloadKey, "true");
           window.location.reload();
         }
       }

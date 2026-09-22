@@ -18,6 +18,8 @@ import "./styles/radio.css";
 import "./styles/custom-select.css";
 import "./styles/extend.css";
 
+import "@/locales"; // 必须最先导入：初始化 i18n，保证模块顶层 t() 调用时语言已就绪
+
 // setupGlobalErrorHandler();
 // ✅ 在应用渲染前执行版本检查
 setupAppVersionNotification();

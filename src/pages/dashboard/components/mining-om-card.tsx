@@ -3,6 +3,8 @@ import React, { useEffect, useState } from "react";
 import { BsChevronRight } from "react-icons/bs";
 import { Card, Col, Row, Statistic } from "antd";
 
+import { t } from "@/locales";
+
 interface MiningPoolCardProps {
   poolType: string; // 接收矿池类型作为 props
 }
@@ -63,7 +65,7 @@ const MiningOMCard: React.FC<MiningPoolCardProps> = ({ poolType }) => {
   return (
     <div>
       <Card
-        title={"运维"}
+        title={t("运维")}
         loading={loading}
         bordered={false}
         className="card-wapper"
@@ -88,7 +90,7 @@ const MiningOMCard: React.FC<MiningPoolCardProps> = ({ poolType }) => {
         <Row gutter={24}>
           <Col span={24}>
             <Statistic
-              title={`当前在线数 / 累计故障下架总数`}
+              title={t("当前在线数 / 累计故障下架总数")}
               // value={` 0 / 20000`} // 假设昨日总收益在状态中
               valueStyle={{ color: "green", fontSize: "20px", fontWeight: "bold" }}
               // valueStyle={{ display: 'flex', alignItems: 'center' }}
@@ -190,7 +192,7 @@ const MiningOMCard: React.FC<MiningPoolCardProps> = ({ poolType }) => {
         </Row> */}
       </Card>
       <Card
-        title={"运维"}
+        title={t("运维")}
         loading={loading}
         bordered={false}
         className="card-wapper"
@@ -269,13 +271,13 @@ const MiningOMCard: React.FC<MiningPoolCardProps> = ({ poolType }) => {
           <Col span={8} style={{ borderLeft: "1px solid #f0f0f0", paddingLeft: "16px" }}>
             <Row gutter={24}>
               <Col span={24} style={{ fontSize: "14px", color: "gray", marginBottom: "12px" }}>
-                <span style={{ fontSize: "14px", color: "gray" }}>昨日故障数</span>
+                <span style={{ fontSize: "14px", color: "gray" }}>{t("昨日故障数")}</span>
                 <span style={{ fontSize: "14px", color: "black", marginLeft: "10px" }}>
-                  {data?.yesterdayFaultsCount} 台
+                  {t("{{value}} 台", { value: data?.yesterdayFaultsCount })}
                 </span>
               </Col>
               <Col span={24} style={{ fontSize: "14px", color: "gray", marginBottom: "12px" }}>
-                <span style={{ fontSize: "14px", color: "gray" }}>折合年维修率</span>
+                <span style={{ fontSize: "14px", color: "gray" }}>{t("折合年维修率")}</span>
                 <span style={{ fontSize: "14px", color: "black", marginLeft: "10px" }}>
                   {data?.yesterdayFailureRate}%
                 </span>
@@ -285,13 +287,13 @@ const MiningOMCard: React.FC<MiningPoolCardProps> = ({ poolType }) => {
           <Col span={8} style={{ borderLeft: "1px solid #f0f0f0", paddingLeft: "16px" }}>
             <Row gutter={24}>
               <Col span={24} style={{ fontSize: "14px", color: "gray", marginBottom: "12px" }}>
-                <span style={{ fontSize: "14px", color: "gray" }}>近一周故障数</span>
+                <span style={{ fontSize: "14px", color: "gray" }}>{t("近一周故障数")}</span>
                 <span style={{ fontSize: "14px", color: "black", marginLeft: "10px" }}>
-                  {data?.lastWeekFaultsCount}台
+                  {t("{{value}}台", { value: data?.lastWeekFaultsCount })}
                 </span>
               </Col>
               <Col span={24} style={{ fontSize: "14px", color: "gray", marginBottom: "12px" }}>
-                <span style={{ fontSize: "14px", color: "gray" }}>折合年维修率</span>
+                <span style={{ fontSize: "14px", color: "gray" }}>{t("折合年维修率")}</span>
                 <span style={{ fontSize: "14px", color: "black", marginLeft: "10px" }}>
                   {data?.lastWeekFailureRate}%
                 </span>
@@ -301,13 +303,13 @@ const MiningOMCard: React.FC<MiningPoolCardProps> = ({ poolType }) => {
           <Col span={8} style={{ borderLeft: "1px solid #f0f0f0", paddingLeft: "16px" }}>
             <Row gutter={24}>
               <Col span={24} style={{ fontSize: "14px", color: "gray", marginBottom: "12px" }}>
-                <span style={{ fontSize: "14px", color: "gray" }}>近一月故障数</span>
+                <span style={{ fontSize: "14px", color: "gray" }}>{t("近一月故障数")}</span>
                 <span style={{ fontSize: "14px", color: "black", marginLeft: "10px" }}>
-                  {data?.lastMonthFaultsCount} 台
+                  {t("{{value}} 台", { value: data?.lastMonthFaultsCount })}
                 </span>
               </Col>
               <Col span={24} style={{ fontSize: "14px", color: "gray", marginBottom: "12px" }}>
-                <span style={{ fontSize: "14px", color: "gray" }}>折合年维修率</span>
+                <span style={{ fontSize: "14px", color: "gray" }}>{t("折合年维修率")}</span>
                 <span style={{ fontSize: "14px", color: "black", marginLeft: "10px" }}>
                   {data?.lastMonthFailureRate}%
                 </span>

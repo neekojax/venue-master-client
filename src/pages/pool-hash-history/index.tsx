@@ -5,6 +5,7 @@ import { ReactEcharts } from "@/components/react-echarts";
 import useAuthRedirect from "@/hooks/useAuthRedirect.ts";
 import { useSelector, useSettingsStore } from "@/stores";
 
+import { t } from "@/locales";
 import { fetchHashRateHistoryByPoolName } from "@/pages/pool-hash-history/api.tsx";
 
 export default function PoolHashHistoryPage() {
@@ -54,7 +55,7 @@ export default function PoolHashHistoryPage() {
         trigger: "axis",
       },
       legend: {
-        data: ["结算算力", "理论算力"],
+        data: [t("结算算力"), t("理论算力")],
       },
       xAxis: {
         type: "category",
@@ -65,13 +66,13 @@ export default function PoolHashHistoryPage() {
       },
       yAxis: {
         type: "value",
-        name: "哈希（PH/s）",
+        name: t("哈希（PH/s）"),
         nameLocation: "end",
         nameGap: 20,
       },
       series: [
         {
-          name: "结算算力",
+          name: t("结算算力"),
           type: "line",
           data: hashRates,
           smooth: true,
@@ -81,7 +82,7 @@ export default function PoolHashHistoryPage() {
           symbol: "none",
         },
         {
-          name: "理论算力",
+          name: t("理论算力"),
           type: "line",
           data: theoreticalHashes,
           smooth: true,
@@ -96,12 +97,12 @@ export default function PoolHashHistoryPage() {
 
   const columns = [
     {
-      title: "结算日期",
+      title: t("结算日期"),
       dataIndex: "date",
       key: "date",
     },
     {
-      title: "结算算力",
+      title: t("结算算力"),
       dataIndex: "hash_rate",
       key: "hash_rate",
       render: (
@@ -117,7 +118,7 @@ export default function PoolHashHistoryPage() {
       ) => <span>{text} PH/s</span>, // Display unit
     },
     {
-      title: "理论算力",
+      title: t("理论算力"),
       dataIndex: "settlement_theoretical_hash",
       key: "settlement_theoretical_hash",
       render: (
@@ -133,7 +134,7 @@ export default function PoolHashHistoryPage() {
       ) => <span>{text} PH/s</span>, // Display unit
     },
     {
-      title: "算力达成率",
+      title: t("算力达成率"),
       dataIndex: "hash_completion_rate",
       key: "hash_completion_rate",
     },
@@ -150,10 +151,10 @@ export default function PoolHashHistoryPage() {
     >
       <h1 style={{ fontSize: "24px", marginBottom: "10px" }}>{poolName}</h1>
       <div style={{ marginTop: "20px" }}>
-        <Card title="历史算力曲线" loading={loading}>
+        <Card title={t("历史算力曲线")} loading={loading}>
           <ReactEcharts option={getOption()} style={{ height: "400px", width: "100%" }} />
         </Card>
-        <Card title="历史算力数据" style={{ marginTop: "20px" }}>
+        <Card title={t("历史算力数据")} style={{ marginTop: "20px" }}>
           <Table
             dataSource={history?.slice().reverse()}
             columns={columns}

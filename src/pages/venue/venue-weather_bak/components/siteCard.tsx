@@ -3,6 +3,8 @@ import { MapPin } from "lucide-react";
 import { WeatherData } from "../types/weather";
 import { DayNightRow } from "./DayNightRow";
 
+import { t } from "@/locales";
+
 // interface Props {
 //     site: Site;
 // }
@@ -58,7 +60,7 @@ export const SiteCard: React.FC<{ site: Venue }> = ({ site }) => {
             venue_id: site.venue?.id ?? 0,
             venue_name: site.venue?.name ?? "",
             date: daily.date,
-            day_period: "白天",
+            day_period: t("白天"),
             weather: "-",
             min_temperature: 0,
             max_temperature: 0,
@@ -70,7 +72,7 @@ export const SiteCard: React.FC<{ site: Venue }> = ({ site }) => {
             venue_id: site.venue?.id ?? 0,
             venue_name: site.venue?.name ?? "",
             date: daily.date,
-            day_period: "夜间",
+            day_period: t("夜间"),
             weather: "-",
             min_temperature: 0,
             max_temperature: 0,
@@ -83,8 +85,8 @@ export const SiteCard: React.FC<{ site: Venue }> = ({ site }) => {
             <div key={daily.date} className="flex flex-col gap-2">
               <div className="text-center text-sm font-medium text-slate-500">{dateStr}</div>
               <div className="flex flex-col gap-2 flex-1">
-                <DayNightRow label="白天" data={daily.day ?? defaultDay} />
-                <DayNightRow label="夜间" data={daily.night ?? defaultNight} isNight />
+                <DayNightRow label={t("白天")} data={daily.day ?? defaultDay} />
+                <DayNightRow label={t("夜间")} data={daily.night ?? defaultNight} isNight />
               </div>
             </div>
           );

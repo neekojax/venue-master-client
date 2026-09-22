@@ -2,6 +2,8 @@ import { Link, Navigate, type RouteObject } from "react-router-dom";
 import { ProgressBar } from "@/components/progress-bar";
 import { ROUTE_PATHS } from "@/constants/common";
 
+import { t } from "@/locales";
+
 export const miningRoute: RouteObject = {
   path: ROUTE_PATHS.mining,
   lazy: async () => ({
@@ -9,8 +11,8 @@ export const miningRoute: RouteObject = {
   }),
   HydrateFallback: ProgressBar,
   handle: {
-    title: "算力监控",
-    crumb: () => "算力监控",
+    title: t("算力监控"),
+    crumb: () => t("算力监控"),
   },
   children: [
     {
@@ -24,8 +26,8 @@ export const miningRoute: RouteObject = {
       }),
       HydrateFallback: ProgressBar,
       handle: {
-        title: "实时算力",
-        crumb: () => <Link to={ROUTE_PATHS.miningHashRate}>实时算力</Link>,
+        title: t("实时算力"),
+        crumb: () => <Link to={ROUTE_PATHS.miningHashRate}>{t("实时算力")}</Link>,
       },
     },
     {
@@ -35,8 +37,8 @@ export const miningRoute: RouteObject = {
       }),
       HydrateFallback: ProgressBar,
       handle: {
-        title: "矿机监控",
-        crumb: () => <Link to={ROUTE_PATHS.farmMonitor}>矿机监控</Link>,
+        title: t("矿机监控"),
+        crumb: () => <Link to={ROUTE_PATHS.farmMonitor}>{t("矿机监控")}</Link>,
       },
     },
     {
@@ -46,8 +48,8 @@ export const miningRoute: RouteObject = {
       }),
       HydrateFallback: ProgressBar,
       handle: {
-        title: "故障机监控",
-        crumb: () => <Link to={ROUTE_PATHS.faultMonitor}>故障机监控</Link>,
+        title: t("故障机监控"),
+        crumb: () => <Link to={ROUTE_PATHS.faultMonitor}>{t("故障机监控")}</Link>,
       },
     },
     {
@@ -57,8 +59,8 @@ export const miningRoute: RouteObject = {
       }),
       HydrateFallback: ProgressBar,
       handle: {
-        title: "异常数分析",
-        crumb: () => <Link to={ROUTE_PATHS.abnormalAnalysis}>异常数分析</Link>,
+        title: t("异常数分析"),
+        crumb: () => <Link to={ROUTE_PATHS.abnormalAnalysis}>{t("异常数分析")}</Link>,
       },
     },
     {
@@ -68,8 +70,8 @@ export const miningRoute: RouteObject = {
       }),
       HydrateFallback: ProgressBar,
       handle: {
-        title: "账户列表",
-        crumb: () => <Link to={ROUTE_PATHS.miningSetting}>账户列表</Link>,
+        title: t("账户列表"),
+        crumb: () => <Link to={ROUTE_PATHS.miningSetting}>{t("账户列表")}</Link>,
       },
     },
     {
@@ -80,8 +82,8 @@ export const miningRoute: RouteObject = {
       HydrateFallback: ProgressBar,
       handle: {
         name: "miningAgentSetting",
-        title: "矿机代理设置",
-        crumb: () => <Link to={ROUTE_PATHS.miningAgentSetting}>矿机代理设置</Link>,
+        title: t("矿机代理设置"),
+        crumb: () => <Link to={ROUTE_PATHS.miningAgentSetting}>{t("矿机代理设置")}</Link>,
         permission: ROUTE_PATHS.miningAgentSetting,
       },
     },
@@ -93,8 +95,8 @@ export const miningRoute: RouteObject = {
       HydrateFallback: ProgressBar,
       handle: {
         name: "assetHashrateHistory",
-        title: "资产变更历史",
-        crumb: () => <Link to={ROUTE_PATHS.assetHashrateHistory}>资产变更历史</Link>,
+        title: t("资产变更历史"),
+        crumb: () => <Link to={ROUTE_PATHS.assetHashrateHistory}>{t("资产变更历史")}</Link>,
         permission: ROUTE_PATHS.assetHashrateHistory,
       },
     },

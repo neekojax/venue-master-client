@@ -3,6 +3,7 @@ import { message, Space, Switch } from "antd";
 import EditTable from "@/components/edit-table";
 import { exportElectricAverageToExcel } from "@/utils/excel.ts";
 
+import { t } from "@/locales";
 import { fetchSettlementAverage } from "@/pages/electric-data/api.tsx";
 import ElectricSelectComponent from "@/pages/electric-data/components/electric-select.tsx";
 import { PRICE_TYPE_REAL_TIME, SettlementQueryParam } from "@/pages/electric-data/type.tsx";
@@ -31,25 +32,25 @@ export default function ElectricAverage() {
   useEffect(() => {
     setColumns([
       {
-        title: "电力接入点",
+        title: t("电力接入点"),
         dataIndex: "name",
         key: "name",
         width: 100,
       },
       {
-        title: "数据口径",
+        title: t("数据口径"),
         dataIndex: "type",
         key: "type",
         width: 80,
       },
       {
-        title: "时间范围",
+        title: t("时间范围"),
         dataIndex: "time_range",
         key: "time_range",
         width: 120,
       },
       {
-        title: "平均电价",
+        title: t("平均电价"),
         dataIndex: "average",
         key: "average",
         width: 200,
@@ -77,7 +78,7 @@ export default function ElectricAverage() {
         setTableData([]);
       }
     } catch (_error) {
-      message.error("获取月均费用统计数据失败");
+      message.error(t("获取月均费用统计数据失败"));
     }
   };
 
@@ -102,7 +103,7 @@ export default function ElectricAverage() {
       <div style={{ marginTop: "20px" }}>
         <Space size={12}>
           <span style={{ color: "#000" }}>
-            <Switch size="small" checked={showCollectionOnly} onChange={onCollectionChange} /> 我的收藏
+            <Switch size="small" checked={showCollectionOnly} onChange={onCollectionChange} /> {t("我的收藏")}
           </span>
         </Space>
       </div>
@@ -127,7 +128,7 @@ export default function ElectricAverage() {
             {/*) : (*/}
             <p style={{ fontSize: "16px" }}>
               <i className="fas fa-exclamation-circle" style={{ marginRight: "8px", color: "#f39c12" }}></i>
-              暂无数据, 请选择电网场地搜索数据
+              {t("暂无数据, 请选择电网场地搜索数据")}
             </p>
             {/*)}*/}
           </div>

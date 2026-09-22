@@ -3,6 +3,7 @@ import { Form, type FormInstance, Input, InputNumber, Radio, Select } from "antd
 import type { MiningPool } from "../type.tsx";
 import { useSelector, useSettingsStore } from "@/stores";
 
+import { getLanguage, t } from "@/locales";
 import { useVenueList } from "@/pages/venue/hook/hook.ts";
 
 const { Option } = Select;
@@ -14,9 +15,9 @@ interface EditFormProps {
 
 //
 const formFields = [
-  { label: "场地", name: "venue_id", component: Select },
-  { label: "子账户", name: "pool_name", component: Input },
-  { label: "场地主体", name: "pool_type", component: Input },
+  { label: t("场地"), name: "venue_id", component: Select },
+  { label: t("子账户"), name: "pool_name", component: Input },
+  { label: t("场地主体"), name: "pool_type", component: Input },
   // {
   //   label: "场地主体",
   //   name: "pool_type",
@@ -29,17 +30,17 @@ const formFields = [
   //   ],
   // },
   {
-    label: "所属国家",
+    label: t("所属国家"),
     name: "country",
     component: Input,
   },
   {
-    label: "托管机器",
+    label: t("托管机器"),
     name: "hosted_machine",
     component: Input,
   },
   {
-    label: "理论算力",
+    label: t("理论算力"),
     name: "theoretical_hashrate",
     component: Input,
   },
@@ -53,8 +54,8 @@ const formFields = [
   //   name: "basic_hosting_fee",
   //   component: Input,
   // },
-  { label: "主链接", name: "master_link", component: Input },
-  { label: "备用链接", name: "backup_link", component: Input },
+  { label: t("主链接"), name: "master_link", component: Input },
+  { label: t("备用链接"), name: "backup_link", component: Input },
 ];
 
 export default function EditForm({ initialValues, onFormInstanceReady }: EditFormProps) {
@@ -83,7 +84,8 @@ export default function EditForm({ initialValues, onFormInstanceReady }: EditFor
       initialValues={initialValues}
       preserve={false}
       labelAlign="left"
-      labelCol={{ flex: "100px" }}
+      labelWrap
+      labelCol={{ flex: getLanguage() === "en" ? "0 0 150px" : "0 0 100px" }}
       wrapperCol={{ flex: 10 }}
       className="mt-4"
     >
@@ -92,11 +94,11 @@ export default function EditForm({ initialValues, onFormInstanceReady }: EditFor
           key={field.name}
           label={field.label}
           name={field.name}
-          rules={[{ required: true, message: `请输入${field.label}` }]}
+          rules={[{ required: true, message: t("请输入{{label}}", { label: field.label }) }]}
         >
           {field.component === Select && field.name === "venue_id" ? (
             // 使用 venueList 渲染场地选择
-            <Select placeholder={`请选择 ${field.label}`}>
+            <Select placeholder={t("请选择 {{label}}", { label: field.label })}>
               {venueList?.data?.map((venue: { id: number; venue_name: string }) => (
                 <Option key={venue.id} value={venue.id}>
                   {" "}
@@ -116,7 +118,7 @@ export default function EditForm({ initialValues, onFormInstanceReady }: EditFor
             //   </Select>
             // )
             <Input
-              placeholder={`请输入${field.label}`}
+              placeholder={t("请输入{{label}}", { label: field.label })}
               disabled={field.name === "pool_type"}
               // value={field.value}
               type={
@@ -132,14 +134,14 @@ export default function EditForm({ initialValues, onFormInstanceReady }: EditFor
       ))}
 
       <Form.Item
-        label="是否变频"
+        label={t("是否变频")}
         name="is_overclocked"
-        rules={[{ required: true, message: "请选择是否变频" }]}
+        rules={[{ required: true, message: t("请选择是否变频") }]}
       >
         <Radio.Group
           options={[
-            { label: "否", value: 0 },
-            { label: "是", value: 1 },
+            { label: t("否"), value: 0 },
+            { label: t("是"), value: 1 },
           ]}
           onChange={(e) => {
             if (e.target.value !== 1) {
@@ -151,11 +153,11 @@ export default function EditForm({ initialValues, onFormInstanceReady }: EditFor
 
       {isOverclocked === 1 ? (
         <Form.Item
-          label="变频单机算力"
+          label={t("变频单机算力")}
           name="overclock_hashrate_per_machine"
-          rules={[{ required: true, message: "请输入变频单机算力" }]}
+          rules={[{ required: true, message: t("请输入变频单机算力") }]}
         >
-          <InputNumber className="w-full" min={0} step={0.01} placeholder="请输入变频单机算力" />
+          <InputNumber className="w-full" min={0} step={0.01} placeholder={t("请输入变频单机算力")} />
         </Form.Item>
       ) : null}
     </Form>

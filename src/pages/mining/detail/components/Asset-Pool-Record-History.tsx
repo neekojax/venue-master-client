@@ -18,6 +18,7 @@ import {
 import type { ColumnsType } from "antd/es/table";
 import dayjs, { Dayjs } from "dayjs";
 
+import { t } from "@/locales";
 import {
   useAssetPoolRecordCreate,
   useAssetPoolRecordDelete,
@@ -42,21 +43,21 @@ type AssetPoolRecordFormValues = {
 };
 
 const CLOUD_POWER_OPTIONS = [
-  { label: "正常", value: 0 },
-  { label: "云算力", value: 1 },
-  { label: "租赁算力（整条为租赁）", value: 2 },
-  { label: "含租赁算力", value: 3 },
-  { label: "待撤场", value: 4 },
+  { label: t("正常"), value: 0 },
+  { label: t("云算力"), value: 1 },
+  { label: t("租赁算力（整条为租赁）"), value: 2 },
+  { label: t("含租赁算力"), value: 3 },
+  { label: t("待撤场"), value: 4 },
 ];
 
 const OVERCLOCK_OPTIONS = [
-  { label: "否", value: 0 },
-  { label: "是", value: 1 },
+  { label: t("否"), value: 0 },
+  { label: t("是"), value: 1 },
 ];
 
 const SOURCE_TYPE_OPTIONS = [
-  { label: "资产同步", value: 1 },
-  { label: "手动调整", value: 2 },
+  { label: t("资产同步"), value: 1 },
+  { label: t("手动调整"), value: 2 },
 ];
 
 function renderCloudPowerTag(value: number | undefined) {
@@ -71,19 +72,21 @@ function renderCloudPowerTag(value: number | undefined) {
     4: "volcano",
   };
 
-  return <Tag color={colorMap[normalizedValue] ?? "default"}>{matchedOption?.label ?? "正常"}</Tag>;
+  return <Tag color={colorMap[normalizedValue] ?? "default"}>{matchedOption?.label ?? t("正常")}</Tag>;
 }
 
 function renderOverclockTag(value: number | undefined) {
   const normalizedValue = Number(value ?? 0);
-  return <Tag color={normalizedValue === 1 ? "gold" : "default"}>{normalizedValue === 1 ? "是" : "否"}</Tag>;
+  return (
+    <Tag color={normalizedValue === 1 ? "gold" : "default"}>{normalizedValue === 1 ? t("是") : t("否")}</Tag>
+  );
 }
 
 function renderSourceTypeTag(value: number | undefined) {
   const normalizedValue = Number(value ?? 1);
   const matchedOption = SOURCE_TYPE_OPTIONS.find((item) => item.value === normalizedValue);
   return (
-    <Tag color={normalizedValue === 2 ? "orange" : "geekblue"}>{matchedOption?.label ?? "资产同步"}</Tag>
+    <Tag color={normalizedValue === 2 ? "orange" : "geekblue"}>{matchedOption?.label ?? t("资产同步")}</Tag>
   );
 }
 
@@ -180,10 +183,10 @@ const AssetPoolRecordHistory: React.FC = () => {
 
       if (editingRecord) {
         await updateMutation.mutateAsync({ ...payload, id: editingRecord.id } as AssetPoolRecordUpdate);
-        message.success("历史记录更新成功");
+        message.success(t("历史记录更新成功"));
       } else {
         await createMutation.mutateAsync(payload);
-        message.success("历史记录创建成功");
+        message.success(t("历史记录创建成功"));
       }
 
       closeModal();
@@ -191,16 +194,16 @@ const AssetPoolRecordHistory: React.FC = () => {
       if ((e as { errorFields?: unknown[] })?.errorFields) {
         return;
       }
-      message.error((e as Error).message || "保存失败");
+      message.error((e as Error).message || t("保存失败"));
     }
   };
 
   const handleDelete = async (record: AssetPoolRecord) => {
     try {
       await deleteMutation.mutateAsync(record.id);
-      message.success("历史记录删除成功");
+      message.success(t("历史记录删除成功"));
     } catch (e) {
-      message.error((e as Error).message || "删除失败");
+      message.error((e as Error).message || t("删除失败"));
     }
   };
 
@@ -210,48 +213,48 @@ const AssetPoolRecordHistory: React.FC = () => {
         venue_id: venueId,
         pool_id: Number(poolId),
       });
-      message.success("已触发资产接管历史重建");
+      message.success(t("已触发资产接管历史重建"));
     } catch (e) {
-      message.error((e as Error).message || "重建失败");
+      message.error((e as Error).message || t("重建失败"));
     }
   };
 
   const columns: ColumnsType<AssetPoolRecord> = [
     {
-      title: "开始时间",
+      title: t("开始时间"),
       dataIndex: "start_time",
       key: "start_time",
       width: 160,
     },
     {
-      title: "结束时间",
+      title: t("结束时间"),
       dataIndex: "end_time",
       key: "end_time",
       width: 160,
       render: (value: string | undefined) => value || "-",
     },
     {
-      title: "理论算力(PH/s)",
+      title: t("理论算力(PH/s)"),
       dataIndex: "theoretical_hashrate",
       key: "theoretical_hashrate",
       width: 130,
     },
     {
-      title: "托管机器",
+      title: t("托管机器"),
       dataIndex: "hosted_machine",
       key: "hosted_machine",
       width: 110,
       align: "right",
     },
     {
-      title: "算力类型",
+      title: t("算力类型"),
       dataIndex: "is_cloud_power",
       key: "is_cloud_power",
       width: 170,
       render: (value: number | undefined) => renderCloudPowerTag(value),
     },
     {
-      title: "租赁算力(P)",
+      title: t("租赁算力(P)"),
       dataIndex: "leased_power",
       key: "leased_power",
       width: 120,
@@ -259,14 +262,14 @@ const AssetPoolRecordHistory: React.FC = () => {
       render: (value: number | undefined) => value ?? 0,
     },
     {
-      title: "是否变频",
+      title: t("是否变频"),
       dataIndex: "is_overclocked",
       key: "is_overclocked",
       width: 100,
       render: (value: number | undefined) => renderOverclockTag(value),
     },
     {
-      title: "变频后单机算力(T)",
+      title: t("变频后单机算力(T)"),
       dataIndex: "overclock_hashrate_per_machine",
       key: "overclock_hashrate_per_machine",
       width: 150,
@@ -274,48 +277,48 @@ const AssetPoolRecordHistory: React.FC = () => {
       render: (value: number | undefined) => value ?? 0,
     },
     {
-      title: "来源类型",
+      title: t("来源类型"),
       dataIndex: "source_type",
       key: "source_type",
       width: 100,
       render: (value: number | undefined) => renderSourceTypeTag(value),
     },
     {
-      title: "资产记录ID",
+      title: t("资产记录ID"),
       dataIndex: "asset_record_id",
       key: "asset_record_id",
       width: 120,
       render: (value: number | undefined) => value ?? "-",
     },
     {
-      title: "来源更新时间",
+      title: t("来源更新时间"),
       dataIndex: "source_updated_at",
       key: "source_updated_at",
       width: 180,
       render: (value: string | undefined) => value || "-",
     },
     {
-      title: "基线记录ID",
+      title: t("基线记录ID"),
       dataIndex: "base_record_id",
       key: "base_record_id",
       width: 120,
       render: (value: number | undefined) => value ?? "-",
     },
     {
-      title: "操作",
+      title: t("操作"),
       key: "action",
       fixed: "right",
       width: 160,
       render: (_: unknown, record) => (
         <Space size="middle">
-          <a onClick={() => openEdit(record)}>修改</a>
+          <a onClick={() => openEdit(record)}>{t("修改")}</a>
           <Popconfirm
-            title="确认删除该资产接管历史？"
+            title={t("确认删除该资产接管历史？")}
             onConfirm={() => void handleDelete(record)}
-            okText="删除"
-            cancelText="取消"
+            okText={t("删除")}
+            cancelText={t("取消")}
           >
-            <a>删除</a>
+            <a>{t("删除")}</a>
           </Popconfirm>
         </Space>
       ),
@@ -328,25 +331,25 @@ const AssetPoolRecordHistory: React.FC = () => {
         <div>
           <div className="flex items-center gap-2 text-base font-semibold text-slate-900">
             <HistoryOutlined className="text-sky-600" />
-            <span>资产接管算力历史</span>
+            <span>{t("资产接管算力历史")}</span>
           </div>
           <div className="mt-1 text-xs text-slate-500">
-            展示资产系统同步和手动调整生成的算力变更历史，按开始日期倒序显示。
+            {t("展示资产系统同步和手动调整生成的算力变更历史，按开始日期倒序显示。")}
           </div>
         </div>
         <Space wrap>
           <Popconfirm
-            title="确认按当前资产数据重建该主矿池历史？"
+            title={t("确认按当前资产数据重建该主矿池历史？")}
             onConfirm={() => void handleRebuild()}
-            okText="重建"
-            cancelText="取消"
+            okText={t("重建")}
+            cancelText={t("取消")}
           >
             <Button icon={<RedoOutlined />} loading={rebuildMutation.isPending}>
-              重建历史
+              {t("重建历史")}
             </Button>
           </Popconfirm>
           <Button type="primary" onClick={openCreate}>
-            + 新增历史
+            {t("+ 新增历史")}
           </Button>
         </Space>
       </div>
@@ -356,7 +359,7 @@ const AssetPoolRecordHistory: React.FC = () => {
           className="mb-4"
           type="error"
           showIcon
-          message={(error as Error)?.message || "资产接管历史加载失败"}
+          message={(error as Error)?.message || t("资产接管历史加载失败")}
         />
       ) : null}
 
@@ -370,7 +373,7 @@ const AssetPoolRecordHistory: React.FC = () => {
       />
 
       <Modal
-        title={editingRecord ? "编辑资产接管历史" : "新增资产接管历史"}
+        title={editingRecord ? t("编辑资产接管历史") : t("新增资产接管历史")}
         open={isModalOpen}
         onOk={() => void handleSubmit()}
         onCancel={closeModal}
@@ -386,33 +389,33 @@ const AssetPoolRecordHistory: React.FC = () => {
         <Form form={form} layout="vertical" preserve={false}>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <Form.Item
-              label="开始日期"
+              label={t("开始日期")}
               name="start_time"
-              rules={[{ required: true, message: "请选择开始日期" }]}
+              rules={[{ required: true, message: t("请选择开始日期") }]}
             >
               <DatePicker className="w-full" />
             </Form.Item>
-            <Form.Item label="结束时间" name="end_time">
+            <Form.Item label={t("结束时间")} name="end_time">
               <DatePicker className="w-full" showTime />
             </Form.Item>
             <Form.Item
-              label="理论算力(PH/s)"
+              label={t("理论算力(PH/s)")}
               name="theoretical_hashrate"
-              rules={[{ required: true, message: "请输入理论算力" }]}
+              rules={[{ required: true, message: t("请输入理论算力") }]}
             >
               <InputNumber className="w-full" min={0} />
             </Form.Item>
             <Form.Item
-              label="托管机器"
+              label={t("托管机器")}
               name="hosted_machine"
-              rules={[{ required: true, message: "请输入托管机器数" }]}
+              rules={[{ required: true, message: t("请输入托管机器数") }]}
             >
               <InputNumber className="w-full" min={0} />
             </Form.Item>
             <Form.Item
-              label="算力类型"
+              label={t("算力类型")}
               name="is_cloud_power"
-              rules={[{ required: true, message: "请选择算力类型" }]}
+              rules={[{ required: true, message: t("请选择算力类型") }]}
               className="md:col-span-2"
             >
               <Radio.Group
@@ -441,7 +444,7 @@ const AssetPoolRecordHistory: React.FC = () => {
                 </div>
               </Radio.Group>
             </Form.Item>
-            <Form.Item label="租赁算力(P)" name="leased_power">
+            <Form.Item label={t("租赁算力(P)")} name="leased_power">
               <InputNumber
                 className="w-full"
                 min={0}
@@ -449,9 +452,9 @@ const AssetPoolRecordHistory: React.FC = () => {
               />
             </Form.Item>
             <Form.Item
-              label="是否变频"
+              label={t("是否变频")}
               name="is_overclocked"
-              rules={[{ required: true, message: "请选择是否变频" }]}
+              rules={[{ required: true, message: t("请选择是否变频") }]}
             >
               <Radio.Group
                 options={OVERCLOCK_OPTIONS}
@@ -462,20 +465,20 @@ const AssetPoolRecordHistory: React.FC = () => {
                 }}
               />
             </Form.Item>
-            <Form.Item label="变频后单机算力(T)" name="overclock_hashrate_per_machine">
+            <Form.Item label={t("变频后单机算力(T)")} name="overclock_hashrate_per_machine">
               <InputNumber className="w-full" min={0} disabled={Number(isOverclocked ?? 0) !== 1} />
             </Form.Item>
             <Form.Item
-              label="来源类型"
+              label={t("来源类型")}
               name="source_type"
-              rules={[{ required: true, message: "请选择来源类型" }]}
+              rules={[{ required: true, message: t("请选择来源类型") }]}
             >
               <Radio.Group options={SOURCE_TYPE_OPTIONS} />
             </Form.Item>
-            <Form.Item label="资产记录ID" name="asset_record_id" hidden={Number(sourceType ?? 2) === 2}>
+            <Form.Item label={t("资产记录ID")} name="asset_record_id" hidden={Number(sourceType ?? 2) === 2}>
               <InputNumber className="w-full" min={0} />
             </Form.Item>
-            <Form.Item label="基线记录ID" name="base_record_id" hidden={Number(sourceType ?? 2) === 2}>
+            <Form.Item label={t("基线记录ID")} name="base_record_id" hidden={Number(sourceType ?? 2) === 2}>
               <InputNumber className="w-full" min={0} />
             </Form.Item>
           </div>

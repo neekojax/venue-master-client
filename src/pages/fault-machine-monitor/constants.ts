@@ -1,3 +1,7 @@
+/**
+ * 注意：以下编码均为与后端约定的数据值（abnormalLogTrendAllowedCode 白名单），
+ * 必须保持中文，不随界面语言切换；展示层需要翻译时用 t(code) 动态翻译。
+ */
 /** 与后端 abnormalLogTrendAllowedCode 白名单保持一致 */
 export const FAULT_CODES = [
   "算力板",

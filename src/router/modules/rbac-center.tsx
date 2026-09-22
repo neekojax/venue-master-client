@@ -2,6 +2,8 @@ import { Link, type RouteObject } from "react-router-dom";
 import { ProgressBar } from "@/components/progress-bar";
 import { ROUTE_PATHS } from "@/constants/common";
 
+import { t } from "@/locales";
+
 export const rbacCenterRoute: RouteObject = {
   path: ROUTE_PATHS.rbacCenter,
   lazy: async () => ({
@@ -9,7 +11,7 @@ export const rbacCenterRoute: RouteObject = {
   }),
   HydrateFallback: ProgressBar,
   handle: {
-    title: "权限管理",
-    crumb: () => <Link to={ROUTE_PATHS.rbacCenter}>权限管理</Link>,
+    title: t("权限管理"),
+    crumb: () => <Link to={ROUTE_PATHS.rbacCenter}>{t("权限管理")}</Link>,
   },
 };

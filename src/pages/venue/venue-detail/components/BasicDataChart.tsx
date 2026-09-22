@@ -18,6 +18,8 @@ import type { VenueStats } from "../types";
 import EffectChart from "./EffectChart";
 import EfficiencyGauge from "./gauge";
 
+import { t } from "@/locales";
+
 const App: React.FC<{ stats: VenueStats; loading: boolean }> = ({ stats, loading }) => {
   const chartRef = useRef<HTMLDivElement | null>(null);
   const chartInstance = useRef<EChartsType | null>(null);
@@ -112,23 +114,23 @@ const App: React.FC<{ stats: VenueStats; loading: boolean }> = ({ stats, loading
         },
         series: [
           {
-            name: "总数",
+            name: t("总数"),
             type: "pie",
             radius: ["75%", "95%"],
             // label: { },
             label: { show: false, position: "center", formatter: "{b}\n{c}" },
-            data: [{ value: total, name: "总数", itemStyle: { color: "#1890ff" } }],
+            data: [{ value: total, name: t("总数"), itemStyle: { color: "#1890ff" } }],
           },
           {
-            name: "故障数",
+            name: t("故障数"),
             type: "pie",
             radius: ["50%", "70%"],
             label: { show: false },
             data: [
-              { value: validFailures, name: "故障数", itemStyle: { color: "#fa8c16" } },
+              { value: validFailures, name: t("故障数"), itemStyle: { color: "#fa8c16" } },
               {
                 value: Math.max(0, total - validFailures),
-                name: "故障数",
+                name: t("故障数"),
                 itemStyle: { color: "transparent" },
               },
             ],
@@ -160,15 +162,19 @@ const App: React.FC<{ stats: VenueStats; loading: boolean }> = ({ stats, loading
 
   return (
     <>
-      <Row gutter={16} v-else style={{ marginBottom: 24 }}>
+      <Row gutter={16} v-else style={{ marginBottom: 24 }} align="stretch">
         <Col span={8}>
           <Skeleton loading={loading} active>
             <Card
-              title="机器汇总"
+              title={t("机器汇总")}
+              className="h-full flex flex-col"
+              styles={{ body: { flex: 1 } }}
               actions={[
                 <span key="setting">
                   <CloseCircleOutlined style={{ color: "red", fontSize: 16, marginRight: "10px" }} />
-                  <span>故障率：{(stats?.totalFailuresRate || 0)?.toFixed(2)}%</span>
+                  <span>
+                    {t("故障率：{{value}}%", { value: (stats?.totalFailuresRate || 0)?.toFixed(2) })}
+                  </span>
                 </span>,
                 // <span key="setting">
                 //   {/* <SettingOutlined /> */}
@@ -180,6 +186,7 @@ const App: React.FC<{ stats: VenueStats; loading: boolean }> = ({ stats, loading
               <Row justify="space-between" align="middle">
                 <Col span={12} style={{ textAlign: "left" }}>
                   <Typography.Text
+                    ellipsis={{ tooltip: true }}
                     style={{
                       width: 80,
                       display: "inline-block", // 必须加，才能让宽度生效
@@ -189,9 +196,10 @@ const App: React.FC<{ stats: VenueStats; loading: boolean }> = ({ stats, loading
                       textOverflow: "ellipsis",
                     }}
                   >
-                    托管台数：
+                    {t("托管台数：")}
                   </Typography.Text>
                   <Typography.Text
+                    ellipsis={{ tooltip: true }}
                     style={{
                       width: 80,
                       display: "inline-block", // 必须加，才能让宽度生效
@@ -236,6 +244,7 @@ const App: React.FC<{ stats: VenueStats; loading: boolean }> = ({ stats, loading
                 }
                 <Col span={12} style={{ textAlign: "right" }}>
                   <Typography.Text
+                    ellipsis={{ tooltip: true }}
                     style={{
                       width: 80,
                       display: "inline-block", // 必须加，才能让宽度生效
@@ -245,9 +254,10 @@ const App: React.FC<{ stats: VenueStats; loading: boolean }> = ({ stats, loading
                       textOverflow: "ellipsis",
                     }}
                   >
-                    故障台数：
+                    {t("故障台数：")}
                   </Typography.Text>
                   <Typography.Text
+                    ellipsis={{ tooltip: true }}
                     style={{
                       width: 80,
                       display: "inline-block", // 必须加，才能让宽度生效
@@ -301,23 +311,28 @@ const App: React.FC<{ stats: VenueStats; loading: boolean }> = ({ stats, loading
         <Col span={8}>
           <Skeleton loading={loading} active>
             <Card
-              title="算力汇总"
+              title={t("算力汇总")}
+              className="h-full flex flex-col"
+              styles={{ body: { flex: 1 } }}
               actions={[
                 <span key="setting">
                   <SettingOutlined style={{ fontSize: 16, color: "#1890ff", marginRight: "10px" }} />
                   {/* <ThunderboltOutlined style={{ color: 'orange', fontSize: 16, marginRight: '10px' }} /> */}
-                  <span>算力有效率：{(stats?.effectiveRate24h || 0)?.toFixed(2)}%</span>
+                  <span>
+                    {t("算力有效率：{{value}}%", { value: (stats?.effectiveRate24h || 0)?.toFixed(2) })}
+                  </span>
                 </span>,
                 <span key="setting">
                   {/* <SettingOutlined /> */}
                   <CheckCircleOutlined style={{ color: "green", fontSize: 16, marginRight: "10px" }} />
-                  <span>在架有效率：{(stats?.onlineRatio || 0)?.toFixed(2)}%</span>
+                  <span>{t("在架有效率：{{value}}%", { value: (stats?.onlineRatio || 0)?.toFixed(2) })}</span>
                 </span>,
               ]}
             >
               <Row justify="space-between" align="middle">
                 <Col span={12} style={{ textAlign: "left" }}>
                   <Typography.Text
+                    ellipsis={{ tooltip: true }}
                     style={{
                       width: 80,
                       display: "inline-block", // 必须加，才能让宽度生效
@@ -327,9 +342,10 @@ const App: React.FC<{ stats: VenueStats; loading: boolean }> = ({ stats, loading
                       textOverflow: "ellipsis",
                     }}
                   >
-                    有效算力：
+                    {t("有效算力：")}
                   </Typography.Text>
                   <Typography.Text
+                    ellipsis={{ tooltip: true }}
                     style={{
                       width: 80,
                       display: "inline-block", // 必须加，才能让宽度生效
@@ -347,6 +363,7 @@ const App: React.FC<{ stats: VenueStats; loading: boolean }> = ({ stats, loading
 
                 <Col span={12} style={{ textAlign: "right" }}>
                   <Typography.Text
+                    ellipsis={{ tooltip: true }}
                     style={{
                       width: 100,
                       display: "inline-block", // 必须加，才能让宽度生效
@@ -356,9 +373,10 @@ const App: React.FC<{ stats: VenueStats; loading: boolean }> = ({ stats, loading
                       textOverflow: "ellipsis",
                     }}
                   >
-                    在架理论算力：
+                    {t("在架理论算力：")}
                   </Typography.Text>
                   <Typography.Text
+                    ellipsis={{ tooltip: true }}
                     style={{
                       width: 80,
                       display: "inline-block", // 必须加，才能让宽度生效
@@ -375,6 +393,7 @@ const App: React.FC<{ stats: VenueStats; loading: boolean }> = ({ stats, loading
                 </Col>
                 <Col span={12} style={{ textAlign: "left" }}>
                   <Typography.Text
+                    ellipsis={{ tooltip: true }}
                     style={{
                       width: 80,
                       display: "inline-block", // 必须加，才能让宽度生效
@@ -384,9 +403,10 @@ const App: React.FC<{ stats: VenueStats; loading: boolean }> = ({ stats, loading
                       textOverflow: "ellipsis",
                     }}
                   >
-                    理论算力：
+                    {t("理论算力：")}
                   </Typography.Text>
                   <Typography.Text
+                    ellipsis={{ tooltip: true }}
                     style={{
                       width: 80,
                       display: "inline-block", // 必须加，才能让宽度生效
@@ -408,13 +428,16 @@ const App: React.FC<{ stats: VenueStats; loading: boolean }> = ({ stats, loading
         </Col>
         <Col span={8}>
           <Skeleton loading={loading} active>
-            <Card title="影响占比">
+            <Card
+              title={t("影响占比")}
+              className="h-full flex flex-col"
+              styles={{ body: { flex: 1, display: "flex", flexDirection: "column" } }}
+            >
               <div style={{ height: "20px" }}></div>
               <EffectChart data={stats || undefined} />
               <div
                 style={{
-                  marginTop: 25,
-                  marginBottom: -20,
+                  marginTop: "auto",
                   display: "flex",
                   flexWrap: "wrap", // 允许换行
                   // gap: 12,          // 子元素间距
@@ -425,20 +448,24 @@ const App: React.FC<{ stats: VenueStats; loading: boolean }> = ({ stats, loading
                   <Col span={12} style={{ textAlign: "left" }}>
                     <WarningOutlined style={{ color: "#faad14", marginRight: 8 }} />
                     {/* <CheckCircleOutlined style={{ color: 'green', fontSize: 16, marginRight: 8 }} /> */}
-                    影响占比：{stats?.impactRatio?.toFixed(2)}%
+                    {t("影响占比：")}
+                    {stats?.impactRatio?.toFixed(2)}%
                   </Col>
                   <Col span={12} style={{ textAlign: "right" }}>
                     <CloseCircleOutlined style={{ color: "#ff4d4f", marginRight: 8 }} />
-                    总故障率：{stats?.totalFailuresRate.toFixed(2)}%
+                    {t("总故障率：")}
+                    {stats?.totalFailuresRate.toFixed(2)}%
                   </Col>
                   <Col span={12} style={{ textAlign: "left" }}>
                     <ThunderboltOutlined style={{ color: "#faad14", marginRight: 8 }} />
                     {/* <CheckCircleOutlined style={{ color: 'green', fontSize: 16, marginRight: 8 }} /> */}
-                    限电占比：{stats?.limitImpactRate?.toFixed(2)}%
+                    {t("限电占比：")}
+                    {stats?.limitImpactRate?.toFixed(2)}%
                   </Col>
                   <Col span={12} style={{ textAlign: "right" }}>
                     <FireOutlined style={{ color: "#ff4d4f", marginRight: 8 }} />
-                    高温占比：{stats?.highTemperatureRate.toFixed(2)}%
+                    {t("高温占比：")}
+                    {stats?.highTemperatureRate.toFixed(2)}%
                   </Col>
                 </Row>
                 <div></div>

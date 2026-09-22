@@ -1,6 +1,8 @@
 import { useEffect, useRef } from "react";
 import * as echarts from "echarts";
 
+import { t } from "@/locales";
+
 export type EfficiencyDetail = {
   Date: string;
   Category: string;
@@ -114,7 +116,7 @@ const BarEfficiencyData = ({ data }: { data: EfficiencyDetail[] }) => {
 
   return (
     <>
-      <div className="text-gray-500 mb-2">近三天有效率</div>
+      <div className="text-gray-500 mb-2">{t("近三天有效率")}</div>
       <div ref={domRef} id="efficiency" className="h-64"></div>
     </>
   );

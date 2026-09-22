@@ -2,6 +2,8 @@ import React from "react";
 import { Progress } from "antd";
 import type { ProgressProps } from "antd/es/progress";
 
+import { t } from "@/locales";
+
 export type LocationCardProps = {
   location: {
     name: string;
@@ -26,7 +28,7 @@ const LocationCard: React.FC<LocationCardProps> = ({ location, getTemperatureCol
         <div className="flex justify-between items-center mb-2">
           <span className="text-gray-600 flex items-center">
             <i className="fas fa-thermometer-half mr-2 text-red-500"></i>
-            温度
+            {t("温度")}
           </span>
           {location.temperature === 0 && location.humidity === 0 && (
             <span
@@ -40,7 +42,7 @@ const LocationCard: React.FC<LocationCardProps> = ({ location, getTemperatureCol
                 marginRight: 4,
               }}
             >
-              设备异常，请检查设备
+              {t("设备异常，请检查设备")}
             </span>
           )}
 
@@ -57,8 +59,10 @@ const LocationCard: React.FC<LocationCardProps> = ({ location, getTemperatureCol
                   marginRight: 4,
                 }}
               >
-                设备异常，请检查设备<br></br>
-                最后更新时间：{location.last_update}
+                {t("设备异常，请检查设备")}
+                <br></br>
+                {t("最后更新时间：")}
+                {location.last_update}
               </span>
             </>
           )}
@@ -81,7 +85,7 @@ const LocationCard: React.FC<LocationCardProps> = ({ location, getTemperatureCol
         <div className="flex justify-between items-center mb-2">
           <span className="text-gray-600 flex items-center">
             <i className="fas fa-tint mr-2 text-blue-500"></i>
-            湿度
+            {t("湿度")}
           </span>
           {/* {location.humidity === 0 && (
             <span
@@ -112,7 +116,7 @@ const LocationCard: React.FC<LocationCardProps> = ({ location, getTemperatureCol
         </div>
       </div>
       <div className="flex justify-between items-center gap-2 mt-5 pt-4 border-t border-gray-100">
-        <span className="text-gray-600">凝露值</span>
+        <span className="text-gray-600">{t("凝露值")}</span>
         <span className="font-medium text-gray-800 whitespace-nowrap">
           {location.dew_point == null ? "--" : `${location.dew_point.toFixed(1)} ℃`}
         </span>

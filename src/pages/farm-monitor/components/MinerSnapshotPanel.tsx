@@ -21,6 +21,8 @@ import type { TaskSnapshotItem, TaskSnapshotQueryParams } from "../types";
 import { buildTaskSnapshotExportParams, downloadExcelBlobResponse } from "../utils";
 import ColumnSettingsPopover from "./ColumnSettingsPopover";
 
+import { getLanguage, t } from "@/locales";
+
 export interface MinerSnapshotSearchValues {
   minerCode?: string;
   sn?: string;
@@ -33,8 +35,8 @@ export interface MinerSnapshotSearchValues {
 }
 
 const BOOL_FILTER_OPTIONS = [
-  { label: "是", value: "true" },
-  { label: "否", value: "false" },
+  { label: t("是"), value: "true" },
+  { label: t("否"), value: "false" },
 ];
 
 interface MinerSnapshotPanelProps {
@@ -109,14 +111,14 @@ export default function MinerSnapshotPanel({
     total: snapshotTotal,
     showSizeChanger: true,
     pageSizeOptions: [10, 20, 50, 100, 200, 500],
-    showTotal: (total) => `共 ${total} 条记录`,
-    locale: { items_per_page: "条/页" },
+    showTotal: (total) => t("共 {{total}} 条记录", { total: total }),
+    locale: { items_per_page: t("条/页") },
     onChange: onPageChange,
   };
 
   const handleExport = async () => {
     if (!snapshotTaskIdsParam) {
-      message.warning("暂无已完成探测任务，无法导出");
+      message.warning(t("暂无已完成探测任务，无法导出"));
       return;
     }
     if (exporting) return;
@@ -126,9 +128,9 @@ export default function MinerSnapshotPanel({
       const res = await fetchTaskSnapshotExport(venueType, snapshotTaskIdsParam, params);
       const fileId = snapshotTaskIdsParam.replace(/,/g, "-");
       downloadExcelBlobResponse(res, `task_snapshots_${fileId}_${dayjs().format("YYYYMMDD_HHmmss")}.xlsx`);
-      message.success("导出成功");
+      message.success(t("导出成功"));
     } catch {
-      message.error("导出失败，请稍后重试");
+      message.error(t("导出失败，请稍后重试"));
     } finally {
       setExporting(false);
     }
@@ -151,7 +153,7 @@ export default function MinerSnapshotPanel({
         className="bg-white min-w-0 [&:fullscreen]:flex [&:fullscreen]:flex-col [&:fullscreen]:h-screen [&:fullscreen]:overflow-auto [&:fullscreen]:p-0"
       >
         <div className="px-5 pt-4 pb-3 border-b border-gray-200 bg-white">
-          <h2 className="text-lg font-semibold text-gray-800 m-0">矿机信息管理</h2>
+          <h2 className="text-lg font-semibold text-gray-800 m-0">{t("矿机信息管理")}</h2>
         </div>
         {filterExpanded ? (
           <div className="px-5 py-4 border-b border-gray-200 filter-form miner-snapshot-filter bg-white">
@@ -160,52 +162,53 @@ export default function MinerSnapshotPanel({
               layout="horizontal"
               labelAlign="left"
               colon={false}
+              labelWrap
               onFinish={onSearch}
-              labelCol={{ flex: "0 0 96px" }}
+              labelCol={{ flex: getLanguage() === "en" ? "0 0 150px" : "0 0 96px" }}
               wrapperCol={{ flex: "1 1 0" }}
               className="[&_.ant-form-item]:!mb-0 [&_.ant-form-item-label>label]:!font-semibold [&_.ant-form-item-label>label]:!text-gray-800"
             >
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-x-6 gap-y-4 items-end">
-                <Form.Item name="fullType" label="机型" className="!mb-0 min-w-0">
+                <Form.Item name="fullType" label={t("机型")} className="!mb-0 min-w-0">
                   <Select
                     allowClear
                     showSearch
                     optionFilterProp="label"
-                    placeholder="请选择"
+                    placeholder={t("请选择")}
                     options={fullTypeOptions.map((value) => ({ label: value, value }))}
                   />
                 </Form.Item>
-                <Form.Item name="minerCode" label="矿工号" className="!mb-0 min-w-0">
+                <Form.Item name="minerCode" label={t("矿工号")} className="!mb-0 min-w-0">
                   <Select
                     allowClear
                     showSearch
                     optionFilterProp="label"
-                    placeholder="请选择"
+                    placeholder={t("请选择")}
                     options={minerCodeOptions.map((value) => ({ label: value, value }))}
                   />
                 </Form.Item>
-                <Form.Item name="controlBoardSN" label="控制板序列号" className="!mb-0 min-w-0">
-                  <Input allowClear placeholder="请输入控制板序列号" />
+                <Form.Item name="controlBoardSN" label={t("控制板序列号")} className="!mb-0 min-w-0">
+                  <Input allowClear placeholder={t("请输入控制板序列号")} />
                 </Form.Item>
-                <Form.Item name="zeroHashrate" label="零算力" className="!mb-0 min-w-0">
-                  <Select allowClear placeholder="请选择" options={BOOL_FILTER_OPTIONS} />
+                <Form.Item name="zeroHashrate" label={t("零算力")} className="!mb-0 min-w-0">
+                  <Select allowClear placeholder={t("请选择")} options={BOOL_FILTER_OPTIONS} />
                 </Form.Item>
-                <Form.Item name="ip" label="矿机IP地址" className="!mb-0 min-w-0">
-                  <Input allowClear placeholder="请输入矿机IP地址" />
+                <Form.Item name="ip" label={t("矿机IP地址")} className="!mb-0 min-w-0">
+                  <Input allowClear placeholder={t("请输入矿机IP地址")} />
                 </Form.Item>
-                <Form.Item name="macAddress" label="矿机MAC地址" className="!mb-0 min-w-0">
-                  <Input allowClear placeholder="请输入矿机MAC地址" />
+                <Form.Item name="macAddress" label={t("矿机MAC地址")} className="!mb-0 min-w-0">
+                  <Input allowClear placeholder={t("请输入矿机MAC地址")} />
                 </Form.Item>
-                <Form.Item name="sn" label="算力板序列号" className="!mb-0 min-w-0">
-                  <Input allowClear placeholder="请输入算力板序列号" />
+                <Form.Item name="sn" label={t("算力板序列号")} className="!mb-0 min-w-0">
+                  <Input allowClear placeholder={t("请输入算力板序列号")} />
                 </Form.Item>
-                <Form.Item name="hashrateFault" label="低算力" className="!mb-0 min-w-0">
-                  <Select allowClear placeholder="请选择" options={BOOL_FILTER_OPTIONS} />
+                <Form.Item name="hashrateFault" label={t("低算力")} className="!mb-0 min-w-0">
+                  <Select allowClear placeholder={t("请选择")} options={BOOL_FILTER_OPTIONS} />
                 </Form.Item>
                 <div className="flex min-w-0 justify-end gap-2 pb-0.5 md:col-span-2 lg:col-span-4">
-                  <Button onClick={onReset}>重置</Button>
+                  <Button onClick={onReset}>{t("重置")}</Button>
                   <Button type="primary" htmlType="submit">
-                    搜索
+                    {t("搜索")}
                   </Button>
                 </div>
               </div>
@@ -215,7 +218,7 @@ export default function MinerSnapshotPanel({
 
         <div className="longdataTable w-full min-w-0 overflow-x-auto bg-white">
           <div className="flex justify-end items-center gap-1 border-b border-gray-100 px-4 py-2">
-            <Tooltip title={filterExpanded ? "收起筛选" : "展开筛选"}>
+            <Tooltip title={filterExpanded ? t("收起筛选") : t("展开筛选")}>
               <Button
                 type="text"
                 shape="circle"
@@ -224,7 +227,7 @@ export default function MinerSnapshotPanel({
                 onClick={() => setFilterExpanded((v) => !v)}
               />
             </Tooltip>
-            <Tooltip title="导出">
+            <Tooltip title={t("导出")}>
               <Button
                 type="text"
                 shape="circle"
@@ -234,7 +237,7 @@ export default function MinerSnapshotPanel({
                 onClick={() => void handleExport()}
               />
             </Tooltip>
-            <Tooltip title="刷新">
+            <Tooltip title={t("刷新")}>
               <Button
                 type="text"
                 shape="circle"
@@ -243,7 +246,7 @@ export default function MinerSnapshotPanel({
                 loading={loading}
               />
             </Tooltip>
-            <Tooltip title={isFullscreen ? "退出全屏" : "全屏"}>
+            <Tooltip title={isFullscreen ? t("退出全屏") : t("全屏")}>
               <Button
                 type="text"
                 shape="circle"
@@ -264,7 +267,7 @@ export default function MinerSnapshotPanel({
               bordered={false}
               scroll={{ x: scrollX }}
               locale={{
-                emptyText: snapshotTaskIdsParam ? "暂无矿机快照数据" : "暂无已完成探测任务",
+                emptyText: snapshotTaskIdsParam ? t("暂无矿机快照数据") : t("暂无已完成探测任务"),
               }}
               pagination={pagination}
             />

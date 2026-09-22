@@ -9,6 +9,8 @@ dayjs.locale("zh-cn");
 import HostingRecord, { type HostingRecordHandle } from "./components/HostingRecord";
 import PowerConsumption, { type PowerConsumptionHandle } from "./components/PowerConsumption";
 
+import { t } from "@/locales";
+
 const App: React.FC = () => {
   const [activeTab, setActiveTab] = useState<"power" | "service">("power");
   const [showSiteFilter, setShowSiteFilter] = useState(false);
@@ -46,14 +48,14 @@ const App: React.FC = () => {
       <div className=" mx-auto">
         {/* Page Header */}
         <div className="mb-6">
-          <h1 className="text-2xl font-bold text-gray-900">场地账单</h1>
+          <h1 className="text-2xl font-bold text-gray-900">{t("场地账单")}</h1>
         </div>
         {/* Action Bar */}
         <div className="flex justify-between items-center mb-4">
           {activeTab === "power" && (
             <>
               <div className="text-gray-600">
-                共找到 <span className="font-semibold">{powerSites.length}</span> 条记录
+                {t("共找到")} <span className="font-semibold">{powerSites.length}</span> {t("条记录")}
               </div>
 
               <div className="flex items-center space-x-2">
@@ -64,14 +66,14 @@ const App: React.FC = () => {
                     className="!rounded-button whitespace-nowrap"
                     onClick={() => setShowSiteFilter(!showSiteFilter)}
                   >
-                    筛选
+                    {t("筛选")}
                   </Button>
                   {showSiteFilter && (
                     <div className="site-filter-dropdown absolute right-0 mt-2 w-80 bg-white rounded-lg shadow-lg z-10 border border-gray-200 p-4">
-                      <div className="font-medium text-gray-900 mb-3">选择场地</div>
+                      <div className="font-medium text-gray-900 mb-3">{t("选择场地")}</div>
                       <Input
                         size="middle"
-                        placeholder="搜索场地..."
+                        placeholder={t("搜索场地...")}
                         className="mb-3"
                         value={filters.siteName}
                         onChange={(e) => {
@@ -115,7 +117,7 @@ const App: React.FC = () => {
                       </div>
                       <div className="flex justify-end space-x-2 mt-3 pt-3 border-t border-gray-200">
                         <Button size="small" onClick={() => setShowSiteFilter(false)}>
-                          取消
+                          {t("取消")}
                         </Button>
                         <Button
                           size="small"
@@ -124,7 +126,7 @@ const App: React.FC = () => {
                             setShowSiteFilter(false);
                           }}
                         >
-                          应用
+                          {t("应用")}
                         </Button>
                       </div>
                     </div>
@@ -136,7 +138,7 @@ const App: React.FC = () => {
                   className="!rounded-button whitespace-nowrap"
                   onClick={() => powerRef.current?.exportToExcel()}
                 >
-                  导出 Excel
+                  {t("导出 Excel")}
                 </Button>
               </div>
             </>
@@ -145,7 +147,7 @@ const App: React.FC = () => {
           {activeTab === "service" && (
             <>
               <div className="text-gray-600">
-                共找到 <span className="font-semibold">{serviceSites.length}</span> 条记录
+                {t("共找到")} <span className="font-semibold">{serviceSites.length}</span> {t("条记录")}
               </div>
               <div className="flex items-center space-x-2">
                 <div className="relative">
@@ -155,14 +157,14 @@ const App: React.FC = () => {
                     className="!rounded-button whitespace-nowrap"
                     onClick={() => setShowSiteFilter(!showSiteFilter)}
                   >
-                    筛选
+                    {t("筛选")}
                   </Button>
                   {showSiteFilter && (
                     <div className="site-filter-dropdown absolute right-0 mt-2 w-80 bg-white rounded-lg shadow-lg z-10 border border-gray-200 p-4">
-                      <div className="font-medium text-gray-900 mb-3">选择场地</div>
+                      <div className="font-medium text-gray-900 mb-3">{t("选择场地")}</div>
                       <Input
                         size="middle"
-                        placeholder="搜索场地..."
+                        placeholder={t("搜索场地...")}
                         className="mb-3"
                         value={filters.siteName}
                         onChange={(e) => {
@@ -206,7 +208,7 @@ const App: React.FC = () => {
                       </div>
                       <div className="flex justify-end space-x-2 mt-3 pt-3 border-t border-gray-200">
                         <Button size="small" onClick={() => setShowSiteFilter(false)}>
-                          取消
+                          {t("取消")}
                         </Button>
                         <Button
                           size="small"
@@ -215,7 +217,7 @@ const App: React.FC = () => {
                             setShowSiteFilter(false);
                           }}
                         >
-                          应用
+                          {t("应用")}
                         </Button>
                       </div>
                     </div>
@@ -227,7 +229,7 @@ const App: React.FC = () => {
                   className="!rounded-button whitespace-nowrap"
                   onClick={() => serviceRef.current?.exportToExcel?.()}
                 >
-                  导出 Excel
+                  {t("导出 Excel")}
                 </Button>
               </div>
             </>
@@ -246,7 +248,7 @@ const App: React.FC = () => {
                 }`}
                 onClick={() => setActiveTab("power")}
               >
-                账单总功耗
+                {t("账单总功耗")}
               </button>
               <button
                 className={`py-4 px-6 text-center border-b-2 font-medium text-sm ${
@@ -256,7 +258,7 @@ const App: React.FC = () => {
                 }`}
                 onClick={() => setActiveTab("service")}
               >
-                托管运维单价
+                {t("托管运维单价")}
               </button>
             </div>
           </div>

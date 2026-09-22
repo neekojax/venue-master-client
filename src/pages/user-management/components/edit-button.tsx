@@ -2,6 +2,8 @@ import { useState } from "react";
 import { Button } from "antd";
 import EditModal from "./edit-modal";
 
+import { t } from "@/locales";
+
 type EditButtonProps = {
   data: any;
 };
@@ -28,7 +30,7 @@ export default function EditButton({ data }: EditButtonProps) {
   return (
     <>
       <Button type="link" size="small" onClick={handleOpen}>
-        编辑
+        {t("编辑")}
       </Button>
       <EditModal open={open} initialValues={data} onCreate={onCreate} onCancel={handleClose} />
     </>

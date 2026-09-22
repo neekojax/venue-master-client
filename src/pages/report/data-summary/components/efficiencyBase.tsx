@@ -1,3 +1,4 @@
+import { t } from "@/locales";
 export type EfficiencyStat = {
   cumulativeOutput: number;
   dailyOutput: number;
@@ -15,7 +16,7 @@ const EfficiencyBase: React.FC<{ data: EfficiencyStat }> = ({ data }) => {
             <div className="space-y-4">
               <div className="flex items-center gap-4">
                 <div className="text-gray-500" style={{ minWidth: "80px" }}>
-                  算力
+                  {t("算力")}
                 </div>
                 <div className="text-xl text-gray-800">
                   {data?.totalHash.toFixed(2)} <span className="text-sm text-gray-400">EH/s</span>
@@ -23,13 +24,13 @@ const EfficiencyBase: React.FC<{ data: EfficiencyStat }> = ({ data }) => {
               </div>
               <div className="flex items-center gap-4">
                 <div className="text-gray-500" style={{ minWidth: "80px" }}>
-                  全网占比
+                  {t("全网占比")}
                 </div>
                 <div className="text-xl text-gray-800">{data?.networkHashRate.toFixed(2)}%</div>
               </div>
               <div className="flex items-center gap-4">
                 <div className="text-gray-500" style={{ minWidth: "80px" }}>
-                  算力有效率
+                  {t("算力有效率")}
                 </div>
                 <div className="text-xl text-gray-800">{data?.hashEffective.toFixed(2)}%</div>
               </div>
@@ -37,7 +38,7 @@ const EfficiencyBase: React.FC<{ data: EfficiencyStat }> = ({ data }) => {
             <div className="space-y-4">
               <div className="flex items-center gap-4">
                 <div className="text-gray-500" style={{ minWidth: "80px" }}>
-                  日产出
+                  {t("日产出")}
                 </div>
                 <div className="text-xl text-gray-800">
                   {data?.dailyOutput.toFixed(2)} <span className="text-sm text-gray-400">BTC</span>
@@ -45,7 +46,7 @@ const EfficiencyBase: React.FC<{ data: EfficiencyStat }> = ({ data }) => {
               </div>
               <div className="flex items-center gap-4">
                 <div className="text-gray-500" style={{ minWidth: "80px" }}>
-                  MTD产出
+                  {t("MTD产出")}
                 </div>
                 <div className="text-xl text-gray-800">
                   {data?.mtdOutput.toFixed(2)} <span className="text-sm text-gray-400">BTC</span>
@@ -53,7 +54,7 @@ const EfficiencyBase: React.FC<{ data: EfficiencyStat }> = ({ data }) => {
               </div>
               <div className="flex items-center gap-4">
                 <div className="text-gray-500" style={{ minWidth: "80px" }}>
-                  累计产出
+                  {t("累计产出")}
                 </div>
                 <div className="text-xl text-gray-800">
                   {data?.cumulativeOutput.toFixed(2)} <span className="text-sm text-gray-400">BTC</span>

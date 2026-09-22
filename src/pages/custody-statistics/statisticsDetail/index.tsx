@@ -3,14 +3,16 @@ import React from "react";
 import ChartFee from "./components/chartFee";
 import ChartPrice from "./components/chartPrice";
 
+import { t } from "@/locales";
+
 const App: React.FC = () => {
   const [venueName, setVenueName] = React.useState<string>("");
   return (
     <div className="min-h-screen" style={{ margin: "0 auto" }}>
       {/* Header Section */}
       <div className="text-center mb-12 mt-8">
-        <h1 className="text-3xl font-bold text-gray-800 mb-2">BTC价格与托管费比例趋势分析</h1>
-        <p className="text-gray-500">最近半年数据</p>
+        <h1 className="text-3xl font-bold text-gray-800 mb-2">{t("BTC价格与托管费比例趋势分析")}</h1>
+        <p className="text-gray-500">{t("最近半年数据")}</p>
         <span className="inline-block bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded-full mt-2">
           {venueName}
         </span>

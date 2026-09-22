@@ -1,4 +1,4 @@
-import { Tag, Typography } from "antd";
+import { Tag, Tooltip, Typography } from "antd";
 import type { ColumnsType } from "antd/es/table";
 import type { HashBoardData, TaskSnapshotItem } from "./types";
 import {
@@ -9,7 +9,18 @@ import {
   formatSnapshotTime,
 } from "./utils";
 
+import { t } from "@/locales";
+
 const { Link } = Typography;
+
+/** 表头统一处理：放得下就完整显示，放不下单行截断显示省略号，鼠标移入 Tooltip 展示全称 */
+function headerTitle(text: string) {
+  return (
+    <Tooltip title={text} mouseEnterDelay={0.2}>
+      <span className="block truncate">{text}</span>
+    </Tooltip>
+  );
+}
 
 export type ColumnPin = false | "left" | "right";
 
@@ -153,47 +164,47 @@ function renderHashBoardHashrate(hashBoards: unknown, index: number) {
 
 /** 默认显示列及顺序（列设置可调整） */
 export const DEFAULT_SNAPSHOT_COLUMN_CONFIGS: SnapshotColumnConfig[] = [
-  { key: "index", title: "序号", visible: true, pin: "left", lockVisible: true },
-  { key: "site_code", title: "场地", visible: true, pin: "left" },
-  { key: "miner_code", title: "矿工号", visible: true, pin: false },
-  { key: "ip", title: "机器IP", visible: true, pin: false },
-  { key: "mac_address", title: "MAC地址", visible: true, pin: false },
-  { key: "control_board_sn", title: "控制板序列号", visible: true, pin: false },
-  { key: "full_type", title: "机型", visible: true, pin: false },
-  { key: "power", title: "功耗比", visible: true, pin: false },
-  { key: "hashrate", title: "算力", visible: true, pin: false },
-  { key: "hashrate_30m", title: "30分钟算力", visible: true, pin: false },
-  { key: "total_hashrate", title: "平均算力", visible: true, pin: false },
-  { key: "ideal_hashrate", title: "理论算力", visible: true, pin: false },
-  { key: "firmware_version", title: "固件版本", visible: true, pin: false },
-  { key: "pool1_worker", title: "矿池1", visible: true, pin: false },
-  { key: "pool2_worker", title: "矿池2", visible: true, pin: false },
-  { key: "pool3_worker", title: "矿池3", visible: true, pin: false },
-  { key: "temperature", title: "温度", visible: true, pin: false },
-  { key: "fans", title: "风扇", visible: true, pin: false },
-  { key: "hash_board_1_sn", title: "算力板1序列号", visible: false, pin: false },
-  { key: "hash_board_1_hashrate", title: "算力板1算力", visible: false, pin: false },
-  { key: "hash_board_1_temperature", title: "算力板1温度", visible: false, pin: false },
-  { key: "hash_board_2_sn", title: "算力板2序列号", visible: false, pin: false },
-  { key: "hash_board_2_hashrate", title: "算力板2算力", visible: false, pin: false },
-  { key: "hash_board_2_temperature", title: "算力板2温度", visible: false, pin: false },
-  { key: "hash_board_3_sn", title: "算力板3序列号", visible: false, pin: false },
-  { key: "hash_board_3_hashrate", title: "算力板3算力", visible: false, pin: false },
-  { key: "hash_board_3_temperature", title: "算力板3温度", visible: false, pin: false },
-  { key: "uptime", title: "运行时长", visible: true, pin: false },
-  { key: "run_mode", title: "运行模式", visible: true, pin: false },
-  { key: "error", title: "错误信息", visible: true, pin: false },
-  { key: "collect_time", title: "采集时间", visible: true, pin: false },
-  { key: "created_at", title: "创建时间", visible: true, pin: false },
-  { key: "updated_at", title: "更新时间", visible: true, pin: false },
+  { key: "index", title: t("序号"), visible: true, pin: "left", lockVisible: true },
+  { key: "site_code", title: t("场地"), visible: true, pin: "left" },
+  { key: "miner_code", title: t("矿工号"), visible: true, pin: false },
+  { key: "ip", title: t("机器IP"), visible: true, pin: false },
+  { key: "mac_address", title: t("MAC地址"), visible: true, pin: false },
+  { key: "control_board_sn", title: t("控制板序列号"), visible: true, pin: false },
+  { key: "full_type", title: t("机型"), visible: true, pin: false },
+  { key: "power", title: t("功耗比"), visible: true, pin: false },
+  { key: "hashrate", title: t("算力"), visible: true, pin: false },
+  { key: "hashrate_30m", title: t("30分钟算力"), visible: true, pin: false },
+  { key: "total_hashrate", title: t("平均算力"), visible: true, pin: false },
+  { key: "ideal_hashrate", title: t("理论算力"), visible: true, pin: false },
+  { key: "firmware_version", title: t("固件版本"), visible: true, pin: false },
+  { key: "pool1_worker", title: t("矿池1"), visible: true, pin: false },
+  { key: "pool2_worker", title: t("矿池2"), visible: true, pin: false },
+  { key: "pool3_worker", title: t("矿池3"), visible: true, pin: false },
+  { key: "temperature", title: t("温度"), visible: true, pin: false },
+  { key: "fans", title: t("风扇"), visible: true, pin: false },
+  { key: "hash_board_1_sn", title: t("算力板1序列号"), visible: false, pin: false },
+  { key: "hash_board_1_hashrate", title: t("算力板1算力"), visible: false, pin: false },
+  { key: "hash_board_1_temperature", title: t("算力板1温度"), visible: false, pin: false },
+  { key: "hash_board_2_sn", title: t("算力板2序列号"), visible: false, pin: false },
+  { key: "hash_board_2_hashrate", title: t("算力板2算力"), visible: false, pin: false },
+  { key: "hash_board_2_temperature", title: t("算力板2温度"), visible: false, pin: false },
+  { key: "hash_board_3_sn", title: t("算力板3序列号"), visible: false, pin: false },
+  { key: "hash_board_3_hashrate", title: t("算力板3算力"), visible: false, pin: false },
+  { key: "hash_board_3_temperature", title: t("算力板3温度"), visible: false, pin: false },
+  { key: "uptime", title: t("运行时长"), visible: true, pin: false },
+  { key: "run_mode", title: t("运行模式"), visible: true, pin: false },
+  { key: "error", title: t("错误信息"), visible: true, pin: false },
+  { key: "collect_time", title: t("采集时间"), visible: true, pin: false },
+  { key: "created_at", title: t("创建时间"), visible: true, pin: false },
+  { key: "updated_at", title: t("更新时间"), visible: true, pin: false },
   // 默认隐藏
-  { key: "agent_code", title: "代理编码", visible: false, pin: false },
-  { key: "task_id", title: "任务ID", visible: false, pin: false },
-  { key: "hashrate_5s", title: "5秒算力", visible: false, pin: false },
-  { key: "hashrate_fault", title: "算力异常", visible: false, pin: false },
-  { key: "pool1_url", title: "矿池1地址", visible: false, pin: false },
-  { key: "pool2_url", title: "矿池2地址", visible: false, pin: false },
-  { key: "pool3_url", title: "矿池3地址", visible: false, pin: false },
+  { key: "agent_code", title: t("代理编码"), visible: false, pin: false },
+  { key: "task_id", title: t("任务ID"), visible: false, pin: false },
+  { key: "hashrate_5s", title: t("5秒算力"), visible: false, pin: false },
+  { key: "hashrate_fault", title: t("算力异常"), visible: false, pin: false },
+  { key: "pool1_url", title: t("矿池1地址"), visible: false, pin: false },
+  { key: "pool2_url", title: t("矿池2地址"), visible: false, pin: false },
+  { key: "pool3_url", title: t("矿池3地址"), visible: false, pin: false },
 ];
 
 export function cloneColumnConfigs(configs: SnapshotColumnConfig[]) {
@@ -345,13 +356,13 @@ function buildColumnMap(
 
   return {
     index: {
-      title: "序号",
+      title: t("序号"),
       key: "index",
       width: 64,
       render: (_v, _row, index) => (page - 1) * pageSize + index + 1,
     },
     site_code: {
-      title: "场地",
+      title: t("场地"),
       dataIndex: "site_code",
       key: "site_code",
       width: 180,
@@ -359,7 +370,7 @@ function buildColumnMap(
       render: (v: string | undefined) => textCell(v ?? siteCodeFallback),
     },
     agent_code: {
-      title: "代理编码",
+      title: t("代理编码"),
       dataIndex: "agent_code",
       key: "agent_code",
       width: 120,
@@ -367,7 +378,7 @@ function buildColumnMap(
       render: textCell,
     },
     miner_code: {
-      title: "矿工号",
+      title: t("矿工号"),
       dataIndex: "miner_code",
       key: "miner_code",
       width: 120,
@@ -375,14 +386,14 @@ function buildColumnMap(
       render: (v: string | undefined) => renderWorkerTag(v),
     },
     ip: {
-      title: "机器IP",
+      title: t("机器IP"),
       dataIndex: "ip",
       key: "ip",
       width: 130,
       render: (v) => formatSnapshotIp(v),
     },
     mac_address: {
-      title: "MAC地址",
+      title: t("MAC地址"),
       dataIndex: "mac_address",
       key: "mac_address",
       width: 160,
@@ -395,7 +406,7 @@ function buildColumnMap(
         ),
     },
     control_board_sn: {
-      title: "控制板序列号",
+      title: t("控制板序列号"),
       dataIndex: "control_board_sn",
       key: "control_board_sn",
       width: 200,
@@ -403,7 +414,7 @@ function buildColumnMap(
       render: textCell,
     },
     full_type: {
-      title: "机型",
+      title: t("机型"),
       dataIndex: "full_type",
       key: "full_type",
       width: 150,
@@ -411,7 +422,7 @@ function buildColumnMap(
       render: (v: string | undefined) => renderWorkerTag(v),
     },
     power: {
-      title: "功耗比",
+      title: t("功耗比"),
       dataIndex: "power",
       key: "power",
       width: 110,
@@ -419,35 +430,35 @@ function buildColumnMap(
         renderPowerRatioCell(v, record.hashrate_30m),
     },
     hashrate: {
-      title: "算力",
+      title: t("算力"),
       dataIndex: "hashrate",
       key: "hashrate",
       width: 110,
       render: (v: number | undefined) => renderHashrateCell(v, 2),
     },
     hashrate_30m: {
-      title: "30分钟算力",
+      title: t("30分钟算力"),
       dataIndex: "hashrate_30m",
       key: "hashrate_30m",
       width: 120,
       render: (v: number | undefined) => renderHashrateCell(v, 2),
     },
     ideal_hashrate: {
-      title: "理论算力",
+      title: t("理论算力"),
       dataIndex: "ideal_hashrate",
       key: "ideal_hashrate",
       width: 110,
       render: (v: number | undefined) => renderHashrateCell(v, 2),
     },
     total_hashrate: {
-      title: "平均算力",
+      title: t("平均算力"),
       dataIndex: "total_hashrate",
       key: "total_hashrate",
       width: 110,
       render: (v: number | undefined) => renderHashrateCell(v, 2),
     },
     firmware_version: {
-      title: "固件版本",
+      title: t("固件版本"),
       dataIndex: "firmware_version",
       key: "firmware_version",
       width: 180,
@@ -455,7 +466,7 @@ function buildColumnMap(
       render: textCell,
     },
     pool1_worker: {
-      title: "矿池1",
+      title: t("矿池1"),
       dataIndex: "pool1_worker",
       key: "pool1_worker",
       width: 140,
@@ -463,7 +474,7 @@ function buildColumnMap(
       render: (v: string | undefined) => renderWorkerTag(v),
     },
     pool2_worker: {
-      title: "矿池2",
+      title: t("矿池2"),
       dataIndex: "pool2_worker",
       key: "pool2_worker",
       width: 140,
@@ -471,7 +482,7 @@ function buildColumnMap(
       render: (v: string | undefined) => renderWorkerTag(v),
     },
     pool3_worker: {
-      title: "矿池3",
+      title: t("矿池3"),
       dataIndex: "pool3_worker",
       key: "pool3_worker",
       width: 140,
@@ -479,7 +490,7 @@ function buildColumnMap(
       render: (v: string | undefined) => renderWorkerTag(v),
     },
     temperature: {
-      title: "温度",
+      title: t("温度"),
       dataIndex: "temperature",
       key: "temperature",
       width: 160,
@@ -487,7 +498,7 @@ function buildColumnMap(
       render: (v: unknown) => formatSnapshotJson(v),
     },
     fans: {
-      title: "风扇",
+      title: t("风扇"),
       dataIndex: "fans",
       key: "fans",
       width: 160,
@@ -495,7 +506,7 @@ function buildColumnMap(
       render: (v: unknown) => formatSnapshotJson(v),
     },
     hash_board_1_sn: {
-      title: "算力板1序列号",
+      title: t("算力板1序列号"),
       dataIndex: "hash_boards",
       key: "hash_board_1_sn",
       width: 180,
@@ -503,21 +514,21 @@ function buildColumnMap(
       render: (v: unknown) => renderHashBoardText(v, 0, "sn"),
     },
     hash_board_1_hashrate: {
-      title: "算力板1算力",
+      title: t("算力板1算力"),
       dataIndex: "hash_boards",
       key: "hash_board_1_hashrate",
       width: 130,
       render: (v: unknown) => renderHashBoardHashrate(v, 0),
     },
     hash_board_1_temperature: {
-      title: "算力板1温度",
+      title: t("算力板1温度"),
       dataIndex: "hash_boards",
       key: "hash_board_1_temperature",
       width: 130,
       render: (v: unknown) => renderHashBoardText(v, 0, "temperature"),
     },
     hash_board_2_sn: {
-      title: "算力板2序列号",
+      title: t("算力板2序列号"),
       dataIndex: "hash_boards",
       key: "hash_board_2_sn",
       width: 180,
@@ -525,21 +536,21 @@ function buildColumnMap(
       render: (v: unknown) => renderHashBoardText(v, 1, "sn"),
     },
     hash_board_2_hashrate: {
-      title: "算力板2算力",
+      title: t("算力板2算力"),
       dataIndex: "hash_boards",
       key: "hash_board_2_hashrate",
       width: 130,
       render: (v: unknown) => renderHashBoardHashrate(v, 1),
     },
     hash_board_2_temperature: {
-      title: "算力板2温度",
+      title: t("算力板2温度"),
       dataIndex: "hash_boards",
       key: "hash_board_2_temperature",
       width: 130,
       render: (v: unknown) => renderHashBoardText(v, 1, "temperature"),
     },
     hash_board_3_sn: {
-      title: "算力板3序列号",
+      title: t("算力板3序列号"),
       dataIndex: "hash_boards",
       key: "hash_board_3_sn",
       width: 180,
@@ -547,21 +558,21 @@ function buildColumnMap(
       render: (v: unknown) => renderHashBoardText(v, 2, "sn"),
     },
     hash_board_3_hashrate: {
-      title: "算力板3算力",
+      title: t("算力板3算力"),
       dataIndex: "hash_boards",
       key: "hash_board_3_hashrate",
       width: 130,
       render: (v: unknown) => renderHashBoardHashrate(v, 2),
     },
     hash_board_3_temperature: {
-      title: "算力板3温度",
+      title: t("算力板3温度"),
       dataIndex: "hash_boards",
       key: "hash_board_3_temperature",
       width: 130,
       render: (v: unknown) => renderHashBoardText(v, 2, "temperature"),
     },
     uptime: {
-      title: "运行时长",
+      title: t("运行时长"),
       dataIndex: "uptime",
       key: "uptime",
       width: 100,
@@ -569,7 +580,7 @@ function buildColumnMap(
       render: textCell,
     },
     run_mode: {
-      title: "运行模式",
+      title: t("运行模式"),
       dataIndex: "run_mode",
       key: "run_mode",
       width: 100,
@@ -577,7 +588,7 @@ function buildColumnMap(
       render: textCell,
     },
     error: {
-      title: "错误信息",
+      title: t("错误信息"),
       dataIndex: "error",
       key: "error",
       width: 140,
@@ -585,28 +596,28 @@ function buildColumnMap(
       render: textCell,
     },
     collect_time: {
-      title: "采集时间",
+      title: t("采集时间"),
       dataIndex: "collect_time",
       key: "collect_time",
       width: 170,
       render: (v: string | undefined) => formatSnapshotTime(v),
     },
     created_at: {
-      title: "创建时间",
+      title: t("创建时间"),
       dataIndex: "created_at",
       key: "created_at",
       width: 170,
       render: (v: string | undefined) => formatSnapshotTime(v),
     },
     updated_at: {
-      title: "更新时间",
+      title: t("更新时间"),
       dataIndex: "updated_at",
       key: "updated_at",
       width: 170,
       render: (v: string | undefined) => formatSnapshotTime(v),
     },
     task_id: {
-      title: "任务ID",
+      title: t("任务ID"),
       dataIndex: "task_id",
       key: "task_id",
       width: 120,
@@ -614,21 +625,22 @@ function buildColumnMap(
       render: textCell,
     },
     hashrate_5s: {
-      title: "5秒算力",
+      title: t("5秒算力"),
       dataIndex: "hashrate_5s",
       key: "hashrate_5s",
       width: 110,
       render: (v: number | undefined) => formatSnapshotHashrate(v, 2),
     },
     hashrate_fault: {
-      title: "算力异常",
+      title: t("算力异常"),
       dataIndex: "hashrate_fault",
       key: "hashrate_fault",
       width: 88,
-      render: (v: boolean | undefined) => (v ? <Tag color="error">是</Tag> : <Tag color="default">否</Tag>),
+      render: (v: boolean | undefined) =>
+        v ? <Tag color="error">{t("是")}</Tag> : <Tag color="default">{t("否")}</Tag>,
     },
     pool1_url: {
-      title: "矿池1地址",
+      title: t("矿池1地址"),
       dataIndex: "pool1_url",
       key: "pool1_url",
       width: 180,
@@ -636,7 +648,7 @@ function buildColumnMap(
       render: textCell,
     },
     pool2_url: {
-      title: "矿池2地址",
+      title: t("矿池2地址"),
       dataIndex: "pool2_url",
       key: "pool2_url",
       width: 180,
@@ -644,7 +656,7 @@ function buildColumnMap(
       render: textCell,
     },
     pool3_url: {
-      title: "矿池3地址",
+      title: t("矿池3地址"),
       dataIndex: "pool3_url",
       key: "pool3_url",
       width: 180,
@@ -678,7 +690,9 @@ export function buildSnapshotTableColumns(
       const config = configMap.get(key);
       const width = typeof col.width === "number" ? col.width : 120;
       scrollX += width;
-      const base = { ...col, title: config?.title ?? col.title };
+      // 列配置里的 title 是纯字符串，会覆盖列自带 title —— 在此统一做「截断 + Tooltip」处理
+      const rawTitle = config?.title ?? col.title;
+      const base = { ...col, title: typeof rawTitle === "string" ? headerTitle(rawTitle) : rawTitle };
       if (config?.pin === "left") {
         return { ...base, fixed: "left" as const };
       }

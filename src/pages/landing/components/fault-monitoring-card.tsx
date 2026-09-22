@@ -1,8 +1,10 @@
 import { useEffect, useState } from "react";
+import { Tooltip } from "antd";
 import { AlertCircle, AlertTriangle, RefreshCw } from "lucide-react";
 import { ReactEcharts } from "@/components/react-echarts";
 import { useSelector, useSettingsStore } from "@/stores";
 
+import { t } from "@/locales";
 import { fetchFailureStatistics } from "@/pages/landing/api.ts";
 
 interface FailureData {
@@ -134,8 +136,8 @@ const FaultMonitoringCard = () => {
             <AlertTriangle size={20} className="text-red-500" />
           </div>
           <div>
-            <h2 className="text-lg font-bold text-slate-900 tracking-tight">故障监控</h2>
-            <p className="text-xs text-slate-400">系统健康与警报</p>
+            <h2 className="text-lg font-bold text-slate-900 tracking-tight">{t("故障监控")}</h2>
+            <p className="text-xs text-slate-400">{t("系统健康与警报")}</p>
           </div>
         </div>
       </div>
@@ -143,16 +145,20 @@ const FaultMonitoringCard = () => {
       <div className="flex flex-col h-full">
         {/* Stats */}
         <div className="flex gap-4 mb-6">
-          <div className="flex-1 bg-slate-50/80 rounded-2xl p-4 border border-slate-100 flex flex-col justify-between hover:border-slate-300 transition-colors">
-            <div className="flex items-center justify-between gap-2 mb-2 text-slate-500">
-              <div className="flex items-center gap-2">
-                <AlertCircle size={14} />
-                <span className="text-xs font-semibold uppercase">昨日总故障数</span>
+          <div className="flex-1 min-w-0 bg-slate-50/80 rounded-2xl p-4 border border-slate-100 flex flex-col justify-between hover:border-slate-300 transition-colors">
+            <div className="mb-2 text-slate-500">
+              <div className="flex items-center gap-2 min-w-0">
+                <AlertCircle size={14} className="shrink-0" />
+                <Tooltip title={t("昨日总故障数")} mouseEnterDelay={0.2}>
+                  <span className="text-xs font-semibold uppercase truncate min-w-0 cursor-default">
+                    {t("昨日总故障数")}
+                  </span>
+                </Tooltip>
               </div>
               {showUpdatingBadge ? (
-                <span className="inline-flex items-center gap-1 rounded-full bg-blue-50 px-2 py-0.5 text-[11px] font-medium text-blue-500">
+                <span className="inline-flex items-center gap-1 rounded-full bg-blue-50 px-2 py-0.5 text-[11px] font-medium text-blue-500 mt-1.5">
                   <RefreshCw size={11} className="animate-spin" />
-                  更新中
+                  {t("更新中")}
                 </span>
               ) : null}
             </div>
@@ -162,16 +168,20 @@ const FaultMonitoringCard = () => {
             </div>
           </div>
 
-          <div className="flex-1 bg-red-50/50 rounded-2xl p-4 border border-red-100 flex flex-col justify-between hover:border-red-200 transition-colors">
-            <div className="flex items-center justify-between gap-2 mb-2 text-red-600">
-              <div className="flex items-center gap-2">
-                <AlertTriangle size={14} />
-                <span className="text-xs font-semibold uppercase">昨日新增故障数</span>
+          <div className="flex-1 min-w-0 bg-red-50/50 rounded-2xl p-4 border border-red-100 flex flex-col justify-between hover:border-red-200 transition-colors">
+            <div className="mb-2 text-red-600">
+              <div className="flex items-center gap-2 min-w-0">
+                <AlertTriangle size={14} className="shrink-0" />
+                <Tooltip title={t("昨日新增故障数")} mouseEnterDelay={0.2}>
+                  <span className="text-xs font-semibold uppercase truncate min-w-0 cursor-default">
+                    {t("昨日新增故障数")}
+                  </span>
+                </Tooltip>
               </div>
               {showUpdatingBadge ? (
-                <span className="inline-flex items-center gap-1 rounded-full bg-blue-50 px-2 py-0.5 text-[11px] font-medium text-blue-500">
+                <span className="inline-flex items-center gap-1 rounded-full bg-blue-50 px-2 py-0.5 text-[11px] font-medium text-blue-500 mt-1.5">
                   <RefreshCw size={11} className="animate-spin" />
-                  更新中
+                  {t("更新中")}
                 </span>
               ) : null}
             </div>
@@ -184,7 +194,7 @@ const FaultMonitoringCard = () => {
 
         {/* Chart */}
         <div className="flex-1 min-h-[120px] flex flex-col justify-end">
-          <div className="text-xs text-slate-400 mb-2 text-right">最近7日故障曲线</div>
+          <div className="text-xs text-slate-400 mb-2 text-right">{t("最近7日故障曲线")}</div>
           <div className="w-full h-full min-h-[100px]">
             <ReactEcharts option={getOption()} style={{ height: "100%", width: "100%" }} />
           </div>

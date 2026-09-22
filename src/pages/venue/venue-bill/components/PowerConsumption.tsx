@@ -5,6 +5,8 @@ import type { ColumnsType } from "antd/es/table";
 import { fetchPowerConsumptionList } from "../../api";
 import { exportPowerConsumptionToExcel } from "@/utils/excel";
 
+import { t } from "@/locales";
+
 interface PowerConsumptionRecord {
   venue_id: number;
   siteName: string;
@@ -35,7 +37,7 @@ const PowerConsumption = forwardRef<PowerConsumptionHandle, PowerConsumptionProp
 
     const columns: ColumnsType<PowerConsumptionRecord> = [
       {
-        title: "场地名称",
+        title: t("场地名称"),
         dataIndex: "siteName",
         key: "siteName",
         sorter: (a, b) => a.siteName.localeCompare(b.siteName),
@@ -43,7 +45,7 @@ const PowerConsumption = forwardRef<PowerConsumptionHandle, PowerConsumptionProp
         width: 350,
       },
       {
-        title: "账单覆盖周期",
+        title: t("账单覆盖周期"),
         dataIndex: "start_time",
         key: "start_time",
         width: 250,
@@ -54,7 +56,7 @@ const PowerConsumption = forwardRef<PowerConsumptionHandle, PowerConsumptionProp
         ),
       },
       {
-        title: "总功耗",
+        title: t("总功耗"),
         dataIndex: "power_consumption",
         key: "power_consumption",
         sorter: (a, b) => a.power_consumption - b.power_consumption,
@@ -67,7 +69,7 @@ const PowerConsumption = forwardRef<PowerConsumptionHandle, PowerConsumptionProp
 
     const ExtendColumns: ColumnsType<PowerConsumptionRecord> = [
       {
-        title: "账单覆盖周期",
+        title: t("账单覆盖周期"),
         dataIndex: "start_time",
         key: "start_time",
         width: 250,
@@ -78,7 +80,7 @@ const PowerConsumption = forwardRef<PowerConsumptionHandle, PowerConsumptionProp
         ),
       },
       {
-        title: "总功耗 (kWh)",
+        title: t("总功耗 (kWh)"),
         dataIndex: "power_consumption",
         key: "power_consumption",
         sorter: (a, b) => a.power_consumption - b.power_consumption,
@@ -175,8 +177,12 @@ const PowerConsumption = forwardRef<PowerConsumptionHandle, PowerConsumptionProp
       <>
         <div className="mb-4 p-4 bg-blue-50 rounded-lg">
           {/* <div className="text-blue-800 font-medium mb-1">名词释义</div> */}
-          <div className="text-blue-600 text-sm">结算电量：实际产生的电力消耗量，用于计算电费的基础数据</div>
-          <div className="text-blue-600 text-sm">矿池算力：连接至矿池的设备总算力，反映场地的服务能力</div>
+          <div className="text-blue-600 text-sm">
+            {t("结算电量：实际产生的电力消耗量，用于计算电费的基础数据")}
+          </div>
+          <div className="text-blue-600 text-sm">
+            {t("矿池算力：连接至矿池的设备总算力，反映场地的服务能力")}
+          </div>
         </div>
         <Table
           columns={columns}

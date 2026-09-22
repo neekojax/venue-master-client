@@ -1,3 +1,4 @@
+import { t } from "@/locales";
 export interface Rig {
   id: string;
   site: string;
@@ -34,77 +35,77 @@ export interface SiteInfo {
 // Generate realistic sites data
 export const SITES: SiteInfo[] = [
   {
-    name: "四川阿坝一号场",
+    name: t("四川阿坝一号场"),
     totalRigs: 1250,
     activeRigs: 1210,
     abnormalStats: { yesterday: 8, day3: 15, day7: 24, day15: 42, day30: 68, all: 115 },
     history30Days: [],
   },
   {
-    name: "内蒙古鄂尔多斯二号场",
+    name: t("内蒙古鄂尔多斯二号场"),
     totalRigs: 2800,
     activeRigs: 2680,
     abnormalStats: { yesterday: 24, day3: 52, day7: 89, day15: 145, day30: 210, all: 345 },
     history30Days: [],
   },
   {
-    name: "新疆准东三号场",
+    name: t("新疆准东三号场"),
     totalRigs: 4500,
     activeRigs: 4350,
     abnormalStats: { yesterday: 45, day3: 98, day7: 154, day15: 280, day30: 420, all: 680 },
     history30Days: [],
   },
   {
-    name: "云南昭通四号场",
+    name: t("云南昭通四号场"),
     totalRigs: 950,
     activeRigs: 920,
     abnormalStats: { yesterday: 5, day3: 12, day7: 19, day15: 31, day30: 55, all: 92 },
     history30Days: [],
   },
   {
-    name: "甘肃玉门五号场",
+    name: t("甘肃玉门五号场"),
     totalRigs: 1600,
     activeRigs: 1520,
     abnormalStats: { yesterday: 18, day3: 35, day7: 58, day15: 92, day30: 148, all: 240 },
     history30Days: [],
   },
   {
-    name: "青海海西六号场",
+    name: t("青海海西六号场"),
     totalRigs: 2100,
     activeRigs: 2010,
     abnormalStats: { yesterday: 12, day3: 28, day7: 49, day15: 78, day30: 125, all: 210 },
     history30Days: [],
   },
   {
-    name: "四川雅安七号场",
+    name: t("四川雅安七号场"),
     totalRigs: 1400,
     activeRigs: 1375,
     abnormalStats: { yesterday: 10, day3: 22, day7: 38, day15: 65, day30: 95, all: 155 },
     history30Days: [],
   },
   {
-    name: "贵州贵阳八号场",
+    name: t("贵州贵阳八号场"),
     totalRigs: 1100,
     activeRigs: 1080,
     abnormalStats: { yesterday: 6, day3: 14, day7: 25, day15: 44, day30: 72, all: 118 },
     history30Days: [],
   },
   {
-    name: "青海格尔木九号场",
+    name: t("青海格尔木九号场"),
     totalRigs: 2300,
     activeRigs: 2240,
     abnormalStats: { yesterday: 19, day3: 41, day7: 72, day15: 120, day30: 185, all: 295 },
     history30Days: [],
   },
   {
-    name: "内蒙古乌海十号场",
+    name: t("内蒙古乌海十号场"),
     totalRigs: 3200,
     activeRigs: 3120,
     abnormalStats: { yesterday: 31, day3: 65, day7: 112, day15: 195, day30: 310, all: 490 },
     history30Days: [],
   },
   {
-    name: "云南怒江十一号场",
+    name: t("云南怒江十一号场"),
     totalRigs: 850,
     activeRigs: 830,
     abnormalStats: { yesterday: 4, day3: 9, day7: 15, day15: 28, day30: 48, all: 76 },
@@ -210,7 +211,7 @@ export const generateRigs = (): Rig[] => {
         d.setHours(10 + (i % 8), 15 + ((i * 12) % 45));
         dismantledTime = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")} ${String(d.getHours()).padStart(2, "0")}:${String(d.getMinutes()).padStart(2, "0")}`;
       } else if (isDismantled === "未知") {
-        dismantledTime = "待确认";
+        dismantledTime = t("待确认");
       }
 
       rigs.push({
@@ -240,5 +241,5 @@ export const RIG_MODELS = [
   "Avalon A1246",
   "Jasminer X4",
 ];
-export const ASSET_TYPES = ["自有", "非自有", "未知"];
-export const DISMANTLED_STATES = ["下架", "在架", "未知"];
+export const ASSET_TYPES = [t("自有"), t("非自有"), t("未知")];
+export const DISMANTLED_STATES = [t("下架"), t("在架"), t("未知")];

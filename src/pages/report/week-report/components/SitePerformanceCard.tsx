@@ -6,6 +6,8 @@ import type { ColumnsType } from "antd/es/table";
 import type { DailyData, DataItem } from "./types";
 import { formatDivide1000 } from "@/utils/format";
 
+import { t } from "@/locales";
+
 // 统一从共享类型导入，避免与其他组件定义不一致
 
 interface SitePerformanceCardProps {
@@ -67,7 +69,7 @@ function renderOverclockMetric(
 }
 
 const SitePerformanceCard: React.FC<SitePerformanceCardProps> = ({
-  title = "场地算力表现",
+  title = t("场地算力表现"),
   columns,
   data,
   onSearch,
@@ -97,9 +99,9 @@ const SitePerformanceCard: React.FC<SitePerformanceCardProps> = ({
     if (typeof column.title === "string") return column.title;
     switch (String(column.key)) {
       case "average_thermal_power":
-        return "理论算力 (PH/s) / 变频";
+        return t("理论算力 (PH/s) / 变频");
       case "average_hash_effective_rate":
-        return "算力有效率 / 变频";
+        return t("算力有效率 / 变频");
       default:
         return String(column.key);
     }
@@ -224,13 +226,13 @@ const SitePerformanceCard: React.FC<SitePerformanceCardProps> = ({
           <span>
             <Switch size="small" checked={showCollectionOnly} onChange={setShowCollectionOnly} />
             {"  "}
-            <span style={{ marginRight: "10px" }}>我的自选</span>
+            <span style={{ marginRight: "10px" }}>{t("我的自选")}</span>
           </span>
 
           <div className="flex items-center gap-4">
             <Input
               size="small"
-              placeholder="搜索场地..."
+              placeholder={t("搜索场地...")}
               prefix={<SearchOutlined className="text-gray-400" />}
               className="!rounded-button"
               onPressEnter={(e) => onSearch?.((e.target as HTMLInputElement).value)}
@@ -265,7 +267,7 @@ const SitePerformanceCard: React.FC<SitePerformanceCardProps> = ({
                   className={`text-gray-600 flex items-center gap-2 select-none ${!sortedColumnLabel ? "pl-2" : ""}`}
                 >
                   <span className="text-sm" style={{ fontSize: "12px" }}>
-                    已选{selectedColumnKeys.length}列
+                    {t("已选{{length}}列", { length: selectedColumnKeys.length })}
                   </span>
                 </div>
 
@@ -280,7 +282,7 @@ const SitePerformanceCard: React.FC<SitePerformanceCardProps> = ({
               {showColumnSelector && (
                 <div className="absolute right-0 top-full mt-1 w-60 bg-white border border-gray-200 rounded-lg shadow-xl z-50 py-1 max-h-96 overflow-y-auto">
                   <div className="px-3 py-2 text-xs font-semibold text-gray-500 border-b border-gray-100 bg-gray-50">
-                    显示列
+                    {t("显示列")}
                   </div>
                   {ALL_COLUMNS.map((col) => (
                     <div
@@ -313,21 +315,21 @@ const SitePerformanceCard: React.FC<SitePerformanceCardProps> = ({
               type={selected === "all" ? "primary" : "default"}
               onClick={() => setSelected("all")}
             >
-              全部场地
+              {t("全部场地")}
             </Button>
             <Button
               size="small"
               type={selected === "top5" ? "primary" : "default"}
               onClick={() => setSelected("top5")}
             >
-              有效率 Top 5
+              {t("有效率 Top 5")}
             </Button>
             <Button
               size="small"
               type={selected === "bottom5" ? "primary" : "default"}
               onClick={() => setSelected("bottom5")}
             >
-              有效率 Bottom 5
+              {t("有效率 Bottom 5")}
             </Button>
             {/* <Segmented
             size="middle"
@@ -355,7 +357,7 @@ const SitePerformanceCard: React.FC<SitePerformanceCardProps> = ({
           ...pagination,
           total: filteredData.length,
           // pageSize: 10,
-          showTotal: (total) => `共 ${total} 个场地`,
+          showTotal: (total) => t("共 {{total}} 个场地", { total: total }),
           showSizeChanger: true,
           showQuickJumper: true,
           onChange: (page, pageSize) => {
@@ -367,7 +369,7 @@ const SitePerformanceCard: React.FC<SitePerformanceCardProps> = ({
           expandedRowRender: (record) => {
             const dailyColumns: ColumnsType<DailyData> = [
               {
-                title: "日期",
+                title: t("日期"),
                 dataIndex: "Date",
                 key: "Date",
                 align: "center",
@@ -376,8 +378,8 @@ const SitePerformanceCard: React.FC<SitePerformanceCardProps> = ({
               {
                 title: (
                   <span>
-                    理论算力 (PH/s)
-                    <span style={{ marginLeft: 4 }}>/ 变频</span>
+                    {t("理论算力 (PH/s)")}
+                    <span style={{ marginLeft: 4 }}>{t("/ 变频")}</span>
                   </span>
                 ),
                 dataIndex: "TheoreticalPower",
@@ -398,7 +400,7 @@ const SitePerformanceCard: React.FC<SitePerformanceCardProps> = ({
                   ),
               },
               {
-                title: "实际算力 (PH/s)",
+                title: t("实际算力 (PH/s)"),
                 dataIndex: "Power24h",
                 key: "Power24h",
                 align: "center",
@@ -406,7 +408,7 @@ const SitePerformanceCard: React.FC<SitePerformanceCardProps> = ({
                 render: (value: number) => formatDivide1000(value),
               },
               {
-                title: "产出效率(BTC/EH)",
+                title: t("产出效率(BTC/EH)"),
                 dataIndex: "OutputEfficiency",
                 key: "OutputEfficiency",
                 align: "center",
@@ -416,8 +418,8 @@ const SitePerformanceCard: React.FC<SitePerformanceCardProps> = ({
               {
                 title: (
                   <span>
-                    算力有效率
-                    <span style={{ marginLeft: 4 }}>/ 变频</span>
+                    {t("算力有效率")}
+                    <span style={{ marginLeft: 4 }}>{t("/ 变频")}</span>
                   </span>
                 ),
                 dataIndex: "HashEffectiveRate",
@@ -448,7 +450,7 @@ const SitePerformanceCard: React.FC<SitePerformanceCardProps> = ({
                 ),
               },
               {
-                title: "净有效率",
+                title: t("净有效率"),
                 dataIndex: "ForecastHashEfficiency",
                 key: "ForecastHashEfficiency",
                 align: "center",
@@ -457,7 +459,7 @@ const SitePerformanceCard: React.FC<SitePerformanceCardProps> = ({
                 sorter: (a, b) => a.ForecastHashEfficiency - b.ForecastHashEfficiency,
               },
               {
-                title: "故障数",
+                title: t("故障数"),
                 dataIndex: "Failure",
                 key: "Failure",
                 align: "center",
@@ -466,7 +468,7 @@ const SitePerformanceCard: React.FC<SitePerformanceCardProps> = ({
                 sorter: (a, b) => a.Failure - b.Failure,
               },
               {
-                title: "故障率",
+                title: t("故障率"),
                 dataIndex: "FailureRate",
                 key: "FailureRate",
                 align: "center",
@@ -482,7 +484,7 @@ const SitePerformanceCard: React.FC<SitePerformanceCardProps> = ({
                 ),
               },
               {
-                title: "待修率",
+                title: t("待修率"),
                 dataIndex: "PendingRepairRate",
                 key: "PendingRepairRate",
                 align: "center",
@@ -492,7 +494,7 @@ const SitePerformanceCard: React.FC<SitePerformanceCardProps> = ({
               },
 
               {
-                title: "净故障率",
+                title: t("净故障率"),
                 dataIndex: "NetFailureRate",
                 key: "NetFailureRate",
                 align: "center",
@@ -501,7 +503,7 @@ const SitePerformanceCard: React.FC<SitePerformanceCardProps> = ({
                 render: (value) => <span className="text-red-500">{value}%</span>,
               },
               {
-                title: "报废数",
+                title: t("报废数"),
                 dataIndex: "Scrap",
                 key: "Scrap",
                 align: "center",
@@ -510,7 +512,7 @@ const SitePerformanceCard: React.FC<SitePerformanceCardProps> = ({
                 sorter: (a, b) => a.Scrap - b.Scrap,
               },
               {
-                title: "高温影响率",
+                title: t("高温影响率"),
                 dataIndex: "HighTemperatureImpactRate",
                 key: "HighTemperatureImpactRate",
                 align: "center",
@@ -519,7 +521,7 @@ const SitePerformanceCard: React.FC<SitePerformanceCardProps> = ({
                 render: (value) => <span className="text-orange-500">{value}%</span>,
               },
               {
-                title: "限电影响率",
+                title: t("限电影响率"),
                 dataIndex: "LimitImpactRate",
                 key: "LimitImpactRate",
                 align: "center",
@@ -528,7 +530,7 @@ const SitePerformanceCard: React.FC<SitePerformanceCardProps> = ({
                 render: (value) => <span className="text-yellow-500">{value}%</span>,
               },
               {
-                title: "低功耗影响率",
+                title: t("低功耗影响率"),
                 width: 150,
                 dataIndex: "low_power_impact_rate",
                 key: "low_power_impact_rate",
@@ -537,7 +539,7 @@ const SitePerformanceCard: React.FC<SitePerformanceCardProps> = ({
                 render: (value) => <span>{value}%</span>,
               },
               {
-                title: "撤场比例",
+                title: t("撤场比例"),
                 width: 150,
                 dataIndex: "withdraw_impact_rate",
                 key: "withdraw_impact_rate",
@@ -546,7 +548,7 @@ const SitePerformanceCard: React.FC<SitePerformanceCardProps> = ({
                 render: (value) => <span>{value}%</span>,
               },
               {
-                title: "云算力比例",
+                title: t("云算力比例"),
                 width: 150,
                 dataIndex: "cloud_power_rate",
                 key: "cloud_power_rate",
@@ -555,7 +557,7 @@ const SitePerformanceCard: React.FC<SitePerformanceCardProps> = ({
                 render: (value) => <span>{value}%</span>,
               },
               {
-                title: "上架数量",
+                title: t("上架数量"),
                 dataIndex: "Shelved",
                 key: "Shelved",
                 align: "center",
@@ -563,7 +565,7 @@ const SitePerformanceCard: React.FC<SitePerformanceCardProps> = ({
                 sorter: (a, b) => a.Shelved - b.Shelved,
               },
               {
-                title: "下架数量",
+                title: t("下架数量"),
                 dataIndex: "Unshelved",
                 key: "Unshelved",
                 align: "center",

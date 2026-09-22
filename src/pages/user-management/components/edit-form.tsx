@@ -3,6 +3,8 @@ import { unstable_usePrompt } from "react-router-dom";
 import { Form, type FormInstance, Input } from "antd";
 import type { Values } from "../types";
 
+import { t } from "@/locales";
+
 interface EditFormProps {
   initialValues: Values;
   onFormInstanceReady: (instance: FormInstance<Values>) => void;
@@ -21,7 +23,7 @@ export default function EditForm({ initialValues, onFormInstanceReady }: EditFor
   // https://reactrouter.com/en/main/hooks/use-prompt
   // Block navigating elsewhere when data has been entered into the input
   unstable_usePrompt({
-    message: "您还有未保存的修改，确定要离开吗？",
+    message: t("您还有未保存的修改，确定要离开吗？"),
     when: ({ currentLocation, nextLocation }) =>
       hasChanged && currentLocation.pathname !== nextLocation.pathname,
   });

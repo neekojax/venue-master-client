@@ -2,6 +2,8 @@ import dayjs from "dayjs";
 import timezone from "dayjs/plugin/timezone";
 import utc from "dayjs/plugin/utc";
 
+import { t } from "@/locales";
+
 // 加载插件
 dayjs.extend(utc);
 dayjs.extend(timezone);
@@ -66,11 +68,15 @@ export function getTimeDifference(startTime: string, endTime: string) {
   const minutes = Math.floor(diff / (1000 * 60));
   diff %= 1000 * 60;
   if (days) {
-    return `${days}天 ` + (hours ? hours + "小时 " : "") + (minutes ? minutes + "分钟" : "");
+    return (
+      t("{{days}}天", { days: days }) +
+      (hours ? hours + t("小时") : "") +
+      (minutes ? minutes + t("分钟") : "")
+    );
   } else if (hours) {
-    return `${hours}小时 ` + (minutes ? minutes + "分钟" : "");
+    return t("{{hours}}小时", { hours: hours }) + (minutes ? minutes + t("分钟") : "");
   } else if (minutes) {
-    return `${minutes}分钟`;
+    return t("{{minutes}}分钟", { minutes: minutes });
   }
   return "---";
 }
