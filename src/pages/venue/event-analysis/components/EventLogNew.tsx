@@ -147,7 +147,7 @@ const getColumnKey = (column: ColumnsType<EventLog>[number]) =>
 
 const App: React.FC<{ storageKey: string }> = ({ storageKey }) => {
   const columnStorageKey = `${storageKey}:hidden-columns`;
-  const [hiddenColumns, setHiddenColumns] = useState<string[]>(() => {
+  const [hiddenColumns] = useState<string[]>(() => {
     try {
       const saved = JSON.parse(localStorage.getItem(columnStorageKey) || "null");
       return Array.isArray(saved) && saved.every((key) => typeof key === "string")
@@ -650,18 +650,18 @@ const App: React.FC<{ storageKey: string }> = ({ storageKey }) => {
     setIsModalVisible(true);
   };
 
-  const handleEdit = (record: EventLog) => {
-    form.setFieldsValue({
-      ...record,
-      log_date: record.log_date ? dayjs(record.log_date) : undefined,
-      start_time: record.start_time ? dayjs(record.start_time) : undefined, //dayjs(record.start_time),
-      end_time: record.end_time ? dayjs(record.end_time) : undefined, // 如果为 null/undefined，就不传入初始值
-      // end_time: dayjs(record.end_time),
-      machine_model: record.machine_model,
-      machine_status: record.machine_status,
-    });
-    setIsModalVisible(true);
-  };
+  // const handleEdit = (record: EventLog) => {
+  //   form.setFieldsValue({
+  //     ...record,
+  //     log_date: record.log_date ? dayjs(record.log_date) : undefined,
+  //     start_time: record.start_time ? dayjs(record.start_time) : undefined, //dayjs(record.start_time),
+  //     end_time: record.end_time ? dayjs(record.end_time) : undefined, // 如果为 null/undefined，就不传入初始值
+  //     // end_time: dayjs(record.end_time),
+  //     machine_model: record.machine_model,
+  //     machine_status: record.machine_status,
+  //   });
+  //   setIsModalVisible(true);
+  // };
 
   const handleDelete = (id: number) => {
     deleteMutation.mutate(id, {
