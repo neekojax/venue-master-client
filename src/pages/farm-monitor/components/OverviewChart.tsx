@@ -5,6 +5,8 @@ import { ReactEcharts } from "@/components/react-echarts";
 import { FARM_STATUS_COLOR, type FarmStatus } from "../mockData";
 import type { OverviewPoint, TimeRange } from "../types";
 
+import { t } from "@/locales";
+
 const { Text } = Typography;
 
 interface OverviewChartProps {
@@ -19,14 +21,14 @@ interface OverviewChartProps {
 }
 
 const LEGEND_ITEMS = [
-  { name: "理论在架数", color: "#1677ff", type: "dashed" as const },
-  { name: "扫描数", color: "#52c41a", type: "solid" as const },
-  { name: "低算力数量", color: "#fa8c16", type: "solid" as const },
-  { name: "零算力数量", color: "#ff4d4f", type: "solid" as const },
-  { name: "总算力 E", color: "#722ed1", type: "solid" as const },
+  { name: t("理论在架数"), color: "#1677ff", type: "dashed" as const },
+  { name: t("扫描数"), color: "#52c41a", type: "solid" as const },
+  { name: t("低算力数量"), color: "#fa8c16", type: "solid" as const },
+  { name: t("零算力数量"), color: "#ff4d4f", type: "solid" as const },
+  { name: t("总算力 E"), color: "#722ed1", type: "solid" as const },
 ];
 
-const HASHRATE_SERIES_NAME = "总算力 E";
+const HASHRATE_SERIES_NAME = t("总算力 E");
 
 const DEFAULT_SERIES_VISIBLE = Object.fromEntries(LEGEND_ITEMS.map((item) => [item.name, true])) as Record<
   string,
@@ -85,7 +87,7 @@ export default function OverviewChart({
 
     const allSeries = [
       {
-        name: "理论在架数",
+        name: t("理论在架数"),
         type: "line" as const,
         yAxisIndex: 0,
         data: data.map((d) => d.theoreticalOnline),
@@ -94,7 +96,7 @@ export default function OverviewChart({
         smooth: true,
       },
       {
-        name: "扫描数",
+        name: t("扫描数"),
         type: "line" as const,
         yAxisIndex: 0,
         data: data.map((d) => d.online),
@@ -104,7 +106,7 @@ export default function OverviewChart({
         smooth: true,
       },
       {
-        name: "低算力数量",
+        name: t("低算力数量"),
         type: "line" as const,
         yAxisIndex: 0,
         data: data.map((d) => d.lowHashrate),
@@ -114,7 +116,7 @@ export default function OverviewChart({
         smooth: true,
       },
       {
-        name: "零算力数量",
+        name: t("零算力数量"),
         type: "line" as const,
         yAxisIndex: 0,
         data: data.map((d) => d.zeroHashrate),
@@ -169,7 +171,7 @@ export default function OverviewChart({
       yAxis: [
         {
           type: "value",
-          name: countSeriesVisible ? "台数" : "",
+          name: countSeriesVisible ? t("台数") : "",
           show: countSeriesVisible,
           position: "left",
           nameLocation: "middle",
@@ -207,7 +209,7 @@ export default function OverviewChart({
     <div className="bg-white rounded-lg border border-gray-200 p-5">
       <div className="flex items-center justify-between gap-3 mb-4 min-w-0">
         <h2 className="text-lg font-semibold m-0 flex flex-1 min-w-0 items-center gap-2 overflow-hidden">
-          <span className="text-gray-800 shrink-0">运行概览</span>
+          <span className="text-gray-800 shrink-0">{t("运行概览")}</span>
           {farmName ? (
             <>
               <span className="text-gray-300 shrink-0">|</span>
@@ -225,12 +227,12 @@ export default function OverviewChart({
             buttonStyle="solid"
             size="small"
             options={[
-              { label: "24小时", value: "24h" },
-              { label: "7天", value: "7d" },
+              { label: t("24小时"), value: "24h" },
+              { label: t("7天"), value: "7d" },
             ]}
           />
           <Text type="secondary" className="text-xs">
-            更新于 {lastUpdated}
+            {t("更新于 {{lastUpdated}}", { lastUpdated: lastUpdated })}
           </Text>
           <Button type="text" icon={<ReloadOutlined />} onClick={onRefresh} />
         </Space>
@@ -246,7 +248,7 @@ export default function OverviewChart({
               className={`flex items-center gap-1.5 text-xs border-0 bg-transparent p-0 cursor-pointer transition-opacity ${
                 active ? "text-gray-600 opacity-100" : "text-gray-400 opacity-45"
               }`}
-              title={active ? "点击隐藏" : "点击显示"}
+              title={active ? t("点击隐藏") : t("点击显示")}
             >
               <span
                 className="inline-block w-5 h-0.5"

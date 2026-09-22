@@ -2,6 +2,8 @@ import { useEffect, useRef } from "react";
 import echarts from "@/components/react-echarts/library";
 import type { VenueStats } from "../types";
 
+import { t } from "@/locales";
+
 interface EffectChartProps {
   data?: VenueStats;
 }
@@ -46,7 +48,7 @@ const EffectChart: React.FC<EffectChartProps> = ({ data }) => {
       },
       series: [
         {
-          name: "影响占比",
+          name: t("影响占比"),
           type: "pie",
           top: "30%",
           radius: ["70%", "100%"],
@@ -71,9 +73,9 @@ const EffectChart: React.FC<EffectChartProps> = ({ data }) => {
             show: false,
           },
           data: [
-            { value: data.highTemperatureRate || 0, name: "高温占比" },
-            { value: data.limitImpactRate || 0, name: "限电占比" },
-            { value: data.totalFailuresRate || 0, name: "故障率" },
+            { value: data.highTemperatureRate || 0, name: t("高温占比") },
+            { value: data.limitImpactRate || 0, name: t("限电占比") },
+            { value: data.totalFailuresRate || 0, name: t("故障率") },
             {
               value: Math.max(
                 0,
@@ -82,7 +84,7 @@ const EffectChart: React.FC<EffectChartProps> = ({ data }) => {
                   (data.highTemperatureRate || 0) -
                   (data.totalFailuresRate || 0),
               ),
-              name: "其他占比",
+              name: t("其他占比"),
             },
           ],
         },

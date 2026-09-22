@@ -2,6 +2,8 @@ import { type RouteObject } from "react-router-dom";
 import { ProgressBar } from "@/components/progress-bar";
 import { ROUTE_PATHS } from "@/constants/common";
 
+import { t } from "@/locales";
+
 export const utilityRoute: RouteObject = {
   path: ROUTE_PATHS.utility,
   lazy: async () => ({
@@ -9,6 +11,6 @@ export const utilityRoute: RouteObject = {
   }),
   HydrateFallback: ProgressBar,
   handle: {
-    title: "实用工具",
+    title: t("实用工具"),
   },
 };

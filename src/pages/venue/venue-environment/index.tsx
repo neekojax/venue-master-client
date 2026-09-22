@@ -7,6 +7,7 @@ import type { ProgressProps } from "antd/es/progress";
 import LocationCard from "./components/LocationCard";
 import { useSelector, useSettingsStore } from "@/stores"; // 根据实际路径调整
 
+import { t } from "@/locales";
 import { fetchVenueEnvironment } from "@/pages/venue/api";
 
 // 场地数据类型定义
@@ -103,7 +104,7 @@ const App: React.FC = () => {
       generateVenueData();
       // updateLastUpdatedTime();
       setLoading(false);
-      message.success("数据更新成功");
+      message.success(t("数据更新成功"));
     }, 800);
   };
   // 自动刷新（每30秒）
@@ -138,7 +139,7 @@ const App: React.FC = () => {
               showSearch
               size="middle"
               allowClear
-              placeholder="按场地名筛选"
+              placeholder={t("按场地名筛选")}
               options={venueNameOptions}
               value={selectedVenueName}
               onSearch={(val) => setFilterText(val)}
@@ -157,7 +158,7 @@ const App: React.FC = () => {
               className="mr-3"
               style={{ marginLeft: "10px" }}
             />
-            <span className="ml-1">我的自选</span>
+            <span className="ml-1">{t("我的自选")}</span>
           </div>
 
           <>
@@ -171,7 +172,7 @@ const App: React.FC = () => {
                 loading={loading}
                 className="!rounded-button whitespace-nowrap"
               >
-                刷新数据
+                {t("刷新数据")}
               </Button>
             </div>
           </>
@@ -179,7 +180,7 @@ const App: React.FC = () => {
 
         <Spin
           spinning={loading}
-          tip="加载中..."
+          tip={t("加载中...")}
           size="large"
           className="w-full"
           style={{ minHeight: "200px" }}
@@ -194,7 +195,7 @@ const App: React.FC = () => {
                       {venue.venue_name}
                     </Link>
                   </span>
-                  <span className="text-sm text-gray-500">环境数据</span>
+                  <span className="text-sm text-gray-500">{t("环境数据")}</span>
                   {/* {(() => {
                     const d = new Date(venue.last_update);
                     const parsed = !isNaN(d.getTime())
@@ -220,7 +221,7 @@ const App: React.FC = () => {
                       : "text-gray-600 bg-gray-50 border-gray-200";
                   })()} rounded-full px-3 py-1`}
                 >
-                  最后更新:{" "}
+                  {t("最后更新:")}{" "}
                   <span
                     className={`font-mono ${(() => {
                       const d = new Date(venue.last_update);
@@ -264,7 +265,7 @@ const App: React.FC = () => {
               pageSize={pageSize}
               total={filteredVenues.length}
               onChange={(page) => setCurrentPage(page)}
-              showTotal={(total: number, _range: [number, number]) => `共 ${total} 条`}
+              showTotal={(total: number, _range: [number, number]) => t("共 {{total}} 条", { total: total })}
             />
           </div>
         </Spin>

@@ -4,6 +4,8 @@ import { BsChevronRight } from "react-icons/bs";
 import { FaTachometerAlt } from "react-icons/fa";
 import { Card, Col, Row, Statistic } from "antd";
 
+import { t } from "@/locales";
+
 interface MiningPoolCardProps {
   poolType: string; // 接收矿池类型作为 props
 }
@@ -69,7 +71,7 @@ const MiningOMCard: React.FC<MiningPoolCardProps> = ({ poolType }) => {
             <FaTachometerAlt style={{ fontSize: "24px", marginRight: "8px" }} />
           </Col>
           <Col>
-            <h3 style={{ marginLeft: 10, fontSize: "24px" }}>运维</h3>
+            <h3 style={{ marginLeft: 10, fontSize: "24px" }}>{t("运维")}</h3>
           </Col>
         </Row>
       }
@@ -102,7 +104,7 @@ const MiningOMCard: React.FC<MiningPoolCardProps> = ({ poolType }) => {
       <Row gutter={24}>
         <Col span={8}>
           <Statistic
-            title={`当前累计下架总数 / 理论总数`}
+            title={t("当前累计下架总数 / 理论总数")}
             // value={` 0 / 20000`} // 假设昨日总收益在状态中
             valueStyle={{ color: "green", fontSize: "20px", fontWeight: "bold" }}
             // valueStyle={{ display: 'flex', alignItems: 'center' }}
@@ -129,10 +131,10 @@ const MiningOMCard: React.FC<MiningPoolCardProps> = ({ poolType }) => {
           <Row gutter={24}>
             <Col span={10}>
               <Col span={24} style={{ fontSize: "14px", color: "gray", marginBottom: "18px" }}>
-                上周限电影响在线率
+                {t("上周限电影响在线率")}
               </Col>
               <Col span={24} style={{ fontSize: "14px", color: "gray", marginBottom: "12px" }}>
-                上周其他时间影响在线率
+                {t("上周其他时间影响在线率")}
               </Col>
               {/*<Col span={24} style={{ fontSize: "14px", color: "gray", marginBottom: "12px" }}>*/}
               {/*  上月限电时长*/}
@@ -156,13 +158,13 @@ const MiningOMCard: React.FC<MiningPoolCardProps> = ({ poolType }) => {
         <Col span={8} style={{ borderLeft: "1px solid #f0f0f0", paddingLeft: "16px" }}>
           <Row gutter={24}>
             <Col span={24} style={{ fontSize: "14px", color: "gray", marginBottom: "12px" }}>
-              <span style={{ fontSize: "14px", color: "gray" }}>上一周故障数</span>
+              <span style={{ fontSize: "14px", color: "gray" }}>{t("上一周故障数")}</span>
               <span style={{ fontSize: "14px", color: "black", marginLeft: "10px" }}>
-                {data?.yesterdayFaultsCount} 台
+                {t("{{value}} 台", { value: data?.yesterdayFaultsCount })}
               </span>
             </Col>
             <Col span={24} style={{ fontSize: "14px", color: "gray", marginBottom: "12px" }}>
-              <span style={{ fontSize: "14px", color: "gray" }}>故障率</span>
+              <span style={{ fontSize: "14px", color: "gray" }}>{t("故障率")}</span>
               <span style={{ fontSize: "14px", color: "black", marginLeft: "10px" }}>
                 {data?.yesterdayFailureRate}%
               </span>
@@ -172,13 +174,13 @@ const MiningOMCard: React.FC<MiningPoolCardProps> = ({ poolType }) => {
         <Col span={8} style={{ borderLeft: "1px solid #f0f0f0", paddingLeft: "16px" }}>
           <Row gutter={24}>
             <Col span={24} style={{ fontSize: "14px", color: "gray", marginBottom: "12px" }}>
-              <span style={{ fontSize: "14px", color: "gray" }}>上上周故障数</span>
+              <span style={{ fontSize: "14px", color: "gray" }}>{t("上上周故障数")}</span>
               <span style={{ fontSize: "14px", color: "black", marginLeft: "10px" }}>
-                {data?.lastWeekFaultsCount}台
+                {t("{{value}}台", { value: data?.lastWeekFaultsCount })}
               </span>
             </Col>
             <Col span={24} style={{ fontSize: "14px", color: "gray", marginBottom: "12px" }}>
-              <span style={{ fontSize: "14px", color: "gray" }}>故障率</span>
+              <span style={{ fontSize: "14px", color: "gray" }}>{t("故障率")}</span>
               <span style={{ fontSize: "14px", color: "black", marginLeft: "10px" }}>
                 {data?.lastWeekFailureRate}%
               </span>
@@ -188,13 +190,13 @@ const MiningOMCard: React.FC<MiningPoolCardProps> = ({ poolType }) => {
         <Col span={8} style={{ borderLeft: "1px solid #f0f0f0", paddingLeft: "16px" }}>
           <Row gutter={24}>
             <Col span={24} style={{ fontSize: "14px", color: "gray", marginBottom: "12px" }}>
-              <span style={{ fontSize: "14px", color: "gray" }}>5月故障数</span>
+              <span style={{ fontSize: "14px", color: "gray" }}>{t("5月故障数")}</span>
               <span style={{ fontSize: "14px", color: "black", marginLeft: "10px" }}>
-                {data?.lastMonthFaultsCount} 台
+                {t("{{value}} 台", { value: data?.lastMonthFaultsCount })}
               </span>
             </Col>
             <Col span={24} style={{ fontSize: "14px", color: "gray", marginBottom: "12px" }}>
-              <span style={{ fontSize: "14px", color: "gray" }}>故障率</span>
+              <span style={{ fontSize: "14px", color: "gray" }}>{t("故障率")}</span>
               <span style={{ fontSize: "14px", color: "black", marginLeft: "10px" }}>
                 {data?.lastMonthFailureRate}%
               </span>

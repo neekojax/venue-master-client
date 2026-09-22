@@ -5,6 +5,7 @@ import { ROUTE_PATHS } from "@/constants/common";
 import useAuthRedirect from "@/hooks/useAuthRedirect.ts";
 import { useSelector, useSettingsStore } from "@/stores";
 
+import { t } from "@/locales";
 import { downloadAllWeeklyReports, getVenueBasicInfo, getWeeklyReportPage } from "@/pages/venue/api.tsx";
 import WeeklyBusinessReport from "@/pages/venue/venue-detail/components/WeeklyBusinessReport";
 import {
@@ -101,7 +102,10 @@ export default function VenueWeeklyReportPage() {
       const url = window.URL.createObjectURL(blob);
       const link = document.createElement("a");
       link.href = url;
-      link.setAttribute("download", `${basicInfo?.venue_name || "场地"}_运营周报.xlsx`);
+      link.setAttribute(
+        "download",
+        t("{{value}}_运营周报.xlsx", { value: basicInfo?.venue_name || t("场地") }),
+      );
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
@@ -116,16 +120,16 @@ export default function VenueWeeklyReportPage() {
       <div className="mb-6 flex items-center justify-between">
         <div>
           <Title level={2} className="!mb-1">
-            场地运营周报
+            {t("场地运营周报")}
           </Title>
           {basicInfo?.venue_name ? <Text type="secondary">{basicInfo.venue_name}</Text> : null}
         </div>
         <div className="flex items-center gap-3">
           <Button type="primary" loading={downloading} onClick={handleDownload}>
-            下载周报
+            {t("下载周报")}
           </Button>
           <Link to={ROUTE_PATHS.miningSiteDetail(Number(venueId || 0))}>
-            <Button>返回场地详情</Button>
+            <Button>{t("返回场地详情")}</Button>
           </Link>
         </div>
       </div>

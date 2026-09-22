@@ -10,6 +10,7 @@ import isSameOrBefore from "dayjs/plugin/isSameOrBefore";
 import * as XLSX from "xlsx";
 import { useSelector, useSettingsStore } from "@/stores";
 
+import { t as i18nT } from "@/locales";
 // import { formatAmount, formatHashrate } from "@/utils/num";
 import { fetchDailyVenueHostingStat } from "@/pages/report/api.tsx";
 // 必须扩展 dayjs，否则会报 “不存在属性”
@@ -105,9 +106,9 @@ const App: React.FC = () => {
   // ];
 
   const columns: ColumnsType<DataType> = [
-    { title: "日期", dataIndex: "date", key: "date", fixed: "left", width: 120 },
+    { title: i18nT("日期"), dataIndex: "date", key: "date", fixed: "left", width: 120 },
     {
-      title: "场地名称",
+      title: i18nT("场地名称"),
       dataIndex: "venue_name",
       key: "venue_name",
       fixed: "left",
@@ -115,7 +116,7 @@ const App: React.FC = () => {
       ellipsis: false,
     },
     {
-      title: "算力(TH)",
+      title: i18nT("算力(TH)"),
       dataIndex: "hash",
       key: "hash",
       width: 140,
@@ -125,7 +126,7 @@ const App: React.FC = () => {
       sorter: (a, b) => a.hash - b.hash,
     },
     {
-      title: "日产出(BTC)",
+      title: i18nT("日产出(BTC)"),
       dataIndex: "income_btc",
       key: "income_btc",
       width: 160,
@@ -134,7 +135,7 @@ const App: React.FC = () => {
       sorter: (a, b) => a.income_btc - b.income_btc,
     },
     {
-      title: "托管单价($)",
+      title: i18nT("托管单价($)"),
       dataIndex: "managed_unit_price",
       key: "managed_unit_price",
       width: 140,
@@ -143,7 +144,7 @@ const App: React.FC = () => {
       sorter: (a, b) => a.managed_unit_price - b.managed_unit_price,
     },
     {
-      title: "运维单价($)",
+      title: i18nT("运维单价($)"),
       dataIndex: "maintenance_price",
       key: "maintenance_price",
       width: 140,
@@ -152,7 +153,7 @@ const App: React.FC = () => {
       sorter: (a, b) => a.maintenance_price - b.maintenance_price,
     },
     {
-      title: "额定功耗",
+      title: i18nT("额定功耗"),
       dataIndex: "nominal_power_consumption",
       key: "nominal_power_consumption",
       width: 140,
@@ -161,7 +162,7 @@ const App: React.FC = () => {
       sorter: (a, b) => a.nominal_power_consumption - b.nominal_power_consumption,
     },
     {
-      title: "预估功耗",
+      title: i18nT("预估功耗"),
       dataIndex: "power_consumption",
       key: "power_consumption",
       width: 140,
@@ -179,7 +180,7 @@ const App: React.FC = () => {
     //     sorter: (a, b) => a.power_consumption_diff - b.power_consumption_diff,
     // },
     {
-      title: "总托管费($)",
+      title: i18nT("总托管费($)"),
       dataIndex: "total_hosting_fee",
       key: "total_hosting_fee",
       width: 160,
@@ -189,7 +190,7 @@ const App: React.FC = () => {
       sorter: (a, b) => a.total_hosting_fee - b.total_hosting_fee,
     },
     {
-      title: "总维保费($)",
+      title: i18nT("总维保费($)"),
       dataIndex: "total_maintenance_fee",
       key: "total_maintenance_fee",
       width: 160,
@@ -294,16 +295,16 @@ const App: React.FC = () => {
 
     // 定义中文列名映射
     const mainDataHeaders = {
-      venue_name: "场地名称",
-      date: "日期",
-      hash: "算力(TH)",
-      income_btc: "日产出(BTC)",
-      managed_unit_price: "托管单价($)",
-      maintenance_price: "运维单价($)",
-      nominal_power_consumption: "额定功耗",
-      power_consumption: "预估功耗",
-      total_hosting_fee: "总托管费($)",
-      total_maintenance_fee: "总维保费($)",
+      venue_name: i18nT("场地名称"),
+      date: i18nT("日期"),
+      hash: i18nT("算力(TH)"),
+      income_btc: i18nT("日产出(BTC)"),
+      managed_unit_price: i18nT("托管单价($)"),
+      maintenance_price: i18nT("运维单价($)"),
+      nominal_power_consumption: i18nT("额定功耗"),
+      power_consumption: i18nT("预估功耗"),
+      total_hosting_fee: i18nT("总托管费($)"),
+      total_maintenance_fee: i18nT("总维保费($)"),
     };
 
     // 准备主数据（只导出表格展示字段，并转换为中文列名）
@@ -350,7 +351,7 @@ const App: React.FC = () => {
 
         worksheet[cellAddress].s = {
           font: {
-            name: "微软雅黑",
+            name: i18nT("微软雅黑"),
             sz: 12,
             bold: true,
             color: { rgb: "FFFFFF" },
@@ -381,7 +382,7 @@ const App: React.FC = () => {
 
           worksheet[cellAddress].s = {
             font: {
-              name: "微软雅黑",
+              name: i18nT("微软雅黑"),
               sz: 10,
             },
             alignment: {
@@ -417,10 +418,10 @@ const App: React.FC = () => {
     const mainWorksheet = XLSX.utils.json_to_sheet(mainData);
     const mainHeaderKeys = Object.keys(mainData[0] || {});
     setWorksheetStyle(mainWorksheet, mainHeaderKeys);
-    XLSX.utils.book_append_sheet(workbook, mainWorksheet, "数据概览汇总数据");
+    XLSX.utils.book_append_sheet(workbook, mainWorksheet, i18nT("数据概览汇总数据"));
 
     // 导出文件
-    XLSX.writeFile(workbook, "数据概览汇总数据.xlsx");
+    XLSX.writeFile(workbook, i18nT("数据概览汇总数据.xlsx"));
   };
 
   return (
@@ -450,7 +451,7 @@ const App: React.FC = () => {
             onClick={exportToCSV}
             className="!rounded-button"
           >
-            导出报表
+            {i18nT("导出报表")}
           </Button>
         </div>
         <div className="mx-auto">
@@ -465,7 +466,7 @@ const App: React.FC = () => {
               showSizeChanger: true,
               onShowSizeChange: (_, size) => setPageSize(size),
               showQuickJumper: true,
-              showTotal: (total) => `共 ${total} 条`,
+              showTotal: (total) => i18nT("共 {{total}} 条", { total: total }),
             }}
             className="custom-table"
             rowKey={(record) => `${record.date}-${record.venue_id}`}

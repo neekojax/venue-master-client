@@ -4,6 +4,7 @@ import { Button, DatePicker, Form, InputNumber, message, Modal, Popconfirm, Radi
 import type { ColumnsType } from "antd/es/table";
 import dayjs from "dayjs";
 
+import { t } from "@/locales";
 import AssetPoolRecordHistory from "@/pages/mining/detail/components/Asset-Pool-Record-History.tsx";
 import {
   usePoolRecordCreate,
@@ -28,16 +29,16 @@ type PoolRecord = {
 };
 
 const CLOUD_POWER_OPTIONS = [
-  { label: "正常", value: 0 },
-  { label: "云算力", value: 1 },
-  { label: "租赁算力（整条为租赁）", value: 2 },
-  { label: "含租赁算力", value: 3 },
-  { label: "待撤场", value: 4 },
+  { label: t("正常"), value: 0 },
+  { label: t("云算力"), value: 1 },
+  { label: t("租赁算力（整条为租赁）"), value: 2 },
+  { label: t("含租赁算力"), value: 3 },
+  { label: t("待撤场"), value: 4 },
 ];
 
 const OVERCLOCK_OPTIONS = [
-  { label: "否", value: 0 },
-  { label: "是", value: 1 },
+  { label: t("否"), value: 0 },
+  { label: t("是"), value: 1 },
 ];
 
 function renderCloudPowerTag(value: number | undefined) {
@@ -52,12 +53,14 @@ function renderCloudPowerTag(value: number | undefined) {
     4: "volcano",
   };
 
-  return <Tag color={colorMap[normalizedValue] ?? "default"}>{matchedOption?.label ?? "正常"}</Tag>;
+  return <Tag color={colorMap[normalizedValue] ?? "default"}>{matchedOption?.label ?? t("正常")}</Tag>;
 }
 
 function renderOverclockTag(value: number | undefined) {
   const normalizedValue = Number(value ?? 0);
-  return <Tag color={normalizedValue === 1 ? "gold" : "default"}>{normalizedValue === 1 ? "是" : "否"}</Tag>;
+  return (
+    <Tag color={normalizedValue === 1 ? "gold" : "default"}>{normalizedValue === 1 ? t("是") : t("否")}</Tag>
+  );
 }
 
 const OperationLog: React.FC = () => {
@@ -135,10 +138,10 @@ const OperationLog: React.FC = () => {
     try {
       if (editingRecord) {
         await updateMutation.mutateAsync({ ...(payload as PoolRecordUpdate), id: editingRecord.id });
-        message.success("已更新");
+        message.success(t("已更新"));
       } else {
         await createMutation.mutateAsync(payload as PoolRecordCreate);
-        message.success("已新增");
+        message.success(t("已新增"));
       }
       setIsModalOpen(false);
       form.resetFields();
@@ -151,7 +154,7 @@ const OperationLog: React.FC = () => {
   const handleDelete = async (record: PoolRecord) => {
     try {
       await deleteMutation.mutateAsync(record.id);
-      message.success("已删除");
+      message.success(t("已删除"));
     } catch (e) {
       // 已在 hook 中处理 onError
       console.log(e);
@@ -159,50 +162,50 @@ const OperationLog: React.FC = () => {
   };
 
   const columns: ColumnsType<PoolRecord> = [
-    { title: "开始时间", dataIndex: "start_time", key: "start_time" },
-    { title: "结束时间", dataIndex: "end_time", key: "end_time" },
-    { title: "理论算力", dataIndex: "theoretical_hashrate", key: "theoretical_hashrate" },
-    { title: "托管机器", dataIndex: "hosted_machine", key: "hosted_machine", align: "right" },
+    { title: t("开始时间"), dataIndex: "start_time", key: "start_time" },
+    { title: t("结束时间"), dataIndex: "end_time", key: "end_time" },
+    { title: t("理论算力"), dataIndex: "theoretical_hashrate", key: "theoretical_hashrate" },
+    { title: t("托管机器"), dataIndex: "hosted_machine", key: "hosted_machine", align: "right" },
     {
-      title: "算力区间类型",
+      title: t("算力区间类型"),
       dataIndex: "is_cloud_power",
       key: "is_cloud_power",
       render: (value: number | undefined) => renderCloudPowerTag(value),
     },
     {
-      title: "租赁算力(P)",
+      title: t("租赁算力(P)"),
       dataIndex: "leased_power",
       key: "leased_power",
       align: "right",
       render: (value: number | undefined) => value ?? 0,
     },
     {
-      title: "是否变频",
+      title: t("是否变频"),
       dataIndex: "is_overclocked",
       key: "is_overclocked",
       render: (value: number | undefined) => renderOverclockTag(value),
     },
     {
-      title: "变频后单机算力(T)",
+      title: t("变频后单机算力(T)"),
       dataIndex: "overclock_hashrate_per_machine",
       key: "overclock_hashrate_per_machine",
       align: "right",
       render: (value: number | undefined) => value ?? 0,
     },
     {
-      title: "操作",
+      title: t("操作"),
       key: "action",
       width: 160,
       render: (_, record) => (
         <div className="flex gap-3">
-          <a onClick={() => openEdit(record)}>修改</a>
+          <a onClick={() => openEdit(record)}>{t("修改")}</a>
           <Popconfirm
-            title="确认删除该记录？"
+            title={t("确认删除该记录？")}
             onConfirm={() => handleDelete(record)}
-            okText="删除"
-            cancelText="取消"
+            okText={t("删除")}
+            cancelText={t("取消")}
           >
-            <a>删除</a>
+            <a>{t("删除")}</a>
           </Popconfirm>
         </div>
       ),
@@ -217,7 +220,7 @@ const OperationLog: React.FC = () => {
                 </div> */}
         <div></div>
         <Button type="primary" size="small" onClick={openCreate}>
-          + 新增记录
+          {t("+ 新增记录")}
         </Button>
       </div>
 
@@ -232,7 +235,7 @@ const OperationLog: React.FC = () => {
       <AssetPoolRecordHistory />
 
       <Modal
-        title={editingRecord ? "编辑记录" : "新增记录"}
+        title={editingRecord ? t("编辑记录") : t("新增记录")}
         open={isModalOpen}
         onOk={handleSubmit}
         onCancel={() => setIsModalOpen(false)}
@@ -241,33 +244,37 @@ const OperationLog: React.FC = () => {
       >
         <Form form={form} layout="vertical" preserve={false}>
           <Form.Item
-            label="开始时间"
+            label={t("开始时间")}
             name="start_time"
-            rules={[{ required: true, message: "请选择开始时间" }]}
+            rules={[{ required: true, message: t("请选择开始时间") }]}
           >
             <DatePicker showTime style={{ width: "100%" }} />
           </Form.Item>
-          <Form.Item label="结束时间" name="end_time" rules={[{ required: true, message: "请选择结束时间" }]}>
+          <Form.Item
+            label={t("结束时间")}
+            name="end_time"
+            rules={[{ required: true, message: t("请选择结束时间") }]}
+          >
             <DatePicker showTime style={{ width: "100%" }} />
           </Form.Item>
           <Form.Item
-            label="理论算力"
+            label={t("理论算力")}
             name="theoretical_hashrate"
-            rules={[{ required: true, message: "请输入理论算力" }]}
+            rules={[{ required: true, message: t("请输入理论算力") }]}
           >
-            <InputNumber className="w-full" min={0} placeholder="请输入理论算力" />
+            <InputNumber className="w-full" min={0} placeholder={t("请输入理论算力")} />
           </Form.Item>
           <Form.Item
-            label="托管机器"
+            label={t("托管机器")}
             name="hosted_machine"
-            rules={[{ required: true, message: "请输入托管机器" }]}
+            rules={[{ required: true, message: t("请输入托管机器") }]}
           >
-            <InputNumber className="w-full" min={0} placeholder="请输入托管机器" />
+            <InputNumber className="w-full" min={0} placeholder={t("请输入托管机器")} />
           </Form.Item>
           <Form.Item
-            label="算力区间类型"
+            label={t("算力区间类型")}
             name="is_cloud_power"
-            rules={[{ required: true, message: "请选择算力区间类型" }]}
+            rules={[{ required: true, message: t("请选择算力区间类型") }]}
           >
             <Radio.Group
               className="w-full"
@@ -295,18 +302,18 @@ const OperationLog: React.FC = () => {
               </div>
             </Radio.Group>
           </Form.Item>
-          <Form.Item label="租赁算力(P)" name="leased_power">
+          <Form.Item label={t("租赁算力(P)")} name="leased_power">
             <InputNumber
               className="w-full"
               min={0}
               disabled={Number(isCloudPower ?? 0) !== 3}
-              placeholder="请输入租赁算力"
+              placeholder={t("请输入租赁算力")}
             />
           </Form.Item>
           <Form.Item
-            label="是否变频"
+            label={t("是否变频")}
             name="is_overclocked"
-            rules={[{ required: true, message: "请选择是否变频" }]}
+            rules={[{ required: true, message: t("请选择是否变频") }]}
           >
             <Radio.Group
               options={OVERCLOCK_OPTIONS}
@@ -317,12 +324,12 @@ const OperationLog: React.FC = () => {
               }}
             />
           </Form.Item>
-          <Form.Item label="变频后单机算力(T)" name="overclock_hashrate_per_machine">
+          <Form.Item label={t("变频后单机算力(T)")} name="overclock_hashrate_per_machine">
             <InputNumber
               className="w-full"
               min={0}
               disabled={Number(isOverclocked ?? 0) !== 1}
-              placeholder="请输入变频后单机算力"
+              placeholder={t("请输入变频后单机算力")}
             />
           </Form.Item>
         </Form>

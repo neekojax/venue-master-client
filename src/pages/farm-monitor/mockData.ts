@@ -1,5 +1,7 @@
 import type { OverviewPoint, TimeRange } from "./types";
 
+import { t } from "@/locales";
+
 export type { OverviewPoint, TimeRange } from "./types";
 
 export interface MinerRecord {
@@ -26,7 +28,7 @@ export const KPI_SUMMARY = {
   highTempEvents: 4,
 };
 
-export const FARM_OPTIONS = ["新疆数据中心", "内蒙古矿场", "四川矿场", "云南矿场"];
+export const FARM_OPTIONS = [t("新疆数据中心"), t("内蒙古矿场"), t("四川矿场"), t("云南矿场")];
 
 export type FarmStatus = "normal" | "warning" | "error";
 
@@ -46,17 +48,17 @@ export interface FarmSite {
 }
 
 const FARM_NAMES = [
-  "四川甘孜矿场",
-  "新疆哈密矿场",
-  "内蒙古鄂尔多斯矿场",
-  "云南昭通矿场",
-  "甘肃酒泉矿场",
-  "青海海西矿场",
-  "宁夏中卫矿场",
-  "新疆数据中心",
-  "内蒙古矿场",
-  "四川矿场",
-  "云南矿场",
+  t("四川甘孜矿场"),
+  t("新疆哈密矿场"),
+  t("内蒙古鄂尔多斯矿场"),
+  t("云南昭通矿场"),
+  t("甘肃酒泉矿场"),
+  t("青海海西矿场"),
+  t("宁夏中卫矿场"),
+  t("新疆数据中心"),
+  t("内蒙古矿场"),
+  t("四川矿场"),
+  t("云南矿场"),
   "ETH02-01",
   "OBTX01",
   "sabeta",
@@ -64,16 +66,16 @@ const FARM_NAMES = [
   "Arct-HF02",
   "CANGO-01",
   "CANGO-02",
-  "LN-矿场-A",
-  "LN-矿场-B",
-  "ND-西部01",
-  "ND-西部02",
-  "华北矿场01",
-  "华北矿场02",
-  "华南矿场01",
-  "华南矿场02",
-  "西南矿场01",
-  "西南矿场02",
+  t("LN-矿场-A"),
+  t("LN-矿场-B"),
+  t("ND-西部01"),
+  t("ND-西部02"),
+  t("华北矿场01"),
+  t("华北矿场02"),
+  t("华南矿场01"),
+  t("华南矿场02"),
+  t("西南矿场01"),
+  t("西南矿场02"),
 ];
 
 const ICON_PALETTE = [

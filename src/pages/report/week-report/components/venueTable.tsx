@@ -84,6 +84,7 @@ import type { ColumnsType } from "antd/es/table";
 import SitePerformanceCard from "./SitePerformanceCard";
 import type { DataItem } from "./types";
 
+import { t } from "@/locales";
 import { fetchWeekEvent } from "@/pages/report/api.tsx";
 
 // 统一使用共享类型，避免与其他组件的定义不一致
@@ -209,7 +210,7 @@ const SimpleRichEditor: React.FC<{
         ref={quillRef}
         theme="snow"
         value={value || ""}
-        placeholder={placeholder || "请输入内容"}
+        placeholder={placeholder || t("请输入内容")}
         modules={modules}
         onChange={(html) => {
           onChange?.(html);
@@ -259,7 +260,7 @@ const VenuePage: React.FC<VenueTableProps> = ({ data, startDate, endDate, onRequ
         progress: values.progress,
       };
       await fetchWeekEvent(payload);
-      message.success("周报事件已更新");
+      message.success(t("周报事件已更新"));
       setSubmitting(false);
       handleCancel();
       // 刷新数据
@@ -270,7 +271,7 @@ const VenuePage: React.FC<VenueTableProps> = ({ data, startDate, endDate, onRequ
       setSubmitting(false);
       // 表单校验或接口异常
       if ((err as any)?.errorFields) return; // 校验错误不提示
-      message.error("提交失败，请稍后重试");
+      message.error(t("提交失败，请稍后重试"));
     }
   };
 
@@ -288,7 +289,7 @@ const VenuePage: React.FC<VenueTableProps> = ({ data, startDate, endDate, onRequ
 
   const columns: ColumnsType<DataItem> = [
     {
-      title: "场地名称",
+      title: t("场地名称"),
       dataIndex: "venue_name",
       key: "venue_name",
       align: "left",
@@ -312,7 +313,7 @@ const VenuePage: React.FC<VenueTableProps> = ({ data, startDate, endDate, onRequ
             >
               {isSpecialVenue && (
                 <Tag color="red" style={{ marginLeft: 2 }}>
-                  补充
+                  {t("补充")}
                 </Tag>
               )}
 
@@ -327,8 +328,8 @@ const VenuePage: React.FC<VenueTableProps> = ({ data, startDate, endDate, onRequ
     {
       title: (
         <span>
-          理论算力 (PH/s)
-          <span style={{ marginLeft: 4 }}>/ 变频</span>
+          {t("理论算力 (PH/s)")}
+          <span style={{ marginLeft: 4 }}>{t("/ 变频")}</span>
         </span>
       ),
       dataIndex: "average_thermal_power",
@@ -344,7 +345,7 @@ const VenuePage: React.FC<VenueTableProps> = ({ data, startDate, endDate, onRequ
         ),
     },
     {
-      title: "实际算力 (PH/s)",
+      title: t("实际算力 (PH/s)"),
       dataIndex: "average_power_24h",
       key: "average_power_24h",
       align: "center",
@@ -352,7 +353,7 @@ const VenuePage: React.FC<VenueTableProps> = ({ data, startDate, endDate, onRequ
       render: (value: number) => value?.toFixed(3),
     },
     {
-      title: "产出效率(BTC/EH)",
+      title: t("产出效率(BTC/EH)"),
       dataIndex: "output_efficiency",
       key: "output_efficiency",
       align: "center",
@@ -362,8 +363,8 @@ const VenuePage: React.FC<VenueTableProps> = ({ data, startDate, endDate, onRequ
     {
       title: (
         <span>
-          算力有效率
-          <span style={{ marginLeft: 4 }}>/ 变频</span>
+          {t("算力有效率")}
+          <span style={{ marginLeft: 4 }}>{t("/ 变频")}</span>
         </span>
       ),
       dataIndex: "average_hash_effective_rate",
@@ -403,7 +404,7 @@ const VenuePage: React.FC<VenueTableProps> = ({ data, startDate, endDate, onRequ
       },
     },
     {
-      title: "净有效率",
+      title: t("净有效率"),
       dataIndex: "forecast_hash_efficiency",
       key: "forecast_hash_efficiency",
       align: "center",
@@ -413,7 +414,7 @@ const VenuePage: React.FC<VenueTableProps> = ({ data, startDate, endDate, onRequ
     },
     // 新增字段展示
     {
-      title: "故障数",
+      title: t("故障数"),
       width: 120,
       dataIndex: "average_failure",
       key: "average_failure",
@@ -421,7 +422,7 @@ const VenuePage: React.FC<VenueTableProps> = ({ data, startDate, endDate, onRequ
       render: (value: number | undefined) => value ?? 0,
     },
     {
-      title: "故障率",
+      title: t("故障率"),
       width: 250,
       dataIndex: "average_failure_rate",
       key: "average_failure_rate",
@@ -452,7 +453,7 @@ const VenuePage: React.FC<VenueTableProps> = ({ data, startDate, endDate, onRequ
       },
     },
     {
-      title: "待修率",
+      title: t("待修率"),
       width: 150,
       dataIndex: "average_pending_repair_rate",
       key: "average_pending_repair_rate",
@@ -476,7 +477,7 @@ const VenuePage: React.FC<VenueTableProps> = ({ data, startDate, endDate, onRequ
       },
     },
     {
-      title: "净故障率",
+      title: t("净故障率"),
       width: 150,
       dataIndex: "average_net_failure_rate",
       key: "average_net_failure_rate",
@@ -494,7 +495,7 @@ const VenuePage: React.FC<VenueTableProps> = ({ data, startDate, endDate, onRequ
     //   render: (value: number | undefined) => (value ?? 0),
     // },
     {
-      title: "报废数",
+      title: t("报废数"),
       width: 120,
       dataIndex: "average_scrap",
       key: "average_scrap",
@@ -502,7 +503,7 @@ const VenuePage: React.FC<VenueTableProps> = ({ data, startDate, endDate, onRequ
       render: (value: number | undefined) => value ?? 0,
     },
     {
-      title: "高温影响率",
+      title: t("高温影响率"),
       width: 150,
       dataIndex: "average_high_temperature_impact_rate",
       key: "average_high_temperature_impact_rate",
@@ -511,7 +512,7 @@ const VenuePage: React.FC<VenueTableProps> = ({ data, startDate, endDate, onRequ
       render: (value) => <span>{value}%</span>,
     },
     {
-      title: "限电影响率",
+      title: t("限电影响率"),
       width: 150,
       dataIndex: "average_limit_impact_rate",
       key: "average_limit_impact_rate",
@@ -520,7 +521,7 @@ const VenuePage: React.FC<VenueTableProps> = ({ data, startDate, endDate, onRequ
       render: (value) => <span>{value}%</span>,
     },
     {
-      title: "低功耗影响率",
+      title: t("低功耗影响率"),
       width: 150,
       dataIndex: "average_low_power_impact_rate",
       key: "average_low_power_impact_rate",
@@ -529,7 +530,7 @@ const VenuePage: React.FC<VenueTableProps> = ({ data, startDate, endDate, onRequ
       render: (value) => <span>{value}%</span>,
     },
     {
-      title: "撤场比例",
+      title: t("撤场比例"),
       width: 150,
       dataIndex: "average_withdraw_impact_rate",
       key: "average_withdraw_impact_rate",
@@ -538,7 +539,7 @@ const VenuePage: React.FC<VenueTableProps> = ({ data, startDate, endDate, onRequ
       render: (value) => <span>{value}%</span>,
     },
     {
-      title: "云算力比例",
+      title: t("云算力比例"),
       width: 150,
       dataIndex: "average_cloud_power_rate",
       key: "average_cloud_power_rate",
@@ -548,7 +549,7 @@ const VenuePage: React.FC<VenueTableProps> = ({ data, startDate, endDate, onRequ
     },
 
     {
-      title: "本周上架",
+      title: t("本周上架"),
       width: 120,
       dataIndex: "week_shelved",
       key: "week_shelved",
@@ -556,7 +557,7 @@ const VenuePage: React.FC<VenueTableProps> = ({ data, startDate, endDate, onRequ
       render: (value: number | undefined) => value ?? 0,
     },
     {
-      title: "本周下架",
+      title: t("本周下架"),
       width: 120,
       dataIndex: "week_unshelved",
       key: "week_unshelved",
@@ -564,7 +565,7 @@ const VenuePage: React.FC<VenueTableProps> = ({ data, startDate, endDate, onRequ
       render: (value: number | undefined) => value ?? 0,
     },
     {
-      title: "关机币价",
+      title: t("关机币价"),
       width: 150,
       dataIndex: "shutdown_price",
       key: "shutdown_price",
@@ -572,7 +573,7 @@ const VenuePage: React.FC<VenueTableProps> = ({ data, startDate, endDate, onRequ
       render: (value: number | undefined) => (value == null ? "-" : `${value.toFixed(2)}`),
     },
     {
-      title: "事件原因",
+      title: t("事件原因"),
       width: 200,
       dataIndex: "event_reason",
       key: "event_reason",
@@ -614,7 +615,7 @@ const VenuePage: React.FC<VenueTableProps> = ({ data, startDate, endDate, onRequ
       },
     },
     {
-      title: "跟进事项",
+      title: t("跟进事项"),
       width: 200,
       dataIndex: "follow_up",
       key: "follow_up",
@@ -656,7 +657,7 @@ const VenuePage: React.FC<VenueTableProps> = ({ data, startDate, endDate, onRequ
       },
     },
     {
-      title: "处理进度",
+      title: t("处理进度"),
       width: 150,
       dataIndex: "progress",
       key: "progress",
@@ -698,13 +699,13 @@ const VenuePage: React.FC<VenueTableProps> = ({ data, startDate, endDate, onRequ
       },
     },
     {
-      title: "操作",
+      title: t("操作"),
       width: 150,
       dataIndex: "operation",
       key: "operation",
       align: "center",
       render: (_: any, record: DataItem) => (
-        <Tooltip title="编辑">
+        <Tooltip title={t("编辑")}>
           <Button type="text" icon={<EditOutlined />} onClick={() => openEditModal(record)} />
         </Tooltip>
       ),
@@ -715,47 +716,47 @@ const VenuePage: React.FC<VenueTableProps> = ({ data, startDate, endDate, onRequ
     <>
       <SitePerformanceCard columns={columns} data={data} onSearch={(val) => console.log("搜索:", val)} />
       <Modal
-        title="编辑周报事件"
+        title={t("编辑周报事件")}
         open={isModalOpen}
         onCancel={handleCancel}
         footer={[
           <Button size="small" key="cancel" onClick={handleCancel}>
-            取消
+            {t("取消")}
           </Button>,
           <Button size="small" key="submit" type="primary" loading={submitting} onClick={handleSubmit}>
-            提交
+            {t("提交")}
           </Button>,
         ]}
         destroyOnClose
         maskClosable={!submitting}
       >
         <div className="mb-3 text-sm text-gray-500">
-          <div>场地ID：{editingRecord?.venue_id ?? "-"}</div>
-          <div>开始日期：{startDate}</div>
-          <div>结束日期：{endDate}</div>
+          <div>{t("场地ID：{{value}}", { value: editingRecord?.venue_id ?? "-" })}</div>
+          <div>{t("开始日期：{{startDate}}", { startDate: startDate })}</div>
+          <div>{t("结束日期：{{endDate}}", { endDate: endDate })}</div>
         </div>
         <Form form={form} layout="vertical" key={editingRecord?.venue_id ?? "form"}>
-          <Form.Item name="event_reason" label="事件原因">
+          <Form.Item name="event_reason" label={t("事件原因")}>
             <SimpleRichEditor
               value={form.getFieldValue("event_reason")}
               onChange={(html) => form.setFieldValue("event_reason", html)}
-              placeholder="请输入事件原因"
+              placeholder={t("请输入事件原因")}
               refreshKey={`event_reason_${editingRecord?.venue_id ?? "form"}`}
             />
           </Form.Item>
-          <Form.Item name="progress" label="处理进度">
+          <Form.Item name="progress" label={t("处理进度")}>
             <SimpleRichEditor
               value={form.getFieldValue("progress")}
               onChange={(html) => form.setFieldValue("progress", html)}
-              placeholder="请输入处理进度"
+              placeholder={t("请输入处理进度")}
               refreshKey={`progress_${editingRecord?.venue_id ?? "form"}`}
             />
           </Form.Item>
-          <Form.Item name="follow_up" label="跟进事项">
+          <Form.Item name="follow_up" label={t("跟进事项")}>
             <SimpleRichEditor
               value={form.getFieldValue("follow_up")}
               onChange={(html) => form.setFieldValue("follow_up", html)}
-              placeholder="请输入跟进事项"
+              placeholder={t("请输入跟进事项")}
               refreshKey={`follow_up_${editingRecord?.venue_id ?? "form"}`}
             />
           </Form.Item>

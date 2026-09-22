@@ -5,6 +5,8 @@ import { FARM_MONITOR_TOP_HEIGHT } from "../constants";
 import type { FarmSite } from "../mockData";
 import { formatTotalHashrateE } from "../utils";
 
+import { t } from "@/locales";
+
 const { Text } = Typography;
 
 const DOT_ACTIVE = "#52c41a";
@@ -39,15 +41,15 @@ export default function FarmSiteList({ sites, selectedId, loading, onSelect }: F
     >
       <div className="px-4 pt-4 pb-3 border-b border-gray-100 shrink-0">
         <div className="mb-3">
-          <div className="text-base font-semibold text-gray-800 leading-tight">场地列表</div>
+          <div className="text-base font-semibold text-gray-800 leading-tight">{t("场地列表")}</div>
           <Text type="secondary" className="text-xs">
-            {sites.length} 个场地
+            {t("{{length}} 个场地", { length: sites.length })}
           </Text>
         </div>
         <Input
           allowClear
           size="middle"
-          placeholder="搜索场地名称"
+          placeholder={t("搜索场地名称")}
           prefix={<SearchOutlined className="text-gray-300" />}
           value={keyword}
           onChange={(e) => setKeyword(e.target.value)}
@@ -55,13 +57,13 @@ export default function FarmSiteList({ sites, selectedId, loading, onSelect }: F
       </div>
 
       <div className="flex items-center justify-between px-4 py-2 text-xs text-gray-400 border-b border-gray-50 shrink-0">
-        <span>场地名称</span>
+        <span>{t("场地名称")}</span>
         <button
           type="button"
           className="flex items-center gap-0.5 text-gray-500 hover:text-blue-500 border-0 bg-transparent cursor-pointer p-0"
           onClick={() => setSortDesc((v) => !v)}
         >
-          总算力
+          {t("总算力")}
           <ArrowDownOutlined
             className="text-[10px] transition-transform"
             style={{ transform: sortDesc ? "none" : "rotate(180deg)" }}
@@ -75,7 +77,7 @@ export default function FarmSiteList({ sites, selectedId, loading, onSelect }: F
             <Spin />
           </div>
         ) : filteredSites.length === 0 ? (
-          <div className="py-8 text-center text-gray-400 text-sm">暂无匹配场地</div>
+          <div className="py-8 text-center text-gray-400 text-sm">{t("暂无匹配场地")}</div>
         ) : (
           filteredSites.map((site) => {
             const active = selectedId === site.id;

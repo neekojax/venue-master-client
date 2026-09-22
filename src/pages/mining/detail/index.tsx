@@ -3,6 +3,7 @@ import { useParams } from "react-router-dom";
 import { DatabaseOutlined, RetweetOutlined } from "@ant-design/icons";
 import { Tabs } from "antd";
 
+import { t } from "@/locales";
 import HostList from "@/pages/mining/detail/components/Host-list.tsx";
 import OperationLog from "@/pages/mining/detail/components/Operation-Log.tsx";
 
@@ -22,7 +23,7 @@ const MiningDetailPage: React.FC = () => {
             key: "log",
             label: (
               <>
-                <RetweetOutlined /> 算力变更
+                <RetweetOutlined /> {t("算力变更")}
               </>
             ),
             children: <OperationLog />,
@@ -31,7 +32,7 @@ const MiningDetailPage: React.FC = () => {
             key: "host",
             label: (
               <>
-                <DatabaseOutlined /> 托管信息
+                <DatabaseOutlined /> {t("托管信息")}
               </>
             ),
             children: <HostList />,

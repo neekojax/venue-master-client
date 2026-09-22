@@ -4,6 +4,7 @@ import { Button, Space, Table, Tooltip } from "antd";
 import type { ColumnsType } from "antd/es/table";
 import dayjs from "dayjs";
 
+import { t } from "@/locales";
 import { fetchEventOperationLogs } from "@/pages/venue/api.tsx";
 
 const LogsDetail: React.FC = () => {
@@ -17,11 +18,11 @@ const LogsDetail: React.FC = () => {
 
   const columns: ColumnsType<any> = useMemo(
     () => [
-      { title: "操作者", dataIndex: "username", key: "username", width: 120 },
+      { title: t("操作者"), dataIndex: "username", key: "username", width: 120 },
       { title: "IP", dataIndex: "ip", key: "ip", width: 140 },
-      { title: "状态", dataIndex: "response_status", key: "response_status", width: 100 },
+      { title: t("状态"), dataIndex: "response_status", key: "response_status", width: 100 },
       {
-        title: "事件行为",
+        title: t("事件行为"),
         dataIndex: "operation_desc",
         key: "operation_desc",
         width: 120,
@@ -43,7 +44,7 @@ const LogsDetail: React.FC = () => {
         ),
       },
       {
-        title: "场地",
+        title: t("场地"),
         key: "venue_name",
         width: 180,
         render: (_: any, record: any) => {
@@ -78,7 +79,7 @@ const LogsDetail: React.FC = () => {
         },
       },
       {
-        title: "账户",
+        title: t("账户"),
         key: "pool_name",
         width: 120,
         render: (_: any, record: any) => {
@@ -97,7 +98,7 @@ const LogsDetail: React.FC = () => {
         },
       },
       {
-        title: "事件开始时间",
+        title: t("事件开始时间"),
         key: "start_time",
         width: 150,
         render: (_: any, record: any) => {
@@ -116,7 +117,7 @@ const LogsDetail: React.FC = () => {
         },
       },
       {
-        title: "事件结束时间",
+        title: t("事件结束时间"),
         key: "end_time",
         width: 150,
         render: (_: any, record: any) => {
@@ -135,7 +136,7 @@ const LogsDetail: React.FC = () => {
         },
       },
       {
-        title: "事件类型",
+        title: t("事件类型"),
         key: "log_type",
         width: 100,
         render: (_: any, record: any) => {
@@ -154,7 +155,7 @@ const LogsDetail: React.FC = () => {
         },
       },
       {
-        title: "影响台数",
+        title: t("影响台数"),
         key: "impact_count",
         width: 120,
         render: (_: any, record: any) => {
@@ -173,7 +174,7 @@ const LogsDetail: React.FC = () => {
         },
       },
       {
-        title: "事件原因",
+        title: t("事件原因"),
         key: "event_reason",
         width: 150,
         ellipsis: { showTitle: false },
@@ -209,7 +210,7 @@ const LogsDetail: React.FC = () => {
         },
       },
       {
-        title: "是否休眠",
+        title: t("是否休眠"),
         key: "is_sleep",
         width: 100,
         render: (_: any, record: any) => {
@@ -225,13 +226,13 @@ const LogsDetail: React.FC = () => {
                 })()
               : raw;
           const v = d?.is_sleep;
-          if (v === 1 || v === true) return <span style={{ color: "#fa8c16" }}>已休眠</span>;
-          if (v === 0 || v === false) return <span style={{ color: "#52c41a" }}>未休眠</span>;
+          if (v === 1 || v === true) return <span style={{ color: "#fa8c16" }}>{t("已休眠")}</span>;
+          if (v === 0 || v === false) return <span style={{ color: "#52c41a" }}>{t("未休眠")}</span>;
           return "-";
         },
       },
       {
-        title: "操作时间",
+        title: t("操作时间"),
         dataIndex: "created_at",
         key: "created_at",
         width: 180,
@@ -274,7 +275,7 @@ const LogsDetail: React.FC = () => {
       <div className="flex items-center justify-between mb-4">
         <Space>
           <Button type="primary" size="small" onClick={() => navigate(-1)}>
-            &lt; 返回{" "}
+            {t("< 返回{{value}}", { value: " " })}
           </Button>
         </Space>
       </div>

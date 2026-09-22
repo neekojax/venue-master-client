@@ -7,6 +7,7 @@ import Cookies from "js-cookie"; // 导入 js-cookie
 import { useLogin } from "../api";
 import { COOKIE_DOMAIN, ROUTE_PATHS } from "@/constants/common";
 
+import { t } from "@/locales";
 import { LoginField } from "@/pages/login/type.ts";
 
 export default function LoginForm() {
@@ -83,13 +84,13 @@ export default function LoginForm() {
 
         navigate(ROUTE_PATHS.landing); // 进行导航
         window.$notification?.success({
-          message: "登录成功",
-          description: "欢迎回来",
+          message: t("登录成功"),
+          description: t("欢迎回来"),
         });
       } else {
         // 处理未返回 token 的情况
         window.$notification?.error({
-          message: "登录失败，请重试",
+          message: t("登录失败，请重试"),
         });
       }
     } catch (err) {
@@ -111,12 +112,12 @@ export default function LoginForm() {
       onFinishFailed={onFinishFailed}
       autoComplete="off"
     >
-      <Form.Item name="name" rules={[{ required: true, message: "请输入用户名" }]}>
-        <Input addonBefore={<UserOutlined />} placeholder="请输入用户名" />
+      <Form.Item name="name" rules={[{ required: true, message: t("请输入用户名") }]}>
+        <Input addonBefore={<UserOutlined />} placeholder={t("请输入用户名")} />
       </Form.Item>
 
-      <Form.Item name="password" rules={[{ required: true, message: "请输入密码" }]}>
-        <Input.Password addonBefore={<LockOutlined />} placeholder="请输入密码" />
+      <Form.Item name="password" rules={[{ required: true, message: t("请输入密码") }]}>
+        <Input.Password addonBefore={<LockOutlined />} placeholder={t("请输入密码")} />
       </Form.Item>
 
       {/*<Form.Item name="captcha" rules={[{ required: true, message: "请输入验证码" }]}>*/}
@@ -133,7 +134,7 @@ export default function LoginForm() {
 
       <Form.Item>
         <Button type="primary" htmlType="submit" block loading={isPending}>
-          登录
+          {t("登录")}
         </Button>
       </Form.Item>
     </Form>

@@ -11,6 +11,7 @@ import * as XLSX from "xlsx";
 import { useSelector, useSettingsStore } from "@/stores";
 import { formatHashrate } from "@/utils/num";
 
+import { t as i18nT } from "@/locales";
 import { fetchEfficiencyMachineStat } from "@/pages/report/api.tsx";
 // 必须扩展 dayjs，否则会报 “不存在属性”
 dayjs.extend(isSameOrAfter);
@@ -104,24 +105,24 @@ const App: React.FC = () => {
   // ];
 
   const columns: ColumnsType<DataType> = [
-    { title: "日期", dataIndex: "date", key: "date", fixed: "left", width: 120 },
+    { title: i18nT("日期"), dataIndex: "date", key: "date", fixed: "left", width: 120 },
     {
-      title: "地区",
+      title: i18nT("地区"),
       dataIndex: "region",
       key: "region",
       fixed: "left",
       width: 120,
       // filterMultiple: true,
       filters: [
-        { text: "北美", value: "北美" },
-        { text: "埃塞俄比亚", value: "埃塞俄比亚" },
-        { text: "巴拉圭", value: "巴拉圭" },
-        { text: "阿曼", value: "阿曼" },
+        { text: i18nT("北美"), value: i18nT("北美") },
+        { text: i18nT("埃塞俄比亚"), value: i18nT("埃塞俄比亚") },
+        { text: i18nT("巴拉圭"), value: i18nT("巴拉圭") },
+        { text: i18nT("阿曼"), value: i18nT("阿曼") },
       ],
       onFilter: (value, record) => record.region === value,
     },
     {
-      title: "托管台数",
+      title: i18nT("托管台数"),
       dataIndex: "TotalMachine",
       key: "TotalMachine",
       width: 165,
@@ -130,7 +131,7 @@ const App: React.FC = () => {
       sorter: (a, b) => a.TotalMachine - b.TotalMachine,
     },
     {
-      title: "理论算力",
+      title: i18nT("理论算力"),
       dataIndex: "TheoreticalHashrate",
       key: "TheoreticalHashrate",
       width: 125,
@@ -141,7 +142,7 @@ const App: React.FC = () => {
       sorter: (a, b) => a.TheoreticalHashrate - b.TheoreticalHashrate,
     },
     {
-      title: "24H算力",
+      title: i18nT("24H算力"),
       dataIndex: "EffectivePower",
       key: "EffectivePower",
       width: 145,
@@ -153,7 +154,7 @@ const App: React.FC = () => {
       sorter: (a, b) => a.EffectivePower - b.EffectivePower,
     },
     {
-      title: "24H有效率",
+      title: i18nT("24H有效率"),
       dataIndex: "Efficiency",
       key: "Efficiency",
       width: 140,
@@ -162,7 +163,7 @@ const App: React.FC = () => {
       sorter: (a, b) => a.Efficiency - b.Efficiency,
     },
     {
-      title: "日产出(BTC)",
+      title: i18nT("日产出(BTC)"),
       dataIndex: "DailyOutput",
       key: "DailyOutput",
       width: 165,
@@ -171,7 +172,7 @@ const App: React.FC = () => {
       sorter: (a, b) => a.DailyOutput - b.DailyOutput,
     },
     {
-      title: "总故障台数",
+      title: i18nT("总故障台数"),
       dataIndex: "TotalFailure",
       key: "TotalFailure",
       width: 120,
@@ -180,7 +181,7 @@ const App: React.FC = () => {
       sorter: (a, b) => a.TotalFailure - b.TotalFailure,
     },
     {
-      title: "总故障率",
+      title: i18nT("总故障率"),
       dataIndex: "TotalFailure",
       key: "TotalFailure",
       width: 120,
@@ -192,7 +193,7 @@ const App: React.FC = () => {
     },
     {
       // title: "24小时故障数",
-      title: "新增故障台数",
+      title: i18nT("新增故障台数"),
       dataIndex: "NewFailure",
       key: "NewFailure",
       width: 138,
@@ -202,7 +203,7 @@ const App: React.FC = () => {
     },
     {
       // title: "24小时故障率",
-      title: "新增故障率",
+      title: i18nT("新增故障率"),
       dataIndex: "NewFailureRate",
       key: "NewFailureRate",
       width: 138,
@@ -310,17 +311,17 @@ const App: React.FC = () => {
 
     // 定义中文列名映射
     const mainDataHeaders = {
-      date: "日期",
-      region: "地区",
-      TotalMachine: "托管台数",
-      TheoreticalHashrate: "理论算力",
-      EffectivePower: "24小时算力(P)",
-      Efficiency: "24小时有效率",
-      DailyOutput: "日产出(BTC)",
-      TotalFailure: "总故障数",
-      CumulativeOutput: "总故障数率",
-      NewFailure: "新增故障台数",
-      NewFailureRate: "新增故障台数率",
+      date: i18nT("日期"),
+      region: i18nT("地区"),
+      TotalMachine: i18nT("托管台数"),
+      TheoreticalHashrate: i18nT("理论算力"),
+      EffectivePower: i18nT("24小时算力(P)"),
+      Efficiency: i18nT("24小时有效率"),
+      DailyOutput: i18nT("日产出(BTC)"),
+      TotalFailure: i18nT("总故障数"),
+      CumulativeOutput: i18nT("总故障数率"),
+      NewFailure: i18nT("新增故障台数"),
+      NewFailureRate: i18nT("新增故障台数率"),
     };
 
     // 准备主数据（转换为中文列名）
@@ -372,7 +373,7 @@ const App: React.FC = () => {
 
         worksheet[cellAddress].s = {
           font: {
-            name: "微软雅黑",
+            name: i18nT("微软雅黑"),
             sz: 12,
             bold: true,
             color: { rgb: "FFFFFF" },
@@ -403,7 +404,7 @@ const App: React.FC = () => {
 
           worksheet[cellAddress].s = {
             font: {
-              name: "微软雅黑",
+              name: i18nT("微软雅黑"),
               sz: 10,
             },
             alignment: {
@@ -439,10 +440,10 @@ const App: React.FC = () => {
     const mainWorksheet = XLSX.utils.json_to_sheet(mainData);
     const mainHeaderKeys = Object.keys(mainData[0] || {});
     setWorksheetStyle(mainWorksheet, mainHeaderKeys);
-    XLSX.utils.book_append_sheet(workbook, mainWorksheet, "数据概览汇总数据");
+    XLSX.utils.book_append_sheet(workbook, mainWorksheet, i18nT("数据概览汇总数据"));
 
     // 导出文件
-    XLSX.writeFile(workbook, "数据概览汇总数据.xlsx");
+    XLSX.writeFile(workbook, i18nT("数据概览汇总数据.xlsx"));
   };
 
   return (
@@ -478,7 +479,7 @@ const App: React.FC = () => {
             onClick={exportToCSV}
             className="!rounded-button"
           >
-            导出报表
+            {i18nT("导出报表")}
           </Button>
         </div>
         <div className="mx-auto">
@@ -493,7 +494,7 @@ const App: React.FC = () => {
               showSizeChanger: true,
               onShowSizeChange: (_, size) => setPageSize(size),
               showQuickJumper: true,
-              showTotal: (total) => `共 ${total} 条`,
+              showTotal: (total) => i18nT("共 {{total}} 条", { total: total }),
             }}
             className="custom-table"
             rowKey={(record) => `${record.date}-${record.region}`}

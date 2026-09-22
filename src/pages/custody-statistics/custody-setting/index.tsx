@@ -7,6 +7,7 @@ import EditTable from "@/components/edit-table";
 import useAuthRedirect from "@/hooks/useAuthRedirect.ts";
 import { getShortenedLink } from "@/utils/short-link.ts";
 
+import { t } from "@/locales";
 import EditForm from "@/pages/custody-statistics/components/edit-form.tsx";
 import {
   useCustodyInfoDelete,
@@ -87,17 +88,17 @@ export default function SettingPage() {
         },
       },
       {
-        title: "场地",
+        title: t("场地"),
         dataIndex: "venue_name",
         key: "venue_name",
       },
       {
-        title: "子账号",
+        title: t("子账号"),
         dataIndex: "sub_account_name",
         key: "sub_account_name",
       },
       {
-        title: "观察者链接",
+        title: t("观察者链接"),
         dataIndex: "observer_link",
         key: "observer_link",
         width: 300,
@@ -114,17 +115,17 @@ export default function SettingPage() {
         ),
       },
       {
-        title: "能耗比（J/T）",
+        title: t("能耗比（J/T）"),
         dataIndex: "energy_ratio",
         key: "energy_ratio",
       },
       {
-        title: "基础托管费（$/kwh）",
+        title: t("基础托管费（$/kwh）"),
         dataIndex: "basic_hosting_fee",
         key: "basic_hosting_fee",
       },
       {
-        title: "操作",
+        title: t("操作"),
         valueType: "option",
         key: "operation",
       },
@@ -133,12 +134,12 @@ export default function SettingPage() {
 
   // Loading 状态
   if (isLoadingFields) {
-    return <Spin tip="加载中..." />;
+    return <Spin tip={t("加载中...")} />;
   }
 
   // 错误状态
   if (error) {
-    return <Alert message="错误" description={error.message} type="error" showIcon />;
+    return <Alert message={t("错误")} description={error.message} type="error" showIcon />;
   }
 
   // 搜索处理函数
@@ -149,10 +150,10 @@ export default function SettingPage() {
   const handleDelete = (recordId: number) => {
     deleteMutation.mutate(recordId, {
       onSuccess: () => {
-        message.success("删除记录成功");
+        message.success(t("删除记录成功"));
       },
       onError: (error) => {
-        message.error(`删除记录失败: ${error.message}`);
+        message.error(t("删除记录失败: {{message}}", { message: error.message }));
       },
     });
   };
@@ -169,10 +170,10 @@ export default function SettingPage() {
 
     updateMutation.mutate(custodyInfoUpdate, {
       onSuccess: () => {
-        message.success("更新成功");
+        message.success(t("更新成功"));
       },
       onError: (error) => {
-        message.error(`更新失败: ${error.message}`);
+        message.error(t("更新失败: {{message}}", { message: error.message }));
       },
     });
   };
@@ -187,10 +188,10 @@ export default function SettingPage() {
   const handleNewCustodyInfo = async (values: CustodyInfoNew) => {
     newMutation.mutate(values, {
       onSuccess: () => {
-        message.success("添加成功");
+        message.success(t("添加成功"));
       },
       onError: (error) => {
-        message.error(`添加失败: ${error.message}`);
+        message.error(t("添加失败: {{message}}", { message: error.message }));
       },
     });
   };
@@ -203,7 +204,7 @@ export default function SettingPage() {
       >
         <Space size={24}>
           <ActionButton
-            label={"添加基础数据"}
+            label={t("添加基础数据")}
             initialValues={emptyData}
             onSubmit={handleNewCustodyInfo}
             FormComponent={EditForm}
@@ -212,7 +213,7 @@ export default function SettingPage() {
         </Space>
         <Input
           prefix={<SearchOutlined style={{ color: "rgba(0, 0, 0, 0.25)", fontSize: 18 }} />}
-          placeholder="请输入搜索字段"
+          placeholder={t("请输入搜索字段")}
           value={searchTerm}
           onChange={handleSearch}
           style={{ width: 250 }} // 设定宽度

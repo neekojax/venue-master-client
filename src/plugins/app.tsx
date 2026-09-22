@@ -3,6 +3,8 @@ import dayjs from "dayjs";
 import timezone from "dayjs/plugin/timezone";
 import utc from "dayjs/plugin/utc";
 
+import { t } from "@/locales";
+
 dayjs.extend(utc);
 dayjs.extend(timezone);
 
@@ -52,15 +54,15 @@ export function setupAppVersionNotification() {
           window.location.reload(); // 刷新页面
         }}
       >
-        立即刷新
+        {t("立即刷新")}
       </Button>
     );
 
     isShow = true;
 
     notification.open({
-      message: "系统版本更新通知",
-      description: "检测到系统有新版本发布，是否立即刷新页面？",
+      message: t("系统版本更新通知"),
+      description: t("检测到系统有新版本发布，是否立即刷新页面？"),
       duration: 0, // 常驻通知
       onClick: () => {
         clearCacheAndReload();

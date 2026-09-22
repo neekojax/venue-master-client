@@ -2,6 +2,8 @@ import { FcRefresh } from "react-icons/fc";
 import { Card, Col, Row } from "antd";
 import { ReactEcharts } from "@/components/react-echarts";
 
+import { t } from "@/locales";
+
 const MiningRepairTrendChart = () => {
   const generateRepairData = () => {
     const data = [];
@@ -83,7 +85,7 @@ const MiningRepairTrendChart = () => {
             <FcRefresh style={{ fontSize: "20px", marginRight: "5px" }} />
           </Col>
           <Col>
-            <h3 style={{ marginLeft: 5, fontSize: "14px" }}>维修态曲线</h3>
+            <h3 style={{ marginLeft: 5, fontSize: "14px" }}>{t("维修态曲线")}</h3>
           </Col>
         </Row>
       }

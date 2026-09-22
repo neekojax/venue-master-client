@@ -2,13 +2,15 @@ import { Link, Outlet, type RouteObject } from "react-router-dom";
 import { ProgressBar } from "@/components/progress-bar";
 import { ROUTE_PATHS } from "@/constants/common";
 
+import { t } from "@/locales";
+
 export const logsRoute: RouteObject = {
   path: ROUTE_PATHS.logs,
   element: <Outlet />,
   HydrateFallback: ProgressBar,
   handle: {
-    title: "用户操作日志",
-    crumb: () => <Link to={ROUTE_PATHS.logs}>用户操作日志</Link>,
+    title: t("用户操作日志"),
+    crumb: () => <Link to={ROUTE_PATHS.logs}>{t("用户操作日志")}</Link>,
   },
   children: [
     {
@@ -18,8 +20,8 @@ export const logsRoute: RouteObject = {
       }),
       HydrateFallback: ProgressBar,
       handle: {
-        title: "操作日志",
-        crumb: () => <Link to={ROUTE_PATHS.logs}>操作日志</Link>,
+        title: t("操作日志"),
+        crumb: () => <Link to={ROUTE_PATHS.logs}>{t("操作日志")}</Link>,
       },
     },
     {
@@ -29,8 +31,8 @@ export const logsRoute: RouteObject = {
       }),
       HydrateFallback: ProgressBar,
       handle: {
-        title: "操作日志详情",
-        crumb: () => <>操作日志详情</>,
+        title: t("操作日志详情"),
+        crumb: () => <>{t("操作日志详情")}</>,
       },
     },
   ],

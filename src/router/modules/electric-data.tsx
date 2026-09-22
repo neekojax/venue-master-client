@@ -2,6 +2,8 @@ import { Link, type RouteObject } from "react-router-dom";
 import { ProgressBar } from "@/components/progress-bar";
 import { ROUTE_PATHS } from "@/constants/common";
 
+import { t } from "@/locales";
+
 export const electricMenuRoute: RouteObject = {
   path: ROUTE_PATHS.electric,
   lazy: async () => ({
@@ -9,8 +11,8 @@ export const electricMenuRoute: RouteObject = {
   }),
   HydrateFallback: ProgressBar,
   handle: {
-    title: "电网数据",
-    crumb: () => "电网数据",
+    title: t("电网数据"),
+    crumb: () => t("电网数据"),
   },
   children: [
     {
@@ -20,8 +22,8 @@ export const electricMenuRoute: RouteObject = {
       }),
       HydrateFallback: ProgressBar,
       handle: {
-        title: "限电记录",
-        crumb: () => <Link to={ROUTE_PATHS.electricLimit}>限电记录</Link>,
+        title: t("限电记录"),
+        crumb: () => <Link to={ROUTE_PATHS.electricLimit}>{t("限电记录")}</Link>,
       },
     },
     {
@@ -31,8 +33,8 @@ export const electricMenuRoute: RouteObject = {
       }),
       HydrateFallback: ProgressBar,
       handle: {
-        title: "平均电价",
-        crumb: () => <Link to={ROUTE_PATHS.electricAverage}>平均电价</Link>,
+        title: t("平均电价"),
+        crumb: () => <Link to={ROUTE_PATHS.electricAverage}>{t("平均电价")}</Link>,
       },
     },
     {
@@ -42,8 +44,8 @@ export const electricMenuRoute: RouteObject = {
       }),
       HydrateFallback: ProgressBar,
       handle: {
-        title: "基础数据",
-        crumb: () => <Link to={ROUTE_PATHS.electricAverage}>基础数据</Link>,
+        title: t("基础数据"),
+        crumb: () => <Link to={ROUTE_PATHS.electricAverage}>{t("基础数据")}</Link>,
       },
     },
   ],

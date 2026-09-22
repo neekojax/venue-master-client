@@ -2,6 +2,8 @@ import { DesktopOutlined, MoonOutlined, SunOutlined } from "@ant-design/icons";
 import { Dropdown, type MenuProps } from "antd";
 import { useTheme } from "../theme-provider";
 
+import { t } from "@/locales";
+
 export function ThemeSwitch() {
   const { theme, setTheme, isDarkMode } = useTheme();
 
@@ -37,7 +39,7 @@ export function ThemeSwitch() {
     {
       label: (
         <div>
-          <SunOutlined /> 浅色模式
+          <SunOutlined /> {t("浅色模式")}
         </div>
       ),
       key: "0",
@@ -46,7 +48,7 @@ export function ThemeSwitch() {
     {
       label: (
         <div>
-          <MoonOutlined /> 深色模式
+          <MoonOutlined /> {t("深色模式")}
         </div>
       ),
       key: "1",
@@ -55,7 +57,7 @@ export function ThemeSwitch() {
     {
       label: (
         <div>
-          <DesktopOutlined /> 跟随系统
+          <DesktopOutlined /> {t("跟随系统")}
         </div>
       ),
       key: "3",

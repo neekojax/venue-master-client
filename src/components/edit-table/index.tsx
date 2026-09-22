@@ -5,6 +5,8 @@ import { message, Pagination, Popconfirm } from "antd";
 
 import "./styles.css";
 
+import { t } from "@/locales";
+
 type EditTableProps = {
   tableData: any[];
   setTableData: React.Dispatch<React.SetStateAction<any[]>>;
@@ -45,10 +47,10 @@ export default function EditTable({
       <FormOutlined />
     </a>,
     <Popconfirm
-      title="确认删除此记录吗？"
+      title={t("确认删除此记录吗？")}
       onConfirm={() => handleDelete(record.key)} // 调用 onDelete
-      okText="是"
-      cancelText="否"
+      okText={t("是")}
+      cancelText={t("否")}
     >
       <a key={`delete-${record.key}`}>
         {/* 删除 */}
@@ -83,7 +85,7 @@ export default function EditTable({
               handleSave(rowKey as number, data);
             } else {
               // 如果验证不通过，显示提示信息
-              message.error("所有字段不能为空");
+              message.error(t("所有字段不能为空"));
             }
           },
         }}

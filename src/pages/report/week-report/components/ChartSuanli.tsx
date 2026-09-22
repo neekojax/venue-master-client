@@ -4,6 +4,8 @@ import { GridComponent, TitleComponent, TooltipComponent } from "echarts/compone
 import * as echarts from "echarts/core";
 import { CanvasRenderer } from "echarts/renderers";
 
+import { t } from "@/locales";
+
 // 注册 ECharts 组件
 echarts.use([LineChart, GridComponent, TooltipComponent, TitleComponent, CanvasRenderer]);
 
@@ -41,7 +43,13 @@ const WaveLineCard: React.FC<Props> = ({ hashEffectiveRate }) => {
         formatter: (params: any) => {
           // params 是数组，因为 trigger: "axis"
           return params
-            .map((item: any) => `${item.name || ""}<br>${item.marker}算力有效率：${item.value.toFixed(2)}%`)
+            .map((item: any) =>
+              t("{{value}}<br>{{marker}}算力有效率：{{value2}}%", {
+                value: item.name || "",
+                marker: item.marker,
+                value2: item.value.toFixed(2),
+              }),
+            )
             .join("<br/>");
         },
       },
@@ -121,7 +129,7 @@ const WaveLineCard: React.FC<Props> = ({ hashEffectiveRate }) => {
   return (
     <>
       <div className="flex justify-between items-center mb-4">
-        <h3 className="text-lg font-semibold">算力有效率</h3>
+        <h3 className="text-lg font-semibold">{t("算力有效率")}</h3>
         {/* <Radio.Group
                     value={chart.period}
                     onChange={(e) => {

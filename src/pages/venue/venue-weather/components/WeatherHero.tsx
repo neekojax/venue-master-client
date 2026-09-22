@@ -2,6 +2,8 @@ import React from "react";
 import { VenueWeather } from "../types";
 import { WeatherIcon } from "./WeatherIcon";
 
+import { t } from "@/locales";
+
 interface Props {
   data: VenueWeather;
 }
@@ -15,7 +17,7 @@ const WeatherHero: React.FC<Props> = ({ data }) => {
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
           <div className="flex items-center space-x-3">
             <span className="px-3 py-1 bg-white/20 backdrop-blur-md rounded-full text-xs font-bold tracking-wider uppercase">
-              {data.data_source} • 实时监测
+              {t("{{data_source}} • 实时监测", { data_source: data.data_source })}
             </span>
             <div className="flex items-center space-x-2 bg-black/10 px-2 py-1 rounded text-[10px] font-mono border border-white/10">
               <i className="fas fa-globe-asia opacity-70"></i>
@@ -23,7 +25,7 @@ const WeatherHero: React.FC<Props> = ({ data }) => {
             </div>
           </div>
           <span className="text-blue-100 text-xs flex items-center">
-            <i className="far fa-clock mr-1"></i> 最后更新: {data.date}
+            <i className="far fa-clock mr-1"></i> {t("最后更新:")} {data.date}
           </span>
         </div>
 
@@ -48,25 +50,25 @@ const WeatherHero: React.FC<Props> = ({ data }) => {
 
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-x-8 gap-y-4 flex-1 border-t md:border-t-0 md:border-l border-white/10 pt-6 md:pt-0 md:pl-12">
             <div>
-              <p className="text-blue-200 text-[10px] font-bold uppercase mb-1">当前湿度</p>
+              <p className="text-blue-200 text-[10px] font-bold uppercase mb-1">{t("当前湿度")}</p>
               <p className="text-xl font-semibold">{data.humidity}%</p>
-              <p className="text-[10px] text-blue-100/70 mt-1">实时环境状态</p>
+              <p className="text-[10px] text-blue-100/70 mt-1">{t("实时环境状态")}</p>
             </div>
             <div>
-              <p className="text-blue-200 text-[10px] font-bold uppercase mb-1">平均风速</p>
+              <p className="text-blue-200 text-[10px] font-bold uppercase mb-1">{t("平均风速")}</p>
               <p className="text-xl font-semibold">
                 {data.wind_speed.toFixed(2)} <span className="text-xs opacity-70">km/h</span>
               </p>
               <p className="text-[10px] opacity-60 uppercase">{data.wind_direction}</p>
             </div>
             <div>
-              <p className="text-blue-200 text-[10px] font-bold uppercase mb-1">阵风风速</p>
+              <p className="text-blue-200 text-[10px] font-bold uppercase mb-1">{t("阵风风速")}</p>
               <p className="text-xl font-semibold">
                 {data.wind_gust_speed.toFixed(2)} <span className="text-xs opacity-70">km/h</span>
               </p>
             </div>
             <div>
-              <p className="text-blue-200 text-[10px] font-bold uppercase mb-1">降水量</p>
+              <p className="text-blue-200 text-[10px] font-bold uppercase mb-1">{t("降水量")}</p>
               <p className="text-xl font-semibold">
                 {data.precipitation} <span className="text-xs opacity-70">mm</span>
               </p>

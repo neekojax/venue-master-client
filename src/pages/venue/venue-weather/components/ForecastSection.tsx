@@ -2,6 +2,8 @@ import React, { useState } from "react";
 import { ForecastDay, VenueWeather } from "../types";
 import { WeatherIcon } from "./WeatherIcon";
 
+import { t } from "@/locales";
+
 interface Props {
   basicData: VenueWeather;
   forecastDays: ForecastDay[];
@@ -17,7 +19,7 @@ const ForecastSection: React.FC<Props> = ({ basicData, forecastDays, forecastNig
         <div className="flex items-center space-x-4">
           <h3 className="text-sm font-bold text-gray-800 flex items-center uppercase tracking-wider">
             <i className="far fa-calendar-days mr-2 text-blue-500"></i>
-            未来天气预报
+            {t("未来天气预报")}
           </h3>
 
           <div className="flex bg-gray-200/50 p-1 rounded-lg border border-gray-200 backdrop-blur-sm">
@@ -38,11 +40,11 @@ const ForecastSection: React.FC<Props> = ({ basicData, forecastDays, forecastNig
                 <>
                   <button onClick={() => setViewMode("day")} className={dayBtnClass}>
                     <i className="fas fa-sun"></i>
-                    <span>白天</span>
+                    <span>{t("白天")}</span>
                   </button>
                   <button onClick={() => setViewMode("night")} className={nightBtnClass}>
                     <i className="fas fa-moon"></i>
-                    <span>夜晚</span>
+                    <span>{t("夜晚")}</span>
                   </button>
                 </>
               );
@@ -66,7 +68,7 @@ const ForecastSection: React.FC<Props> = ({ basicData, forecastDays, forecastNig
             // const weatherDesc = isNight && day.weather === "晴" ? "" : day.weather;
             const dateParts = day.date.split("-");
             const displayDate = `${dateParts[1]} / ${dateParts[2]}`;
-            const weekday = ["周日", "周一", "周二", "周三", "周四", "周五", "周六"][
+            const weekday = [t("周日"), t("周一"), t("周二"), t("周三"), t("周四"), t("周五"), t("周六")][
               new Date(day.date).getDay()
             ];
 
@@ -93,7 +95,7 @@ const ForecastSection: React.FC<Props> = ({ basicData, forecastDays, forecastNig
 
                 <div className="px-4 pb-4 mt-4 space-y-4">
                   <div className="flex justify-between items-center text-[11px]">
-                    <span className="text-gray-400 font-medium">温度区间</span>
+                    <span className="text-gray-400 font-medium">{t("温度区间")}</span>
                     <span className="font-black text-gray-900">
                       {day.temp_min}° - {day.temp_max}°
                     </span>
@@ -101,7 +103,7 @@ const ForecastSection: React.FC<Props> = ({ basicData, forecastDays, forecastNig
 
                   <div className="space-y-1.5">
                     <div className="flex justify-between items-center text-[11px]">
-                      <span className="text-gray-400 font-medium">湿度 (L/A/H)</span>
+                      <span className="text-gray-400 font-medium">{t("湿度 (L/A/H)")}</span>
                       <span className="font-bold text-gray-700">
                         {day.humidity_min}/{day.humidity_avg}/{day.humidity_max}%
                       </span>
@@ -116,12 +118,16 @@ const ForecastSection: React.FC<Props> = ({ basicData, forecastDays, forecastNig
 
                   <div className="space-y-1.5 pt-1">
                     <div className="flex justify-between items-center text-[11px]">
-                      <span className="text-gray-400 font-medium">风力详情</span>
+                      <span className="text-gray-400 font-medium">{t("风力详情")}</span>
                       <span className="font-bold text-gray-700">{day.wind_direction}</span>
                     </div>
                     <div className="flex justify-between items-center text-[11px]">
-                      <span className="text-gray-400">平均: {day.wind_speed} km/h</span>
-                      <span className="text-orange-500 font-black">阵风: {day.wind_gust_speed}</span>
+                      <span className="text-gray-400">
+                        {t("平均: {{wind_speed}} km/h", { wind_speed: day.wind_speed })}
+                      </span>
+                      <span className="text-orange-500 font-black">
+                        {t("阵风: {{wind_gust_speed}}", { wind_gust_speed: day.wind_gust_speed })}
+                      </span>
                     </div>
                   </div>
                 </div>
@@ -129,7 +135,7 @@ const ForecastSection: React.FC<Props> = ({ basicData, forecastDays, forecastNig
                 <div className="mt-auto px-4 py-3 border-t border-gray-50 flex justify-between items-center bg-blue-50/10">
                   <div className="flex items-center text-[11px] font-bold text-blue-500">
                     <i className="fas fa-cloud-rain mr-2 opacity-70"></i>
-                    降水量
+                    {t("降水量")}
                   </div>
                   <span className="text-[11px] font-black text-blue-600">{day.precipitation} mm</span>
                 </div>
@@ -142,10 +148,10 @@ const ForecastSection: React.FC<Props> = ({ basicData, forecastDays, forecastNig
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
           {forecastNight.map((day, idx) => {
             const isNight = viewMode === "night";
-            const weatherDesc = isNight && day.weather === "晴" ? "月朗星稀" : day.weather;
+            const weatherDesc = isNight && day.weather === "晴" ? t("月朗星稀") : day.weather;
             const dateParts = day.date.split("-");
             const displayDate = `${dateParts[1]} / ${dateParts[2]}`;
-            const weekday = ["周日", "周一", "周二", "周三", "周四", "周五", "周六"][
+            const weekday = [t("周日"), t("周一"), t("周二"), t("周三"), t("周四"), t("周五"), t("周六")][
               new Date(day.date).getDay()
             ];
 
@@ -176,7 +182,7 @@ const ForecastSection: React.FC<Props> = ({ basicData, forecastDays, forecastNig
                 <div className="px-4 pb-4 mt-4 space-y-4">
                   {/* Temperature */}
                   <div className="flex justify-between items-center text-[11px]">
-                    <span className="text-gray-400 font-medium">温度区间</span>
+                    <span className="text-gray-400 font-medium">{t("温度区间")}</span>
                     <span className="font-black text-gray-900">
                       {day.temp_min}° - {day.temp_max}°
                     </span>
@@ -185,7 +191,7 @@ const ForecastSection: React.FC<Props> = ({ basicData, forecastDays, forecastNig
                   {/* Humidity with Bar */}
                   <div className="space-y-1.5">
                     <div className="flex justify-between items-center text-[11px]">
-                      <span className="text-gray-400 font-medium">湿度 (L/A/H)</span>
+                      <span className="text-gray-400 font-medium">{t("湿度 (L/A/H)")}</span>
                       <span className="font-bold text-gray-700">
                         {day.humidity_min}/{day.humidity_avg}/{day.humidity_max}%
                       </span>
@@ -201,12 +207,16 @@ const ForecastSection: React.FC<Props> = ({ basicData, forecastDays, forecastNig
                   {/* Wind Details */}
                   <div className="space-y-1.5 pt-1">
                     <div className="flex justify-between items-center text-[11px]">
-                      <span className="text-gray-400 font-medium">风力详情</span>
+                      <span className="text-gray-400 font-medium">{t("风力详情")}</span>
                       <span className="font-bold text-gray-700">{day.wind_direction}</span>
                     </div>
                     <div className="flex justify-between items-center text-[11px]">
-                      <span className="text-gray-400">平均: {day.wind_speed} km/h</span>
-                      <span className="text-orange-500 font-black">阵风: {day.wind_gust_speed}</span>
+                      <span className="text-gray-400">
+                        {t("平均: {{wind_speed}} km/h", { wind_speed: day.wind_speed })}
+                      </span>
+                      <span className="text-orange-500 font-black">
+                        {t("阵风: {{wind_gust_speed}}", { wind_gust_speed: day.wind_gust_speed })}
+                      </span>
                     </div>
                   </div>
                 </div>
@@ -215,7 +225,7 @@ const ForecastSection: React.FC<Props> = ({ basicData, forecastDays, forecastNig
                 <div className="mt-auto px-4 py-3 border-t border-gray-50 flex justify-between items-center bg-blue-50/10">
                   <div className="flex items-center text-[11px] font-bold text-blue-500">
                     <i className="fas fa-cloud-rain mr-2 opacity-70"></i>
-                    降水量
+                    {t("降水量")}
                   </div>
                   <span className="text-[11px] font-black text-blue-600">{day.precipitation} mm</span>
                 </div>

@@ -7,6 +7,8 @@ import ProfitTable from "./profitTable";
 import { useSelector, useSettingsStore } from "@/stores";
 import { formatAmount } from "@/utils/num";
 
+import { t } from "@/locales";
+
 export type Financials = {
   category: string;
   income_usd: number;
@@ -66,44 +68,44 @@ const Profit: React.FC<{ chartDate: string }> = ({ chartDate }) => {
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-2 text-lg">
             <i className="fas fa-chart-pie text-blue-500"></i>
-            <span>CANGO - 预估利润 (单位: $)</span>
+            <span>{t("CANGO - 预估利润 (单位: $)")}</span>
           </div>
           <Link
             to="/report/data-summary/profit-list"
             className="text-blue-600 hover:text-blue-700 hover:underline text-sm"
           >
-            查看更多
+            {t("查看更多")}
           </Link>
         </div>
         <div className="grid grid-cols-3 gap-4 mb-6">
           <div className="bg-gray-50 rounded-lg p-4 border border-gray-100">
-            <div className="text-gray-500 mb-2">日产出价值</div>
+            <div className="text-gray-500 mb-2">{t("日产出价值")}</div>
             <div className="text-2xl">$ {formatAmount(profitStat.dailyIncomeUSD, 0, "", false)}</div>
           </div>
 
           <div className="bg-gray-50 rounded-lg p-4 border border-gray-100">
-            <div className="text-gray-500 mb-2">累计托管费</div>
+            <div className="text-gray-500 mb-2">{t("累计托管费")}</div>
             <div className="text-2xl">$ {formatAmount(profitStat.accumulatedHostingFee, 0, "", false)}</div>
           </div>
           <div className="bg-gray-50 rounded-lg p-4 border border-gray-100">
-            <div className="text-gray-500 mb-2">累计单币成本</div>
+            <div className="text-gray-500 mb-2">{t("累计单币成本")}</div>
             <div className="text-2xl">$ {formatAmount(profitStat.accumulatedPerCoinCost, 0, "", false)}</div>
           </div>
 
           <div className="bg-gray-50 rounded-lg p-4 border border-gray-100">
-            <div className="text-gray-500 mb-2">累计产出价值</div>
+            <div className="text-gray-500 mb-2">{t("累计产出价值")}</div>
             <div className="text-2xl">$ {formatAmount(profitStat.accumulatedIncomeUSD, 0, "", false)}</div>
           </div>
 
           <div className="bg-gray-50 rounded-lg p-4 border border-gray-100">
-            <div className="text-gray-500 mb-2">累计运维费</div>
+            <div className="text-gray-500 mb-2">{t("累计运维费")}</div>
             <div className="text-2xl">
               $ {formatAmount(profitStat.accumulatedMaintenanceFee, 0, "", false)}
             </div>
           </div>
 
           <div className="bg-gray-50 rounded-lg p-4 border border-gray-100">
-            <div className="text-gray-500 mb-2">累计单币成本-含折旧</div>
+            <div className="text-gray-500 mb-2">{t("累计单币成本-含折旧")}</div>
             <div className="text-2xl">
               $ {formatAmount(profitStat.accumulatedDepreciationPerCoinCost, 0, "", false)}
             </div>
@@ -118,26 +120,26 @@ const Profit: React.FC<{ chartDate: string }> = ({ chartDate }) => {
               tableProps={{
                 columns: [
                   {
-                    title: "地区",
+                    title: t("地区"),
                     dataIndex: "category",
                   },
                   {
-                    title: "日产出价值",
+                    title: t("日产出价值"),
                     dataIndex: "income_usd",
                     render: (value) => `${formatAmount(value, 0, "", false)}`,
                   },
                   {
-                    title: "日托管费",
+                    title: t("日托管费"),
                     dataIndex: "hosting_fee",
                     render: (value) => `${formatAmount(value, 0, "", false)}`,
                   },
                   {
-                    title: "日运维费",
+                    title: t("日运维费"),
                     dataIndex: "maintenance_fee",
                     render: (value) => `${formatAmount(value, 0, "", false)}`,
                   },
                   {
-                    title: "日单币成本",
+                    title: t("日单币成本"),
                     dataIndex: "per_coin_cost",
                     render: (value) => `${formatAmount(value, 0, "", false)}`,
                   },
@@ -154,26 +156,26 @@ const Profit: React.FC<{ chartDate: string }> = ({ chartDate }) => {
               tableProps={{
                 columns: [
                   {
-                    title: "地区",
+                    title: t("地区"),
                     dataIndex: "category",
                   },
                   {
-                    title: "累计产出价值",
+                    title: t("累计产出价值"),
                     dataIndex: "income_usd",
                     render: (value) => `${formatAmount(value, 0, "", false)}`,
                   },
                   {
-                    title: "累计托管费",
+                    title: t("累计托管费"),
                     dataIndex: "hosting_fee",
                     render: (value) => `${formatAmount(value, 0, "", false)}`,
                   },
                   {
-                    title: "累计运维费",
+                    title: t("累计运维费"),
                     dataIndex: "maintenance_fee",
                     render: (value) => `${formatAmount(value, 0, "", false)}`,
                   },
                   {
-                    title: "累计单币成本",
+                    title: t("累计单币成本"),
                     dataIndex: "per_coin_cost",
                     render: (value) => `${formatAmount(value, 0, "", false)}`,
                   },
@@ -193,26 +195,26 @@ const Profit: React.FC<{ chartDate: string }> = ({ chartDate }) => {
               tableProps={{
                 columns: [
                   {
-                    title: "类型",
+                    title: t("类型"),
                     dataIndex: "category",
                   },
                   {
-                    title: "日产出价值",
+                    title: t("日产出价值"),
                     dataIndex: "income_usd",
                     render: (value) => `${formatAmount(value, 0, "", false)}`,
                   },
                   {
-                    title: "日托管费",
+                    title: t("日托管费"),
                     dataIndex: "hosting_fee",
                     render: (value) => `${formatAmount(value, 0, "", false)}`,
                   },
                   {
-                    title: "日运维费",
+                    title: t("日运维费"),
                     dataIndex: "maintenance_fee",
                     render: (value) => `${formatAmount(value, 0, "", false)}`,
                   },
                   {
-                    title: "日单币成本",
+                    title: t("日单币成本"),
                     dataIndex: "per_coin_cost",
                     render: (value) => `${formatAmount(value, 0, "", false)}`,
                   },
@@ -229,26 +231,26 @@ const Profit: React.FC<{ chartDate: string }> = ({ chartDate }) => {
               tableProps={{
                 columns: [
                   {
-                    title: "类型",
+                    title: t("类型"),
                     dataIndex: "category",
                   },
                   {
-                    title: "累计产出价值",
+                    title: t("累计产出价值"),
                     dataIndex: "income_usd",
                     render: (value) => `${formatAmount(value, 0, "", false)}`,
                   },
                   {
-                    title: "累计托管费",
+                    title: t("累计托管费"),
                     dataIndex: "hosting_fee",
                     render: (value) => `${formatAmount(value, 0, "", false)}`,
                   },
                   {
-                    title: "累计运维费",
+                    title: t("累计运维费"),
                     dataIndex: "maintenance_fee",
                     render: (value) => `${formatAmount(value, 0, "", false)}`,
                   },
                   {
-                    title: "累计单币成本",
+                    title: t("累计单币成本"),
                     dataIndex: "per_coin_cost",
                     render: (value) => `${formatAmount(value, 0, "", false)}`,
                   },

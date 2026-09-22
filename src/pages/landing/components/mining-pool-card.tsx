@@ -3,6 +3,7 @@ import { InfoCircleOutlined } from "@ant-design/icons";
 import { Tooltip } from "antd";
 import { Activity, TrendingDown, TrendingUp } from "lucide-react";
 
+import { t } from "@/locales";
 import { fetchTotalLastHashStatus, fetchTotalRealTimeStatus } from "@/pages/mining/api.tsx";
 
 interface MetricRowProps {
@@ -106,7 +107,7 @@ const MiningPoolCard: React.FC<MiningPoolCardProps> = ({ poolType }) => {
             <Activity size={20} className="text-blue-600" />
           </div>
           <div>
-            <h2 className="text-lg font-bold text-slate-900 tracking-tight">效率</h2>
+            <h2 className="text-lg font-bold text-slate-900 tracking-tight">{t("效率")}</h2>
           </div>
         </div>
       </div>
@@ -115,13 +116,13 @@ const MiningPoolCard: React.FC<MiningPoolCardProps> = ({ poolType }) => {
       <div className="grid grid-cols-2 gap-4 mb-6">
         <div className="bg-slate-50/80 p-4 rounded-2xl border border-slate-100 hover:border-blue-200 transition-colors group">
           <div className="text-xs text-slate-500 mb-1.5 font-semibold uppercase tracking-wider group-hover:text-blue-600 transition-colors flex items-center gap-1.5">
-            <span>实时总算力</span>
+            <span>{t("实时总算力")}</span>
             <Tooltip
               title={
                 <>
-                  主矿池算力: {realTimeStatus?.totalMasterCurrentHashrate} PH/s
+                  {t("主矿池算力:")} {realTimeStatus?.totalMasterCurrentHashrate} PH/s
                   <br />
-                  备用矿池算力: {realTimeStatus?.totalBackUpCurrentHashrate} PH/s
+                  {t("备用矿池算力:")} {realTimeStatus?.totalBackUpCurrentHashrate} PH/s
                 </>
               }
             >
@@ -135,9 +136,9 @@ const MiningPoolCard: React.FC<MiningPoolCardProps> = ({ poolType }) => {
               <Tooltip
                 title={
                   <>
-                    主矿池算力: {realTimeStatus?.totalMasterCurrentHashrate} PH/s
+                    {t("主矿池算力:")} {realTimeStatus?.totalMasterCurrentHashrate} PH/s
                     <br />
-                    备用矿池算力: {realTimeStatus?.totalBackUpCurrentHashrate} PH/s
+                    {t("备用矿池算力:")} {realTimeStatus?.totalBackUpCurrentHashrate} PH/s
                   </>
                 }
               >
@@ -148,13 +149,13 @@ const MiningPoolCard: React.FC<MiningPoolCardProps> = ({ poolType }) => {
         </div>
         <div className="bg-slate-50/80 p-4 rounded-2xl border border-slate-100 hover:border-blue-200 transition-colors group">
           <div className="text-xs text-slate-500 mb-1.5 font-semibold uppercase tracking-wider group-hover:text-blue-600 transition-colors flex items-center gap-1.5">
-            <span>理论算力</span>
+            <span>{t("理论算力")}</span>
             <Tooltip
               title={
                 <span style={{ fontSize: 11, lineHeight: 1.6, letterSpacing: 0.2 }}>
-                  理论算力：
+                  {t("理论算力：")}
                   <br />
-                  总理论算力-租赁算力-仓库算力-待撤场算力
+                  {t("总理论算力-租赁算力-仓库算力-待撤场算力")}
                 </span>
               }
               overlayInnerStyle={{ minWidth: 260, maxWidth: 360, padding: "8px 12px" }}
@@ -166,7 +167,11 @@ const MiningPoolCard: React.FC<MiningPoolCardProps> = ({ poolType }) => {
             <span>{realTimeStatus?.totalTheoreticalHashrate}</span>
             <span className="text-sm font-normal text-slate-500 flex items-center gap-1">
               PH/s
-              <Tooltip title={`总理论算力: ${realTimeStatus?.totalRawTheoreticalHashrate} PH/s`}>
+              <Tooltip
+                title={t("总理论算力: {{value}} PH/s", {
+                  value: realTimeStatus?.totalRawTheoreticalHashrate,
+                })}
+              >
                 <InfoCircleOutlined style={{ fontSize: 12, cursor: "pointer" }} />
               </Tooltip>
             </span>
@@ -202,31 +207,31 @@ const MiningPoolCard: React.FC<MiningPoolCardProps> = ({ poolType }) => {
           </div>
         </div>
         <div>
-          <div className="text-sm font-bold text-slate-900">实时算力达成率</div>
+          <div className="text-sm font-bold text-slate-900">{t("实时算力达成率")}</div>
         </div>
       </div>
 
       {/* Detailed List */}
       <div className="flex-1 flex flex-col justify-center">
         <MetricRow
-          label="昨天算力达成率"
+          label={t("昨天算力达成率")}
           value={`${lastHashStatus?.last24HourEfficiency}%`}
           trend={lastHashStatus?.last24HourEfficiencyDiff > 0 ? "up" : "down"}
           trendValue={`${Math.abs(lastHashStatus?.last24HourEfficiencyDiff || 0).toFixed(2)}%`}
         />
         <MetricRow
-          label="近一周平均算力达成率"
+          label={t("近一周平均算力达成率")}
           value={`${lastHashStatus?.lastWeekEfficiency}%`}
           trend={lastHashStatus?.lastWeekEfficiencyDiff > 0 ? "up" : "down"}
           trendValue={`${Math.abs(lastHashStatus?.lastWeekEfficiencyDiff || 0).toFixed(2)}%`}
         />
         <MetricRow
-          label={`${lastHashStatus?.lastMonth}月算力达成率`}
+          label={t("{{value}}月算力达成率", { value: lastHashStatus?.lastMonth })}
           value={`${lastHashStatus?.lastMonthEfficiency}%`}
           highlight
         />
         <MetricRow
-          label={`${lastHashStatus?.last2Month}月算力达成率`}
+          label={t("{{value}}月算力达成率", { value: lastHashStatus?.last2Month })}
           value={`${lastHashStatus?.last2MonthEfficiency}%`}
         />
       </div>

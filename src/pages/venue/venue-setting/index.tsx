@@ -12,6 +12,7 @@ import ExcelUpload from "@/components/excel-upload";
 import useAuthRedirect from "@/hooks/useAuthRedirect.ts";
 import { useSelector, useSettingsStore } from "@/stores";
 
+import { t } from "@/locales";
 import ResizableHeaderCell from "@/pages/custody-statistics/statistics/components/ResizableHeaderCell";
 import { uploadVenueExcel } from "@/pages/venue/api.tsx";
 import { useVenueList, useVenueNew, useVenueUpdate } from "@/pages/venue/hook/hook.ts";
@@ -85,7 +86,7 @@ const VenueManagement: React.FC = () => {
         setVenues(formattedData);
         setFilteredVenues(formattedData);
       } else {
-        message.error(`获取场地数据失败: ${data.data.message}`);
+        message.error(t("获取场地数据失败: {{message}}", { message: data.data.message }));
       }
     }
   }, [data]);
@@ -135,11 +136,11 @@ const VenueManagement: React.FC = () => {
 
   const handleDelete = (id: number) => {
     Modal.confirm({
-      title: "确认删除",
-      content: "确定要删除这个场地吗？",
+      title: t("确认删除"),
+      content: t("确定要删除这个场地吗？"),
       onOk: () => {
         setVenues(venues.filter((item) => item.id !== id));
-        message.success("删除成功");
+        message.success(t("删除成功"));
       },
     });
   };
@@ -167,16 +168,16 @@ const VenueManagement: React.FC = () => {
         // 编辑
         const hostedMachineValue = Number(values.hosted_machine);
         if (isNaN(hostedMachineValue)) {
-          message.error("hosted_machine 不是有效的数字");
+          message.error(t("hosted_machine 不是有效的数字"));
           return; // 或者抛出错误，阻止继续执行
         }
         values.hosted_machine = hostedMachineValue;
         updateMutation.mutate(values, {
           onSuccess: () => {
-            message.success("更新成功");
+            message.success(t("更新成功"));
           },
           onError: (error) => {
-            message.error(`更新失败: ${error.message}`);
+            message.error(t("更新失败: {{message}}", { message: error.message }));
           },
         });
       } else {
@@ -196,10 +197,10 @@ const VenueManagement: React.FC = () => {
           { poolType, data: venueUpdate },
           {
             onSuccess: () => {
-              message.success("创建成功");
+              message.success(t("创建成功"));
             },
             onError: (error) => {
-              message.error(`创建失败: ${error.message}`);
+              message.error(t("创建失败: {{message}}", { message: error.message }));
             },
           },
         );
@@ -214,7 +215,7 @@ const VenueManagement: React.FC = () => {
   // 表格列定义
   const columns = [
     {
-      title: "序号",
+      title: t("序号"),
       dataIndex: "id",
       width: 60,
       render(_text: string, _record: any, index: number) {
@@ -222,7 +223,7 @@ const VenueManagement: React.FC = () => {
       },
     },
     {
-      title: "场地名称",
+      title: t("场地名称"),
       dataIndex: "venue_name",
       width: venueNameColumnWidth,
       onHeaderCell: () =>
@@ -245,7 +246,7 @@ const VenueManagement: React.FC = () => {
       sorter: (a: Venue, b: Venue) => a.venue_name.localeCompare(b.venue_name),
     },
     {
-      title: "子账户",
+      title: t("子账户"),
       dataIndex: "pools",
       width: 200,
       render: (pools: Pool[]) => {
@@ -255,7 +256,7 @@ const VenueManagement: React.FC = () => {
               pools.map((pool, idx) => {
                 const s = Number(pool?.status ?? -1);
                 const color = s === 1 ? "green" : s === 0 ? "red" : s === 2 ? "orange" : "#666";
-                const text = s === 1 ? "活跃" : s === 0 ? "关机" : s === 2 ? "已撤场" : "未知";
+                const text = s === 1 ? t("活跃") : s === 0 ? t("关机") : s === 2 ? t("已撤场") : t("未知");
                 return (
                   <span
                     key={`${pool.pool_id}-${idx}`}
@@ -271,37 +272,37 @@ const VenueManagement: React.FC = () => {
       },
     },
     {
-      title: "场地代码",
+      title: t("场地代码"),
       dataIndex: "venue_code",
       sorter: (a: Venue, b: Venue) => (a.venue_code || "").localeCompare(b.venue_code || ""),
     },
     {
-      title: "所在国家",
+      title: t("所在国家"),
       dataIndex: "country",
       sorter: (a: Venue, b: Venue) => (a.country || "").localeCompare(b.country || ""),
     },
     {
-      title: "托管机器",
+      title: t("托管机器"),
       dataIndex: "hosted_machine",
       width: 100,
     },
     {
-      title: "机型",
+      title: t("机型"),
       dataIndex: "miner_type",
       width: 100,
     },
     {
-      title: "场地键值",
+      title: t("场地键值"),
       dataIndex: "agent_key",
       width: 300,
     },
     {
-      title: "详细地址",
+      title: t("详细地址"),
       dataIndex: "address",
       width: 200,
     },
     {
-      title: "操作",
+      title: t("操作"),
       key: "action",
       width: 120,
       render: (_: any, record: Venue) => (
@@ -354,7 +355,7 @@ const VenueManagement: React.FC = () => {
             onClick={handleAdd}
             className="!rounded-button whitespace-nowrap"
           >
-            新增场地
+            {t("新增场地")}
           </Button>
           {/* <Button
             size="middle"
@@ -370,14 +371,14 @@ const VenueManagement: React.FC = () => {
         <div className="flex space-x-4">
           <Input
             size="small"
-            placeholder="搜索场地名称、代码或地址"
+            placeholder={t("搜索场地名称、代码或地址")}
             prefix={<SearchOutlined />}
             onChange={(e) => handleSearch(e.target.value)}
             className="w-64"
           />
           <Select
             size="small"
-            placeholder="按国家筛选"
+            placeholder={t("按国家筛选")}
             allowClear
             onChange={handleCountryFilter}
             className="w-40"
@@ -390,7 +391,7 @@ const VenueManagement: React.FC = () => {
           </Select>
           <Select
             size="small"
-            placeholder="按状态筛选"
+            placeholder={t("按状态筛选")}
             allowClear
             value={poolStatusFilter as any}
             onChange={(v) => setPoolStatusFilter(v ?? null)}
@@ -407,7 +408,7 @@ const VenueManagement: React.FC = () => {
                   marginRight: 6,
                 }}
               />
-              活跃
+              {t("活跃")}
             </Option>
             <Option value={0}>
               <span
@@ -420,7 +421,7 @@ const VenueManagement: React.FC = () => {
                   marginRight: 6,
                 }}
               />
-              关机
+              {t("关机")}
             </Option>
             <Option value={2}>
               <span
@@ -433,7 +434,7 @@ const VenueManagement: React.FC = () => {
                   marginRight: 6,
                 }}
               />
-              已撤场
+              {t("已撤场")}
             </Option>
           </Select>
 
@@ -445,7 +446,7 @@ const VenueManagement: React.FC = () => {
             style={{ marginRight: "15px" }}
             onClick={showExcelUploadModal}
           >
-            导入功耗
+            {t("导入功耗")}
           </Button>
         </div>
       </div>
@@ -467,60 +468,60 @@ const VenueManagement: React.FC = () => {
             if (size && size !== pageSize) setPageSize(size);
           },
           showQuickJumper: true,
-          showTotal: (total) => `共 ${total} 条`,
+          showTotal: (total) => t("共 {{total}} 条", { total: total }),
         }}
       />
 
       <Modal
-        title={currentVenue ? "编辑场地" : "新增场地"}
+        title={currentVenue ? t("编辑场地") : t("新增场地")}
         visible={isModalVisible}
         onOk={handleModalOk}
         onCancel={handleModalCancel}
         width={600}
         footer={[
           <Button key="back" onClick={handleModalCancel}>
-            取消
+            {t("取消")}
           </Button>,
           <Button key="submit" type="primary" onClick={handleModalOk}>
-            确定
+            {t("确定")}
           </Button>,
         ]}
       >
         <Form form={form} layout="vertical" initialValues={currentVenue || undefined}>
           <Form.Item
             name="venue_name"
-            label="场地名称"
-            rules={[{ required: true, message: "请输入场地名称" }]}
+            label={t("场地名称")}
+            rules={[{ required: true, message: t("请输入场地名称") }]}
           >
-            <Input placeholder="请输入场地名称" />
+            <Input placeholder={t("请输入场地名称")} />
           </Form.Item>
-          <Form.Item name="venue_code" label="场地代码">
-            <Input placeholder="请输入场地代码" />
+          <Form.Item name="venue_code" label={t("场地代码")}>
+            <Input placeholder={t("请输入场地代码")} />
           </Form.Item>
           <Form.Item
             name="country"
-            label="所在国家"
+            label={t("所在国家")}
             rules={[
-              { required: true, message: "请输入国家" },
-              { whitespace: true, message: "国家不能为空" },
+              { required: true, message: t("请输入国家") },
+              { whitespace: true, message: t("国家不能为空") },
             ]}
           >
-            <Input placeholder="请输入国家" />
+            <Input placeholder={t("请输入国家")} />
           </Form.Item>
-          <Form.Item name="hosted_machine" label="托管机器">
-            <Input type="number" placeholder="托管机器" />
+          <Form.Item name="hosted_machine" label={t("托管机器")}>
+            <Input type="number" placeholder={t("托管机器")} />
           </Form.Item>
-          <Form.Item name="miner_type" label="托管机型">
-            <Input placeholder="托管机型" />
+          <Form.Item name="miner_type" label={t("托管机型")}>
+            <Input placeholder={t("托管机型")} />
           </Form.Item>
-          <Form.Item name="agent_key" label="场地键值">
+          <Form.Item name="agent_key" label={t("场地键值")}>
             <Input placeholder="agent_key" />
           </Form.Item>
-          <Form.Item name="address" label="详细地址">
-            <TextArea rows={3} placeholder="请输入详细地址" />
+          <Form.Item name="address" label={t("详细地址")}>
+            <TextArea rows={3} placeholder={t("请输入详细地址")} />
           </Form.Item>
           {/* 添加 ID 字段 */}
-          <Form.Item name="id" label="场地ID" style={{ display: "none" }}>
+          <Form.Item name="id" label={t("场地ID")} style={{ display: "none" }}>
             <Input type="hidden" />
           </Form.Item>
         </Form>
@@ -528,7 +529,7 @@ const VenueManagement: React.FC = () => {
 
       {/* Excel上传Modal */}
       <Modal
-        title="Excel文件导入"
+        title={t("Excel文件导入")}
         open={excelUploadModalVisible}
         onCancel={hideExcelUploadModal}
         footer={null}
@@ -538,8 +539,8 @@ const VenueManagement: React.FC = () => {
           onUpload={handleExcelUpload}
           accept=".xlsx,.xls"
           maxSize={10}
-          title="点击或拖拽Excel文件到此区域上传"
-          description="支持.xlsx和.xls格式，文件大小不超过10MB"
+          title={t("点击或拖拽Excel文件到此区域上传")}
+          description={t("支持.xlsx和.xls格式，文件大小不超过10MB")}
         />
       </Modal>
     </div>

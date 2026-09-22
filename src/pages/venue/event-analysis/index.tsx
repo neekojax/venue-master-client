@@ -3,6 +3,8 @@ import { AlertTriangle, BarChart3, LayoutList } from "lucide-react";
 import AnalysisView from "./components/EventImpactAnalysis";
 import EventLogsView from "./components/EventLogNew";
 
+import { t } from "@/locales";
+
 const EventImpactAnalysis: React.FC = () => {
   const [activeTab, setActiveTab] = useState<"analysis" | "logs">("logs");
 
@@ -13,9 +15,9 @@ const EventImpactAnalysis: React.FC = () => {
         <div>
           <h1 className="text-xl font-bold text-gray-900 flex items-center gap-2">
             <AlertTriangle className="text-orange-500" size={24} />
-            事件管理中心
+            {t("事件管理中心")}
           </h1>
-          <p className="text-xs text-gray-500 mt-1 ml-8">全方位监控、分析与管理场地突发事件</p>
+          <p className="text-xs text-gray-500 mt-1 ml-8">{t("全方位监控、分析与管理场地突发事件")}</p>
         </div>
 
         {/* Tabs */}
@@ -28,7 +30,7 @@ const EventImpactAnalysis: React.FC = () => {
              `}
           >
             <LayoutList size={16} />
-            事件日志
+            {t("事件日志")}
           </button>
           <button
             onClick={() => setActiveTab("analysis")}
@@ -38,7 +40,7 @@ const EventImpactAnalysis: React.FC = () => {
              `}
           >
             <BarChart3 size={16} />
-            事件影响分析
+            {t("事件影响分析")}
           </button>
         </div>
       </div>

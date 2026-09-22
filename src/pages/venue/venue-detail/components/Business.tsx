@@ -9,6 +9,7 @@ import type { WeeklyReportRow } from "./weeklyMock";
 import { useSelector, useSettingsStore } from "@/stores";
 import { getTimeDifference } from "@/utils/date";
 
+import { t } from "@/locales";
 import { getLast10DaysDailyStat, getLast10Event } from "@/pages/venue/api.tsx";
 
 interface SubAccountStat {
@@ -81,16 +82,16 @@ const BusinessReport: React.FC<BusinessReportProps> = ({
 
   // 子账户统计表格列配置
   const subAccountColumns: ColumnsType<SubAccountStat> = [
-    { title: "矿池名称", dataIndex: "pool_name", key: "pool_name", fixed: "left", width: 120 },
+    { title: t("矿池名称"), dataIndex: "pool_name", key: "pool_name", fixed: "left", width: 120 },
     {
-      title: "24小时产出(BTC)",
+      title: t("24小时产出(BTC)"),
       dataIndex: "btcOutput24h",
       key: "btcOutput24h",
       width: 165,
       render: (value) => value.toFixed(8),
     },
     {
-      title: "理论算力(P)",
+      title: t("理论算力(P)"),
       dataIndex: "theoreticalPower",
       width: 120,
       key: "theoreticalPower",
@@ -98,7 +99,7 @@ const BusinessReport: React.FC<BusinessReportProps> = ({
       render: (value) => value.toFixed(2),
     },
     {
-      title: "24小时算力(P)",
+      title: t("24小时算力(P)"),
       dataIndex: "power24h",
       key: "power24h",
       width: 145,
@@ -106,7 +107,7 @@ const BusinessReport: React.FC<BusinessReportProps> = ({
       render: (value) => <span className="font-semibold text-blue-600">{value.toFixed(2)}</span>,
     },
     {
-      title: "24小时有效率",
+      title: t("24小时有效率"),
       dataIndex: "effectiveRate24h",
       key: "effectiveRate24h",
       width: 140,
@@ -116,17 +117,17 @@ const BusinessReport: React.FC<BusinessReportProps> = ({
       ),
     },
     {
-      title: "在架有效率",
+      title: t("在架有效率"),
       dataIndex: "onlineRatio",
       key: "onlineRatio",
       width: 140,
       align: "center",
       render: (value) => `${value.toFixed(2)}%`,
     },
-    { title: "托管台数", dataIndex: "totalMachines", key: "totalMachines", width: 105 },
-    { title: "总故障数", dataIndex: "totalFailures", key: "totalFailures", width: 120 },
+    { title: t("托管台数"), dataIndex: "totalMachines", key: "totalMachines", width: 105 },
+    { title: t("总故障数"), dataIndex: "totalFailures", key: "totalFailures", width: 120 },
     {
-      title: "总故障率",
+      title: t("总故障率"),
       dataIndex: "totalFailuresRate",
       key: "totalFailuresRate",
       width: 120,
@@ -139,7 +140,7 @@ const BusinessReport: React.FC<BusinessReportProps> = ({
       ),
     },
     {
-      title: "24小时故障数",
+      title: t("24小时故障数"),
       dataIndex: "failures24h",
       key: "failures24h",
       width: 138,
@@ -147,7 +148,7 @@ const BusinessReport: React.FC<BusinessReportProps> = ({
       render: (value) => <span className="font-medium text-amber-600">{value.toLocaleString()}</span>,
     },
     {
-      title: "24小时故障率",
+      title: t("24小时故障率"),
       dataIndex: "failureRate24h",
       key: "failureRate24h",
       width: 138,
@@ -160,14 +161,14 @@ const BusinessReport: React.FC<BusinessReportProps> = ({
       ),
     },
     {
-      title: "影响占比",
+      title: t("影响占比"),
       dataIndex: "impactRatio",
       key: "impactRatio",
       width: 105,
       render: (value) => `${value.toFixed(2)}%`,
     },
     {
-      title: "限电影响",
+      title: t("限电影响"),
       dataIndex: "limitImpactRate",
       key: "limitImpactRate",
       width: 140,
@@ -175,7 +176,7 @@ const BusinessReport: React.FC<BusinessReportProps> = ({
       render: (value) => <span className="font-medium text-violet-600">{value.toFixed(2)}%</span>,
     },
     {
-      title: "高温影响",
+      title: t("高温影响"),
       dataIndex: "highTemperatureRate",
       key: "highTemperatureRate",
       width: 140,
@@ -185,16 +186,16 @@ const BusinessReport: React.FC<BusinessReportProps> = ({
   ];
 
   const dailyColumns: ColumnsType<DailyRecord> = [
-    { title: "日期", dataIndex: "date", key: "date", fixed: "left", width: 120 },
+    { title: t("日期"), dataIndex: "date", key: "date", fixed: "left", width: 120 },
     {
-      title: "24小时产出(BTC)",
+      title: t("24小时产出(BTC)"),
       dataIndex: "btcOutput24h",
       key: "btcOutput24h",
       width: 165,
       render: (value) => value.toFixed(8),
     },
     {
-      title: "理论算力(P)",
+      title: t("理论算力(P)"),
       dataIndex: "theoreticalPower",
       width: 120,
       key: "theoreticalPower",
@@ -202,7 +203,7 @@ const BusinessReport: React.FC<BusinessReportProps> = ({
       render: (value) => value.toFixed(2),
     },
     {
-      title: "24小时算力(P)",
+      title: t("24小时算力(P)"),
       dataIndex: "power24h",
       key: "power24h",
       width: 145,
@@ -210,7 +211,7 @@ const BusinessReport: React.FC<BusinessReportProps> = ({
       render: (value) => <span className="font-semibold text-blue-600">{value.toFixed(2)}</span>,
     },
     {
-      title: "24小时有效率",
+      title: t("24小时有效率"),
       dataIndex: "effectiveRate24h",
       key: "effectiveRate24h",
       width: 140,
@@ -220,7 +221,7 @@ const BusinessReport: React.FC<BusinessReportProps> = ({
       ),
     },
     {
-      title: "在架有效率",
+      title: t("在架有效率"),
       dataIndex: "onlineRatio",
       key: "onlineRatio",
       width: 140,
@@ -228,21 +229,21 @@ const BusinessReport: React.FC<BusinessReportProps> = ({
       render: (value) => `${value.toFixed(2)}%`,
     },
     {
-      title: "托管台数",
+      title: t("托管台数"),
       dataIndex: "totalMachines",
       key: "totalMachines",
       width: 105,
       render: (value) => value.toLocaleString(),
     },
     {
-      title: "总故障数",
+      title: t("总故障数"),
       dataIndex: "totalFailures",
       key: "totalFailures",
       width: 120,
       render: (value) => value.toLocaleString(),
     },
     {
-      title: "总故障率",
+      title: t("总故障率"),
       dataIndex: "totalFailuresRate",
       key: "totalFailuresRate",
       width: 120,
@@ -255,7 +256,7 @@ const BusinessReport: React.FC<BusinessReportProps> = ({
       ),
     },
     {
-      title: "24小时故障数",
+      title: t("24小时故障数"),
       dataIndex: "failures24h",
       key: "failures24h",
       width: 138,
@@ -263,7 +264,7 @@ const BusinessReport: React.FC<BusinessReportProps> = ({
       render: (value) => <span className="font-medium text-amber-600">{value.toLocaleString()}</span>,
     },
     {
-      title: "24小时上架数",
+      title: t("24小时上架数"),
       dataIndex: "shelved",
       key: "shelved",
       width: 138,
@@ -273,7 +274,7 @@ const BusinessReport: React.FC<BusinessReportProps> = ({
       ),
     },
     {
-      title: "24小时故障率",
+      title: t("24小时故障率"),
       dataIndex: "failureRate24h",
       key: "failureRate24h",
       width: 138,
@@ -286,14 +287,14 @@ const BusinessReport: React.FC<BusinessReportProps> = ({
       ),
     },
     {
-      title: "影响占比",
+      title: t("影响占比"),
       dataIndex: "impactRatio",
       key: "impactRatio",
       width: 105,
       render: (value) => `${value.toFixed(2)}%`,
     },
     {
-      title: "限电影响",
+      title: t("限电影响"),
       dataIndex: "limitImpactRate",
       key: "limitImpactRate",
       width: 140,
@@ -301,7 +302,7 @@ const BusinessReport: React.FC<BusinessReportProps> = ({
       render: (value) => <span className="font-medium text-violet-600">{value.toFixed(2)}%</span>,
     },
     {
-      title: "高温影响",
+      title: t("高温影响"),
       dataIndex: "highTemperatureRate",
       key: "highTemperatureRate",
       width: 140,
@@ -311,11 +312,11 @@ const BusinessReport: React.FC<BusinessReportProps> = ({
   ];
 
   const abnormalColumns: ColumnsType<AbnormalRecord> = [
-    { title: "日期", dataIndex: "log_date", key: "log_date", fixed: "left", width: 120 },
+    { title: t("日期"), dataIndex: "log_date", key: "log_date", fixed: "left", width: 120 },
     // { title: "影响时长", dataIndex: "level", key: "level" },
     // { title: "时间范围", dataIndex: "start_time", key: "start_time" },
     {
-      title: "影响时长",
+      title: t("影响时长"),
       dataIndex: "log_date",
       // width: 120,
       render: (text: string, record: any) => {
@@ -329,26 +330,26 @@ const BusinessReport: React.FC<BusinessReportProps> = ({
           }
           return (
             <Tag color="red">
-              <SyncOutlined spin style={{ marginRight: 4 }} /> 影响中
+              <SyncOutlined spin style={{ marginRight: 4 }} /> {t("影响中")}
             </Tag>
           );
         }
         return (
           <Tag color="red">
-            <SyncOutlined spin style={{ marginRight: 4 }} /> 影响中
+            <SyncOutlined spin style={{ marginRight: 4 }} /> {t("影响中")}
           </Tag>
         );
         // return dayjs(text).format("YYYY-MM-DD HH:mm");
       },
     },
     {
-      title: "时间范围",
+      title: t("时间范围"),
       dataIndex: "start_time",
       // width: 280,
       render: (_text, record) => `${record.start_time} - ${record.end_time}`,
     },
     {
-      title: "事件类型",
+      title: t("事件类型"),
       dataIndex: "log_type",
       key: "log_type",
       render: (text) => {
@@ -366,19 +367,19 @@ const BusinessReport: React.FC<BusinessReportProps> = ({
       },
     },
     {
-      title: "影响台数",
+      title: t("影响台数"),
       dataIndex: "impact_count",
       key: "impact_count",
       width: 105,
       render: (value) => <span className="font-medium text-amber-600">{value.toLocaleString()}</span>,
     },
     {
-      title: "影响算力",
+      title: t("影响算力"),
       dataIndex: "impact_power_loss",
       key: "impact_power_loss",
       render: (value) => <span className="font-semibold text-blue-600">{value}</span>,
     },
-    { title: "事件原因", dataIndex: "event_reason", key: "event_reason" },
+    { title: t("事件原因"), dataIndex: "event_reason", key: "event_reason" },
   ];
 
   // 获取数据
@@ -433,31 +434,31 @@ const BusinessReport: React.FC<BusinessReportProps> = ({
             }}
             className="venue-detail-segmented"
             options={[
-              { label: "运营日报", value: "daily" },
-              { label: "运营周报", value: "weekly" },
-              { label: "异常事件", value: "events" },
+              { label: t("运营日报"), value: "daily" },
+              { label: t("运营周报"), value: "weekly" },
+              { label: t("异常事件"), value: "events" },
             ]}
           />
         </div>
 
         {viewMode === "daily" ? (
           <Link to={`/report/daily-list/${venueId}/${venueName}`}>
-            <Button type="primary">查看更多日报</Button>
+            <Button type="primary">{t("查看更多日报")}</Button>
           </Link>
         ) : viewMode === "events" ? (
           <Link to={`/venue/event-log-list/${venueId}/${venueName}`}>
-            <Button type="primary">查看更多事件</Button>
+            <Button type="primary">{t("查看更多事件")}</Button>
           </Link>
         ) : (
           <Link to={`/venue/weekly-report/${venueId}`}>
-            <Button type="primary">查看更多周报</Button>
+            <Button type="primary">{t("查看更多周报")}</Button>
           </Link>
         )}
       </div>
 
       <Spin
         spinning={loading || (viewMode === "weekly" && weeklyLoading)}
-        tip={viewMode === "weekly" && weeklyLoading ? "周报加载中..." : "数据加载中..."}
+        tip={viewMode === "weekly" && weeklyLoading ? t("周报加载中...") : t("数据加载中...")}
       >
         {viewMode === "daily" ? (
           <Table<DailyRecord>
@@ -470,7 +471,7 @@ const BusinessReport: React.FC<BusinessReportProps> = ({
             expandable={{
               expandedRowRender: (record) => (
                 <div style={{ margin: 0 }}>
-                  <h4 style={{ marginBottom: 16 }}>子账户统计详情</h4>
+                  <h4 style={{ marginBottom: 16 }}>{t("子账户统计详情")}</h4>
                   <Table<SubAccountStat>
                     columns={subAccountColumns}
                     dataSource={record.subAccountStats}

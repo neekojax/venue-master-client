@@ -21,6 +21,7 @@ import { useSelector, useSettingsStore } from "@/stores";
 
 import "./index.css";
 
+import { t } from "@/locales";
 import ChartFee from "@/pages/custody-statistics/statisticsDetail/components/chartFee";
 import { getRecent10WeeksWeeklyReport, getVenueBasicInfo, getVenueDailyStat } from "@/pages/venue/api.tsx";
 import { useVenueList } from "@/pages/venue/hook/hook";
@@ -152,22 +153,26 @@ const VenueDetail: React.FC = () => {
             <h1 className="text-3xl font-bold text-gray-900">{basicInfo?.venue_name}</h1>
             <div className="flex items-center gap-2 text-sm text-gray-500">
               <span className="px-2 py-1 bg-gray-100 rounded-md">
-                矿工号:{" "}
-                {basicInfo?.sub_accounts?.map((item, index) => (
-                  <span key={item.pool_id}>
-                    <a href={item.pool_link} target="_blank" rel="noreferrer">
-                      {item.pool_name}
-                    </a>
-                    {index !== basicInfo.sub_accounts.length - 1 && " "}
-                  </span>
-                ))}
+                {t("矿工号:{{value}} {{value2}}", {
+                  value: " ",
+                  value2: basicInfo?.sub_accounts?.map((item, index) => (
+                    <span key={item.pool_id}>
+                      {" "}
+                      <a href={item.pool_link} target="_blank" rel="noreferrer">
+                        {" "}
+                        {item.pool_name}{" "}
+                      </a>{" "}
+                      {index !== basicInfo.sub_accounts.length - 1 && " "}{" "}
+                    </span>
+                  )),
+                })}
               </span>
             </div>
           </div>
           <div>
             {localStorage.getItem("user_access_level") != "special" && (
               <Select
-                placeholder="选择场地"
+                placeholder={t("选择场地")}
                 style={{ width: 200 }}
                 value={venueId}
                 showSearch
@@ -203,11 +208,15 @@ const VenueDetail: React.FC = () => {
           <div className="flex items-center gap-4">
             <div className="flex items-center gap-2">
               <CloudOutlined className="text-primary" />
-              <span className="text-gray-600">当前温度: {basicInfo?.temperature + " ℃" || "--"}</span>
+              <span className="text-gray-600">
+                {t("当前温度: {{value}}", { value: basicInfo?.temperature + " ℃" || "--" })}
+              </span>
             </div>
             <div className="flex items-center gap-2">
               <ThunderboltOutlined className="text-primary" />
-              <span className="text-gray-600">当前湿度: {basicInfo?.humidity + " %" || "--"}</span>
+              <span className="text-gray-600">
+                {t("当前湿度: {{value}}", { value: basicInfo?.humidity + " %" || "--" })}
+              </span>
             </div>
           </div>
         </div>
@@ -230,23 +239,23 @@ const VenueDetail: React.FC = () => {
         <div className="flex items-center gap-3">
           <div className="venue-trend-accent" />
           <div>
-            <h2 className="text-xl font-semibold text-gray-900">运行趋势分析</h2>
-            <p className="text-sm text-slate-500 mt-1">从日维度与周维度观察场地运行稳定性与影响因素</p>
+            <h2 className="text-xl font-semibold text-gray-900">{t("运行趋势分析")}</h2>
+            <p className="text-sm text-slate-500 mt-1">{t("从日维度与周维度观察场地运行稳定性与影响因素")}</p>
           </div>
-          {curveMode === "week" ? <Tag color="processing">周维度预览</Tag> : null}
+          {curveMode === "week" ? <Tag color="processing">{t("周维度预览")}</Tag> : null}
         </div>
         <Segmented
           className="venue-trend-segmented"
           value={curveMode}
           onChange={(value) => setCurveMode(value as "day" | "week")}
           options={[
-            { label: "日", value: "day" },
-            { label: "周", value: "week" },
+            { label: t("日"), value: "day" },
+            { label: t("周"), value: "week" },
           ]}
         />
       </div>
 
-      <Spin spinning={curveMode === "week" && weeklyLoading} tip="周报加载中...">
+      <Spin spinning={curveMode === "week" && weeklyLoading} tip={t("周报加载中...")}>
         <div className="grid grid-cols-2 gap-4 mb-8">
           <div className="venue-trend-card venue-trend-card-blue bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
             <ChartSuanli mode={curveMode} weeklyData={weeklyEffectiveRateData}></ChartSuanli>

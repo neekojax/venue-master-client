@@ -9,6 +9,7 @@ import { useSelector, useSettingsStore } from "@/stores";
 
 import "./running-kpi.css";
 
+import { t } from "@/locales";
 import { fetchMiningPoolRunningData } from "@/pages/venue/api.tsx";
 
 export default function VenueRunningKpi() {
@@ -54,7 +55,7 @@ export default function VenueRunningKpi() {
     } catch (err) {
       // 处理错误
       // console.log("服务异常，请稍后重试", err);
-      message.error("服务异常，请稍后重试" + err);
+      message.error(t("服务异常，请稍后重试") + err);
     } finally {
       setLoading(false);
     }
@@ -63,7 +64,7 @@ export default function VenueRunningKpi() {
   const renderEfficiencyChart = (monthEfficiencys: any[]) => {
     // 检查 monthEfficiencys 是否存在且是数组
     if (!Array.isArray(monthEfficiencys) || monthEfficiencys?.length === 0) {
-      return <div>数据不足</div>; // 如果没有数据，返回提示
+      return <div>{t("数据不足")}</div>; // 如果没有数据，返回提示
     }
 
     // 提取效率数据
@@ -71,7 +72,7 @@ export default function VenueRunningKpi() {
 
     // 检查 efficiencies 的长度，确保有至少两个数据点
     if (efficiencies?.length < 2) {
-      return <div>数据不足</div>; // 如果数据少于两个，返回提示
+      return <div>{t("数据不足")}</div>; // 如果数据少于两个，返回提示
     }
 
     // const minEfficiency = Math.min(...efficiencies); // 获取最低值
@@ -97,7 +98,7 @@ export default function VenueRunningKpi() {
           },
           series: [
             {
-              name: "效率",
+              name: t("效率"),
               type: "bar",
               barWidth: 8, // 设置柱子宽度（单位：像素）
               data: efficiencies, // 提取效率数据
@@ -125,7 +126,7 @@ export default function VenueRunningKpi() {
     fetchData(poolType);
     setColumns([
       {
-        title: "场地",
+        title: t("场地"),
         dataIndex: "venueName",
         fixed: "left",
         width: 250,
@@ -150,7 +151,7 @@ export default function VenueRunningKpi() {
               >
                 {isSpecialVenue && (
                   <Tag color="red" style={{ marginLeft: 2 }}>
-                    补充
+                    {t("补充")}
                   </Tag>
                 )}
 
@@ -164,19 +165,19 @@ export default function VenueRunningKpi() {
         },
       },
       {
-        title: "子账户",
+        title: t("子账户"),
         dataIndex: "name",
         width: 160,
       },
       {
-        title: "理论算力 (PH/s)",
+        title: t("理论算力 (PH/s)"),
         dataIndex: "theoreticalHashRate",
         width: 125,
         sorter: (a: { theoreticalHashRate: number }, b: { theoreticalHashRate: number }) =>
           a.theoreticalHashRate - b.theoreticalHashRate,
       },
       {
-        title: "24h算力",
+        title: t("24h算力"),
         dataIndex: "lastHash",
         width: 120,
         render: (text: { split: (arg0: string) => [any, any] }) => {
@@ -191,7 +192,7 @@ export default function VenueRunningKpi() {
         },
       },
       {
-        title: "当前达成率",
+        title: t("当前达成率"),
         dataIndex: "currentEffective",
         width: 120,
         render: (value: number) => (
@@ -205,7 +206,7 @@ export default function VenueRunningKpi() {
           a.currentEffective - b.currentEffective,
       },
       {
-        title: "昨日算力达成率",
+        title: t("昨日算力达成率"),
         dataIndex: "lastDayEffective",
         width: 140,
         render: (value: number) => (
@@ -219,7 +220,7 @@ export default function VenueRunningKpi() {
           a.lastDayEffective - b.lastDayEffective,
       },
       {
-        title: "上周算力达成率",
+        title: t("上周算力达成率"),
         dataIndex: "lastWeekHashEfficiency",
         width: 140,
         render: (value: number) => (
@@ -233,7 +234,7 @@ export default function VenueRunningKpi() {
           a.lastWeekHashEfficiency - b.lastWeekHashEfficiency,
       },
       {
-        title: "周算力达成率增幅",
+        title: t("周算力达成率增幅"),
         dataIndex: "weekGrowth",
         width: 160,
         render: (_text: any, record: { last2WeekHashEfficiency: number; lastWeekHashEfficiency: number }) => {
@@ -247,7 +248,7 @@ export default function VenueRunningKpi() {
         },
       },
       {
-        title: "昨日故障率",
+        title: t("昨日故障率"),
         dataIndex: "lastDayFault",
         width: 120,
         render: () => {
@@ -255,7 +256,7 @@ export default function VenueRunningKpi() {
         },
       },
       {
-        title: "上周故障率",
+        title: t("上周故障率"),
         dataIndex: "lastWeekFault",
         width: 120,
         render: () => "-",
@@ -268,28 +269,28 @@ export default function VenueRunningKpi() {
         // ),
       },
       {
-        title: "周故障率增幅",
+        title: t("周故障率增幅"),
         dataIndex: "lastWeekFaultDiff",
         width: 120,
         key: "lastWeekFaultDiff",
         render: () => "-",
       },
       {
-        title: "月达成率趋势",
+        title: t("月达成率趋势"),
         dataIndex: "monthEfficiencys",
         width: 120,
         render: (_text: any, record: { monthEfficiencys: any[] }) =>
           renderEfficiencyChart(record.monthEfficiencys),
       },
       {
-        title: "月故障率趋势",
+        title: t("月故障率趋势"),
         dataIndex: "historyMonthFault",
         width: 120,
         // render: (data) => renderMiniChart(data, "failure"),
         render: () => "-",
       },
       {
-        title: "观察者链接",
+        title: t("观察者链接"),
         dataIndex: "observerLink",
         width: 100,
         render: (_text: any, record: string) => {
@@ -302,13 +303,13 @@ export default function VenueRunningKpi() {
               rel="noopener noreferrer"
               className="text-blue-600 hover:text-blue-800"
             >
-              查看
+              {t("查看")}
             </a>
           );
         },
       },
       {
-        title: "导出",
+        title: t("导出"),
         key: "export",
         fixed: "right",
         width: 80,
@@ -335,7 +336,7 @@ export default function VenueRunningKpi() {
           height: "100vh", // 或具体高度
         }}
       >
-        <Spin tip="加载中..." />
+        <Spin tip={t("加载中...")} />
       </div>
     );
   }
@@ -398,7 +399,7 @@ export default function VenueRunningKpi() {
             showSizeChanger: true,
             pageSizeOptions: ["20", "30", "50"],
             defaultPageSize: 20,
-            showTotal: (total) => `共 ${total} 条`,
+            showTotal: (total) => t("共 {{total}} 条", { total: total }),
             total: filteredData?.length,
             onChange: () => {
               const tableBody = document.querySelector(".ant-table-body");

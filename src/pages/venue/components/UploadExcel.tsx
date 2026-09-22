@@ -4,6 +4,8 @@ import { UploadOutlined } from "@ant-design/icons";
 import { Button, message, Upload } from "antd";
 import axios from "axios";
 
+import { t } from "@/locales";
+
 const UploadExcel: React.FC = () => {
   const [loading, setLoading] = useState(false);
 
@@ -47,11 +49,11 @@ const UploadExcel: React.FC = () => {
           },
         });
 
-        message.success("上传成功");
+        message.success(t("上传成功"));
         return response.data; // 返回服务器响应的数据
       } catch (error) {
         // console.error("上传失败:", error);
-        message.error("上传失败");
+        message.error(t("上传失败"));
         throw error; // 抛出错误以便在调用时被捕获
       } finally {
         setLoading(false); // 结束 loading
@@ -62,7 +64,7 @@ const UploadExcel: React.FC = () => {
   return (
     <Upload {...uploadProps}>
       <Button icon={<UploadOutlined />} size="middle" loading={loading}>
-        导入事件
+        {t("导入事件")}
       </Button>
     </Upload>
   );

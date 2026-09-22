@@ -2,6 +2,7 @@ import { Alert, message, Spin, Table, Tag } from "antd";
 import { ActionButton, ActionButtonMode } from "@/components/action-button";
 import useAuthRedirect from "@/hooks/useAuthRedirect.ts";
 
+import { t } from "@/locales";
 import DeleteButton from "@/pages/base/components/delete-button.tsx";
 import EditForm from "@/pages/base/components/edit-form.tsx";
 import {
@@ -20,12 +21,12 @@ export default function BasePage() {
 
   // Loading 状态
   if (isLoading) {
-    return <Spin tip="加载中..." />;
+    return <Spin tip={t("加载中...")} />;
   }
 
   // 错误状态
   if (error) {
-    return <Alert message="错误" description={error.message} type="error" showIcon />;
+    return <Alert message={t("错误")} description={error.message} type="error" showIcon />;
   }
 
   // 创建一个空的数据对象
@@ -56,10 +57,10 @@ export default function BasePage() {
     };
     newTemplateMutation.mutate(templateDataNew, {
       onSuccess: () => {
-        message.success("模版已成功新增");
+        message.success(t("模版已成功新增"));
       },
       onError: (error) => {
-        message.error(`新增失败: ${error.message}`);
+        message.error(t("新增失败: {{message}}", { message: error.message }));
       },
     });
   };
@@ -79,10 +80,10 @@ export default function BasePage() {
     };
     changeTemplateMutation.mutate(templateDataChange, {
       onSuccess: () => {
-        message.success("模版已成功更新");
+        message.success(t("模版已成功更新"));
       },
       onError: (error) => {
-        message.error(`更新失败: ${error.message}`);
+        message.error(t("更新失败: {{message}}", { message: error.message }));
       },
     });
   };
@@ -103,18 +104,18 @@ export default function BasePage() {
   // 定义表格列
   const columns = [
     {
-      title: "序号",
+      title: t("序号"),
       dataIndex: "serialNumber",
       key: "serialNumber",
       // 如果需要，可以添加排序功能
     },
     {
-      title: "模板名称",
+      title: t("模板名称"),
       dataIndex: "templateName",
       key: "templateName",
     },
     {
-      title: "字段",
+      title: t("字段"),
       key: "fields",
       render: (_text: any, record: { fields: any }) => (
         <>
@@ -126,13 +127,13 @@ export default function BasePage() {
               </Tag>
             ))
           ) : (
-            <span>无字段</span>
+            <span>{t("无字段")}</span>
           )}
         </>
       ),
     },
     {
-      title: "操作",
+      title: t("操作"),
       key: "action",
       render: (_text: any, record: { key: any }) => (
         <>
@@ -153,7 +154,7 @@ export default function BasePage() {
   return (
     <div>
       <ActionButton
-        label={"添加模版"}
+        label={t("添加模版")}
         // @ts-ignore
         initialValues={emptyData}
         onSubmit={handleAddTemplate}

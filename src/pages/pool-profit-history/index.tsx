@@ -5,6 +5,7 @@ import { ReactEcharts } from "@/components/react-echarts";
 import useAuthRedirect from "@/hooks/useAuthRedirect.ts";
 import { useSelector, useSettingsStore } from "@/stores";
 
+import { t } from "@/locales";
 import { fetchPoolProfitHistory } from "@/pages/pool-profit-history/api.tsx";
 
 export default function PoolProfitHistoryPage() {
@@ -51,7 +52,7 @@ export default function PoolProfitHistoryPage() {
       trigger: "axis",
     },
     legend: {
-      data: ["BTC 收益", "USD 收益"],
+      data: [t("BTC 收益"), t("USD 收益")],
     },
     xAxis: {
       type: "category",
@@ -60,25 +61,25 @@ export default function PoolProfitHistoryPage() {
     yAxis: [
       {
         type: "value",
-        name: "BTC 收益",
+        name: t("BTC 收益"),
         position: "left",
       },
       {
         type: "value",
-        name: "USD 收益",
+        name: t("USD 收益"),
         position: "right",
       },
     ],
     series: [
       {
-        name: "BTC 收益",
+        name: t("BTC 收益"),
         type: "line",
         data: sortedData?.map((item: { income_btc: any }) => item.income_btc),
         yAxisIndex: 0,
         symbol: "none",
       },
       {
-        name: "USD 收益",
+        name: t("USD 收益"),
         type: "line",
         data: sortedData?.map((item: { income_usd: any }) => item.income_usd),
         yAxisIndex: 1,
@@ -90,27 +91,27 @@ export default function PoolProfitHistoryPage() {
   // Ant Design 表格列定义
   const columns = [
     {
-      title: "日期",
+      title: t("日期"),
       dataIndex: "date",
       key: "date",
     },
     {
-      title: "BTC 收益",
+      title: t("BTC 收益"),
       dataIndex: "income_btc",
       key: "income_btc",
     },
     {
-      title: "USD 收益",
+      title: t("USD 收益"),
       dataIndex: "income_usd",
       key: "income_usd",
     },
     {
-      title: "托管费用",
+      title: t("托管费用"),
       dataIndex: "hosting_fee",
       key: "hosting_fee",
     },
     {
-      title: "托管比率",
+      title: t("托管比率"),
       dataIndex: "hosting_ratio",
       key: "hosting_ratio",
     },
@@ -127,13 +128,13 @@ export default function PoolProfitHistoryPage() {
     >
       <h1 style={{ fontSize: "24px", marginBottom: "10px" }}>{history?.pool_name}</h1>
       <h2 style={{ fontSize: "20px", color: "#555" }}>
-        历史总收益 (BTC): {history ? history.total_income_btc : 0}
+        {t("历史总收益 (BTC): {{value}}", { value: history ? history.total_income_btc : 0 })}
       </h2>
-      <Card loading={loading} title="历史收益曲线" style={{ marginTop: "20px" }}>
+      <Card loading={loading} title={t("历史收益曲线")} style={{ marginTop: "20px" }}>
         <ReactEcharts option={option} style={{ height: "400px", width: "100%", marginBottom: "20px" }} />
       </Card>
 
-      <Card loading={loading} title="每日收益详情" style={{ marginTop: "20px" }}>
+      <Card loading={loading} title={t("每日收益详情")} style={{ marginTop: "20px" }}>
         <Table
           dataSource={sortedData?.slice().reverse()}
           columns={columns}

@@ -54,6 +54,8 @@ import {
   updateUserRoles,
 } from "./api";
 
+import { t } from "@/locales";
+
 const { Paragraph, Text } = Typography;
 
 type RouteModalMode = "create" | "edit";
@@ -184,7 +186,7 @@ export default function RbacCenterPage() {
           return nextRoles[0]?.id || "";
         });
       } catch (error: any) {
-        messageApi.error(error?.message || "加载角色失败");
+        messageApi.error(error?.message || t("加载角色失败"));
       } finally {
         setLoadingRoles(false);
       }
@@ -209,7 +211,7 @@ export default function RbacCenterPage() {
         setRolePermissions(permissionRes?.data || null);
         setRoleFrontendRoutes(Array.isArray(routeRes?.data?.routes) ? routeRes.data.routes : []);
       } catch (error: any) {
-        messageApi.error(error?.message || "加载角色详情失败");
+        messageApi.error(error?.message || t("加载角色详情失败"));
       } finally {
         setLoadingRoleDetail(false);
       }
@@ -224,7 +226,7 @@ export default function RbacCenterPage() {
       const res: any = await fetchRbacUsers();
       setUsers(Array.isArray(res?.data?.users) ? res.data.users : []);
     } catch (error: any) {
-      messageApi.error(error?.message || "加载用户失败");
+      messageApi.error(error?.message || t("加载用户失败"));
     } finally {
       setLoadingUsers(false);
     }
@@ -237,7 +239,7 @@ export default function RbacCenterPage() {
       const res: any = await fetchFrontendRoutesWithStatus();
       setFrontendRoutes(Array.isArray(res?.data?.routes) ? res.data.routes : []);
     } catch (error: any) {
-      messageApi.error(error?.message || "加载前端路由失败");
+      messageApi.error(error?.message || t("加载前端路由失败"));
     } finally {
       setLoadingRoutes(false);
     }
@@ -272,10 +274,10 @@ export default function RbacCenterPage() {
     setSavingApiSlug(apiSlug);
     try {
       await updateRoleApiPermission(selectedRoleId, apiSlug, enabled ? 1 : 0);
-      messageApi.success("接口权限已更新");
+      messageApi.success(t("接口权限已更新"));
       await loadRoleDetail(selectedRoleId);
     } catch (error: any) {
-      messageApi.error(error?.message || "更新接口权限失败");
+      messageApi.error(error?.message || t("更新接口权限失败"));
     } finally {
       setSavingApiSlug("");
     }
@@ -286,10 +288,10 @@ export default function RbacCenterPage() {
     setSavingFrontendRouteId(frontendRouteId);
     try {
       await updateRoleFrontendRoutePermission(selectedRoleId, frontendRouteId, enabled ? 1 : 0);
-      messageApi.success("前端路由权限已更新");
+      messageApi.success(t("前端路由权限已更新"));
       await loadRoleDetail(selectedRoleId);
     } catch (error: any) {
-      messageApi.error(error?.message || "更新前端路由权限失败");
+      messageApi.error(error?.message || t("更新前端路由权限失败"));
     } finally {
       setSavingFrontendRouteId(0);
     }
@@ -336,11 +338,11 @@ export default function RbacCenterPage() {
     const values = await roleForm.validateFields();
     try {
       await createRole(values);
-      messageApi.success("角色创建成功");
+      messageApi.success(t("角色创建成功"));
       setRoleModalOpen(false);
       await loadRoles();
     } catch (error: any) {
-      messageApi.error(error?.message || "角色创建失败");
+      messageApi.error(error?.message || t("角色创建失败"));
     }
   };
 
@@ -348,11 +350,11 @@ export default function RbacCenterPage() {
     const values = await userForm.validateFields();
     try {
       await createUser(values);
-      messageApi.success("用户创建成功");
+      messageApi.success(t("用户创建成功"));
       setUserModalOpen(false);
       await loadUsers();
     } catch (error: any) {
-      messageApi.error(error?.message || "用户创建失败");
+      messageApi.error(error?.message || t("用户创建失败"));
     }
   };
 
@@ -364,11 +366,11 @@ export default function RbacCenterPage() {
         user_id: editingUser.user_id,
         role_ids: values.role_ids || [],
       });
-      messageApi.success("用户角色已更新");
+      messageApi.success(t("用户角色已更新"));
       setRoleAssignModalOpen(false);
       await loadUsers();
     } catch (error: any) {
-      messageApi.error(error?.message || "更新用户角色失败");
+      messageApi.error(error?.message || t("更新用户角色失败"));
     }
   };
 
@@ -377,10 +379,10 @@ export default function RbacCenterPage() {
     const values = await passwordForm.validateFields();
     try {
       await updateUserPassword(editingUser.user_id, values.password);
-      messageApi.success("密码已更新");
+      messageApi.success(t("密码已更新"));
       setPasswordModalOpen(false);
     } catch (error: any) {
-      messageApi.error(error?.message || "更新密码失败");
+      messageApi.error(error?.message || t("更新密码失败"));
     }
   };
 
@@ -393,10 +395,10 @@ export default function RbacCenterPage() {
     try {
       if (routeModalMode === "create") {
         await createFrontendRoute(payload);
-        messageApi.success("前端路由创建成功");
+        messageApi.success(t("前端路由创建成功"));
       } else if (editingRoute) {
         await updateFrontendRoute(editingRoute.id, payload);
-        messageApi.success("前端路由更新成功");
+        messageApi.success(t("前端路由更新成功"));
       }
       setRouteModalOpen(false);
       await loadFrontendRoutes();
@@ -404,13 +406,13 @@ export default function RbacCenterPage() {
         await loadRoleDetail(selectedRoleId);
       }
     } catch (error: any) {
-      messageApi.error(error?.message || "保存前端路由失败");
+      messageApi.error(error?.message || t("保存前端路由失败"));
     }
   };
 
   const roleColumns: ColumnsType<RbacRole> = [
     {
-      title: "角色",
+      title: t("角色"),
       dataIndex: "name",
       key: "name",
       render: (_, record) => (
@@ -422,7 +424,7 @@ export default function RbacCenterPage() {
               bordered={false}
               style={{ marginInlineEnd: 0 }}
             >
-              {record.status === 1 ? "启用" : "禁用"}
+              {record.status === 1 ? t("启用") : t("禁用")}
             </Tag>
           </Space>
           <Text type="secondary" style={{ fontSize: 12 }}>
@@ -438,21 +440,21 @@ export default function RbacCenterPage() {
               overflow: "hidden",
             }}
           >
-            {record.description || "暂无描述"}
+            {record.description || t("暂无描述")}
           </Text>
           <Space size={[6, 6]} wrap>
             <Tag color="orange" bordered={false} style={{ marginInlineEnd: 0 }}>
-              接口 {record.api_count || 0}
+              {t("接口 {{value}}", { value: record.api_count || 0 })}
             </Tag>
             <Tag color="cyan" bordered={false} style={{ marginInlineEnd: 0 }}>
-              业务 {record.business_module_count || 0}
+              {t("业务 {{value}}", { value: record.business_module_count || 0 })}
             </Tag>
           </Space>
         </Space>
       ),
     },
     {
-      title: "接口",
+      title: t("接口"),
       dataIndex: "api_count",
       key: "api_count",
       width: 78,
@@ -462,26 +464,26 @@ export default function RbacCenterPage() {
     ...(isSuperAdmin
       ? [
           {
-            title: "操作",
+            title: t("操作"),
             key: "action",
             width: 100,
             render: (_: unknown, record: RbacRole) =>
               record.id === "role-super-admin" ? null : (
                 <Popconfirm
-                  title="删除角色"
-                  description={`确认删除角色 ${record.name} 吗？`}
+                  title={t("删除角色")}
+                  description={t("确认删除角色 {{name}} 吗？", { name: record.name })}
                   onConfirm={async () => {
                     try {
                       await deleteRole(record.id);
-                      messageApi.success("角色已删除");
+                      messageApi.success(t("角色已删除"));
                       await loadRoles();
                     } catch (error: any) {
-                      messageApi.error(error?.message || "删除角色失败");
+                      messageApi.error(error?.message || t("删除角色失败"));
                     }
                   }}
                 >
                   <Button type="link" danger size="small">
-                    删除
+                    {t("删除")}
                   </Button>
                 </Popconfirm>
               ),
@@ -492,7 +494,7 @@ export default function RbacCenterPage() {
 
   const userColumns: ColumnsType<RbacUser> = [
     {
-      title: "用户",
+      title: t("用户"),
       dataIndex: "username",
       key: "username",
       render: (_, record) => (
@@ -505,18 +507,18 @@ export default function RbacCenterPage() {
       ),
     },
     {
-      title: "昵称",
+      title: t("昵称"),
       dataIndex: "nickname",
       key: "nickname",
     },
     {
-      title: "邮箱",
+      title: t("邮箱"),
       dataIndex: "email",
       key: "email",
       render: (value) => value || "-",
     },
     {
-      title: "角色",
+      title: t("角色"),
       dataIndex: "role_names",
       key: "role_names",
       render: (value: string[]) =>
@@ -527,43 +529,45 @@ export default function RbacCenterPage() {
             ))}
           </Space>
         ) : (
-          <Text type="secondary">未分配</Text>
+          <Text type="secondary">{t("未分配")}</Text>
         ),
     },
     {
-      title: "状态",
+      title: t("状态"),
       dataIndex: "status",
       key: "status",
       width: 90,
-      render: (value) => <Tag color={value === 1 ? "green" : "default"}>{value === 1 ? "启用" : "禁用"}</Tag>,
+      render: (value) => (
+        <Tag color={value === 1 ? "green" : "default"}>{value === 1 ? t("启用") : t("禁用")}</Tag>
+      ),
     },
     {
-      title: "操作",
+      title: t("操作"),
       key: "action",
       width: 220,
       render: (_: unknown, record: RbacUser) => (
         <Space size="small" wrap>
           <Button type="link" size="small" onClick={() => openAssignRoleModal(record)}>
-            分配角色
+            {t("分配角色")}
           </Button>
           <Button type="link" size="small" onClick={() => openPasswordModal(record)}>
-            改密码
+            {t("改密码")}
           </Button>
           <Popconfirm
-            title="删除用户"
-            description={`确认删除用户 ${record.username} 吗？`}
+            title={t("删除用户")}
+            description={t("确认删除用户 {{username}} 吗？", { username: record.username })}
             onConfirm={async () => {
               try {
                 await deleteUser(record.user_id);
-                messageApi.success("用户已删除");
+                messageApi.success(t("用户已删除"));
                 await loadUsers();
               } catch (error: any) {
-                messageApi.error(error?.message || "删除用户失败");
+                messageApi.error(error?.message || t("删除用户失败"));
               }
             }}
           >
             <Button type="link" danger size="small">
-              删除
+              {t("删除")}
             </Button>
           </Popconfirm>
         </Space>
@@ -573,13 +577,13 @@ export default function RbacCenterPage() {
 
   const apiPermissionColumns: ColumnsType<any> = [
     {
-      title: "模块",
+      title: t("模块"),
       dataIndex: "route_name",
       key: "route_name",
       width: 160,
     },
     {
-      title: "接口名",
+      title: t("接口名"),
       dataIndex: "name",
       key: "name",
       width: 180,
@@ -592,12 +596,12 @@ export default function RbacCenterPage() {
       render: (value) => <Tag color={value === "GET" ? "blue" : "orange"}>{value}</Tag>,
     },
     {
-      title: "路径",
+      title: t("路径"),
       dataIndex: "path_pattern",
       key: "path_pattern",
     },
     {
-      title: "启用",
+      title: t("启用"),
       dataIndex: "enabled",
       key: "enabled",
       width: 110,
@@ -614,7 +618,7 @@ export default function RbacCenterPage() {
 
   const roleFrontendRouteColumns: ColumnsType<FrontendRoutePermission> = [
     {
-      title: "前端路由",
+      title: t("前端路由"),
       dataIndex: "path",
       key: "path",
       render: (_, record) => (
@@ -627,20 +631,22 @@ export default function RbacCenterPage() {
       ),
     },
     {
-      title: "说明",
+      title: t("说明"),
       dataIndex: "description",
       key: "description",
       render: (value) => value || "-",
     },
     {
-      title: "状态",
+      title: t("状态"),
       dataIndex: "status",
       key: "status",
       width: 90,
-      render: (value) => <Tag color={value === 1 ? "green" : "default"}>{value === 1 ? "启用" : "禁用"}</Tag>,
+      render: (value) => (
+        <Tag color={value === 1 ? "green" : "default"}>{value === 1 ? t("启用") : t("禁用")}</Tag>
+      ),
     },
     {
-      title: "可访问",
+      title: t("可访问"),
       dataIndex: "enabled",
       key: "enabled",
       width: 110,
@@ -657,7 +663,7 @@ export default function RbacCenterPage() {
 
   const frontendRouteColumns: ColumnsType<FrontendRouteItem> = [
     {
-      title: "名称",
+      title: t("名称"),
       dataIndex: "name",
       key: "name",
       render: (_, record) => (
@@ -670,45 +676,47 @@ export default function RbacCenterPage() {
       ),
     },
     {
-      title: "说明",
+      title: t("说明"),
       dataIndex: "description",
       key: "description",
       render: (value) => value || "-",
     },
     {
-      title: "状态",
+      title: t("状态"),
       dataIndex: "status",
       key: "status",
       width: 90,
-      render: (value) => <Tag color={value === 1 ? "green" : "default"}>{value === 1 ? "启用" : "禁用"}</Tag>,
+      render: (value) => (
+        <Tag color={value === 1 ? "green" : "default"}>{value === 1 ? t("启用") : t("禁用")}</Tag>
+      ),
     },
     {
-      title: "操作",
+      title: t("操作"),
       key: "action",
       width: 160,
       render: (_: unknown, record: FrontendRouteItem) => (
         <Space size="small">
           <Button type="link" size="small" onClick={() => openEditRouteModal(record)}>
-            编辑
+            {t("编辑")}
           </Button>
           <Popconfirm
-            title="删除前端路由"
-            description={`确认删除路由 ${record.path} 吗？`}
+            title={t("删除前端路由")}
+            description={t("确认删除路由 {{path}} 吗？", { path: record.path })}
             onConfirm={async () => {
               try {
                 await deleteFrontendRoute(record.id);
-                messageApi.success("前端路由已删除");
+                messageApi.success(t("前端路由已删除"));
                 await loadFrontendRoutes();
                 if (selectedRoleId) {
                   await loadRoleDetail(selectedRoleId);
                 }
               } catch (error: any) {
-                messageApi.error(error?.message || "删除前端路由失败");
+                messageApi.error(error?.message || t("删除前端路由失败"));
               }
             }}
           >
             <Button type="link" danger size="small">
-              删除
+              {t("删除")}
             </Button>
           </Popconfirm>
         </Space>
@@ -727,7 +735,7 @@ export default function RbacCenterPage() {
             tabBarStyle={{ marginBottom: 20 }}
             tabBarExtraContent={
               <Button icon={<ReloadOutlined />} onClick={() => void refreshCurrentTab()}>
-                刷新
+                {t("刷新")}
               </Button>
             }
             items={[
@@ -736,7 +744,7 @@ export default function RbacCenterPage() {
                 label: (
                   <Space size={8}>
                     <SafetyCertificateOutlined />
-                    <span>角色权限</span>
+                    <span>{t("角色权限")}</span>
                     <Badge count={roles.length} color="#1677ff" />
                   </Space>
                 ),
@@ -757,7 +765,7 @@ export default function RbacCenterPage() {
                           <Col xs={24} md={12} lg={13}>
                             <Input.Search
                               allowClear
-                              placeholder="搜索角色名、角色ID或描述"
+                              placeholder={t("搜索角色名、角色ID或描述")}
                               value={roleSearchKeyword}
                               onChange={(event) => setRoleSearchKeyword(event.target.value)}
                             />
@@ -766,11 +774,11 @@ export default function RbacCenterPage() {
                             <Space size={8} wrap>
                               {isSuperAdmin ? (
                                 <Button type="primary" icon={<PlusOutlined />} onClick={openCreateRoleModal}>
-                                  新建角色
+                                  {t("新建角色")}
                                 </Button>
                               ) : (
                                 <Tag color="default" bordered={false} style={{ marginInlineEnd: 0 }}>
-                                  只读
+                                  {t("只读")}
                                 </Tag>
                               )}
                             </Space>
@@ -797,7 +805,7 @@ export default function RbacCenterPage() {
                             },
                           })}
                           scroll={{ y: 560 }}
-                          locale={{ emptyText: "暂无角色数据" }}
+                          locale={{ emptyText: t("暂无角色数据") }}
                         />
                       </Card>
                     </Col>
@@ -814,7 +822,7 @@ export default function RbacCenterPage() {
                               key: "api-permissions",
                               label: (
                                 <Space size={8}>
-                                  <span>接口权限</span>
+                                  <span>{t("接口权限")}</span>
                                   <Badge
                                     count={flattenedApiPermissions.length}
                                     style={{ backgroundColor: "#fa8c16" }}
@@ -826,7 +834,7 @@ export default function RbacCenterPage() {
                                   <Row justify="space-between" align="middle" gutter={[12, 12]}>
                                     <Col xs={24} md={14}>
                                       <Text type="secondary">
-                                        按业务模块聚合后的接口权限，适合逐项开关和排查权限缺口。
+                                        {t("按业务模块聚合后的接口权限，适合逐项开关和排查权限缺口。")}
                                       </Text>
                                     </Col>
                                     <Col>
@@ -836,9 +844,9 @@ export default function RbacCenterPage() {
                                           onChange={setApiPermissionStatusFilter}
                                           style={{ width: 120 }}
                                           options={[
-                                            { label: "全部", value: "all" },
-                                            { label: "启用", value: "enabled" },
-                                            { label: "关闭", value: "disabled" },
+                                            { label: t("全部"), value: "all" },
+                                            { label: t("启用"), value: "enabled" },
+                                            { label: t("关闭"), value: "disabled" },
                                           ]}
                                         />
                                         <Tag color="orange" bordered={false} style={{ marginInlineEnd: 0 }}>
@@ -866,7 +874,7 @@ export default function RbacCenterPage() {
                               key: "frontend-route-permissions",
                               label: (
                                 <Space size={8}>
-                                  <span>前端路由权限</span>
+                                  <span>{t("前端路由权限")}</span>
                                   <Badge
                                     count={roleFrontendRoutes.length}
                                     style={{ backgroundColor: "#722ed1" }}
@@ -878,7 +886,7 @@ export default function RbacCenterPage() {
                                   <Row justify="space-between" align="middle" gutter={[12, 12]}>
                                     <Col xs={24} md={14}>
                                       <Text type="secondary">
-                                        这里控制页面级访问权限，和路由资源表保持一一对应。
+                                        {t("这里控制页面级访问权限，和路由资源表保持一一对应。")}
                                       </Text>
                                     </Col>
                                     <Col>
@@ -888,9 +896,9 @@ export default function RbacCenterPage() {
                                           onChange={setFrontendRouteStatusFilter}
                                           style={{ width: 120 }}
                                           options={[
-                                            { label: "全部", value: "all" },
-                                            { label: "启用", value: "enabled" },
-                                            { label: "关闭", value: "disabled" },
+                                            { label: t("全部"), value: "all" },
+                                            { label: t("启用"), value: "enabled" },
+                                            { label: t("关闭"), value: "disabled" },
                                           ]}
                                         />
                                         <Tag color="purple" bordered={false} style={{ marginInlineEnd: 0 }}>
@@ -926,7 +934,7 @@ export default function RbacCenterPage() {
                 label: (
                   <Space size={8}>
                     <UserOutlined />
-                    <span>用户角色</span>
+                    <span>{t("用户角色")}</span>
                     {isSuperAdmin ? <Badge count={users.length} color="#52c41a" /> : null}
                   </Space>
                 ),
@@ -936,16 +944,16 @@ export default function RbacCenterPage() {
                     title={
                       <Space direction="vertical" size={2}>
                         <Text strong style={{ fontSize: 16 }}>
-                          用户与角色绑定
+                          {t("用户与角色绑定")}
                         </Text>
                         <Text type="secondary">
-                          把后台用户和角色关系维护在一起，权限调整后更容易核对影响范围。
+                          {t("把后台用户和角色关系维护在一起，权限调整后更容易核对影响范围。")}
                         </Text>
                       </Space>
                     }
                     extra={
                       <Button type="primary" icon={<PlusOutlined />} onClick={openCreateUserModal}>
-                        新建用户
+                        {t("新建用户")}
                       </Button>
                     }
                   >
@@ -958,7 +966,7 @@ export default function RbacCenterPage() {
                           }}
                         >
                           <Statistic
-                            title="用户总数"
+                            title={t("用户总数")}
                             value={users.length}
                             valueStyle={{ color: "#1677ff" }}
                           />
@@ -972,7 +980,7 @@ export default function RbacCenterPage() {
                           }}
                         >
                           <Statistic
-                            title="启用用户"
+                            title={t("启用用户")}
                             value={users.filter((item) => item.status === 1).length}
                             valueStyle={{ color: "#52c41a" }}
                           />
@@ -986,7 +994,7 @@ export default function RbacCenterPage() {
                           }}
                         >
                           <Statistic
-                            title="已分配角色用户"
+                            title={t("已分配角色用户")}
                             value={users.filter((item) => item.role_ids?.length).length}
                             valueStyle={{ color: "#722ed1" }}
                           />
@@ -1002,14 +1010,17 @@ export default function RbacCenterPage() {
                       <Col xs={24} md={14} lg={12}>
                         <Input.Search
                           allowClear
-                          placeholder="搜索用户名、用户ID、昵称、邮箱或角色名"
+                          placeholder={t("搜索用户名、用户ID、昵称、邮箱或角色名")}
                           value={userSearchKeyword}
                           onChange={(event) => setUserSearchKeyword(event.target.value)}
                         />
                       </Col>
                       <Col>
                         <Tag color="blue" bordered={false} style={{ marginInlineEnd: 0 }}>
-                          {filteredUsers.length} / {users.length} 条
+                          {t("{{length}} / {{length2}} 条", {
+                            length: filteredUsers.length,
+                            length2: users.length,
+                          })}
                         </Tag>
                       </Col>
                     </Row>
@@ -1025,7 +1036,10 @@ export default function RbacCenterPage() {
                   </Card>
                 ) : (
                   <Card bordered={false}>
-                    <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} description="仅超级管理员可管理用户角色" />
+                    <Empty
+                      image={Empty.PRESENTED_IMAGE_SIMPLE}
+                      description={t("仅超级管理员可管理用户角色")}
+                    />
                   </Card>
                 ),
               },
@@ -1034,7 +1048,7 @@ export default function RbacCenterPage() {
                 label: (
                   <Space size={8}>
                     <PartitionOutlined />
-                    <span>前端路由</span>
+                    <span>{t("前端路由")}</span>
                     {isSuperAdmin ? <Badge count={frontendRoutes.length} color="#722ed1" /> : null}
                   </Space>
                 ),
@@ -1044,16 +1058,16 @@ export default function RbacCenterPage() {
                     title={
                       <Space direction="vertical" size={2}>
                         <Text strong style={{ fontSize: 16 }}>
-                          前端路由资源
+                          {t("前端路由资源")}
                         </Text>
                         <Text type="secondary">
-                          维护可分配给角色的页面路径，角色页里再决定具体哪些角色可访问。
+                          {t("维护可分配给角色的页面路径，角色页里再决定具体哪些角色可访问。")}
                         </Text>
                       </Space>
                     }
                     extra={
                       <Button type="primary" icon={<PlusOutlined />} onClick={openCreateRouteModal}>
-                        新建前端路由
+                        {t("新建前端路由")}
                       </Button>
                     }
                   >
@@ -1066,7 +1080,7 @@ export default function RbacCenterPage() {
                           }}
                         >
                           <Statistic
-                            title="路由总数"
+                            title={t("路由总数")}
                             value={frontendRoutes.length}
                             valueStyle={{ color: "#722ed1" }}
                           />
@@ -1080,7 +1094,7 @@ export default function RbacCenterPage() {
                           }}
                         >
                           <Statistic
-                            title="启用路由"
+                            title={t("启用路由")}
                             value={frontendRoutes.filter((item) => item.status === 1).length}
                             valueStyle={{ color: "#52c41a" }}
                           />
@@ -1094,7 +1108,7 @@ export default function RbacCenterPage() {
                           }}
                         >
                           <Statistic
-                            title="带说明路由"
+                            title={t("带说明路由")}
                             value={frontendRoutes.filter((item) => item.description).length}
                             valueStyle={{ color: "#fa8c16" }}
                           />
@@ -1102,7 +1116,7 @@ export default function RbacCenterPage() {
                       </Col>
                     </Row>
                     <Paragraph type="secondary" style={{ marginBottom: 16 }}>
-                      创建或编辑路由后，可以回到“角色权限”页快速核对某个角色的页面访问范围。
+                      {t("创建或编辑路由后，可以回到“角色权限”页快速核对某个角色的页面访问范围。")}
                     </Paragraph>
                     <Table<FrontendRouteItem>
                       loading={loadingRoutes}
@@ -1115,7 +1129,10 @@ export default function RbacCenterPage() {
                   </Card>
                 ) : (
                   <Card bordered={false}>
-                    <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} description="仅超级管理员可管理前端路由" />
+                    <Empty
+                      image={Empty.PRESENTED_IMAGE_SIMPLE}
+                      description={t("仅超级管理员可管理前端路由")}
+                    />
                   </Card>
                 ),
               },
@@ -1126,64 +1143,72 @@ export default function RbacCenterPage() {
 
       <Modal
         open={roleModalOpen}
-        title="新建角色"
+        title={t("新建角色")}
         onCancel={() => setRoleModalOpen(false)}
         onOk={() => void submitCreateRole()}
         destroyOnHidden
       >
         <Form form={roleForm} layout="vertical">
-          <Form.Item label="角色ID" name="role_id" extra="可选。为空时由后端自动生成。">
-            <Input placeholder="例如：role-audit-admin" />
+          <Form.Item label={t("角色ID")} name="role_id" extra={t("可选。为空时由后端自动生成。")}>
+            <Input placeholder={t("例如：role-audit-admin")} />
           </Form.Item>
-          <Form.Item label="角色名称" name="name" rules={[{ required: true, message: "请输入角色名称" }]}>
-            <Input placeholder="例如：审计管理员" />
+          <Form.Item
+            label={t("角色名称")}
+            name="name"
+            rules={[{ required: true, message: t("请输入角色名称") }]}
+          >
+            <Input placeholder={t("例如：审计管理员")} />
           </Form.Item>
-          <Form.Item label="描述" name="description">
-            <Input.TextArea rows={3} placeholder="描述该角色的使用范围" />
+          <Form.Item label={t("描述")} name="description">
+            <Input.TextArea rows={3} placeholder={t("描述该角色的使用范围")} />
           </Form.Item>
         </Form>
       </Modal>
 
       <Modal
         open={userModalOpen}
-        title="新建用户"
+        title={t("新建用户")}
         onCancel={() => setUserModalOpen(false)}
         onOk={() => void submitCreateUser()}
         destroyOnHidden
       >
         <Form form={userForm} layout="vertical">
-          <Form.Item label="用户名" name="username" rules={[{ required: true, message: "请输入用户名" }]}>
-            <Input placeholder="例如：admin_ops" />
+          <Form.Item
+            label={t("用户名")}
+            name="username"
+            rules={[{ required: true, message: t("请输入用户名") }]}
+          >
+            <Input placeholder={t("例如：admin_ops")} />
           </Form.Item>
-          <Form.Item label="昵称" name="nickname">
-            <Input placeholder="例如：运维管理员" />
+          <Form.Item label={t("昵称")} name="nickname">
+            <Input placeholder={t("例如：运维管理员")} />
           </Form.Item>
-          <Form.Item label="邮箱" name="email">
-            <Input placeholder="例如：admin@example.com" />
+          <Form.Item label={t("邮箱")} name="email">
+            <Input placeholder={t("例如：admin@example.com")} />
           </Form.Item>
           <Form.Item
-            label="初始密码"
+            label={t("初始密码")}
             name="password"
             rules={[
-              { required: true, message: "请输入初始密码" },
-              { min: 8, message: "密码至少 8 位" },
+              { required: true, message: t("请输入初始密码") },
+              { min: 8, message: t("密码至少 8 位") },
             ]}
-            extra="后端会校验密码强度，建议使用字母和数字组合。"
+            extra={t("后端会校验密码强度，建议使用字母和数字组合。")}
           >
-            <Input.Password placeholder="请输入初始密码" />
+            <Input.Password placeholder={t("请输入初始密码")} />
           </Form.Item>
         </Form>
       </Modal>
 
       <Modal
         open={roleAssignModalOpen}
-        title={editingUser ? `分配角色: ${editingUser.username}` : "分配角色"}
+        title={editingUser ? t("分配角色: {{username}}", { username: editingUser.username }) : t("分配角色")}
         onCancel={() => setRoleAssignModalOpen(false)}
         onOk={() => void submitAssignRoles()}
         destroyOnHidden
       >
         <Form form={assignRoleForm} layout="vertical">
-          <Form.Item label="角色列表" name="role_ids">
+          <Form.Item label={t("角色列表")} name="role_ids">
             <Checkbox.Group options={roleOptions} style={{ display: "grid", gap: 8 }} />
           </Form.Item>
         </Form>
@@ -1191,44 +1216,48 @@ export default function RbacCenterPage() {
 
       <Modal
         open={passwordModalOpen}
-        title={editingUser ? `修改密码: ${editingUser.username}` : "修改密码"}
+        title={editingUser ? t("修改密码: {{username}}", { username: editingUser.username }) : t("修改密码")}
         onCancel={() => setPasswordModalOpen(false)}
         onOk={() => void submitPassword()}
         destroyOnHidden
       >
         <Form form={passwordForm} layout="vertical">
           <Form.Item
-            label="新密码"
+            label={t("新密码")}
             name="password"
             rules={[
-              { required: true, message: "请输入新密码" },
-              { min: 8, message: "密码至少 8 位" },
+              { required: true, message: t("请输入新密码") },
+              { min: 8, message: t("密码至少 8 位") },
             ]}
           >
-            <Input.Password placeholder="请输入新密码" />
+            <Input.Password placeholder={t("请输入新密码")} />
           </Form.Item>
         </Form>
       </Modal>
 
       <Modal
         open={routeModalOpen}
-        title={routeModalMode === "create" ? "新建前端路由" : "编辑前端路由"}
+        title={routeModalMode === "create" ? t("新建前端路由") : t("编辑前端路由")}
         onCancel={() => setRouteModalOpen(false)}
         onOk={() => void submitRoute()}
         destroyOnHidden
       >
         <Form form={routeForm} layout="vertical">
-          <Form.Item label="路由路径" name="path" rules={[{ required: true, message: "请输入路由路径" }]}>
-            <Input placeholder="例如：/rbac-center" />
+          <Form.Item
+            label={t("路由路径")}
+            name="path"
+            rules={[{ required: true, message: t("请输入路由路径") }]}
+          >
+            <Input placeholder={t("例如：/rbac-center")} />
           </Form.Item>
-          <Form.Item label="名称" name="name" rules={[{ required: true, message: "请输入名称" }]}>
-            <Input placeholder="例如：权限管理" />
+          <Form.Item label={t("名称")} name="name" rules={[{ required: true, message: t("请输入名称") }]}>
+            <Input placeholder={t("例如：权限管理")} />
           </Form.Item>
-          <Form.Item label="描述" name="description">
-            <Input.TextArea rows={3} placeholder="描述这个前端页面的用途" />
+          <Form.Item label={t("描述")} name="description">
+            <Input.TextArea rows={3} placeholder={t("描述这个前端页面的用途")} />
           </Form.Item>
-          <Form.Item label="状态" name="status" valuePropName="checked" initialValue={true}>
-            <Checkbox>启用该前端路由</Checkbox>
+          <Form.Item label={t("状态")} name="status" valuePropName="checked" initialValue={true}>
+            <Checkbox>{t("启用该前端路由")}</Checkbox>
           </Form.Item>
         </Form>
       </Modal>

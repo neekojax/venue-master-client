@@ -2,13 +2,15 @@ import React from "react";
 import { ArrowRight, ExternalLink } from "lucide-react";
 import { UTILITY_TOOLS } from "./constants";
 
+import { t } from "@/locales";
+
 const UtilityTools: React.FC = () => {
   return (
     <div className="p-2 space-y-4 max-w-[1200px] mx-auto animate-in fade-in slide-in-from-bottom-4 duration-500">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-gray-200 pb-2">
         <div>
-          <h2 className="text-3xl font-bold text-gray-900 tracking-tight">实用工具中心</h2>
-          <p className="text-gray-500 mt-2 text-lg">集成全网算力、难度及收益分析等专业矿工必备工具</p>
+          <h2 className="text-3xl font-bold text-gray-900 tracking-tight">{t("实用工具中心")}</h2>
+          <p className="text-gray-500 mt-2 text-lg">{t("集成全网算力、难度及收益分析等专业矿工必备工具")}</p>
         </div>
         {/* <div className="relative group">
           <Search
@@ -52,7 +54,7 @@ const UtilityTools: React.FC = () => {
               <p className="text-gray-500 text-sm leading-relaxed mb-6 flex-1">{tool.description}</p>
 
               <div className="flex items-center gap-2 text-sm font-bold text-blue-600">
-                <span>立即进入</span>
+                <span>{t("立即进入")}</span>
                 <ArrowRight size={14} className="group-hover:translate-x-1 transition-transform" />
               </div>
             </div>

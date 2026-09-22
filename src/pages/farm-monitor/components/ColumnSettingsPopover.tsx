@@ -8,6 +8,8 @@ import {
   type SnapshotColumnConfig,
 } from "../snapshotTableColumns";
 
+import { t } from "@/locales";
+
 interface ColumnSettingsPopoverProps {
   value: SnapshotColumnConfig[];
   onChange: (configs: SnapshotColumnConfig[]) => void;
@@ -83,7 +85,7 @@ export default function ColumnSettingsPopover({ value, onChange }: ColumnSetting
           indeterminate={indeterminate}
           onChange={(e) => handleCheckAll(e.target.checked)}
         >
-          全部
+          {t("全部")}
         </Checkbox>
       </div>
 
@@ -110,7 +112,7 @@ export default function ColumnSettingsPopover({ value, onChange }: ColumnSetting
               {item.title}
             </span>
             <div className="flex items-center gap-0.5 shrink-0">
-              <Tooltip title="固定到左侧">
+              <Tooltip title={t("固定到左侧")}>
                 <Button
                   type="text"
                   size="small"
@@ -120,7 +122,7 @@ export default function ColumnSettingsPopover({ value, onChange }: ColumnSetting
                   onClick={() => handleTogglePin(item.key, "left")}
                 />
               </Tooltip>
-              <Tooltip title="固定到右侧">
+              <Tooltip title={t("固定到右侧")}>
                 <Button
                   type="text"
                   size="small"
@@ -140,14 +142,14 @@ export default function ColumnSettingsPopover({ value, onChange }: ColumnSetting
 
       <div className="flex items-center justify-between border-t border-gray-100 px-3 py-2.5">
         <Button type="link" size="small" className="!px-0" onClick={handleReset}>
-          恢复默认
+          {t("恢复默认")}
         </Button>
         <div className="flex gap-2">
           <Button size="small" onClick={handleCancel}>
-            取消
+            {t("取消")}
           </Button>
           <Button type="primary" size="small" onClick={handleConfirm}>
-            确认
+            {t("确认")}
           </Button>
         </div>
       </div>
@@ -156,7 +158,7 @@ export default function ColumnSettingsPopover({ value, onChange }: ColumnSetting
 
   return (
     <Popover open={open} trigger="click" placement="bottomRight" content={content} onOpenChange={setOpen}>
-      <Tooltip title="列设置">
+      <Tooltip title={t("列设置")}>
         <Button
           type="text"
           shape="circle"

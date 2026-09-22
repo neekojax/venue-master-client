@@ -29,6 +29,7 @@ import useAuthRedirect from "@/hooks/useAuthRedirect";
 import { useSettingsStore } from "@/stores";
 import { useSelector } from "@/stores/selectors";
 
+import { t as i18nT } from "@/locales";
 import { useBoundSites } from "@/pages/farm-monitor/hook";
 import type { BoundSiteItem } from "@/pages/farm-monitor/types";
 
@@ -201,23 +202,23 @@ export default function FaultMachineMonitorPage() {
     setPage(1);
   };
 
-  const statsTimeLabel = statsTimeMode === "24h" ? "24小时内" : statsSelectedDate;
+  const statsTimeLabel = statsTimeMode === "24h" ? i18nT("24小时内") : statsSelectedDate;
   const statsLoading = useMock
     ? false
     : isSummaryLoading || (Boolean(selectedStatsSiteCode) && isDetailLoading);
 
   const statsErrorMessage = useMemo(() => {
     if (useMock) return "";
-    if (isSummaryError) return (summaryError as Error)?.message || "场地汇总加载失败";
+    if (isSummaryError) return (summaryError as Error)?.message || i18nT("场地汇总加载失败");
     if (selectedStatsSiteCode && isDetailError) {
-      return (detailError as Error)?.message || "场地明细加载失败";
+      return (detailError as Error)?.message || i18nT("场地明细加载失败");
     }
     return "";
   }, [useMock, isSummaryError, summaryError, selectedStatsSiteCode, isDetailError, detailError]);
 
   const logsErrorMessage = useMemo(() => {
     if (useMock || !isLogsError) return "";
-    return (logsError as Error)?.message || "故障日志列表加载失败";
+    return (logsError as Error)?.message || i18nT("故障日志列表加载失败");
   }, [useMock, isLogsError, logsError]);
 
   return (
@@ -229,7 +230,7 @@ export default function FaultMachineMonitorPage() {
           message={statsErrorMessage}
           action={
             <button type="button" className="text-[#1677ff]" onClick={() => void handleStatsRefresh()}>
-              重试
+              {i18nT("重试")}
             </button>
           }
         />
@@ -258,7 +259,7 @@ export default function FaultMachineMonitorPage() {
           message={logsErrorMessage}
           action={
             <button type="button" className="text-[#1677ff]" onClick={() => void handleTableRefresh()}>
-              重试
+              {i18nT("重试")}
             </button>
           }
         />

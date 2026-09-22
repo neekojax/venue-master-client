@@ -1,6 +1,7 @@
 // 增加矿池
 import axiosInstance from "@/helper/axiosInstance";
 import { fetchDelete, fetchGet, fetchPost, fetchPostFile } from "@/helper/fetchHelper.ts";
+import { t } from "@/locales";
 import {
   AssetPoolRecordCreate,
   AssetPoolRecordRebuild,
@@ -21,7 +22,7 @@ const ensureCodeSuccess = <T,>(
     return result;
   }
 
-  throw new Error(result?.message || result?.msg || "操作失败");
+  throw new Error(result?.message || result?.msg || t("操作失败"));
 };
 
 export const fetchMiningPoolList = async (poolType: string, poolCategory: string) => {

@@ -1,6 +1,8 @@
 // fetchWrapper.ts
 import axiosInstance from "./axiosInstance";
 
+import { t } from "@/locales";
+
 // GET 请求（支持可选查询参数）
 export const fetchGet = async (endpoint: string, params?: Record<string, any>, config?: any) => {
   try {
@@ -100,7 +102,7 @@ const checkSuccess = (result: any) => {
     return;
   }
   if (!result?.success) {
-    const errorMessage = result.message || "操作失败"; // 默认错误信息
+    const errorMessage = result.message || t("操作失败"); // 默认错误信息
     console.error("服务器返回的错误信息:", errorMessage);
     throw new Error(errorMessage); // 抛出服务器返回的错误信息
   }

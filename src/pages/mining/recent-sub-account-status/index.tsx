@@ -15,6 +15,7 @@ import { saveAs } from "file-saver";
 import { toPng } from "html-to-image";
 import useAuthRedirect from "@/hooks/useAuthRedirect.ts";
 
+import { t } from "@/locales";
 import { fetchRecentSubAccountStatus } from "@/pages/mining/api.tsx";
 
 const { Title, Text } = Typography;
@@ -80,36 +81,36 @@ async function downloadHistoryWorkbook(
 ) {
   const safeName = (poolName || "recent-sub-account-status").replace(/[\\/:*?"<>|]/g, "-");
   const workbook = new ExcelJS.Workbook();
-  const overviewSheet = workbook.addWorksheet("总览");
-  const detailSheet = workbook.addWorksheet("详细数据");
+  const overviewSheet = workbook.addWorksheet(t("总览"));
+  const detailSheet = workbook.addWorksheet(t("详细数据"));
 
   overviewSheet.columns = [
-    { header: "项目", key: "label", width: 18 },
-    { header: "值", key: "value", width: 22 },
-    { header: "项目2", key: "label2", width: 18 },
-    { header: "值2", key: "value2", width: 22 },
+    { header: t("项目"), key: "label", width: 18 },
+    { header: t("值"), key: "value", width: 22 },
+    { header: t("项目2"), key: "label2", width: 18 },
+    { header: t("值2"), key: "value2", width: 22 },
   ];
 
   overviewSheet.mergeCells("A1:D1");
-  overviewSheet.getCell("A1").value = `${poolName || "子账户"} 历史状态`;
+  overviewSheet.getCell("A1").value = t("{{value}} 历史状态", { value: poolName || t("子账户") });
   overviewSheet.getCell("A1").font = { size: 20, bold: true, color: { argb: "1E3A8A" } };
   overviewSheet.getCell("A1").alignment = { vertical: "middle", horizontal: "left" };
   overviewSheet.getRow(1).height = 28;
 
   if (summary) {
-    overviewSheet.getCell("A3").value = "最新算力";
+    overviewSheet.getCell("A3").value = t("最新算力");
     overviewSheet.getCell("B3").value = formatHashrate(summary.last.CurrentHashrate).text;
-    overviewSheet.getCell("C3").value = "平均算力";
+    overviewSheet.getCell("C3").value = t("平均算力");
     overviewSheet.getCell("D3").value = formatHashrate(summary.avgHashrate).text;
 
-    overviewSheet.getCell("A4").value = "最新在线机器";
+    overviewSheet.getCell("A4").value = t("最新在线机器");
     overviewSheet.getCell("B4").value = summary.last.OnlineMachines;
-    overviewSheet.getCell("C4").value = "最新离线机器";
+    overviewSheet.getCell("C4").value = t("最新离线机器");
     overviewSheet.getCell("D4").value = summary.last.OfflineMachines;
 
-    overviewSheet.getCell("A5").value = "峰值算力";
+    overviewSheet.getCell("A5").value = t("峰值算力");
     overviewSheet.getCell("B5").value = formatHashrate(summary.maxHashrate).text;
-    overviewSheet.getCell("C5").value = "记录条数";
+    overviewSheet.getCell("C5").value = t("记录条数");
     overviewSheet.getCell("D5").value = history.length;
 
     ["A3", "C3", "A4", "C4", "A5", "C5"].forEach((cell) => {
@@ -140,21 +141,21 @@ async function downloadHistoryWorkbook(
   }
 
   detailSheet.columns = [
-    { header: "时间", key: "time", width: 24 },
-    { header: "当前算力", key: "hashrate", width: 20 },
-    { header: "在线机器", key: "online", width: 14 },
-    { header: "离线机器", key: "offline", width: 14 },
+    { header: t("时间"), key: "time", width: 24 },
+    { header: t("当前算力"), key: "hashrate", width: 20 },
+    { header: t("在线机器"), key: "online", width: 14 },
+    { header: t("离线机器"), key: "offline", width: 14 },
   ];
 
   detailSheet.mergeCells("A1:D1");
-  detailSheet.getCell("A1").value = `${poolName || "子账户"} 历史状态详细数据`;
+  detailSheet.getCell("A1").value = t("{{value}} 历史状态详细数据", { value: poolName || t("子账户") });
   detailSheet.getCell("A1").font = { size: 16, bold: true, color: { argb: "1E3A8A" } };
   detailSheet.getCell("A1").alignment = { vertical: "middle", horizontal: "left" };
   detailSheet.getRow(1).height = 24;
 
   const headerRowIndex = 3;
   const headerRow = detailSheet.getRow(headerRowIndex);
-  headerRow.values = ["时间", "当前算力", "在线机器", "离线机器"];
+  headerRow.values = [t("时间"), t("当前算力"), t("在线机器"), t("离线机器")];
   headerRow.font = { bold: true, color: { argb: "0F172A" } };
   headerRow.fill = {
     type: "pattern",
@@ -200,7 +201,7 @@ function SvgLineChart({ history }: { history: RecentSubAccountStatusItem[] }) {
   const [hoverIndex, setHoverIndex] = useState<number | null>(null);
 
   if (history.length === 0) {
-    return <Empty description="暂无历史状态数据" style={{ padding: "40px 0" }} />;
+    return <Empty description={t("暂无历史状态数据")} style={{ padding: "40px 0" }} />;
   }
 
   const hashrates = history.map((item) => item.CurrentHashrate);
@@ -270,7 +271,7 @@ function SvgLineChart({ history }: { history: RecentSubAccountStatusItem[] }) {
               }}
             >
               <span style={{ width: 10, height: 10, borderRadius: "50%", background: "#2563eb" }} />
-              当前算力
+              {t("当前算力")}
             </button>
             <button
               type="button"
@@ -287,7 +288,7 @@ function SvgLineChart({ history }: { history: RecentSubAccountStatusItem[] }) {
               }}
             >
               <span style={{ width: 10, height: 10, borderRadius: "50%", background: "#22c55e" }} />
-              在线机器
+              {t("在线机器")}
             </button>
             <button
               type="button"
@@ -304,7 +305,7 @@ function SvgLineChart({ history }: { history: RecentSubAccountStatusItem[] }) {
               }}
             >
               <span style={{ width: 10, height: 10, borderRadius: "50%", background: "#f97316" }} />
-              离线机器
+              {t("离线机器")}
             </button>
           </div>
         </div>
@@ -398,13 +399,13 @@ function SvgLineChart({ history }: { history: RecentSubAccountStatusItem[] }) {
                   {hoverPoint.item.Time}
                 </text>
                 <text x="12" y="40" fontSize="12" fill="#2563eb">
-                  {`当前算力：${formatHashrate(hoverPoint.item.CurrentHashrate).text}`}
+                  {t("当前算力：{{value}}", { value: formatHashrate(hoverPoint.item.CurrentHashrate).text })}
                 </text>
                 <text x="12" y="58" fontSize="12" fill="#16a34a">
-                  {`在线机器：${hoverPoint.item.OnlineMachines}`}
+                  {t("在线机器：{{OnlineMachines}}", { OnlineMachines: hoverPoint.item.OnlineMachines })}
                 </text>
                 <text x="12" y="74" fontSize="12" fill="#f97316">
-                  {`离线机器：${hoverPoint.item.OfflineMachines}`}
+                  {t("离线机器：{{OfflineMachines}}", { OfflineMachines: hoverPoint.item.OfflineMachines })}
                 </text>
               </g>
             </>
@@ -477,7 +478,7 @@ export default function RecentSubAccountStatusPage() {
       if (!venueType || !poolId) {
         if (mounted) {
           setLoading(false);
-          setLoadError("缺少必要参数");
+          setLoadError(t("缺少必要参数"));
         }
         return;
       }
@@ -487,7 +488,7 @@ export default function RecentSubAccountStatusPage() {
         setLoadError("");
         const result = (await Promise.race([
           fetchRecentSubAccountStatus(venueType, poolId),
-          new Promise((_, reject) => setTimeout(() => reject(new Error("接口请求超时")), 15000)),
+          new Promise((_, reject) => setTimeout(() => reject(new Error(t("接口请求超时"))), 15000)),
         ])) as { data?: RawRecentSubAccountStatusItem[] };
         const list = Array.isArray(result?.data) ? result.data : [];
         const normalized = list.map((item) => normalizeStatusItem(item));
@@ -502,7 +503,7 @@ export default function RecentSubAccountStatusPage() {
       } catch (error: any) {
         if (mounted) {
           setHistory([]);
-          setLoadError(error?.message || "获取历史状态失败");
+          setLoadError(error?.message || t("获取历史状态失败"));
         }
       } finally {
         if (mounted) {
@@ -518,7 +519,7 @@ export default function RecentSubAccountStatusPage() {
     };
   }, [poolId, venueType]);
 
-  const title = locationState.poolName || `子账户 ${poolId || ""}`;
+  const title = locationState.poolName || t("子账户 {{value}}", { value: poolId || "" });
   const summary = useMemo(() => {
     if (history.length === 0) return null;
 
@@ -534,9 +535,9 @@ export default function RecentSubAccountStatusPage() {
   }, [history]);
 
   const columns = [
-    { title: "时间", dataIndex: "Time", key: "Time", width: 180 },
+    { title: t("时间"), dataIndex: "Time", key: "Time", width: 180 },
     {
-      title: <span style={{ paddingLeft: 18, display: "inline-block" }}>当前算力(TH/s)</span>,
+      title: <span style={{ paddingLeft: 18, display: "inline-block" }}>{t("当前算力(TH/s)")}</span>,
       dataIndex: "CurrentHashrate",
       key: "CurrentHashrate",
       width: 240,
@@ -559,14 +560,14 @@ export default function RecentSubAccountStatusPage() {
       ),
     },
     {
-      title: "在线机器",
+      title: t("在线机器"),
       dataIndex: "OnlineMachines",
       key: "OnlineMachines",
       width: 120,
       render: (value: number) => <span style={{ color: "#15803d", fontWeight: 600 }}>{value}</span>,
     },
     {
-      title: "离线机器",
+      title: t("离线机器"),
       dataIndex: "OfflineMachines",
       key: "OfflineMachines",
       width: 120,
@@ -587,18 +588,20 @@ export default function RecentSubAccountStatusPage() {
         }}
       >
         <Title level={2} style={{ marginTop: 0, marginBottom: 8, color: "#1e3a8a", fontSize: 44 }}>
-          {title} 历史状态
+          {t("{{title}} 历史状态", { title: title })}
         </Title>
 
         {locationState.venueName ? (
-          <Text style={{ color: "#64748b" }}>{`场地：${locationState.venueName}`}</Text>
+          <Text style={{ color: "#64748b" }}>
+            {t("场地：{{venueName}}", { venueName: locationState.venueName })}
+          </Text>
         ) : null}
       </div>
 
       {loadError ? (
         <Alert
           style={{ marginTop: 16, marginBottom: 16 }}
-          message="接口请求失败"
+          message={t("接口请求失败")}
           description={loadError}
           type="error"
           showIcon
@@ -609,7 +612,7 @@ export default function RecentSubAccountStatusPage() {
         <Col xs={24} sm={12} xl={6}>
           <Card variant="outlined" style={{ borderRadius: 20 }}>
             <Statistic
-              title="最新算力"
+              title={t("最新算力")}
               value={summary ? formatHashrate(summary.last.CurrentHashrate).value : 0}
               precision={2}
               suffix={summary ? formatHashrate(summary.last.CurrentHashrate).unit : "TH/s"}
@@ -618,45 +621,49 @@ export default function RecentSubAccountStatusPage() {
             />
             <Text style={{ color: summary && summary.hashrateDelta >= 0 ? "#16a34a" : "#dc2626" }}>
               {summary && summary.hashrateDelta >= 0 ? <ArrowUpOutlined /> : <ArrowDownOutlined />}
-              {` 较首条记录 ${summary ? formatHashrate(Math.abs(summary.hashrateDelta)).text : "0.00 TH/s"}`}
+              {t("较首条记录 {{value}}", {
+                value: summary ? formatHashrate(Math.abs(summary.hashrateDelta)).text : "0.00 TH/s",
+              })}
             </Text>
           </Card>
         </Col>
         <Col xs={24} sm={12} xl={6}>
           <Card variant="outlined" style={{ borderRadius: 20 }}>
             <Statistic
-              title="平均算力"
+              title={t("平均算力")}
               value={summary ? formatHashrate(summary.avgHashrate).value : 0}
               precision={2}
               suffix={summary ? formatHashrate(summary.avgHashrate).unit : "TH/s"}
               valueStyle={{ color: "#0f766e", fontWeight: 700 }}
             />
-            <Text
-              style={{ color: "#64748b" }}
-            >{`峰值 ${summary ? formatHashrate(summary.maxHashrate).text : "0.00 TH/s"}`}</Text>
+            <Text style={{ color: "#64748b" }}>
+              {t("峰值 {{value}}", {
+                value: summary ? formatHashrate(summary.maxHashrate).text : "0.00 TH/s",
+              })}
+            </Text>
           </Card>
         </Col>
         <Col xs={24} sm={12} xl={6}>
           <Card variant="outlined" style={{ borderRadius: 20 }}>
             <Statistic
-              title="最新在线机器"
+              title={t("最新在线机器")}
               value={summary ? summary.last.OnlineMachines : 0}
               valueStyle={{ color: "#15803d", fontWeight: 700 }}
             />
-            <Text style={{ color: "#64748b" }}>最新在线机器数量</Text>
+            <Text style={{ color: "#64748b" }}>{t("最新在线机器数量")}</Text>
           </Card>
         </Col>
         <Col xs={24} sm={12} xl={6}>
           <Card variant="outlined" style={{ borderRadius: 20 }}>
             <Statistic
-              title="最新离线机器"
+              title={t("最新离线机器")}
               value={summary ? summary.last.OfflineMachines : 0}
               valueStyle={{ color: "#dc2626", fontWeight: 700 }}
               prefix={<DisconnectOutlined />}
             />
             <Text style={{ color: summary && summary.offlineDelta <= 0 ? "#16a34a" : "#dc2626" }}>
               {summary && summary.offlineDelta <= 0 ? <ArrowDownOutlined /> : <ArrowUpOutlined />}
-              {` 较首条记录 ${summary ? Math.abs(summary.offlineDelta) : 0} 台`}
+              {t("较首条记录 {{value}} 台", { value: summary ? Math.abs(summary.offlineDelta) : 0 })}
             </Text>
           </Card>
         </Col>
@@ -674,7 +681,7 @@ export default function RecentSubAccountStatusPage() {
             }}
           >
             <LineChartOutlined style={{ color: "#2563eb" }} />
-            最近三天状态趋势
+            {t("最近三天状态趋势")}
           </span>
         }
         extra={
@@ -684,7 +691,7 @@ export default function RecentSubAccountStatusPage() {
             icon={<DownloadOutlined />}
             onClick={() => downloadHistoryWorkbook(history, title, summary)}
           >
-            下载 Excel
+            {t("下载 Excel")}
           </Button>
         }
         style={{ marginBottom: 16, background: "#ffffff", color: "#1f2937" }}
@@ -710,7 +717,7 @@ export default function RecentSubAccountStatusPage() {
             }}
           >
             <TableOutlined style={{ color: "#0f766e" }} />
-            历史状态明细
+            {t("历史状态明细")}
           </span>
         }
         style={{ background: "#ffffff", color: "#1f2937" }}
@@ -720,7 +727,7 @@ export default function RecentSubAccountStatusPage() {
           loading={loading}
           dataSource={history.slice().reverse()}
           columns={columns}
-          locale={{ emptyText: "暂无历史状态数据" }}
+          locale={{ emptyText: t("暂无历史状态数据") }}
           style={{ background: "#ffffff" }}
           pagination={{
             position: ["bottomCenter"],

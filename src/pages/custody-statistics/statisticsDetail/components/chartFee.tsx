@@ -4,6 +4,7 @@ import { useParams } from "react-router-dom";
 import { LineChartOutlined } from "@ant-design/icons";
 import * as echarts from "echarts";
 
+import { t } from "@/locales";
 import { fetchCustodyFeeRatioHistory } from "@/pages/custody-statistics/api";
 
 const FeeApp: React.FC<{ onVenueNameChange?: (name: string) => void }> = ({ onVenueNameChange }) => {
@@ -71,7 +72,7 @@ const FeeApp: React.FC<{ onVenueNameChange?: (name: string) => void }> = ({ onVe
       const renderChart = () => {
         feeChart.setOption({
           title: {
-            text: "托管费比例趋势（%）",
+            text: t("托管费比例趋势（%）"),
             textStyle: {
               fontSize: 16,
               fontWeight: "bold",
@@ -190,7 +191,7 @@ const FeeApp: React.FC<{ onVenueNameChange?: (name: string) => void }> = ({ onVe
 
           series: [
             {
-              name: "托管费比例",
+              name: t("托管费比例"),
               data: feeRatios,
               type: "line",
               smooth: true,
@@ -204,7 +205,7 @@ const FeeApp: React.FC<{ onVenueNameChange?: (name: string) => void }> = ({ onVe
               showSymbol: false,
             },
             {
-              name: "功耗",
+              name: t("功耗"),
               data: powerConsumptions,
               type: "line",
               smooth: true,
@@ -249,20 +250,20 @@ const FeeApp: React.FC<{ onVenueNameChange?: (name: string) => void }> = ({ onVe
       <div className="bg-white rounded-xl shadow-md p-6 transition-all hover:shadow-lg">
         <div className="flex items-center mb-4">
           <LineChartOutlined className="text-green-500 text-xl mr-2" />
-          <h2 className="text-lg font-semibold text-gray-700">托管费比例变化</h2>
+          <h2 className="text-lg font-semibold text-gray-700">{t("托管费比例变化")}</h2>
         </div>
         <div ref={feeChartRef} className="w-full h-80"></div>
         <div className="mt-4 flex flex-wrap gap-2">
           <div className="bg-green-50 rounded-lg px-4 py-2">
-            <span className="text-green-800 font-medium">最高费率:</span>
+            <span className="text-green-800 font-medium">{t("最高费率:")}</span>
             <span className="text-green-600 ml-1">{Math.max(...feeRatios)}%</span>
           </div>
           <div className="bg-green-50 rounded-lg px-4 py-2">
-            <span className="text-green-800 font-medium">最低费率:</span>
+            <span className="text-green-800 font-medium">{t("最低费率:")}</span>
             <span className="text-green-600 ml-1">{Math.min(...feeRatios)}%</span>
           </div>
           <div className="bg-green-50 rounded-lg px-4 py-2">
-            <span className="text-green-800 font-medium">最新费率:</span>
+            <span className="text-green-800 font-medium">{t("最新费率:")}</span>
             <span className="text-green-600 ml-1">{feeRatios[feeRatios.length - 1]}%</span>
           </div>
         </div>

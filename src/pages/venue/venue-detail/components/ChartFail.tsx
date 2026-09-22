@@ -17,6 +17,7 @@ import {
 import type { WeeklyChartPoint } from "./weeklyMock";
 import { useSelector, useSettingsStore } from "@/stores";
 
+import { t } from "@/locales";
 import { getLast30DaysFailureRate } from "@/pages/venue/api.tsx";
 
 // 注册 ECharts 组件
@@ -112,7 +113,7 @@ const WaveLineCard: React.FC<{ mode?: "day" | "week"; weeklyData?: WeeklyChartPo
           formatter: (value: string) => {
             if (mode === "week") {
               const week = weeklyData.find((item) => item.date === value)?.weekNo;
-              return week ? `第${week}周` : value;
+              return week ? t("第{{week}}周", { week: week }) : value;
             }
             const d = new Date(value);
             if (!isNaN(d.getTime())) {
@@ -133,7 +134,7 @@ const WaveLineCard: React.FC<{ mode?: "day" | "week"; weeklyData?: WeeklyChartPo
       yAxis: [
         {
           type: "value",
-          name: mode === "week" ? "故障数" : "故障率",
+          name: mode === "week" ? t("故障数") : t("故障率"),
           splitNumber: 4,
           axisLine: { show: false },
           axisTick: { show: false },
@@ -144,7 +145,7 @@ const WaveLineCard: React.FC<{ mode?: "day" | "week"; weeklyData?: WeeklyChartPo
         {
           type: "value",
           min: 0,
-          name: "故障数",
+          name: t("故障数"),
           splitNumber: 4,
           axisLine: { show: false },
           axisTick: { show: false },
@@ -156,7 +157,7 @@ const WaveLineCard: React.FC<{ mode?: "day" | "week"; weeklyData?: WeeklyChartPo
         {
           type: "line",
           smooth: true,
-          name: mode === "week" ? "故障数" : "故障率",
+          name: mode === "week" ? t("故障数") : t("故障率"),
           yAxisIndex: 0,
           itemStyle: { color: "rgb(216, 70, 70)" },
           showSymbol: false,
@@ -173,7 +174,7 @@ const WaveLineCard: React.FC<{ mode?: "day" | "week"; weeklyData?: WeeklyChartPo
         {
           type: "line",
           smooth: true,
-          name: mode === "week" ? "故障率" : "故障数",
+          name: mode === "week" ? t("故障率") : t("故障数"),
           yAxisIndex: 1,
           itemStyle: {
             color: "rgb(241, 235, 235)", //rgb(216, 70, 70) 点的颜色
@@ -205,9 +206,9 @@ const WaveLineCard: React.FC<{ mode?: "day" | "week"; weeklyData?: WeeklyChartPo
       <div className="flex justify-between items-center mb-4">
         <div className="flex items-center gap-3">
           <div>
-            <h3 style={chartTitleStyle}>故障率变化曲线</h3>
+            <h3 style={chartTitleStyle}>{t("故障率变化曲线")}</h3>
           </div>
-          <span style={chartRangeBadge("#dc2626")}>{mode === "week" ? "近10周" : "近30日"}</span>
+          <span style={chartRangeBadge("#dc2626")}>{mode === "week" ? t("近10周") : t("近30日")}</span>
         </div>
       </div>
       <Spin spinning={loading}>

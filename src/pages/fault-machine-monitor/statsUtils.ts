@@ -2,6 +2,8 @@ import dayjs from "dayjs";
 import { FAULT_CODE_COLOR, type FaultCode, SITE_LINE_COLORS } from "./constants";
 import type { AbnormalLogFilters, AbnormalLogListItem, AbnormalLogRecord, FaultStatsTimeMode } from "./types";
 
+import { t } from "@/locales";
+
 export interface SiteDistributionItem {
   siteCode: string;
   siteName: string;
@@ -33,7 +35,9 @@ export function formatFrequencyTooltip(point: FrequencyPoint | undefined, axisLa
   const breakdown = point.codeStats.filter((s) => s.count > 0).sort((a, b) => b.count - a.count);
 
   const lines: string[] = [`<div style="font-weight:600;margin-bottom:4px">${title}</div>`];
-  lines.push(`<div style="font-size:12px">异常 <span style="font-weight:600">${point.count}</span> 条</div>`);
+  lines.push(
+    `<div style="font-size:12px">${t("异常")} <span style="font-weight:600">${point.count}</span> ${t("条")}</div>`,
+  );
 
   if (breakdown.length > 0) {
     lines.push(

@@ -52,6 +52,7 @@ import { useSelector, useSettingsStore } from "@/stores";
 
 import "./index.css";
 
+import { t } from "@/locales";
 import { downloadExcelBlobResponse } from "@/pages/farm-monitor/utils";
 
 const { Text } = Typography;
@@ -104,11 +105,11 @@ function pickValue<T>(...values: T[]): T | undefined {
 
 function statsCards(stats: SiteInfo["abnormalStats"]) {
   return [
-    { label: "最近1日异常", val: stats.yesterday, color: "text-rose-600", bg: "bg-rose-50" },
-    { label: "最近7日异常", val: stats.day7, color: "text-orange-600", bg: "bg-orange-50" },
-    { label: "最近15日异常", val: stats.day15, color: "text-indigo-600", bg: "bg-indigo-50" },
-    { label: "最近30日异常", val: stats.day30, color: "text-slate-600", bg: "bg-slate-100" },
-    { label: "累计异常", val: stats.all, color: "text-purple-600", bg: "bg-purple-50" },
+    { label: t("最近1日异常"), val: stats.yesterday, color: "text-rose-600", bg: "bg-rose-50" },
+    { label: t("最近7日异常"), val: stats.day7, color: "text-orange-600", bg: "bg-orange-50" },
+    { label: t("最近15日异常"), val: stats.day15, color: "text-indigo-600", bg: "bg-indigo-50" },
+    { label: t("最近30日异常"), val: stats.day30, color: "text-slate-600", bg: "bg-slate-100" },
+    { label: t("累计异常"), val: stats.all, color: "text-purple-600", bg: "bg-purple-50" },
   ].map((item, idx) => (
     <div
       key={idx}
@@ -118,7 +119,7 @@ function statsCards(stats: SiteInfo["abnormalStats"]) {
     >
       <div className="text-[11px] text-slate-500 font-medium mb-0.5">{item.label}</div>
       <div className={`text-lg font-bold font-mono ${item.color}`}>
-        {item.val} <span className="text-[10px] font-sans text-slate-400 font-normal">台</span>
+        {item.val} <span className="text-[10px] font-sans text-slate-400 font-normal">{t("台")}</span>
       </div>
     </div>
   ));
@@ -138,7 +139,10 @@ function buildLineOption(data: HistoryPoint[], lineColor: string, tooltipBg: str
         if (!point) return "";
         const onShelf = point.onShelfMax ?? "-";
         const refreshed = point.refreshedCount ?? "-";
-        return `${point.date}<br/>异常矿机数：${point.abnormalCount}<br/>期望在架：${onShelf}<br/>刷新数：${refreshed}`;
+        return t(
+          "{{date}}<br/>异常矿机数：{{abnormalCount}}<br/>期望在架：{{onShelf}}<br/>刷新数：{{refreshed}}",
+          { date: point.date, abnormalCount: point.abnormalCount, onShelf: onShelf, refreshed: refreshed },
+        );
       },
     },
     grid: { left: 0, right: 10, top: 8, bottom: 0, containLabel: true },
@@ -159,7 +163,7 @@ function buildLineOption(data: HistoryPoint[], lineColor: string, tooltipBg: str
     },
     series: [
       {
-        name: "异常矿机数",
+        name: t("异常矿机数"),
         type: "line",
         smooth: true,
         symbol: "circle",
@@ -281,7 +285,7 @@ export default function AbnormalAnalysisPage() {
       dismantled: searchDismantled,
       asset: searchAsset,
     });
-    message.success("筛选已应用");
+    message.success(t("筛选已应用"));
   };
 
   const handleReset = () => {
@@ -304,7 +308,7 @@ export default function AbnormalAnalysisPage() {
       dismantled: "all",
       asset: "all",
     });
-    message.info("筛选已重置");
+    message.info(t("筛选已重置"));
   };
 
   useEffect(() => {
@@ -421,7 +425,7 @@ export default function AbnormalAnalysisPage() {
 
   const handleCopyText = (text: string, type: string) => {
     navigator.clipboard.writeText(text);
-    message.success(`${type} 已复制到剪贴板`);
+    message.success(t("{{type}} 已复制到剪贴板", { type: type }));
   };
 
   const buildDetailQueryParams = (options?: {
@@ -456,10 +460,10 @@ export default function AbnormalAnalysisPage() {
         res,
         `abnormal_analysis_detail_${new Date().toISOString().slice(0, 10)}.xlsx`,
       );
-      message.success("下载成功");
+      message.success(t("下载成功"));
     } catch (error) {
       console.error("abnormalAnalysisDetail export error", error);
-      message.error("下载失败，请稍后重试");
+      message.error(t("下载失败，请稍后重试"));
     } finally {
       setDetailExporting(false);
     }
@@ -506,30 +510,35 @@ export default function AbnormalAnalysisPage() {
       const stats = selectedSiteData.stats;
       const windows = [
         {
-          label: "最近1日异常",
+          label: t("最近1日异常"),
           val: stats.yesterday?.anomaly ?? 0,
           color: "text-rose-600",
           bg: "bg-rose-50",
         },
         {
-          label: "最近7日异常",
+          label: t("最近7日异常"),
           val: stats.last7Days?.anomaly ?? 0,
           color: "text-orange-600",
           bg: "bg-orange-50",
         },
         {
-          label: "最近15日异常",
+          label: t("最近15日异常"),
           val: stats.last15Days?.anomaly ?? 0,
           color: "text-indigo-600",
           bg: "bg-indigo-50",
         },
         {
-          label: "最近30日异常",
+          label: t("最近30日异常"),
           val: stats.last30Days?.anomaly ?? 0,
           color: "text-slate-600",
           bg: "bg-slate-100",
         },
-        { label: "累计异常", val: stats.allTime?.anomaly ?? 0, color: "text-purple-600", bg: "bg-purple-50" },
+        {
+          label: t("累计异常"),
+          val: stats.allTime?.anomaly ?? 0,
+          color: "text-purple-600",
+          bg: "bg-purple-50",
+        },
       ];
       return windows.map((item, idx) => (
         <div
@@ -540,7 +549,7 @@ export default function AbnormalAnalysisPage() {
         >
           <div className="text-[11px] text-slate-500 font-medium mb-0.5">{item.label}</div>
           <div className={`text-lg font-bold font-mono ${item.color}`}>
-            {item.val} <span className="text-[10px] font-sans text-slate-400 font-normal">台</span>
+            {item.val} <span className="text-[10px] font-sans text-slate-400 font-normal">{t("台")}</span>
           </div>
         </div>
       ));
@@ -548,21 +557,21 @@ export default function AbnormalAnalysisPage() {
 
     if (selectedSiteSummary) {
       const windows = [
-        { label: "全部异常", val: selectedSiteSummary.anomaly, color: "text-rose-600", bg: "bg-rose-50" },
+        { label: t("全部异常"), val: selectedSiteSummary.anomaly, color: "text-rose-600", bg: "bg-rose-50" },
         {
-          label: "期望在架",
+          label: t("期望在架"),
           val: selectedSiteSummary.onShelfMax,
           color: "text-slate-700",
           bg: "bg-slate-100",
         },
         {
-          label: "刷新数",
+          label: t("刷新数"),
           val: selectedSiteSummary.refreshedCount,
           color: "text-teal-700",
           bg: "bg-teal-50",
         },
         {
-          label: "异常比例",
+          label: t("异常比例"),
           val: `${selectedSiteSummary.anomalyRatio}%`,
           color: "text-amber-700",
           bg: "bg-amber-50",
@@ -577,7 +586,7 @@ export default function AbnormalAnalysisPage() {
           <div className={`text-lg font-bold font-mono ${item.color}`}>
             {item.val}
             {typeof item.val === "number" ? (
-              <span className="text-[10px] font-sans text-slate-400 font-normal"> 台</span>
+              <span className="text-[10px] font-sans text-slate-400 font-normal"> {t("台")}</span>
             ) : null}
           </div>
         </div>
@@ -589,7 +598,7 @@ export default function AbnormalAnalysisPage() {
 
   const columns: ColumnsType<AbnormalAnalysisDetailItem> = [
     {
-      title: "场地",
+      title: t("场地"),
       dataIndex: "site",
       key: "site",
       width: 220,
@@ -602,7 +611,7 @@ export default function AbnormalAnalysisPage() {
       ),
     },
     {
-      title: "MAC 地址",
+      title: t("MAC 地址"),
       dataIndex: "mac",
       key: "mac",
       width: 180,
@@ -610,17 +619,17 @@ export default function AbnormalAnalysisPage() {
       render: (text: string) => (
         <span className="font-mono text-xs bg-slate-100 px-1.5 py-0.5 rounded text-slate-600 flex items-center justify-between group max-w-[170px]">
           <span>{text}</span>
-          <Tooltip title="复制 MAC">
+          <Tooltip title={t("复制 MAC")}>
             <CopyOutlined
               className="text-slate-400 hover:text-blue-500 cursor-pointer ml-1.5 opacity-0 group-hover:opacity-100 transition-opacity"
-              onClick={() => handleCopyText(text, "MAC 地址")}
+              onClick={() => handleCopyText(text, t("MAC 地址"))}
             />
           </Tooltip>
         </span>
       ),
     },
     {
-      title: "控制板 SN",
+      title: t("控制板 SN"),
       dataIndex: "controlBoardSN",
       key: "controlBoardSN",
       width: 180,
@@ -628,24 +637,24 @@ export default function AbnormalAnalysisPage() {
       render: (text: string) => (
         <span className="font-mono text-xs text-slate-500 flex items-center justify-between group max-w-[150px]">
           <span>{text}</span>
-          <Tooltip title="复制 SN">
+          <Tooltip title={t("复制 SN")}>
             <CopyOutlined
               className="text-slate-400 hover:text-blue-500 cursor-pointer ml-1.5 opacity-0 group-hover:opacity-100 transition-opacity"
-              onClick={() => handleCopyText(text, "控制板 SN")}
+              onClick={() => handleCopyText(text, t("控制板 SN"))}
             />
           </Tooltip>
         </span>
       ),
     },
     {
-      title: "机型",
+      title: t("机型"),
       dataIndex: "model",
       key: "model",
       width: 260,
       render: (text: string) => <Tag color="blue">{text}</Tag>,
     },
     {
-      title: "算力板序列号",
+      title: t("算力板序列号"),
       dataIndex: "hashBoardSN",
       key: "hashBoardSN",
       width: 560,
@@ -661,10 +670,10 @@ export default function AbnormalAnalysisPage() {
                 </Tag>
               ))}
             </div>
-            <Tooltip title="复制算力板序列号">
+            <Tooltip title={t("复制算力板序列号")}>
               <CopyOutlined
                 className="text-slate-400 hover:text-blue-500 cursor-pointer opacity-0 group-hover:opacity-100 transition-opacity mt-1"
-                onClick={() => handleCopyText(list.join(", "), "算力板序列号")}
+                onClick={() => handleCopyText(list.join(", "), t("算力板序列号"))}
               />
             </Tooltip>
           </div>
@@ -672,7 +681,7 @@ export default function AbnormalAnalysisPage() {
       },
     },
     {
-      title: "矿工号",
+      title: t("矿工号"),
       dataIndex: "minerCode",
       key: "minerCode",
       width: 220,
@@ -683,10 +692,10 @@ export default function AbnormalAnalysisPage() {
         return (
           <span className="font-semibold text-slate-800 flex items-center justify-between gap-2 group max-w-[220px]">
             <span className="truncate">{text}</span>
-            <Tooltip title="复制矿工号">
+            <Tooltip title={t("复制矿工号")}>
               <CopyOutlined
                 className="text-slate-400 hover:text-blue-500 cursor-pointer opacity-0 group-hover:opacity-100 transition-opacity"
-                onClick={() => handleCopyText(text, "矿工号")}
+                onClick={() => handleCopyText(text, t("矿工号"))}
               />
             </Tooltip>
           </span>
@@ -694,7 +703,7 @@ export default function AbnormalAnalysisPage() {
       },
     },
     {
-      title: "IP 地址",
+      title: t("IP 地址"),
       dataIndex: "ipAddress",
       key: "ipAddress",
       width: 220,
@@ -705,10 +714,10 @@ export default function AbnormalAnalysisPage() {
         return (
           <span className="font-mono text-xs text-slate-600 flex items-center justify-between gap-2 group max-w-[220px]">
             <span className="truncate">{text}</span>
-            <Tooltip title="复制 IP">
+            <Tooltip title={t("复制 IP")}>
               <CopyOutlined
                 className="text-slate-400 hover:text-blue-500 cursor-pointer opacity-0 group-hover:opacity-100 transition-opacity"
-                onClick={() => handleCopyText(text, "IP 地址")}
+                onClick={() => handleCopyText(text, t("IP 地址"))}
               />
             </Tooltip>
           </span>
@@ -716,7 +725,7 @@ export default function AbnormalAnalysisPage() {
       },
     },
     {
-      title: "刷新时间",
+      title: t("刷新时间"),
       dataIndex: "refreshTime",
       key: "refreshTime",
       width: 180,
@@ -737,7 +746,7 @@ export default function AbnormalAnalysisPage() {
       },
     },
     {
-      title: "是否下架",
+      title: t("是否下架"),
       dataIndex: "isDismantled",
       key: "isDismantled",
       width: 110,
@@ -745,33 +754,33 @@ export default function AbnormalAnalysisPage() {
         if (text === "下架") {
           return (
             <Tag color="error" icon={<CloseCircleOutlined />}>
-              下架
+              {t("下架")}
             </Tag>
           );
         } else if (text === "在架") {
           return (
             <Tag color="success" icon={<CheckCircleOutlined />}>
-              在架
+              {t("在架")}
             </Tag>
           );
         } else {
           return (
             <Tag color="warning" icon={<QuestionCircleOutlined />}>
-              未知
+              {t("未知")}
             </Tag>
           );
         }
       },
     },
     {
-      title: "下架时间",
+      title: t("下架时间"),
       dataIndex: "dismantledTime",
       key: "dismantledTime",
       width: 180,
       render: (text: string) => <span className="text-xs text-slate-500">{text}</span>,
     },
     {
-      title: "产权",
+      title: t("产权"),
       dataIndex: "assetOwnership",
       key: "assetOwnership",
       width: 100,
@@ -787,26 +796,36 @@ export default function AbnormalAnalysisPage() {
   // 全场统计卡片：基于真实接口的五个时间窗口（anomaly 为异常矿机数）
   const allSiteStatsCards = (stats?: AnomalyStats) => {
     const windows = [
-      { label: "最近1日异常", val: stats?.yesterday?.anomaly ?? 0, color: "text-rose-600", bg: "bg-rose-50" },
       {
-        label: "最近7日异常",
+        label: t("最近1日异常"),
+        val: stats?.yesterday?.anomaly ?? 0,
+        color: "text-rose-600",
+        bg: "bg-rose-50",
+      },
+      {
+        label: t("最近7日异常"),
         val: stats?.last7Days?.anomaly ?? 0,
         color: "text-orange-600",
         bg: "bg-orange-50",
       },
       {
-        label: "最近15日异常",
+        label: t("最近15日异常"),
         val: stats?.last15Days?.anomaly ?? 0,
         color: "text-indigo-600",
         bg: "bg-indigo-50",
       },
       {
-        label: "最近30日异常",
+        label: t("最近30日异常"),
         val: stats?.last30Days?.anomaly ?? 0,
         color: "text-slate-600",
         bg: "bg-slate-100",
       },
-      { label: "累计异常", val: stats?.allTime?.anomaly ?? 0, color: "text-purple-600", bg: "bg-purple-50" },
+      {
+        label: t("累计异常"),
+        val: stats?.allTime?.anomaly ?? 0,
+        color: "text-purple-600",
+        bg: "bg-purple-50",
+      },
     ];
     return windows.map((item, idx) => (
       <div
@@ -817,7 +836,7 @@ export default function AbnormalAnalysisPage() {
       >
         <div className="text-[11px] text-slate-500 font-medium mb-0.5">{item.label}</div>
         <div className={`text-lg font-bold font-mono ${item.color}`}>
-          {item.val} <span className="text-[10px] font-sans text-slate-400 font-normal">台</span>
+          {item.val} <span className="text-[10px] font-sans text-slate-400 font-normal">{t("台")}</span>
         </div>
       </div>
     ));
@@ -834,11 +853,13 @@ export default function AbnormalAnalysisPage() {
               <div className="px-4 py-2.5 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
                 <div className="flex items-center gap-2">
                   <div className="w-1 h-4 bg-indigo-600 rounded-full"></div>
-                  <span className="text-sm font-bold text-slate-800">全场统计</span>
+                  <span className="text-sm font-bold text-slate-800">{t("全场统计")}</span>
                 </div>
-                <Tag color="purple">全部场地 · {allSiteData?.siteCount ?? "-"} 个</Tag>
+                <Tag color="purple">
+                  {t("全部场地 · {{value}} 个", { value: allSiteData?.siteCount ?? "-" })}
+                </Tag>
               </div>
-              <Spin spinning={allSiteLoading} tip="全场统计加载中...">
+              <Spin spinning={allSiteLoading} tip={t("全场统计加载中...")}>
                 <div className="p-3.5">
                   <div className="grid grid-cols-2 sm:grid-cols-5 gap-2 mb-3">
                     {allSiteStatsCards(allSiteData?.stats)}
@@ -846,16 +867,16 @@ export default function AbnormalAnalysisPage() {
                   <div className="mt-2.5">
                     <div className="flex items-center justify-between mb-2">
                       <Text className="text-xs font-bold text-slate-500 font-mono">
-                        全场折线图 (最近30日折线图)
+                        {t("全场折线图 (最近30日折线图)")}
                       </Text>
-                      <span className="text-[11px] text-slate-400">实时更新</span>
+                      <span className="text-[11px] text-slate-400">{t("实时更新")}</span>
                     </div>
                     <div className="h-[135px] w-full">
                       {hasAllSiteTrendData ? (
                         <ReactEcharts option={globalLineOption} />
                       ) : (
                         <div className="h-full flex items-center justify-center">
-                          <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} description="暂无全场趋势数据" />
+                          <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} description={t("暂无全场趋势数据")} />
                         </div>
                       )}
                     </div>
@@ -870,14 +891,14 @@ export default function AbnormalAnalysisPage() {
                 <div className="flex items-center gap-2">
                   <div className="w-1 h-4 bg-teal-600 rounded-full"></div>
                   <span className="text-sm font-bold text-slate-800">
-                    {selectedSiteSummary?.siteName ?? selectedSiteName}异常统计
+                    {t("{{value}}异常统计", { value: selectedSiteSummary?.siteName ?? selectedSiteName })}
                   </span>
                 </div>
                 <Tag color="cyan">
-                  {selectedSiteSummary?.siteCode ?? (hasSiteListData ? "当前场地" : "暂无数据")}
+                  {selectedSiteSummary?.siteCode ?? (hasSiteListData ? t("当前场地") : t("暂无数据"))}
                 </Tag>
               </div>
-              <Spin spinning={selectedSiteLoading} tip="场地统计加载中...">
+              <Spin spinning={selectedSiteLoading} tip={t("场地统计加载中...")}>
                 <div className="p-3.5">
                   {hasSiteListData ? (
                     <>
@@ -893,19 +914,25 @@ export default function AbnormalAnalysisPage() {
                       <div className="mt-2.5">
                         <div className="flex items-center justify-between mb-2">
                           <Text className="text-xs font-bold text-slate-500 font-mono">
-                            {selectedSiteName}折线图 (最近30日折线图)
+                            {t("{{selectedSiteName}}折线图 (最近30日折线图)", {
+                              selectedSiteName: selectedSiteName,
+                            })}
                           </Text>
                           {selectedSiteData?.stats ? (
                             <span className="text-xs text-teal-600 font-medium">
-                              30日异常: {selectedSiteData.stats.last30Days?.anomaly ?? 0} 台
+                              {t("30日异常: {{value}} 台", {
+                                value: selectedSiteData.stats.last30Days?.anomaly ?? 0,
+                              })}
                             </span>
                           ) : selectedSiteSummary ? (
                             <span className="text-xs text-teal-600 font-medium">
-                              期望在架: {selectedSiteSummary.onShelfMax} 台
+                              {t("期望在架: {{onShelfMax}} 台", {
+                                onShelfMax: selectedSiteSummary.onShelfMax,
+                              })}
                             </span>
                           ) : (
                             <span className="text-xs text-teal-600 font-medium">
-                              矿机总数: {selectedSite.totalRigs} 台
+                              {t("矿机总数: {{totalRigs}} 台", { totalRigs: selectedSite.totalRigs })}
                             </span>
                           )}
                         </div>
@@ -914,20 +941,23 @@ export default function AbnormalAnalysisPage() {
                             <ReactEcharts option={siteLineOption} />
                           ) : (
                             <div className="h-full flex items-center justify-center">
-                              <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} description="暂无场地趋势数据" />
+                              <Empty
+                                image={Empty.PRESENTED_IMAGE_SIMPLE}
+                                description={t("暂无场地趋势数据")}
+                              />
                             </div>
                           )}
                         </div>
                         {selectedSiteSummary && !selectedSiteData?.stats ? (
                           <div className="mt-2 text-[11px] text-slate-400">
-                            当前仅场地列表接入真实接口，单场地最近30日曲线仍使用页面示例数据。
+                            {t("当前仅场地列表接入真实接口，单场地最近30日曲线仍使用页面示例数据。")}
                           </div>
                         ) : null}
                       </div>
                     </>
                   ) : (
                     <div className="py-10">
-                      <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} description="暂无场地异常数据" />
+                      <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} description={t("暂无场地异常数据")} />
                     </div>
                   )}
                 </div>
@@ -941,14 +971,14 @@ export default function AbnormalAnalysisPage() {
               <div className="px-4 py-2.5 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
                 <div className="flex items-center gap-2">
                   <SlidersOutlined className="text-slate-500" />
-                  <span className="text-sm font-bold text-slate-800">场地列表</span>
+                  <span className="text-sm font-bold text-slate-800">{t("场地列表")}</span>
                 </div>
                 <Badge count={siteAnomalyListData?.total ?? 0} color="#0f172a" />
               </div>
-              <Spin spinning={siteAnomalyListLoading} tip="场地列表加载中...">
+              <Spin spinning={siteAnomalyListLoading} tip={t("场地列表加载中...")}>
                 <div className="p-3.5 flex flex-col flex-1">
                   <div className="text-xs text-slate-400 mb-3 font-mono leading-relaxed">
-                    点击下方场地卡片，查看该场地昨日异常汇总
+                    {t("点击下方场地卡片，查看该场地昨日异常汇总")}
                   </div>
                   <div className="abnormal-slider flex flex-col gap-3 overflow-y-auto pr-1 max-h-[505px]">
                     {hasSiteListData ? (
@@ -965,7 +995,7 @@ export default function AbnormalAnalysisPage() {
                             key={site.siteCode || site.siteName}
                             onClick={() => {
                               setSelectedSiteName(site.siteName);
-                              message.info(`已选择场地: ${site.siteName}`);
+                              message.info(t("已选择场地: {{siteName}}", { siteName: site.siteName }));
                             }}
                             className={`group relative py-2.5 px-3 rounded-lg border cursor-pointer transition-all duration-300 select-none ${
                               isSelected
@@ -986,27 +1016,29 @@ export default function AbnormalAnalysisPage() {
                                       : "text-slate-400 group-hover:text-slate-600"
                                   }
                                 />
-                                <span
-                                  className={`font-semibold text-xs transition-colors truncate ${
-                                    isSelected ? "text-white" : "text-slate-800"
-                                  }`}
-                                >
-                                  {site.siteName}
-                                </span>
+                                <Tooltip title={site.siteName} mouseEnterDelay={0.2}>
+                                  <span
+                                    className={`font-semibold text-xs transition-colors truncate ${
+                                      isSelected ? "text-white" : "text-slate-800"
+                                    }`}
+                                  >
+                                    {site.siteName}
+                                  </span>
+                                </Tooltip>
                               </div>
                               <span
                                 className={`shrink-0 text-[10px] font-mono px-1.5 py-0.5 rounded-full ${
                                   isSelected ? "bg-slate-800 text-amber-400" : "bg-slate-100 text-slate-600"
                                 }`}
                               >
-                                异常 {site.anomaly} 台
+                                {t("异常 {{anomaly}} 台", { anomaly: site.anomaly })}
                               </span>
                             </div>
 
                             <div className="space-y-1">
                               <div className="flex justify-between text-[11px] gap-2">
                                 <span className={isSelected ? "text-slate-400" : "text-slate-500"}>
-                                  刷新/期望:{" "}
+                                  {t("刷新/期望:")}{" "}
                                   <span className="font-mono">
                                     {site.refreshedCount}/{site.onShelfMax}
                                   </span>
@@ -1022,7 +1054,7 @@ export default function AbnormalAnalysisPage() {
                                         : "text-teal-600"
                                   }`}
                                 >
-                                  异常 {site.anomalyRatio}%
+                                  {t("异常 {{anomalyRatio}}%", { anomalyRatio: site.anomalyRatio })}
                                 </span>
                               </div>
 
@@ -1050,7 +1082,7 @@ export default function AbnormalAnalysisPage() {
                       })
                     ) : (
                       <div className="py-10">
-                        <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} description="暂无场地列表数据" />
+                        <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} description={t("暂无场地列表数据")} />
                       </div>
                     )}
                   </div>
@@ -1065,26 +1097,27 @@ export default function AbnormalAnalysisPage() {
           <div className="px-5 py-4 border-b border-slate-100 flex flex-wrap items-center justify-between gap-3 bg-slate-50/50">
             <div className="flex items-center gap-2">
               <div className="w-1.5 h-5 bg-slate-900 rounded-full"></div>
-              <span className="text-base font-bold text-slate-800">异常信息详情栏</span>
+              <span className="text-base font-bold text-slate-800">{t("异常信息详情栏")}</span>
             </div>
             <div className="flex items-center gap-2">
               <span className="text-xs text-slate-500">
-                检索到 <span className="font-bold text-slate-900 font-mono">{detailTotal}</span> 台矿机
+                {t("检索到")} <span className="font-bold text-slate-900 font-mono">{detailTotal}</span>{" "}
+                {t("台矿机")}
               </span>
               <span className="inline-block w-px h-3 bg-slate-200 align-middle mx-1.5"></span>
-              <Tag color="cyan">最新时间可按排序</Tag>
+              <Tag color="cyan">{t("最新时间可按排序")}</Tag>
             </div>
           </div>
 
           <div className="p-5 border-b border-slate-100 bg-slate-50/30">
             <Row gutter={[16, 16]}>
               <Col xs={24} sm={12} md={6} lg={6}>
-                <div className="text-xs text-slate-500 mb-1.5 font-medium">场地</div>
+                <div className="text-xs text-slate-500 mb-1.5 font-medium">{t("场地")}</div>
                 <Select
                   showSearch
                   allowClear={false}
                   style={{ width: "100%" }}
-                  placeholder="选择场地"
+                  placeholder={t("选择场地")}
                   value={searchSite}
                   onChange={(val) => setSearchSite(val)}
                   optionFilterProp="label"
@@ -1094,45 +1127,45 @@ export default function AbnormalAnalysisPage() {
                       .includes(input.toLowerCase())
                   }
                   options={[
-                    { value: "all", label: "全部场地" },
+                    { value: "all", label: t("全部场地") },
                     ...siteAnomalyList.map((s) => ({ value: s.siteName, label: s.siteName })),
                   ]}
                 />
               </Col>
               <Col xs={24} sm={12} md={6} lg={6}>
-                <div className="text-xs text-slate-500 mb-1.5 font-medium">MAC 地址</div>
+                <div className="text-xs text-slate-500 mb-1.5 font-medium">{t("MAC 地址")}</div>
                 <Input
-                  placeholder="搜索 MAC 模糊匹配"
+                  placeholder={t("搜索 MAC 模糊匹配")}
                   value={searchMac}
                   onChange={(e) => setSearchMac(e.target.value)}
                   allowClear
                 />
               </Col>
               <Col xs={24} sm={12} md={6} lg={6}>
-                <div className="text-xs text-slate-500 mb-1.5 font-medium">控制板 SN</div>
+                <div className="text-xs text-slate-500 mb-1.5 font-medium">{t("控制板 SN")}</div>
                 <Input
-                  placeholder="控制板 SN"
+                  placeholder={t("控制板 SN")}
                   value={searchSN}
                   onChange={(e) => setSearchSN(e.target.value)}
                   allowClear
                 />
               </Col>
               <Col xs={24} sm={12} md={6} lg={6}>
-                <div className="text-xs text-slate-500 mb-1.5 font-medium">算力板序列号</div>
+                <div className="text-xs text-slate-500 mb-1.5 font-medium">{t("算力板序列号")}</div>
                 <Input
-                  placeholder="搜索算力板序列号"
+                  placeholder={t("搜索算力板序列号")}
                   value={searchHashBoardSN}
                   onChange={(e) => setSearchHashBoardSN(e.target.value)}
                   allowClear
                 />
               </Col>
               <Col xs={24} sm={12} md={6} lg={6}>
-                <div className="text-xs text-slate-500 mb-1.5 font-medium">矿工号</div>
+                <div className="text-xs text-slate-500 mb-1.5 font-medium">{t("矿工号")}</div>
                 <Select
                   showSearch
                   allowClear
                   style={{ width: "100%" }}
-                  placeholder="选择矿工号"
+                  placeholder={t("选择矿工号")}
                   loading={detailMinerCodeLoading}
                   value={searchMinerId}
                   onChange={(val) => setSearchMinerId(val || "")}
@@ -1141,43 +1174,43 @@ export default function AbnormalAnalysisPage() {
                 />
               </Col>
               <Col xs={24} sm={12} md={6} lg={6}>
-                <div className="text-xs text-slate-500 mb-1.5 font-medium">统计起始时间</div>
+                <div className="text-xs text-slate-500 mb-1.5 font-medium">{t("统计起始时间")}</div>
                 <DatePicker
                   showTime
                   style={{ width: "100%" }}
-                  placeholder="选择统计起始时间"
+                  placeholder={t("选择统计起始时间")}
                   value={searchRefreshTimeFrom}
                   onChange={(value) => setSearchRefreshTimeFrom(value)}
                   allowClear
                 />
               </Col>
               <Col xs={24} sm={12} md={6} lg={6}>
-                <div className="text-xs text-slate-500 mb-1.5 font-medium">下架</div>
+                <div className="text-xs text-slate-500 mb-1.5 font-medium">{t("下架")}</div>
                 <Select
                   style={{ width: "100%" }}
-                  placeholder="是否下架"
+                  placeholder={t("是否下架")}
                   value={searchDismantled}
                   onChange={(val) => setSearchDismantled(val)}
                   options={[
-                    { value: "all", label: "全部" },
-                    { value: "在架", label: "在架" },
-                    { value: "下架", label: "下架" },
-                    { value: "未知", label: "未知" },
+                    { value: "all", label: t("全部") },
+                    { value: "在架", label: t("在架") },
+                    { value: "下架", label: t("下架") },
+                    { value: "未知", label: t("未知") },
                   ]}
                 />
               </Col>
               <Col xs={24} sm={12} md={6} lg={6}>
-                <div className="text-xs text-slate-500 mb-1.5 font-medium">产权</div>
+                <div className="text-xs text-slate-500 mb-1.5 font-medium">{t("产权")}</div>
                 <Select
                   style={{ width: "100%" }}
-                  placeholder="产权"
+                  placeholder={t("产权")}
                   value={searchAsset}
                   onChange={(val) => setSearchAsset(val)}
                   options={[
-                    { value: "all", label: "全部" },
-                    { value: "自有", label: "自有" },
-                    { value: "非自有", label: "非自有" },
-                    { value: "未知", label: "未知" },
+                    { value: "all", label: t("全部") },
+                    { value: "自有", label: t("自有") },
+                    { value: "非自有", label: t("非自有") },
+                    { value: "未知", label: t("未知") },
                   ]}
                 />
               </Col>
@@ -1185,7 +1218,7 @@ export default function AbnormalAnalysisPage() {
 
             <div className="flex justify-end gap-3 mt-4 pt-3 border-t border-dashed border-slate-200">
               <Button icon={<ReloadOutlined />} onClick={handleReset} className="hover:border-slate-400">
-                重置
+                {t("重置")}
               </Button>
               <Button
                 type="primary"
@@ -1193,14 +1226,14 @@ export default function AbnormalAnalysisPage() {
                 onClick={handleSearch}
                 className="bg-slate-900 hover:bg-slate-800 text-white"
               >
-                搜索
+                {t("搜索")}
               </Button>
               <Button
                 icon={<DownloadOutlined />}
                 loading={detailExporting}
                 onClick={handleDownloadCurrentPage}
               >
-                下载明细
+                {t("下载明细")}
               </Button>
             </div>
           </div>
@@ -1249,17 +1282,19 @@ export default function AbnormalAnalysisPage() {
               total: detailTotal,
               showSizeChanger: true,
               pageSizeOptions: ["10", "20", "50", "100"],
-              showTotal: (total: number) => `共 ${total} 项`,
+              showTotal: (total: number) => t("共 {{total}} 项", { total: total }),
               className: "px-6 py-4",
             }}
             locale={{
               emptyText: (
                 <div className="py-12 text-center">
                   <AlertOutlined className="text-4xl text-slate-300 mb-3" />
-                  <div className="text-slate-500 font-medium">没有找到符合条件的矿机数据</div>
-                  <div className="text-xs text-slate-400 mt-1">请尝试放宽筛选条件，或重置搜索筛选器。</div>
+                  <div className="text-slate-500 font-medium">{t("没有找到符合条件的矿机数据")}</div>
+                  <div className="text-xs text-slate-400 mt-1">
+                    {t("请尝试放宽筛选条件，或重置搜索筛选器。")}
+                  </div>
                   <Button onClick={handleReset} className="mt-4" size="small">
-                    重置筛选
+                    {t("重置筛选")}
                   </Button>
                 </div>
               ),

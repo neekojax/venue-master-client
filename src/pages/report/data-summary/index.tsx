@@ -11,6 +11,8 @@ import FaultRate from "./components/faultRate";
 import OverviewModel from "./components/OverviewModel";
 import Profit from "./components/profit";
 
+import { t } from "@/locales";
+
 // import { fetchBtcMarketInfo } from "@/pages/report/api";
 
 const App: React.FC = () => {
@@ -29,7 +31,7 @@ const App: React.FC = () => {
         backgroundColor: "#ffffff",
       });
       const link = document.createElement("a");
-      link.download = `数据总览-${date.format("YYYY-MM-DD")}.png`;
+      link.download = t("数据总览-{{value}}.png", { value: date.format("YYYY-MM-DD") });
       link.href = dataUrl;
       link.click();
     } catch (error) {
@@ -58,7 +60,7 @@ const App: React.FC = () => {
           <OverviewModel chartDate={date.format("YYYY-MM-DD")} />
 
           <Button type="primary" icon={<DownloadOutlined />} onClick={handleSaveImage}>
-            保存为图片
+            {t("保存为图片")}
           </Button>
           <DatePicker
             value={date}
@@ -75,9 +77,9 @@ const App: React.FC = () => {
         {/* 市场行情 */}
         <div className="col-span-2 bg-white rounded-lg p-6 " style={{ border: "solid 1px #e5e5e5" }}>
           <div className="flex items-center justify-between mb-4">
-            <div className="flex items中心 gap-2 text-lg">
+            <div className={t("flex items中心 gap-2 text-lg")}>
               <i className="fas fa-chart-bar text-blue-500"></i>
-              <span>市场行情</span>
+              <span>{t("市场行情")}</span>
             </div>
             {/* <div className="text-sm text-gray-400">实时数据</div> */}
           </div>
@@ -96,8 +98,8 @@ const App: React.FC = () => {
           <ChartDashboard
             chartDate={date.format("YYYY-MM-DD")}
             panels={[
-              { title: "算力趋势", id: "powerTrend" },
-              { title: "单价趋势", id: "priceTrend" },
+              { title: t("算力趋势"), id: "powerTrend" },
+              { title: t("单价趋势"), id: "priceTrend" },
             ]}
             loading={loading}
             onLoaded={() => setLoading(false)}

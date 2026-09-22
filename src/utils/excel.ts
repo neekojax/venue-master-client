@@ -1,25 +1,27 @@
 import dayjs from "dayjs";
 import * as XLSX from "xlsx"; // 导入 xlsx 库
 
+import { t } from "@/locales";
+
 export const exportCustodyStatisticsToExcel = (data: any) => {
   // 创建一个工作簿
   const workbook = XLSX.utils.book_new();
 
   // 自定义表头（对齐数据库返回字段）
   const customHeader = [
-    { header: "收益日期", key: "report_date" },
-    { header: "场地ID", key: "venue_id" },
-    { header: "场地名", key: "venue_name" },
-    { header: "24h算力（TH/s）", key: "hash" },
-    { header: "BTC收益（BTC）", key: "total_income_btc" },
-    { header: "USD收益（USD）", key: "total_income_usd" },
-    { header: "净收益（USD）", key: "net_income" },
-    { header: "单价（$/kwh）", key: "basic_hosting_fee" },
-    { header: "预估能耗", key: "power_consumption" },
-    { header: "实际能耗", key: "nominal_power_consumption" },
-    { header: "能耗差异", key: "power_consumption_diff" },
-    { header: "总托管费（USD）", key: "total_hosting_fee" },
-    { header: "托管费占比（%）", key: "hosting_fee_ratio" },
+    { header: t("收益日期"), key: "report_date" },
+    { header: t("场地ID"), key: "venue_id" },
+    { header: t("场地名"), key: "venue_name" },
+    { header: t("24h算力（TH/s）"), key: "hash" },
+    { header: t("BTC收益（BTC）"), key: "total_income_btc" },
+    { header: t("USD收益（USD）"), key: "total_income_usd" },
+    { header: t("净收益（USD）"), key: "net_income" },
+    { header: t("单价（$/kwh）"), key: "basic_hosting_fee" },
+    { header: t("预估能耗"), key: "power_consumption" },
+    { header: t("实际能耗"), key: "nominal_power_consumption" },
+    { header: t("能耗差异"), key: "power_consumption_diff" },
+    { header: t("总托管费（USD）"), key: "total_hosting_fee" },
+    { header: t("托管费占比（%）"), key: "hosting_fee_ratio" },
   ];
 
   // 处理数据并生成工作表（映射数据库字段）
@@ -66,14 +68,14 @@ export const exportCustodyStatisticsToExcel = (data: any) => {
   ];
 
   // 将工作表添加到工作簿
-  XLSX.utils.book_append_sheet(workbook, worksheet, "托管费统计");
+  XLSX.utils.book_append_sheet(workbook, worksheet, t("托管费统计"));
 
   // 获取当前日期并格式化为 YYYY-MM-DD
   const date = new Date();
   const formattedDate = date.toISOString().split("T")[0]; // 获取日期部分
 
   // 生成文件名
-  const fileName = `托管统计_${formattedDate}.xlsx`;
+  const fileName = t("托管统计_{{formattedDate}}.xlsx", { formattedDate: formattedDate });
 
   // 导出 Excel 文件
   XLSX.writeFile(workbook, fileName);
@@ -85,10 +87,10 @@ export const exportElectricDataToExcel = (data: any) => {
 
   // 自定义表头
   const customHeader = [
-    { header: "电站名称", key: "name" },
-    { header: "电站类型", key: "type" },
-    { header: "限定时间范围", key: "time_range" },
-    { header: "限定时长（分钟）", key: "time_length" },
+    { header: t("电站名称"), key: "name" },
+    { header: t("电站类型"), key: "type" },
+    { header: t("限定时间范围"), key: "time_range" },
+    { header: t("限定时长（分钟）"), key: "time_length" },
   ];
 
   // 处理数据并生成工作表
@@ -118,14 +120,14 @@ export const exportElectricDataToExcel = (data: any) => {
   ];
 
   // 将工作表添加到工作簿
-  XLSX.utils.book_append_sheet(workbook, worksheet, "限电记录");
+  XLSX.utils.book_append_sheet(workbook, worksheet, t("限电记录"));
 
   // 获取当前日期并格式化为 YYYY-MM-DD
   const date = new Date();
   const formattedDate = date.toISOString().split("T")[0]; // 获取日期部分
 
   // 生成文件名
-  const fileName = `限电记录_${formattedDate}.xlsx`;
+  const fileName = t("限电记录_{{formattedDate}}.xlsx", { formattedDate: formattedDate });
 
   // 导出 Excel 文件
   XLSX.writeFile(workbook, fileName);
@@ -137,9 +139,9 @@ export const exportElectricDataToExcelT = (data: any) => {
 
   // 自定义表头
   const customHeader = [
-    { header: "电站名称", key: "name" },
-    { header: "限定时间范围", key: "time_range" },
-    { header: "限定时长（小时）", key: "time_length" },
+    { header: t("电站名称"), key: "name" },
+    { header: t("限定时间范围"), key: "time_range" },
+    { header: t("限定时长（小时）"), key: "time_length" },
   ];
 
   // 处理数据并生成工作表
@@ -167,14 +169,14 @@ export const exportElectricDataToExcelT = (data: any) => {
   ];
 
   // 将工作表添加到工作簿
-  XLSX.utils.book_append_sheet(workbook, worksheet, "限电记录");
+  XLSX.utils.book_append_sheet(workbook, worksheet, t("限电记录"));
 
   // 获取当前日期并格式化为 YYYY-MM-DD
   const date = new Date();
   const formattedDate = date.toISOString().split("T")[0]; // 获取日期部分
 
   // 生成文件名
-  const fileName = `限电记录_${formattedDate}.xlsx`;
+  const fileName = t("限电记录_{{formattedDate}}.xlsx", { formattedDate: formattedDate });
 
   // 导出 Excel 文件
   XLSX.writeFile(workbook, fileName);
@@ -186,10 +188,10 @@ export const exportElectricAverageToExcel = (data: any) => {
 
   // 自定义表头
   const customHeader = [
-    { header: "电站名称", key: "name" },
-    { header: "电站类型", key: "type" },
-    { header: "时间范围", key: "time_range" },
-    { header: "平均电价（US$ Cent/KWH）", key: "average" },
+    { header: t("电站名称"), key: "name" },
+    { header: t("电站类型"), key: "type" },
+    { header: t("时间范围"), key: "time_range" },
+    { header: t("平均电价（US$ Cent/KWH）"), key: "average" },
   ];
 
   // 处理数据并生成工作表
@@ -219,14 +221,14 @@ export const exportElectricAverageToExcel = (data: any) => {
   ];
 
   // 将工作表添加到工作簿
-  XLSX.utils.book_append_sheet(workbook, worksheet, "平均电价");
+  XLSX.utils.book_append_sheet(workbook, worksheet, t("平均电价"));
 
   // 获取当前日期并格式化为 YYYY-MM-DD
   const date = new Date();
   const formattedDate = date.toISOString().split("T")[0]; // 获取日期部分
 
   // 生成文件名
-  const fileName = `平均电价_${formattedDate}.xlsx`;
+  const fileName = t("平均电价_{{formattedDate}}.xlsx", { formattedDate: formattedDate });
 
   // 导出 Excel 文件
   XLSX.writeFile(workbook, fileName);
@@ -238,10 +240,10 @@ export const exportElectricBasicToExcel = (data: any) => {
 
   // 自定义表头
   const customHeader = [
-    { header: "电站名称", key: "name" },
-    { header: "电站类型", key: "type" },
-    { header: "时间范围", key: "time" },
-    { header: "电价（US$ Cent/KWH）", key: "price" },
+    { header: t("电站名称"), key: "name" },
+    { header: t("电站类型"), key: "type" },
+    { header: t("时间范围"), key: "time" },
+    { header: t("电价（US$ Cent/KWH）"), key: "price" },
   ];
 
   // 处理数据并生成工作表
@@ -271,14 +273,14 @@ export const exportElectricBasicToExcel = (data: any) => {
   ];
 
   // 将工作表添加到工作簿
-  XLSX.utils.book_append_sheet(workbook, worksheet, "电价信息");
+  XLSX.utils.book_append_sheet(workbook, worksheet, t("电价信息"));
 
   // 获取当前日期并格式化为 YYYY-MM-DD
   const date = new Date();
   const formattedDate = date.toISOString().split("T")[0]; // 获取日期部分
 
   // 生成文件名
-  const fileName = `电价信息_${formattedDate}.xlsx`;
+  const fileName = t("电价信息_{{formattedDate}}.xlsx", { formattedDate: formattedDate });
 
   // 导出 Excel 文件
   XLSX.writeFile(workbook, fileName);
@@ -289,20 +291,20 @@ export const exportHashRateToExcel = (data: any) => {
   const workbook = XLSX.utils.book_new();
   // 自定义表头
   const customHeader = [
-    { header: "场地", key: "venue_name" },
-    { header: "子账号", key: "pool_name" },
-    { header: "实时算力", key: "current_hash" },
-    { header: "在线", key: "online" },
-    { header: "离线", key: "offline" },
+    { header: t("场地"), key: "venue_name" },
+    { header: t("子账号"), key: "pool_name" },
+    { header: t("实时算力"), key: "current_hash" },
+    { header: t("在线"), key: "online" },
+    { header: t("离线"), key: "offline" },
     // { header: "24小时算力", key: "last_hash" },
     // { header: "上次结算算力", key: "last_settlement_hash" },
-    { header: "理论算力", key: "theoretical" },
-    { header: "算力达成率", key: "last_hash_rate_effective" },
+    { header: t("理论算力"), key: "theoretical" },
+    { header: t("算力达成率"), key: "last_hash_rate_effective" },
     // { header: "上次结算收益BTC", key: "last_settlement_profit_btc" },
     // { header: "上次结算收益FB", key: "last_settlement_profit_fb" },
     // { header: "上次结算时间", key: "last_settlement_date" },
-    { header: "刷新时间", key: "update_time" },
-    { header: "链接", key: "link" },
+    { header: t("刷新时间"), key: "update_time" },
+    { header: t("链接"), key: "link" },
   ];
 
   // 处理数据并生成工作表
@@ -356,7 +358,7 @@ export const exportHashRateToExcel = (data: any) => {
   XLSX.utils.book_append_sheet(
     workbook,
     worksheet,
-    localStorage.getItem(`mining-hash_poolCategory`) || "主矿池" + "_实时算力",
+    localStorage.getItem(`mining-hash_poolCategory`) || t("主矿池") + t("_实时算力"),
   );
 
   // 获取当前日期并格式化为 YYYY-MM-DD
@@ -365,7 +367,8 @@ export const exportHashRateToExcel = (data: any) => {
 
   // 生成文件名
   const fileName =
-    (localStorage.getItem(`mining-hash_poolCategory`) || "主矿池") + `_实时算力_${formattedDate}.xlsx`;
+    (localStorage.getItem(`mining-hash_poolCategory`) || t("主矿池")) +
+    t("_实时算力_{{formattedDate}}.xlsx", { formattedDate: formattedDate });
 
   // 导出 Excel 文件
   XLSX.writeFile(workbook, fileName);
@@ -379,16 +382,16 @@ export const exportMiningPoolListToExcel = (data: any) => {
     // let statusStyle = {};
 
     if (status === 1) {
-      statusText = "活跃";
+      statusText = t("活跃");
       // statusStyle = { color: "green" }; // 活跃状态，绿色
     } else if (status === 0) {
-      statusText = "暂停";
+      statusText = t("暂停");
       // statusStyle = { color: "red" }; // 暂停状态，红色
     } else if (status === 2) {
-      statusText = "已撤场";
+      statusText = t("已撤场");
       // statusStyle = { color: "orange" }; // 已撤场状态，红色
     } else if (status === 3) {
-      statusText = "入库";
+      statusText = t("入库");
     }
 
     return { statusText };
@@ -396,26 +399,26 @@ export const exportMiningPoolListToExcel = (data: any) => {
   // 自定义表头
 
   const customHeader = [
-    { header: "场地", key: "venue_name" },
-    { header: "子账户", key: "pool_name" },
+    { header: t("场地"), key: "venue_name" },
+    { header: t("子账户"), key: "pool_name" },
     // { header: "主体类型", key: "pool_type" },
-    { header: "场地类型", key: "pool_category" },
-    { header: "所属国家", key: "country" },
+    { header: t("场地类型"), key: "pool_category" },
+    { header: t("所属国家"), key: "country" },
     {
-      header: "托管机器",
+      header: t("托管机器"),
       key: "hosted_machine",
     },
     {
-      header: "状态",
+      header: t("状态"),
       key: "status",
       // render: (_text: any, record: { status: unknown }) => StatusColumn({ status: record.status }).statusText,
     },
 
-    { header: "理论算力（PH/s）", key: "theoretical_hashrate" },
-    { header: "是否变频", key: "is_overclocked" },
-    { header: "变频单机算力（T）", key: "overclock_hashrate_per_machine" },
+    { header: t("理论算力（PH/s）"), key: "theoretical_hashrate" },
+    { header: t("是否变频"), key: "is_overclocked" },
+    { header: t("变频单机算力（T）"), key: "overclock_hashrate_per_machine" },
     {
-      header: "散热模式",
+      header: t("散热模式"),
       key: "heat_diss_mode",
 
       // render: (value: number) => {
@@ -431,7 +434,7 @@ export const exportMiningPoolListToExcel = (data: any) => {
 
     // { header: "能耗比(J/T)", key: "energy_ratio" },
     // { header: "基础托管费($/kwh)", key: "basic_hosting_fee" },
-    { header: "链接", key: "link" },
+    { header: t("链接"), key: "link" },
   ];
 
   // 处理数据并生成工作表
@@ -444,9 +447,9 @@ export const exportMiningPoolListToExcel = (data: any) => {
     hosted_machine: item.hosted_machine,
     status: StatusColumn({ status: item.status }).statusText,
     theoretical_hashrate: item.theoretical_hashrate,
-    is_overclocked: Number(item.is_overclocked ?? 0) === 1 ? "是" : "否",
+    is_overclocked: Number(item.is_overclocked ?? 0) === 1 ? t("是") : t("否"),
     overclock_hashrate_per_machine: item.overclock_hashrate_per_machine ?? 0,
-    heat_diss_mode: item.heat_diss_mode === 1 ? "风冷" : item.heat_diss_mode === 2 ? "水冷" : "未知",
+    heat_diss_mode: item.heat_diss_mode === 1 ? t("风冷") : item.heat_diss_mode === 2 ? t("水冷") : t("未知"),
     // energy_ratio: item.energy_ratio,
     // basic_hosting_fee: item.basic_hosting_fee,
     link: item.link,
@@ -480,7 +483,7 @@ export const exportMiningPoolListToExcel = (data: any) => {
   XLSX.utils.book_append_sheet(
     workbook,
     worksheet,
-    localStorage.getItem(`mining-hash_poolCategory`) || "主矿池" + "_矿池列表",
+    localStorage.getItem(`mining-hash_poolCategory`) || t("主矿池") + t("_矿池列表"),
   );
 
   // 获取当前日期并格式化为 YYYY-MM-DD
@@ -489,7 +492,8 @@ export const exportMiningPoolListToExcel = (data: any) => {
 
   // 生成文件名
   const fileName =
-    (localStorage.getItem(`mining-hash_poolCategory`) || "主矿池") + `_矿池列表_${formattedDate}.xlsx`;
+    (localStorage.getItem(`mining-hash_poolCategory`) || t("主矿池")) +
+    t("_矿池列表_{{formattedDate}}.xlsx", { formattedDate: formattedDate });
 
   // 导出 Excel 文件
   XLSX.writeFile(workbook, fileName);
@@ -501,18 +505,18 @@ export const exportMiningPoolMonthRecordToExcel = (data: any) => {
 
   // 定义静态表头
   const staticHeaders = [
-    "场地名/编码",
-    "机器数量",
-    "理论算力",
-    "昨日故障率",
-    "3月故障率",
-    "4月故障率",
-    "4月故障率",
+    t("场地名/编码"),
+    t("机器数量"),
+    t("理论算力"),
+    t("昨日故障率"),
+    t("3月故障率"),
+    t("4月故障率"),
+    t("4月故障率"),
   ];
 
   // 生成动态列标题和对应数据
   const monthRows = data.monthEfficiencys.map((month: any) => [
-    `${new Date(month.time).getMonth() + 1}月算力达成率`, // 动态列标题
+    t("{{value}}月算力达成率", { value: new Date(month.time).getMonth() + 1 }), // 动态列标题
     month.efficiency, // 对应的数据
   ]);
 
@@ -536,10 +540,10 @@ export const exportMiningPoolMonthRecordToExcel = (data: any) => {
   const worksheet = XLSX.utils.aoa_to_sheet(fullHeaders.concat(rowData));
 
   // 将工作表添加到工作簿
-  XLSX.utils.book_append_sheet(workbook, worksheet, "矿池数据");
+  XLSX.utils.book_append_sheet(workbook, worksheet, t("矿池数据"));
 
   // 导出 Excel 文件
-  XLSX.writeFile(workbook, "矿池数据.xlsx");
+  XLSX.writeFile(workbook, t("矿池数据.xlsx"));
 };
 
 export const exportPowerConsumptionToExcel = (data: any[]) => {
@@ -548,10 +552,10 @@ export const exportPowerConsumptionToExcel = (data: any[]) => {
 
   // 自定义表头（功耗账单）
   const customHeader = [
-    { header: "场地名称", key: "siteName" },
-    { header: "账单开始", key: "start_time" },
-    { header: "账单结束", key: "end_time" },
-    { header: "总功耗 (kWh)", key: "power_consumption" },
+    { header: t("场地名称"), key: "siteName" },
+    { header: t("账单开始"), key: "start_time" },
+    { header: t("账单结束"), key: "end_time" },
+    { header: t("总功耗 (kWh)"), key: "power_consumption" },
   ];
 
   // 处理数据并生成工作表
@@ -592,14 +596,14 @@ export const exportPowerConsumptionToExcel = (data: any[]) => {
   ];
 
   // 将工作表添加到工作簿
-  XLSX.utils.book_append_sheet(workbook, worksheet, "总功耗账单");
+  XLSX.utils.book_append_sheet(workbook, worksheet, t("总功耗账单"));
 
   // 获取当前日期并格式化为 YYYY-MM-DD
   const date = new Date();
   const formattedDate = date.toISOString().split("T")[0];
 
   // 生成文件名
-  const fileName = `总功耗账单_${formattedDate}.xlsx`;
+  const fileName = t("总功耗账单_{{formattedDate}}.xlsx", { formattedDate: formattedDate });
 
   // 导出 Excel 文件
   XLSX.writeFile(workbook, fileName, { cellDates: true });
@@ -620,12 +624,12 @@ export const exportHostingRecordToExcel = (data: any[]) => {
   type HeaderKey = keyof HostingRecordExportRow;
 
   const customHeader: Array<{ header: string; key: HeaderKey }> = [
-    { header: "场地名称", key: "siteName" },
-    { header: "账单开始", key: "start_time" },
-    { header: "账单结束", key: "end_time" },
-    { header: "托管单价（USD）", key: "hosting_price" },
-    { header: "托管最低单价（USD）", key: "min_hosting_price" },
-    { header: "运维单价（USD）", key: "maintenance_price" },
+    { header: t("场地名称"), key: "siteName" },
+    { header: t("账单开始"), key: "start_time" },
+    { header: t("账单结束"), key: "end_time" },
+    { header: t("托管单价（USD）"), key: "hosting_price" },
+    { header: t("托管最低单价（USD）"), key: "min_hosting_price" },
+    { header: t("运维单价（USD）"), key: "maintenance_price" },
   ];
 
   const formattedData: HostingRecordExportRow[] = (data || []).map((item: any) => ({
@@ -670,11 +674,11 @@ export const exportHostingRecordToExcel = (data: any[]) => {
     { wch: 18 }, // 运维单价
   ];
 
-  XLSX.utils.book_append_sheet(workbook, worksheet, "托管运维单价");
+  XLSX.utils.book_append_sheet(workbook, worksheet, t("托管运维单价"));
 
   const date = new Date();
   const formattedDate = date.toISOString().split("T")[0];
-  const fileName = `托管运维单价_${formattedDate}.xlsx`;
+  const fileName = t("托管运维单价_{{formattedDate}}.xlsx", { formattedDate: formattedDate });
   XLSX.writeFile(workbook, fileName, { cellDates: true });
 };
 
@@ -730,27 +734,27 @@ export const exportEventLogsToExcel = (
     created_at: string;
     updated_at: string;
   }>,
-  sheetName = "事件日志",
-  fileName = `事件日志_${new Date().toISOString().split("T")[0]}.xlsx`,
+  sheetName = t("事件日志"),
+  fileName = t("事件日志_{{value}}.xlsx", { value: new Date().toISOString().split("T")[0] }),
 ) => {
   const workbook = XLSX.utils.book_new();
 
   // 与页面展示一致的表头（去除无对应字段的“记录人”）
   const headers = [
-    "场地",
-    "子账户",
-    "是否休眠",
-    "事件类型",
+    t("场地"),
+    t("子账户"),
+    t("是否休眠"),
+    t("事件类型"),
     // "日期",
-    "开始时间",
-    "结束时间",
-    "影响时长（小时）",
-    "影响台数",
-    "影响算力（小智测算）",
-    "事件原因",
-    "解决措施",
-    "创建时间",
-    "更新时间",
+    t("开始时间"),
+    t("结束时间"),
+    t("影响时长（小时）"),
+    t("影响台数"),
+    t("影响算力（小智测算）"),
+    t("事件原因"),
+    t("解决措施"),
+    t("创建时间"),
+    t("更新时间"),
   ];
 
   const rows: any[][] = [
@@ -759,7 +763,7 @@ export const exportEventLogsToExcel = (
       item.venue_info.venue_name ?? "",
       // item.ven venue_name ?? "",
       item.pool_info.pool_name ?? "",
-      item.is_sleep === 1 ? "已休眠" : "未休眠", // 0 未休眠 1 已休眠
+      item.is_sleep === 1 ? t("已休眠") : t("未休眠"), // 0 未休眠 1 已休眠
       item.log_type ?? "",
       // item.log_date ?? "",
       item.start_time ? dayjs(item.start_time).toDate() : null,

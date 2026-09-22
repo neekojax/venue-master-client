@@ -5,6 +5,7 @@ import dayjs from "dayjs";
 import { useSelector, useSettingsStore } from "@/stores";
 
 import { fetchGet } from "@/helper/fetchHelper.ts";
+import { t as i18nT } from "@/locales";
 import { useVenueList } from "@/pages/venue/hook/hook.ts";
 
 const LogsPage: React.FC = () => {
@@ -42,10 +43,10 @@ const LogsPage: React.FC = () => {
     //   return undefined;
     // };
     return [
-      { title: "用户", dataIndex: "username", key: "username", width: 80, ellipsis: true },
+      { title: i18nT("用户"), dataIndex: "username", key: "username", width: 80, ellipsis: true },
       // { title: "状态", dataIndex: "response_status", key: "response_status", width: 100, ellipsis: true },
       {
-        title: "操作类型",
+        title: i18nT("操作类型"),
         dataIndex: "operation_type",
         key: "operation_type",
         width: 80,
@@ -58,7 +59,7 @@ const LogsPage: React.FC = () => {
         },
       },
       {
-        title: "操作描述",
+        title: i18nT("操作描述"),
         dataIndex: "operation_desc",
         key: "operation_desc",
         width: 120,
@@ -81,16 +82,16 @@ const LogsPage: React.FC = () => {
         ),
       },
       {
-        title: "操作状态",
+        title: i18nT("操作状态"),
         dataIndex: "response_status",
         key: "response_status",
         width: 80,
         render: (text: any) => (
-          <Tag color={text === 200 ? "green" : "red"}>{text === 200 ? "成功" : "失败"}</Tag>
+          <Tag color={text === 200 ? "green" : "red"}>{text === 200 ? i18nT("成功") : i18nT("失败")}</Tag>
         ),
       },
       {
-        title: "场地",
+        title: i18nT("场地"),
         dataIndex: "venue_name",
         key: "venue_name",
         width: 200,
@@ -113,7 +114,7 @@ const LogsPage: React.FC = () => {
         ),
       },
       {
-        title: "操作内容",
+        title: i18nT("操作内容"),
         dataIndex: "request_body",
         key: "request_body",
         width: 200,
@@ -156,7 +157,7 @@ const LogsPage: React.FC = () => {
         },
       },
       {
-        title: "操作时间",
+        title: i18nT("操作时间"),
         dataIndex: "created_at",
         key: "created_at",
         width: 160,
@@ -219,7 +220,7 @@ const LogsPage: React.FC = () => {
       <div className="flex items-center justify-between mb-4">
         <Space>
           <Input
-            placeholder="用户名"
+            placeholder={i18nT("用户名")}
             allowClear
             value={username}
             onChange={(e) => setUsername(e.target.value)}
@@ -228,7 +229,7 @@ const LogsPage: React.FC = () => {
           />
           <Select
             size="middle"
-            placeholder="选择场地"
+            placeholder={i18nT("选择场地")}
             style={{ minWidth: "300px", marginRight: "15px" }}
             options={siteOptions}
             onChange={(val) => setSelectedVenueName(val)}
@@ -243,7 +244,7 @@ const LogsPage: React.FC = () => {
               fetchData(1, pageSize);
             }}
           >
-            查询
+            {i18nT("查询")}
           </Button>
         </Space>
       </div>
@@ -266,7 +267,7 @@ const LogsPage: React.FC = () => {
             const body = document.querySelector(".ant-table-body");
             if (body) body.scrollTop = 0;
           },
-          showTotal: (t) => `共 ${t} 条`,
+          showTotal: (t) => i18nT("共 {{t}} 条", { t: t }),
         }}
       />
     </div>
