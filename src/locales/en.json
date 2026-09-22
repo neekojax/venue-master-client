@@ -1735,5 +1735,8 @@
   "黄": "Yellow",
   "（夜间）": "(Nighttime)",
   "（白天）": "(Daytime)",
-  "，完成时间：{{value}}": ", Completed At: {{value}}"
+  "，完成时间：{{value}}": ", Completed At: {{value}}",
+  "统一查看、跟进与复盘场地突发事件": "View, track and review venue incidents in one place",
+  "事件管理视图": "Event management views",
+  "更多操作": "More actions"
 }

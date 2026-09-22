@@ -96,7 +96,10 @@ export default function AbnormalLogPanel({
         width: 220,
         ellipsis: true,
         render: (v: string) => (
-          <Typography.Text ellipsis={{ tooltip: v }} style={{ width: "100%" }}>
+          <Typography.Text
+            ellipsis={{ tooltip: v }}
+            style={{ width: "100%", fontFamily: "inherit", fontSize: "inherit", fontWeight: "inherit" }}
+          >
             {v}
           </Typography.Text>
         ),
@@ -108,7 +111,10 @@ export default function AbnormalLogPanel({
         width: 130,
         ellipsis: true,
         render: (v: string) => (
-          <Typography.Text ellipsis={{ tooltip: v }} style={{ width: "100%" }}>
+          <Typography.Text
+            ellipsis={{ tooltip: v }}
+            style={{ width: "100%", fontFamily: "inherit", fontSize: "inherit", fontWeight: "inherit" }}
+          >
             {v}
           </Typography.Text>
         ),
@@ -129,7 +135,10 @@ export default function AbnormalLogPanel({
         width: 150,
         ellipsis: true,
         render: (v: string) => (
-          <Typography.Text ellipsis={{ tooltip: v }} style={{ width: "100%" }}>
+          <Typography.Text
+            ellipsis={{ tooltip: v }}
+            style={{ width: "100%", fontFamily: "inherit", fontSize: "inherit", fontWeight: "inherit" }}
+          >
             {v}
           </Typography.Text>
         ),
@@ -148,7 +157,10 @@ export default function AbnormalLogPanel({
         width: 200,
         ellipsis: true,
         render: (v: string) => (
-          <Typography.Text ellipsis={{ tooltip: v }} style={{ width: "100%" }}>
+          <Typography.Text
+            ellipsis={{ tooltip: v }}
+            style={{ width: "100%", fontFamily: "inherit", fontSize: "inherit", fontWeight: "inherit" }}
+          >
             {v}
           </Typography.Text>
         ),

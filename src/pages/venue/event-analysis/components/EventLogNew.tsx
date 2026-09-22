@@ -4,31 +4,29 @@ import {
   DeleteOutlined,
   DisconnectOutlined,
   DownloadOutlined,
-  // DownOutlined,
-  // EditOutlined,
+  DownOutlined,
+  EditOutlined,
   EllipsisOutlined,
   FallOutlined,
-  FileTextOutlined,
   FilterOutlined,
   MinusCircleOutlined,
   PlusOutlined,
   PoweroffOutlined,
   RestOutlined,
-  // SettingOutlined,
+  SettingOutlined,
   SyncOutlined,
 } from "@ant-design/icons";
 import {
   Button,
-  // Checkbox,
+  Checkbox,
   DatePicker,
   Drawer,
-  // Dropdown,
+  Dropdown,
   Form,
   Input,
   message,
   Modal,
-  Popconfirm,
-  // Popover,
+  Popover,
   Segmented,
   Select,
   Space,
@@ -147,7 +145,7 @@ const getColumnKey = (column: ColumnsType<EventLog>[number]) =>
 
 const App: React.FC<{ storageKey: string }> = ({ storageKey }) => {
   const columnStorageKey = `${storageKey}:hidden-columns`;
-  const [hiddenColumns] = useState<string[]>(() => {
+  const [hiddenColumns, setHiddenColumns] = useState<string[]>(() => {
     try {
       const saved = JSON.parse(localStorage.getItem(columnStorageKey) || "null");
       return Array.isArray(saved) && saved.every((key) => typeof key === "string")
@@ -396,6 +394,9 @@ const App: React.FC<{ storageKey: string }> = ({ storageKey }) => {
             <div
               style={{
                 width: "100%",
+                overflow: "hidden",
+                textOverflow: "ellipsis",
+                whiteSpace: "nowrap",
                 color: isSpecialVenue ? "red" : "#333", // 特殊场地字体颜色为红色
                 fontWeight: isSpecialVenue ? "bold" : "normal", // 加粗特殊场地
               }}
@@ -592,11 +593,6 @@ const App: React.FC<{ storageKey: string }> = ({ storageKey }) => {
       },
     },
     {
-      title: headerTitle(t("备注")),
-      dataIndex: "resolution_measures",
-      width: 200,
-    },
-    {
       title: headerTitle(t("创建时间")),
       dataIndex: "created_at",
       width: 200,
@@ -620,26 +616,41 @@ const App: React.FC<{ storageKey: string }> = ({ storageKey }) => {
       render: (_, record) => (
         <Space size={16}>
           {is_log_visible && (
-            <Tooltip title={t("操作日志")}>
-              <Link to={ROUTE_PATHS.logsDetail(record.id)}>
-                <Button type="text" icon={<FileTextOutlined />} className="!rounded-button" />
-              </Link>
-            </Tooltip>
+            <Link to={ROUTE_PATHS.logsDetail(record.id)} className="text-[#0958D9] hover:text-[#0958D9]">
+              {t("查看")}
+            </Link>
           )}
-          <Popconfirm
-            title={t("确定要删除这条记录吗？")}
-            onConfirm={() => handleDelete(record.id)}
-            okText={t("确定")}
-            cancelText={t("取消")}
+          <Dropdown
+            overlayClassName="event-log-action-menu"
+            trigger={["click"]}
+            menu={{
+              items: [
+                { key: "edit", label: t("编辑"), icon: <EditOutlined /> },
+                { key: "delete", label: t("删除"), icon: <DeleteOutlined />, danger: true },
+              ],
+              onClick: ({ key }) => {
+                if (key === "edit") {
+                  handleEdit(record);
+                } else if (key === "delete") {
+                  Modal.confirm({
+                    title: t("确定要删除这条记录吗？"),
+                    okText: t("删除"),
+                    cancelText: t("取消"),
+                    okButtonProps: { danger: true },
+                    onOk: () => handleDelete(record.id),
+                  });
+                }
+              },
+            }}
           >
             <Button
               type="text"
               size="small"
-              aria-label="更多操作"
+              aria-label={t("更多操作")}
               icon={<EllipsisOutlined style={{ fontSize: 20 }} />}
               className="!text-blue-500"
             />
-          </Popconfirm>
+          </Dropdown>
         </Space>
       ),
     },
@@ -650,18 +661,18 @@ const App: React.FC<{ storageKey: string }> = ({ storageKey }) => {
     setIsModalVisible(true);
   };
 
-  // const handleEdit = (record: EventLog) => {
-  //   form.setFieldsValue({
-  //     ...record,
-  //     log_date: record.log_date ? dayjs(record.log_date) : undefined,
-  //     start_time: record.start_time ? dayjs(record.start_time) : undefined, //dayjs(record.start_time),
-  //     end_time: record.end_time ? dayjs(record.end_time) : undefined, // 如果为 null/undefined，就不传入初始值
-  //     // end_time: dayjs(record.end_time),
-  //     machine_model: record.machine_model,
-  //     machine_status: record.machine_status,
-  //   });
-  //   setIsModalVisible(true);
-  // };
+  const handleEdit = (record: EventLog) => {
+    form.setFieldsValue({
+      ...record,
+      log_date: record.log_date ? dayjs(record.log_date) : undefined,
+      start_time: record.start_time ? dayjs(record.start_time) : undefined, //dayjs(record.start_time),
+      end_time: record.end_time ? dayjs(record.end_time) : undefined, // 如果为 null/undefined，就不传入初始值
+      // end_time: dayjs(record.end_time),
+      machine_model: record.machine_model,
+      machine_status: record.machine_status,
+    });
+    setIsModalVisible(true);
+  };
 
   const handleDelete = (id: number) => {
     deleteMutation.mutate(id, {
@@ -794,20 +805,11 @@ const App: React.FC<{ storageKey: string }> = ({ storageKey }) => {
   }, [opLogs]);
 
   return (
-    <div className="">
-      <div className="mx-auto bg-white rounded-lg shadow-sm">
-        <div className="p-6 border-b border-gray-200">
-          <div className="grid grid-cols-[auto_1fr] gap-6 mb-6 filter-form border border-gray-200 rounded-lg p-4">
-            {/* <Button
-              type="primary"
-              icon={<PlusOutlined />}
-              onClick={handleAdd}
-              size="middle"
-              className="!rounded-button"
-            >
-              {t("新增事件")}
-            </Button> */}
-            <div className="flex items-center justify-end gap-4">
+    <div className="event-log-view">
+      <div className="mx-auto">
+        <div className="event-log-toolbar">
+          <div className="event-log-filters">
+            <div className="flex flex-wrap items-center gap-3">
               <div className="relative">
                 <Button
                   size="middle"
@@ -816,9 +818,11 @@ const App: React.FC<{ storageKey: string }> = ({ storageKey }) => {
                   onClick={() => setShowSiteFilter(!showSiteFilter)}
                 >
                   {t("场地筛选")}
+                  {effectiveSelectedLocation.length > 0 ? ` · ${effectiveSelectedLocation.length}` : ""}
+                  <DownOutlined className="ml-2 text-slate-400" />
                 </Button>
                 {showSiteFilter && (
-                  <div className="site-filter-dropdown absolute right-0 mt-2 w-80 bg-white rounded-lg shadow-lg z-10 border border-gray-200 p-4">
+                  <div className="site-filter-dropdown absolute left-0 mt-2 w-80 max-w-[calc(100vw-4rem)] bg-white rounded-lg shadow-lg z-10 border border-gray-200 p-4">
                     <div className="font-medium text-gray-900 mb-3">{t("选择场地")}</div>
                     <div className="flex items-center justify-between gap-3 mb-3">
                       <div className="flex items-center gap-2">
@@ -834,7 +838,7 @@ const App: React.FC<{ storageKey: string }> = ({ storageKey }) => {
                             setShowFavoriteOnly(checked);
                           }}
                         />
-                        <span className="text-sm text-gray-700">{t("我的收藏")}</span>
+                        <span className="event-log-filter-label text-gray-700">{t("我的收藏")}</span>
                       </div>
                       {showFavoriteOnly ? (
                         <span className="text-[11px] text-gray-400">
@@ -914,7 +918,9 @@ const App: React.FC<{ storageKey: string }> = ({ storageKey }) => {
                     setShowFavoriteOnly(checked);
                   }}
                 />
-                <span className="text-sm text-gray-700 whitespace-nowrap">{t("我的收藏")}</span>
+                <span className="event-log-filter-label text-gray-700 whitespace-nowrap">
+                  {t("我的收藏")}
+                </span>
               </div>
               <RangePicker
                 size="middle"
@@ -939,7 +945,7 @@ const App: React.FC<{ storageKey: string }> = ({ storageKey }) => {
                   setCurrentPage(1);
                   setSelectedDurationType(vals);
                 }}
-                className="w-full sm:w-[170px]"
+                className="w-full sm:w-[120px]"
                 allowClear
               >
                 <Option value="finished">{t("已结束事件")}</Option>
@@ -1172,34 +1178,38 @@ const App: React.FC<{ storageKey: string }> = ({ storageKey }) => {
               >
                 {t("导出当前页")}
               </Button>
-              <div className="flex items-center ml-4 bg-gray-100 rounded p-1 text-sm">
-                <div
-                  className={`px-3 py-1 rounded cursor-pointer transition-all ${
-                    sortOrder !== "endTimeDesc"
-                      ? "bg-white text-[#333] shadow-sm font-medium"
-                      : "text-gray-500 hover:text-gray-700"
-                  }`}
-                  onClick={() => {
-                    setSortOrder(undefined);
-                    setCurrentPage(1);
-                  }}
-                >
-                  {t("按开始时间排序")}
-                </div>
-                <div
-                  className={`px-3 py-1 rounded cursor-pointer transition-all ${
-                    sortOrder === "endTimeDesc"
-                      ? "bg-white text-[#333] shadow-sm font-medium"
-                      : "text-gray-500 hover:text-gray-700"
-                  }`}
-                  onClick={() => {
-                    setSortOrder("endTimeDesc");
-                    setCurrentPage(1);
-                  }}
-                >
-                  {t("按结束时间排序")}
-                </div>
-              </div>
+              <Popover
+                trigger="click"
+                placement="bottomRight"
+                title={t("显示列")}
+                content={
+                  <div className="flex flex-col gap-2 max-h-96 overflow-y-auto">
+                    <Button size="small" onClick={() => setHiddenColumns(DEFAULT_HIDDEN_COLUMNS)}>
+                      {t("恢复默认")}
+                    </Button>
+                    {columns.map((column) => {
+                      const key = getColumnKey(column);
+                      return (
+                        <Checkbox
+                          key={key}
+                          checked={!hiddenColumns.includes(key)}
+                          onChange={(event) => {
+                            setHiddenColumns((previous) =>
+                              event.target.checked
+                                ? previous.filter((item) => item !== key)
+                                : [...previous, key],
+                            );
+                          }}
+                        >
+                          {typeof column.title === "function" ? key : column.title}
+                        </Checkbox>
+                      );
+                    })}
+                  </div>
+                }
+              >
+                <Button icon={<SettingOutlined />}>{t("列配置")}</Button>
+              </Popover>
             </Space>
             <div className="flex flex-wrap items-center gap-5">
               <span className="text-xs text-slate-500 whitespace-nowrap">
@@ -1244,7 +1254,7 @@ const App: React.FC<{ storageKey: string }> = ({ storageKey }) => {
             // rowSelection={rowSelection}
             columns={columns.filter((column) => !hiddenColumns.includes(getColumnKey(column)))}
             dataSource={logData || []} // 使用过滤后的数据
-            scroll={{ x: "max-content" }}
+            scroll={{ x: 1450 }}
             rowKey="id"
             loading={isLoading}
             onChange={(pagination: any, filters: any, sorter: any) => {
