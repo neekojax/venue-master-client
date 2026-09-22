@@ -17,6 +17,7 @@ import emptyAntIcon from "@/assets/empty-ant.png";
 import FormulaTooltip from "@/components/tooltip/FormulaTooltip";
 // @ts-ignore
 import FormulaYouxiaolvTooltip from "@/components/tooltip/FormulaYouxiaolvTooltip";
+import { ROUTE_PATHS } from "@/constants/common";
 import { useSelector, useSettingsStore } from "@/stores";
 
 import { t } from "@/locales";
@@ -980,6 +981,11 @@ const App: React.FC = () => {
               <span className="text-sm text-gray-500 ml-2"> ({selectedDate || formattedDate})</span>
             </h1>
             <div className="flex items-center gap-2">
+              <Link
+                to={`${ROUTE_PATHS.dailySnapshot}?date=${encodeURIComponent(String(selectedDate || formattedDate))}&reportType=venue`}
+              >
+                <Button>{t("快照")}</Button>
+              </Link>
               <DatePicker
                 className="w-40"
                 placeholder={t("选择日期")}

@@ -54,6 +54,7 @@ export const ROUTE_PATHS = {
 
   report: "/report",
   dailyReport: "/report/daily",
+  dailySnapshot: "/report/daily/snapshots",
   dataSummary: "/report/data-summary", // 数据概览
   dataSummaryList: "/report/data-summary/list", // 数据概览更多界面
   dataSummaryProfitList: "/report/data-summary/profit-list", // 数据概览更多界面

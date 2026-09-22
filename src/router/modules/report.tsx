@@ -16,6 +16,12 @@ export const reportRoute: RouteObject = {
   },
   children: [
     {
+      path: ROUTE_PATHS.dailySnapshot,
+      lazy: async () => ({ Component: (await import("@/pages/report/daily-snapshot")).default }),
+      HydrateFallback: ProgressBar,
+      handle: { title: t("运营日报快照"), crumb: () => t("运营日报快照") },
+    },
+    {
       index: true,
       element: <Navigate replace to={ROUTE_PATHS.weekReport} />,
     },
