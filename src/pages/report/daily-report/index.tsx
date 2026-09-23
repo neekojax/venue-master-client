@@ -20,7 +20,7 @@ import FormulaYouxiaolvTooltip from "@/components/tooltip/FormulaYouxiaolvToolti
 import { ROUTE_PATHS } from "@/constants/common";
 import { useSelector, useSettingsStore } from "@/stores";
 
-import { t } from "@/locales";
+import { getLanguage, t } from "@/locales";
 import ResizableHeaderCell from "@/pages/custody-statistics/statistics/components/ResizableHeaderCell";
 import { fetchDailyReport } from "@/pages/report/api.tsx";
 
@@ -1037,11 +1037,22 @@ const App: React.FC = () => {
                     {(statistics.averageEffectiveRateNoWarehouse || 0).toFixed(2)}%
                   </span>
                 </div>
-                <div className="text-[10px] text-slate-400 font-bold truncate mt-2 uppercase tracking-tighter">
-                  {t("净有效率 {{value}}%", {
+                <Tooltip
+                  title={t("净有效率 {{value}}%", {
                     value: (statistics.averageForecastEfficiencyNoWarehouse || 0).toFixed(2),
                   })}
-                </div>
+                  placement="top"
+                >
+                  <div
+                    className={`text-[10px] text-slate-400 font-bold mt-2 uppercase tracking-tighter ${
+                      getLanguage() === "en" ? "w-[140px] truncate" : "truncate"
+                    }`}
+                  >
+                    {t("净有效率 {{value}}%", {
+                      value: (statistics.averageForecastEfficiencyNoWarehouse || 0).toFixed(2),
+                    })}
+                  </div>
+                </Tooltip>
                 {statistics.totalCloudPower24h != 0 && (
                   <div className="text-[10px] text-slate-400 font-bold truncate mt-2 uppercase tracking-tighter">
                     {t("包含云算力 {{value}}E", { value: (statistics.totalCloudPower24h || 0).toFixed(2) })}
@@ -1070,10 +1081,20 @@ const App: React.FC = () => {
                   </div>
                 }
               >
-                <div className="absolute bottom-3 right-5 inline-flex items-center gap-1 px-2 py-0.5 rounded-full border border-amber-300 bg-amber-50 text-amber-600 text-[10px] font-bold cursor-pointer hover:bg-amber-100 hover:text-amber-700 transition-colors">
-                  <Warehouse className="w-3 h-3" />
-                  <span>{t("含仓库")}</span>
-                </div>
+                <Tooltip title={t("含仓库")} placement="top">
+                  <div
+                    className={`absolute top-1/2 right-3 inline-flex items-center gap-1 px-2 py-0.5 rounded-full border border-amber-300 bg-amber-50 text-amber-600 text-[10px] font-bold cursor-pointer hover:bg-amber-100 hover:text-amber-700 transition-colors ${
+                      getLanguage() === "en" ? "max-w-[110px]" : ""
+                    }`}
+                    style={{ transform: "translateY(calc(-50% + 15px))" }}
+                  >
+                    <Warehouse className="w-3 h-3 shrink-0" />
+                    <span
+                      className={`${getLanguage() === "en" ? "truncate" : ""} block`}
+                      style={getLanguage() === "en" ? { maxWidth: 80 } : undefined}
+                    ></span>
+                  </div>
+                </Tooltip>
               </Tooltip>
               {/* <Tooltip title="不含租赁算力、仓库算力、待撤场算力">
                 <div className="absolute bottom-3 right-5 w-3.5 h-3.5 rounded-full border border-slate-300 text-slate-400 flex items-center justify-center text-[9px] font-bold cursor-pointer hover:bg-slate-100 hover:text-slate-600 transition-colors">
@@ -1106,8 +1127,7 @@ const App: React.FC = () => {
                   </div>
                   <div className="text-[10px] text-slate-400 font-bold uppercase tracking-tighter flex items-center justify-between gap-2">
                     <span className="truncate">
-                      {t("租赁算力 {{value}}E", { value: (statistics.totalLeasedPower24h || 0).toFixed(2) })}
-
+                      {t("租赁算力 {{value}}", { value: (statistics.totalLeasedPower24h || 0).toFixed(2) })}E
                       {/* {t("{{value}}租赁算力{{value2}} {{value3}}E", {
                         value: statistics.totalCloudPower24h != 0 && t("剔除"),
                         value2: " ",
