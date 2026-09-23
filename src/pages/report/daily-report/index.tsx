@@ -1106,11 +1106,13 @@ const App: React.FC = () => {
                   </div>
                   <div className="text-[10px] text-slate-400 font-bold uppercase tracking-tighter flex items-center justify-between gap-2">
                     <span className="truncate">
-                      {t("{{value}}租赁算力{{value2}} {{value3}}E", {
+                      {t("租赁算力 {{value}}E", { value: (statistics.totalLeasedPower24h || 0).toFixed(2) })}
+
+                      {/* {t("{{value}}租赁算力{{value2}} {{value3}}E", {
                         value: statistics.totalCloudPower24h != 0 && t("剔除"),
                         value2: " ",
                         value3: (statistics.totalLeasedPower24h || 0).toFixed(2),
-                      })}
+                      })} */}
                     </span>
                   </div>
                 </div>
