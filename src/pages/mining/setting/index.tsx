@@ -4,6 +4,7 @@ import { Link } from "react-router-dom";
 import {
   CopyOutlined,
   DeleteOutlined,
+  EllipsisOutlined,
   ExportOutlined,
   FormOutlined,
   ImportOutlined,
@@ -16,12 +17,12 @@ import {
   Button,
   Col,
   DatePicker,
+  Dropdown,
   Form,
   Input,
   InputNumber,
   message,
   Modal,
-  Popconfirm,
   Radio,
   Row,
   Select,
@@ -130,7 +131,7 @@ const formatLeasePower = (leasedPower?: number | null) => {
     return "";
   }
 
-  return `${Number(leasedPower)}P`;
+  return `${Number(leasedPower).toFixed(2)} P`;
 };
 
 type MiningPoolTableRow = {
@@ -501,10 +502,12 @@ export default function MiningSettingPage() {
           <span style={{ color: operationalStatus.color }}>{operationalStatus.text}</span>
         ) : null}
         {shouldShowLeaseStatus ? (
-          <span style={{ color: LEASE_STATUS_COLOR_MAP[accountLeaseStatus], fontSize: 12 }}>
-            {accountLeaseStatus}
-            {leasePowerText}
-          </span>
+          <div className="flex flex-col gap-0.5">
+            <span style={{ color: LEASE_STATUS_COLOR_MAP[accountLeaseStatus], fontSize: 12 }}>
+              {t(accountLeaseStatus)}
+            </span>
+            {leasePowerText && <span className="text-xs text-gray-500 tabular-nums">{leasePowerText}</span>}
+          </div>
         ) : null}
       </div>
     );
@@ -751,13 +754,17 @@ export default function MiningSettingPage() {
         title: headerTitle(t("托管机器")),
         dataIndex: "hosted_machine",
         key: "hosted_machine",
-        width: 75,
+        width: 90,
+        align: "right",
+        render: (value: number | null) => (
+          <span className="tabular-nums">{value == null ? "-" : Number(value).toLocaleString()}</span>
+        ),
       },
       {
         title: headerTitle(t("状态")),
         dataIndex: "status",
         key: "status",
-        width: 170,
+        width: 130,
         render: (
           _text: any,
           record: {
@@ -787,13 +794,17 @@ export default function MiningSettingPage() {
         ),
         dataIndex: "theoretical_hashrate",
         key: "theoretical_hashrate",
-        width: 140,
+        width: 115,
+        align: "right",
+        render: (value: number | null) => (
+          <span className="tabular-nums">{value == null ? "-" : Number(value).toFixed(2)}</span>
+        ),
       },
       {
         title: headerTitle(t("是否变频")),
         dataIndex: "is_overclocked",
         key: "is_overclocked",
-        width: 100,
+        width: 80,
         render: (value: number | null | undefined) => {
           if (value === 1) {
             return <Tag color="processing">{t("是")}</Tag>;
@@ -808,12 +819,13 @@ export default function MiningSettingPage() {
         title: headerTitle(t("变频单机算力")),
         dataIndex: "overclock_hashrate_per_machine",
         key: "overclock_hashrate_per_machine",
-        width: 140,
+        width: 90,
+        align: "right",
         render: (value: number | null | undefined) => {
           if (value == null) {
             return <span>-</span>;
           }
-          return value;
+          return <span className="tabular-nums">{Number(value).toFixed(2)}</span>;
         },
       },
       // {
@@ -944,76 +956,95 @@ export default function MiningSettingPage() {
         title: headerTitle(t("操作")),
         valueType: "option1",
         key: "operation",
-        width: 290,
+        width: 150,
         render: (_text: any, record: MiningPoolTableRow) => {
           const isBound = Boolean(record.asset_site_bound);
           const isMainPool = record.pool_category === "主矿池";
 
           return (
             <div className="flex items-center gap-2">
-              <a key={`edit-${record.key}`} onClick={() => showModal(record)}>
-                <FormOutlined />
-              </a>
-              <Popconfirm
-                title={t("确认删除此记录吗？")}
-                onConfirm={() => handleDelete(record.key)}
-                okText={t("是")}
-                cancelText={t("否")}
-              >
-                <a key={`delete-${record.key}`}>
-                  <DeleteOutlined style={{ color: "red" }} />
-                </a>
-              </Popconfirm>
-              {isSuperAdmin ? (
-                <Popconfirm
-                  title={t("确认重建该账户的资产变更历史？")}
-                  description={t("将按当前资产数据重新生成该主矿池的资产变更历史。")}
-                  onConfirm={() => handleRebuildAssetHistory(record)}
-                  okText={t("重建")}
-                  cancelText={t("取消")}
-                  disabled={!isMainPool}
-                >
-                  <Button
-                    type="link"
-                    size="small"
-                    icon={<RedoOutlined />}
-                    loading={assetPoolRecordRebuildMutation.isPending && rebuildingPoolId === record.pool_id}
-                    disabled={!isMainPool}
-                    style={{
-                      padding: 0,
-                      height: "auto",
-                      color: isMainPool ? "#2563eb" : "#94a3b8",
-                    }}
-                  >
-                    {t("重建历史")}
-                  </Button>
-                </Popconfirm>
-              ) : null}
-              {isSuperAdmin ? (
-                <Tooltip
-                  title={
-                    !isMainPool
-                      ? t("仅主矿池支持绑定")
-                      : isBound
-                        ? t("已绑定资产系统场地")
-                        : t("当前未绑定资产系统场地")
+              <Tooltip title={t("编辑")}>
+                <Button
+                  type="text"
+                  size="small"
+                  aria-label={t("编辑")}
+                  icon={<FormOutlined />}
+                  onClick={() => showModal(record)}
+                />
+              </Tooltip>
+              <Tooltip title={t("删除")}>
+                <Button
+                  type="text"
+                  size="small"
+                  danger
+                  aria-label={t("删除")}
+                  icon={<DeleteOutlined />}
+                  onClick={() =>
+                    Modal.confirm({
+                      title: t("确认删除此记录吗？"),
+                      okText: t("删除"),
+                      cancelText: t("取消"),
+                      okButtonProps: { danger: true },
+                      onOk: () => handleDelete(record.key),
+                    })
                   }
+                />
+              </Tooltip>
+              {isSuperAdmin && (
+                <Dropdown
+                  trigger={["click"]}
+                  menu={{
+                    items: [
+                      {
+                        key: "bind",
+                        label: (
+                          <Tooltip
+                            title={
+                              !isMainPool
+                                ? t("仅主矿池支持绑定")
+                                : isBound
+                                  ? t("已绑定资产系统场地")
+                                  : t("当前未绑定资产系统场地")
+                            }
+                          >
+                            <span
+                              style={{ color: !isMainPool ? "#94a3b8" : isBound ? "#16a34a" : "#d97706" }}
+                            >
+                              {t("资产绑定")}
+                            </span>
+                          </Tooltip>
+                        ),
+                        icon: <LinkOutlined />,
+                      },
+                      {
+                        key: "rebuild",
+                        label: t("重建历史"),
+                        icon: <RedoOutlined />,
+                        disabled: !isMainPool || assetPoolRecordRebuildMutation.isPending,
+                      },
+                    ],
+                    onClick: ({ key }) => {
+                      if (key === "bind") openAssetBindModal(record);
+                      if (key === "rebuild" && isMainPool)
+                        Modal.confirm({
+                          title: t("确认重建该账户的资产变更历史？"),
+                          content: t("将按当前资产数据重新生成该主矿池的资产变更历史。"),
+                          okText: t("重建"),
+                          cancelText: t("取消"),
+                          onOk: () => handleRebuildAssetHistory(record),
+                        });
+                    },
+                  }}
                 >
                   <Button
-                    type="link"
+                    type="text"
                     size="small"
-                    icon={<LinkOutlined />}
-                    style={{
-                      padding: 0,
-                      height: "auto",
-                      color: !isMainPool ? "#94a3b8" : isBound ? "#16a34a" : "#d97706",
-                    }}
-                    onClick={() => openAssetBindModal(record)}
-                  >
-                    {t("资产绑定")}
-                  </Button>
-                </Tooltip>
-              ) : null}
+                    aria-label={t("更多操作")}
+                    icon={<EllipsisOutlined />}
+                    loading={assetPoolRecordRebuildMutation.isPending && rebuildingPoolId === record.pool_id}
+                  />
+                </Dropdown>
+              )}
             </div>
           );
         },
@@ -1236,7 +1267,7 @@ export default function MiningSettingPage() {
     <div>
       <div
         style={{ background: "#fff", color: "grey", borderRadius: "0.5rem", padding: "20px 0px" }}
-        className="longdataTable"
+        className="longdataTable [&_.ant-table-tbody>tr>td.ant-table-cell]:!py-2"
       >
         <Row gutter={[16, 16]} justify="space-between" align="middle" style={{ marginLeft: "8px" }}>
           <Col xs={24} sm={24} md={12}>

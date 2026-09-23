@@ -46,6 +46,7 @@ const metricLabels: Record<string, string> = {
 };
 const eventLabels: Record<string, string> = {
   venue_id: "场地ID",
+  pool_id: "子账户ID",
   machine_model: "机器型号",
   machine_status: "机器状态",
   actual_loss_hashrate: "影响算力（小智测算）",
@@ -69,7 +70,6 @@ function EventDetails({ events }: { events: SnapshotEvent[] }) {
       locale={{ emptyText: t("该版本没有参与计算的事件") }}
       columns={[
         { title: t("事件ID"), dataIndex: "event_id", width: 90 },
-        { title: t("子账户ID"), dataIndex: "pool_id", width: 110 },
         { title: t("子账户名称"), dataIndex: "sub_account_name", width: 180, render: display },
         { title: t("事件类型"), dataIndex: "log_type", width: 110, render: (v) => t(display(v)) },
         { title: t("开始时间"), dataIndex: "start_time", width: 175 },

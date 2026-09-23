@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
 import { FaAdn, FaFish } from "react-icons/fa6";
-import { WiDirectionUpRight } from "react-icons/wi";
 import { Link } from "react-router-dom";
 import { ExportOutlined, LineChartOutlined, SearchOutlined } from "@ant-design/icons";
 import { Button, Col, Input, Radio, Row, Spin, Switch, Table, Tag, Tooltip } from "antd";
@@ -232,12 +231,18 @@ export default function MiningHashRatePage() {
         title: t("实时算力"),
         dataIndex: "current_hash",
         key: "current_hash",
+        align: "right",
         render: (text: any) => {
-          const parts = text.split(" "); // 根据空格分割
+          const parts = String(text ?? "--")
+            .trim()
+            .split(/\s+/); // 根据空格分割
 
           return (
-            <span>
-              {parts[0]} <span className="text-sm text-gray-500">{parts[1]}</span>
+            <span className="inline-flex items-baseline justify-end gap-1 whitespace-nowrap tabular-nums">
+              {parts[0]}{" "}
+              <span className="inline-block w-10 text-left text-xs text-gray-400">
+                {parts.slice(1).join(" ")}
+              </span>
             </span>
           );
         },
@@ -246,14 +251,20 @@ export default function MiningHashRatePage() {
         title: t("理论算力"),
         dataIndex: "theoretical",
         key: "theoretical",
+        align: "right",
         render: (text: any) => {
-          const parts = text.split(" "); // 根据空格分割
+          const parts = String(text ?? "--")
+            .trim()
+            .split(/\s+/); // 根据空格分割
           if (parts[0] == "0.00") {
             return "--";
           }
           return (
-            <span>
-              {parts[0]} <span className="text-sm text-gray-500">{parts[1]}</span>
+            <span className="inline-flex items-baseline justify-end gap-1 whitespace-nowrap tabular-nums">
+              {parts[0]}{" "}
+              <span className="inline-block w-10 text-left text-xs text-gray-400">
+                {parts.slice(1).join(" ")}
+              </span>
             </span>
           );
         },
@@ -292,12 +303,12 @@ export default function MiningHashRatePage() {
         title: t("在线/离线"),
         key: "status",
         render: (_text: any, record: any) => (
-          <span>
-            <Tag color="success" v-if={record.online != 0}>
-              {record.online}
+          <span className="inline-grid grid-cols-2 gap-2 whitespace-nowrap tabular-nums">
+            <Tag color="success" className="!m-0 min-w-[52px] text-center">
+              {record.online ?? "--"}
             </Tag>
-            <Tag color="error" v-if={record.offline != "0"}>
-              {record.offline}
+            <Tag color="error" className="!m-0 min-w-[52px] text-center">
+              {record.offline ?? "--"}
             </Tag>
           </span>
         ),
@@ -321,8 +332,13 @@ export default function MiningHashRatePage() {
         dataIndex: "last_hash_rate_effective",
         key: "last_hash_rate_effective",
         render: (text: any) => {
-          const value = parseFloat(text.replace("%", "")); // 去掉 '%' 并解析为数字
-          return <span style={{ color: value < 90 ? "red" : "green" }}>{text}</span>;
+          const value = parseFloat(String(text ?? ""));
+          if (!Number.isFinite(value)) return "--";
+          return (
+            <span className="tabular-nums whitespace-nowrap" style={{ color: value < 90 ? "red" : "green" }}>
+              {value.toFixed(2)}%
+            </span>
+          );
         },
         sorter: (a: any, b: any) => {
           // 将带有 '%' 的字符串转换为数字进行比较
@@ -356,10 +372,10 @@ export default function MiningHashRatePage() {
             href={link}
             target="_blank"
             rel="noopener noreferrer"
-            style={{ color: "#252F4A" }}
+            style={{ color: "#1677FF" }}
             title={link} // 悬停显示完整链接
           >
-            <WiDirectionUpRight style={{ marginLeft: 8, fontSize: "32px" }} />
+            <ExportOutlined style={{ marginLeft: 8, fontSize: 16 }} />
           </a>
         ),
       },
@@ -473,6 +489,7 @@ export default function MiningHashRatePage() {
           <Spin style={{ width: "100%", textAlign: "center", marginTop: "50%" }} />
         ) : (
           <Table
+            className="[&_.ant-table-tbody>tr>td.ant-table-cell]:!py-2"
             components={{ header: { cell: ResizableHeaderCell } }}
             pagination={{
               position: ["bottomCenter"],
