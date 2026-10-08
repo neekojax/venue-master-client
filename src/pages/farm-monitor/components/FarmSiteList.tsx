@@ -30,7 +30,10 @@ export default function FarmSiteList({ sites, selectedId, loading, onSelect }: F
   const filteredSites = useMemo(() => {
     const kw = keyword.trim().toLowerCase();
     const list = kw ? sites.filter((s) => s.name.toLowerCase().includes(kw)) : [...sites];
-    list.sort((a, b) => (sortDesc ? b.hashrate - a.hashrate : a.hashrate - b.hashrate));
+    list.sort((a, b) => {
+      const offlineOrder = Number(a.status === "error") - Number(b.status === "error");
+      return offlineOrder || (sortDesc ? b.hashrate - a.hashrate : a.hashrate - b.hashrate);
+    });
     return list;
   }, [sites, keyword, sortDesc]);
 
