@@ -153,19 +153,15 @@ const VenueDetail: React.FC = () => {
             <h1 className="text-3xl font-bold text-gray-900">{basicInfo?.venue_name}</h1>
             <div className="flex items-center gap-2 text-sm text-gray-500">
               <span className="px-2 py-1 bg-gray-100 rounded-md">
-                {t("矿工号:{{value}} {{value2}}", {
-                  value: " ",
-                  value2: basicInfo?.sub_accounts?.map((item, index) => (
-                    <span key={item.pool_id}>
-                      {" "}
-                      <a href={item.pool_link} target="_blank" rel="noreferrer">
-                        {" "}
-                        {item.pool_name}{" "}
-                      </a>{" "}
-                      {index !== basicInfo.sub_accounts.length - 1 && " "}{" "}
-                    </span>
-                  )),
-                })}
+                {t("矿工号:")}{" "}
+                {basicInfo?.sub_accounts?.map((item, index) => (
+                  <span key={item.pool_id}>
+                    <a href={item.pool_link} target="_blank" rel="noreferrer">
+                      {item.pool_name}
+                    </a>
+                    {index !== basicInfo.sub_accounts.length - 1 && " "}
+                  </span>
+                ))}
               </span>
             </div>
           </div>
