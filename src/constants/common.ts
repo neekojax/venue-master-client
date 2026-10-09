@@ -31,6 +31,7 @@ export const ROUTE_PATHS = {
   miningHashRate: "/mining/hash",
 
   farmMonitor: "/mining/farm-monitor",
+  farmAbnormalHistory: "/mining/farm-monitor/abnormal-history",
   miningAgentSetting: "/mining/agent-setting",
   assetHashrateHistory: "/mining/asset-hashrate-history",
   faultMonitor: "/mining/fault-monitor",

@@ -42,6 +42,12 @@ export const miningRoute: RouteObject = {
       },
     },
     {
+      path: ROUTE_PATHS.farmAbnormalHistory,
+      lazy: async () => ({ Component: (await import("@/pages/farm-monitor/abnormal-history")).default }),
+      HydrateFallback: ProgressBar,
+      handle: { title: t("场地异常历史"), crumb: () => t("场地异常历史") },
+    },
+    {
       path: ROUTE_PATHS.faultMonitor,
       lazy: async () => ({
         Component: (await import("@/pages/fault-machine-monitor")).default,

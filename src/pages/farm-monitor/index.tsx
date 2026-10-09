@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { Form } from "antd";
 import dayjs from "dayjs";
 import FarmSiteList from "./components/FarmSiteList";
@@ -17,6 +18,7 @@ import {
   mapProbeTasksToOverviewPoints,
   resolveLatestProbeTaskIds,
 } from "./utils";
+import { ROUTE_PATHS } from "@/constants/common";
 import useAuthRedirect from "@/hooks/useAuthRedirect";
 import { useSettingsStore } from "@/stores";
 import { useSelector } from "@/stores/selectors";
@@ -39,6 +41,8 @@ import { mapAbnormalLogListToRecords } from "@/pages/fault-machine-monitor/utils
 
 export default function FarmMonitorPage() {
   useAuthRedirect();
+  const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const { poolType } = useSettingsStore(useSelector(["poolType"]));
 
   const [form] = Form.useForm<MinerSnapshotSearchValues>();
@@ -58,7 +62,7 @@ export default function FarmMonitorPage() {
     return list.map(mapBoundSiteToFarmSite);
   }, [boundSitesRes]);
 
-  const [selectedFarmId, setSelectedFarmId] = useState<string | null>(null);
+  const [selectedFarmId, setSelectedFarmId] = useState<string | null>(() => searchParams.get("siteCode"));
 
   useEffect(() => {
     if (farmSites.length === 0) return;
@@ -271,24 +275,10 @@ export default function FarmMonitorPage() {
   };
 
   const openAbnormalManagementTerminal = useCallback(() => {
-    if (!selectedFarmId) return;
-    const nextValues: AbnormalLogSearchValues = {
-      siteCode: selectedFarmId,
-      code: undefined,
-      ip: undefined,
-      mac: undefined,
-      controlBoardSN: undefined,
-      logTimeRange: abnormalLogRange,
-    };
-    abnormalForm.setFieldsValue(nextValues);
-    setAbnormalFilters({
-      siteCode: selectedFarmId,
-      logTimeFrom: abnormalLogRange[0].format("YYYY-MM-DD HH:mm:ss"),
-      logTimeTo: abnormalLogRange[1].format("YYYY-MM-DD HH:mm:ss"),
-    });
-    setAbnormalPage(1);
-    setAbnormalTerminalOpen(true);
-  }, [abnormalForm, abnormalLogRange, selectedFarmId]);
+    if (!selectedFarm?.name || !selectedFarmId) return;
+    const params = new URLSearchParams({ siteName: selectedFarm.name, siteCode: selectedFarmId });
+    navigate(`${ROUTE_PATHS.farmAbnormalHistory}?${params}`);
+  }, [navigate, selectedFarm, selectedFarmId]);
 
   useEffect(() => {
     if (!abnormalTerminalOpen || !selectedFarmId) return;
