@@ -238,6 +238,8 @@ const AssetPoolRecordHistory: React.FC = () => {
       dataIndex: "theoretical_hashrate",
       key: "theoretical_hashrate",
       width: 130,
+      render: (value: number | null | undefined) =>
+        value != null && Number.isFinite(Number(value)) ? (Number(value) / 1000).toFixed(3) : "-",
     },
     {
       title: t("托管机器"),
