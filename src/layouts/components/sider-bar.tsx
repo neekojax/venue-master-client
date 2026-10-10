@@ -65,50 +65,50 @@ const SiderItems = (permissionIds: string, permissionRoutes: string, selectedKey
     },
     {
       icon: <MdMonitorHeart />,
-      label: t("算力监控"),
+      label: t("算力监控", { context: "nav" }),
       key: ROUTE_PATHS.mining,
       hidden: hasPermission(ROUTE_PATHS.mining),
       children: [
         {
           key: ROUTE_PATHS.miningHashRate,
           hidden: hasPermission(ROUTE_PATHS.miningHashRate),
-          label: t("实时算力"),
+          label: t("实时算力", { context: "nav" }),
         },
         {
           key: ROUTE_PATHS.farmMonitor,
           hidden: hasPermission(ROUTE_PATHS.farmMonitor),
-          label: t("矿机监控"),
+          label: t("矿机监控", { context: "nav" }),
         },
         {
           key: ROUTE_PATHS.faultMonitor,
           hidden: hasPermission(ROUTE_PATHS.faultMonitor),
-          label: t("故障机监控"),
+          label: t("故障机监控", { context: "nav" }),
         },
         {
           key: ROUTE_PATHS.abnormalAnalysis,
           hidden: hasPermission(ROUTE_PATHS.abnormalAnalysis),
-          label: t("异常数分析"),
+          label: t("异常数分析", { context: "nav" }),
         },
         {
           key: ROUTE_PATHS.miningSetting,
           hidden: hasPermission(ROUTE_PATHS.miningSetting),
-          label: t("账户列表"),
+          label: t("账户列表", { context: "nav" }),
         },
         {
           key: ROUTE_PATHS.miningAgentSetting,
           hidden: hasPermission(ROUTE_PATHS.miningAgentSetting),
-          label: t("矿机代理设置"),
+          label: t("矿机代理设置", { context: "nav" }),
         },
         {
           key: ROUTE_PATHS.assetHashrateHistory,
           hidden: hasPermission(ROUTE_PATHS.assetHashrateHistory),
-          label: t("资产变更历史"),
+          label: t("资产变更历史", { context: "nav" }),
         },
       ],
     },
     {
       icon: <SiNginxproxymanager />,
-      label: t("场地管理"),
+      label: t("场地管理", { context: "nav" }),
       key: ROUTE_PATHS.venue,
       hidden: hasPermission(ROUTE_PATHS.venue),
       children: [
@@ -121,12 +121,12 @@ const SiderItems = (permissionIds: string, permissionRoutes: string, selectedKey
               {
                 key: ROUTE_PATHS.venueEnvironment,
                 hidden: hasPermission(ROUTE_PATHS.venueEnvironment),
-                label: t("场地环境"),
+                label: t("场地环境", { context: "nav" }),
               },
               {
                 key: ROUTE_PATHS.venueWeather,
                 hidden: hasPermission(ROUTE_PATHS.venueWeather),
-                label: t("场地天气"),
+                label: t("场地天气", { context: "nav" }),
               },
             ]
           : []),
@@ -143,13 +143,13 @@ const SiderItems = (permissionIds: string, permissionRoutes: string, selectedKey
         {
           key: ROUTE_PATHS.venueSetting,
           hidden: hasPermission(ROUTE_PATHS.venueSetting),
-          label: t("场地列表"),
+          label: t("场地列表", { context: "nav" }),
         },
       ],
     },
     {
       icon: <FaRegChartBar />,
-      label: t("报表"),
+      label: t("报表", { context: "nav" }),
       key: ROUTE_PATHS.report,
       hidden: hasPermission(ROUTE_PATHS.report),
       children: [
@@ -158,7 +158,7 @@ const SiderItems = (permissionIds: string, permissionRoutes: string, selectedKey
               {
                 key: ROUTE_PATHS.dataSummary,
                 hidden: hasPermission(ROUTE_PATHS.dataSummary),
-                label: t("数据概览"),
+                label: t("数据概览", { context: "nav" }),
               },
             ]
           : []),
@@ -167,7 +167,7 @@ const SiderItems = (permissionIds: string, permissionRoutes: string, selectedKey
               {
                 key: ROUTE_PATHS.dailyReport,
                 hidden: hasPermission(ROUTE_PATHS.dailyReport),
-                label: t("运营日报"),
+                label: t("运营日报", { context: "nav" }),
               },
             ]
           : []),
@@ -176,20 +176,20 @@ const SiderItems = (permissionIds: string, permissionRoutes: string, selectedKey
               {
                 key: ROUTE_PATHS.subAccountDailyReport,
                 hidden: hasPermission(ROUTE_PATHS.subAccountDailyReport),
-                label: t("账户日报"),
+                label: t("账户日报", { context: "nav" }),
               },
             ]
           : []),
         {
           key: ROUTE_PATHS.weekReport,
           hidden: hasPermission(ROUTE_PATHS.weekReport),
-          label: t("运营周报"),
+          label: t("运营周报", { context: "nav" }),
         },
       ].filter(Boolean),
     },
     {
       icon: <ProductOutlined />,
-      label: t("电费监控"),
+      label: t("电费监控", { context: "nav" }),
       key: ROUTE_PATHS.custodyMenu,
       hidden: hasPermission(ROUTE_PATHS.custodyMenu),
       // hidden: localStorage.getItem("permission_ids") !== "role-venue-ops",
@@ -201,14 +201,14 @@ const SiderItems = (permissionIds: string, permissionRoutes: string, selectedKey
         {
           key: ROUTE_PATHS.statistics,
           hidden: hasPermission(ROUTE_PATHS.statistics),
-          label: t("费用统计"),
+          label: t("费用统计", { context: "nav" }),
         },
         ...(showNDPoolType == "CANG"
           ? [
               {
                 key: ROUTE_PATHS.venueBill,
                 hidden: hasPermission(ROUTE_PATHS.venueBill),
-                label: t("电费参数"),
+                label: t("电费参数", { context: "nav" }),
               },
             ]
           : []),
@@ -225,7 +225,7 @@ const SiderItems = (permissionIds: string, permissionRoutes: string, selectedKey
         <Wrench size={18} style={{ color: "#bbb" }} />
       ),
       key: ROUTE_PATHS.utility,
-      label: t("实用工具"),
+      label: t("实用工具", { context: "nav" }),
     },
     {
       icon: selectedKeys?.includes(ROUTE_PATHS.rbacCenter) ? (
@@ -235,7 +235,7 @@ const SiderItems = (permissionIds: string, permissionRoutes: string, selectedKey
       ),
       key: ROUTE_PATHS.rbacCenter,
       hidden: hasPermission(ROUTE_PATHS.rbacCenter),
-      label: t("权限管理"),
+      label: t("权限管理", { context: "nav" }),
     },
     {
       icon: selectedKeys?.includes(ROUTE_PATHS.logs) ? (
@@ -245,7 +245,7 @@ const SiderItems = (permissionIds: string, permissionRoutes: string, selectedKey
       ),
       key: ROUTE_PATHS.logs,
       hidden: hasPermission(ROUTE_PATHS.logs),
-      label: t("操作日志"),
+      label: t("操作日志", { context: "nav" }),
     },
 
     // {
