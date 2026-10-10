@@ -727,7 +727,6 @@ export default function MiningSettingPage() {
               }}
             >
               <Link
-                reloadDocument
                 to={ROUTE_PATHS.miningDetail(record.venue_id, record.pool_id)}
                 className="text-blue-500 hover:underline"
               >

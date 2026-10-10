@@ -401,7 +401,7 @@ const AssetPoolRecordHistory: React.FC = () => {
               <DatePicker className="w-full" showTime />
             </Form.Item>
             <Form.Item
-              label={t("理论算力(PH/s)")}
+              label={t("理论算力(TH/s)")}
               name="theoretical_hashrate"
               rules={[{ required: true, message: t("请输入理论算力") }]}
             >

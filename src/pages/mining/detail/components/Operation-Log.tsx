@@ -1,18 +1,32 @@
 import React, { useMemo, useState } from "react";
 import { useParams } from "react-router-dom";
-import { Button, DatePicker, Form, InputNumber, message, Modal, Popconfirm, Radio, Table, Tag } from "antd";
+import { SafetyCertificateOutlined } from "@ant-design/icons";
+import {
+  Alert,
+  Button,
+  DatePicker,
+  Form,
+  InputNumber,
+  message,
+  Modal,
+  Popconfirm,
+  Radio,
+  Table,
+  Tag,
+} from "antd";
 import type { ColumnsType } from "antd/es/table";
 import dayjs from "dayjs";
 
 import { t } from "@/locales";
 import AssetPoolRecordHistory from "@/pages/mining/detail/components/Asset-Pool-Record-History.tsx";
 import {
+  useAssetSiteInfoList,
   usePoolRecordCreate,
   usePoolRecordDelete,
   usePoolRecordList,
   usePoolRecordUpdate,
 } from "@/pages/mining/hook.ts";
-import type { PoolRecordCreate, PoolRecordUpdate } from "@/pages/mining/type.tsx";
+import type { AssetSiteInfo, PoolRecordCreate, PoolRecordUpdate } from "@/pages/mining/type.tsx";
 
 type PoolRecord = {
   id: number;
@@ -69,6 +83,11 @@ const OperationLog: React.FC = () => {
   const poolId = params.poolId!;
 
   const { data, isLoading } = usePoolRecordList(poolId);
+  const { data: assetSiteData } = useAssetSiteInfoList();
+  const assetSite = (assetSiteData?.data?.list as AssetSiteInfo[] | undefined)?.find(
+    (site) => Number(site.venue_id) === Number(venueId) && Number(site.pool_id) === Number(poolId),
+  );
+  const isAssetManaged = Number(assetSite?.asset_switch_enabled) === 1;
   const createMutation = usePoolRecordCreate();
   const updateMutation = usePoolRecordUpdate();
   const deleteMutation = usePoolRecordDelete();
@@ -214,6 +233,19 @@ const OperationLog: React.FC = () => {
 
   return (
     <div>
+      {isAssetManaged && (
+        <Alert
+          className="mb-4"
+          type="info"
+          showIcon
+          icon={<SafetyCertificateOutlined />}
+          message={<span className="font-semibold text-blue-700">{t("资产接管已开启")}</span>}
+          description={
+            assetSite?.asset_switch_at ? `${t("生效时间")}：${assetSite.asset_switch_at}` : undefined
+          }
+          style={{ border: "1px solid #91caff", background: "#e6f4ff", borderRadius: 8 }}
+        />
+      )}
       <div className="mb-4 flex items-center justify-between">
         {/* <div className="text-lg font-semibold">
                     操作记录（venueId: {venueId}, poolId: {poolId}）

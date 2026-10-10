@@ -1785,5 +1785,6 @@
   "在架台数": "Machines on shelf",
   "异常原因": "Anomaly reason",
   "填写原因": "Add reason",
-  "确认删除？": "Delete this record?"
+  "确认删除？": "Delete this record?",
+  "理论算力(TH/s)": "Theoretical Hashrate (TH/s)"
 }
