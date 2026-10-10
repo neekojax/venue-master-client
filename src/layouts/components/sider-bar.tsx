@@ -82,12 +82,12 @@ const SiderItems = (permissionIds: string, permissionRoutes: string, selectedKey
         {
           key: ROUTE_PATHS.faultMonitor,
           hidden: hasPermission(ROUTE_PATHS.faultMonitor),
-          label: t("故障机监控", { context: "nav" }),
+          label: t("故障机监控", { context: "nav", defaultValue: "故障监控" }),
         },
         {
           key: ROUTE_PATHS.abnormalAnalysis,
           hidden: hasPermission(ROUTE_PATHS.abnormalAnalysis),
-          label: t("异常数分析", { context: "nav" }),
+          label: t("异常数分析", { context: "nav", defaultValue: "异常分析" }),
         },
         {
           key: ROUTE_PATHS.miningSetting,
@@ -97,12 +97,12 @@ const SiderItems = (permissionIds: string, permissionRoutes: string, selectedKey
         {
           key: ROUTE_PATHS.miningAgentSetting,
           hidden: hasPermission(ROUTE_PATHS.miningAgentSetting),
-          label: t("矿机代理设置", { context: "nav" }),
+          label: t("矿机代理设置", { context: "nav", defaultValue: "代理设置" }),
         },
         {
           key: ROUTE_PATHS.assetHashrateHistory,
           hidden: hasPermission(ROUTE_PATHS.assetHashrateHistory),
-          label: t("资产变更历史", { context: "nav" }),
+          label: t("资产变更历史", { context: "nav", defaultValue: "资产历史" }),
         },
       ],
     },
