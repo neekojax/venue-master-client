@@ -4,6 +4,8 @@ export type VenueInfoParam = {
   venue_code: string;
   country: string;
   address: string;
+  latitude?: number | null;
+  longitude?: number | null;
   agent_key: string;
   hosted_machine: number;
   miner_type: string;

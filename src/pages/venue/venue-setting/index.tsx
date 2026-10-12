@@ -7,7 +7,7 @@ import {
   PlusOutlined,
   SearchOutlined,
 } from "@ant-design/icons";
-import { Button, Form, Input, message, Modal, Select, Space, Table } from "antd";
+import { Button, Form, Input, InputNumber, message, Modal, Select, Space, Table } from "antd";
 import ExcelUpload from "@/components/excel-upload";
 import useAuthRedirect from "@/hooks/useAuthRedirect.ts";
 import { useSelector, useSettingsStore } from "@/stores";
@@ -34,6 +34,8 @@ interface Venue {
   venue_code: string | null;
   country: string | null;
   address: string | null;
+  latitude?: number | null;
+  longitude?: number | null;
   agent_key: string | null;
   hosted_machine: number;
   miner_type: string | null;
@@ -78,6 +80,8 @@ const VenueManagement: React.FC = () => {
           venue_code: item.venue_code,
           country: item.country,
           address: item.address,
+          latitude: item.latitude,
+          longitude: item.longitude,
           agent_key: item.agent_key,
           hosted_machine: item.hosted_machine,
           miner_type: item.miner_type,
@@ -164,6 +168,9 @@ const VenueManagement: React.FC = () => {
 
   const handleModalOk = () => {
     form.validateFields().then((values) => {
+      // API convention: latitude is longitude; longitude is latitude.
+      values.latitude = values.latitude ?? null;
+      values.longitude = values.longitude ?? null;
       if (currentVenue) {
         // 编辑
         const hostedMachineValue = Number(values.hosted_machine);
@@ -188,6 +195,8 @@ const VenueManagement: React.FC = () => {
           venue_code: values.venue_code,
           country: values.country,
           address: values.address,
+          latitude: values.latitude,
+          longitude: values.longitude,
           agent_key: values.agent_key,
           hosted_machine: Number(values.hosted_machine),
           miner_type: values.miner_type,
@@ -218,6 +227,8 @@ const VenueManagement: React.FC = () => {
       title: t("序号"),
       dataIndex: "id",
       width: 60,
+      onHeaderCell: () => ({ style: { whiteSpace: "nowrap" as const } }),
+      onCell: () => ({ style: { whiteSpace: "nowrap" as const } }),
       render(_text: string, _record: any, index: number) {
         return index + 1;
       },
@@ -282,6 +293,19 @@ const VenueManagement: React.FC = () => {
       sorter: (a: Venue, b: Venue) => (a.country || "").localeCompare(b.country || ""),
     },
     {
+      title: t("经纬度"),
+      key: "coordinates",
+      width: 200,
+      render: (_: unknown, record: Venue) => (
+        <span className="whitespace-nowrap tabular-nums">
+          {[record.latitude, record.longitude]
+            .filter((value): value is number => value != null)
+            .map((value) => `${Number(Number(value).toFixed(6))}°`)
+            .join(" / ")}
+        </span>
+      ),
+    },
+    {
       title: t("托管机器"),
       dataIndex: "hosted_machine",
       width: 100,
@@ -290,11 +314,6 @@ const VenueManagement: React.FC = () => {
       title: t("机型"),
       dataIndex: "miner_type",
       width: 100,
-    },
-    {
-      title: t("场地键值"),
-      dataIndex: "agent_key",
-      width: 300,
     },
     {
       title: t("详细地址"),
@@ -517,6 +536,14 @@ const VenueManagement: React.FC = () => {
           <Form.Item name="agent_key" label={t("场地键值")}>
             <Input placeholder="agent_key" />
           </Form.Item>
+          <div className="grid grid-cols-1 gap-x-4 md:grid-cols-2">
+            <Form.Item name="latitude" label={t("经度")} rules={[{ type: "number", min: -180, max: 180 }]}>
+              <InputNumber min={-180} max={180} placeholder={t("可选")} style={{ width: "100%" }} />
+            </Form.Item>
+            <Form.Item name="longitude" label={t("纬度")} rules={[{ type: "number", min: -90, max: 90 }]}>
+              <InputNumber min={-90} max={90} placeholder={t("可选")} style={{ width: "100%" }} />
+            </Form.Item>
+          </div>
           <Form.Item name="address" label={t("详细地址")}>
             <TextArea rows={3} placeholder={t("请输入详细地址")} />
           </Form.Item>

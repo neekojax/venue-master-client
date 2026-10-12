@@ -1809,5 +1809,9 @@
   "电费参数_nav": "Cost Settings",
   "实用工具_nav": "Tools",
   "权限管理_nav": "Permissions",
-  "操作日志_nav": "Audit Log"
+  "操作日志_nav": "Audit Log",
+  "经纬度": "Coordinates",
+  "经度": "Longitude",
+  "纬度": "Latitude",
+  "可选": "Optional"
 }
