@@ -7,7 +7,7 @@ import {
   PlusOutlined,
   SearchOutlined,
 } from "@ant-design/icons";
-import { Button, Form, Input, InputNumber, message, Modal, Select, Space, Table } from "antd";
+import { Button, Form, Input, InputNumber, message, Modal, Select, Space, Table, Tag } from "antd";
 import ExcelUpload from "@/components/excel-upload";
 import useAuthRedirect from "@/hooks/useAuthRedirect.ts";
 import { useSelector, useSettingsStore } from "@/stores";
@@ -37,6 +37,7 @@ interface Venue {
   latitude?: number | null;
   longitude?: number | null;
   agent_key: string | null;
+  operation_mode: number;
   hosted_machine: number;
   miner_type: string | null;
   pools: Pool[];
@@ -58,6 +59,7 @@ const VenueManagement: React.FC = () => {
   // const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([]);
   const [searchText, setSearchText] = useState("");
   const [countryFilter, setCountryFilter] = useState<string | null>(null);
+  const [operationModeFilter, setOperationModeFilter] = useState<number | null>(null);
   const [poolStatusFilter, setPoolStatusFilter] = useState<number | null>(null);
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [currentVenue, setCurrentVenue] = useState<Venue | null>(null);
@@ -83,6 +85,7 @@ const VenueManagement: React.FC = () => {
           latitude: item.latitude,
           longitude: item.longitude,
           agent_key: item.agent_key,
+          operation_mode: item.operation_mode ?? 1,
           hosted_machine: item.hosted_machine,
           miner_type: item.miner_type,
           pools: item.pools || [], // 补充池数据，默认空数组
@@ -110,13 +113,16 @@ const VenueManagement: React.FC = () => {
     if (countryFilter) {
       result = result.filter((item) => item.country === countryFilter);
     }
+    if (operationModeFilter !== null) {
+      result = result.filter((item) => Number(item.operation_mode) === operationModeFilter);
+    }
     if (poolStatusFilter !== null) {
       result = result.filter(
         (item) => Array.isArray(item.pools) && item.pools.some((p) => Number(p?.status) === poolStatusFilter),
       );
     }
     setFilteredVenues(result);
-  }, [searchText, countryFilter, poolStatusFilter, venues]);
+  }, [searchText, countryFilter, operationModeFilter, poolStatusFilter, venues]);
 
   const handleSearch = (value: string) => {
     setSearchText(value);
@@ -198,6 +204,7 @@ const VenueManagement: React.FC = () => {
           latitude: values.latitude,
           longitude: values.longitude,
           agent_key: values.agent_key,
+          operation_mode: Number(values.operation_mode ?? 1),
           hosted_machine: Number(values.hosted_machine),
           miner_type: values.miner_type,
         };
@@ -237,6 +244,7 @@ const VenueManagement: React.FC = () => {
       title: t("场地名称"),
       dataIndex: "venue_name",
       width: venueNameColumnWidth,
+      fixed: "left" as const,
       onHeaderCell: () =>
         ({
           width: venueNameColumnWidth,
@@ -245,12 +253,38 @@ const VenueManagement: React.FC = () => {
             localStorage.setItem("venue-setting-venue-name-column-width", String(nextWidth));
           },
         }) as any,
-      render: (text: string, record: { id?: any }) => {
+      render: (text: string, record: { id?: any; operation_mode?: number }) => {
+        const isHosted = Number(record.operation_mode) === 2;
         return (
-          <div style={{ width: "100%", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
-            <Link to={`/venue/detail/${record.id}`} className="text-blue-500 hover:underline">
+          <div style={{ display: "flex", alignItems: "center", gap: 8, width: "100%", overflow: "hidden" }}>
+            <Link
+              to={`/venue/detail/${record.id}`}
+              className="text-blue-500 hover:underline"
+              style={{ flex: 1, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}
+            >
               {text}
             </Link>
+            <Tag
+              style={
+                isHosted
+                  ? {
+                      marginInlineEnd: 0,
+                      marginLeft: "auto",
+                      color: "#2B64CB",
+                      background: "#EEF3FF",
+                      borderColor: "#B8C8FF",
+                    }
+                  : {
+                      marginInlineEnd: 0,
+                      marginLeft: "auto",
+                      color: "#C47B16",
+                      background: "#FFF7E6",
+                      borderColor: "#FFD49F",
+                    }
+              }
+            >
+              {isHosted ? t("托管") : t("代管")}
+            </Tag>
           </div>
         );
       },
@@ -309,6 +343,9 @@ const VenueManagement: React.FC = () => {
       title: t("托管机器"),
       dataIndex: "hosted_machine",
       width: 100,
+      align: "right" as const,
+      render: (value: number | null | undefined) =>
+        value == null ? "—" : <span className="tabular-nums">{Number(value).toLocaleString()}</span>,
     },
     {
       title: t("机型"),
@@ -324,6 +361,7 @@ const VenueManagement: React.FC = () => {
       title: t("操作"),
       key: "action",
       width: 120,
+      fixed: "right" as const,
       render: (_: any, record: Venue) => (
         <Space size="middle">
           <Button type="text" icon={<EditOutlined />} onClick={() => handleEdit(record)} />
@@ -410,6 +448,17 @@ const VenueManagement: React.FC = () => {
           </Select>
           <Select
             size="small"
+            placeholder={t("场地属性")}
+            allowClear
+            value={operationModeFilter}
+            onChange={(value) => setOperationModeFilter(value ?? null)}
+            className="w-32"
+          >
+            <Option value={1}>{t("代管")}</Option>
+            <Option value={2}>{t("托管")}</Option>
+          </Select>
+          <Select
+            size="small"
             placeholder={t("按状态筛选")}
             allowClear
             value={poolStatusFilter as any}
@@ -471,6 +520,7 @@ const VenueManagement: React.FC = () => {
       </div>
 
       <Table
+        className="[&_.ant-table-thead>tr>th]:!py-2 [&_.ant-table-tbody>tr>td]:!py-2"
         components={{ header: { cell: ResizableHeaderCell } }}
         columns={columns}
         dataSource={filteredVenues}
@@ -535,6 +585,12 @@ const VenueManagement: React.FC = () => {
           </Form.Item>
           <Form.Item name="agent_key" label={t("场地键值")}>
             <Input placeholder="agent_key" />
+          </Form.Item>
+          <Form.Item name="operation_mode" label={t("场地属性")} initialValue={1}>
+            <Select>
+              <Option value={1}>{t("代管")}</Option>
+              <Option value={2}>{t("托管")}</Option>
+            </Select>
           </Form.Item>
           <div className="grid grid-cols-1 gap-x-4 md:grid-cols-2">
             <Form.Item name="latitude" label={t("经度")} rules={[{ type: "number", min: -180, max: 180 }]}>

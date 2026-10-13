@@ -65,6 +65,7 @@ const emptyData = {
   name: "",
   pool_type: "",
   country: "",
+  owner_type: 2,
   status: 0, // 状态：0 关机，1 活跃，2 已撤场，3 入库
   hosted_machine: 0,
   // pool_category: "",
@@ -144,6 +145,8 @@ type MiningPoolTableRow = {
   hosted_machine?: number;
   status?: number;
   pool_category?: string;
+  operation_mode?: number;
+  owner_type?: number;
   theoretical_hashrate?: number | string;
   is_overclocked?: number | null;
   overclock_hashrate_per_machine?: number | null;
@@ -273,6 +276,8 @@ export default function MiningSettingPage() {
 
   const [searchTerm, setSearchTerm] = useState(""); // 新增搜索状态;
   const [statusFilter, setStatusFilter] = useState<StatusFilterValue>(null); // 状态筛选
+  const [operationModeFilter, setOperationModeFilter] = useState<number | null>(null);
+  const [ownerTypeFilter, setOwnerTypeFilter] = useState<number | null>(null);
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [excelUploadModalVisible, setExcelUploadModalVisible] = useState(false);
@@ -335,6 +340,7 @@ export default function MiningSettingPage() {
     pool_type?: string;
     status?: number;
     country?: string;
+    owner_type?: number;
     hosted_machine: number;
     pool_category?: string;
     theoretical_hashrate?: number;
@@ -519,13 +525,16 @@ export default function MiningSettingPage() {
         (
           item: {
             id: any;
+            venue_info?: { id: any; venue_name: any; operation_mode?: any };
             venue_name: any;
             venue_id: any;
             pool_name: any;
             country: any;
+            owner_type: any;
             hosted_machine: any;
             status: any;
             pool_category: any;
+            operation_mode: any;
             theoretical_hashrate: any;
             is_overclocked: any;
             overclock_hashrate_per_machine: any;
@@ -558,9 +567,12 @@ export default function MiningSettingPage() {
             venue_name: item.venue_info.venue_name,
             pool_name: item.pool_name,
             country: item.country,
+            owner_type: Number(item.owner_type ?? 2),
             hosted_machine: item.hosted_machine,
             status: item.status,
             pool_category: item.pool_category,
+            // operation_mode 属于场地信息；兼容后端平铺返回该字段的情况。
+            operation_mode: Number(item.venue_info?.operation_mode ?? item.operation_mode ?? 1),
             theoretical_hashrate: item.theoretical_hashrate,
             is_overclocked: item.is_overclocked,
             overclock_hashrate_per_machine: item.overclock_hashrate_per_machine,
@@ -704,44 +716,80 @@ export default function MiningSettingPage() {
         },
       },
       {
+        title: headerTitle(t("场地属性")),
+        dataIndex: "operation_mode",
+        key: "operation_mode",
+        width: 100,
+        render: (value: number | undefined) => {
+          const isHosted = Number(value) === 2;
+          return (
+            <Tag
+              style={
+                isHosted
+                  ? { marginInlineEnd: 0, color: "#2B64CB", background: "#EEF3FF", borderColor: "#B8C8FF" }
+                  : { marginInlineEnd: 0, color: "#C47B16", background: "#FFF7E6", borderColor: "#FFD49F" }
+              }
+            >
+              {isHosted ? t("托管") : t("代管")}
+            </Tag>
+          );
+        },
+      },
+      {
         title: headerTitle(t("子账户")),
         dataIndex: "pool_name",
         key: "pool_name",
         width: 200,
         // render: (text: any) => <span style={{ color: "#333" }}>{text}</span>,
-        render: (text: any, record: { venue_id?: any; pool_id?: any }) => (
-          // render: (text: any) => (
-          <Tooltip
-            title={text}
-            placement="top"
-            overlayInnerStyle={{ color: "white" }}
-            style={{ color: "white" }}
-          >
-            <div
-              style={{
-                width: "100%",
-                overflow: "hidden",
-                color: "#333",
-                textOverflow: "ellipsis",
-                whiteSpace: "nowrap",
-              }}
+        render: (text: any, record: { venue_id?: any; pool_id?: any; owner_type?: number }) => {
+          const ownerType = Number(record.owner_type ?? 2);
+          const ownerMeta =
+            ownerType === 0
+              ? { label: t("自营"), color: "#2F8F5B", background: "#F0FFF4", borderColor: "#B7E4C7" }
+              : ownerType === 1
+                ? { label: t("客户"), color: "#7C5CC4", background: "#F6F0FF", borderColor: "#D8C4FF" }
+                : { label: t("合资"), color: "#C47B16", background: "#FFF7E6", borderColor: "#FFD49F" };
+
+          return (
+            // render: (text: any) => (
+            <Tooltip
+              title={text}
+              placement="top"
+              overlayInnerStyle={{ color: "white" }}
+              style={{ color: "white" }}
             >
-              <Link
-                to={ROUTE_PATHS.miningDetail(record.venue_id, record.pool_id)}
-                className="text-blue-500 hover:underline"
+              <div
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 8,
+                  width: "100%",
+                  overflow: "hidden",
+                  color: "#333",
+                }}
               >
-                {text}
-              </Link>
-              {/* {text} */}
-            </div>
-          </Tooltip>
-        ),
-      },
-      {
-        title: headerTitle(t("场地类型")),
-        dataIndex: "pool_category",
-        key: "pool_category",
-        width: 75,
+                <Link
+                  to={ROUTE_PATHS.miningDetail(record.venue_id, record.pool_id)}
+                  className="text-blue-500 hover:underline"
+                  style={{ flex: 1, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}
+                >
+                  {text}
+                </Link>
+                <Tag
+                  style={{
+                    marginInlineEnd: 0,
+                    marginLeft: "auto",
+                    color: ownerMeta.color,
+                    background: ownerMeta.background,
+                    borderColor: ownerMeta.borderColor,
+                  }}
+                >
+                  {ownerMeta.label}
+                </Tag>
+              </div>
+            </Tooltip>
+          );
+        },
       },
       {
         title: headerTitle(t("所属国家")),
@@ -763,7 +811,7 @@ export default function MiningSettingPage() {
         title: headerTitle(t("状态")),
         dataIndex: "status",
         key: "status",
-        width: 130,
+        width: 90,
         render: (
           _text: any,
           record: {
@@ -1085,6 +1133,7 @@ export default function MiningSettingPage() {
   const handleNewMiningPool = async (values: MiningPool) => {
     const payload: MiningPool = {
       ...values,
+      owner_type: Number(values.owner_type ?? 2),
       theoretical_hashrate: String(values.theoretical_hashrate),
       is_overclocked: values.is_overclocked ?? 0,
       overclock_hashrate_per_machine:
@@ -1112,6 +1161,7 @@ export default function MiningSettingPage() {
       pool_name: data.pool_name,
       pool_type: poolType,
       country: data.country,
+      owner_type: Number(data.owner_type ?? 2),
       hosted_machine: Number(data.hosted_machine),
       status: data.status,
       pool_category: data.pool_category,
@@ -1243,7 +1293,11 @@ export default function MiningSettingPage() {
               ? Number(item.asset_switch_enabled) === 1
               : item.account_lease_status === statusFilter;
 
-      return matchesSearch && matchesCollection && matchesStatus;
+      const matchesOperationMode =
+        operationModeFilter === null || Number(item.operation_mode) === operationModeFilter;
+      const matchesOwnerType = ownerTypeFilter === null || Number(item.owner_type) === ownerTypeFilter;
+
+      return matchesSearch && matchesCollection && matchesStatus && matchesOperationMode && matchesOwnerType;
     })
     .sort((a: any, b: any) => {
       if (hashrateSortOrder) {
@@ -1268,113 +1322,166 @@ export default function MiningSettingPage() {
         style={{ background: "#fff", color: "grey", borderRadius: "0.5rem", padding: "20px 0px" }}
         className="longdataTable [&_.ant-table-tbody>tr>td.ant-table-cell]:!py-2"
       >
-        <Row gutter={[16, 16]} justify="space-between" align="middle" style={{ marginLeft: "8px" }}>
-          <Col xs={24} sm={24} md={12}>
-            <span style={{ marginRight: "15px", marginLeft: "10px" }}>
-              <Switch size="small" checked={showCollectionOnly} onChange={setShowCollectionOnly} />{" "}
-              {t("我的自选")}{" "}
-            </span>
-            <Radio.Group
-              size="small"
-              onChange={handlePoolCategoryChange}
-              value={poolCategory}
-              style={{ marginLeft: "10px", marginRight: "15px", fontSize: "13px" }}
+        <Row style={{ marginLeft: "8px", marginRight: "8px" }}>
+          <Col span={24}>
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                flexWrap: "nowrap",
+                gap: 12,
+                overflowX: "auto",
+                marginBottom: 16,
+                color: "#000",
+                padding: "0 2px",
+              }}
             >
-              <Radio.Button value="主矿池" style={{ fontSize: "12px" }}>
-                {t("主矿池")}
-              </Radio.Button>
-              <Radio.Button value="备用矿池" style={{ fontSize: "12px" }}>
-                {t("备用矿池")}
-              </Radio.Button>
-            </Radio.Group>
-
-            <ActionButton
-              label={t("添加矿池")}
-              size="small"
-              // @ts-ignore
-              initialValues={emptyData}
-              onSubmit={handleNewMiningPool}
-              FormComponent={EditForm}
-              mode={ActionButtonMode.ADD}
-            />
-          </Col>
-          <Col xs={24} sm={24} md={12} style={{ textAlign: "right" }}>
-            <div style={{ marginBottom: 16, marginRight: "0px", color: "#000" }}>
-              <Input
-                prefix={<SearchOutlined style={{ color: "rgba(0, 0, 0, 0.25)" }} size={18} />}
-                placeholder={t("请输入场地或子账户名")}
-                value={searchTerm}
-                size="middle"
-                onChange={handleSearch}
-                style={{ width: 250, fontSize: "12px", marginRight: "15px" }} // 设定宽度
-                className="text-sm"
-              />
-              <Select
-                size="middle"
-                className="small-select"
-                placeholder={t("筛选状态")}
-                allowClear
-                value={statusFilter}
-                onChange={handleStatusFilterChange}
-                dropdownClassName="small-select-dropdown"
-                style={{ width: 120, fontSize: "12px", marginRight: "15px", textAlign: "left" }}
-              >
-                <Option value={1} style={{ fontSize: "12px", textAlign: "left" }}>
-                  <span className="status-dot status-active" />
-                  <span>{t("活跃")}</span>
-                </Option>
-                <Option value={0} style={{ fontSize: "12px", textAlign: "left" }}>
-                  <span className="status-dot status-removed" />
-                  <span>{t("关机")}</span>
-                </Option>
-                <Option value={2} style={{ fontSize: "12px", textAlign: "left" }}>
-                  <span className="status-dot status-offline " />
-                  <span>{t("已撤场")}</span>
-                </Option>
-                <Option value={3} style={{ fontSize: "12px", textAlign: "left" }}>
-                  <span className="status-dot status-active" />
-                  <span>{t("入库")}</span>
-                </Option>
-                <Option value={LEASE_STATUS_PENDING_REMOVAL} style={{ fontSize: "12px", textAlign: "left" }}>
-                  <span style={{ color: LEASE_STATUS_COLOR_MAP[LEASE_STATUS_PENDING_REMOVAL] }}>
-                    {t("待撤场")}
-                  </span>
-                </Option>
-                <Option value={LEASE_STATUS_PARTIAL} style={{ fontSize: "12px", textAlign: "left" }}>
-                  <span style={{ color: LEASE_STATUS_COLOR_MAP[LEASE_STATUS_PARTIAL] }}>{t("部分租赁")}</span>
-                </Option>
-                <Option value={LEASE_STATUS_FULL} style={{ fontSize: "12px", textAlign: "left" }}>
-                  <span style={{ color: LEASE_STATUS_COLOR_MAP[LEASE_STATUS_FULL] }}>{t("全部租赁")}</span>
-                </Option>
-                <Option value={ASSET_SWITCH_ENABLED_FILTER} style={{ fontSize: "12px", textAlign: "left" }}>
-                  <span style={{ color: "#2563eb" }}>{t("资产接管已开启")}</span>
-                </Option>
-              </Select>
-
-              <Button
-                type="primary"
+              <span style={{ flexShrink: 0 }}>
+                <Switch size="small" checked={showCollectionOnly} onChange={setShowCollectionOnly} />{" "}
+                {t("我的自选")}{" "}
+              </span>
+              <Radio.Group
                 size="small"
-                // ghost
-                icon={<ImportOutlined />}
-                style={{ marginRight: "15px" }}
-                onClick={showExcelUploadModal}
+                onChange={handlePoolCategoryChange}
+                value={poolCategory}
+                style={{ flexShrink: 0, fontSize: "13px" }}
               >
-                {t("导入托管信息")}
-              </Button>
+                <Radio.Button value="主矿池" style={{ fontSize: "12px" }}>
+                  {t("主矿池")}
+                </Radio.Button>
+                <Radio.Button value="备用矿池" style={{ fontSize: "12px" }}>
+                  {t("备用矿池")}
+                </Radio.Button>
+              </Radio.Group>
 
-              <Button
-                type="primary"
-                // icon={<DownloadOutlined />}
-                icon={<ExportOutlined />}
-                // size="middle"
-                // ghost
-                size="small"
-                className={"exportButton"}
-                style={{ marginLeft: "0px", color: "#fff", marginRight: "8px" }}
-                onClick={onDownload}
+              <span style={{ display: "inline-flex", flexShrink: 0 }}>
+                <ActionButton
+                  label={t("添加矿池")}
+                  size="small"
+                  // @ts-ignore
+                  initialValues={emptyData}
+                  onSubmit={handleNewMiningPool}
+                  FormComponent={EditForm}
+                  mode={ActionButtonMode.ADD}
+                />
+              </span>
+              <div
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  flexShrink: 0,
+                  gap: 12,
+                  marginLeft: "auto",
+                }}
               >
-                {t("导出")}
-              </Button>
+                <Input
+                  prefix={<SearchOutlined style={{ color: "rgba(0, 0, 0, 0.25)" }} size={18} />}
+                  placeholder={t("筛选场地和子账户")}
+                  value={searchTerm}
+                  size="middle"
+                  onChange={handleSearch}
+                  style={{ flexShrink: 0, width: 220, fontSize: "12px" }}
+                  className="text-sm"
+                />
+                <Select
+                  size="middle"
+                  className="small-select"
+                  placeholder={t("筛选状态")}
+                  allowClear
+                  value={statusFilter}
+                  onChange={handleStatusFilterChange}
+                  dropdownClassName="small-select-dropdown"
+                  style={{ flexShrink: 0, width: 120, fontSize: "12px", textAlign: "left" }}
+                >
+                  <Option value={1} style={{ fontSize: "12px", textAlign: "left" }}>
+                    <span className="status-dot status-active" />
+                    <span>{t("活跃")}</span>
+                  </Option>
+                  <Option value={0} style={{ fontSize: "12px", textAlign: "left" }}>
+                    <span className="status-dot status-removed" />
+                    <span>{t("关机")}</span>
+                  </Option>
+                  <Option value={2} style={{ fontSize: "12px", textAlign: "left" }}>
+                    <span className="status-dot status-offline " />
+                    <span>{t("已撤场")}</span>
+                  </Option>
+                  <Option value={3} style={{ fontSize: "12px", textAlign: "left" }}>
+                    <span className="status-dot status-active" />
+                    <span>{t("入库")}</span>
+                  </Option>
+                  <Option
+                    value={LEASE_STATUS_PENDING_REMOVAL}
+                    style={{ fontSize: "12px", textAlign: "left" }}
+                  >
+                    <span style={{ color: LEASE_STATUS_COLOR_MAP[LEASE_STATUS_PENDING_REMOVAL] }}>
+                      {t("待撤场")}
+                    </span>
+                  </Option>
+                  <Option value={LEASE_STATUS_PARTIAL} style={{ fontSize: "12px", textAlign: "left" }}>
+                    <span style={{ color: LEASE_STATUS_COLOR_MAP[LEASE_STATUS_PARTIAL] }}>
+                      {t("部分租赁")}
+                    </span>
+                  </Option>
+                  <Option value={LEASE_STATUS_FULL} style={{ fontSize: "12px", textAlign: "left" }}>
+                    <span style={{ color: LEASE_STATUS_COLOR_MAP[LEASE_STATUS_FULL] }}>{t("全部租赁")}</span>
+                  </Option>
+                  <Option value={ASSET_SWITCH_ENABLED_FILTER} style={{ fontSize: "12px", textAlign: "left" }}>
+                    <span style={{ color: "#2563eb" }}>{t("资产接管已开启")}</span>
+                  </Option>
+                </Select>
+                <Select
+                  size="middle"
+                  className="small-select"
+                  placeholder={t("场地属性")}
+                  allowClear
+                  value={operationModeFilter}
+                  onChange={(value) => setOperationModeFilter(value ?? null)}
+                  dropdownClassName="small-select-dropdown"
+                  style={{ flexShrink: 0, width: 120, fontSize: "12px", textAlign: "left" }}
+                >
+                  <Option value={1}>{t("代管")}</Option>
+                  <Option value={2}>{t("托管")}</Option>
+                </Select>
+                <Select
+                  size="middle"
+                  className="small-select"
+                  placeholder={t("子账户属性")}
+                  allowClear
+                  value={ownerTypeFilter}
+                  onChange={(value) => setOwnerTypeFilter(value ?? null)}
+                  dropdownClassName="small-select-dropdown"
+                  style={{ flexShrink: 0, width: 130, fontSize: "12px", textAlign: "left" }}
+                >
+                  <Option value={0}>{t("自营")}</Option>
+                  <Option value={1}>{t("客户")}</Option>
+                  <Option value={2}>{t("合资")}</Option>
+                </Select>
+
+                <Button
+                  type="primary"
+                  size="small"
+                  // ghost
+                  icon={<ImportOutlined />}
+                  style={{ flexShrink: 0 }}
+                  onClick={showExcelUploadModal}
+                >
+                  {t("导入托管信息")}
+                </Button>
+
+                <Button
+                  type="primary"
+                  // icon={<DownloadOutlined />}
+                  icon={<ExportOutlined />}
+                  // size="middle"
+                  // ghost
+                  size="small"
+                  className={"exportButton"}
+                  style={{ flexShrink: 0, color: "#fff" }}
+                  onClick={onDownload}
+                >
+                  {t("导出")}
+                </Button>
+              </div>
             </div>
           </Col>
         </Row>
@@ -1638,6 +1745,18 @@ export default function MiningSettingPage() {
               rules={[{ required: true, message: "Please input your country!" }]}
             >
               <Input />
+            </Form.Item>
+            <Form.Item<FieldType>
+              label={t("账户归属")}
+              name="owner_type"
+              initialValue={2}
+              rules={[{ required: true, message: t("请选择账户归属") }]}
+            >
+              <Select>
+                <Option value={0}>{t("自营")}</Option>
+                <Option value={1}>{t("客户")}</Option>
+                <Option value={2}>{t("合资")}</Option>
+              </Select>
             </Form.Item>
             <Form.Item<FieldType>
               label={t("托管机器")}

@@ -133,6 +133,14 @@ export default function EditForm({ initialValues, onFormInstanceReady }: EditFor
         </Form.Item>
       ))}
 
+      <Form.Item label={t("账户归属")} name="owner_type" initialValue={2} rules={[{ required: true }]}>
+        <Select>
+          <Option value={0}>{t("自营")}</Option>
+          <Option value={1}>{t("客户")}</Option>
+          <Option value={2}>{t("合资")}</Option>
+        </Select>
+      </Form.Item>
+
       <Form.Item
         label={t("是否变频")}
         name="is_overclocked"

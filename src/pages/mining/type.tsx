@@ -6,6 +6,7 @@ export type MiningPool = {
   pool_name: string;
   pool_type: string;
   country: string;
+  owner_type: number;
   // pool_category: string;
   theoretical_hashrate: string;
   is_overclocked?: number | null;
@@ -22,6 +23,7 @@ export type MiningPoolUpdate = {
   pool_name: string;
   pool_type: string;
   country: string;
+  owner_type: number;
   hosted_machine: number;
   status: number;
   pool_category: string;

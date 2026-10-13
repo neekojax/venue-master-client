@@ -7,6 +7,7 @@ export type VenueInfoParam = {
   latitude?: number | null;
   longitude?: number | null;
   agent_key: string;
+  operation_mode: number;
   hosted_machine: number;
   miner_type: string;
 };
