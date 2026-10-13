@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import {
+  CopyOutlined,
   DeleteOutlined,
   EditOutlined,
   ImportOutlined,
@@ -14,6 +15,7 @@ import { useSelector, useSettingsStore } from "@/stores";
 
 import { t } from "@/locales";
 import ResizableHeaderCell from "@/pages/custody-statistics/statistics/components/ResizableHeaderCell";
+import { useMiningPoolList } from "@/pages/mining/hook.ts";
 import { uploadVenueExcel } from "@/pages/venue/api.tsx";
 import { useVenueList, useVenueNew, useVenueUpdate } from "@/pages/venue/hook/hook.ts";
 import { VenueInfoParam } from "@/pages/venue/type.tsx";
@@ -26,6 +28,8 @@ interface Pool {
   pool_type: string;
   pool_name: string;
   status: number; // 活跃
+  account_lease_status?: "全部租赁" | "部分租赁" | "部分租赁算力" | "非租赁" | "待撤场";
+  leased_power?: number | null;
 }
 interface Venue {
   id: number;
@@ -43,6 +47,8 @@ interface Venue {
   pools: Pool[];
 }
 
+type PoolStatusFilter = number | "待撤场" | "部分租赁" | "全部租赁" | null;
+
 const VenueManagement: React.FC = () => {
   useAuthRedirect();
   const { poolType } = useSettingsStore(useSelector(["poolType"]));
@@ -52,6 +58,8 @@ const VenueManagement: React.FC = () => {
   });
 
   const { data } = useVenueList(poolType);
+  const { data: mainPoolData } = useMiningPoolList(poolType, "主矿池");
+  const { data: backupPoolData } = useMiningPoolList(poolType, "备用矿池");
   const [excelUploadModalVisible, setExcelUploadModalVisible] = useState(false);
   // const [data] = useState<any>();
   const [venues, setVenues] = useState<Venue[]>([]);
@@ -60,7 +68,7 @@ const VenueManagement: React.FC = () => {
   const [searchText, setSearchText] = useState("");
   const [countryFilter, setCountryFilter] = useState<string | null>(null);
   const [operationModeFilter, setOperationModeFilter] = useState<number | null>(null);
-  const [poolStatusFilter, setPoolStatusFilter] = useState<number | null>(null);
+  const [poolStatusFilter, setPoolStatusFilter] = useState<PoolStatusFilter>(null);
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [currentVenue, setCurrentVenue] = useState<Venue | null>(null);
   const [form] = Form.useForm();
@@ -73,6 +81,15 @@ const VenueManagement: React.FC = () => {
   // 当获取到数据时更新 venues 和 filteredVenues
   useEffect(() => {
     if (data) {
+      const leaseInfoByPoolId = new Map<number, Pick<Pool, "account_lease_status" | "leased_power">>(
+        [...(mainPoolData?.data || []), ...(backupPoolData?.data || [])].map((pool: any) => [
+          Number(pool.id),
+          {
+            account_lease_status: pool.account_lease_status,
+            leased_power: pool.leased_power,
+          },
+        ]),
+      );
       // console.log(data);
       if (Array.isArray(data.data)) {
         const formattedData = data.data.map((item: any) => ({
@@ -88,7 +105,10 @@ const VenueManagement: React.FC = () => {
           operation_mode: item.operation_mode ?? 1,
           hosted_machine: item.hosted_machine,
           miner_type: item.miner_type,
-          pools: item.pools || [], // 补充池数据，默认空数组
+          pools: (item.pools || []).map((pool: Pool) => ({
+            ...pool,
+            ...leaseInfoByPoolId.get(Number(pool.pool_id)),
+          })),
         }));
         setVenues(formattedData);
         setFilteredVenues(formattedData);
@@ -96,7 +116,7 @@ const VenueManagement: React.FC = () => {
         message.error(t("获取场地数据失败: {{message}}", { message: data.data.message }));
       }
     }
-  }, [data]);
+  }, [backupPoolData, data, mainPoolData]);
 
   // 搜索和过滤
   useEffect(() => {
@@ -118,7 +138,18 @@ const VenueManagement: React.FC = () => {
     }
     if (poolStatusFilter !== null) {
       result = result.filter(
-        (item) => Array.isArray(item.pools) && item.pools.some((p) => Number(p?.status) === poolStatusFilter),
+        (item) =>
+          Array.isArray(item.pools) &&
+          item.pools.some((pool) =>
+            typeof poolStatusFilter === "number"
+              ? Number(pool?.status) === poolStatusFilter &&
+                (poolStatusFilter !== 1 ||
+                  !["待撤场", "部分租赁", "部分租赁算力", "全部租赁"].includes(
+                    pool.account_lease_status || "",
+                  ))
+              : pool.account_lease_status === poolStatusFilter ||
+                (poolStatusFilter === "部分租赁" && pool.account_lease_status === "部分租赁算力"),
+          ),
       );
     }
     setFilteredVenues(result);
@@ -228,6 +259,25 @@ const VenueManagement: React.FC = () => {
   const handleModalCancel = () => {
     setIsModalVisible(false);
   };
+
+  const handleCopyVenueName = async (venueName: string) => {
+    try {
+      if (navigator.clipboard?.writeText) {
+        await navigator.clipboard.writeText(venueName);
+      } else {
+        const textarea = document.createElement("textarea");
+        textarea.value = venueName;
+        document.body.appendChild(textarea);
+        textarea.select();
+        document.execCommand("copy");
+        document.body.removeChild(textarea);
+      }
+      message.success(t("已复制"));
+    } catch {
+      message.error(t("复制失败"));
+    }
+  };
+
   // 表格列定义
   const columns = [
     {
@@ -257,13 +307,26 @@ const VenueManagement: React.FC = () => {
         const isHosted = Number(record.operation_mode) === 2;
         return (
           <div style={{ display: "flex", alignItems: "center", gap: 8, width: "100%", overflow: "hidden" }}>
-            <Link
-              to={`/venue/detail/${record.id}`}
-              className="text-blue-500 hover:underline"
-              style={{ flex: 1, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}
-            >
-              {text}
-            </Link>
+            <div style={{ display: "flex", alignItems: "center", flex: 1, minWidth: 0, gap: 4 }}>
+              <Link
+                to={`/venue/detail/${record.id}`}
+                className="text-blue-500 hover:underline"
+                style={{ flex: 1, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}
+              >
+                {text}
+              </Link>
+              <Button
+                type="text"
+                size="small"
+                aria-label={t("复制")}
+                icon={<CopyOutlined />}
+                onClick={(event) => {
+                  event.preventDefault();
+                  event.stopPropagation();
+                  void handleCopyVenueName(text);
+                }}
+              />
+            </div>
             <Tag
               style={
                 isHosted
@@ -300,15 +363,73 @@ const VenueManagement: React.FC = () => {
             {Array.isArray(pools) &&
               pools.map((pool, idx) => {
                 const s = Number(pool?.status ?? -1);
-                const color = s === 1 ? "green" : s === 0 ? "red" : s === 2 ? "orange" : "#666";
-                const text = s === 1 ? t("活跃") : s === 0 ? t("关机") : s === 2 ? t("已撤场") : t("未知");
+                const operationalStatus =
+                  s === 1
+                    ? { text: t("活跃"), color: "green" }
+                    : s === 0
+                      ? { text: t("关机"), color: "red" }
+                      : s === 2
+                        ? { text: t("已撤场"), color: "orange" }
+                        : s === 3
+                          ? { text: t("入库"), color: "#1677ff" }
+                          : { text: "-", color: "#999" };
+                const leaseStatus =
+                  pool.account_lease_status === "部分租赁算力" ? "部分租赁" : pool.account_lease_status;
+                const shouldHideOperationalStatus =
+                  leaseStatus === "待撤场" || leaseStatus === "部分租赁" || leaseStatus === "全部租赁";
+                const shouldShowLeaseStatus = leaseStatus && leaseStatus !== "非租赁";
+                const leaseStatusColor =
+                  leaseStatus === "全部租赁"
+                    ? "#7c3aed"
+                    : leaseStatus === "部分租赁"
+                      ? "#d97706"
+                      : leaseStatus === "待撤场"
+                        ? "#d9480f"
+                        : "#6b7280";
+                const leasePower = Number(pool.leased_power);
+                const leasePowerText =
+                  leaseStatus === "部分租赁" && pool.leased_power != null && Number.isFinite(leasePower)
+                    ? t("租赁算力 {{value}}", { value: `${leasePower.toFixed(2)} P` })
+                    : "";
                 return (
                   <span
                     key={`${pool.pool_id}-${idx}`}
-                    style={{ whiteSpace: "nowrap", display: "block", width: "100%" }}
+                    style={{ display: "flex", alignItems: "center", gap: 8, lineHeight: 1.4, width: "100%" }}
                   >
-                    <span style={{ color: "#333" }}>{pool.pool_name}</span>
-                    <span style={{ color, marginLeft: 4 }}>（{text}）</span>
+                    <span
+                      style={{
+                        flex: 1,
+                        minWidth: 0,
+                        overflow: "hidden",
+                        textOverflow: "ellipsis",
+                        whiteSpace: "nowrap",
+                        color: "#333",
+                      }}
+                    >
+                      {pool.pool_name}
+                    </span>
+                    <span
+                      style={{
+                        display: "flex",
+                        flexDirection: "column",
+                        alignItems: "flex-end",
+                        flexShrink: 0,
+                      }}
+                    >
+                      {!shouldHideOperationalStatus ? (
+                        <span style={{ color: operationalStatus.color, fontSize: 12 }}>
+                          {operationalStatus.text}
+                        </span>
+                      ) : null}
+                      {shouldShowLeaseStatus ? (
+                        <>
+                          <span style={{ color: leaseStatusColor, fontSize: 12 }}>{t(leaseStatus)}</span>
+                          {leasePowerText ? (
+                            <span className="text-xs text-gray-500 tabular-nums">{leasePowerText}</span>
+                          ) : null}
+                        </>
+                      ) : null}
+                    </span>
                   </span>
                 );
               })}
@@ -330,14 +451,27 @@ const VenueManagement: React.FC = () => {
       title: t("经纬度"),
       key: "coordinates",
       width: 200,
-      render: (_: unknown, record: Venue) => (
-        <span className="whitespace-nowrap tabular-nums">
-          {[record.latitude, record.longitude]
-            .filter((value): value is number => value != null)
-            .map((value) => `${Number(Number(value).toFixed(6))}°`)
-            .join(" / ")}
-        </span>
-      ),
+      render: (_: unknown, record: Venue) => {
+        // 接口约定：latitude 存经度，longitude 存纬度。
+        const latitude = record.longitude;
+        const longitude = record.latitude;
+        const formatCoordinate = (value: number, positiveDirection: string, negativeDirection: string) =>
+          `${Math.abs(Number(value)).toFixed(4)}°${Number(value) >= 0 ? positiveDirection : negativeDirection}`;
+
+        if (latitude == null && longitude == null) return <span>—</span>;
+
+        return (
+          <span className="whitespace-nowrap tabular-nums">
+            {longitude != null ? (
+              <span style={{ color: "#d97706" }}>{formatCoordinate(longitude, "E", "W")}</span>
+            ) : null}
+            {latitude != null && longitude != null ? ", " : ""}
+            {latitude != null ? (
+              <span style={{ color: "#1677ff" }}>{formatCoordinate(latitude, "N", "S")}</span>
+            ) : null}
+          </span>
+        );
+      },
     },
     {
       title: t("托管机器"),
@@ -503,6 +637,15 @@ const VenueManagement: React.FC = () => {
                 }}
               />
               {t("已撤场")}
+            </Option>
+            <Option value="待撤场">
+              <span style={{ color: "#d9480f" }}>{t("待撤场")}</span>
+            </Option>
+            <Option value="部分租赁">
+              <span style={{ color: "#d97706" }}>{t("部分租赁")}</span>
+            </Option>
+            <Option value="全部租赁">
+              <span style={{ color: "#7c3aed" }}>{t("全部租赁")}</span>
             </Option>
           </Select>
 
