@@ -667,7 +667,7 @@ const VenueManagement: React.FC = () => {
       </div>
 
       <Table
-        className="[&_.ant-table-thead>tr>th]:!py-2 [&_.ant-table-tbody>tr>td]:!py-2"
+        className="[&_.ant-table-thead>tr>th]:!py-2 [&_.ant-table-tbody>tr:not(.ant-table-measure-row)>td]:!py-2"
         components={{ header: { cell: ResizableHeaderCell } }}
         columns={columns}
         dataSource={filteredVenues}
