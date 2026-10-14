@@ -356,7 +356,7 @@ const VenueManagement: React.FC = () => {
     {
       title: t("子账户"),
       dataIndex: "pools",
-      width: 200,
+      width: 260,
       render: (pools: Pool[]) => {
         return (
           <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
@@ -440,11 +440,13 @@ const VenueManagement: React.FC = () => {
     {
       title: t("场地代码"),
       dataIndex: "venue_code",
+      width: 180,
       sorter: (a: Venue, b: Venue) => (a.venue_code || "").localeCompare(b.venue_code || ""),
     },
     {
       title: t("所在国家"),
       dataIndex: "country",
+      width: 90,
       sorter: (a: Venue, b: Venue) => (a.country || "").localeCompare(b.country || ""),
     },
     {
@@ -482,24 +484,26 @@ const VenueManagement: React.FC = () => {
         value == null ? "—" : <span className="tabular-nums">{Number(value).toLocaleString()}</span>,
     },
     {
-      title: t("机型"),
-      dataIndex: "miner_type",
-      width: 100,
-    },
-    {
-      title: t("详细地址"),
-      dataIndex: "address",
-      width: 200,
-    },
-    {
       title: t("操作"),
       key: "action",
       width: 120,
       fixed: "right" as const,
       render: (_: any, record: Venue) => (
         <Space size="middle">
-          <Button type="text" icon={<EditOutlined />} onClick={() => handleEdit(record)} />
-          <Button type="text" icon={<DeleteOutlined />} onClick={() => handleDelete(record.id)} />
+          <Button
+            type="text"
+            icon={<EditOutlined />}
+            aria-label={t("编辑")}
+            style={{ color: "#1677ff" }}
+            onClick={() => handleEdit(record)}
+          />
+          <Button
+            type="text"
+            danger
+            icon={<DeleteOutlined />}
+            aria-label={t("删除")}
+            onClick={() => handleDelete(record.id)}
+          />
         </Space>
       ),
     },

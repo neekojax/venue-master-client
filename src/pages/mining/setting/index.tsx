@@ -111,6 +111,24 @@ const LEASE_STATUS_COLOR_MAP: Record<AccountLeaseStatus, string> = {
   待撤场: "#d9480f",
 };
 
+const copyText = async (text: string) => {
+  try {
+    if (navigator.clipboard?.writeText) {
+      await navigator.clipboard.writeText(text);
+    } else {
+      const textarea = document.createElement("textarea");
+      textarea.value = text;
+      document.body.appendChild(textarea);
+      textarea.select();
+      document.execCommand("copy");
+      document.body.removeChild(textarea);
+    }
+    message.success(t("已复制"));
+  } catch {
+    message.error(t("复制失败"));
+  }
+};
+
 const getOperationalStatusMeta = (status?: number) => {
   if (status === 1) {
     return { text: t("活跃"), color: "green" };
@@ -690,6 +708,17 @@ export default function MiningSettingPage() {
                 >
                   {text}
                 </Link>
+                <Button
+                  type="text"
+                  size="small"
+                  aria-label={t("复制")}
+                  icon={<CopyOutlined />}
+                  onClick={(event) => {
+                    event.preventDefault();
+                    event.stopPropagation();
+                    void copyText(text);
+                  }}
+                />
 
                 {/* 收藏按钮 */}
                 <FavoriteButton
@@ -775,6 +804,17 @@ export default function MiningSettingPage() {
                 >
                   {text}
                 </Link>
+                <Button
+                  type="text"
+                  size="small"
+                  aria-label={t("复制")}
+                  icon={<CopyOutlined />}
+                  onClick={(event) => {
+                    event.preventDefault();
+                    event.stopPropagation();
+                    void copyText(text);
+                  }}
+                />
                 <Tag
                   style={{
                     marginInlineEnd: 0,
