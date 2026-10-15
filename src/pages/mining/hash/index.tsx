@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { FaAdn, FaFish } from "react-icons/fa6";
 import { Link } from "react-router-dom";
 import { ExportOutlined, LineChartOutlined, SearchOutlined } from "@ant-design/icons";
-import { Button, Col, Input, Radio, Row, Spin, Switch, Table, Tag, Tooltip } from "antd";
+import { Button, Col, Input, Radio, Row, Select, Spin, Switch, Table, Tag, Tooltip } from "antd";
 // import EditTable from "@/components/edit-table";
 import { FavoriteButton } from "@/components/FavoriteButton";
 import { ROUTE_PATHS } from "@/constants/common";
@@ -17,6 +17,7 @@ import ResizableHeaderCell from "@/pages/custody-statistics/statistics/component
 import { useMiningHashRateList, useMiningPoolList } from "@/pages/mining/hook.ts";
 
 const StoragePrefix = "mining-hash";
+const { Option } = Select;
 
 export default function MiningHashRatePage() {
   useAuthRedirect();
@@ -49,6 +50,8 @@ export default function MiningHashRatePage() {
 
   const [tableData, setTableData] = useState<any>([]);
   const [searchTerm, setSearchTerm] = useState(""); // 新增搜索状态
+  const [operationModeFilter, setOperationModeFilter] = useState<number | null>(null);
+  const [ownerTypeFilter, setOwnerTypeFilter] = useState<number | null>(null);
 
   useEffect(() => {
     if (hashData && hashData.data) {
@@ -488,14 +491,22 @@ export default function MiningHashRatePage() {
   const filteredData = tableData
     .filter((item: { [key: string]: any }) => {
       // 1️⃣ 搜索词过滤
-      const matchesSearch = Object.values(item).some((value) =>
-        String(value).toLowerCase().includes(searchTerm.toLowerCase()),
-      );
+      const keyword = searchTerm.trim().toLowerCase();
+      const venueAttribute = Number(item.operation_mode) === 2 ? t("托管") : t("代管");
+      const accountAttribute =
+        Number(item.owner_type) === 0 ? t("自营") : Number(item.owner_type) === 1 ? t("客户") : t("合资");
+      const matchesSearch =
+        keyword === "" ||
+        Object.values(item).some((value) => String(value).toLowerCase().includes(keyword)) ||
+        [venueAttribute, accountAttribute].some((value) => value.toLowerCase().includes(keyword));
 
       // 2️⃣ 收藏过滤
       const matchesCollection = !showCollectionOnly || item.collection === 1;
+      const matchesOperationMode =
+        operationModeFilter === null || Number(item.operation_mode) === operationModeFilter;
+      const matchesOwnerType = ownerTypeFilter === null || Number(item.owner_type) === ownerTypeFilter;
 
-      return matchesSearch && matchesCollection;
+      return matchesSearch && matchesCollection && matchesOperationMode && matchesOwnerType;
     })
     .sort((a: any, b: any) => {
       const nameA = a.venue_name.toLowerCase();
@@ -538,12 +549,37 @@ export default function MiningHashRatePage() {
           <Col xs={24} sm={24} md={12} style={{ textAlign: "right" }}>
             <Input
               prefix={<SearchOutlined />}
-              placeholder={t("搜索")}
+              placeholder={t("搜索场地或子账户")}
               size="middle"
               value={searchTerm}
               onChange={handleSearch}
-              style={{ width: "250px", marginRight: "20px" }}
+              style={{ width: "220px", marginRight: "12px" }}
             />
+            <Select
+              size="middle"
+              className="text-sm [&_.ant-select-selection-item]:!text-[12px] [&_.ant-select-selection-placeholder]:!text-[12px]"
+              placeholder={t("场地属性")}
+              allowClear
+              value={operationModeFilter}
+              onChange={(value) => setOperationModeFilter(value ?? null)}
+              style={{ width: 120, marginRight: 12, textAlign: "left", fontSize: 12 }}
+            >
+              <Option value={1}>{t("代管")}</Option>
+              <Option value={2}>{t("托管")}</Option>
+            </Select>
+            <Select
+              size="middle"
+              className="text-sm [&_.ant-select-selection-item]:!text-[12px] [&_.ant-select-selection-placeholder]:!text-[12px]"
+              placeholder={t("子账户属性")}
+              allowClear
+              value={ownerTypeFilter}
+              onChange={(value) => setOwnerTypeFilter(value ?? null)}
+              style={{ width: 130, marginRight: 12, textAlign: "left", fontSize: 12 }}
+            >
+              <Option value={0}>{t("自营")}</Option>
+              <Option value={1}>{t("客户")}</Option>
+              <Option value={2}>{t("合资")}</Option>
+            </Select>
 
             <Button size="middle" icon={<ExportOutlined />} onClick={onDownload}>
               {t("导出")}
