@@ -14,7 +14,7 @@ import "./VenueTabs.css";
 
 import { t } from "@/locales";
 import ResizableHeaderCell from "@/pages/custody-statistics/statistics/components/ResizableHeaderCell";
-import { useMiningHashRateList } from "@/pages/mining/hook.ts";
+import { useMiningHashRateList, useMiningPoolList } from "@/pages/mining/hook.ts";
 
 const StoragePrefix = "mining-hash";
 
@@ -29,6 +29,7 @@ export default function MiningHashRatePage() {
   });
 
   const { data: hashData, isLoading: isLoadingPools } = useMiningHashRateList(poolType, poolCategory);
+  const { data: poolData } = useMiningPoolList(poolType, poolCategory);
 
   const [columns, setColumns] = useState<any>([]);
   const [venueNameColumnWidth, setVenueNameColumnWidth] = useState<number>(() => {
@@ -51,6 +52,15 @@ export default function MiningHashRatePage() {
 
   useEffect(() => {
     if (hashData && hashData.data) {
+      const accountAttributesByPoolId = new Map<string, { operation_mode: number; owner_type: number }>(
+        (poolData?.data || []).map((pool: any) => [
+          String(pool.id),
+          {
+            operation_mode: Number(pool.venue_info?.operation_mode ?? pool.operation_mode ?? 1),
+            owner_type: Number(pool.owner_type ?? 2),
+          },
+        ]),
+      );
       const newData = hashData.data.map(
         (
           item: {
@@ -74,10 +84,14 @@ export default function MiningHashRatePage() {
             update_time: any;
             link: any;
             collection: any;
+            operation_mode?: any;
+            owner_type?: any;
+            venue_info?: { operation_mode?: any };
           },
           index: any,
         ) => {
           const resolvedPoolId = item.pool_id ?? item.poolId ?? item["Pool ID"] ?? item.id;
+          const accountAttributes = accountAttributesByPoolId.get(String(resolvedPoolId));
 
           return {
             key: resolvedPoolId ?? `${item.venue_id}-${item.pool_name}-${index}`,
@@ -86,6 +100,13 @@ export default function MiningHashRatePage() {
             serialNumber: index + 1,
             venue_name: item.venue_name,
             pool_name: item.pool_name,
+            operation_mode: Number(
+              item.venue_info?.operation_mode ??
+                item.operation_mode ??
+                accountAttributes?.operation_mode ??
+                1,
+            ),
+            owner_type: Number(item.owner_type ?? accountAttributes?.owner_type ?? 2),
             current_hash: item.current_hash,
             online: item.online,
             offline: item.offline,
@@ -106,7 +127,7 @@ export default function MiningHashRatePage() {
     } else {
       setTableData([]);
     }
-  }, [hashData]);
+  }, [hashData, poolData]);
 
   // 表头定义
   useEffect(() => {
@@ -142,8 +163,9 @@ export default function MiningHashRatePage() {
             },
           }) as any,
         // render: (text: any) => <span style={{ color: "#333" }}>{text}</span>,
-        render: (text: string, record: { venue_id?: any; collection?: any }) => {
+        render: (text: string, record: { venue_id?: any; collection?: any; operation_mode?: number }) => {
           const isSpecialVenue = text === "Arct-HF01-J XP-AR-US" || text === "ARCT Technologies-HF02-AR-US";
+          const isHosted = Number(record.operation_mode) === 2;
           return (
             <Tooltip
               title={text}
@@ -174,6 +196,26 @@ export default function MiningHashRatePage() {
                 >
                   {text}
                 </Link>
+
+                <Tag
+                  style={
+                    isHosted
+                      ? {
+                          marginInlineEnd: 0,
+                          color: "#2B64CB",
+                          background: "#EEF3FF",
+                          borderColor: "#B8C8FF",
+                        }
+                      : {
+                          marginInlineEnd: 0,
+                          color: "#C47B16",
+                          background: "#FFF7E6",
+                          borderColor: "#FFD49F",
+                        }
+                  }
+                >
+                  {isHosted ? t("托管") : t("代管")}
+                </Tag>
 
                 {/* 收藏按钮 */}
                 <FavoriteButton
@@ -206,26 +248,50 @@ export default function MiningHashRatePage() {
         responsive: ["xs", "sm", "md"], // 适配所有屏幕
         width: "100px",
         // render: (text: any) => <span style={{ color: "#333" }}>{text}</span>,
-        render: (text: any) => (
-          <Tooltip
-            title={text}
-            placement="top"
-            overlayInnerStyle={{ color: "white" }}
-            style={{ color: "white" }}
-          >
-            <div
-              style={{
-                width: "100%",
-                overflow: "hidden",
-                color: "#333",
-                textOverflow: "ellipsis",
-                whiteSpace: "nowrap",
-              }}
+        render: (text: any, record: { owner_type?: number }) => {
+          const ownerType = Number(record.owner_type ?? 2);
+          const ownerMeta =
+            ownerType === 0
+              ? { label: t("自营"), color: "#2F8F5B", background: "#F0FFF4", borderColor: "#B7E4C7" }
+              : ownerType === 1
+                ? { label: t("客户"), color: "#7C5CC4", background: "#F6F0FF", borderColor: "#D8C4FF" }
+                : { label: t("合资"), color: "#C47B16", background: "#FFF7E6", borderColor: "#FFD49F" };
+
+          return (
+            <Tooltip
+              title={text}
+              placement="top"
+              overlayInnerStyle={{ color: "white" }}
+              style={{ color: "white" }}
             >
-              {text}
-            </div>
-          </Tooltip>
-        ),
+              <div
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 4,
+                  width: "100%",
+                  overflow: "hidden",
+                  color: "#333",
+                }}
+              >
+                <span style={{ flex: 1, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                  {text}
+                </span>
+                <Tag
+                  style={{
+                    marginInlineEnd: 0,
+                    marginLeft: "auto",
+                    color: ownerMeta.color,
+                    background: ownerMeta.background,
+                    borderColor: ownerMeta.borderColor,
+                  }}
+                >
+                  {ownerMeta.label}
+                </Tag>
+              </div>
+            </Tooltip>
+          );
+        },
       },
       {
         title: t("实时算力"),
