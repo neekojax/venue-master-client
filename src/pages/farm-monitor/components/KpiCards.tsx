@@ -1,8 +1,8 @@
 import {
   ApiOutlined,
-  CloudOutlined,
   DashboardOutlined,
   DisconnectOutlined,
+  MoreOutlined,
   PoweroffOutlined,
   ThunderboltOutlined,
   WarningOutlined,
@@ -43,7 +43,6 @@ const CARDS: Array<{
   },
   { key: "lowHashrate", label: t("低算力"), icon: WarningOutlined, color: "#fa8c16", bg: "#fff7e6" },
   { key: "zeroHashrate", label: t("零算力"), icon: PoweroffOutlined, color: "#ff4d4f", bg: "#fff1f0" },
-  { key: "networkEvents", label: t("网络事件"), icon: CloudOutlined, color: "#13c2c2", bg: "#e6fffb" },
   {
     key: "powerLimitEvents",
     label: t("限电事件"),
@@ -51,6 +50,7 @@ const CARDS: Array<{
     color: "#faad14",
     bg: "#fffbe6",
   },
+  { key: "otherImpactEvents", label: t("其他影响"), icon: MoreOutlined, color: "#722ed1", bg: "#f9f0ff" },
 ];
 
 function formatKpiValue(value: number | null) {

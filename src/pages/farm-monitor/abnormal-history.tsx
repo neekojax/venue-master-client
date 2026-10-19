@@ -1,12 +1,14 @@
+import { useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { ArrowLeftOutlined, ReloadOutlined } from "@ant-design/icons";
 import { useQuery } from "@tanstack/react-query";
-import { Alert, Button, Empty, Spin, Table, Tag } from "antd";
+import { Alert, Button, Empty, Modal, Spin, Table, Tag } from "antd";
 import { ReactEcharts } from "@/components/react-echarts";
 import AbnormalReasonButton from "./components/AbnormalReasonButton";
 import {
   type DailyAbnormalReason,
   type DailyAbnormalRecord,
+  type DailyEventImpactDetail,
   fetchDailyAbnormalHistory,
 } from "./abnormal-history-api";
 import { ROUTE_PATHS } from "@/constants/common";
@@ -41,6 +43,11 @@ export default function AbnormalHistoryPage() {
     enabled: Boolean(poolType && siteName),
   });
   const rows = query.data?.list ?? [];
+  const [eventImpactModal, setEventImpactModal] = useState<{
+    title: string;
+    date: string;
+    details: DailyEventImpactDetail[];
+  } | null>(null);
   const chartRows = [...rows].sort((a, b) => a.date.localeCompare(b.date));
   const latest = rows[0];
   const statuses: Record<string, [string, string]> = {
@@ -196,8 +203,53 @@ export default function AbnormalHistoryPage() {
                   title: t("异常台数"),
                   dataIndex: "abnormalCount",
                   width: 100,
+                  align: "right",
                   render: (v: number) => (
                     <strong className={v > 0 ? "abnormal-history-accent" : ""}>{number(v)}</strong>
+                  ),
+                },
+                {
+                  title: t("全天影响"),
+                  key: "allDayImpactCount",
+                  width: 110,
+                  align: "right",
+                  render: (_, row) => (
+                    <Button
+                      type="link"
+                      size="small"
+                      className="!px-0"
+                      onClick={() =>
+                        setEventImpactModal({
+                          title: t("全天影响"),
+                          date: row.date,
+                          details: row.eventImpact.allDayDetails,
+                        })
+                      }
+                    >
+                      {number(row.eventImpact.allDayImpactCount)} {t("台")}
+                    </Button>
+                  ),
+                },
+                {
+                  title: t("短时影响"),
+                  key: "shortTermImpactCount",
+                  width: 110,
+                  align: "right",
+                  render: (_, row) => (
+                    <Button
+                      type="link"
+                      size="small"
+                      className="!px-0"
+                      onClick={() =>
+                        setEventImpactModal({
+                          title: t("短时影响"),
+                          date: row.date,
+                          details: row.eventImpact.shortTermDetails,
+                        })
+                      }
+                    >
+                      {number(row.eventImpact.shortTermImpactCount)} {t("台")}
+                    </Button>
                   ),
                 },
                 {
@@ -263,6 +315,40 @@ export default function AbnormalHistoryPage() {
                 },
               }}
             />
+            <Modal
+              title={eventImpactModal ? `${eventImpactModal.date} · ${eventImpactModal.title}` : ""}
+              open={Boolean(eventImpactModal)}
+              width={800}
+              footer={null}
+              onCancel={() => setEventImpactModal(null)}
+            >
+              <Table<DailyEventImpactDetail>
+                rowKey="eventId"
+                size="small"
+                pagination={false}
+                dataSource={eventImpactModal?.details ?? []}
+                scroll={{ x: 720 }}
+                locale={{ emptyText: t("暂无事件明细") }}
+                columns={[
+                  { title: t("事件类型"), dataIndex: "eventType", width: 110 },
+                  {
+                    title: t("影响台数"),
+                    dataIndex: "impactCount",
+                    width: 100,
+                    align: "right",
+                    render: number,
+                  },
+                  { title: t("事件开始时间"), dataIndex: "startTime", width: 170 },
+                  {
+                    title: t("事件结束时间"),
+                    dataIndex: "endTime",
+                    width: 170,
+                    render: (value: string) => value || t("进行中"),
+                  },
+                  { title: t("事件原因"), dataIndex: "eventReason", width: 180, ellipsis: true },
+                ]}
+              />
+            </Modal>
           </section>
         </Spin>
       )}

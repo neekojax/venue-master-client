@@ -6,6 +6,8 @@ import {
   CopyOutlined,
   DownloadOutlined,
   EnvironmentOutlined,
+  FullscreenExitOutlined,
+  FullscreenOutlined,
   QuestionCircleOutlined,
   ReloadOutlined,
   SearchOutlined,
@@ -53,6 +55,7 @@ import { useSelector, useSettingsStore } from "@/stores";
 import "./index.css";
 
 import { t } from "@/locales";
+import ResizableHeaderCell from "@/pages/custody-statistics/statistics/components/ResizableHeaderCell";
 import { downloadExcelBlobResponse } from "@/pages/farm-monitor/utils";
 
 const { Text } = Typography;
@@ -197,8 +200,24 @@ export default function AbnormalAnalysisPage() {
   const [detailMinerCodeLoading, setDetailMinerCodeLoading] = useState(false);
   const [detailExporting, setDetailExporting] = useState(false);
   const [detailPage, setDetailPage] = useState(1);
-  const [detailPageSize, setDetailPageSize] = useState(10);
+  const [detailPageSize, setDetailPageSize] = useState(20);
   const [detailOrderBy, setDetailOrderBy] = useState<DetailOrderBy>("refreshTimeDesc");
+  const [detailFilterExpanded, setDetailFilterExpanded] = useState(true);
+  const [detailFullscreen, setDetailFullscreen] = useState(false);
+  const [detailSiteColumnWidth, setDetailSiteColumnWidth] = useState(() => {
+    const savedWidth = Number(localStorage.getItem("abnormal-analysis-site-column-width"));
+    return Number.isFinite(savedWidth) && savedWidth >= 160 ? savedWidth : 220;
+  });
+  const detailFullscreenTargetId = "abnormal-analysis-detail-fullscreen";
+
+  useEffect(() => {
+    const onFullscreenChange = () => {
+      const element = document.getElementById(detailFullscreenTargetId);
+      setDetailFullscreen(document.fullscreenElement === element);
+    };
+    document.addEventListener("fullscreenchange", onFullscreenChange);
+    return () => document.removeEventListener("fullscreenchange", onFullscreenChange);
+  }, []);
 
   useEffect(() => {
     if (!poolType) return;
@@ -309,6 +328,20 @@ export default function AbnormalAnalysisPage() {
       asset: "all",
     });
     message.info(t("筛选已重置"));
+  };
+
+  const handleDetailRefresh = () => {
+    setFilters((current) => ({ ...current }));
+  };
+
+  const handleDetailFullscreen = () => {
+    const element = document.getElementById(detailFullscreenTargetId);
+    if (!element) return;
+    if (document.fullscreenElement === element) {
+      void document.exitFullscreen?.();
+      return;
+    }
+    void element.requestFullscreen?.();
   };
 
   useEffect(() => {
@@ -601,12 +634,21 @@ export default function AbnormalAnalysisPage() {
       title: t("场地"),
       dataIndex: "site",
       key: "site",
-      width: 220,
+      width: detailSiteColumnWidth,
       fixed: "left",
+      onHeaderCell: () =>
+        ({
+          width: detailSiteColumnWidth,
+          onColumnResize: (nextWidth: number) => {
+            setDetailSiteColumnWidth(nextWidth);
+            localStorage.setItem("abnormal-analysis-site-column-width", String(nextWidth));
+          },
+        }) as any,
       render: (text: string) => (
-        <span className="font-medium text-slate-700 flex items-center gap-1.5">
-          <EnvironmentOutlined className="text-slate-400" />
-          {text}
+        <span className="font-medium text-slate-700 flex min-w-0 items-center gap-1.5">
+          <Text ellipsis={{ tooltip: text }} className="min-w-0 flex-1 !text-inherit">
+            {text}
+          </Text>
         </span>
       ),
     },
@@ -615,25 +657,13 @@ export default function AbnormalAnalysisPage() {
       dataIndex: "mac",
       key: "mac",
       width: 180,
-      fixed: "left",
-      render: (text: string) => (
-        <span className="font-mono text-xs bg-slate-100 px-1.5 py-0.5 rounded text-slate-600 flex items-center justify-between group max-w-[170px]">
-          <span>{text}</span>
-          <Tooltip title={t("复制 MAC")}>
-            <CopyOutlined
-              className="text-slate-400 hover:text-blue-500 cursor-pointer ml-1.5 opacity-0 group-hover:opacity-100 transition-opacity"
-              onClick={() => handleCopyText(text, t("MAC 地址"))}
-            />
-          </Tooltip>
-        </span>
-      ),
+      render: (text: string) => <span className="text-[#1677ff]">{text}</span>,
     },
     {
       title: t("控制板 SN"),
       dataIndex: "controlBoardSN",
       key: "controlBoardSN",
       width: 180,
-      fixed: "left",
       render: (text: string) => (
         <span className="font-mono text-xs text-slate-500 flex items-center justify-between group max-w-[150px]">
           <span>{text}</span>
@@ -665,7 +695,7 @@ export default function AbnormalAnalysisPage() {
           <div className="flex items-start justify-between gap-2 group">
             <div className="flex flex-nowrap gap-1 overflow-x-auto whitespace-nowrap pb-1 max-w-[500px]">
               {list.map((item) => (
-                <Tag key={item} color="cyan">
+                <Tag key={item} color="blue">
                   {item}
                 </Tag>
               ))}
@@ -690,7 +720,7 @@ export default function AbnormalAnalysisPage() {
         if (list.length === 0) return <span className="text-slate-400">-</span>;
         const text = list.join(", ");
         return (
-          <span className="font-semibold text-slate-800 flex items-center justify-between gap-2 group max-w-[220px]">
+          <span className="font-mono text-xs text-slate-500 flex items-center justify-between gap-2 group max-w-[220px]">
             <span className="truncate">{text}</span>
             <Tooltip title={t("复制矿工号")}>
               <CopyOutlined
@@ -1093,213 +1123,251 @@ export default function AbnormalAnalysisPage() {
         </Row>
 
         {/* 异常信息详情栏 */}
-        <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
-          <div className="px-5 py-4 border-b border-slate-100 flex flex-wrap items-center justify-between gap-3 bg-slate-50/50">
-            <div className="flex items-center gap-2">
-              <div className="w-1.5 h-5 bg-slate-900 rounded-full"></div>
-              <span className="text-base font-bold text-slate-800">{t("异常信息详情栏")}</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <span className="text-xs text-slate-500">
+        <div className="w-full min-w-0 max-w-full bg-white rounded-lg border border-gray-200 shadow-sm overflow-hidden">
+          <div
+            id={detailFullscreenTargetId}
+            className="bg-white min-w-0 [&:fullscreen]:flex [&:fullscreen]:flex-col [&:fullscreen]:h-screen [&:fullscreen]:overflow-auto"
+          >
+            <div className="px-5 pt-4 pb-3 border-b border-gray-200 bg-white flex items-center justify-between gap-3">
+              <h2 className="text-lg font-semibold text-gray-800 m-0">{t("异常信息详情栏")}</h2>
+              <span className="text-xs text-slate-500 whitespace-nowrap">
                 {t("检索到")} <span className="font-bold text-slate-900 font-mono">{detailTotal}</span>{" "}
                 {t("台矿机")}
               </span>
-              <span className="inline-block w-px h-3 bg-slate-200 align-middle mx-1.5"></span>
-              <Tag color="cyan">{t("最新时间可按排序")}</Tag>
             </div>
-          </div>
 
-          <div className="p-5 border-b border-slate-100 bg-slate-50/30">
-            <Row gutter={[16, 16]}>
-              <Col xs={24} sm={12} md={6} lg={6}>
-                <div className="text-xs text-slate-500 mb-1.5 font-medium">{t("场地")}</div>
-                <Select
-                  showSearch
-                  allowClear={false}
-                  style={{ width: "100%" }}
-                  placeholder={t("选择场地")}
-                  value={searchSite}
-                  onChange={(val) => setSearchSite(val)}
-                  optionFilterProp="label"
-                  filterOption={(input, option) =>
-                    String(option?.label ?? "")
-                      .toLowerCase()
-                      .includes(input.toLowerCase())
-                  }
-                  options={[
-                    { value: "all", label: t("全部场地") },
-                    ...siteAnomalyList.map((s) => ({ value: s.siteName, label: s.siteName })),
-                  ]}
-                />
-              </Col>
-              <Col xs={24} sm={12} md={6} lg={6}>
-                <div className="text-xs text-slate-500 mb-1.5 font-medium">{t("MAC 地址")}</div>
-                <Input
-                  placeholder={t("搜索 MAC 模糊匹配")}
-                  value={searchMac}
-                  onChange={(e) => setSearchMac(e.target.value)}
-                  allowClear
-                />
-              </Col>
-              <Col xs={24} sm={12} md={6} lg={6}>
-                <div className="text-xs text-slate-500 mb-1.5 font-medium">{t("控制板 SN")}</div>
-                <Input
-                  placeholder={t("控制板 SN")}
-                  value={searchSN}
-                  onChange={(e) => setSearchSN(e.target.value)}
-                  allowClear
-                />
-              </Col>
-              <Col xs={24} sm={12} md={6} lg={6}>
-                <div className="text-xs text-slate-500 mb-1.5 font-medium">{t("算力板序列号")}</div>
-                <Input
-                  placeholder={t("搜索算力板序列号")}
-                  value={searchHashBoardSN}
-                  onChange={(e) => setSearchHashBoardSN(e.target.value)}
-                  allowClear
-                />
-              </Col>
-              <Col xs={24} sm={12} md={6} lg={6}>
-                <div className="text-xs text-slate-500 mb-1.5 font-medium">{t("矿工号")}</div>
-                <Select
-                  showSearch
-                  allowClear
-                  style={{ width: "100%" }}
-                  placeholder={t("选择矿工号")}
-                  loading={detailMinerCodeLoading}
-                  value={searchMinerId}
-                  onChange={(val) => setSearchMinerId(val || "")}
-                  optionFilterProp="label"
-                  options={detailMinerCodeOptions}
-                />
-              </Col>
-              <Col xs={24} sm={12} md={6} lg={6}>
-                <div className="text-xs text-slate-500 mb-1.5 font-medium">{t("统计起始时间")}</div>
-                <DatePicker
-                  showTime
-                  style={{ width: "100%" }}
-                  placeholder={t("选择统计起始时间")}
-                  value={searchRefreshTimeFrom}
-                  onChange={(value) => setSearchRefreshTimeFrom(value)}
-                  allowClear
-                />
-              </Col>
-              <Col xs={24} sm={12} md={6} lg={6}>
-                <div className="text-xs text-slate-500 mb-1.5 font-medium">{t("下架")}</div>
-                <Select
-                  style={{ width: "100%" }}
-                  placeholder={t("是否下架")}
-                  value={searchDismantled}
-                  onChange={(val) => setSearchDismantled(val)}
-                  options={[
-                    { value: "all", label: t("全部") },
-                    { value: "在架", label: t("在架") },
-                    { value: "下架", label: t("下架") },
-                    { value: "未知", label: t("未知") },
-                  ]}
-                />
-              </Col>
-              <Col xs={24} sm={12} md={6} lg={6}>
-                <div className="text-xs text-slate-500 mb-1.5 font-medium">{t("产权")}</div>
-                <Select
-                  style={{ width: "100%" }}
-                  placeholder={t("产权")}
-                  value={searchAsset}
-                  onChange={(val) => setSearchAsset(val)}
-                  options={[
-                    { value: "all", label: t("全部") },
-                    { value: "自有", label: t("自有") },
-                    { value: "非自有", label: t("非自有") },
-                    { value: "未知", label: t("未知") },
-                  ]}
-                />
-              </Col>
-            </Row>
+            {detailFilterExpanded ? (
+              <div className="px-5 py-4 border-b border-gray-200 bg-white">
+                <Row gutter={[16, 16]}>
+                  <Col xs={24} sm={12} md={6} lg={6}>
+                    <div className="text-xs text-slate-500 mb-1.5 font-medium">{t("场地")}</div>
+                    <Select
+                      showSearch
+                      allowClear={false}
+                      style={{ width: "100%" }}
+                      placeholder={t("选择场地")}
+                      value={searchSite}
+                      onChange={(val) => setSearchSite(val)}
+                      optionFilterProp="label"
+                      filterOption={(input, option) =>
+                        String(option?.label ?? "")
+                          .toLowerCase()
+                          .includes(input.toLowerCase())
+                      }
+                      options={[
+                        { value: "all", label: t("全部场地") },
+                        ...siteAnomalyList.map((s) => ({ value: s.siteName, label: s.siteName })),
+                      ]}
+                    />
+                  </Col>
+                  <Col xs={24} sm={12} md={6} lg={6}>
+                    <div className="text-xs text-slate-500 mb-1.5 font-medium">{t("MAC 地址")}</div>
+                    <Input
+                      placeholder={t("搜索 MAC 模糊匹配")}
+                      value={searchMac}
+                      onChange={(e) => setSearchMac(e.target.value)}
+                      allowClear
+                    />
+                  </Col>
+                  <Col xs={24} sm={12} md={6} lg={6}>
+                    <div className="text-xs text-slate-500 mb-1.5 font-medium">{t("控制板 SN")}</div>
+                    <Input
+                      placeholder={t("控制板 SN")}
+                      value={searchSN}
+                      onChange={(e) => setSearchSN(e.target.value)}
+                      allowClear
+                    />
+                  </Col>
+                  <Col xs={24} sm={12} md={6} lg={6}>
+                    <div className="text-xs text-slate-500 mb-1.5 font-medium">{t("算力板序列号")}</div>
+                    <Input
+                      placeholder={t("搜索算力板序列号")}
+                      value={searchHashBoardSN}
+                      onChange={(e) => setSearchHashBoardSN(e.target.value)}
+                      allowClear
+                    />
+                  </Col>
+                  <Col xs={24} sm={12} md={6} lg={6}>
+                    <div className="text-xs text-slate-500 mb-1.5 font-medium">{t("矿工号")}</div>
+                    <Select
+                      showSearch
+                      allowClear
+                      style={{ width: "100%" }}
+                      placeholder={t("选择矿工号")}
+                      loading={detailMinerCodeLoading}
+                      value={searchMinerId}
+                      onChange={(val) => setSearchMinerId(val || "")}
+                      optionFilterProp="label"
+                      options={detailMinerCodeOptions}
+                    />
+                  </Col>
+                  <Col xs={24} sm={12} md={6} lg={6}>
+                    <div className="text-xs text-slate-500 mb-1.5 font-medium">{t("统计起始时间")}</div>
+                    <DatePicker
+                      showTime
+                      style={{ width: "100%" }}
+                      placeholder={t("选择统计起始时间")}
+                      value={searchRefreshTimeFrom}
+                      onChange={(value) => setSearchRefreshTimeFrom(value)}
+                      allowClear
+                    />
+                  </Col>
+                  <Col xs={24} sm={12} md={6} lg={6}>
+                    <div className="text-xs text-slate-500 mb-1.5 font-medium">{t("下架")}</div>
+                    <Select
+                      style={{ width: "100%" }}
+                      placeholder={t("是否下架")}
+                      value={searchDismantled}
+                      onChange={(val) => setSearchDismantled(val)}
+                      options={[
+                        { value: "all", label: t("全部") },
+                        { value: "在架", label: t("在架") },
+                        { value: "下架", label: t("下架") },
+                        { value: "未知", label: t("未知") },
+                      ]}
+                    />
+                  </Col>
+                  <Col xs={24} sm={12} md={6} lg={6}>
+                    <div className="text-xs text-slate-500 mb-1.5 font-medium">{t("产权")}</div>
+                    <Select
+                      style={{ width: "100%" }}
+                      placeholder={t("产权")}
+                      value={searchAsset}
+                      onChange={(val) => setSearchAsset(val)}
+                      options={[
+                        { value: "all", label: t("全部") },
+                        { value: "自有", label: t("自有") },
+                        { value: "非自有", label: t("非自有") },
+                        { value: "未知", label: t("未知") },
+                      ]}
+                    />
+                  </Col>
+                </Row>
 
-            <div className="flex justify-end gap-3 mt-4 pt-3 border-t border-dashed border-slate-200">
-              <Button icon={<ReloadOutlined />} onClick={handleReset} className="hover:border-slate-400">
-                {t("重置")}
-              </Button>
-              <Button
-                type="primary"
-                icon={<SearchOutlined />}
-                onClick={handleSearch}
-                className="bg-slate-900 hover:bg-slate-800 text-white"
-              >
-                {t("搜索")}
-              </Button>
-              <Button
-                icon={<DownloadOutlined />}
-                loading={detailExporting}
-                onClick={handleDownloadCurrentPage}
-              >
-                {t("下载明细")}
-              </Button>
-            </div>
-          </div>
-
-          <Table
-            loading={detailLoading}
-            columns={columns}
-            dataSource={detailList}
-            rowKey="id"
-            scroll={{ x: 2000 }}
-            onChange={(
-              pagination: any,
-              _filters: any,
-              sorter: SorterResult<AbnormalAnalysisDetailItem> | SorterResult<AbnormalAnalysisDetailItem>[],
-              extra: { action?: "paginate" | "sort" | "filter" },
-            ) => {
-              const activeSorter = Array.isArray(sorter) ? sorter[0] : sorter;
-              const nextPage = pagination?.current ?? 1;
-              const nextPageSize = pagination?.pageSize ?? 10;
-
-              if (extra?.action === "paginate") {
-                if (nextPage !== detailPage) setDetailPage(nextPage);
-                if (nextPageSize !== detailPageSize) setDetailPageSize(nextPageSize);
-                return;
-              }
-
-              if (extra?.action === "sort" && activeSorter?.columnKey === "refreshTime") {
-                const nextOrderBy =
-                  activeSorter.order === "ascend"
-                    ? "refreshTimeAsc"
-                    : activeSorter.order === "descend"
-                      ? "refreshTimeDesc"
-                      : detailOrderBy;
-
-                if (nextOrderBy !== detailOrderBy) {
-                  setDetailOrderBy(nextOrderBy);
-                }
-                if (detailPage !== 1) {
-                  setDetailPage(1);
-                }
-              }
-            }}
-            pagination={{
-              current: detailPage,
-              pageSize: detailPageSize,
-              total: detailTotal,
-              showSizeChanger: true,
-              pageSizeOptions: ["10", "20", "50", "100"],
-              showTotal: (total: number) => t("共 {{total}} 项", { total: total }),
-              className: "px-6 py-4",
-            }}
-            locale={{
-              emptyText: (
-                <div className="py-12 text-center">
-                  <AlertOutlined className="text-4xl text-slate-300 mb-3" />
-                  <div className="text-slate-500 font-medium">{t("没有找到符合条件的矿机数据")}</div>
-                  <div className="text-xs text-slate-400 mt-1">
-                    {t("请尝试放宽筛选条件，或重置搜索筛选器。")}
-                  </div>
-                  <Button onClick={handleReset} className="mt-4" size="small">
-                    {t("重置筛选")}
+                <div className="flex justify-end gap-3 mt-4 pt-3 border-t border-dashed border-slate-200">
+                  <Button onClick={handleReset} className="hover:border-slate-400">
+                    {t("重置")}
+                  </Button>
+                  <Button type="primary" onClick={handleSearch}>
+                    {t("搜索")}
                   </Button>
                 </div>
-              ),
-            }}
-          />
+              </div>
+            ) : null}
+
+            <div className="w-full min-w-0 overflow-x-auto bg-white">
+              <div className="flex justify-end items-center gap-1 border-b border-gray-100 px-4 py-2">
+                <Tooltip title={detailFilterExpanded ? t("收起筛选") : t("展开筛选")}>
+                  <Button
+                    type="text"
+                    shape="circle"
+                    icon={
+                      <SearchOutlined className={detailFilterExpanded ? "text-[#1677ff]" : "text-gray-500"} />
+                    }
+                    className={detailFilterExpanded ? "!bg-[#e6f4ff]" : undefined}
+                    onClick={() => setDetailFilterExpanded((expanded) => !expanded)}
+                  />
+                </Tooltip>
+                <Tooltip title={t("下载明细")}>
+                  <Button
+                    type="text"
+                    shape="circle"
+                    icon={<DownloadOutlined />}
+                    loading={detailExporting}
+                    disabled={detailExporting}
+                    onClick={handleDownloadCurrentPage}
+                  />
+                </Tooltip>
+                <Tooltip title={t("刷新")}>
+                  <Button
+                    type="text"
+                    shape="circle"
+                    icon={<ReloadOutlined />}
+                    loading={detailLoading}
+                    onClick={handleDetailRefresh}
+                  />
+                </Tooltip>
+                <Tooltip title={detailFullscreen ? t("退出全屏") : t("全屏")}>
+                  <Button
+                    type="text"
+                    shape="circle"
+                    icon={detailFullscreen ? <FullscreenExitOutlined /> : <FullscreenOutlined />}
+                    onClick={handleDetailFullscreen}
+                  />
+                </Tooltip>
+              </div>
+
+              <div className="px-4 pb-4">
+                <Table
+                  loading={detailLoading}
+                  columns={columns}
+                  dataSource={detailList}
+                  rowKey="id"
+                  components={{ header: { cell: ResizableHeaderCell } }}
+                  size="middle"
+                  bordered={false}
+                  scroll={{ x: 2000 }}
+                  onChange={(
+                    pagination: any,
+                    _filters: any,
+                    sorter:
+                      | SorterResult<AbnormalAnalysisDetailItem>
+                      | SorterResult<AbnormalAnalysisDetailItem>[],
+                    extra: { action?: "paginate" | "sort" | "filter" },
+                  ) => {
+                    const activeSorter = Array.isArray(sorter) ? sorter[0] : sorter;
+                    const nextPage = pagination?.current ?? 1;
+                    const nextPageSize = pagination?.pageSize ?? 10;
+
+                    if (extra?.action === "paginate") {
+                      if (nextPage !== detailPage) setDetailPage(nextPage);
+                      if (nextPageSize !== detailPageSize) setDetailPageSize(nextPageSize);
+                      return;
+                    }
+
+                    if (extra?.action === "sort" && activeSorter?.columnKey === "refreshTime") {
+                      const nextOrderBy =
+                        activeSorter.order === "ascend"
+                          ? "refreshTimeAsc"
+                          : activeSorter.order === "descend"
+                            ? "refreshTimeDesc"
+                            : detailOrderBy;
+
+                      if (nextOrderBy !== detailOrderBy) {
+                        setDetailOrderBy(nextOrderBy);
+                      }
+                      if (detailPage !== 1) {
+                        setDetailPage(1);
+                      }
+                    }
+                  }}
+                  pagination={{
+                    current: detailPage,
+                    pageSize: detailPageSize,
+                    total: detailTotal,
+                    showSizeChanger: true,
+                    pageSizeOptions: ["10", "20", "50", "100"],
+                    showTotal: (total: number) => t("共 {{total}} 项", { total: total }),
+                    className: "px-6 py-4",
+                  }}
+                  locale={{
+                    emptyText: (
+                      <div className="py-12 text-center">
+                        <AlertOutlined className="text-4xl text-slate-300 mb-3" />
+                        <div className="text-slate-500 font-medium">{t("没有找到符合条件的矿机数据")}</div>
+                        <div className="text-xs text-slate-400 mt-1">
+                          {t("请尝试放宽筛选条件，或重置搜索筛选器。")}
+                        </div>
+                        <Button onClick={handleReset} className="mt-4" size="small">
+                          {t("重置筛选")}
+                        </Button>
+                      </div>
+                    ),
+                  }}
+                />
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </div>

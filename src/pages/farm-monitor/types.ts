@@ -102,9 +102,8 @@ export interface LatestFinishedProbeTask {
   agent_count?: number;
   agents?: ProbeTaskAgentDetail[];
   event_impact?: {
-    high_temperature_impact_count?: number;
     limit_impact_count?: number;
-    network_impact_count?: number;
+    other_impact_count?: number;
     reference_time?: string;
   };
   present_agent_count?: number;
@@ -125,9 +124,8 @@ export interface KpiSummary {
   theoreticalOffline: number | null;
   lowHashrate: number | null;
   zeroHashrate: number | null;
-  networkEvents: number | null;
   powerLimitEvents: number | null;
-  highTempEvents: number | null;
+  otherImpactEvents: number | null;
   yesterdayAbnormal: number | null;
 }
 

@@ -29,11 +29,11 @@ const LEGEND_ITEMS = [
 ];
 
 const HASHRATE_SERIES_NAME = t("总算力 E");
+const DEFAULT_VISIBLE_SERIES_NAMES = new Set([t("理论在架数"), t("扫描数"), HASHRATE_SERIES_NAME]);
 
-const DEFAULT_SERIES_VISIBLE = Object.fromEntries(LEGEND_ITEMS.map((item) => [item.name, true])) as Record<
-  string,
-  boolean
->;
+const DEFAULT_SERIES_VISIBLE = Object.fromEntries(
+  LEGEND_ITEMS.map((item) => [item.name, DEFAULT_VISIBLE_SERIES_NAMES.has(item.name)]),
+) as Record<string, boolean>;
 
 function formatHashrateE(value: number) {
   return `${Number(value).toFixed(4)} E`;

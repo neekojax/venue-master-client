@@ -23,9 +23,8 @@ export const KPI_SUMMARY = {
   theoreticalOffline: 5,
   lowHashrate: 2,
   zeroHashrate: 1,
-  networkEvents: 3,
   powerLimitEvents: 1,
-  highTempEvents: 4,
+  otherImpactEvents: 4,
 };
 
 export const FARM_OPTIONS = [t("新疆数据中心"), t("内蒙古矿场"), t("四川矿场"), t("云南矿场")];

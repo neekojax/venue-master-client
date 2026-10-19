@@ -17,9 +17,8 @@ const EMPTY_KPI_SUMMARY: KpiSummary = {
   theoreticalOffline: null,
   lowHashrate: null,
   zeroHashrate: null,
-  networkEvents: null,
   powerLimitEvents: null,
-  highTempEvents: null,
+  otherImpactEvents: null,
   yesterdayAbnormal: null,
 };
 
@@ -49,9 +48,8 @@ export function mapLatestTaskToKpiSummary(
     theoreticalOffline,
     lowHashrate: task.fault_total ?? null,
     zeroHashrate: task.zero_hashrate_total ?? null,
-    networkEvents: task.event_impact?.network_impact_count ?? null,
     powerLimitEvents: task.event_impact?.limit_impact_count ?? null,
-    highTempEvents: task.event_impact?.high_temperature_impact_count ?? null,
+    otherImpactEvents: task.event_impact?.other_impact_count ?? null,
     yesterdayAbnormal: yesterdayAbnormal ?? null,
   };
 }
