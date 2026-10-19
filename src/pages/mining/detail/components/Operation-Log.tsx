@@ -42,6 +42,31 @@ type PoolRecord = {
   overclock_hashrate_per_machine?: number;
 };
 
+function getOverlappingRecordIds<T extends Pick<PoolRecord, "id" | "start_time" | "end_time">>(records: T[]) {
+  const ranges = records.flatMap((record) => {
+    const start = dayjs(record.start_time);
+    if (!start.isValid()) return [];
+    const parsedEnd = record.end_time ? dayjs(record.end_time) : null;
+    const end = parsedEnd?.isValid() ? parsedEnd.valueOf() : Number.POSITIVE_INFINITY;
+    const startValue = start.valueOf();
+    return end <= startValue ? [] : [{ id: record.id, start: startValue, end }];
+  });
+  const overlappingIds = new Set<number>();
+
+  for (let currentIndex = 0; currentIndex < ranges.length; currentIndex += 1) {
+    for (let compareIndex = currentIndex + 1; compareIndex < ranges.length; compareIndex += 1) {
+      const current = ranges[currentIndex];
+      const compared = ranges[compareIndex];
+      if (Math.max(current.start, compared.start) < Math.min(current.end, compared.end)) {
+        overlappingIds.add(current.id);
+        overlappingIds.add(compared.id);
+      }
+    }
+  }
+
+  return overlappingIds;
+}
+
 const CLOUD_POWER_OPTIONS = [
   { label: t("正常"), value: 0 },
   { label: t("云算力"), value: 1 },
@@ -98,7 +123,11 @@ const OperationLog: React.FC = () => {
   const isCloudPower = Form.useWatch("is_cloud_power", form);
   const isOverclocked = Form.useWatch("is_overclocked", form);
 
-  const records: PoolRecord[] = useMemo(() => (data?.data ?? []) as PoolRecord[], [data]);
+  const records: PoolRecord[] = useMemo(() => {
+    const list = (data?.data ?? []) as PoolRecord[];
+    return [...list].sort((a, b) => dayjs(a.start_time).valueOf() - dayjs(b.start_time).valueOf());
+  }, [data]);
+  const overlappingRecordIds = useMemo(() => getOverlappingRecordIds(records), [records]);
 
   const openCreate = () => {
     setEditingRecord(null);
@@ -181,7 +210,17 @@ const OperationLog: React.FC = () => {
   };
 
   const columns: ColumnsType<PoolRecord> = [
-    { title: t("开始时间"), dataIndex: "start_time", key: "start_time" },
+    {
+      title: t("开始时间"),
+      dataIndex: "start_time",
+      key: "start_time",
+      render: (value: string, record) => (
+        <span className="inline-flex items-center gap-2">
+          {value}
+          {overlappingRecordIds.has(record.id) ? <Tag color="error">{t("时间重叠")}</Tag> : null}
+        </span>
+      ),
+    },
     { title: t("结束时间"), dataIndex: "end_time", key: "end_time" },
     { title: t("理论算力"), dataIndex: "theoretical_hashrate", key: "theoretical_hashrate" },
     { title: t("托管机器"), dataIndex: "hosted_machine", key: "hosted_machine", align: "right" },

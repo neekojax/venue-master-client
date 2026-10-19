@@ -42,6 +42,33 @@ type AssetPoolRecordFormValues = {
   source_type?: number;
 };
 
+function getOverlappingRecordIds<T extends Pick<AssetPoolRecord, "id" | "start_time" | "end_time">>(
+  records: T[],
+) {
+  const ranges = records.flatMap((record) => {
+    const start = dayjs(record.start_time);
+    if (!start.isValid()) return [];
+    const parsedEnd = record.end_time ? dayjs(record.end_time) : null;
+    const end = parsedEnd?.isValid() ? parsedEnd.valueOf() : Number.POSITIVE_INFINITY;
+    const startValue = start.valueOf();
+    return end <= startValue ? [] : [{ id: record.id, start: startValue, end }];
+  });
+  const overlappingIds = new Set<number>();
+
+  for (let currentIndex = 0; currentIndex < ranges.length; currentIndex += 1) {
+    for (let compareIndex = currentIndex + 1; compareIndex < ranges.length; compareIndex += 1) {
+      const current = ranges[currentIndex];
+      const compared = ranges[compareIndex];
+      if (Math.max(current.start, compared.start) < Math.min(current.end, compared.end)) {
+        overlappingIds.add(current.id);
+        overlappingIds.add(compared.id);
+      }
+    }
+  }
+
+  return overlappingIds;
+}
+
 const CLOUD_POWER_OPTIONS = [
   { label: t("正常"), value: 0 },
   { label: t("云算力"), value: 1 },
@@ -110,8 +137,9 @@ const AssetPoolRecordHistory: React.FC = () => {
 
   const records: AssetPoolRecord[] = useMemo(() => {
     const list = Array.isArray(data?.data) ? (data.data as AssetPoolRecord[]) : [];
-    return [...list].sort((a, b) => dayjs(b.start_time).valueOf() - dayjs(a.start_time).valueOf());
+    return [...list].sort((a, b) => dayjs(a.start_time).valueOf() - dayjs(b.start_time).valueOf());
   }, [data]);
+  const overlappingRecordIds = useMemo(() => getOverlappingRecordIds(records), [records]);
 
   const openCreate = () => {
     setEditingRecord(null);
@@ -224,7 +252,13 @@ const AssetPoolRecordHistory: React.FC = () => {
       title: t("开始时间"),
       dataIndex: "start_time",
       key: "start_time",
-      width: 160,
+      width: 230,
+      render: (value: string, record) => (
+        <span className="inline-flex items-center gap-2">
+          {value}
+          {overlappingRecordIds.has(record.id) ? <Tag color="error">{t("时间重叠")}</Tag> : null}
+        </span>
+      ),
     },
     {
       title: t("结束时间"),
@@ -296,7 +330,7 @@ const AssetPoolRecordHistory: React.FC = () => {
       title: t("来源更新时间"),
       dataIndex: "source_updated_at",
       key: "source_updated_at",
-      width: 180,
+      width: 230,
       render: (value: string | undefined) => value || "-",
     },
     {
@@ -336,7 +370,7 @@ const AssetPoolRecordHistory: React.FC = () => {
             <span>{t("资产接管算力历史")}</span>
           </div>
           <div className="mt-1 text-xs text-slate-500">
-            {t("展示资产系统同步和手动调整生成的算力变更历史，按开始日期倒序显示。")}
+            {t("展示资产系统同步和手动调整生成的算力变更历史，按开始日期升序显示。")}
           </div>
         </div>
         <Space wrap>
