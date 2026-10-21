@@ -16,6 +16,7 @@ interface KpiCardsProps {
   data: KpiSummary;
   loading?: boolean;
   onAbnormalClick?: () => void;
+  onEventImpactClick?: () => void;
 }
 
 const CARDS: Array<{
@@ -57,18 +58,26 @@ function formatKpiValue(value: number | null) {
   return value == null ? "-" : String(value);
 }
 
-export default function KpiCards({ data, loading = false, onAbnormalClick }: KpiCardsProps) {
+export default function KpiCards({
+  data,
+  loading = false,
+  onAbnormalClick,
+  onEventImpactClick,
+}: KpiCardsProps) {
   return (
     <Spin spinning={loading}>
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
         {CARDS.map((card) => {
           const Icon = card.icon;
-          const clickable = card.key === "yesterdayAbnormal" && onAbnormalClick;
+          const isEventImpactCard = card.key === "powerLimitEvents" || card.key === "otherImpactEvents";
+          const clickable =
+            (card.key === "yesterdayAbnormal" && onAbnormalClick) ||
+            (isEventImpactCard && onEventImpactClick);
           return (
             <button
               key={card.key}
               type="button"
-              onClick={clickable ? onAbnormalClick : undefined}
+              onClick={clickable ? (isEventImpactCard ? onEventImpactClick : onAbnormalClick) : undefined}
               className={`bg-white rounded-lg border border-gray-200 px-4 py-3 flex items-center gap-3 w-full text-left ${
                 clickable ? "hover:border-blue-300 hover:shadow-sm cursor-pointer" : "cursor-default"
               }`}

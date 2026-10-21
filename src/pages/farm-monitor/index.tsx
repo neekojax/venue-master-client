@@ -280,6 +280,10 @@ export default function FarmMonitorPage() {
     navigate(`${ROUTE_PATHS.farmAbnormalHistory}?${params}`);
   }, [navigate, selectedFarm, selectedFarmId]);
 
+  const openEventLog = useCallback(() => {
+    navigate(ROUTE_PATHS.eventLog);
+  }, [navigate]);
+
   useEffect(() => {
     if (!abnormalTerminalOpen || !selectedFarmId) return;
     const nextValues: AbnormalLogSearchValues = {
@@ -319,6 +323,7 @@ export default function FarmMonitorPage() {
               isLatestTaskLoading || isLatestTaskFetching || isAbnormalDataLoading || isAbnormalDataFetching
             }
             onAbnormalClick={openAbnormalManagementTerminal}
+            onEventImpactClick={openEventLog}
           />
         </div>
         {abnormalTerminalOpen ? (
