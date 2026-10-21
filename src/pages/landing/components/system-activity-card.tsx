@@ -217,7 +217,7 @@ const SystemActivityCard = () => {
           </div>
         </div>
         <Link
-          to={ROUTE_PATHS.eventLog}
+          to={ROUTE_PATHS.eventAnalysis}
           className="text-xs font-medium text-blue-600 hover:text-blue-700 bg-blue-50 hover:bg-blue-100 px-2.5 py-1 rounded-md transition-colors"
         >
           {t("查看全部")}
