@@ -1,7 +1,7 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import { useParams } from "react-router-dom";
 import { DownloadOutlined } from "@ant-design/icons";
-import { Button, DatePicker, Table } from "antd";
+import { Button, DatePicker, message, Progress, Table, Tag } from "antd";
 import type { RangePickerProps } from "antd/es/date-picker";
 import type { ColumnsType } from "antd/es/table";
 import dayjs from "dayjs";
@@ -10,7 +10,12 @@ import isSameOrBefore from "dayjs/plugin/isSameOrBefore";
 import * as XLSX from "xlsx";
 import { useSelector, useSettingsStore } from "@/stores";
 
-import { fetchAllDailyStat } from "@/pages/report/api.tsx";
+import { t as i18nT } from "@/locales";
+import {
+  fetchAllDailyStatTask,
+  fetchAllDailyStatTaskResult,
+  submitAllDailyStatTask,
+} from "@/pages/report/api.tsx";
 // 必须扩展 dayjs，否则会报 “不存在属性”
 dayjs.extend(isSameOrAfter);
 dayjs.extend(isSameOrBefore);
@@ -27,6 +32,7 @@ interface SubAccountStat {
   totalFailures: number;
   totalFailuresRate: number;
   failures24h: number;
+  shelved?: number;
   failureRate24h: number;
   impactRatio: number;
   limitImpactRate: number;
@@ -44,6 +50,7 @@ interface DataType {
   totalFailures: number;
   totalFailuresRate: number;
   failures24h: number;
+  shelved: number;
   failureRate24h: number;
   impactRatio: number;
   limitImpactRate: number;
@@ -51,6 +58,52 @@ interface DataType {
   onlineRatio: number;
   subAccountStats: SubAccountStat[];
 }
+
+interface DailyStatTaskPayload {
+  taskId: string;
+  status: "pending" | "running" | "success" | "failed";
+  progress: number;
+  totalDays: number;
+  resultCount: number;
+  startDate: string;
+  endDate: string;
+  errorMessage: string;
+}
+
+const TASK_STATUS_TEXT: Record<DailyStatTaskPayload["status"], string> = {
+  pending: i18nT("等待执行"),
+  running: i18nT("执行中"),
+  success: i18nT("执行成功"),
+  failed: i18nT("执行失败"),
+};
+
+const TASK_STATUS_COLOR_MAP: Record<DailyStatTaskPayload["status"], string> = {
+  pending: "default",
+  running: "processing",
+  success: "green",
+  failed: "red",
+};
+
+const formatDailyRecords = (rawList: any[] = []): DataType[] =>
+  rawList.map((venue: any) => ({
+    date: venue.date || "",
+    btcOutput24h: venue.btcOutput24h || 0,
+    theoreticalPower: venue.theoreticalPower || 0,
+    power24h: venue.power24h || 0,
+    effectiveRate24h: venue.effectiveRate24h || 0,
+    totalMachines: venue.totalMachines || 0,
+    totalFailures: venue.totalFailures || 0,
+    impactMachine: venue.impactMachine || 0,
+    failures24h: venue.failures24h || 0,
+    shelved: Number(venue.shelved ?? 0),
+    failureRate24h: venue.failureRate24h || 0,
+    impactRatio: venue.impactRatio || 0,
+    onlineRatio: venue.onlineRatio || 0,
+    limitImpactRate: venue.limitImpactRate || 0,
+    highTemperatureRate: venue.highTemperatureRate || 0,
+    subAccountStats: venue.subAccountStats || [],
+    totalFailuresRate: venue.totalFailuresRate || 0,
+  }));
 
 const App: React.FC = () => {
   const params = useParams<{ venueId: string; venueName: string }>();
@@ -66,6 +119,17 @@ const App: React.FC = () => {
 
   const [filteredData, setFilteredData] = useState<DataType[]>([]);
   const [pageSize, setPageSize] = useState(20);
+  const [taskInfo, setTaskInfo] = useState<DailyStatTaskPayload | null>(null);
+  const [isSubmittingTask, setIsSubmittingTask] = useState(false);
+  const pollTimerRef = useRef<number | null>(null);
+  const requestSerialRef = useRef(0);
+
+  const clearPollTimer = useCallback(() => {
+    if (pollTimerRef.current != null) {
+      window.clearTimeout(pollTimerRef.current);
+      pollTimerRef.current = null;
+    }
+  }, []);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -78,18 +142,24 @@ const App: React.FC = () => {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
+  useEffect(() => {
+    return () => {
+      clearPollTimer();
+    };
+  }, [clearPollTimer]);
+
   // 子账户统计表格列配置
   const subAccountColumns: ColumnsType<SubAccountStat> = [
-    { title: "矿池名称", dataIndex: "pool_name", key: "pool_name", fixed: "left", width: 120 },
+    { title: i18nT("矿池名称"), dataIndex: "pool_name", key: "pool_name", fixed: "left", width: 120 },
     {
-      title: "24小时产出(BTC)",
+      title: i18nT("24小时产出(BTC)"),
       dataIndex: "btcOutput24h",
       key: "btcOutput24h",
       width: 165,
       render: (value) => value.toFixed(8),
     },
     {
-      title: "理论算力(P)",
+      title: i18nT("理论算力(P)"),
       dataIndex: "theoreticalPower",
       width: 120,
       key: "theoreticalPower",
@@ -97,7 +167,7 @@ const App: React.FC = () => {
       render: (value) => value.toFixed(2),
     },
     {
-      title: "24小时算力(P)",
+      title: i18nT("24小时算力(P)"),
       dataIndex: "power24h",
       key: "power24h",
       width: 145,
@@ -105,7 +175,7 @@ const App: React.FC = () => {
       render: (value) => value.toFixed(2),
     },
     {
-      title: "24小时有效率",
+      title: i18nT("24小时有效率"),
       dataIndex: "effectiveRate24h",
       key: "effectiveRate24h",
       width: 140,
@@ -113,24 +183,24 @@ const App: React.FC = () => {
       render: (value) => `${value.toFixed(2)}%`,
     },
     {
-      title: "在架有效率",
+      title: i18nT("在架有效率"),
       dataIndex: "onlineRatio",
       key: "onlineRatio",
       width: 140,
       align: "center",
       render: (value) => `${value.toFixed(2)}%`,
     },
-    { title: "托管台数", dataIndex: "totalMachines", key: "totalMachines", width: 105 },
-    { title: "总故障数", dataIndex: "totalFailures", key: "totalFailures", width: 120 },
+    { title: i18nT("托管台数"), dataIndex: "totalMachines", key: "totalMachines", width: 105 },
+    { title: i18nT("总故障数"), dataIndex: "totalFailures", key: "totalFailures", width: 120 },
     {
-      title: "总故障率",
+      title: i18nT("总故障率"),
       dataIndex: "totalFailuresRate",
       key: "totalFailuresRate",
       width: 120,
       render: (value) => `${value.toFixed(2)}%`,
     },
     {
-      title: "24小时故障数",
+      title: i18nT("24小时故障数"),
       dataIndex: "failures24h",
       key: "failures24h",
       width: 138,
@@ -138,28 +208,36 @@ const App: React.FC = () => {
       render: (value) => value.toLocaleString(),
     },
     {
-      title: "24小时故障率",
+      title: i18nT("24小时上架数"),
+      dataIndex: "shelved",
+      key: "shelved",
+      width: 138,
+      align: "right",
+      render: (value) => (value ?? 0).toLocaleString(),
+    },
+    {
+      title: i18nT("24小时故障率"),
       dataIndex: "failureRate24h",
       key: "failureRate24h",
       width: 140,
       render: (value) => `${value.toFixed(2)}%`,
     },
     {
-      title: "影响占比",
+      title: i18nT("影响占比"),
       dataIndex: "impactRatio",
       key: "impactRatio",
       width: 120,
       render: (value) => `${value.toFixed(2)}%`,
     },
     {
-      title: "限电影响",
+      title: i18nT("限电影响"),
       dataIndex: "limitImpactRate",
       key: "limitImpactRate",
       width: 140,
       render: (value) => `${value.toFixed(2)}%`,
     },
     {
-      title: "高温影响",
+      title: i18nT("高温影响"),
       dataIndex: "highTemperatureRate",
       key: "highTemperatureRate",
       width: 140,
@@ -169,9 +247,9 @@ const App: React.FC = () => {
   ];
 
   const columns: ColumnsType<DataType> = [
-    { title: "日期", dataIndex: "date", key: "date", fixed: "left", width: 120 },
+    { title: i18nT("日期"), dataIndex: "date", key: "date", fixed: "left", width: 120 },
     {
-      title: "24小时产出(BTC)",
+      title: i18nT("24小时产出(BTC)"),
       dataIndex: "btcOutput24h",
       key: "btcOutput24h",
       width: 165,
@@ -180,7 +258,7 @@ const App: React.FC = () => {
       sorter: (a, b) => a.btcOutput24h - b.btcOutput24h,
     },
     {
-      title: "理论算力(P)",
+      title: i18nT("理论算力(P)"),
       dataIndex: "theoreticalPower",
       key: "theoreticalPower",
       width: 125,
@@ -189,7 +267,7 @@ const App: React.FC = () => {
       sorter: (a, b) => a.theoreticalPower - b.theoreticalPower,
     },
     {
-      title: "24小时算力(P)",
+      title: i18nT("24小时算力(P)"),
       dataIndex: "power24h",
       key: "power24h",
       width: 145,
@@ -198,7 +276,7 @@ const App: React.FC = () => {
       sorter: (a, b) => a.power24h - b.power24h,
     },
     {
-      title: "24小时有效率",
+      title: i18nT("24小时有效率"),
       dataIndex: "effectiveRate24h",
       key: "effectiveRate24h",
       width: 140,
@@ -207,7 +285,7 @@ const App: React.FC = () => {
       sorter: (a, b) => a.effectiveRate24h - b.effectiveRate24h,
     },
     {
-      title: "在架有效率",
+      title: i18nT("在架有效率"),
       dataIndex: "onlineRatio",
       key: "onlineRatio",
       width: 140,
@@ -215,7 +293,7 @@ const App: React.FC = () => {
       render: (value) => `${value.toFixed(2)}%`,
     },
     {
-      title: "托管台数",
+      title: i18nT("托管台数"),
       dataIndex: "totalMachines",
       key: "totalMachines",
       width: 105,
@@ -224,7 +302,7 @@ const App: React.FC = () => {
       sorter: (a, b) => a.totalMachines - b.totalMachines,
     },
     {
-      title: "总故障台数",
+      title: i18nT("总故障台数"),
       dataIndex: "totalFailures",
       key: "totalFailures",
       width: 120,
@@ -233,7 +311,7 @@ const App: React.FC = () => {
       sorter: (a, b) => a.totalFailures - b.totalFailures,
     },
     {
-      title: "总故障率",
+      title: i18nT("总故障率"),
       key: "totalFailureRate",
       width: 120,
       align: "right",
@@ -245,7 +323,7 @@ const App: React.FC = () => {
       },
     },
     {
-      title: "24小时故障数",
+      title: i18nT("24小时故障数"),
       dataIndex: "failures24h",
       key: "failures24h",
       width: 138,
@@ -254,7 +332,15 @@ const App: React.FC = () => {
       sorter: (a, b) => a.failures24h - b.failures24h,
     },
     {
-      title: "24小时故障率",
+      title: i18nT("24小时上架数"),
+      dataIndex: "shelved",
+      key: "shelved",
+      width: 138,
+      align: "right",
+      render: (value: number) => value.toLocaleString(),
+    },
+    {
+      title: i18nT("24小时故障率"),
       dataIndex: "failureRate24h",
       key: "failureRate24h",
       width: 138,
@@ -262,7 +348,7 @@ const App: React.FC = () => {
       sorter: (a, b) => a.failureRate24h - b.failureRate24h,
     },
     {
-      title: "影响占比",
+      title: i18nT("影响占比"),
       dataIndex: "impactRatio",
       key: "impactRatio",
       width: 105,
@@ -270,7 +356,7 @@ const App: React.FC = () => {
       sorter: (a, b) => a.impactRatio - b.impactRatio,
     },
     {
-      title: "限电影响",
+      title: i18nT("限电影响"),
       dataIndex: "limitImpactRate",
       key: "limitImpactRate",
       width: 140,
@@ -278,7 +364,7 @@ const App: React.FC = () => {
       sorter: (a, b) => a.limitImpactRate - b.limitImpactRate,
     },
     {
-      title: "高温影响",
+      title: i18nT("高温影响"),
       dataIndex: "highTemperatureRate",
       key: "highTemperatureRate",
       width: 140,
@@ -287,63 +373,6 @@ const App: React.FC = () => {
     },
   ];
 
-  const fetchReportData = async () => {
-    setLoading(true); // 👈 开始加载
-    setFilteredData([]);
-
-    try {
-      // 检查 dateRange 是否存在
-      if (!dateRange) {
-        console.error("dateRange is null");
-        setLoading(false);
-        return;
-      }
-
-      const reportData = await fetchAllDailyStat(
-        poolType,
-        Number(venueId),
-        dateRange[0].format("YYYY-MM-DD"),
-        dateRange[1].format("YYYY-MM-DD"),
-      );
-      if (reportData && reportData.data) {
-        console.log("reportData:", reportData);
-        const formattedData: DataType[] = reportData.data.map((venue: any) => ({
-          date: venue.date || "",
-          btcOutput24h: venue.btcOutput24h || 0,
-          theoreticalPower: venue.theoreticalPower || 0,
-          power24h: venue.power24h || 0,
-          effectiveRate24h: venue.effectiveRate24h || 0,
-          totalMachines: venue.totalMachines || 0,
-          totalFailures: venue.totalFailures || 0,
-          impactMachine: venue.impactMachine || 0,
-          failures24h: venue.failures24h || 0,
-          failureRate24h: venue.failureRate24h || 0,
-          impactRatio: venue.impactRatio || 0,
-          onlineRatio: venue.onlineRatio || 0,
-          limitImpactRate: venue.limitImpactRate || 0,
-          highTemperatureRate: venue.highTemperatureRate || 0,
-          subAccountStats: venue.subAccountStats || [],
-          totalFailuresRate: venue.totalFailuresRate || 0,
-        }));
-        // setData(formattedData);
-        // 应用默认的日期筛选（最近1个月）
-        // const defaultStart = dayjs().subtract(1, "months");
-        // const defaultEnd = dayjs();
-        // const defaultFiltered = formattedData.filter((item) => {
-        //   const d = dayjs(item.date);
-        //   return d.isValid() && d.isSameOrAfter(defaultStart, "day") && d.isSameOrBefore(defaultEnd, "day");
-        // });
-        setFilteredData(formattedData);
-      } else {
-        console.error("API 返回无效:", reportData);
-      }
-    } catch (error) {
-      console.error("获取日报数据失败:", error);
-    } finally {
-      setLoading(false); // 👈 请求结束，关闭加载
-    }
-  };
-
   // 日期筛选
   // 先定义日期范围 state，默认为最近1个月
   const [dateRange, setDateRange] = useState<[dayjs.Dayjs, dayjs.Dayjs] | null>([
@@ -351,15 +380,122 @@ const App: React.FC = () => {
     dayjs(),
   ]);
 
-  // 拉取数据
-  useEffect(() => {
-    // 检查 dateRange 是否存在
+  const fetchTaskResult = useCallback(
+    async (taskId: string, requestSerial: number) => {
+      const result = await fetchAllDailyStatTaskResult(poolType, taskId);
+
+      if (requestSerial !== requestSerialRef.current) {
+        return;
+      }
+
+      setFilteredData(formatDailyRecords(result?.data));
+    },
+    [poolType],
+  );
+
+  const pollTaskStatus = useCallback(
+    async (taskId: string, requestSerial: number) => {
+      try {
+        const response = await fetchAllDailyStatTask(poolType, taskId);
+
+        if (requestSerial !== requestSerialRef.current) {
+          return;
+        }
+
+        const task = response?.data as DailyStatTaskPayload | undefined;
+        if (!task) {
+          throw new Error(i18nT("任务状态返回为空"));
+        }
+
+        setTaskInfo(task);
+
+        if (task.status === "success") {
+          await fetchTaskResult(taskId, requestSerial);
+          setLoading(false);
+          return;
+        }
+
+        if (task.status === "failed") {
+          throw new Error(task.errorMessage || i18nT("日报任务执行失败"));
+        }
+
+        pollTimerRef.current = window.setTimeout(() => {
+          pollTaskStatus(taskId, requestSerial);
+        }, 2000);
+      } catch (error: any) {
+        if (requestSerial !== requestSerialRef.current) {
+          return;
+        }
+        setLoading(false);
+        message.error(error.message || i18nT("获取日报任务状态失败"));
+      }
+    },
+    [fetchTaskResult, poolType],
+  );
+
+  const fetchReportData = useCallback(async () => {
     if (!dateRange) {
-      console.error("dateRange is null");
+      setLoading(false);
       return;
     }
-    fetchReportData();
-  }, [venueId, dateRange]);
+
+    requestSerialRef.current += 1;
+    const requestSerial = requestSerialRef.current;
+    clearPollTimer();
+    setIsSubmittingTask(true);
+    setLoading(true);
+    setFilteredData([]);
+    setTaskInfo(null);
+
+    try {
+      const submitResult = await submitAllDailyStatTask(
+        poolType,
+        Number(venueId),
+        dateRange[0].format("YYYY-MM-DD"),
+        dateRange[1].format("YYYY-MM-DD"),
+      );
+
+      if (requestSerial !== requestSerialRef.current) {
+        return;
+      }
+
+      const task = submitResult?.data?.task as DailyStatTaskPayload | undefined;
+      if (!task?.taskId) {
+        throw new Error(i18nT("日报任务提交失败"));
+      }
+
+      setIsSubmittingTask(false);
+      setTaskInfo(task);
+
+      if (task.status === "success") {
+        await fetchTaskResult(task.taskId, requestSerial);
+        setLoading(false);
+        return;
+      }
+
+      if (task.status === "failed") {
+        throw new Error(task.errorMessage || i18nT("日报任务执行失败"));
+      }
+
+      pollTimerRef.current = window.setTimeout(() => {
+        pollTaskStatus(task.taskId, requestSerial);
+      }, 2000);
+    } catch (error) {
+      setIsSubmittingTask(false);
+      message.error((error as Error).message || i18nT("获取日报数据失败"));
+      setTaskInfo(null);
+      setFilteredData([]);
+      clearPollTimer();
+      setLoading(false);
+    }
+  }, [clearPollTimer, dateRange, fetchTaskResult, pollTaskStatus, poolType, venueId]);
+
+  // 拉取数据
+  useEffect(() => {
+    if (dateRange) {
+      fetchReportData();
+    }
+  }, [dateRange, fetchReportData]);
 
   const onDateChange: RangePickerProps["onChange"] = (dates) => {
     setDateRange(dates as [dayjs.Dayjs, dayjs.Dayjs] | null);
@@ -369,9 +505,28 @@ const App: React.FC = () => {
   const handleReset = () => {
     const defaultStart = dayjs().subtract(1, "months");
     const defaultEnd = dayjs();
+    clearPollTimer();
+    setIsSubmittingTask(false);
     setDateRange([defaultStart, defaultEnd]);
+    setTaskInfo(null);
     setFilteredData([]); // 立即清空，触发表格重新渲染，随后 useEffect 会重新拉取
   };
+
+  const visibleTaskInfo = taskInfo;
+  const shouldShowTaskPanel =
+    isSubmittingTask ||
+    visibleTaskInfo?.status === "pending" ||
+    visibleTaskInfo?.status === "running" ||
+    visibleTaskInfo?.status === "failed";
+  const progressPercent = visibleTaskInfo
+    ? Math.min(
+        100,
+        Math.max(
+          0,
+          visibleTaskInfo.totalDays > 0 ? (visibleTaskInfo.progress / visibleTaskInfo.totalDays) * 100 : 0,
+        ),
+      )
+    : 0;
 
   // 导出 Excel
   const exportToCSV = () => {
@@ -379,40 +534,42 @@ const App: React.FC = () => {
 
     // 定义中文列名映射
     const mainDataHeaders = {
-      date: "日期",
-      btcOutput24h: "24小时产出(BTC)",
-      theoreticalPower: "理论算力(P)",
-      power24h: "24小时算力(P)",
-      impactMachine: "在架算力(P)",
-      effectiveRate24h: "24小时有效率",
-      totalMachines: "托管台数",
-      onlineRatio: "在架有效率",
-      totalFailures: "总故障数",
-      totalFailuresRate: "总故障率",
-      failures24h: "24小时故障数",
-      failureRate24h: "24小时故障率",
-      impactRatio: "影响占比",
-      limitImpactRate: "限电影响",
-      highTemperatureRate: "高温影响",
+      date: i18nT("日期"),
+      btcOutput24h: i18nT("24小时产出(BTC)"),
+      theoreticalPower: i18nT("理论算力(P)"),
+      power24h: i18nT("24小时算力(P)"),
+      impactMachine: i18nT("在架算力(P)"),
+      effectiveRate24h: i18nT("24小时有效率"),
+      totalMachines: i18nT("托管台数"),
+      onlineRatio: i18nT("在架有效率"),
+      totalFailures: i18nT("总故障数"),
+      totalFailuresRate: i18nT("总故障率"),
+      failures24h: i18nT("24小时故障数"),
+      shelved: i18nT("24小时上架数"),
+      failureRate24h: i18nT("24小时故障率"),
+      impactRatio: i18nT("影响占比"),
+      limitImpactRate: i18nT("限电影响"),
+      highTemperatureRate: i18nT("高温影响"),
     };
 
     const subAccountHeaders = {
-      date: "日期",
-      pool_name: "矿池名称",
-      btcOutput24h: "24小时产出(BTC)",
-      theoreticalPower: "理论算力(P)",
-      power24h: "24小时算力(P)",
-      impactMachine: "在架算力(P)",
-      effectiveRate24h: "24小时有效率",
-      totalMachines: "托管台数",
-      onlineRatio: "在架有效率",
-      totalFailures: "总故障数",
-      totalFailuresRate: "总故障率",
-      failures24h: "24小时故障数",
-      failureRate24h: "24小时故障率",
-      impactRatio: "影响占比",
-      limitImpactRate: "限电影响",
-      highTemperatureRate: "高温影响",
+      date: i18nT("日期"),
+      pool_name: i18nT("矿池名称"),
+      btcOutput24h: i18nT("24小时产出(BTC)"),
+      theoreticalPower: i18nT("理论算力(P)"),
+      power24h: i18nT("24小时算力(P)"),
+      impactMachine: i18nT("在架算力(P)"),
+      effectiveRate24h: i18nT("24小时有效率"),
+      totalMachines: i18nT("托管台数"),
+      onlineRatio: i18nT("在架有效率"),
+      totalFailures: i18nT("总故障数"),
+      totalFailuresRate: i18nT("总故障率"),
+      failures24h: i18nT("24小时故障数"),
+      shelved: i18nT("24小时上架数"),
+      failureRate24h: i18nT("24小时故障率"),
+      impactRatio: i18nT("影响占比"),
+      limitImpactRate: i18nT("限电影响"),
+      highTemperatureRate: i18nT("高温影响"),
     };
 
     // 准备主数据（排除subAccountStats字段并转换为中文列名）
@@ -505,7 +662,7 @@ const App: React.FC = () => {
 
         worksheet[cellAddress].s = {
           font: {
-            name: "微软雅黑",
+            name: i18nT("微软雅黑"),
             sz: 12,
             bold: true,
             color: { rgb: "FFFFFF" },
@@ -536,7 +693,7 @@ const App: React.FC = () => {
 
           worksheet[cellAddress].s = {
             font: {
-              name: "微软雅黑",
+              name: i18nT("微软雅黑"),
               sz: 10,
             },
             alignment: {
@@ -574,7 +731,7 @@ const App: React.FC = () => {
     setWorksheetStyle(mainWorksheet, mainHeaderKeys);
     // 工作表命名：当前场地名 + 日期时间（Excel 工作表名最多 31 字符，且不能包含 : \ / ? * [ ]）
     const ts = dayjs().format("YYYYMMDD_HHmm");
-    const rawSheetName = `${venueName || "未命名场地"}-${ts}`;
+    const rawSheetName = `${venueName || i18nT("未命名场地")}-${ts}`;
     // 仅保留必须的转义（反斜杠与中括号），移除对 "/", "?", "*" 的不必要转义
     const safeSheetName = rawSheetName.replace("/[\\/:?*[]]/g", "-").slice(0, 31);
     XLSX.utils.book_append_sheet(workbook, mainWorksheet, safeSheetName);
@@ -583,7 +740,7 @@ const App: React.FC = () => {
     const subAccountWorksheet = XLSX.utils.json_to_sheet(subAccountData);
     const subAccountHeaderKeys = Object.keys(subAccountData[0] || {});
     setWorksheetStyle(subAccountWorksheet, subAccountHeaderKeys);
-    XLSX.utils.book_append_sheet(workbook, subAccountWorksheet, "子账户详细数据");
+    XLSX.utils.book_append_sheet(workbook, subAccountWorksheet, i18nT("子账户详细数据"));
 
     // 导出文件
     XLSX.writeFile(workbook, safeSheetName + ".xlsx");
@@ -605,31 +762,77 @@ const App: React.FC = () => {
         }`}
       >
         <div className="mb-6 flex items-center justify-between gap-4">
-          <RangePicker
-            value={dateRange}
-            onChange={onDateChange}
-            disabledDate={(current, { from }) => {
-              if (!from) return false;
-              // 限制最大选择范围为2个月
-              const maxRange = 2;
-              const diffMonths = Math.abs(current.diff(from, "month", true));
-              return diffMonths > maxRange;
-            }}
-          />
+          <div className="flex items-center gap-2">
+            <RangePicker
+              value={dateRange}
+              onChange={onDateChange}
+              disabledDate={(current, { from }) => {
+                if (!from) return false;
+                // 限制最大选择范围为2个月
+                const maxRange = 2;
+                const diffMonths = Math.abs(current.diff(from, "month", true));
+                return diffMonths > maxRange;
+              }}
+            />
+          </div>
           <div className="flex items-center gap-2">
             <Button onClick={handleReset} className="!rounded-button">
-              重置
+              {i18nT("重置")}
             </Button>
             <Button
               type="primary"
               icon={<DownloadOutlined />}
               onClick={exportToCSV}
+              disabled={!filteredData.length}
               className="!rounded-button"
             >
-              导出报表
+              {i18nT("导出报表")}
             </Button>
           </div>
         </div>
+        {shouldShowTaskPanel ? (
+          <div className="mb-6 rounded-2xl border border-slate-200 bg-slate-50 px-5 py-4 shadow-sm">
+            <div className="mb-3 flex flex-wrap items-center gap-3">
+              <span className="text-sm font-semibold text-slate-900">{i18nT("日报生成状态")}</span>
+              {visibleTaskInfo ? (
+                <>
+                  <Tag color={TASK_STATUS_COLOR_MAP[visibleTaskInfo.status]}>
+                    {TASK_STATUS_TEXT[visibleTaskInfo.status]}
+                  </Tag>
+                  <span className="text-sm text-slate-600">
+                    {i18nT("已处理 {{progress}}/{{totalDays}} 天", {
+                      progress: visibleTaskInfo.progress,
+                      totalDays: visibleTaskInfo.totalDays,
+                    })}
+                  </span>
+                  {visibleTaskInfo.status !== "failed" ? (
+                    <span className="text-sm text-slate-500">{i18nT("系统每 2 秒自动刷新一次状态")}</span>
+                  ) : null}
+                </>
+              ) : (
+                <>
+                  <Tag color="processing">{i18nT("提交中")}</Tag>
+                  <span className="text-sm text-slate-600">{i18nT("正在提交日报任务，请稍候...")}</span>
+                </>
+              )}
+            </div>
+            {visibleTaskInfo ? (
+              <>
+                <Progress
+                  percent={Number(progressPercent.toFixed(0))}
+                  status={visibleTaskInfo.status === "failed" ? "exception" : "active"}
+                  strokeColor={visibleTaskInfo.status === "failed" ? "#dc2626" : "#1677ff"}
+                  showInfo={false}
+                />
+                {visibleTaskInfo.errorMessage ? (
+                  <div className="mt-2 text-sm text-rose-600">
+                    {i18nT("错误信息：{{errorMessage}}", { errorMessage: visibleTaskInfo.errorMessage })}
+                  </div>
+                ) : null}
+              </>
+            ) : null}
+          </div>
+        ) : null}
         <div className="mx-auto">
           <Table
             loading={loading} // 👈 表格自带 loading 效果
@@ -642,14 +845,14 @@ const App: React.FC = () => {
               showSizeChanger: true,
               onShowSizeChange: (_, size) => setPageSize(size),
               showQuickJumper: true,
-              showTotal: (total) => `共 ${total} 条`,
+              showTotal: (total) => i18nT("共 {{total}} 条", { total: total }),
             }}
             className="custom-table"
             rowKey="date"
             expandable={{
               expandedRowRender: (record) => (
                 <div style={{ margin: 0 }}>
-                  <h4 style={{ marginBottom: 16 }}>子账户统计详情</h4>
+                  <h4 style={{ marginBottom: 16 }}>{i18nT("子账户统计详情")}</h4>
                   <Table<SubAccountStat>
                     columns={subAccountColumns}
                     dataSource={record.subAccountStats}

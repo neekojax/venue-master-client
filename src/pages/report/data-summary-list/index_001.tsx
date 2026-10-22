@@ -10,6 +10,7 @@ import isSameOrBefore from "dayjs/plugin/isSameOrBefore";
 import * as XLSX from "xlsx";
 import { useSelector, useSettingsStore } from "@/stores";
 
+import { t as i18nT } from "@/locales";
 import { fetchEfficiencyMachineStat } from "@/pages/report/api.tsx";
 // 必须扩展 dayjs，否则会报 “不存在属性”
 dayjs.extend(isSameOrAfter);
@@ -77,16 +78,16 @@ const App: React.FC = () => {
 
   // 子账户统计表格列配置
   const subAccountColumns: ColumnsType<SubAccountStat> = [
-    { title: "地区", dataIndex: "pool_name", key: "pool_name", fixed: "left", width: 120 },
+    { title: i18nT("地区"), dataIndex: "pool_name", key: "pool_name", fixed: "left", width: 120 },
     {
-      title: "24小时产出(BTC)",
+      title: i18nT("24小时产出(BTC)"),
       dataIndex: "btcOutput24h",
       key: "btcOutput24h",
       width: 165,
       render: (value) => value.toFixed(8),
     },
     {
-      title: "理论算力(P)",
+      title: i18nT("理论算力(P)"),
       dataIndex: "theoreticalPower",
       width: 120,
       key: "theoreticalPower",
@@ -94,7 +95,7 @@ const App: React.FC = () => {
       render: (value) => value.toFixed(2),
     },
     {
-      title: "24小时算力(P)",
+      title: i18nT("24小时算力(P)"),
       dataIndex: "power24h",
       key: "power24h",
       width: 145,
@@ -103,7 +104,7 @@ const App: React.FC = () => {
     },
 
     {
-      title: "24小时有效率",
+      title: i18nT("24小时有效率"),
       dataIndex: "effectiveRate24h",
       key: "effectiveRate24h",
       width: 140,
@@ -111,24 +112,24 @@ const App: React.FC = () => {
       render: (value) => `${value.toFixed(2)}%`,
     },
     {
-      title: "在线率",
+      title: i18nT("在线率"),
       dataIndex: "onlineRatio",
       key: "onlineRatio",
       width: 140,
       align: "center",
       render: (value) => `${value.toFixed(2)}%`,
     },
-    { title: "托管台数", dataIndex: "totalMachines", key: "totalMachines", width: 105 },
-    { title: "总故障数", dataIndex: "totalFailures", key: "totalFailures", width: 120 },
+    { title: i18nT("托管台数"), dataIndex: "totalMachines", key: "totalMachines", width: 105 },
+    { title: i18nT("总故障数"), dataIndex: "totalFailures", key: "totalFailures", width: 120 },
     {
-      title: "总故障率",
+      title: i18nT("总故障率"),
       dataIndex: "totalFailuresRate",
       key: "totalFailuresRate",
       width: 120,
       render: (value) => `${value.toFixed(2)}%`,
     },
     {
-      title: "24小时故障数",
+      title: i18nT("24小时故障数"),
       dataIndex: "failures24h",
       key: "failures24h",
       width: 138,
@@ -136,21 +137,21 @@ const App: React.FC = () => {
       render: (value) => value.toLocaleString(),
     },
     {
-      title: "24小时故障率",
+      title: i18nT("24小时故障率"),
       dataIndex: "failureRate24h",
       key: "failureRate24h",
       width: 138,
       render: (value) => `${value.toFixed(2)}%`,
     },
     {
-      title: "影响占比",
+      title: i18nT("影响占比"),
       dataIndex: "impactRatio",
       key: "impactRatio",
       width: 105,
       render: (value) => `${value.toFixed(2)}%`,
     },
     {
-      title: "限电影响",
+      title: i18nT("限电影响"),
       dataIndex: "limitImpactRate",
       key: "limitImpactRate",
       width: 140,
@@ -158,7 +159,7 @@ const App: React.FC = () => {
       render: (value) => `${value.toFixed(2)}%`,
     },
     {
-      title: "高温影响",
+      title: i18nT("高温影响"),
       dataIndex: "highTemperatureRate",
       key: "highTemperatureRate",
       width: 140,
@@ -168,9 +169,9 @@ const App: React.FC = () => {
   ];
 
   const columns: ColumnsType<DataType> = [
-    { title: "日期", dataIndex: "date", key: "date", fixed: "left", width: 120 },
+    { title: i18nT("日期"), dataIndex: "date", key: "date", fixed: "left", width: 120 },
     {
-      title: "24小时产出(BTC)",
+      title: i18nT("24小时产出(BTC)"),
       dataIndex: "btcOutput24h",
       key: "btcOutput24h",
       width: 165,
@@ -179,7 +180,7 @@ const App: React.FC = () => {
       sorter: (a, b) => a.btcOutput24h - b.btcOutput24h,
     },
     {
-      title: "理论算力(P)",
+      title: i18nT("理论算力(P)"),
       dataIndex: "theoreticalPower",
       key: "theoreticalPower",
       width: 125,
@@ -188,7 +189,7 @@ const App: React.FC = () => {
       sorter: (a, b) => a.theoreticalPower - b.theoreticalPower,
     },
     {
-      title: "24小时算力(P)",
+      title: i18nT("24小时算力(P)"),
       dataIndex: "power24h",
       key: "power24h",
       width: 145,
@@ -197,7 +198,7 @@ const App: React.FC = () => {
       sorter: (a, b) => a.power24h - b.power24h,
     },
     {
-      title: "24小时有效率",
+      title: i18nT("24小时有效率"),
       dataIndex: "effectiveRate24h",
       key: "effectiveRate24h",
       width: 140,
@@ -206,7 +207,7 @@ const App: React.FC = () => {
       sorter: (a, b) => a.effectiveRate24h - b.effectiveRate24h,
     },
     {
-      title: "在线率",
+      title: i18nT("在线率"),
       dataIndex: "onlineRatio",
       key: "onlineRatio",
       width: 140,
@@ -214,7 +215,7 @@ const App: React.FC = () => {
       render: (value) => `${value.toFixed(2)}%`,
     },
     {
-      title: "托管台数",
+      title: i18nT("托管台数"),
       dataIndex: "totalMachines",
       key: "totalMachines",
       width: 105,
@@ -223,7 +224,7 @@ const App: React.FC = () => {
       sorter: (a, b) => a.totalMachines - b.totalMachines,
     },
     {
-      title: "总故障台数",
+      title: i18nT("总故障台数"),
       dataIndex: "totalFailures",
       key: "totalFailures",
       width: 120,
@@ -232,7 +233,7 @@ const App: React.FC = () => {
       sorter: (a, b) => a.totalFailures - b.totalFailures,
     },
     {
-      title: "总故障率",
+      title: i18nT("总故障率"),
       key: "totalFailureRate",
       width: 120,
       align: "right",
@@ -244,7 +245,7 @@ const App: React.FC = () => {
       },
     },
     {
-      title: "24小时故障数",
+      title: i18nT("24小时故障数"),
       dataIndex: "failures24h",
       key: "failures24h",
       width: 138,
@@ -253,7 +254,7 @@ const App: React.FC = () => {
       sorter: (a, b) => a.failures24h - b.failures24h,
     },
     {
-      title: "24小时故障率",
+      title: i18nT("24小时故障率"),
       dataIndex: "failureRate24h",
       key: "failureRate24h",
       width: 138,
@@ -261,7 +262,7 @@ const App: React.FC = () => {
       sorter: (a, b) => a.failureRate24h - b.failureRate24h,
     },
     {
-      title: "影响占比",
+      title: i18nT("影响占比"),
       dataIndex: "impactRatio",
       key: "impactRatio",
       width: 105,
@@ -269,7 +270,7 @@ const App: React.FC = () => {
       sorter: (a, b) => a.impactRatio - b.impactRatio,
     },
     {
-      title: "限电影响",
+      title: i18nT("限电影响"),
       dataIndex: "limitImpactRate",
       key: "limitImpactRate",
       width: 140,
@@ -277,7 +278,7 @@ const App: React.FC = () => {
       sorter: (a, b) => a.limitImpactRate - b.limitImpactRate,
     },
     {
-      title: "高温影响",
+      title: i18nT("高温影响"),
       dataIndex: "highTemperatureRate",
       key: "highTemperatureRate",
       width: 140,
@@ -422,37 +423,37 @@ const App: React.FC = () => {
 
     // 定义中文列名映射
     const mainDataHeaders = {
-      date: "日期",
-      btcOutput24h: "24小时产出(BTC)",
-      theoreticalPower: "理论算力(P)",
-      power24h: "24小时算力(P)",
-      effectiveRate24h: "24小时有效率",
-      totalMachines: "托管台数",
-      onlineRatio: "在线率",
-      totalFailures: "总故障数",
-      failures24h: "24小时故障数",
-      failureRate24h: "24小时故障率",
-      impactRatio: "影响占比",
-      limitImpactRate: "限电影响",
-      highTemperatureRate: "高温影响",
+      date: i18nT("日期"),
+      btcOutput24h: i18nT("24小时产出(BTC)"),
+      theoreticalPower: i18nT("理论算力(P)"),
+      power24h: i18nT("24小时算力(P)"),
+      effectiveRate24h: i18nT("24小时有效率"),
+      totalMachines: i18nT("托管台数"),
+      onlineRatio: i18nT("在线率"),
+      totalFailures: i18nT("总故障数"),
+      failures24h: i18nT("24小时故障数"),
+      failureRate24h: i18nT("24小时故障率"),
+      impactRatio: i18nT("影响占比"),
+      limitImpactRate: i18nT("限电影响"),
+      highTemperatureRate: i18nT("高温影响"),
     };
 
     const subAccountHeaders = {
-      date: "日期",
-      pool_name: "地区",
-      btcOutput24h: "24小时产出(BTC)",
-      theoreticalPower: "理论算力(P)",
-      power24h: "24小时算力(P)",
-      effectiveRate24h: "24小时有效率",
-      totalMachines: "托管台数",
-      onlineRatio: "在线率",
-      totalFailures: "总故障数",
-      totalFailuresRate: "总故障率",
-      failures24h: "24小时故障数",
-      failureRate24h: "24小时故障率",
-      impactRatio: "影响占比",
-      limitImpactRate: "限电影响",
-      highTemperatureRate: "高温影响",
+      date: i18nT("日期"),
+      pool_name: i18nT("地区"),
+      btcOutput24h: i18nT("24小时产出(BTC)"),
+      theoreticalPower: i18nT("理论算力(P)"),
+      power24h: i18nT("24小时算力(P)"),
+      effectiveRate24h: i18nT("24小时有效率"),
+      totalMachines: i18nT("托管台数"),
+      onlineRatio: i18nT("在线率"),
+      totalFailures: i18nT("总故障数"),
+      totalFailuresRate: i18nT("总故障率"),
+      failures24h: i18nT("24小时故障数"),
+      failureRate24h: i18nT("24小时故障率"),
+      impactRatio: i18nT("影响占比"),
+      limitImpactRate: i18nT("限电影响"),
+      highTemperatureRate: i18nT("高温影响"),
     };
 
     // 准备主数据（排除subAccountStats字段并转换为中文列名）
@@ -514,7 +515,7 @@ const App: React.FC = () => {
 
         worksheet[cellAddress].s = {
           font: {
-            name: "微软雅黑",
+            name: i18nT("微软雅黑"),
             sz: 12,
             bold: true,
             color: { rgb: "FFFFFF" },
@@ -545,7 +546,7 @@ const App: React.FC = () => {
 
           worksheet[cellAddress].s = {
             font: {
-              name: "微软雅黑",
+              name: i18nT("微软雅黑"),
               sz: 10,
             },
             alignment: {
@@ -581,16 +582,16 @@ const App: React.FC = () => {
     const mainWorksheet = XLSX.utils.json_to_sheet(mainData);
     const mainHeaderKeys = Object.keys(mainData[0] || {});
     setWorksheetStyle(mainWorksheet, mainHeaderKeys);
-    XLSX.utils.book_append_sheet(workbook, mainWorksheet, "日报汇总数据");
+    XLSX.utils.book_append_sheet(workbook, mainWorksheet, i18nT("日报汇总数据"));
 
     // 添加子账户数据sheet
     const subAccountWorksheet = XLSX.utils.json_to_sheet(subAccountData);
     const subAccountHeaderKeys = Object.keys(subAccountData[0] || {});
     setWorksheetStyle(subAccountWorksheet, subAccountHeaderKeys);
-    XLSX.utils.book_append_sheet(workbook, subAccountWorksheet, "子账户详细数据");
+    XLSX.utils.book_append_sheet(workbook, subAccountWorksheet, i18nT("子账户详细数据"));
 
     // 导出文件
-    XLSX.writeFile(workbook, "日报数据.xlsx");
+    XLSX.writeFile(workbook, i18nT("日报数据.xlsx"));
   };
 
   return (
@@ -626,7 +627,7 @@ const App: React.FC = () => {
             onClick={exportToCSV}
             className="!rounded-button"
           >
-            导出报表
+            {i18nT("导出报表")}
           </Button>
         </div>
         <div className="mx-auto">
@@ -641,14 +642,14 @@ const App: React.FC = () => {
               showSizeChanger: true,
               onShowSizeChange: (_, size) => setPageSize(size),
               showQuickJumper: true,
-              showTotal: (total) => `共 ${total} 条`,
+              showTotal: (total) => i18nT("共 {{total}} 条", { total: total }),
             }}
             className="custom-table"
             rowKey="date"
             expandable={{
               expandedRowRender: (record) => (
                 <div style={{ margin: 0 }}>
-                  <h4 style={{ marginBottom: 16 }}>子账户统计详情</h4>
+                  <h4 style={{ marginBottom: 16 }}>{i18nT("子账户统计详情")}</h4>
                   <Table<SubAccountStat>
                     columns={subAccountColumns}
                     dataSource={record.subAccountStats}

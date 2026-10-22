@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Form, type FormInstance, Input } from "antd";
 
+import { t } from "@/locales";
 import type { Field, Values } from "@/pages/base/type.ts";
 
 interface EditFormProps {
@@ -42,7 +43,7 @@ export default function EditForm({ initialValues, onFormInstanceReady }: EditFor
     >
       <Form.Item
         name="templateName"
-        label="模版名称"
+        label={t("模版名称")}
         labelCol={{ span: 6 }} // 设置标签宽度
         wrapperCol={{ span: 13 }} // 设置输入框宽度
       >
@@ -54,13 +55,15 @@ export default function EditForm({ initialValues, onFormInstanceReady }: EditFor
             key={field.ID}
             label={field.FieldName}
             name={field.FieldName}
-            rules={[{ required: true, message: `请输入 ${field.FieldName} 的值` }]}
+            rules={[
+              { required: true, message: t("请输入 {{FieldName}} 的值", { FieldName: field.FieldName }) },
+            ]}
             labelCol={{ span: 6 }} // 设置标签宽度
             wrapperCol={{ span: 13 }} // 设置输入框宽度
             style={{ marginBottom: 15 }}
           >
             <Input
-              placeholder={`输入 ${field.FieldName}`}
+              placeholder={t("输入 {{FieldName}}", { FieldName: field.FieldName })}
               onChange={(e) => updateField(index, e.target.value)}
             />
           </Form.Item>

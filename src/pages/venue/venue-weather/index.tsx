@@ -8,6 +8,8 @@ import WeatherHero from "./components/WeatherHero";
 import { ForecastDay, GeographicLocation, VenueWeather, VenueWeatherAlert, WeatherAlert } from "./types";
 import { useSelector, useSettingsStore } from "@/stores";
 
+import { t } from "@/locales";
+
 const App: React.FC = () => {
   const { poolType } = useSettingsStore(useSelector(["poolType"]));
   const [selectedVenue, setSelectedVenue] = useState<number>(0);
@@ -138,7 +140,7 @@ const App: React.FC = () => {
   const [filters, setFilters] = useState<{ siteName: string }>({ siteName: "" });
   const [selectedSites, setSelectedSites] = useState<number[]>([]);
   const [alertTypeFilter, setAlertTypeFilter] = useState<string | null>(null);
-  const selectedVenueName = venueOptions.find((v) => v.id === selectedVenue)?.name || "选择场地";
+  const selectedVenueName = venueOptions.find((v) => v.id === selectedVenue)?.name || t("选择场地");
   const handleFilterChange = (key: "siteName", value: string) => {
     setFilters((prev) => ({ ...prev, [key]: value }));
   };
@@ -309,7 +311,9 @@ const App: React.FC = () => {
         <div>
           <div className="flex items-center relative">
             <div className="flex flex-col pr-6">
-              <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">监控场地</p>
+              <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">
+                {t("监控场地")}
+              </p>
               <div className="flex items-center space-x-2">
                 <button
                   type="button"
@@ -327,16 +331,16 @@ const App: React.FC = () => {
             <span style={{ marginTop: "10px" }}>
               <Switch size="small" checked={showCollectionOnly} onChange={setShowCollectionOnly} />
               {"  "}
-              <span style={{ marginRight: "10px" }}>我的自选</span>
+              <span style={{ marginRight: "10px" }}>{t("我的自选")}</span>
             </span>
 
             <div className="h-10 w-[1px] bg-gray-100 mx-4"></div>
             {showSiteFilter && (
               <div className="site-filter-dropdown absolute right-0 top-full mt-2 w-80 bg-white rounded-lg z-20 shadow-lg border border-gray-200 p-4">
-                <div className="font-medium text-gray-900 mb-3">选择场地</div>
+                <div className="font-medium text-gray-900 mb-3">{t("选择场地")}</div>
                 <Input
                   size="middle"
-                  placeholder="搜索场地..."
+                  placeholder={t("搜索场地...")}
                   className="mb-3"
                   value={filters.siteName}
                   onChange={(e) => {
@@ -375,7 +379,7 @@ const App: React.FC = () => {
                 </div>
                 <div className="flex justify-end space-x-2 mt-3 pt-3 border-t border-gray-200">
                   <Button size="small" onClick={() => setShowSiteFilter(false)}>
-                    取消
+                    {t("取消")}
                   </Button>
                   <Button
                     size="small"
@@ -388,7 +392,7 @@ const App: React.FC = () => {
                       setShowSiteFilter(false);
                     }}
                   >
-                    应用
+                    {t("应用")}
                   </Button>
                 </div>
               </div>
@@ -409,7 +413,7 @@ const App: React.FC = () => {
                 className="text-xs px-2 py-1 rounded border border-gray-300 hover:bg-gray-100"
                 onClick={() => setAlertTypeFilter(null)}
               >
-                全部场地
+                {t("全部场地")}
               </button>
               {Object.keys(alertTypesIndexRef.current || {}).map((k) => {
                 const isActive = alertTypeFilter === k;
@@ -437,7 +441,7 @@ const App: React.FC = () => {
                       setSelectedVenue(opts.length ? opts[0].id : 0);
                     }}
                   >
-                    {k}预警({alertTypesIndexRef.current?.[k]?.length || 0})
+                    {t("{{k}}预警({{value}})", { k: k, value: alertTypesIndexRef.current?.[k]?.length || 0 })}
                   </button>
                 );
               })}
@@ -449,7 +453,7 @@ const App: React.FC = () => {
             className="px-6 py-2.5 bg-blue-600 hover:bg-blue-700 text-white text-sm font-bold rounded-lg transition-all flex items-center shadow-lg shadow-blue-500/20 active:scale-95"
           >
             <i className={`fas fa-arrows-rotate mr-2 ${loading ? "fa-spin" : ""}`}></i>
-            刷新数据
+            {t("刷新数据")}
           </button>
         </div>
       </div>
@@ -460,7 +464,7 @@ const App: React.FC = () => {
             <div className="h-96 bg-white rounded-xl shadow-sm animate-pulse flex items-center justify-center">
               <div className="text-gray-300 flex flex-col items-center">
                 <i className="fas fa-spinner fa-spin text-3xl mb-3"></i>
-                <span>正在加载气象卫星数据...</span>
+                <span>{t("正在加载气象卫星数据...")}</span>
               </div>
             </div>
           ) : (
@@ -469,7 +473,7 @@ const App: React.FC = () => {
                 <div className="flex items-center justify-between mb-4">
                   <h3 className="text-sm font-bold text-gray-800 flex items-center uppercase tracking-wider">
                     <i className="fas fa-bolt-lightning mr-2 text-yellow-500"></i>
-                    天气实时模块
+                    {t("天气实时模块")}
                   </h3>
                 </div>
                 <WeatherHero data={realtimeWeather} />
@@ -497,7 +501,9 @@ const App: React.FC = () => {
 
           <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
             <div className="p-4 border-b bg-gray-50/50 flex items-center justify-between">
-              <h4 className="font-bold text-gray-800 text-sm tracking-tight uppercase">地理位置中心</h4>
+              <h4 className="font-bold text-gray-800 text-sm tracking-tight uppercase">
+                {t("地理位置中心")}
+              </h4>
               <i className="fas fa-map-location-dot text-gray-400"></i>
             </div>
             <div className="p-5 space-y-6">
@@ -507,7 +513,7 @@ const App: React.FC = () => {
                     <div className="w-1.5 h-1.5 bg-blue-600 rounded-full"></div>
                   </span>
                   <p className="text-[10px] text-gray-400 font-bold uppercase tracking-widest">
-                    场地中心坐标
+                    {t("场地中心坐标")}
                   </p>
                   <p className="text-sm font-mono font-bold text-gray-800">
                     {geographicLocation?.venue_coordinates}
@@ -518,7 +524,7 @@ const App: React.FC = () => {
                     <div className="w-1.5 h-1.5 bg-teal-500 rounded-full"></div>
                   </span>
                   <p className="text-[10px] text-gray-400 font-bold uppercase tracking-widest">
-                    数据源 (Ambient)
+                    {t("数据源 (Ambient)")}
                   </p>
                   <p className="text-sm font-mono font-bold text-gray-800">
                     {geographicLocation?.data_source_coordinates}
@@ -529,9 +535,11 @@ const App: React.FC = () => {
               <div className="bg-blue-50/50 rounded-lg p-3 flex items-center justify-between">
                 <div className="flex items-center space-x-2">
                   <i className="fas fa-ruler-horizontal text-blue-500 text-xs"></i>
-                  <span className="text-xs font-bold text-blue-700">直线距离</span>
+                  <span className="text-xs font-bold text-blue-700">{t("直线距离")}</span>
                 </div>
-                <span className="text-sm font-bold text-blue-800">{geographicLocation?.distance} 公里</span>
+                <span className="text-sm font-bold text-blue-800">
+                  {t("{{value}} 公里", { value: geographicLocation?.distance })}
+                </span>
               </div>
 
               <div className="h-40 bg-gray-100 rounded-xl overflow-hidden relative group">
@@ -546,7 +554,7 @@ const App: React.FC = () => {
                   <div className="absolute top-0 w-4 h-4 bg-red-600 rounded-full border-2 border-white shadow-lg"></div>
                 </div>
                 <div className="absolute bottom-2 right-2 px-2 py-1 bg-white/80 backdrop-blur-sm rounded text-[8px] font-bold text-gray-600">
-                  卫星图层
+                  {t("卫星图层")}
                 </div>
               </div>
             </div>

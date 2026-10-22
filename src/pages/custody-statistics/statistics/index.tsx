@@ -1,8 +1,10 @@
 import { useEffect, useState } from "react";
 import { ExportOutlined, FilterOutlined, SettingOutlined } from "@ant-design/icons";
-import { Button, Input, Select } from "antd";
+import { Button, Input, Select, Switch } from "antd";
 import CustodyStatisticsMonthTable from "./components/CustodyStatisticsMonthTable";
 import CustodyStatisticsTable from "./components/CustodyStatisticsTable";
+
+import { t } from "@/locales";
 
 // 单文件 React 组件：可直接在支持 Tailwind 的项目中预览
 // 说明：这是一个设计原型，展示“按天数搜索（下拉）”与“按月搜索（日历月）”二选一的交互和界面风格
@@ -35,6 +37,7 @@ export default function DateModeHeader() {
   // 提升的筛选与导出相关状态
   const [selectedVenues, setSelectedVenues] = useState<string[]>([]);
   const [showHighFeeOnly, setShowHighFeeOnly] = useState(false);
+  const [showCollectionOnly, setShowCollectionOnly] = useState(false);
   const [venueOptions, setVenueOptions] = useState<{ label: string; value: string }[]>([]);
   const [filteredData, setFilteredData] = useState<any[]>([]);
   // 场地筛选弹层状态
@@ -43,28 +46,28 @@ export default function DateModeHeader() {
   const [showColumnFilter, setShowColumnFilter] = useState(false);
   // 列显示管理（默认：显示除“预估功耗”外的所有列）
   const availableColumns = [
-    { key: "venue_name", label: "场地名" },
-    { key: "hash", label: "24h算力" },
-    { key: "total_income_btc", label: "收益(BTC/USD/净USD)" },
-    { key: "basic_hosting_fee", label: "单价($/kwh)" },
-    { key: "power_consumption", label: "预估功耗" },
-    { key: "nominal_power_consumption", label: "额定功耗" },
-    { key: "power_consumption_diff", label: "功耗差异" },
-    { key: "total_hosting_fee", label: "总托管费" },
-    { key: "hosting_fee_ratio", label: "托管费占比" },
-    { key: "discount_status", label: "折扣状态" },
-    { key: "discount_price", label: "折扣价格" },
-    { key: "discount_hosting_fee_ratio", label: "折扣托管费占比" },
-    { key: "discount_cost_ratio", label: "折扣成本占比" },
-    { key: "downclock_discount", label: "降频后折扣" },
-    { key: "downclock_discount_hosting_fee_ratio", label: "降频后托管费占比" },
-    { key: "downclock_discount_cost_ratio", label: "降频后成本比" },
-    { key: "shutdown_price", label: "关机币价" },
-    { key: "downclock_price_ranges", label: "降频价格区间" },
-    { key: "downclock_before_profit", label: "降频前利润" },
-    { key: "downclock_after_profit", label: "降频后利润" },
-    { key: "date", label: "收益日期" },
-    { key: "period_type", label: "周期类型" },
+    { key: "venue_name", label: t("场地名") },
+    { key: "hash", label: t("24h算力") },
+    { key: "total_income_btc", label: t("收益(BTC/USD/净USD)") },
+    { key: "basic_hosting_fee", label: t("单价($/kwh)") },
+    { key: "power_consumption", label: t("预估功耗") },
+    { key: "nominal_power_consumption", label: t("额定功耗") },
+    { key: "power_consumption_diff", label: t("功耗差异") },
+    { key: "total_hosting_fee", label: t("总托管费") },
+    { key: "hosting_fee_ratio", label: t("托管费占比") },
+    { key: "discount_status", label: t("折扣状态") },
+    { key: "discount_price", label: t("折扣价格") },
+    { key: "discount_hosting_fee_ratio", label: t("折扣托管费占比") },
+    { key: "discount_cost_ratio", label: t("折扣成本占比") },
+    { key: "downclock_discount", label: t("降频后折扣") },
+    { key: "downclock_discount_hosting_fee_ratio", label: t("降频后托管费占比") },
+    { key: "downclock_discount_cost_ratio", label: t("降频后成本比") },
+    { key: "shutdown_price", label: t("关机币价") },
+    { key: "downclock_price_ranges", label: t("降频价格区间") },
+    { key: "downclock_before_profit", label: t("降频前利润") },
+    { key: "downclock_after_profit", label: t("降频后利润") },
+    { key: "date", label: t("收益日期") },
+    { key: "period_type", label: t("周期类型") },
 
     // { key: "total_income_btc", label: "收益BTC" },
     // { key: "total_income_usd", label: "收益USD" },
@@ -112,31 +115,31 @@ export default function DateModeHeader() {
 
     // 定义导出列的顺序与对应中文列名
     const columns = [
-      { key: "venue_name", label: "场地名" },
-      { key: "hash", label: "24h算力" },
-      { key: "total_income_btc", label: "收益BTC" },
-      { key: "total_income_usd", label: "收益USD" },
-      { key: "net_income", label: "净USD" },
-      { key: "basic_hosting_fee", label: "单价($/kwh)" },
-      { key: "power_consumption", label: "预估功耗" },
-      { key: "nominal_power_consumption", label: "额定功耗" },
-      { key: "power_consumption_diff", label: "功耗差异" },
-      { key: "total_hosting_fee", label: "总托管费" },
-      { key: "hosting_fee_ratio", label: "托管费占比" },
-      { key: "discount_status", label: "折扣状态" },
-      { key: "discount_price", label: "折扣价格" },
-      { key: "discount_hosting_fee_ratio", label: "折扣托管费占比" },
-      { key: "discount_cost_ratio", label: "折扣成本占比" },
-      { key: "downclock_discount", label: "降频后折扣" },
-      { key: "downclock_discount_hosting_fee_ratio", label: "降频后托管费占比" },
-      { key: "downclock_discount_cost_ratio", label: "降频后成本比" },
-      { key: "shutdown_price", label: "关机币价" },
-      { key: "downclock_price_ranges", label: "降频价格区间" },
-      { key: "downclock_before_profit", label: "降频前利润" },
-      { key: "downclock_after_profit", label: "降频后利润" },
+      { key: "venue_name", label: t("场地名") },
+      { key: "hash", label: t("24h算力") },
+      { key: "total_income_btc", label: t("收益BTC") },
+      { key: "total_income_usd", label: t("收益USD") },
+      { key: "net_income", label: t("净USD") },
+      { key: "basic_hosting_fee", label: t("单价($/kwh)") },
+      { key: "power_consumption", label: t("预估功耗") },
+      { key: "nominal_power_consumption", label: t("额定功耗") },
+      { key: "power_consumption_diff", label: t("功耗差异") },
+      { key: "total_hosting_fee", label: t("总托管费") },
+      { key: "hosting_fee_ratio", label: t("托管费占比") },
+      { key: "discount_status", label: t("折扣状态") },
+      { key: "discount_price", label: t("折扣价格") },
+      { key: "discount_hosting_fee_ratio", label: t("折扣托管费占比") },
+      { key: "discount_cost_ratio", label: t("折扣成本占比") },
+      { key: "downclock_discount", label: t("降频后折扣") },
+      { key: "downclock_discount_hosting_fee_ratio", label: t("降频后托管费占比") },
+      { key: "downclock_discount_cost_ratio", label: t("降频后成本比") },
+      { key: "shutdown_price", label: t("关机币价") },
+      { key: "downclock_price_ranges", label: t("降频价格区间") },
+      { key: "downclock_before_profit", label: t("降频前利润") },
+      { key: "downclock_after_profit", label: t("降频后利润") },
 
-      { key: "period_type", label: "统计周期" },
-      { key: "date", label: "收益日期" },
+      { key: "period_type", label: t("统计周期") },
+      { key: "date", label: t("收益日期") },
     ];
 
     // 仅导出在数据中实际存在的列
@@ -196,8 +199,8 @@ export default function DateModeHeader() {
     //  {mode === "day" ? `最近 ${dayRange} 天` : `${month}`}
     const fileName =
       mode === "day"
-        ? `最近 ${dayRange.replace("days", "天").replace("month", "月")} 电费统计`
-        : `${month}电费统计`;
+        ? t("最近 {{value}} 电费统计", { value: dayRange.replace("days", t("天")).replace("month", t("月")) })
+        : t("{{month}}电费统计", { month: month });
     a.download = `${fileName}_${new Date().toISOString().slice(0, 10)}.csv`;
     document.body.appendChild(a);
     a.click();
@@ -211,8 +214,10 @@ export default function DateModeHeader() {
       <div className=" mx-auto bg-white rounded-2xl shadow-md p-6">
         <header className="sticky  z-40 bg-white flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div>
-            <h1 className="text-lg font-semibold">电费信息统计</h1>
-            <p className="text-sm text-gray-500 mt-1">选择你要展示的时间粒度：按天数 或 按月（单月）</p>
+            <h1 className="text-lg font-semibold">{t("电费信息统计")}</h1>
+            <p className="text-sm text-gray-500 mt-1">
+              {t("选择你要展示的时间粒度：按天数 或 按月（单月）")}
+            </p>
           </div>
 
           {/* 模式切换控件 */}
@@ -225,7 +230,7 @@ export default function DateModeHeader() {
                 }`}
                 aria-pressed={mode === "day"}
               >
-                按天数
+                {t("按天数")}
               </button>
               <button
                 onClick={() => setMode("month")}
@@ -234,7 +239,7 @@ export default function DateModeHeader() {
                 }`}
                 aria-pressed={mode === "month"}
               >
-                按月
+                {t("按月")}
               </button>
             </div>
 
@@ -245,7 +250,7 @@ export default function DateModeHeader() {
                 aria-hidden={mode !== "day"}
               >
                 <label className={`text-sm ${mode === "day" ? "text-indigo-600" : "text-gray-500"}`}>
-                  最近
+                  {t("最近")}
                 </label>
                 <select
                   value={dayRange}
@@ -253,12 +258,14 @@ export default function DateModeHeader() {
                   disabled={mode !== "day"}
                   className={`appearance-none bg-transparent text-sm font-medium outline-none px-2 py-1 rounded-md ring-1 transition ${mode === "day" ? "ring-gray-300 focus:ring-indigo-500 hover:ring-indigo-300" : "ring-gray-200 bg-gray-100 text-gray-400 cursor-not-allowed"}`}
                 >
-                  <option value="1days">1 天</option>
-                  <option value="7days">7 天</option>
-                  <option value="1month">30 天</option>
-                  <option value="3month">90 天</option>
+                  <option value="1days">{t("1 天")}</option>
+                  <option value="7days">{t("7 天")}</option>
+                  <option value="1month">{t("30 天")}</option>
+                  <option value="3month">{t("90 天")}</option>
                 </select>
-                <span className={`text-sm ${mode === "day" ? "text-gray-400" : "text-gray-500"}`}>数据</span>
+                <span className={`text-sm ${mode === "day" ? "text-gray-400" : "text-gray-500"}`}>
+                  {t("数据")}
+                </span>
               </div>
 
               <div
@@ -266,7 +273,7 @@ export default function DateModeHeader() {
                 aria-hidden={mode !== "month"}
               >
                 <label className={`text-sm ${mode === "month" ? "text-indigo-600" : "text-gray-500"}`}>
-                  选择月份
+                  {t("选择月份")}
                 </label>
                 <input
                   type="month"
@@ -285,14 +292,29 @@ export default function DateModeHeader() {
           {/* 预览区域：展示卡片与时间范围提示 */}
           <div className="flex items-center justify-between mb-4">
             <div className="text-sm text-gray-500">
-              当前筛选：
+              {t("当前筛选：")}
               <span className="ml-2 font-medium text-gray-700">
                 {mode === "day"
-                  ? `最近 ${dayRange.replace("days", "天").replace("month", "月")}`
-                  : `${month.replace("month", "月")}`}
+                  ? t("最近 {{value}}", {
+                      value: dayRange.replace("days", t("天")).replace("month", t("月")),
+                    })
+                  : `${month.replace("month", t("月"))}`}
               </span>
             </div>
             <div style={{ display: "flex", justifyContent: "flex-end", marginTop: -20 }}>
+              <span
+                style={{
+                  display: "inline-flex",
+                  alignItems: "center",
+                  color: "#000",
+                  marginRight: 10,
+                  whiteSpace: "nowrap",
+                }}
+              >
+                <Switch size="small" checked={showCollectionOnly} onChange={setShowCollectionOnly} />
+                <span style={{ marginLeft: 8 }}>{t("我的收藏")}</span>
+              </span>
+
               <div className="relative" style={{ marginRight: 10 }}>
                 <Button
                   size="middle"
@@ -300,14 +322,14 @@ export default function DateModeHeader() {
                   className="!rounded-button whitespace-nowrap"
                   onClick={() => setShowSiteFilter(!showSiteFilter)}
                 >
-                  场地筛选
+                  {t("场地筛选")}
                 </Button>
                 {showSiteFilter && (
                   <div className="site-filter-dropdown absolute right-0 mt-2 w-80 bg-white rounded-lg shadow-lg z-10 border border-gray-200 p-4">
-                    <div className="font-medium text-gray-900 mb-3">选择场地</div>
+                    <div className="font-medium text-gray-900 mb-3">{t("选择场地")}</div>
                     <Input
                       size="middle"
-                      placeholder="搜索场地..."
+                      placeholder={t("搜索场地...")}
                       className="mb-3"
                       value={siteSearch}
                       onChange={(e) => {
@@ -351,7 +373,7 @@ export default function DateModeHeader() {
                     </div>
                     <div className="flex justify-end space-x-2 mt-3 pt-3 border-t border-gray-200">
                       <Button size="small" onClick={() => setShowSiteFilter(false)}>
-                        取消
+                        {t("取消")}
                       </Button>
                       <Button
                         size="small"
@@ -360,7 +382,7 @@ export default function DateModeHeader() {
                           setShowSiteFilter(false);
                         }}
                       >
-                        应用
+                        {t("应用")}
                       </Button>
                     </div>
                   </div>
@@ -375,14 +397,14 @@ export default function DateModeHeader() {
                   className="!rounded-button whitespace-nowrap"
                   onClick={() => setShowColumnFilter(!showColumnFilter)}
                 >
-                  表头设置
+                  {t("表头设置")}
                 </Button>
                 {showColumnFilter && (
                   <div className="column-filter-dropdown absolute right-0 mt-2 w-80 bg-white rounded-lg shadow-lg z-10 border border-gray-200 p-4">
-                    <div className="font-medium text-gray-900 mb-3">显示列</div>
+                    <div className="font-medium text-gray-900 mb-3">{t("显示列")}</div>
                     <Input
                       size="middle"
-                      placeholder="搜索列..."
+                      placeholder={t("搜索列...")}
                       className="mb-3"
                       value={columnSearch}
                       onChange={(e) => setColumnSearch(e.target.value)}
@@ -420,10 +442,10 @@ export default function DateModeHeader() {
                     </div>
                     <div className="flex justify-between space-x-2 mt-3 pt-3 border-t border-gray-200">
                       <Button size="small" onClick={() => setVisibleColumns(defaultVisibleColumnKeys)}>
-                        恢复默认
+                        {t("恢复默认")}
                       </Button>
                       <Button size="small" type="primary" onClick={() => setShowColumnFilter(false)}>
-                        关闭
+                        {t("关闭")}
                       </Button>
                     </div>
                   </div>
@@ -437,14 +459,14 @@ export default function DateModeHeader() {
                 value={discountFilter}
                 // allowClear
                 showSearch
-                placeholder="折扣状态"
+                placeholder={t("折扣状态")}
                 onChange={(val) => setDiscountFilter(val as any)}
                 style={{ width: 120, marginRight: 10 }}
                 options={[
-                  { value: "全部状态", label: "全部状态" },
-                  { value: "打折", label: "打折" },
-                  { value: "不变", label: "不变" },
-                  { value: "分润", label: "分润" },
+                  { value: t("全部状态"), label: t("全部状态") },
+                  { value: t("打折"), label: t("打折") },
+                  { value: t("不变"), label: t("不变") },
+                  { value: t("分润"), label: t("分润") },
                 ]}
               />
 
@@ -454,13 +476,13 @@ export default function DateModeHeader() {
                   type={!showHighFeeOnly ? "primary" : "default"}
                   onClick={() => setShowHighFeeOnly(false)}
                 >
-                  全部
+                  {t("全部")}
                 </Button>
                 <Button
                   type={showHighFeeOnly ? "primary" : "default"}
                   onClick={() => setShowHighFeeOnly(true)}
                 >
-                  高托管费
+                  {t("高托管费")}
                 </Button>
               </Button.Group>
               <Button
@@ -469,7 +491,7 @@ export default function DateModeHeader() {
                 className={"text-blue-500 exportButton"}
                 onClick={() => exportCustodyStatisticsToExcel(filteredData)}
               >
-                导出
+                {t("导出")}
               </Button>
             </div>
           </div>
@@ -481,6 +503,7 @@ export default function DateModeHeader() {
                 dayRange={dayRange}
                 selectedVenues={selectedVenues}
                 showHighFeeOnly={showHighFeeOnly}
+                showCollectionOnly={showCollectionOnly}
                 discountFilter={discountFilter}
                 visibleColumns={visibleColumns}
                 onVenueOptionsReady={(opts: { label: string; value: string }[]) => setVenueOptions(opts)}
@@ -492,6 +515,7 @@ export default function DateModeHeader() {
                 month={month}
                 selectedVenues={selectedVenues}
                 showHighFeeOnly={showHighFeeOnly}
+                showCollectionOnly={showCollectionOnly}
                 discountFilter={discountFilter}
                 visibleColumns={visibleColumns}
                 onVenueOptionsReady={(opts: { label: string; value: string }[]) => setVenueOptions(opts)}

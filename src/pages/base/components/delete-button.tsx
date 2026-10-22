@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Button, message, Modal } from "antd";
 
+import { t } from "@/locales";
 import { useSubmitVenueTemplateDelete } from "@/pages/base/hook/hook.ts";
 
 type DeleteButtonProps = {
@@ -14,17 +15,17 @@ export default function DeleteButton({ data }: DeleteButtonProps) {
 
   const onCreate = () => {
     if (data.fields.length > 0) {
-      message.error("该模版存在字段，不能删除！");
+      message.error(t("该模版存在字段，不能删除！"));
       return;
     }
 
     mutation.mutate(data.key, {
       onSuccess: () => {
-        message.success("模版删除成功");
+        message.success(t("模版删除成功"));
         setOpen(false);
       },
       onError: (error) => {
-        message.error(`删除失败: ${error.message}`);
+        message.error(t("删除失败: {{message}}", { message: error.message }));
       },
     });
   };
@@ -35,17 +36,17 @@ export default function DeleteButton({ data }: DeleteButtonProps) {
   return (
     <>
       <Button type="link" size="small" onClick={handleOpen}>
-        删除
+        {t("删除")}
       </Button>
       <Modal
-        title="温馨提示"
+        title={t("温馨提示")}
         visible={open}
         onOk={onCreate}
         onCancel={handleClose}
-        okText="确定"
-        cancelText="取消"
+        okText={t("确定")}
+        cancelText={t("取消")}
       >
-        <p>你确定要删除当前项吗？</p>
+        <p>{t("你确定要删除当前项吗？")}</p>
       </Modal>
     </>
   );

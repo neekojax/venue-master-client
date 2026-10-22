@@ -3,6 +3,7 @@ import { CheckCircleOutlined } from "@ant-design/icons";
 import { Card, Pagination, Table } from "antd";
 import { useSelector, useSettingsStore } from "@/stores";
 
+import { t } from "@/locales";
 import { fetchAllHashCompletionRate } from "@/pages/hash-detail/api.tsx";
 
 export default function HashCompletionRateHistoryTable() {
@@ -40,7 +41,7 @@ export default function HashCompletionRateHistoryTable() {
 
   const columns = [
     {
-      title: "日期",
+      title: t("日期"),
       dataIndex: "date",
       key: "date",
       sorter: (a: { date: string | number | Date }, b: { date: string | number | Date }) =>
@@ -48,7 +49,7 @@ export default function HashCompletionRateHistoryTable() {
         new Date(b.date).getTime() - new Date(a.date).getTime(), // 排序函数，最新的日期在前
     },
     {
-      title: "算力达成率",
+      title: t("算力达成率"),
       dataIndex: "hash_completion_rate",
       key: "hash_completion_rate",
       render: (text: number) => <span>{text.toFixed(2)}%</span>, // 保留两位小数
@@ -63,7 +64,7 @@ export default function HashCompletionRateHistoryTable() {
       title={
         <span>
           <CheckCircleOutlined style={{ marginRight: 8 }} /> {/* 添加图标 */}
-          历史达成率
+          {t("历史达成率")}
         </span>
       }
       loading={loading}

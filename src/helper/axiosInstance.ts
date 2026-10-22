@@ -4,6 +4,8 @@ import Cookies from "js-cookie";
 import eventBus from "@/components/event-bus";
 import { COOKIE_DOMAIN, ROUTE_PATHS } from "@/constants/common.ts";
 
+import { t } from "@/locales";
+
 // 存储当前的请求队列
 let isRefreshing = false;
 let subscribers: Array<(token: string) => void> = [];
@@ -23,8 +25,7 @@ const axiosInstance = axios.create({
   // baseURL: "http://localhost:8080/admin-api/", //  周莹本地测试
   // baseURL: "http://127.0.0.1:8080/admin-api/", // 你的 API 基础 UR
   // baseURL: "http://45.76.191.253:11001/admin-api/", // 你的 API 基础 UR
-  // baseURL: "https://datastring.cc/admin-api", // 线上发布
-  baseURL: "/admin-api", // uat  特殊对待
+  baseURL: "https://datastring.cc/admin-api", // 线上发布
 });
 
 // 刷新 token 的函数
@@ -35,7 +36,7 @@ const refreshToken = async () => {
     return response.data; // 返回新的 token 数据
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
   } catch (error) {
-    throw new Error("刷新 token 失败");
+    throw new Error(t("刷新 token 失败"));
   }
 };
 
@@ -87,7 +88,7 @@ axiosInstance.interceptors.response.use(
         } catch (error) {
           isRefreshing = false;
           eventBus.emit("redirect", ROUTE_PATHS.login); // Emit the redirect event
-          return Promise.reject(new Error("刷新 token 失败，用户请重新登录。"));
+          return Promise.reject(new Error(t("刷新 token 失败，用户请重新登录。")));
         }
       }
 
@@ -120,7 +121,7 @@ axiosInstance.interceptors.response.use(
 
 // 提取错误信息
 const getErrorMessage = (response: any) => {
-  let errorMessage = "网络响应不正常";
+  let errorMessage = t("网络响应不正常");
   try {
     const errorData = response.data;
     if (errorData && errorData.error) {

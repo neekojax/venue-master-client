@@ -1,0 +1,545 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Venue Detail Apple Mockup</title>
+    <style>
+      :root {
+        --bg: #f3f5f8;
+        --panel: rgba(255, 255, 255, 0.84);
+        --panel-solid: #ffffff;
+        --line: rgba(15, 23, 42, 0.08);
+        --text: #0f172a;
+        --muted: #64748b;
+        --blue: #2f6df6;
+        --green: #2dbb7f;
+        --orange: #f59e0b;
+        --purple: #7c3aed;
+        --shadow: 0 18px 50px rgba(15, 23, 42, 0.08);
+        --radius-xl: 28px;
+        --radius-lg: 22px;
+        --radius-md: 16px;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        font-family:
+          -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "PingFang SC",
+          "Helvetica Neue", sans-serif;
+        background:
+          radial-gradient(circle at top left, rgba(47, 109, 246, 0.12), transparent 28%),
+          radial-gradient(circle at top right, rgba(125, 211, 252, 0.18), transparent 24%),
+          linear-gradient(180deg, #f4f7fb 0%, #f8fafc 100%);
+        color: var(--text);
+      }
+
+      .frame {
+        width: 1720px;
+        min-height: 1080px;
+        margin: 0 auto;
+        padding: 28px 28px 36px;
+      }
+
+      .hero {
+        display: grid;
+        grid-template-columns: 1.35fr 0.9fr;
+        gap: 22px;
+        margin-bottom: 24px;
+      }
+
+      .glass {
+        background: var(--panel);
+        backdrop-filter: blur(28px);
+        border: 1px solid rgba(255, 255, 255, 0.72);
+        box-shadow: var(--shadow);
+        border-radius: var(--radius-xl);
+      }
+
+      .hero-card {
+        padding: 34px 36px;
+        position: relative;
+        overflow: hidden;
+      }
+
+      .hero-card::before {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background:
+          linear-gradient(135deg, rgba(47, 109, 246, 0.08), transparent 38%),
+          radial-gradient(circle at 80% 24%, rgba(125, 211, 252, 0.15), transparent 20%);
+        pointer-events: none;
+      }
+
+      .eyebrow {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 8px 14px;
+        border-radius: 999px;
+        background: rgba(47, 109, 246, 0.08);
+        color: var(--blue);
+        font-size: 13px;
+        font-weight: 700;
+        margin-bottom: 18px;
+      }
+
+      h1 {
+        margin: 0 0 14px;
+        font-size: 48px;
+        line-height: 1.05;
+        letter-spacing: -0.04em;
+      }
+
+      .subline {
+        color: var(--muted);
+        font-size: 16px;
+        margin-bottom: 28px;
+      }
+
+      .pill-row {
+        display: flex;
+        gap: 12px;
+        flex-wrap: wrap;
+      }
+
+      .pill {
+        padding: 11px 16px;
+        border-radius: 999px;
+        background: rgba(255, 255, 255, 0.85);
+        border: 1px solid rgba(15, 23, 42, 0.06);
+        color: #334155;
+        font-size: 14px;
+      }
+
+      .summary-card {
+        padding: 28px;
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 16px;
+      }
+
+      .metric {
+        background: rgba(255, 255, 255, 0.76);
+        border: 1px solid rgba(15, 23, 42, 0.05);
+        border-radius: var(--radius-md);
+        padding: 18px 18px 16px;
+      }
+
+      .metric .label {
+        color: var(--muted);
+        font-size: 13px;
+        margin-bottom: 10px;
+      }
+
+      .metric .value {
+        font-size: 28px;
+        font-weight: 700;
+        letter-spacing: -0.03em;
+      }
+
+      .metric .meta {
+        margin-top: 8px;
+        font-size: 13px;
+        color: var(--muted);
+      }
+
+      .blue { color: var(--blue); }
+      .green { color: var(--green); }
+      .orange { color: var(--orange); }
+      .purple { color: var(--purple); }
+
+      .section {
+        margin-bottom: 22px;
+      }
+
+      .section-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 14px;
+      }
+
+      .section-title {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        font-size: 30px;
+        font-weight: 700;
+        letter-spacing: -0.03em;
+      }
+
+      .switch {
+        display: inline-flex;
+        background: rgba(255, 255, 255, 0.8);
+        border: 1px solid rgba(15, 23, 42, 0.08);
+        border-radius: 999px;
+        padding: 5px;
+        gap: 4px;
+      }
+
+      .switch span {
+        padding: 9px 16px;
+        border-radius: 999px;
+        color: var(--muted);
+        font-size: 13px;
+        font-weight: 600;
+      }
+
+      .switch .active {
+        background: #fff;
+        box-shadow: 0 8px 16px rgba(15, 23, 42, 0.08);
+        color: var(--text);
+      }
+
+      .chart-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 18px;
+      }
+
+      .chart-card {
+        padding: 22px 22px 18px;
+      }
+
+      .chart-top {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        margin-bottom: 12px;
+      }
+
+      .chart-top h3 {
+        margin: 0;
+        font-size: 22px;
+      }
+
+      .chart-top p {
+        margin: 6px 0 0;
+        font-size: 13px;
+        color: var(--muted);
+      }
+
+      .badge {
+        padding: 7px 11px;
+        border-radius: 999px;
+        font-size: 12px;
+        font-weight: 700;
+        background: rgba(47, 109, 246, 0.08);
+        color: var(--blue);
+      }
+
+      .chart-frame {
+        height: 260px;
+        border-radius: 18px;
+        background:
+          linear-gradient(180deg, rgba(255,255,255,0.72), rgba(250,252,255,0.95)),
+          linear-gradient(180deg, rgba(47, 109, 246, 0.04), rgba(47, 109, 246, 0));
+        border: 1px solid rgba(15, 23, 42, 0.05);
+        position: relative;
+        overflow: hidden;
+      }
+
+      .grid-line {
+        position: absolute;
+        left: 18px;
+        right: 18px;
+        border-top: 1px dashed rgba(148, 163, 184, 0.24);
+      }
+
+      .grid-line:nth-child(1) { top: 18%; }
+      .grid-line:nth-child(2) { top: 36%; }
+      .grid-line:nth-child(3) { top: 54%; }
+      .grid-line:nth-child(4) { top: 72%; }
+
+      .legend {
+        position: absolute;
+        top: 14px;
+        right: 16px;
+        display: flex;
+        gap: 14px;
+        font-size: 12px;
+        color: var(--muted);
+      }
+
+      .legend span {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+      }
+
+      .dot {
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+      }
+
+      .table-shell {
+        padding: 22px;
+      }
+
+      .table-head {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 16px;
+      }
+
+      .table-head h3 {
+        margin: 0;
+        font-size: 24px;
+      }
+
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        overflow: hidden;
+        border-radius: 18px;
+      }
+
+      thead th {
+        text-align: left;
+        padding: 14px 16px;
+        background: rgba(247, 250, 255, 0.95);
+        color: #334155;
+        font-size: 13px;
+        border-bottom: 1px solid rgba(148, 163, 184, 0.12);
+      }
+
+      tbody td {
+        padding: 14px 16px;
+        border-bottom: 1px solid rgba(148, 163, 184, 0.08);
+        font-size: 14px;
+      }
+
+      .soft {
+        color: var(--muted);
+      }
+
+      .footer-note {
+        margin-top: 14px;
+        font-size: 12px;
+        color: var(--muted);
+      }
+    </style>
+  </head>
+  <body>
+    <div class="frame">
+      <section class="hero">
+        <div class="glass hero-card">
+          <div class="eyebrow">场地详情 · Apple Style</div>
+          <h1>HUANYU DATA-HH01-Awassa-ET</h1>
+          <div class="subline">矿工号 KJDETH005 · 当前温度 13.94℃ · 当前湿度 58% · 以经营洞察为中心的场地控制台</div>
+          <div class="pill-row">
+            <div class="pill">有效算力 1350.02 PH/s</div>
+            <div class="pill">理论算力 2266.88 PH/s</div>
+            <div class="pill">算力有效率 59.55%</div>
+            <div class="pill">总故障率 0.96%</div>
+          </div>
+        </div>
+        <div class="glass summary-card">
+          <div class="metric">
+            <div class="label">机器汇总</div>
+            <div class="value blue">8,893</div>
+            <div class="meta">托管台数</div>
+          </div>
+          <div class="metric">
+            <div class="label">故障台数</div>
+            <div class="value orange">85</div>
+            <div class="meta">总故障率 0.96%</div>
+          </div>
+          <div class="metric">
+            <div class="label">影响占比</div>
+            <div class="value purple">40.45%</div>
+            <div class="meta">限电 37.28% / 高温 0%</div>
+          </div>
+          <div class="metric">
+            <div class="label">托管费比例</div>
+            <div class="value green">87.92%</div>
+            <div class="meta">最高 106.05% · 最低 70.18%</div>
+          </div>
+        </div>
+      </section>
+
+      <section class="section">
+        <div class="section-header">
+          <div class="section-title">运行趋势分析</div>
+          <div class="switch">
+            <span class="active">周</span>
+            <span>日</span>
+          </div>
+        </div>
+        <div class="chart-grid">
+          <div class="glass chart-card">
+            <div class="chart-top">
+              <div>
+                <h3>算力有效率变化曲线</h3>
+                <p>最近 10 周有效率趋势，突出连续性与波动节奏</p>
+              </div>
+              <div class="badge">近10周</div>
+            </div>
+            <div class="chart-frame">
+              <div class="legend">
+                <span><i class="dot" style="background:#2f6df6"></i>有效率</span>
+              </div>
+              <div class="grid-line"></div><div class="grid-line"></div><div class="grid-line"></div><div class="grid-line"></div>
+              <svg viewBox="0 0 560 260" width="100%" height="100%">
+                <path d="M24 208 C60 196,90 188,126 194 C168 201,186 180,224 174 C262 168,292 164,326 170 C366 176,398 150,430 146 C470 142,506 136,536 126" fill="none" stroke="#2f6df6" stroke-width="4" stroke-linecap="round"/>
+                <path d="M24 208 C60 196,90 188,126 194 C168 201,186 180,224 174 C262 168,292 164,326 170 C366 176,398 150,430 146 C470 142,506 136,536 126 L536 246 L24 246 Z" fill="rgba(47,109,246,.12)"/>
+              </svg>
+            </div>
+          </div>
+
+          <div class="glass chart-card">
+            <div class="chart-top">
+              <div>
+                <h3>故障率变化曲线</h3>
+                <p>把故障率的短期尖峰与持续恶化分开识别</p>
+              </div>
+              <div class="badge" style="background:rgba(245,158,11,.12);color:#f59e0b">近10周</div>
+            </div>
+            <div class="chart-frame">
+              <div class="legend">
+                <span><i class="dot" style="background:#ef4444"></i>故障率</span>
+                <span><i class="dot" style="background:#f59e0b"></i>故障数</span>
+              </div>
+              <div class="grid-line"></div><div class="grid-line"></div><div class="grid-line"></div><div class="grid-line"></div>
+              <svg viewBox="0 0 560 260" width="100%" height="100%">
+                <path d="M24 204 C60 196,92 188,124 170 C156 152,188 160,218 150 C254 138,286 132,320 124 C356 114,392 116,428 108 C462 102,496 92,536 80" fill="none" stroke="#dc2626" stroke-width="4" stroke-linecap="round"/>
+                <path d="M24 210 L90 210 L90 180 L156 180 L156 154 L222 154 L222 132 L288 132 L288 118 L354 118 L354 106 L420 106 L420 90 L486 90 L486 72 L536 72" fill="none" stroke="#f59e0b" stroke-width="3" stroke-dasharray="8 6"/>
+              </svg>
+            </div>
+          </div>
+
+          <div class="glass chart-card">
+            <div class="chart-top">
+              <div>
+                <h3>高温影响曲线</h3>
+                <p>聚焦高温导致的效率损失与波峰时段</p>
+              </div>
+              <div class="badge" style="background:rgba(251,146,60,.12);color:#f97316">近10周</div>
+            </div>
+            <div class="chart-frame">
+              <div class="grid-line"></div><div class="grid-line"></div><div class="grid-line"></div><div class="grid-line"></div>
+              <svg viewBox="0 0 560 260" width="100%" height="100%">
+                <path d="M24 232 C64 224,96 214,128 202 C160 188,188 184,224 172 C260 160,292 150,322 142 C356 134,392 126,428 116 C464 106,496 102,536 94" fill="none" stroke="#f97316" stroke-width="4" stroke-linecap="round"/>
+                <path d="M24 232 C64 224,96 214,128 202 C160 188,188 184,224 172 C260 160,292 150,322 142 C356 134,392 126,428 116 C464 106,496 102,536 94 L536 246 L24 246 Z" fill="rgba(249,115,22,.10)"/>
+              </svg>
+            </div>
+          </div>
+
+          <div class="glass chart-card">
+            <div class="chart-top">
+              <div>
+                <h3>限电影响曲线</h3>
+                <p>观察限电对周运行效率的波动影响强度</p>
+              </div>
+              <div class="badge" style="background:rgba(124,58,237,.10);color:#7c3aed">近10周</div>
+            </div>
+            <div class="chart-frame">
+              <div class="grid-line"></div><div class="grid-line"></div><div class="grid-line"></div><div class="grid-line"></div>
+              <svg viewBox="0 0 560 260" width="100%" height="100%">
+                <path d="M24 176 C54 164,92 160,132 154 C172 148,206 154,236 146 C270 136,300 132,334 128 C370 124,406 126,442 122 C476 118,506 112,536 102" fill="none" stroke="#7c3aed" stroke-width="4" stroke-linecap="round"/>
+                <path d="M24 176 C54 164,92 160,132 154 C172 148,206 154,236 146 C270 136,300 132,334 128 C370 124,406 126,442 122 C476 118,506 112,536 102 L536 246 L24 246 Z" fill="rgba(124,58,237,.10)"/>
+              </svg>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="section glass table-shell">
+        <div class="table-head">
+          <div>
+            <h3>运营周报</h3>
+            <div class="soft">按最近 10 周聚合，展示经营指标、影响指标与设备状态变化</div>
+          </div>
+          <div class="badge">最近10周</div>
+        </div>
+        <table>
+          <thead>
+            <tr>
+              <th>周次</th>
+              <th>理论算力</th>
+              <th>实际算力</th>
+              <th>算力有效率</th>
+              <th>产出</th>
+              <th>产出效率</th>
+              <th>净有效率</th>
+              <th>故障数</th>
+              <th>故障率</th>
+              <th>待修数</th>
+              <th>待修率</th>
+              <th>报废数</th>
+              <th>高温影响率</th>
+              <th>限电影响率</th>
+              <th>本周上架</th>
+              <th>本周下架</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>4/7 - 4/13</td>
+              <td>412.6 PH/s</td>
+              <td>398.2 PH/s</td>
+              <td class="blue">96.51%</td>
+              <td>1.2845 BTC</td>
+              <td>0.0103</td>
+              <td class="green">94.82%</td>
+              <td>17</td>
+              <td>0.56%</td>
+              <td>6</td>
+              <td>0.19%</td>
+              <td>1</td>
+              <td>0.81%</td>
+              <td>0.88%</td>
+              <td>18</td>
+              <td>7</td>
+            </tr>
+            <tr>
+              <td>4/14 - 4/20</td>
+              <td>418.9 PH/s</td>
+              <td>402.4 PH/s</td>
+              <td class="blue">96.06%</td>
+              <td>1.3012 BTC</td>
+              <td>0.0104</td>
+              <td class="green">94.11%</td>
+              <td>19</td>
+              <td>0.62%</td>
+              <td>8</td>
+              <td>0.26%</td>
+              <td>2</td>
+              <td>0.96%</td>
+              <td>0.99%</td>
+              <td>20</td>
+              <td>9</td>
+            </tr>
+            <tr>
+              <td>4/21 - 4/27</td>
+              <td>423.4 PH/s</td>
+              <td>406.8 PH/s</td>
+              <td class="blue">96.08%</td>
+              <td>1.3158 BTC</td>
+              <td>0.0106</td>
+              <td class="green">93.78%</td>
+              <td>22</td>
+              <td>0.71%</td>
+              <td>7</td>
+              <td>0.22%</td>
+              <td>1</td>
+              <td>1.08%</td>
+              <td>1.22%</td>
+              <td>24</td>
+              <td>11</td>
+            </tr>
+          </tbody>
+        </table>
+        <div class="footer-note">说明：当前为设计效果稿，数据和图表风格按照现有场地详情内容重新组织为更偏 Apple 风格的分析面板。</div>
+      </section>
+    </div>
+  </body>
+  </html>

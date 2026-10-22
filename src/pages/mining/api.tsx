@@ -1,6 +1,12 @@
 // 增加矿池
+import axiosInstance from "@/helper/axiosInstance";
 import { fetchDelete, fetchGet, fetchPost, fetchPostFile } from "@/helper/fetchHelper.ts";
+import { t } from "@/locales";
 import {
+  AssetPoolRecordCreate,
+  AssetPoolRecordRebuild,
+  AssetPoolRecordUpdate,
+  AssetSiteMappingUpdate,
   HostRecordCreate,
   HostRecordUpdate,
   MiningPool,
@@ -8,6 +14,16 @@ import {
   PoolRecordCreate,
   PoolRecordUpdate,
 } from "@/pages/mining/type.tsx";
+
+const ensureCodeSuccess = <T,>(
+  result: T & { success?: boolean; code?: number; message?: string; msg?: string },
+) => {
+  if (result?.success === true || result?.code === 0) {
+    return result;
+  }
+
+  throw new Error(result?.message || result?.msg || t("操作失败"));
+};
 
 export const fetchMiningPoolList = async (poolType: string, poolCategory: string) => {
   return await fetchGet(`miningPool/listBtcMiningPool/${poolType}/${poolCategory}`);
@@ -40,6 +56,10 @@ export const fetchTotalLastHashStatus = async (poolType: string) => {
 
 export const fetchTotalLastProfitStatus = async (poolType: string) => {
   return await fetchGet(`miningPool/getTotalLastProfitStatus/${poolType}`);
+};
+
+export const fetchRecentSubAccountStatus = async (venueType: string, poolId: string) => {
+  return await fetchGet(`/venue/getRecentSubAccountStatus/${venueType}/${poolId}`);
 };
 
 export const fetchLastestHashRateEfficiency = async (poolType: string, day: string) => {
@@ -101,4 +121,37 @@ export const uploadMiningPoolExcel = async (file: File) => {
     }
     return response;
   });
+};
+
+export const fetchAssetSiteInfoList = async () => {
+  return await fetchGet("/asset/site-info");
+};
+
+export const submitAssetSiteInfoMappingUpdate = async (data: AssetSiteMappingUpdate) => {
+  return await fetchPost("/asset/site-info/update-mapping", data);
+};
+
+export const fetchAssetPoolRecordList = async (poolId: string) => {
+  const result = await axiosInstance.get(`/asset/pool-record/list/${poolId}`);
+  return ensureCodeSuccess(result);
+};
+
+export const createAssetPoolRecord = async (data: AssetPoolRecordCreate) => {
+  const result = await axiosInstance.post("/asset/pool-record/create", data);
+  return ensureCodeSuccess(result);
+};
+
+export const updateAssetPoolRecord = async (data: AssetPoolRecordUpdate) => {
+  const result = await axiosInstance.post("/asset/pool-record/update", data);
+  return ensureCodeSuccess(result);
+};
+
+export const deleteAssetPoolRecord = async (id: number) => {
+  const result = await axiosInstance.delete(`/asset/pool-record/delete/${id}`);
+  return ensureCodeSuccess(result);
+};
+
+export const rebuildAssetPoolRecord = async (data: AssetPoolRecordRebuild) => {
+  const result = await axiosInstance.post("/asset/pool-record/rebuild", data);
+  return ensureCodeSuccess(result);
 };

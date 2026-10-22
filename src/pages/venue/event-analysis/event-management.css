@@ -1,0 +1,45 @@
+.event-log-toolbar .ant-btn,
+.event-log-toolbar .event-log-filter-label,
+.event-log-toolbar .ant-select,
+.event-log-toolbar .ant-select-selector,
+.event-log-toolbar .ant-select-selection-placeholder,
+.event-log-toolbar .ant-select-selection-item,
+.event-log-toolbar .ant-segmented,
+.event-log-toolbar .ant-segmented-item-label {
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 400;
+}
+
+.event-log-action-menu .ant-dropdown-menu {
+  min-width: 160px;
+  padding: 8px;
+}
+
+.event-log-action-menu .ant-dropdown-menu .ant-dropdown-menu-item {
+  padding: 10px 16px;
+}
+
+.event-log-filters {
+  padding: 16px 18px;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  background: #fff;
+}
+
+.event-log-actions {
+  padding: 20px 14px 4px;
+  background: #fff;
+}
+
+.event-log-view .longdataTable .ant-table-tbody > tr > td.ant-table-cell {
+  padding-top: 8px;
+  padding-bottom: 8px;
+}
+
+@media (max-width: 640px) {
+  .event-log-filters,
+  .event-log-actions {
+    padding: 12px;
+  }
+}

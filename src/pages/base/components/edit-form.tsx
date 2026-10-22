@@ -3,6 +3,8 @@ import { MinusCircleOutlined, PlusOutlined } from "@ant-design/icons";
 import { Button, Form, type FormInstance, Input, Space } from "antd";
 import type { Field, Values } from "../type";
 
+import { t } from "@/locales";
+
 interface EditFormProps {
   initialValues: Values;
   onFormInstanceReady: (instance: FormInstance<Values>) => void;
@@ -72,10 +74,14 @@ export default function EditForm({ initialValues, onFormInstanceReady }: EditFor
       className="mt-4"
     >
       <Form.Item name="templateID" style={{ display: "none" }} />
-      <Form.Item name="templateName" label="模版名称" rules={[{ required: true, message: "请输入模板名称" }]}>
+      <Form.Item
+        name="templateName"
+        label={t("模版名称")}
+        rules={[{ required: true, message: t("请输入模板名称") }]}
+      >
         <Input value={templateName} onChange={(e) => handleTemplateNameChange(e)} />
       </Form.Item>
-      <Form.Item name="fields" label="字段" rules={[{ required: false }]}>
+      <Form.Item name="fields" label={t("字段")} rules={[{ required: false }]}>
         {fields
           .filter((field) => field.status !== "deleted") // 过滤掉状态为 "deleted" 的字段
           .map((field, index) => (
@@ -83,7 +89,7 @@ export default function EditForm({ initialValues, onFormInstanceReady }: EditFor
               <Input
                 value={field.value}
                 onChange={(e) => updateField(index, e.target.value)}
-                placeholder={`字段 ${index + 1}`}
+                placeholder={t("字段 {{value}}", { value: index + 1 })}
               />
               <Button
                 type="text"
@@ -91,7 +97,7 @@ export default function EditForm({ initialValues, onFormInstanceReady }: EditFor
                 icon={<MinusCircleOutlined style={{ color: "red" }} />}
                 onClick={() => removeField(index)} // 删除字段
               >
-                删除
+                {t("删除")}
               </Button>
             </Space>
           ))}
@@ -102,7 +108,7 @@ export default function EditForm({ initialValues, onFormInstanceReady }: EditFor
             icon={<PlusOutlined style={{ color: "white" }} />}
             onClick={addField}
           >
-            添加字段
+            {t("添加字段")}
           </Button>
         </div>
       </Form.Item>

@@ -1,6 +1,8 @@
 // fetchWrapper.ts
 import axiosInstance from "./axiosInstance";
 
+import { t } from "@/locales";
+
 // GET 请求（支持可选查询参数）
 export const fetchGet = async (endpoint: string, params?: Record<string, any>, config?: any) => {
   try {
@@ -36,6 +38,23 @@ export const fetchPost = async (endpoint: string, body: any, customHeaders?: Rec
   }
 };
 
+// PUT 请求
+export const fetchPut = async (endpoint: string, body: any, customHeaders?: Record<string, string>) => {
+  const headers = {
+    "Content-Type": "application/json",
+    ...customHeaders,
+  };
+
+  try {
+    const response = await axiosInstance.put(endpoint, body, { headers });
+    checkSuccess(response);
+    return response;
+  } catch (error) {
+    // @ts-ignore
+    throw new Error(error.message);
+  }
+};
+
 // POST 请求
 export const fetchPostFile = async (
   endpoint: string,
@@ -58,9 +77,9 @@ export const fetchPostFile = async (
 };
 
 // DELETE 请求
-export const fetchDelete = async (endpoint: string) => {
+export const fetchDelete = async (endpoint: string, data?: any) => {
   try {
-    const response = await axiosInstance.delete(endpoint);
+    const response = await axiosInstance.delete(endpoint, data ? { data } : undefined);
     checkSuccess(response);
     return response;
   } catch (error) {
@@ -83,7 +102,7 @@ const checkSuccess = (result: any) => {
     return;
   }
   if (!result?.success) {
-    const errorMessage = result.message || "操作失败"; // 默认错误信息
+    const errorMessage = result.message || t("操作失败"); // 默认错误信息
     console.error("服务器返回的错误信息:", errorMessage);
     throw new Error(errorMessage); // 抛出服务器返回的错误信息
   }

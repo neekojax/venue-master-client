@@ -16,6 +16,7 @@ import {
 } from "lucide-react";
 import { DeviceEnvironmentHistory, VenueEnvironmentHistoryResp } from "./components/types";
 
+import { t } from "@/locales";
 import { fetchVenueEnvironmentHistory } from "@/pages/venue/api";
 
 // --- Data is now fetched from API: fetchVenueEnvironmentHistory ---
@@ -413,7 +414,7 @@ const VenueEnvironmentHistory: React.FC = () => {
   // Export to CSV Function
   const handleExport = () => {
     // 2. Prepare CSV Content using allFilteredRows
-    const headers = ["时间", "位置", "设备ID", "温度(C)", "湿度(%)"];
+    const headers = [t("时间"), t("位置"), t("设备ID"), t("温度(C)"), t("湿度(%)")];
     const csvRows = [
       headers.join(","),
       ...allFilteredRows.map((row) =>
@@ -436,7 +437,10 @@ const VenueEnvironmentHistory: React.FC = () => {
       link.setAttribute("href", url);
       link.setAttribute(
         "download",
-        `${data?.venue_name ?? ""}_环境数据_${new Date().toISOString().slice(0, 10)}.csv`,
+        t("{{value}}_环境数据_{{value2}}.csv", {
+          value: data?.venue_name ?? "",
+          value2: new Date().toISOString().slice(0, 10),
+        }),
       );
       link.style.visibility = "hidden";
       document.body.appendChild(link);
@@ -457,7 +461,9 @@ const VenueEnvironmentHistory: React.FC = () => {
             <ArrowLeft size={20} />
           </button>
           <div>
-            <h1 className="text-xl font-bold text-gray-900">{data?.venue_name ?? ""} 环境历史记录</h1>
+            <h1 className="text-xl font-bold text-gray-900">
+              {t("{{value}} 环境历史记录", { value: data?.venue_name ?? "" })}
+            </h1>
             <div className="text-xs text-gray-500 mt-0.5">Venue ID: {venueId ?? data?.venue_id}</div>
           </div>
         </div>
@@ -493,14 +499,14 @@ const VenueEnvironmentHistory: React.FC = () => {
             className="bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 text-white px-4 py-2 rounded-lg text-sm font-medium flex items-center gap-2 transition-colors shadow-sm"
           >
             <Search size={16} />
-            <span className="hidden md:inline">查询</span>
+            <span className="hidden md:inline">{t("查询")}</span>
           </button>
           <button
             onClick={handleExport}
             className="bg-white border border-gray-200 hover:bg-gray-50 text-gray-700 px-3 py-2 rounded-lg transition-colors flex items-center gap-2 text-sm font-medium shadow-sm"
           >
             <Download size={16} />
-            <span className="hidden md:inline">导出数据</span>
+            <span className="hidden md:inline">{t("导出数据")}</span>
           </button>
         </div>
       </div>
@@ -510,7 +516,7 @@ const VenueEnvironmentHistory: React.FC = () => {
         <div className="absolute inset-0 bg-white/60 backdrop-blur-sm flex items-center justify-center z-50">
           <div className="flex flex-col items-center gap-2">
             <div className="w-8 h-8 border-2 border-blue-600 border-t-transparent rounded-full animate-spin" />
-            <div className="text-sm text-gray-700">正在加载数据...</div>
+            <div className="text-sm text-gray-700">{t("正在加载数据...")}</div>
           </div>
         </div>
       )}
@@ -526,7 +532,7 @@ const VenueEnvironmentHistory: React.FC = () => {
                 <div className="p-1.5 bg-red-50 text-red-500 rounded-md">
                   <Thermometer size={18} />
                 </div>
-                <h2 className="font-bold text-gray-800">温度趋势 (°C)</h2>
+                <h2 className="font-bold text-gray-800">{t("温度趋势 (°C)")}</h2>
               </div>
 
               {/* Legend / Filter */}
@@ -577,7 +583,7 @@ const VenueEnvironmentHistory: React.FC = () => {
                 <div className="p-1.5 bg-blue-50 text-blue-500 rounded-md">
                   <Droplets size={18} />
                 </div>
-                <h2 className="font-bold text-gray-800">湿度趋势 (%)</h2>
+                <h2 className="font-bold text-gray-800">{t("湿度趋势 (%)")}</h2>
               </div>
 
               {/* Legend / Filter */}
@@ -628,14 +634,14 @@ const VenueEnvironmentHistory: React.FC = () => {
           <div className="px-6 py-4 border-b border-gray-100 flex flex-col sm:flex-row sm:items-center justify-between gap-4 sticky top-0 z-30 bg-white rounded-t-xl h-[64px] shadow-sm">
             <h2 className="font-bold text-gray-800 flex items-center gap-2">
               <Filter size={18} className="text-gray-400" />
-              历史数据明细
+              {t("历史数据明细")}
             </h2>
             <div className="flex bg-gray-100 p-1 rounded-lg overflow-x-auto no-scrollbar border border-gray-200">
               <button
                 onClick={() => setActiveTab("all")}
                 className={`px-4 py-1.5 text-xs font-medium rounded-md transition-all whitespace-nowrap shadow-sm ${activeTab === "all" ? "bg-white text-blue-600 shadow ring-1 ring-black/5" : "text-gray-500 hover:text-gray-700 shadow-none bg-transparent"}`}
               >
-                全部设备
+                {t("全部设备")}
               </button>
               {(data?.devices ?? []).map((d) => (
                 <button
@@ -655,19 +661,19 @@ const VenueEnvironmentHistory: React.FC = () => {
               <thead className="bg-gray-50">
                 <tr>
                   <th className="px-6 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider bg-gray-50 text-nowrap sticky top-[64px] z-20 shadow-sm border-b border-gray-200">
-                    时间
+                    {t("时间")}
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider bg-gray-50 text-nowrap sticky top-[64px] z-20 shadow-sm border-b border-gray-200">
-                    位置 / 设备ID
+                    {t("位置 / 设备ID")}
                   </th>
                   <th className="px-6 py-3 text-right text-xs font-bold text-gray-500 uppercase tracking-wider bg-gray-50 text-nowrap sticky top-[64px] z-20 shadow-sm border-b border-gray-200">
-                    温度 (°C)
+                    {t("温度 (°C)")}
                   </th>
                   <th className="px-6 py-3 text-right text-xs font-bold text-gray-500 uppercase tracking-wider bg-gray-50 text-nowrap sticky top-[64px] z-20 shadow-sm border-b border-gray-200">
-                    湿度 (%)
+                    {t("湿度 (%)")}
                   </th>
                   <th className="px-6 py-3 text-center text-xs font-bold text-gray-500 uppercase tracking-wider bg-gray-50 text-nowrap sticky top-[64px] z-20 shadow-sm border-b border-gray-200">
-                    状态
+                    {t("状态")}
                   </th>
                 </tr>
               </thead>
@@ -697,15 +703,15 @@ const VenueEnvironmentHistory: React.FC = () => {
                     <td className="px-6 py-4 whitespace-nowrap text-center">
                       {row.temperature > 40 ? (
                         <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium bg-red-50 text-red-700 ring-1 ring-inset ring-red-600/10">
-                          <AlertOctagon size={12} className="fill-red-500 text-white" /> 高温告警
+                          <AlertOctagon size={12} className="fill-red-500 text-white" /> {t("高温告警")}
                         </span>
                       ) : row.temperature > 35 ? (
                         <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium bg-yellow-50 text-yellow-700 ring-1 ring-inset ring-yellow-600/20">
-                          <AlertTriangle size={12} className="fill-yellow-500 text-white" /> 关注
+                          <AlertTriangle size={12} className="fill-yellow-500 text-white" /> {t("关注")}
                         </span>
                       ) : (
                         <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium bg-green-50 text-green-700 ring-1 ring-inset ring-green-600/20">
-                          <CheckCircle2 size={12} className="fill-green-500 text-white" /> 正常
+                          <CheckCircle2 size={12} className="fill-green-500 text-white" /> {t("正常")}
                         </span>
                       )}
                     </td>
@@ -717,7 +723,7 @@ const VenueEnvironmentHistory: React.FC = () => {
                     <td colSpan={5} className="px-6 py-12 text-center text-gray-500 bg-gray-50/50">
                       <div className="flex flex-col items-center justify-center gap-2">
                         <Search size={32} className="text-gray-300" />
-                        <p>暂无符合条件的数据</p>
+                        <p>{t("暂无符合条件的数据")}</p>
                       </div>
                     </td>
                   </tr>
@@ -731,7 +737,7 @@ const VenueEnvironmentHistory: React.FC = () => {
             {/* Left: Info & Page Size */}
             <div className="flex items-center gap-4 text-sm text-gray-700">
               <span>
-                显示第{" "}
+                {t("显示第")}{" "}
                 <span className="font-mono font-medium">
                   {Math.min((currentPage - 1) * itemsPerPage + 1, totalItems)}
                 </span>{" "}
@@ -739,7 +745,7 @@ const VenueEnvironmentHistory: React.FC = () => {
                 <span className="font-mono font-medium">
                   {Math.min(currentPage * itemsPerPage, totalItems)}
                 </span>{" "}
-                条，共 <span className="font-mono font-medium">{totalItems}</span> 条
+                {t("条，共")} <span className="font-mono font-medium">{totalItems}</span> {t("条")}
               </span>
 
               <div className="flex items-center gap-2">
@@ -751,9 +757,9 @@ const VenueEnvironmentHistory: React.FC = () => {
                   }}
                   className="bg-white border border-gray-300 text-gray-700 text-sm rounded-md focus:ring-blue-500 focus:border-blue-500 block p-1 pl-2 pr-6 h-8 leading-tight cursor-pointer shadow-sm"
                 >
-                  <option value={20}>20 条/页</option>
-                  <option value={50}>50 条/页</option>
-                  <option value={100}>100 条/页</option>
+                  <option value={20}>{t("20 条/页")}</option>
+                  <option value={50}>{t("50 条/页")}</option>
+                  <option value={100}>{t("100 条/页")}</option>
                 </select>
               </div>
             </div>
@@ -762,7 +768,7 @@ const VenueEnvironmentHistory: React.FC = () => {
             <div className="flex items-center gap-4">
               {/* Jump to Page */}
               <div className="flex items-center gap-2 text-sm">
-                <span className="text-gray-500">前往</span>
+                <span className="text-gray-500">{t("前往")}</span>
                 <input
                   type="number"
                   min={1}
@@ -777,7 +783,7 @@ const VenueEnvironmentHistory: React.FC = () => {
                   placeholder={currentPage.toString()}
                   className="w-12 border border-gray-300 rounded-md py-1 px-1 text-center text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 h-8 shadow-sm font-mono"
                 />
-                <span className="text-gray-500">页</span>
+                <span className="text-gray-500">{t("页")}</span>
               </div>
 
               <div className="h-4 w-px bg-gray-300 hidden sm:block"></div>

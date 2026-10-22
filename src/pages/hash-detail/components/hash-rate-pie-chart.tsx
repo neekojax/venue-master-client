@@ -3,6 +3,7 @@ import { Card } from "antd";
 import { ReactEcharts } from "@/components/react-echarts";
 import { useSelector, useSettingsStore } from "@/stores";
 
+import { t } from "@/locales";
 import { fetchRealTimeHashRateDetail } from "@/pages/hash-detail/api.tsx";
 
 export default function HashRatePieChart() {
@@ -34,7 +35,7 @@ export default function HashRatePieChart() {
     return {
       // radius: ['40%', '70%'],
       title: {
-        text: "实时总算力详情",
+        text: t("实时总算力详情"),
         left: "left",
         top: "0",
         textStyle: {
@@ -68,7 +69,7 @@ export default function HashRatePieChart() {
       },
       series: [
         {
-          name: "实时算力",
+          name: t("实时算力"),
           type: "pie",
           // radius: "90%",
           radius: ["60%", "90%"],

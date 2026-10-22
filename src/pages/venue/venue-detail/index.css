@@ -10,6 +10,104 @@
   .shadow-inset {
     box-shadow: inset 0 2px 6px rgba(0,0,0,0.3); /* 内阴影 */
   }
-  .font-12{
+.font-12{
     font-size: 1.1rem;
   }
+
+.weekly-report-table .ant-table-thead > tr > th {
+  background: #f8fafc !important;
+  color: #334155 !important;
+  font-weight: 600;
+  border-bottom: 1px solid rgba(148, 163, 184, 0.18) !important;
+}
+
+.weekly-report-table .ant-table-tbody > tr > td {
+  vertical-align: top;
+  border-bottom: 1px solid rgba(148, 163, 184, 0.12) !important;
+}
+
+.weekly-report-table .ant-table-tbody > tr:hover > td {
+  background: #f8fbff !important;
+}
+
+.venue-detail-segmented .ant-segmented-item-selected {
+  background: linear-gradient(135deg, #2563eb 0%, #3b82f6 100%) !important;
+  color: #fff !important;
+  box-shadow: 0 8px 18px rgba(37, 99, 235, 0.22);
+}
+
+.venue-detail-segmented .ant-segmented-item-label {
+  min-height: 34px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+}
+
+.venue-trend-header {
+  background:
+    radial-gradient(circle at top left, rgba(59, 130, 246, 0.08), transparent 24%),
+    radial-gradient(circle at top right, rgba(167, 139, 250, 0.08), transparent 20%),
+    linear-gradient(180deg, #ffffff 0%, #f8fbff 100%);
+}
+
+.venue-trend-accent {
+  width: 10px;
+  height: 52px;
+  border-radius: 999px;
+  background: linear-gradient(180deg, #2563eb 0%, #7c3aed 100%);
+  box-shadow: 0 8px 18px rgba(37, 99, 235, 0.18);
+}
+
+.venue-trend-segmented {
+  background: rgba(248, 250, 252, 0.9) !important;
+  border: 1px solid rgba(148, 163, 184, 0.18);
+  padding: 4px;
+  border-radius: 14px !important;
+}
+
+.venue-trend-segmented .ant-segmented-item-selected {
+  background: linear-gradient(135deg, #2563eb 0%, #3b82f6 100%) !important;
+  color: #fff !important;
+  box-shadow: 0 8px 18px rgba(37, 99, 235, 0.18);
+}
+
+.venue-trend-segmented .ant-segmented-item-label {
+  min-height: 32px;
+  min-width: 40px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+}
+
+.venue-trend-card {
+  position: relative;
+  overflow: hidden;
+}
+
+.venue-trend-card::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  height: 2px;
+  opacity: 0.55;
+}
+
+.venue-trend-card-blue::before {
+  background: linear-gradient(90deg, #2563eb 0%, #60a5fa 100%);
+}
+
+.venue-trend-card-red::before {
+  background: linear-gradient(90deg, #dc2626 0%, #fb7185 100%);
+}
+
+.venue-trend-card-orange::before {
+  background: linear-gradient(90deg, #ea580c 0%, #fb923c 100%);
+}
+
+.venue-trend-card-violet::before {
+  background: linear-gradient(90deg, #7c3aed 0%, #a78bfa 100%);
+}

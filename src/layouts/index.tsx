@@ -4,6 +4,7 @@ import { useLocation } from "react-router-dom";
 import { MenuFoldOutlined, MenuUnfoldOutlined } from "@ant-design/icons";
 import { Button, Flex, Layout } from "antd";
 import { AppHelmet } from "@/components/helmet";
+import LanguageSwitch from "@/components/language-switch";
 import Breadcrumb from "./components/bread-crumb";
 import Content from "./components/main-content";
 import NetworkEfficiencyCard from "./components/NetworkEfficiencyCard.tsx";
@@ -14,6 +15,7 @@ import { setCollapsed, useSelector, useSettingsStore } from "@/stores";
 import { setPoolType } from "@/stores"; // 引入自定义选择器
 
 import PoolTypeSelect from "@/layouts/components/pool-type-select.tsx";
+import { t } from "@/locales";
 import { checkPermission } from "@/service/api/auth";
 
 export default function MainLayout() {
@@ -66,8 +68,6 @@ export default function MainLayout() {
         const organizations: string[] = Array.isArray((data as any)?.organizations)
           ? (data as any).organizations
           : [];
-        // 字母从小到大排序
-        organizations.sort((a, b) => a.localeCompare(b));
 
         // 角色列表
         const roles: any[] = Array.isArray((data as any)?.roles) ? (data as any).roles : [];
@@ -83,18 +83,21 @@ export default function MainLayout() {
         //   .join(",");
 
         // 汇总接口权限
-        const frontend_routes = roles
-          .flatMap((role: any) => (Array.isArray(role?.frontend_routes) ? role.frontend_routes : []))
-          .map((item: any) => item?.path)
-          .filter((p: any) => typeof p === "string" && p.length > 0)
-          .join(",");
+        const frontend_routes = Array.from(
+          new Set(
+            roles
+              .flatMap((role: any) => (Array.isArray(role?.frontend_routes) ? role.frontend_routes : []))
+              .map((item: any) => item?.path)
+              .filter((p: any) => typeof p === "string" && p.length > 0),
+          ),
+        ).join(",");
 
         // 汇总接口权限
         const apiPermissions = roles.flatMap((role: any) =>
           Array.isArray(role?.api_permissions) ? role.api_permissions : [],
         );
         const api_permissions_paths = apiPermissions
-          .map((item: any) => item?.path)
+          .map((item: any) => item?.path_pattern || item?.path)
           .filter((p: any) => typeof p === "string" && p.length > 0)
           .join(",");
 
@@ -128,6 +131,7 @@ export default function MainLayout() {
             new CustomEvent("permission_ids_updated", {
               detail: {
                 groups: organizations,
+                permission_ids: access_level,
                 access_level,
                 frontend_routes,
                 api_permissions_paths,
@@ -212,13 +216,14 @@ export default function MainLayout() {
               {localStorage.getItem("user_access_level") != "special" && (
                 <>
                   <NetworkEfficiencyCard
-                    title="昨日全网产出效率："
+                    title={t("昨日全网产出效率：")}
                     value={suanlilv?.BTCNetworkPerEPower}
                     unit="BTC/EH"
                   />
                   <PoolTypeSelect />
                 </>
               )}
+              <LanguageSwitch />
               <UserAvatar />
             </Flex>
           </Layout.Header>

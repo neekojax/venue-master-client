@@ -1,14 +1,17 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { DeleteOutlined, FormOutlined } from "@ant-design/icons";
 import { EditableProTable } from "@ant-design/pro-components";
 import { message, Pagination, Popconfirm } from "antd";
 
 import "./styles.css";
 
+import { t } from "@/locales";
+
 type EditTableProps = {
   tableData: any[];
   setTableData: React.Dispatch<React.SetStateAction<any[]>>;
   columns: any;
+  components?: any;
   handleDelete: (recordId: number) => Promise<void>; // 添加 handleDelete 作为参数
   handleSave: (rowKey: number, data: { [x: string]: string }) => Promise<void>; // 添加 handleSave 作为参数
 };
@@ -17,10 +20,24 @@ type EditTableProps = {
 //   return index % 2 === 0 ? "even-row" : "odd-row";
 // };
 
-export default function EditTable({ tableData, columns, handleDelete, handleSave }: EditTableProps) {
+export default function EditTable({
+  tableData,
+  columns,
+  components,
+  handleDelete,
+  handleSave,
+}: EditTableProps) {
   const [editableKeys, setEditableRowKeys] = useState<React.Key[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
+
+  useEffect(() => {
+    const totalPages = Math.max(1, Math.ceil(tableData.length / pageSize));
+
+    if (currentPage > totalPages) {
+      setCurrentPage(totalPages);
+    }
+  }, [currentPage, pageSize, tableData.length]);
 
   // 渲染操作列的函数
   const renderActions = (record: { key: number }, action: { startEditable: (arg0: any) => void }) => [
@@ -30,10 +47,10 @@ export default function EditTable({ tableData, columns, handleDelete, handleSave
       <FormOutlined />
     </a>,
     <Popconfirm
-      title="确认删除此记录吗？"
+      title={t("确认删除此记录吗？")}
       onConfirm={() => handleDelete(record.key)} // 调用 onDelete
-      okText="是"
-      cancelText="否"
+      okText={t("是")}
+      cancelText={t("否")}
     >
       <a key={`delete-${record.key}`}>
         {/* 删除 */}
@@ -55,6 +72,7 @@ export default function EditTable({ tableData, columns, handleDelete, handleSave
         rowKey="key"
         maxLength={5}
         scroll={{ x: 960 }}
+        components={components}
         value={paginatedData}
         // onChange={(newData) => setTableData([...newData])} // 处理只读数组并转换为可变数组
         editable={{
@@ -67,7 +85,7 @@ export default function EditTable({ tableData, columns, handleDelete, handleSave
               handleSave(rowKey as number, data);
             } else {
               // 如果验证不通过，显示提示信息
-              message.error("所有字段不能为空");
+              message.error(t("所有字段不能为空"));
             }
           },
         }}

@@ -1,6 +1,8 @@
-import { Link, type RouteObject } from "react-router-dom";
+import { Link, Navigate, type RouteObject } from "react-router-dom";
 import { ProgressBar } from "@/components/progress-bar";
 import { ROUTE_PATHS } from "@/constants/common";
+
+import { t } from "@/locales";
 
 export const custodyMenuRoute: RouteObject = {
   path: ROUTE_PATHS.custodyMenu,
@@ -9,10 +11,14 @@ export const custodyMenuRoute: RouteObject = {
   }),
   HydrateFallback: ProgressBar,
   handle: {
-    title: "电费监控",
-    crumb: () => "电费监控",
+    title: t("电费监控"),
+    crumb: () => t("电费监控"),
   },
   children: [
+    {
+      index: true,
+      element: <Navigate replace to={ROUTE_PATHS.statistics} />,
+    },
     {
       path: ROUTE_PATHS.setting,
       lazy: async () => ({
@@ -20,8 +26,8 @@ export const custodyMenuRoute: RouteObject = {
       }),
       HydrateFallback: ProgressBar,
       handle: {
-        title: "基础设置",
-        crumb: () => <Link to={ROUTE_PATHS.setting}>基础设置</Link>,
+        title: t("基础设置"),
+        crumb: () => <Link to={ROUTE_PATHS.setting}>{t("基础设置")}</Link>,
       },
     },
     {
@@ -31,8 +37,8 @@ export const custodyMenuRoute: RouteObject = {
       }),
       HydrateFallback: ProgressBar,
       handle: {
-        title: "信息统计",
-        crumb: () => <Link to={ROUTE_PATHS.statistics}>信息统计</Link>,
+        title: t("信息统计"),
+        crumb: () => <Link to={ROUTE_PATHS.statistics}>{t("信息统计")}</Link>,
       },
     },
     // {
@@ -53,7 +59,7 @@ export const custodyMenuRoute: RouteObject = {
       }),
       HydrateFallback: ProgressBar,
       handle: {
-        title: "趋势分析",
+        title: t("趋势分析"),
         crumb: (params: { venueId?: string }) => (
           <Link
             to={
@@ -62,7 +68,7 @@ export const custodyMenuRoute: RouteObject = {
                 : "/custody-menu/statisticsDetail"
             }
           >
-            趋势分析
+            {t("趋势分析")}
           </Link>
         ),
       },
@@ -74,8 +80,8 @@ export const custodyMenuRoute: RouteObject = {
       }),
       HydrateFallback: ProgressBar,
       handle: {
-        title: "信息统计",
-        crumb: () => <Link to={ROUTE_PATHS.dailyAveragePrice}>BTC每日均价</Link>,
+        title: t("信息统计"),
+        crumb: () => <Link to={ROUTE_PATHS.dailyAveragePrice}>{t("BTC每日均价")}</Link>,
       },
     },
   ],

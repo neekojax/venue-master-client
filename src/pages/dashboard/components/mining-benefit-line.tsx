@@ -3,6 +3,7 @@ import { FcLineChart } from "react-icons/fc";
 import { Card, Col, Radio, Row } from "antd";
 import { ReactEcharts } from "@/components/react-echarts";
 
+import { t } from "@/locales";
 import { fetchMiningBenefitLine } from "@/pages/landing/api.ts";
 
 // @ts-ignore
@@ -75,7 +76,7 @@ const MiningBenefitCard = ({ poolType }) => {
       yAxis: [
         {
           type: "value",
-          name: "收入/托管费",
+          name: t("收入/托管费"),
           min: 0,
           splitLine: {
             show: false,
@@ -83,7 +84,7 @@ const MiningBenefitCard = ({ poolType }) => {
         },
         {
           type: "value",
-          name: "费用百分比 (%)",
+          name: t("费用百分比 (%)"),
           min: 0,
           max: 100,
           splitLine: {
@@ -94,7 +95,7 @@ const MiningBenefitCard = ({ poolType }) => {
       ],
       series: [
         {
-          name: "收入(USD)",
+          name: t("收入(USD)"),
           type: "line",
           data: income_usd,
           smooth: true,
@@ -107,7 +108,7 @@ const MiningBenefitCard = ({ poolType }) => {
           showSymbol: false,
         },
         {
-          name: "托管费",
+          name: t("托管费"),
           type: "line",
           data: hosting_fee,
           smooth: true,
@@ -120,7 +121,7 @@ const MiningBenefitCard = ({ poolType }) => {
           showSymbol: false,
         },
         {
-          name: "费用百分比",
+          name: t("费用百分比"),
           type: "line",
           yAxisIndex: 1,
           data: fee_percentage,
@@ -155,7 +156,7 @@ const MiningBenefitCard = ({ poolType }) => {
             <FcLineChart style={{ fontSize: "20px", marginRight: "5px" }} />
           </Col>
           <Col>
-            <h3 style={{ marginLeft: 5, fontSize: "14px" }}>收益+支出</h3>
+            <h3 style={{ marginLeft: 5, fontSize: "14px" }}>{t("收益+支出")}</h3>
           </Col>
         </Row>
       }
@@ -167,13 +168,13 @@ const MiningBenefitCard = ({ poolType }) => {
           size="small"
         >
           <Radio.Button value="7" className={`radio-button ${timeFrame === "7" ? "active" : ""}`}>
-            7天
+            {t("7天")}
           </Radio.Button>
           <Radio.Button value="30" className={`radio-button ${timeFrame === "30" ? "active" : ""}`}>
-            30天
+            {t("30天")}
           </Radio.Button>
           <Radio.Button value="90" className={`radio-button ${timeFrame === "90" ? "active" : ""}`}>
-            90天
+            {t("90天")}
           </Radio.Button>
         </Radio.Group>
       }

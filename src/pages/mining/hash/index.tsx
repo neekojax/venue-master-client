@@ -1,33 +1,42 @@
 import { useEffect, useState } from "react";
 import { FaAdn, FaFish } from "react-icons/fa6";
-import { WiDirectionUpRight } from "react-icons/wi";
 import { Link } from "react-router-dom";
-import { ExportOutlined, SearchOutlined } from "@ant-design/icons";
-import { Button, Col, Input, Radio, Row, Spin, Switch, Table, Tag, Tooltip } from "antd";
-import {} from "antd";
+import { ExportOutlined, LineChartOutlined, SearchOutlined } from "@ant-design/icons";
+import { Button, Col, Input, Radio, Row, Select, Spin, Switch, Table, Tag, Tooltip } from "antd";
 // import EditTable from "@/components/edit-table";
 import { FavoriteButton } from "@/components/FavoriteButton";
+import { ROUTE_PATHS } from "@/constants/common";
 import useAuthRedirect from "@/hooks/useAuthRedirect.ts";
 import { useSelector, useSettingsStore } from "@/stores";
 import { exportHashRateToExcel } from "@/utils/excel";
 
 import "./VenueTabs.css";
 
-import { useMiningHashRateList } from "@/pages/mining/hook.ts";
+import { t } from "@/locales";
+import ResizableHeaderCell from "@/pages/custody-statistics/statistics/components/ResizableHeaderCell";
+import { useMiningHashRateList, useMiningPoolList } from "@/pages/mining/hook.ts";
 
 const StoragePrefix = "mining-hash";
+const { Option } = Select;
 
 export default function MiningHashRatePage() {
   useAuthRedirect();
 
   const { poolType } = useSettingsStore(useSelector(["poolType"]));
-  const [poolCategory, setPoolCategoryType] = useState<string>(
-    localStorage.getItem(`${StoragePrefix}_poolCategory`) || "主矿池",
-  );
+  const [poolCategory, setPoolCategoryType] = useState<string>(() => {
+    // 矿池类别是与后端约定的数据值，必须保持中文，不随界面语言切换
+    const saved = localStorage.getItem(`${StoragePrefix}_poolCategory`);
+    return saved === "主矿池" || saved === "备用矿池" ? saved : "主矿池";
+  });
 
   const { data: hashData, isLoading: isLoadingPools } = useMiningHashRateList(poolType, poolCategory);
+  const { data: poolData } = useMiningPoolList(poolType, poolCategory);
 
   const [columns, setColumns] = useState<any>([]);
+  const [venueNameColumnWidth, setVenueNameColumnWidth] = useState<number>(() => {
+    const storedWidth = localStorage.getItem("mining-hash-venue-name-column-width");
+    return storedWidth ? Number(storedWidth) || 160 : 160;
+  });
 
   const [showCollectionOnly, setShowCollectionOnly] = useState(() => {
     // 初始化时从 localStorage 取值
@@ -41,12 +50,27 @@ export default function MiningHashRatePage() {
 
   const [tableData, setTableData] = useState<any>([]);
   const [searchTerm, setSearchTerm] = useState(""); // 新增搜索状态
+  const [operationModeFilter, setOperationModeFilter] = useState<number | null>(null);
+  const [ownerTypeFilter, setOwnerTypeFilter] = useState<number | null>(null);
 
   useEffect(() => {
     if (hashData && hashData.data) {
+      const accountAttributesByPoolId = new Map<string, { operation_mode: number; owner_type: number }>(
+        (poolData?.data || []).map((pool: any) => [
+          String(pool.id),
+          {
+            operation_mode: Number(pool.venue_info?.operation_mode ?? pool.operation_mode ?? 1),
+            owner_type: Number(pool.owner_type ?? 2),
+          },
+        ]),
+      );
       const newData = hashData.data.map(
         (
           item: {
+            id: any;
+            pool_id?: any;
+            poolId?: any;
+            "Pool ID"?: any;
             venue_id: any;
             venue_name: any;
             pool_name: any;
@@ -63,33 +87,50 @@ export default function MiningHashRatePage() {
             update_time: any;
             link: any;
             collection: any;
+            operation_mode?: any;
+            owner_type?: any;
+            venue_info?: { operation_mode?: any };
           },
           index: any,
-        ) => ({
-          venue_id: item.venue_id,
-          serialNumber: index + 1,
-          venue_name: item.venue_name,
-          pool_name: item.pool_name,
-          current_hash: item.current_hash,
-          online: item.online,
-          offline: item.offline,
-          last_hash: item.last_hash,
-          last_settlement_hash: item.last_settlement_hash,
-          theoretical: item.theoretical,
-          last_hash_rate_effective: item.last_hash_rate_effective,
-          last_settlement_profit_btc: item.last_settlement_profit_btc,
-          last_settlement_profit_fb: item.last_settlement_profit_fb,
-          last_settlement_date: item.last_settlement_date,
-          update_time: item.update_time,
-          link: item.link,
-          collection: item.collection,
-        }),
+        ) => {
+          const resolvedPoolId = item.pool_id ?? item.poolId ?? item["Pool ID"] ?? item.id;
+          const accountAttributes = accountAttributesByPoolId.get(String(resolvedPoolId));
+
+          return {
+            key: resolvedPoolId ?? `${item.venue_id}-${item.pool_name}-${index}`,
+            pool_id: resolvedPoolId,
+            venue_id: item.venue_id,
+            serialNumber: index + 1,
+            venue_name: item.venue_name,
+            pool_name: item.pool_name,
+            operation_mode: Number(
+              item.venue_info?.operation_mode ??
+                item.operation_mode ??
+                accountAttributes?.operation_mode ??
+                1,
+            ),
+            owner_type: Number(item.owner_type ?? accountAttributes?.owner_type ?? 2),
+            current_hash: item.current_hash,
+            online: item.online,
+            offline: item.offline,
+            last_hash: item.last_hash,
+            last_settlement_hash: item.last_settlement_hash,
+            theoretical: item.theoretical,
+            last_hash_rate_effective: item.last_hash_rate_effective,
+            last_settlement_profit_btc: item.last_settlement_profit_btc,
+            last_settlement_profit_fb: item.last_settlement_profit_fb,
+            last_settlement_date: item.last_settlement_date,
+            update_time: item.update_time,
+            link: item.link,
+            collection: item.collection,
+          };
+        },
       );
       setTableData(newData); // 设置表格数据源
     } else {
       setTableData([]);
     }
-  }, [hashData]);
+  }, [hashData, poolData]);
 
   // 表头定义
   useEffect(() => {
@@ -112,13 +153,22 @@ export default function MiningHashRatePage() {
         },
       },
       {
-        title: "场地",
+        title: t("场地"),
         dataIndex: "venue_name",
         key: "venue_name",
-        width: 160,
+        width: venueNameColumnWidth,
+        onHeaderCell: () =>
+          ({
+            width: venueNameColumnWidth,
+            onColumnResize: (nextWidth: number) => {
+              setVenueNameColumnWidth(nextWidth);
+              localStorage.setItem("mining-hash-venue-name-column-width", String(nextWidth));
+            },
+          }) as any,
         // render: (text: any) => <span style={{ color: "#333" }}>{text}</span>,
-        render: (text: string, record: { venue_id?: any; collection?: any }) => {
+        render: (text: string, record: { venue_id?: any; collection?: any; operation_mode?: number }) => {
           const isSpecialVenue = text === "Arct-HF01-J XP-AR-US" || text === "ARCT Technologies-HF02-AR-US";
+          const isHosted = Number(record.operation_mode) === 2;
           return (
             <Tooltip
               title={text}
@@ -150,6 +200,26 @@ export default function MiningHashRatePage() {
                   {text}
                 </Link>
 
+                <Tag
+                  style={
+                    isHosted
+                      ? {
+                          marginInlineEnd: 0,
+                          color: "#2B64CB",
+                          background: "#EEF3FF",
+                          borderColor: "#B8C8FF",
+                        }
+                      : {
+                          marginInlineEnd: 0,
+                          color: "#C47B16",
+                          background: "#FFF7E6",
+                          borderColor: "#FFD49F",
+                        }
+                  }
+                >
+                  {isHosted ? t("托管") : t("代管")}
+                </Tag>
+
                 {/* 收藏按钮 */}
                 <FavoriteButton
                   venueId={record.venue_id}
@@ -166,7 +236,7 @@ export default function MiningHashRatePage() {
                 {/* 特殊场地标记 */}
                 {isSpecialVenue && (
                   <Tag color="red" style={{ marginLeft: 4 }}>
-                    补充
+                    {t("补充")}
                   </Tag>
                 )}
               </div>
@@ -175,59 +245,95 @@ export default function MiningHashRatePage() {
         },
       },
       {
-        title: "子账户",
+        title: t("子账户"),
         dataIndex: "pool_name",
         key: "pool_name",
         responsive: ["xs", "sm", "md"], // 适配所有屏幕
         width: "100px",
         // render: (text: any) => <span style={{ color: "#333" }}>{text}</span>,
-        render: (text: any) => (
-          <Tooltip
-            title={text}
-            placement="top"
-            overlayInnerStyle={{ color: "white" }}
-            style={{ color: "white" }}
-          >
-            <div
-              style={{
-                width: "100%",
-                overflow: "hidden",
-                color: "#333",
-                textOverflow: "ellipsis",
-                whiteSpace: "nowrap",
-              }}
-            >
-              {text}
-            </div>
-          </Tooltip>
-        ),
-      },
-      {
-        title: "实时算力",
-        dataIndex: "current_hash",
-        key: "current_hash",
-        render: (text: any) => {
-          const parts = text.split(" "); // 根据空格分割
+        render: (text: any, record: { owner_type?: number }) => {
+          const ownerType = Number(record.owner_type ?? 2);
+          const ownerMeta =
+            ownerType === 0
+              ? { label: t("自营"), color: "#2F8F5B", background: "#F0FFF4", borderColor: "#B7E4C7" }
+              : ownerType === 1
+                ? { label: t("客户"), color: "#7C5CC4", background: "#F6F0FF", borderColor: "#D8C4FF" }
+                : { label: t("合资"), color: "#C47B16", background: "#FFF7E6", borderColor: "#FFD49F" };
 
           return (
-            <span>
-              {parts[0]} <span className="text-sm text-gray-500">{parts[1]}</span>
+            <Tooltip
+              title={text}
+              placement="top"
+              overlayInnerStyle={{ color: "white" }}
+              style={{ color: "white" }}
+            >
+              <div
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 4,
+                  width: "100%",
+                  overflow: "hidden",
+                  color: "#333",
+                }}
+              >
+                <span style={{ flex: 1, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                  {text}
+                </span>
+                <Tag
+                  style={{
+                    marginInlineEnd: 0,
+                    marginLeft: "auto",
+                    color: ownerMeta.color,
+                    background: ownerMeta.background,
+                    borderColor: ownerMeta.borderColor,
+                  }}
+                >
+                  {ownerMeta.label}
+                </Tag>
+              </div>
+            </Tooltip>
+          );
+        },
+      },
+      {
+        title: t("实时算力"),
+        dataIndex: "current_hash",
+        key: "current_hash",
+        align: "right",
+        render: (text: any) => {
+          const parts = String(text ?? "--")
+            .trim()
+            .split(/\s+/); // 根据空格分割
+
+          return (
+            <span className="inline-flex items-baseline justify-end gap-1 whitespace-nowrap tabular-nums">
+              {parts[0]}{" "}
+              <span className="inline-block w-10 text-left text-xs text-gray-400">
+                {parts.slice(1).join(" ")}
+              </span>
             </span>
           );
         },
       },
       {
-        title: "理论算力",
+        title: t("理论算力"),
         dataIndex: "theoretical",
         key: "theoretical",
+        align: "right",
         render: (text: any) => {
-          const parts = text.split(" "); // 根据空格分割
+          const parts = String(text ?? "--")
+            .trim()
+            .split(/\s+/); // 根据空格分割
           if (parts[0] == "0.00") {
             return "--";
           }
           return (
-            <span>
-              {parts[0]} <span className="text-sm text-gray-500">{parts[1]}</span>
+            <span className="inline-flex items-baseline justify-end gap-1 whitespace-nowrap tabular-nums">
+              {parts[0]}{" "}
+              <span className="inline-block w-10 text-left text-xs text-gray-400">
+                {parts.slice(1).join(" ")}
+              </span>
             </span>
           );
         },
@@ -263,22 +369,22 @@ export default function MiningHashRatePage() {
       //   // ],
       // },
       {
-        title: "在线/离线",
+        title: t("在线/离线"),
         key: "status",
         render: (_text: any, record: any) => (
-          <span>
-            <Tag color="success" v-if={record.online != 0}>
-              {record.online}
+          <span className="inline-grid grid-cols-2 gap-2 whitespace-nowrap tabular-nums">
+            <Tag color="success" className="!m-0 min-w-[52px] text-center">
+              {record.online ?? "--"}
             </Tag>
-            <Tag color="error" v-if={record.offline != "0"}>
-              {record.offline}
+            <Tag color="error" className="!m-0 min-w-[52px] text-center">
+              {record.offline ?? "--"}
             </Tag>
           </span>
         ),
       },
       {
         title: () => (
-          <Tooltip title="昨日算力达成率">
+          <Tooltip title={t("昨日算力达成率")}>
             <span
               style={{
                 display: "inline-block",
@@ -288,15 +394,20 @@ export default function MiningHashRatePage() {
                 whiteSpace: "nowrap",
               }}
             >
-              达成率
+              {t("达成率")}
             </span>
           </Tooltip>
         ),
         dataIndex: "last_hash_rate_effective",
         key: "last_hash_rate_effective",
         render: (text: any) => {
-          const value = parseFloat(text.replace("%", "")); // 去掉 '%' 并解析为数字
-          return <span style={{ color: value < 90 ? "red" : "green" }}>{text}</span>;
+          const value = parseFloat(String(text ?? ""));
+          if (!Number.isFinite(value)) return "--";
+          return (
+            <span className="tabular-nums whitespace-nowrap" style={{ color: value < 90 ? "red" : "green" }}>
+              {value.toFixed(2)}%
+            </span>
+          );
         },
         sorter: (a: any, b: any) => {
           // 将带有 '%' 的字符串转换为数字进行比较
@@ -307,7 +418,7 @@ export default function MiningHashRatePage() {
         },
       },
       {
-        title: "刷新时间",
+        title: t("刷新时间"),
         dataIndex: "update_time",
         key: "update_time",
         render: (text: any) => {
@@ -319,7 +430,7 @@ export default function MiningHashRatePage() {
         },
       },
       {
-        title: "链接",
+        title: t("链接"),
         dataIndex: "link",
         key: "link",
         width: 50,
@@ -330,15 +441,32 @@ export default function MiningHashRatePage() {
             href={link}
             target="_blank"
             rel="noopener noreferrer"
-            style={{ color: "#252F4A" }}
+            style={{ color: "#1677FF" }}
             title={link} // 悬停显示完整链接
           >
-            <WiDirectionUpRight style={{ marginLeft: 8, fontSize: "32px" }} />
+            <ExportOutlined style={{ marginLeft: 8, fontSize: 16 }} />
           </a>
         ),
       },
+      {
+        title: t("历史状态"),
+        key: "recentStatus",
+        width: 90,
+        render: (_text: any, record: { pool_id?: any; pool_name?: any; venue_name?: any }) => (
+          <Tooltip title={t("查看历史状态")}>
+            <Link
+              to={ROUTE_PATHS.recentSubAccountStatus(poolType, record.pool_id)}
+              state={{ poolName: record.pool_name, venueName: record.venue_name }}
+              style={{ color: "#2563eb", display: "inline-flex", alignItems: "center" }}
+            >
+              <LineChartOutlined style={{ marginRight: 4 }} />
+              {t("历史")}
+            </Link>
+          </Tooltip>
+        ),
+      },
     ]);
-  }, []);
+  }, [poolType, venueNameColumnWidth]);
 
   // 搜索处理函数
   const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -347,7 +475,7 @@ export default function MiningHashRatePage() {
 
   // Loading 状态
   if (isLoadingPools) {
-    return <Spin tip="加载中..." />;
+    return <Spin tip={t("加载中...")} />;
   }
 
   const onDownload = () => {
@@ -363,14 +491,22 @@ export default function MiningHashRatePage() {
   const filteredData = tableData
     .filter((item: { [key: string]: any }) => {
       // 1️⃣ 搜索词过滤
-      const matchesSearch = Object.values(item).some((value) =>
-        String(value).toLowerCase().includes(searchTerm.toLowerCase()),
-      );
+      const keyword = searchTerm.trim().toLowerCase();
+      const venueAttribute = Number(item.operation_mode) === 2 ? t("托管") : t("代管");
+      const accountAttribute =
+        Number(item.owner_type) === 0 ? t("自营") : Number(item.owner_type) === 1 ? t("客户") : t("合资");
+      const matchesSearch =
+        keyword === "" ||
+        Object.values(item).some((value) => String(value).toLowerCase().includes(keyword)) ||
+        [venueAttribute, accountAttribute].some((value) => value.toLowerCase().includes(keyword));
 
       // 2️⃣ 收藏过滤
       const matchesCollection = !showCollectionOnly || item.collection === 1;
+      const matchesOperationMode =
+        operationModeFilter === null || Number(item.operation_mode) === operationModeFilter;
+      const matchesOwnerType = ownerTypeFilter === null || Number(item.owner_type) === ownerTypeFilter;
 
-      return matchesSearch && matchesCollection;
+      return matchesSearch && matchesCollection && matchesOperationMode && matchesOwnerType;
     })
     .sort((a: any, b: any) => {
       const nameA = a.venue_name.toLowerCase();
@@ -392,7 +528,7 @@ export default function MiningHashRatePage() {
                 checked={showCollectionOnly}
                 onChange={(checked) => setShowCollectionOnly(checked)}
               />{" "}
-              我的自选
+              {t("我的自选")}
             </span>
 
             <Radio.Group
@@ -402,10 +538,10 @@ export default function MiningHashRatePage() {
               style={{ marginLeft: "10px", fontSize: "13px" }}
             >
               <Radio.Button value="主矿池" style={{ fontSize: "12px" }}>
-                主矿池
+                {t("主矿池")}
               </Radio.Button>
               <Radio.Button value="备用矿池" style={{ fontSize: "12px" }}>
-                备用矿池
+                {t("备用矿池")}
               </Radio.Button>
             </Radio.Group>
           </Col>
@@ -413,15 +549,40 @@ export default function MiningHashRatePage() {
           <Col xs={24} sm={24} md={12} style={{ textAlign: "right" }}>
             <Input
               prefix={<SearchOutlined />}
-              placeholder="搜索"
+              placeholder={t("搜索场地或子账户")}
               size="middle"
               value={searchTerm}
               onChange={handleSearch}
-              style={{ width: "250px", marginRight: "20px" }}
+              style={{ width: "220px", marginRight: "12px" }}
             />
+            <Select
+              size="middle"
+              className="text-sm [&_.ant-select-selection-item]:!text-[12px] [&_.ant-select-selection-placeholder]:!text-[12px]"
+              placeholder={t("场地属性")}
+              allowClear
+              value={operationModeFilter}
+              onChange={(value) => setOperationModeFilter(value ?? null)}
+              style={{ width: 120, marginRight: 12, textAlign: "left", fontSize: 12 }}
+            >
+              <Option value={1}>{t("代管")}</Option>
+              <Option value={2}>{t("托管")}</Option>
+            </Select>
+            <Select
+              size="middle"
+              className="text-sm [&_.ant-select-selection-item]:!text-[12px] [&_.ant-select-selection-placeholder]:!text-[12px]"
+              placeholder={t("子账户属性")}
+              allowClear
+              value={ownerTypeFilter}
+              onChange={(value) => setOwnerTypeFilter(value ?? null)}
+              style={{ width: 130, marginRight: 12, textAlign: "left", fontSize: 12 }}
+            >
+              <Option value={0}>{t("自营")}</Option>
+              <Option value={1}>{t("客户")}</Option>
+              <Option value={2}>{t("合资")}</Option>
+            </Select>
 
             <Button size="middle" icon={<ExportOutlined />} onClick={onDownload}>
-              导出
+              {t("导出")}
             </Button>
           </Col>
         </Row>
@@ -430,12 +591,14 @@ export default function MiningHashRatePage() {
           <Spin style={{ width: "100%", textAlign: "center", marginTop: "50%" }} />
         ) : (
           <Table
+            className="[&_.ant-table-tbody>tr>td.ant-table-cell]:!py-2"
+            components={{ header: { cell: ResizableHeaderCell } }}
             pagination={{
               position: ["bottomCenter"],
               showSizeChanger: true,
               pageSizeOptions: ["10", "20", "30", "50"],
               defaultPageSize: 10,
-              showTotal: (total) => `共 ${total} 条`,
+              showTotal: (total) => t("共 {{total}} 条", { total: total }),
               total: filteredData?.length,
               onChange: () => {
                 const tableBody = document.querySelector(".ant-table-body");

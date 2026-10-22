@@ -6,6 +6,7 @@ import { Card, Col, Row, Statistic, Tooltip } from "antd";
 import { ReactEcharts } from "@/components/react-echarts";
 import { ROUTE_PATHS } from "@/constants/common.ts";
 
+import { t } from "@/locales";
 import { fetchTotalLastHashStatus, fetchTotalRealTimeStatus } from "@/pages/mining/api.tsx";
 
 interface MiningPoolCardProps {
@@ -122,7 +123,7 @@ const MiningPoolShCard: React.FC<MiningPoolCardProps> = ({ poolType }) => {
   return (
     <div>
       <Card
-        title={"理论算力"}
+        title={t("理论算力")}
         loading={loading}
         bordered={false}
         className="card-wapper"
@@ -151,13 +152,13 @@ const MiningPoolShCard: React.FC<MiningPoolCardProps> = ({ poolType }) => {
               valueStyle={{ fontSize: "2.5rem", color: "#071437", fontWeight: "600" }}
             />
             <span className="fs-6 text-gray-500 fw-semibold">
-              理论总算力(PH/s){" "}
+              {t("理论总算力(PH/s)")}{" "}
               <Tooltip
                 title={
                   <>
-                    主矿池算力: {realTimeStatus?.totalMasterCurrentHashrate} PH/s
+                    {t("主矿池算力:")} {realTimeStatus?.totalMasterCurrentHashrate} PH/s
                     <br />
-                    备用矿池算力: {realTimeStatus?.totalBackUpCurrentHashrate} PH/s
+                    {t("备用矿池算力:")} {realTimeStatus?.totalBackUpCurrentHashrate} PH/s
                   </>
                 }
               >
@@ -167,7 +168,7 @@ const MiningPoolShCard: React.FC<MiningPoolCardProps> = ({ poolType }) => {
           </Col>
         </Row>
       </Card>
-      <Card title={"实时算力达成率"}>
+      <Card title={t("实时算力达成率")}>
         <Row gutter={24}>
           <Col span={24}>
             {/* <Statistic

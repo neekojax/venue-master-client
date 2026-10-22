@@ -8,6 +8,7 @@ import * as echarts from "echarts/core";
 import { CanvasRenderer } from "echarts/renderers";
 import { formatAmount } from "@/utils/num";
 
+import { t } from "@/locales";
 import { fetchBtcPrice } from "@/pages/report/api.tsx";
 
 // 注册 ECharts 组件
@@ -75,7 +76,13 @@ const ChartPriceCard: React.FC<{
         formatter: (params: any) => {
           // params 是数组，因为 trigger: "axis"
           return params
-            .map((item: any) => `${item.name || ""}<br>${item.marker}单价：${item.value} USDT`)
+            .map((item: any) =>
+              t("{{value}}<br>{{marker}}单价：{{value2}} USDT", {
+                value: item.name || "",
+                marker: item.marker,
+                value2: item.value,
+              }),
+            )
             .join("<br/>");
         },
       },

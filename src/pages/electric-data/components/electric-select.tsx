@@ -4,6 +4,7 @@ import { ExportOutlined } from "@ant-design/icons";
 import { Button, Cascader, CascaderProps, Col, DatePicker, Radio, Row, Spin } from "antd";
 import dayjs, { Dayjs } from "dayjs";
 
+import { t } from "@/locales";
 import { useSettlementPointsList } from "@/pages/electric-data/hook.ts";
 import { PRICE_TYPE_REAL_TIME, PRICE_TYPE_T1, SettlementQueryParam } from "@/pages/electric-data/type.tsx";
 
@@ -156,8 +157,8 @@ const ElectricSelectComponent = forwardRef((props: ElectricSelectComponentProps,
     <div style={{ display: "flex", justifyContent: "space-between" }}>
       <div className={"mr-4"}>
         <Radio.Group onChange={handleRadioChange} defaultValue={selectedType}>
-          <Radio.Button value={PRICE_TYPE_REAL_TIME}>实时价格</Radio.Button>
-          <Radio.Button value={PRICE_TYPE_T1}>T-1价格</Radio.Button>
+          <Radio.Button value={PRICE_TYPE_REAL_TIME}>{t("实时价格")}</Radio.Button>
+          <Radio.Button value={PRICE_TYPE_T1}>{t("T-1价格")}</Radio.Button>
         </Radio.Group>
       </div>
 
@@ -169,7 +170,7 @@ const ElectricSelectComponent = forwardRef((props: ElectricSelectComponentProps,
             onChange={onCascaderChange}
             multiple
             maxTagCount="responsive"
-            placeholder="请选择类型（可多选）"
+            placeholder={t("请选择类型（可多选）")}
             showCheckedStrategy={SHOW_CHILD}
             value={getCascaderValue()}
           />
@@ -201,7 +202,7 @@ const ElectricSelectComponent = forwardRef((props: ElectricSelectComponentProps,
               width: "100%", // 使按钮填满
             }}
           >
-            搜索
+            {t("搜索")}
           </Button>
         </Col>
       </Row>
@@ -212,7 +213,7 @@ const ElectricSelectComponent = forwardRef((props: ElectricSelectComponentProps,
         className={"text-blue-500 exportButton"}
         onClick={onDownload}
       >
-        导出
+        {t("导出")}
       </Button>
     </div>
   );

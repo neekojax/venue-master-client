@@ -4,31 +4,36 @@ import {
   DeleteOutlined,
   DisconnectOutlined,
   DownloadOutlined,
+  DownOutlined,
   EditOutlined,
+  EllipsisOutlined,
   FallOutlined,
-  FileTextOutlined,
   FilterOutlined,
   MinusCircleOutlined,
   PlusOutlined,
   PoweroffOutlined,
   RestOutlined,
+  SettingOutlined,
   SyncOutlined,
 } from "@ant-design/icons";
 import {
   Button,
+  Checkbox,
   DatePicker,
   Drawer,
+  Dropdown,
   Form,
   Input,
   message,
   Modal,
-  Popconfirm,
+  Popover,
+  Segmented,
   Select,
   Space,
+  Switch,
   Table,
   Tag,
   Tooltip,
-  // Switch
 } from "antd";
 import type { ColumnsType } from "antd/es/table";
 import dayjs from "dayjs";
@@ -39,10 +44,11 @@ import { useSelector, useSettingsStore } from "@/stores"; // 根据实际路径�
 import { exportEventLogsToExcel } from "@/utils/excel";
 
 import "@/styles/compact-form.css";
+import "../event-management.css";
 
+import { t } from "@/locales";
 import { fetchEventLogForExport } from "@/pages/venue/api.tsx";
 // import { getTimeDifference } from "@/utils/date";
-import UploadExcel from "@/pages/venue/components/UploadExcel";
 import {
   useDeleteUpdate,
   useEventLogWithFilter,
@@ -54,6 +60,15 @@ import {
 
 dayjs.extend(isBetween); // 使用插件
 const { RangePicker } = DatePicker;
+/** 表头统一处理：放得下完整显示，放不下单行省略号，鼠标移入 Tooltip 显示全称 */
+function headerTitle(text: string) {
+  return (
+    <Tooltip title={text} mouseEnterDelay={0.2}>
+      <span className="block truncate">{text}</span>
+    </Tooltip>
+  );
+}
+
 const { Option } = Select;
 const { TextArea } = Input;
 
@@ -71,6 +86,8 @@ interface EventLog {
   impact_count: number;
   event_reason: string;
   resolution_measures: string;
+  actual_loss_hashrate?: number;
+  calculated_loss_hashrate?: number | null;
   collection: number;
   created_at: string; // 这里使用 created_at 而不是 update_at
   updated_at: string; // 新增 updated_at 字段
@@ -78,8 +95,75 @@ interface EventLog {
   machine_status?: string;
 }
 
-const App: React.FC = () => {
-  // const [showCollectionOnly, setShowCollectionOnly] = useState(true)
+interface SavedEventFilters {
+  showFavoriteOnly?: boolean;
+  selectedDurationType?: string[];
+  selectedLocation?: string[];
+  selectedEventType?: string[];
+  siteName?: string;
+  dateRange?: [string | null, string | null];
+  pageSize?: number;
+  currentPage?: number;
+  sortOrder?: string;
+}
+
+function readEventFilters(key: string): SavedEventFilters {
+  try {
+    const saved = JSON.parse(sessionStorage.getItem(key) || "{}");
+    if (!saved || typeof saved !== "object" || Array.isArray(saved)) return {};
+    const strings = (value: unknown): string[] =>
+      Array.isArray(value) ? value.filter((item): item is string => typeof item === "string") : [];
+    return {
+      showFavoriteOnly: saved.showFavoriteOnly === true,
+      selectedDurationType: strings(saved.selectedDurationType),
+      selectedLocation: strings(saved.selectedLocation),
+      selectedEventType: strings(saved.selectedEventType),
+      siteName: typeof saved.siteName === "string" ? saved.siteName : "",
+      dateRange: [0, 1].map((index) => {
+        const value = saved.dateRange?.[index];
+        return typeof value === "string" && dayjs(value).isValid() ? value : null;
+      }) as SavedEventFilters["dateRange"],
+      pageSize: [10, 20, 30, 50, 100, 200].includes(saved.pageSize) ? saved.pageSize : 10,
+      currentPage: Number.isInteger(saved.currentPage) && saved.currentPage > 0 ? saved.currentPage : 1,
+      sortOrder: saved.sortOrder === "endTimeDesc" ? "endTimeDesc" : undefined,
+    };
+  } catch {
+    return {};
+  }
+}
+
+const DEFAULT_HIDDEN_COLUMNS = [
+  "actual_loss_hashrate",
+  "machine_model",
+  "machine_status",
+  "calculated_loss_hashrate",
+  "is_sleep",
+];
+
+const getColumnKey = (column: ColumnsType<EventLog>[number]) =>
+  String(column.key ?? ("dataIndex" in column ? column.dataIndex : ""));
+
+const App: React.FC<{ storageKey: string }> = ({ storageKey }) => {
+  const columnStorageKey = `${storageKey}:hidden-columns`;
+  const [hiddenColumns, setHiddenColumns] = useState<string[]>(() => {
+    try {
+      const saved = JSON.parse(localStorage.getItem(columnStorageKey) || "null");
+      return Array.isArray(saved) && saved.every((key) => typeof key === "string")
+        ? saved
+        : DEFAULT_HIDDEN_COLUMNS;
+    } catch {
+      return DEFAULT_HIDDEN_COLUMNS;
+    }
+  });
+  useEffect(() => {
+    try {
+      localStorage.setItem(columnStorageKey, JSON.stringify(hiddenColumns));
+    } catch {
+      // 存储不可用时仍可调整当前页面的列。
+    }
+  }, [columnStorageKey, hiddenColumns]);
+  const [savedFilters] = useState(() => readEventFilters(storageKey));
+  const [showFavoriteOnly, setShowFavoriteOnly] = useState(savedFilters.showFavoriteOnly ?? false);
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [selectedRowKeys] = useState<React.Key[]>([]);
   const [form] = Form.useForm();
@@ -108,19 +192,33 @@ const App: React.FC = () => {
   const newMutation = useEventNew();
   const updateMutation = useEventUpdate();
   const deleteMutation = useDeleteUpdate();
-  const [selectedDurationType, setSelectedDurationType] = useState<string[]>([]);
+  const [selectedDurationType, setSelectedDurationType] = useState<string[]>(
+    savedFilters.selectedDurationType ?? [],
+  );
   // 新增筛选状态
-  const [selectedLocation, setSelectedLocation] = useState<string[]>([]);
+  const [selectedLocation, setSelectedLocation] = useState<string[]>(savedFilters.selectedLocation ?? []);
   const [showSiteFilter, setShowSiteFilter] = useState(false);
-  const [filters, setFilters] = useState<{ siteName: string }>({ siteName: "" });
+  const [filters, setFilters] = useState<{ siteName: string }>({ siteName: savedFilters.siteName ?? "" });
   const powerSites = useMemo(
     () => Array.from(new Set((venueList?.data || []).map((v: any) => v.venue_name))),
     [venueList],
   );
+
+  const favoriteSiteNames = useMemo(() => {
+    const list = Array.isArray(venueList?.data) ? (venueList!.data as any[]) : [];
+    return Array.from(
+      new Set(list.filter((v) => Number(v?.collection ?? 0) === 1).map((v) => String(v.venue_name))),
+    );
+  }, [venueList]);
+
+  const effectiveSelectedLocation = useMemo(
+    () => (showFavoriteOnly ? favoriteSiteNames : selectedLocation),
+    [showFavoriteOnly, favoriteSiteNames, selectedLocation],
+  );
   const handleFilterChange = (key: keyof typeof filters, value: string) => {
     setFilters((prev) => ({ ...prev, [key]: value }));
   };
-  const [selectedEventType, setSelectedEventType] = useState<string[]>([]);
+  const [selectedEventType, setSelectedEventType] = useState<string[]>(savedFilters.selectedEventType ?? []);
   // const [searchText, setSearchText] = useState("");
   // 防抖后的搜索文本
   // const [debouncedSearchText, setDebouncedSearchText] = useState<string>("");
@@ -142,11 +240,48 @@ const App: React.FC = () => {
   //     clearTimeout(timer);
   //   };
   // }, [searchText]);
-  const [dateRange, setDateRange] = useState<[dayjs.Dayjs | null, dayjs.Dayjs | null]>([null, null]);
+  const [dateRange, setDateRange] = useState<[dayjs.Dayjs | null, dayjs.Dayjs | null]>(() => [
+    savedFilters.dateRange?.[0] ? dayjs(savedFilters.dateRange[0]) : null,
+    savedFilters.dateRange?.[1] ? dayjs(savedFilters.dateRange[1]) : null,
+  ]);
   // 添加分页大小状态
-  const [pageSize, setPageSize] = useState<number>(10);
-  const [currentPage, setCurrentPage] = useState<number>(1);
-  const [sortOrder, setSortOrder] = useState<string | undefined>(undefined); // 新增排序状态
+  const [pageSize, setPageSize] = useState<number>(savedFilters.pageSize ?? 10);
+  const [currentPage, setCurrentPage] = useState<number>(savedFilters.currentPage ?? 1);
+  const [sortOrder, setSortOrder] = useState<string | undefined>(savedFilters.sortOrder); // 新增排序状态
+  useEffect(() => {
+    try {
+      sessionStorage.setItem(
+        storageKey,
+        JSON.stringify({
+          showFavoriteOnly,
+          selectedDurationType,
+          selectedLocation,
+          selectedEventType,
+          siteName: filters.siteName,
+          dateRange: [
+            dateRange?.[0]?.format("YYYY-MM-DD") ?? null,
+            dateRange?.[1]?.format("YYYY-MM-DD") ?? null,
+          ],
+          pageSize,
+          currentPage,
+          sortOrder,
+        }),
+      );
+    } catch {
+      // 浏览器禁用存储时仍允许正常使用筛选。
+    }
+  }, [
+    storageKey,
+    showFavoriteOnly,
+    selectedDurationType,
+    selectedLocation,
+    selectedEventType,
+    filters.siteName,
+    dateRange,
+    pageSize,
+    currentPage,
+    sortOrder,
+  ]);
   // const [total, setTotal] = useState<number>(0);
   // 监听模态框中选择的场地ID，联动加载其 pools 列表
   useEffect(() => {
@@ -181,8 +316,8 @@ const App: React.FC = () => {
   const endDate = dateRange && dateRange[1] ? dateRange[1].format("YYYY-MM-DD") : undefined;
   // 将场地 ID 转为逗号分隔的字符串（后端期望格式）
   let venueIds: string | undefined = undefined;
-  if (selectedLocation.length && Array.isArray(venueList?.data)) {
-    const ids = selectedLocation
+  if (effectiveSelectedLocation.length && Array.isArray(venueList?.data)) {
+    const ids = effectiveSelectedLocation
       .map((name) => (venueList!.data as any[]).find((v: any) => v.venue_name === name)?.id)
       .filter((id): id is number => typeof id === "number");
     venueIds = ids.join(",");
@@ -219,6 +354,8 @@ const App: React.FC = () => {
       log_type: item.log_type,
       impact_count: item.impact_count,
       impact_power_loss: item.impact_power_loss,
+      actual_loss_hashrate: item.actual_loss_hashrate,
+      calculated_loss_hashrate: item.calculated_loss_hashrate,
       event_reason: item.event_reason,
       resolution_measures: item.resolution_measures,
       created_at: item.created_at,
@@ -230,7 +367,7 @@ const App: React.FC = () => {
   const total = data?.data?.total || 0;
   const columns: ColumnsType<EventLog> = [
     {
-      title: "序号",
+      title: headerTitle(t("序号")),
       dataIndex: "key",
       width: "70px",
       rowScope: "row",
@@ -242,7 +379,7 @@ const App: React.FC = () => {
       },
     },
     {
-      title: "场地",
+      title: headerTitle(t("场地")),
       dataIndex: "venue_name",
       width: 200,
       render: (_: any, record: EventLog) => {
@@ -258,9 +395,9 @@ const App: React.FC = () => {
               style={{
                 width: "100%",
                 overflow: "hidden",
-                color: isSpecialVenue ? "red" : "#333", // 特殊场地字体颜色为红色
                 textOverflow: "ellipsis",
                 whiteSpace: "nowrap",
+                color: isSpecialVenue ? "red" : "#333", // 特殊场地字体颜色为红色
                 fontWeight: isSpecialVenue ? "bold" : "normal", // 加粗特殊场地
               }}
             >
@@ -269,7 +406,7 @@ const App: React.FC = () => {
               </Link>
               {isSpecialVenue && (
                 <Tag color="red" style={{ marginLeft: 2 }}>
-                  补充
+                  {t("补充")}
                 </Tag>
               )}
             </div>
@@ -278,7 +415,7 @@ const App: React.FC = () => {
       },
     },
     {
-      title: "子账户",
+      title: headerTitle(t("子账户")),
       dataIndex: "pool_name",
       width: 150,
       render: (_: any, record: EventLog) => {
@@ -295,12 +432,12 @@ const App: React.FC = () => {
       },
     },
     {
-      title: "机器型号",
+      title: headerTitle(t("机器型号")),
       dataIndex: "machine_model",
       width: 120,
     },
     {
-      title: "机器状态",
+      title: headerTitle(t("机器状态")),
       dataIndex: "machine_status",
       width: 120,
       render: (status: string) => {
@@ -324,7 +461,7 @@ const App: React.FC = () => {
       },
     },
     {
-      title: "影响时长(小时)",
+      title: headerTitle(t("影响时长(小时)")),
       dataIndex: "log_date",
       width: 140,
       render: (_: string, record: any) => {
@@ -335,13 +472,13 @@ const App: React.FC = () => {
           }
           return (
             <Tag color="red">
-              <SyncOutlined spin style={{ marginRight: 4 }} /> 影响中
+              <SyncOutlined spin style={{ marginRight: 4 }} /> {t("影响中")}
             </Tag>
           );
         }
         return (
           <Tag color="red">
-            <SyncOutlined spin style={{ marginRight: 4 }} /> 影响中
+            <SyncOutlined spin style={{ marginRight: 4 }} /> {t("影响中")}
           </Tag>
         );
         // return dayjs(text).format("YYYY-MM-DD HH:mm");
@@ -355,14 +492,14 @@ const App: React.FC = () => {
       // },
     },
     {
-      title: "时间范围",
+      title: headerTitle(t("时间范围")),
       dataIndex: "start_time",
       width: 280,
       render: (_text, record) => `${record.start_time} - ${record.end_time}`,
       // sorter: true, // 移除表头的排序指示器
     },
     {
-      title: "事件类型",
+      title: headerTitle(t("事件类型")),
       dataIndex: "log_type",
       width: 120,
       render: (text) => {
@@ -377,40 +514,59 @@ const App: React.FC = () => {
           低功耗: "purple", // 为低功耗指定颜色
           其他: "default",
         };
-        return <Tag color={colors[text as keyof typeof colors]}>{text}</Tag>;
+        // 数据值保持中文（与后端一致），显示层走翻译
+        return <Tag color={colors[text as keyof typeof colors]}>{t(text)}</Tag>;
       },
     },
     {
-      title: "影响台数",
+      title: headerTitle(t("影响台数")),
       dataIndex: "impact_count",
       width: 105,
       // sorter: (a, b) => a.impact_count - b.impact_count,
     },
     {
-      title: "影响算力",
+      title: headerTitle(t("影响算力")),
       dataIndex: "impact_power_loss",
       width: 120,
       // sorter: (a, b) => a.impact_count - b.impact_count,
       render: (text) => {
-        if (text) {
+        if (text || text === 0) {
           return `${text} T`;
         }
+        return "-";
       },
     },
     {
-      title: "是否休眠",
+      title: headerTitle(t("影响算力（小智测算）")),
+      dataIndex: "actual_loss_hashrate",
+      width: 150,
+      render: (text) => {
+        if (text || text === 0) {
+          return `${text} T`;
+        }
+        return "-";
+      },
+    },
+    {
+      title: headerTitle(t("系统测算（根据算力曲线）")),
+      dataIndex: "calculated_loss_hashrate",
+      width: 200,
+      render: (text: number | null | undefined) => (text == null ? "-" : `${text} T`),
+    },
+    {
+      title: headerTitle(t("是否休眠")),
       dataIndex: "is_sleep",
       width: 120,
       // sorter: (a, b) => a.impact_count - b.impact_count,
       render: (text) => {
         if (text === 1) {
-          return <Tag color="orange">已休眠</Tag>;
+          return <Tag color="orange">{t("已休眠")}</Tag>;
         }
-        return <Tag color="green">未休眠</Tag>;
+        return <Tag color="green">{t("未休眠")}</Tag>;
       },
     },
     {
-      title: "事件原因",
+      title: headerTitle(t("事件原因")),
       dataIndex: "event_reason",
       width: 250,
       ellipsis: true,
@@ -437,13 +593,7 @@ const App: React.FC = () => {
       },
     },
     {
-      title: "备注",
-      dataIndex: "resolution_measures",
-      width: 200,
-      ellipsis: true,
-    },
-    {
-      title: "创建时间",
+      title: headerTitle(t("创建时间")),
       dataIndex: "created_at",
       width: 200,
       render: (text) => dayjs(text).format("YYYY-MM-DD HH:mm:ss"),
@@ -451,7 +601,7 @@ const App: React.FC = () => {
       // defaultSortOrder: "descend", // 👈 默认按创建时间从新到旧排序
     },
     {
-      title: "更新时间",
+      title: headerTitle(t("更新时间")),
       dataIndex: "updated_at",
       width: 200,
       render: (text) => dayjs(text).format("YYYY-MM-DD HH:mm:ss"),
@@ -459,33 +609,48 @@ const App: React.FC = () => {
       // defaultSortOrder: "descend", // 👈 默认按更新时间从新到旧排序
     },
     {
-      title: "操作",
+      title: headerTitle(t("操作")),
       key: "action",
-      width: 180,
+      width: 120,
       fixed: "right",
       render: (_, record) => (
-        <Space size="small">
-          <Button
-            type="text"
-            icon={<EditOutlined />}
-            onClick={() => handleEdit(record)}
-            className="!rounded-button"
-          />
+        <Space size={16}>
           {is_log_visible && (
-            <Tooltip title="操作日志">
-              <Link to={ROUTE_PATHS.logsDetail(record.id)}>
-                <Button type="text" icon={<FileTextOutlined />} className="!rounded-button" />
-              </Link>
-            </Tooltip>
+            <Link to={ROUTE_PATHS.logsDetail(record.id)} className="text-[#0958D9] hover:text-[#0958D9]">
+              {t("查看")}
+            </Link>
           )}
-          <Popconfirm
-            title="确定要删除这条记录吗？"
-            onConfirm={() => handleDelete(record.id)}
-            okText="确定"
-            cancelText="取消"
+          <Dropdown
+            overlayClassName="event-log-action-menu"
+            trigger={["click"]}
+            menu={{
+              items: [
+                { key: "edit", label: t("编辑"), icon: <EditOutlined /> },
+                { key: "delete", label: t("删除"), icon: <DeleteOutlined />, danger: true },
+              ],
+              onClick: ({ key }) => {
+                if (key === "edit") {
+                  handleEdit(record);
+                } else if (key === "delete") {
+                  Modal.confirm({
+                    title: t("确定要删除这条记录吗？"),
+                    okText: t("删除"),
+                    cancelText: t("取消"),
+                    okButtonProps: { danger: true },
+                    onOk: () => handleDelete(record.id),
+                  });
+                }
+              },
+            }}
           >
-            <Button type="text" danger icon={<DeleteOutlined />} className="!rounded-button" />
-          </Popconfirm>
+            <Button
+              type="text"
+              size="small"
+              aria-label={t("更多操作")}
+              icon={<EllipsisOutlined style={{ fontSize: 20 }} />}
+              className="!text-blue-500"
+            />
+          </Dropdown>
         </Space>
       ),
     },
@@ -512,10 +677,10 @@ const App: React.FC = () => {
   const handleDelete = (id: number) => {
     deleteMutation.mutate(id, {
       onSuccess: () => {
-        message.success("删除成功");
+        message.success(t("删除成功"));
       },
       onError: (error) => {
-        message.error(`删除失败: ${error.message}`);
+        message.error(t("删除失败: {{message}}", { message: error.message }));
       },
     });
   };
@@ -542,10 +707,10 @@ const App: React.FC = () => {
       if (values.id !== undefined) {
         updateMutation.mutate(eventUpdate, {
           onSuccess: () => {
-            message.success("更新成功");
+            message.success(t("更新成功"));
           },
           onError: (error) => {
-            message.error(`更新失败: ${error.message}`);
+            message.error(t("更新失败: {{message}}", { message: error.message }));
           },
         });
       } else {
@@ -553,10 +718,10 @@ const App: React.FC = () => {
           { poolType, data: eventUpdate },
           {
             onSuccess: () => {
-              message.success("添加成功");
+              message.success(t("添加成功"));
             },
             onError: (error) => {
-              message.error(`添加失败: ${error.message}`);
+              message.error(t("添加失败: {{message}}", { message: error.message }));
             },
           },
         );
@@ -594,12 +759,18 @@ const App: React.FC = () => {
 
   const opColumns = React.useMemo(() => {
     const cols: ColumnsType<any> = [
-      { title: "用户", dataIndex: "username", key: "username", width: 120, ellipsis: true },
+      { title: t("用户"), dataIndex: "username", key: "username", width: 120, ellipsis: true },
 
-      { title: "状态", dataIndex: "response_status", key: "response_status", width: 100, ellipsis: true },
-      { title: "操作类型", dataIndex: "operation_type", key: "operation_type", width: 140, ellipsis: true },
+      { title: t("状态"), dataIndex: "response_status", key: "response_status", width: 100, ellipsis: true },
       {
-        title: "描述",
+        title: t("操作类型"),
+        dataIndex: "operation_type",
+        key: "operation_type",
+        width: 140,
+        ellipsis: true,
+      },
+      {
+        title: t("描述"),
         dataIndex: "operation_desc",
         key: "operation_desc",
         width: 120,
@@ -623,7 +794,7 @@ const App: React.FC = () => {
       },
       { title: "IP", dataIndex: "ip", key: "ip", width: 130, ellipsis: true },
       {
-        title: "时间",
+        title: t("时间"),
         dataIndex: "created_at",
         key: "created_at",
         width: 180,
@@ -634,20 +805,11 @@ const App: React.FC = () => {
   }, [opLogs]);
 
   return (
-    <div className="">
-      <div className="mx-auto bg-white rounded-lg shadow-sm">
-        <div className="p-6 border-b border-gray-200">
-          <div className="grid grid-cols-[auto_1fr] gap-6 mb-6 filter-form">
-            <Button
-              type="primary"
-              icon={<PlusOutlined />}
-              onClick={handleAdd}
-              size="middle"
-              className="!rounded-button"
-            >
-              新增事件
-            </Button>
-            <div className="flex items-center justify-end gap-4">
+    <div className="event-log-view">
+      <div className="mx-auto">
+        <div className="event-log-toolbar">
+          <div className="event-log-filters">
+            <div className="flex flex-wrap items-center gap-3">
               <div className="relative">
                 <Button
                   size="middle"
@@ -655,14 +817,38 @@ const App: React.FC = () => {
                   className="!rounded-button whitespace-nowrap"
                   onClick={() => setShowSiteFilter(!showSiteFilter)}
                 >
-                  场地筛选
+                  {t("场地筛选")}
+                  {effectiveSelectedLocation.length > 0 ? ` · ${effectiveSelectedLocation.length}` : ""}
+                  <DownOutlined className="ml-2 text-slate-400" />
                 </Button>
                 {showSiteFilter && (
-                  <div className="site-filter-dropdown absolute right-0 mt-2 w-80 bg-white rounded-lg shadow-lg z-10 border border-gray-200 p-4">
-                    <div className="font-medium text-gray-900 mb-3">选择场地</div>
+                  <div className="site-filter-dropdown absolute left-0 mt-2 w-80 max-w-[calc(100vw-4rem)] bg-white rounded-lg shadow-lg z-10 border border-gray-200 p-4">
+                    <div className="font-medium text-gray-900 mb-3">{t("选择场地")}</div>
+                    <div className="flex items-center justify-between gap-3 mb-3">
+                      <div className="flex items-center gap-2">
+                        <Switch
+                          size="small"
+                          checked={showFavoriteOnly}
+                          onChange={(checked) => {
+                            if (checked && favoriteSiteNames.length === 0) {
+                              message.warning(t("暂无收藏场地"));
+                              return;
+                            }
+                            setCurrentPage(1);
+                            setShowFavoriteOnly(checked);
+                          }}
+                        />
+                        <span className="event-log-filter-label text-gray-700">{t("我的收藏")}</span>
+                      </div>
+                      {showFavoriteOnly ? (
+                        <span className="text-[11px] text-gray-400">
+                          {t("已选 {{length}} 个", { length: favoriteSiteNames.length })}
+                        </span>
+                      ) : null}
+                    </div>
                     <Input
                       size="middle"
-                      placeholder="搜索场地..."
+                      placeholder={t("搜索场地...")}
                       className="mb-3"
                       value={filters.siteName}
                       onChange={(e) => {
@@ -678,8 +864,10 @@ const App: React.FC = () => {
                               type="checkbox"
                               id={`site-${index}`}
                               className="h-4 w-4 text-blue-600 rounded border-gray-300 focus:ring-blue-500"
-                              checked={selectedLocation.includes(site)}
+                              checked={effectiveSelectedLocation.includes(site)}
+                              disabled={showFavoriteOnly}
                               onChange={(e) => {
+                                if (showFavoriteOnly) return;
                                 setSelectedLocation((prev: string[]) => {
                                   const set = new Set(prev);
                                   if (e.target.checked) {
@@ -702,7 +890,7 @@ const App: React.FC = () => {
                     </div>
                     <div className="flex justify-end space-x-2 mt-3 pt-3 border-t border-gray-200">
                       <Button size="small" onClick={() => setShowSiteFilter(false)}>
-                        取消
+                        {t("取消")}
                       </Button>
                       <Button
                         size="small"
@@ -711,18 +899,35 @@ const App: React.FC = () => {
                           setShowSiteFilter(false);
                         }}
                       >
-                        应用
+                        {t("应用")}
                       </Button>
                     </div>
                   </div>
                 )}
               </div>
+              <div className="flex items-center gap-2">
+                <Switch
+                  size="small"
+                  checked={showFavoriteOnly}
+                  onChange={(checked) => {
+                    if (checked && favoriteSiteNames.length === 0) {
+                      message.warning(t("暂无收藏场地"));
+                      return;
+                    }
+                    setCurrentPage(1);
+                    setShowFavoriteOnly(checked);
+                  }}
+                />
+                <span className="event-log-filter-label text-gray-700 whitespace-nowrap">
+                  {t("我的收藏")}
+                </span>
+              </div>
               <RangePicker
                 size="middle"
                 // className="!rounded-lg"
-                placeholder={["开始日期", "结束日期"]}
+                placeholder={[t("开始日期"), t("结束日期")]}
                 value={dateRange}
-                style={{ width: 220 }}
+                className="w-full sm:w-[220px]"
                 onChange={(dates) => {
                   // 类型转换，确保类型兼容
                   setCurrentPage(1);
@@ -734,37 +939,37 @@ const App: React.FC = () => {
               <Select
                 mode="multiple"
                 size="middle"
-                placeholder="选择事件状态"
+                placeholder={t("选择事件状态")}
                 value={selectedDurationType}
                 onChange={(vals) => {
                   setCurrentPage(1);
                   setSelectedDurationType(vals);
                 }}
-                style={{ width: 120 }}
+                className="w-full sm:w-[120px]"
                 allowClear
               >
-                <Option value="finished">已结束事件</Option>
-                <Option value="unfinished">未结束事件</Option>
+                <Option value="finished">{t("已结束事件")}</Option>
+                <Option value="unfinished">{t("未结束事件")}</Option>
               </Select>
 
               <Select
                 mode="multiple"
                 maxTagCount="responsive"
                 maxTagTextLength={4} // 可选：限制每个标签显示文字长度
-                placeholder="选择事件类型"
+                placeholder={t("选择事件类型")}
                 value={selectedEventType}
                 onChange={(vals) => {
                   setCurrentPage(1);
                   setSelectedEventType(vals);
                 }}
-                style={{ width: 150 }}
+                className="w-full sm:w-[150px]"
                 // maxTagTextLength={4} // 可选：限制每个标签显示文字长度
                 size="middle"
               >
                 {["电力", "高温", "极端天气", "日常维护", "设备故障", "网络", "限电", "低功耗", "其他"].map(
                   (type) => (
                     <Option key={type} value={type}>
-                      {type}
+                      {t(type)}
                     </Option>
                   ),
                 )}
@@ -778,9 +983,23 @@ const App: React.FC = () => {
                   refetch();
                 }}
               >
-                刷新
+                {t("刷新")}
               </Button>
 
+              <Button
+                type="link"
+                onClick={() => {
+                  setShowFavoriteOnly(false);
+                  setSelectedLocation([]);
+                  setSelectedDurationType([]);
+                  setSelectedEventType([]);
+                  setDateRange([null, null]);
+                  setFilters({ siteName: "" });
+                  setCurrentPage(1);
+                }}
+              >
+                {t("重置筛选")}
+              </Button>
               {/* <Select
                 placeholder="选择影响时长类型"
                 value={selectedDurationType}
@@ -795,19 +1014,28 @@ const App: React.FC = () => {
             </div>
           </div>
 
-          <div className="flex items-center gap-4 mb-6">
-            <Space>
+          <div className="event-log-actions flex flex-wrap items-center justify-between gap-3">
+            <Space wrap size={8}>
+              <Button
+                type="primary"
+                icon={<PlusOutlined />}
+                onClick={handleAdd}
+                size="middle"
+                className="!rounded-button"
+              >
+                {t("新增事件")}
+              </Button>
+
               {selectedRowKeys.length > 0 && (
                 <Button
                   danger
                   icon={<DeleteOutlined />}
-                  onClick={() => message.success("批量删除成功")}
+                  onClick={() => message.success(t("批量删除成功"))}
                   className="!rounded-button"
                 >
-                  批量删除
+                  {t("批量删除")}
                 </Button>
               )}
-              <UploadExcel />
               {/* <Button
                 icon={<DownloadOutlined />}
                 size="middle"
@@ -873,7 +1101,7 @@ const App: React.FC = () => {
                     });
 
                     // 获取文件名（尝试从 header 中获取）
-                    let filename = `事件日志_${dayjs().format("YYYY-MM-DD")}.xlsx`;
+                    let filename = t("事件日志_{{value}}.xlsx", { value: dayjs().format("YYYY-MM-DD") });
                     const disposition = res?.headers?.["content-disposition"];
                     if (!disposition && typeof res?.headers?.get === "function") {
                       // fetch/axios 特性兼容
@@ -901,17 +1129,17 @@ const App: React.FC = () => {
                     link.parentNode?.removeChild(link);
                     window.URL.revokeObjectURL(url);
 
-                    message.success("导出成功");
+                    message.success(t("导出成功"));
                   } catch (e) {
                     console.error(e);
-                    message.error("导出失败，请稍后重试");
+                    message.error(t("导出失败，请稍后重试"));
                   } finally {
                     setExporting(false);
                   }
                 }}
                 className="!rounded-button"
               >
-                导出全部事件
+                {t("导出全部事件")}
               </Button>
               <Button
                 icon={<DownloadOutlined />}
@@ -919,7 +1147,7 @@ const App: React.FC = () => {
                 onClick={() => {
                   try {
                     if (!logData.length) {
-                      message.warning("当前页没有数据可导出");
+                      message.warning(t("当前页没有数据可导出"));
                       return;
                     }
                     const exportRows = (logData || []).map((item: any) => ({
@@ -937,48 +1165,69 @@ const App: React.FC = () => {
                     }));
                     exportEventLogsToExcel(
                       exportRows,
-                      "当前页事件",
-                      `事件日志_当前页_${dayjs().format("YYYY-MM-DD")}.xlsx`,
+                      t("当前页事件"),
+                      t("事件日志_当前页_{{value}}.xlsx", { value: dayjs().format("YYYY-MM-DD") }),
                     );
-                    message.success("当前页导出成功");
+                    message.success(t("当前页导出成功"));
                   } catch (e) {
                     console.error(e);
-                    message.error("导出失败，请稍后重试");
+                    message.error(t("导出失败，请稍后重试"));
                   }
                 }}
                 className="!rounded-button"
               >
-                导出当前页
+                {t("导出当前页")}
               </Button>
-              <div className="flex items-center ml-4 bg-gray-100 rounded p-1 text-sm">
-                <div
-                  className={`px-3 py-1 rounded cursor-pointer transition-all ${
-                    sortOrder !== "endTimeDesc"
-                      ? "bg-white text-[#333] shadow-sm font-medium"
-                      : "text-gray-500 hover:text-gray-700"
-                  }`}
-                  onClick={() => {
-                    setSortOrder(undefined);
-                    setCurrentPage(1);
-                  }}
-                >
-                  按开始时间排序
-                </div>
-                <div
-                  className={`px-3 py-1 rounded cursor-pointer transition-all ${
-                    sortOrder === "endTimeDesc"
-                      ? "bg-white text-[#333] shadow-sm font-medium"
-                      : "text-gray-500 hover:text-gray-700"
-                  }`}
-                  onClick={() => {
-                    setSortOrder("endTimeDesc");
-                    setCurrentPage(1);
-                  }}
-                >
-                  按结束时间排序
-                </div>
-              </div>
+              <Popover
+                trigger="click"
+                placement="bottomRight"
+                title={t("显示列")}
+                content={
+                  <div className="flex flex-col gap-2 max-h-96 overflow-y-auto">
+                    <Button size="small" onClick={() => setHiddenColumns(DEFAULT_HIDDEN_COLUMNS)}>
+                      {t("恢复默认")}
+                    </Button>
+                    {columns.map((column) => {
+                      const key = getColumnKey(column);
+                      return (
+                        <Checkbox
+                          key={key}
+                          checked={!hiddenColumns.includes(key)}
+                          onChange={(event) => {
+                            setHiddenColumns((previous) =>
+                              event.target.checked
+                                ? previous.filter((item) => item !== key)
+                                : [...previous, key],
+                            );
+                          }}
+                        >
+                          {typeof column.title === "function" ? key : column.title}
+                        </Checkbox>
+                      );
+                    })}
+                  </div>
+                }
+              >
+                <Button icon={<SettingOutlined />}>{t("列配置")}</Button>
+              </Popover>
             </Space>
+            <div className="flex flex-wrap items-center gap-5">
+              <span className="text-xs text-slate-500 whitespace-nowrap">
+                {t("共 {{total}} 条事件", { total: total.toLocaleString("en-US") })}
+              </span>
+              <Segmented
+                aria-label="事件排序"
+                value={sortOrder === "endTimeDesc" ? "endTimeDesc" : "startTime"}
+                options={[
+                  { label: t("按开始时间"), value: "startTime" },
+                  { label: t("按结束时间"), value: "endTimeDesc" },
+                ]}
+                onChange={(value) => {
+                  setSortOrder(value === "endTimeDesc" ? "endTimeDesc" : undefined);
+                  setCurrentPage(1);
+                }}
+              />
+            </div>
           </div>
         </div>
         <div
@@ -1003,9 +1252,9 @@ const App: React.FC = () => {
 
           <Table
             // rowSelection={rowSelection}
-            columns={columns}
+            columns={columns.filter((column) => !hiddenColumns.includes(getColumnKey(column)))}
             dataSource={logData || []} // 使用过滤后的数据
-            scroll={{ x: 1300 }}
+            scroll={{ x: 1450 }}
             rowKey="id"
             loading={isLoading}
             onChange={(pagination: any, filters: any, sorter: any) => {
@@ -1042,13 +1291,13 @@ const App: React.FC = () => {
                 }
               },
               // showQuickJumper: true,
-              showTotal: (total) => `共 ${total} 条记录`,
+              showTotal: (total) => t("共 {{total}} 条记录", { total: total }),
             }}
           />
         </div>
       </div>
       <Drawer
-        title={`操作日志${opEventId ? ` #${opEventId}` : ""}`}
+        title={t("操作日志{{value}}", { value: opEventId ? ` #${opEventId}` : "" })}
         placement="right"
         width={720}
         onClose={() => setOpDrawerOpen(false)}
@@ -1069,13 +1318,13 @@ const App: React.FC = () => {
         </div>
       </Drawer>
       <Modal
-        title={form.getFieldValue("id") ? "编辑事件" : "新增事件"}
+        title={form.getFieldValue("id") ? t("编辑事件") : t("新增事件")}
         open={isModalVisible}
         onOk={handleOk}
         onCancel={() => setIsModalVisible(false)}
         width={800}
-        okText="确定"
-        cancelText="取消"
+        okText={t("确定")}
+        cancelText={t("取消")}
       >
         <Form form={form} layout="vertical" className="pt-2 compact-form" initialValues={{ is_sleep: 0 }}>
           <div className="grid grid-cols-2 gap-x-6">
@@ -1083,9 +1332,13 @@ const App: React.FC = () => {
             <Form.Item name="id" style={{ display: "none" }}>
               <Input type="hidden" />
             </Form.Item>
-            <Form.Item name="venue_id" label="场地" rules={[{ required: true, message: "请选择场地" }]}>
+            <Form.Item
+              name="venue_id"
+              label={t("场地")}
+              rules={[{ required: true, message: t("请选择场地") }]}
+            >
               <Select
-                placeholder="请选择场地"
+                placeholder={t("请选择场地")}
                 size="middle"
                 allowClear
                 showSearch
@@ -1111,9 +1364,13 @@ const App: React.FC = () => {
               </Select>
             </Form.Item>
 
-            <Form.Item name="pool_id" label="子账户" rules={[{ required: true, message: "请选择子账户" }]}>
+            <Form.Item
+              name="pool_id"
+              label={t("子账户")}
+              rules={[{ required: true, message: t("请选择子账户") }]}
+            >
               <Select
-                placeholder="请选择子账户"
+                placeholder={t("请选择子账户")}
                 size="middle"
                 allowClear
                 showSearch
@@ -1127,13 +1384,13 @@ const App: React.FC = () => {
               </Select>
             </Form.Item>
 
-            <Form.Item name="machine_model" label="机器型号">
-              <Input size="middle" placeholder="请输入机器型号" allowClear />
+            <Form.Item name="machine_model" label={t("机器型号")}>
+              <Input size="middle" placeholder={t("请输入机器型号")} allowClear />
             </Form.Item>
 
-            <Form.Item name="machine_status" label="机器状态">
-              <Select size="middle" placeholder="请选择机器状态" allowClear>
-                {["低算力", "休眠", "关机", "断网", "无"].map((status) => (
+            <Form.Item name="machine_status" label={t("机器状态")}>
+              <Select size="middle" placeholder={t("请选择机器状态")} allowClear>
+                {[t("低算力"), t("休眠"), t("关机"), t("断网"), t("无")].map((status) => (
                   <Option key={status} value={status}>
                     {status}
                   </Option>
@@ -1146,21 +1403,21 @@ const App: React.FC = () => {
             </Form.Item> */}
             <Form.Item
               name="start_time"
-              label="开始时间"
-              rules={[{ required: true, message: "请选择开始时间" }]}
+              label={t("开始时间")}
+              rules={[{ required: true, message: t("请选择开始时间") }]}
             >
               <DatePicker size="middle" showTime className="w-full" />
             </Form.Item>
             <Form.Item
               name="log_type"
-              label="事件类型"
-              rules={[{ required: true, message: "请选择事件类型" }]}
+              label={t("事件类型")}
+              rules={[{ required: true, message: t("请选择事件类型") }]}
             >
-              <Select size="middle" placeholder="请选择事件类型">
+              <Select size="middle" placeholder={t("请选择事件类型")}>
                 {["电力", "高温", "极端天气", "日常维护", "设备故障", "网络", "限电", "低功耗", "其他"].map(
                   (type) => (
                     <Option key={type} value={type}>
-                      {type}
+                      {t(type)}
                     </Option>
                   ),
                 )}
@@ -1168,49 +1425,59 @@ const App: React.FC = () => {
             </Form.Item>
             <Form.Item
               name="end_time"
-              label="结束时间"
-              rules={[{ required: false, message: "请选择结束时间" }]}
+              label={t("结束时间")}
+              rules={[{ required: false, message: t("请选择结束时间") }]}
             >
               <DatePicker size="middle" showTime className="w-full" />
             </Form.Item>
             <Form.Item
               name="impact_count"
-              label="影响台数"
+              label={t("影响台数")}
               style={{ fontSize: "12px" }}
-              rules={[{ required: true, message: "请输入影响台数" }]}
+              rules={[{ required: true, message: t("请输入影响台数") }]}
             >
-              <Input size="middle" type="number" placeholder="请输入影响台数" style={{ fontSize: "12px" }} />
+              <Input
+                size="middle"
+                type="number"
+                placeholder={t("请输入影响台数")}
+                style={{ fontSize: "12px" }}
+              />
             </Form.Item>
             <Form.Item
               name="impact_power_loss"
-              label="影响算力"
+              label={t("影响算力")}
               style={{ fontSize: "12px" }}
-              rules={[{ required: false, message: "请输入影响算力" }]}
+              rules={[{ required: false, message: t("请输入影响算力") }]}
             >
-              <Input size="middle" type="number" placeholder="请输入影响算力" style={{ fontSize: "12px" }} />
+              <Input
+                size="middle"
+                type="number"
+                placeholder={t("请输入影响算力")}
+                style={{ fontSize: "12px" }}
+              />
             </Form.Item>
-            <Form.Item name="is_sleep" label="是否休眠" rules={[{ required: true }]}>
-              <Select size="middle" placeholder="请选择是否休眠">
-                <Option value={0}>不休眠</Option>
-                <Option value={1}>已休眠</Option>
+            <Form.Item name="is_sleep" label={t("是否休眠")} rules={[{ required: true }]}>
+              <Select size="middle" placeholder={t("请选择是否休眠")}>
+                <Option value={0}>{t("不休眠")}</Option>
+                <Option value={1}>{t("已休眠")}</Option>
               </Select>
             </Form.Item>
           </div>
           <Form.Item
             name="event_reason"
-            label="事件原因"
+            label={t("事件原因")}
             style={{ fontSize: "12px" }}
-            rules={[{ required: false, message: "请输入事件原因" }]}
+            rules={[{ required: false, message: t("请输入事件原因") }]}
           >
-            <TextArea size="middle" rows={2} placeholder="请输入事件原因" style={{ fontSize: "12px" }} />
+            <TextArea size="middle" rows={2} placeholder={t("请输入事件原因")} style={{ fontSize: "12px" }} />
           </Form.Item>
           <Form.Item
             name="resolution_measures"
-            label="备注"
+            label={t("备注")}
             style={{ fontSize: "12px" }}
-            rules={[{ required: false, message: "请输入备注" }]}
+            rules={[{ required: false, message: t("请输入备注") }]}
           >
-            <TextArea size="middle" rows={2} placeholder="请输入备注" style={{ fontSize: "12px" }} />
+            <TextArea size="middle" rows={2} placeholder={t("请输入备注")} style={{ fontSize: "12px" }} />
           </Form.Item>
         </Form>
       </Modal>
@@ -1218,4 +1485,11 @@ const App: React.FC = () => {
   );
 };
 
-export default App;
+const EventLogsView: React.FC = () => {
+  const { poolType } = useSettingsStore(useSelector(["poolType"]));
+  const account = localStorage.getItem("user_id") || localStorage.getItem("user") || "anonymous";
+  const storageKey = `event-log-filters:v1:${encodeURIComponent(account)}:${encodeURIComponent(poolType)}`;
+  return <App key={storageKey} storageKey={storageKey} />;
+};
+
+export default EventLogsView;

@@ -1,11 +1,16 @@
+export type AccountLeaseStatus = "全部租赁" | "部分租赁" | "部分租赁算力" | "非租赁" | "待撤场";
+
 export type MiningPool = {
   id: number;
   venue_id: number;
   pool_name: string;
   pool_type: string;
   country: string;
+  owner_type: number;
   // pool_category: string;
   theoretical_hashrate: string;
+  is_overclocked?: number | null;
+  overclock_hashrate_per_machine?: number | null;
   // energy_ratio: string;
   // basic_hosting_fee: string;
   master_link: string;
@@ -18,10 +23,13 @@ export type MiningPoolUpdate = {
   pool_name: string;
   pool_type: string;
   country: string;
+  owner_type: number;
   hosted_machine: number;
   status: number;
   pool_category: string;
   theoretical_hashrate: string;
+  is_overclocked?: number | null;
+  overclock_hashrate_per_machine?: number | null;
   // energy_ratio: string;
   // basic_hosting_fee: string;
   heat_diss_mode: number;
@@ -35,6 +43,10 @@ export type PoolRecordCreate = {
   end_time: string;
   theoretical_hashrate: number;
   hosted_machine: number;
+  is_cloud_power?: number;
+  leased_power?: number;
+  is_overclocked?: number;
+  overclock_hashrate_per_machine?: number;
 };
 
 export type PoolRecordUpdate = {
@@ -45,6 +57,54 @@ export type PoolRecordUpdate = {
   end_time: string;
   theoretical_hashrate: number;
   hosted_machine: number;
+  is_cloud_power?: number;
+  leased_power?: number;
+  is_overclocked?: number;
+  overclock_hashrate_per_machine?: number;
+};
+
+export type AssetPoolRecord = {
+  id: number;
+  venue_id: number;
+  pool_id: number;
+  start_time: string;
+  end_time: string;
+  theoretical_hashrate: number;
+  hosted_machine: number;
+  is_overclocked?: number;
+  overclock_hashrate_per_machine?: number;
+  leased_power?: number;
+  is_cloud_power?: number;
+  asset_record_id?: number;
+  source_updated_at?: string;
+  base_record_id?: number;
+  source_type?: number;
+};
+
+export type AssetPoolRecordCreate = {
+  venue_id: number;
+  pool_id: number;
+  start_time: string;
+  end_time: string;
+  theoretical_hashrate: number;
+  hosted_machine: number;
+  is_overclocked?: number;
+  overclock_hashrate_per_machine?: number;
+  leased_power?: number;
+  is_cloud_power?: number;
+  asset_record_id?: number;
+  source_updated_at?: string;
+  base_record_id?: number;
+  source_type?: number;
+};
+
+export type AssetPoolRecordUpdate = AssetPoolRecordCreate & {
+  id: number;
+};
+
+export type AssetPoolRecordRebuild = {
+  venue_id: number;
+  pool_id: number;
 };
 
 export type HostRecordCreate = {
@@ -57,6 +117,27 @@ export type HostRecordCreate = {
   maintenance_price: number; // 运维单价
   power_consumption: number; // 功耗
   is_in_consignment: boolean; // 是否在寄售期
+};
+
+export type AssetSiteInfo = {
+  id: number;
+  name: string;
+  group_id: string;
+  status: string;
+  venue_id: number;
+  pool_id: number;
+  asset_switch_enabled?: number;
+  asset_switch_at?: string;
+  created_at: string;
+  updated_at: string;
+};
+
+export type AssetSiteMappingUpdate = {
+  id: number;
+  venue_id?: number;
+  pool_id?: number;
+  asset_switch_enabled?: number;
+  asset_switch_at?: string;
 };
 
 export type HostRecordUpdate = {

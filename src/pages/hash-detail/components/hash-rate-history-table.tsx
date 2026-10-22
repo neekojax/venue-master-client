@@ -7,6 +7,7 @@ import dayjs, { Dayjs } from "dayjs";
 import { ROUTE_PATHS } from "@/constants/common.ts";
 import { useSelector, useSettingsStore } from "@/stores";
 
+import { t } from "@/locales";
 import { fetchHashRateHistory } from "@/pages/hash-detail/api.tsx";
 
 const { RangePicker } = DatePicker;
@@ -64,7 +65,7 @@ export default function HashRateHistoryTable() {
 
   const columns = [
     {
-      title: "矿池名称",
+      title: t("矿池名称"),
       dataIndex: "pool_name",
       key: "pool_name",
       // width: "300px",
@@ -92,7 +93,7 @@ export default function HashRateHistoryTable() {
       ),
     },
     {
-      title: "算力",
+      title: t("算力"),
       dataIndex: "hash_rate",
       key: "hash_rate",
       render: (text: any) => {
@@ -104,7 +105,7 @@ export default function HashRateHistoryTable() {
       },
     },
     {
-      title: "理论算力",
+      title: t("理论算力"),
       dataIndex: "settlement_theoretical_hash",
       key: "settlement_theoretical_hash",
 
@@ -117,7 +118,7 @@ export default function HashRateHistoryTable() {
       },
     },
     {
-      title: "算力达成率",
+      title: t("算力达成率"),
       dataIndex: "hash_completion_rate",
       key: "hash_completion_rate",
       render: (text: string) => <span>{parseFloat(text).toFixed(2)}%</span>, // 将字符串转为数字并保留两位小数
@@ -125,7 +126,7 @@ export default function HashRateHistoryTable() {
         parseFloat(a.hash_completion_rate) - parseFloat(b.hash_completion_rate), // 根据达成率排序
     },
     {
-      title: "日期",
+      title: t("日期"),
       dataIndex: "date",
       key: "date",
       sorter: (a: { date: string | number | Date }, b: { date: string | number | Date }) =>
@@ -152,7 +153,7 @@ export default function HashRateHistoryTable() {
       title={
         <span>
           <LineChartOutlined style={{ marginRight: 8 }} /> {/* 添加图标 */}
-          历史算力
+          {t("历史算力")}
         </span>
       }
       bordered={false}

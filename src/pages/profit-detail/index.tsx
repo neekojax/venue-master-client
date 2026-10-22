@@ -11,6 +11,7 @@ import { ROUTE_PATHS } from "@/constants/common.ts";
 import useAuthRedirect from "@/hooks/useAuthRedirect.ts";
 import { useSelector, useSettingsStore } from "@/stores";
 
+import { t } from "@/locales";
 import { fetchIncomeStatisticsHistory } from "@/pages/profit-detail/api.tsx";
 
 const { RangePicker } = DatePicker;
@@ -64,7 +65,7 @@ export default function ProfitDetailPage() {
 
   const columns = [
     {
-      title: "矿池名称",
+      title: t("矿池名称"),
       dataIndex: "pool_name",
       key: "pool_name",
       render: (
@@ -88,25 +89,25 @@ export default function ProfitDetailPage() {
       ),
     },
     {
-      title: "收入 (BTC)",
+      title: t("收入 (BTC)"),
       dataIndex: "income_btc",
       key: "income_btc",
       render: (text: number) => text.toFixed(8), // 格式化数字
     },
     {
-      title: "收入 (USD)",
+      title: t("收入 (USD)"),
       dataIndex: "income_usd",
       key: "income_usd",
       render: (text: number) => text.toFixed(2), // 格式化数字
     },
     {
-      title: "托管费用",
+      title: t("托管费用"),
       dataIndex: "hosting_fee",
       key: "hosting_fee",
       render: (text: number) => text.toFixed(2), // 格式化数字
     },
     {
-      title: "托管比例",
+      title: t("托管比例"),
       dataIndex: "hosting_ratio",
       key: "hosting_ratio",
       render: (text: number) => text.toFixed(2) + " %", // 格式化数字
@@ -218,15 +219,15 @@ export default function ProfitDetailPage() {
 
   const formatNumberCN = (value: any) => {
     if (value >= 1e8) {
-      return (value / 1e8).toFixed(2) + "亿";
+      return (value / 1e8).toFixed(2) + t("亿");
     } else if (value >= 1e6) {
-      return (value / 1e6).toFixed(2) + "百万";
+      return (value / 1e6).toFixed(2) + t("百万");
     } else if (value >= 1e4) {
-      return (value / 1e4).toFixed(2) + "万";
+      return (value / 1e4).toFixed(2) + t("万");
     } else if (value >= 1e3) {
-      return (value / 1e3).toFixed(2) + "千";
+      return (value / 1e3).toFixed(2) + t("千");
     } else if (value >= 1e2) {
-      return (value / 1e2).toFixed(2) + "百";
+      return (value / 1e2).toFixed(2) + t("百");
     } else {
       const retValue = value.toFixed(2);
       // return value.toFixed(2);
@@ -256,7 +257,7 @@ export default function ProfitDetailPage() {
       left: "10%",
     },
     legend: {
-      data: ["收入 (BTC)", "收入 (USD)", "托管费用"],
+      data: [t("收入 (BTC)"), t("收入 (USD)"), t("托管费用")],
       top: "-3%",
       icon: "circle", // 图标形状：可选值有 'circle'、'rect'、'roundRect'、'triangle'、'diamond'、'pin'、'arrow' 或自定义路径
       textStyle: {
@@ -294,7 +295,7 @@ export default function ProfitDetailPage() {
     yAxis: [
       {
         type: "value",
-        name: "收入 (BTC)",
+        name: t("收入 (BTC)"),
         position: "left",
         axisLabel: {
           formatter: "{value}",
@@ -304,7 +305,7 @@ export default function ProfitDetailPage() {
       },
       {
         type: "value",
-        name: "金额 (USD)",
+        name: t("金额 (USD)"),
         position: "right",
         splitLine: {
           show: false, // ✅ 关闭背景横线
@@ -321,7 +322,7 @@ export default function ProfitDetailPage() {
     ],
     series: [
       {
-        name: "收入 (BTC)",
+        name: t("收入 (BTC)"),
         type: "line",
         symbol: "none",
         // type: "bar",
@@ -334,7 +335,7 @@ export default function ProfitDetailPage() {
         smooth: true, // 使用平滑曲线
       },
       {
-        name: "收入 (USD)",
+        name: t("收入 (USD)"),
         type: "line",
         symbol: "none",
         // type: "bar",
@@ -347,7 +348,7 @@ export default function ProfitDetailPage() {
         smooth: true, // 使用平滑曲线
       },
       {
-        name: "托管费用",
+        name: t("托管费用"),
         type: "line",
         symbol: "none",
         // type: "bar",
@@ -375,11 +376,11 @@ export default function ProfitDetailPage() {
         {/* <Card loading={loading} style={}> */}
         <Row gutter={24} style={{ display: "flex" }}>
           <Col span={8}>
-            <Card title={"统计数据"}>
+            <Card title={t("统计数据")}>
               <Row gutter={24} style={{ height: "200px" }}>
                 <Col span={24} style={{ marginBottom: "20px" }}>
                   <Statistic
-                    title="总收益BTC"
+                    title={t("总收益BTC")}
                     value={statisticsHistory?.total_income_btc}
                     valueStyle={{ fontSize: "16px", fontWeight: "bold" }}
                   />
@@ -389,7 +390,7 @@ export default function ProfitDetailPage() {
                 </Col>
                 <Col span={24} style={{ marginBottom: "20px" }}>
                   <Statistic
-                    title="总收益($)"
+                    title={t("总收益($)")}
                     value={statisticsHistory?.total_income_usd}
                     valueStyle={{ fontSize: "16px", fontWeight: "bold" }}
                   />
@@ -399,7 +400,7 @@ export default function ProfitDetailPage() {
                 </Col>
                 <Col span={24} style={{ marginBottom: "20px" }}>
                   <Statistic
-                    title="总托管费用($)"
+                    title={t("总托管费用($)")}
                     value={statisticsHistory?.total_hosting_fee}
                     valueStyle={{ fontSize: "16px", fontWeight: "bold" }}
                   />
@@ -408,12 +409,12 @@ export default function ProfitDetailPage() {
             </Card>
           </Col>
           <Col span={8}>
-            <Card title={"托管费占比"}>
+            <Card title={t("托管费占比")}>
               <ReactEcharts option={gaugeChartOptions} style={{ height: "200px", width: "100%" }} />
             </Card>
           </Col>
           <Col span={8}>
-            <Card title={"曲线图"}>
+            <Card title={t("曲线图")}>
               <ReactEcharts option={option} style={{ height: "200px", width: "100%" }} />
             </Card>
           </Col>

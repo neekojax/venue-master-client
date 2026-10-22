@@ -5,6 +5,8 @@ import type { ColumnsType } from "antd/es/table";
 import { fetchHostingRecordListAll } from "../../api";
 import { exportHostingRecordToExcel } from "@/utils/excel";
 
+import { t } from "@/locales";
+
 interface HostingRecord {
   venue_id: number;
   siteName: string;
@@ -36,7 +38,7 @@ const HostingRecord = forwardRef<HostingRecordHandle, HostingRecordProps>(functi
 
   const columns: ColumnsType<HostingRecord> = [
     {
-      title: "场地名称",
+      title: t("场地名称"),
       dataIndex: "siteName",
       key: "siteName",
       sorter: (a, b) => a.siteName.localeCompare(b.siteName),
@@ -44,14 +46,14 @@ const HostingRecord = forwardRef<HostingRecordHandle, HostingRecordProps>(functi
       width: 350,
     },
     {
-      title: "托管单价周期",
+      title: t("托管单价周期"),
       dataIndex: "start_time",
       key: "start_time",
       width: 250,
       render: (value) => <>{value} ~</>,
     },
     {
-      title: "托管最低单价",
+      title: t("托管最低单价"),
       dataIndex: "min_hosting_price",
       key: "min_hosting_price",
       sorter: (a, b) => a.min_hosting_price - b.min_hosting_price,
@@ -59,7 +61,7 @@ const HostingRecord = forwardRef<HostingRecordHandle, HostingRecordProps>(functi
       width: 180,
     },
     {
-      title: "托管单价",
+      title: t("托管单价"),
       dataIndex: "hosting_price",
       key: "hosting_price",
       sorter: (a, b) => a.hosting_price - b.hosting_price,
@@ -67,7 +69,7 @@ const HostingRecord = forwardRef<HostingRecordHandle, HostingRecordProps>(functi
       width: 180,
     },
     {
-      title: "运维单价",
+      title: t("运维单价"),
       dataIndex: "maintenance_price",
       key: "maintenance_price",
       sorter: (a, b) => a.maintenance_price - b.maintenance_price,
@@ -78,7 +80,7 @@ const HostingRecord = forwardRef<HostingRecordHandle, HostingRecordProps>(functi
 
   const ExtendColumns: ColumnsType<HostingRecord> = [
     {
-      title: "托管单价周期",
+      title: t("托管单价周期"),
       dataIndex: "start_time",
       key: "start_time",
       width: 250,
@@ -89,7 +91,7 @@ const HostingRecord = forwardRef<HostingRecordHandle, HostingRecordProps>(functi
       ),
     },
     {
-      title: "托管单价",
+      title: t("托管单价"),
       dataIndex: "hosting_price",
       key: "hosting_price",
       sorter: (a, b) => a.hosting_price - b.hosting_price,
@@ -97,7 +99,7 @@ const HostingRecord = forwardRef<HostingRecordHandle, HostingRecordProps>(functi
       width: 180,
     },
     {
-      title: "托管最低单价",
+      title: t("托管最低单价"),
       dataIndex: "min_hosting_price",
       key: "min_hosting_price",
       sorter: (a, b) => a.min_hosting_price - b.min_hosting_price,
@@ -105,7 +107,7 @@ const HostingRecord = forwardRef<HostingRecordHandle, HostingRecordProps>(functi
       width: 180,
     },
     {
-      title: "运维单价",
+      title: t("运维单价"),
       dataIndex: "maintenance_price",
       key: "maintenance_price",
       sorter: (a, b) => a.maintenance_price - b.maintenance_price,
@@ -199,9 +201,11 @@ const HostingRecord = forwardRef<HostingRecordHandle, HostingRecordProps>(functi
   return (
     <>
       <div className="mb-4 p-4 bg-green-50 rounded-lg">
-        <div className="text-green-800 font-medium mb-1">托管运维单价说明</div>
+        <div className="text-green-800 font-medium mb-1">{t("托管运维单价说明")}</div>
         <div className="text-green-600 text-sm">
-          此页展示单价为合同约定的正常托管单价及运维单价，因在线率不达标或电费比不达标等原因而导致的电费折扣未计入
+          {t(
+            "此页展示单价为合同约定的正常托管单价及运维单价，因在线率不达标或电费比不达标等原因而导致的电费折扣未计入",
+          )}
         </div>
       </div>
       <Table

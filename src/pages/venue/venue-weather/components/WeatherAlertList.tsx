@@ -1,6 +1,8 @@
 import React from "react";
 import { WeatherAlert } from "../types";
 
+import { t as i18nT } from "@/locales";
+
 interface Props {
   alerts: WeatherAlert[];
   onSelectSites?: (ids: number[]) => void;
@@ -18,16 +20,16 @@ const WeatherAlertList: React.FC<Props> = ({ alerts, onSelectSites, onSelectVenu
   };
   const getBadgeStyle = (alert: WeatherAlert) => {
     const text = (alert.description + alert.type).toLowerCase();
-    if (text.includes("warning") || text.includes("预警")) return "bg-red-100 text-red-700";
+    if (text.includes("warning") || text.includes(i18nT("预警"))) return "bg-red-100 text-red-700";
     return "bg-yellow-100 text-yellow-700";
   };
   const getTypeBadgeStyle = (type?: string) => {
     const t = String(type || "");
-    if (t.includes("红")) return "bg-red-100 text-red-700";
-    if (t.includes("橙")) return "bg-orange-100 text-orange-700";
-    if (t.includes("黄")) return "bg-yellow-100 text-yellow-700";
-    if (t.includes("蓝")) return "bg-blue-100 text-blue-700";
-    if (t.toLowerCase().includes("warning") || t.includes("预警")) return "bg-red-100 text-red-700";
+    if (t.includes(i18nT("红"))) return "bg-red-100 text-red-700";
+    if (t.includes(i18nT("橙"))) return "bg-orange-100 text-orange-700";
+    if (t.includes(i18nT("黄"))) return "bg-yellow-100 text-yellow-700";
+    if (t.includes(i18nT("蓝"))) return "bg-blue-100 text-blue-700";
+    if (t.toLowerCase().includes("warning") || t.includes(i18nT("预警"))) return "bg-red-100 text-red-700";
     return "bg-orange-100 text-orange-700";
   };
 
@@ -36,17 +38,17 @@ const WeatherAlertList: React.FC<Props> = ({ alerts, onSelectSites, onSelectVenu
     if (
       text.includes("red") ||
       text.includes("warning") ||
-      text.includes("红色") ||
-      text.includes("预警") ||
-      text.includes("雪")
+      text.includes(i18nT("红色")) ||
+      text.includes(i18nT("预警")) ||
+      text.includes(i18nT("雪"))
     )
       return "border-l-red-500 bg-red-50/10";
     if (
       text.includes("orange") ||
       text.includes("watch") ||
-      text.includes("雨") ||
+      text.includes(i18nT("雨")) ||
       text.includes("rain") ||
-      text.includes("橙色")
+      text.includes(i18nT("橙色"))
     )
       return "border-l-orange-500 bg-orange-50/10";
     return "border-l-yellow-400 bg-yellow-50/10";
@@ -58,7 +60,7 @@ const WeatherAlertList: React.FC<Props> = ({ alerts, onSelectSites, onSelectVenu
         <div>
           <h3 className="font-black text-gray-800 flex items-center text-sm tracking-wide">
             <i className="fas fa-tower-broadcast text-red-500 mr-2 animate-pulse"></i>
-            气象预警中心
+            {i18nT("气象预警中心")}
           </h3>
           <p className="text-[10px] text-gray-400 mt-0.5 font-medium">WEATHER WARNING CENTER</p>
         </div>
@@ -71,7 +73,7 @@ const WeatherAlertList: React.FC<Props> = ({ alerts, onSelectSites, onSelectVenu
         {alerts.length === 0 ? (
           <div className="h-full flex flex-col items-center justify-center text-gray-400 p-8">
             <i className="fas fa-shield-check text-4xl mb-4 opacity-20"></i>
-            <span className="text-xs font-medium">当前所有场地气象状态良好</span>
+            <span className="text-xs font-medium">{i18nT("当前所有场地气象状态良好")}</span>
           </div>
         ) : (
           <div>
@@ -102,7 +104,7 @@ const WeatherAlertList: React.FC<Props> = ({ alerts, onSelectSites, onSelectVenu
                           alert.type,
                         )}`}
                       >
-                        {alert.type || "常规预警"}
+                        {alert.type || i18nT("常规预警")}
                       </span>
                     </h4>
                     <span

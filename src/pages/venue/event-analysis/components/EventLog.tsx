@@ -31,6 +31,7 @@ import isBetween from "dayjs/plugin/isBetween"; // 引入 isBetween 插件
 import { useSelector, useSettingsStore } from "@/stores"; // 根据实际路径调整
 import { exportEventLogsToExcel } from "@/utils/excel";
 
+import { t } from "@/locales";
 // import { getTimeDifference } from "@/utils/date";
 import UploadExcel from "@/pages/venue/components/UploadExcel";
 import {
@@ -166,7 +167,7 @@ const App: React.FC = () => {
 
   const columns: ColumnsType<EventLog> = [
     {
-      title: "序号",
+      title: t("序号"),
       dataIndex: "key",
       width: "70px",
       rowScope: "row",
@@ -178,7 +179,7 @@ const App: React.FC = () => {
       },
     },
     {
-      title: "场地",
+      title: t("场地"),
       dataIndex: "venue_name",
       // width: 120,
       // filters: venueList?.data?.map((venue) => ({ text: venue.venue_name, value: venue.venue_name })),
@@ -208,7 +209,7 @@ const App: React.FC = () => {
               </Link>
               {isSpecialVenue && (
                 <Tag color="red" style={{ marginLeft: 2 }}>
-                  补充
+                  {t("补充")}
                 </Tag>
               )}
             </div>
@@ -217,7 +218,7 @@ const App: React.FC = () => {
       },
     },
     {
-      title: "影响时长(小时)",
+      title: t("影响时长(小时)"),
       dataIndex: "log_date",
       width: 140,
       render: (_: string, record: any) => {
@@ -234,13 +235,13 @@ const App: React.FC = () => {
           }
           return (
             <Tag color="red">
-              <SyncOutlined spin style={{ marginRight: 4 }} /> 影响中
+              <SyncOutlined spin style={{ marginRight: 4 }} /> {t("影响中")}
             </Tag>
           );
         }
         return (
           <Tag color="red">
-            <SyncOutlined spin style={{ marginRight: 4 }} /> 影响中
+            <SyncOutlined spin style={{ marginRight: 4 }} /> {t("影响中")}
           </Tag>
         );
         // return dayjs(text).format("YYYY-MM-DD HH:mm");
@@ -256,7 +257,7 @@ const App: React.FC = () => {
       },
     },
     {
-      title: "时间范围",
+      title: t("时间范围"),
       dataIndex: "start_time",
       width: 280,
       render: (_text, record) => `${record.start_time} - ${record.end_time}`,
@@ -264,18 +265,18 @@ const App: React.FC = () => {
       defaultSortOrder: "descend", // 👈 默认按影响时长从大到小排序
     },
     {
-      title: "事件类型",
+      title: t("事件类型"),
       dataIndex: "log_type",
       width: 120,
       filters: [
-        { text: "电力", value: "电力" },
-        { text: "高温", value: "高温" },
-        { text: "极端天气", value: "极端天气" },
-        { text: "日常维护", value: "日常维护" },
-        { text: "设备故障", value: "设备故障" },
-        { text: "网络", value: "网络" },
-        { text: "限电", value: "限电" },
-        { text: "其他", value: "其他" },
+        { text: t("电力"), value: t("电力") },
+        { text: t("高温"), value: t("高温") },
+        { text: t("极端天气"), value: t("极端天气") },
+        { text: t("日常维护"), value: t("日常维护") },
+        { text: t("设备故障"), value: t("设备故障") },
+        { text: t("网络"), value: t("网络") },
+        { text: t("限电"), value: t("限电") },
+        { text: t("其他"), value: t("其他") },
       ],
       onFilter: () => {
         return true;
@@ -299,13 +300,13 @@ const App: React.FC = () => {
       },
     },
     {
-      title: "影响台数",
+      title: t("影响台数"),
       dataIndex: "impact_count",
       width: 105,
       sorter: (a, b) => a.impact_count - b.impact_count,
     },
     {
-      title: "影响算力",
+      title: t("影响算力"),
       dataIndex: "impact_power_loss",
       width: 120,
       // sorter: (a, b) => a.impact_count - b.impact_count,
@@ -316,7 +317,7 @@ const App: React.FC = () => {
       },
     },
     {
-      title: "事件原因",
+      title: t("事件原因"),
       dataIndex: "event_reason",
       width: 250,
       ellipsis: true,
@@ -343,13 +344,13 @@ const App: React.FC = () => {
       },
     },
     {
-      title: "解决措施",
+      title: t("解决措施"),
       dataIndex: "resolution_measures",
       width: 200,
       ellipsis: true,
     },
     {
-      title: "创建时间",
+      title: t("创建时间"),
       dataIndex: "created_at",
       width: 200,
       render: (text) => dayjs(text).format("YYYY-MM-DD HH:mm:ss"),
@@ -357,7 +358,7 @@ const App: React.FC = () => {
       defaultSortOrder: "descend", // 👈 默认按创建时间从新到旧排序
     },
     {
-      title: "更新时间",
+      title: t("更新时间"),
       dataIndex: "updated_at",
       width: 200,
       render: (text) => dayjs(text).format("YYYY-MM-DD HH:mm:ss"),
@@ -365,7 +366,7 @@ const App: React.FC = () => {
       defaultSortOrder: "descend", // 👈 默认按更新时间从新到旧排序
     },
     {
-      title: "操作",
+      title: t("操作"),
       key: "action",
       width: 120,
       fixed: "right",
@@ -378,10 +379,10 @@ const App: React.FC = () => {
             className="!rounded-button"
           />
           <Popconfirm
-            title="确定要删除这条记录吗？"
+            title={t("确定要删除这条记录吗？")}
             onConfirm={() => handleDelete(record.id)}
-            okText="确定"
-            cancelText="取消"
+            okText={t("确定")}
+            cancelText={t("取消")}
           >
             <Button type="text" icon={<DeleteOutlined />} className="!rounded-button" />
           </Popconfirm>
@@ -417,10 +418,10 @@ const App: React.FC = () => {
   const handleDelete = (id: number) => {
     deleteMutation.mutate(id, {
       onSuccess: () => {
-        message.success("删除成功");
+        message.success(t("删除成功"));
       },
       onError: (error) => {
-        message.error(`删除失败: ${error.message}`);
+        message.error(t("删除失败: {{message}}", { message: error.message }));
       },
     });
   };
@@ -445,10 +446,10 @@ const App: React.FC = () => {
       if (values.id !== undefined) {
         updateMutation.mutate(eventUpdate, {
           onSuccess: () => {
-            message.success("更新成功");
+            message.success(t("更新成功"));
           },
           onError: (error) => {
-            message.error(`更新失败: ${error.message}`);
+            message.error(t("更新失败: {{message}}", { message: error.message }));
           },
         });
       } else {
@@ -456,10 +457,10 @@ const App: React.FC = () => {
           { poolType, data: eventUpdate },
           {
             onSuccess: () => {
-              message.success("添加成功");
+              message.success(t("添加成功"));
             },
             onError: (error) => {
-              message.error(`添加失败: ${error.message}`);
+              message.error(t("添加失败: {{message}}", { message: error.message }));
             },
           },
         );
@@ -480,11 +481,11 @@ const App: React.FC = () => {
               size="middle"
               className="!rounded-button"
             >
-              新增事件
+              {t("新增事件")}
             </Button>
             <div className="flex items-center justify-end gap-4">
               <Input
-                placeholder="搜索场地、事件类型或内容"
+                placeholder={t("搜索场地、事件类型或内容")}
                 prefix={<SearchOutlined />}
                 size="middle"
                 // className="max-w-xs !rounded-lg"
@@ -496,7 +497,7 @@ const App: React.FC = () => {
               <RangePicker
                 size="middle"
                 // className="!rounded-lg"
-                placeholder={["开始日期", "结束日期"]}
+                placeholder={[t("开始日期"), t("结束日期")]}
                 value={dateRange}
                 style={{ width: 220 }}
                 onChange={(dates) => {
@@ -512,14 +513,14 @@ const App: React.FC = () => {
                   className="!rounded-button whitespace-nowrap"
                   onClick={() => setShowSiteFilter(!showSiteFilter)}
                 >
-                  场地筛选
+                  {t("场地筛选")}
                 </Button>
                 {showSiteFilter && (
                   <div className="site-filter-dropdown absolute right-0 mt-2 w-80 bg-white rounded-lg shadow-lg z-10 border border-gray-200 p-4">
-                    <div className="font-medium text-gray-900 mb-3">选择场地</div>
+                    <div className="font-medium text-gray-900 mb-3">{t("选择场地")}</div>
                     <Input
                       size="middle"
-                      placeholder="搜索场地..."
+                      placeholder={t("搜索场地...")}
                       className="mb-3"
                       value={filters.siteName}
                       onChange={(e) => {
@@ -559,7 +560,7 @@ const App: React.FC = () => {
                     </div>
                     <div className="flex justify-end space-x-2 mt-3 pt-3 border-t border-gray-200">
                       <Button size="small" onClick={() => setShowSiteFilter(false)}>
-                        取消
+                        {t("取消")}
                       </Button>
                       <Button
                         size="small"
@@ -568,7 +569,7 @@ const App: React.FC = () => {
                           setShowSiteFilter(false);
                         }}
                       >
-                        应用
+                        {t("应用")}
                       </Button>
                     </div>
                   </div>
@@ -576,14 +577,14 @@ const App: React.FC = () => {
               </div>
               <Select
                 mode="multiple"
-                placeholder="选择影响时长类型"
+                placeholder={t("选择影响时长类型")}
                 value={selectedDurationType}
                 onChange={setSelectedDurationType}
                 style={{ width: 120 }}
                 allowClear
               >
-                <Option value="valid">已结束事件</Option>
-                <Option value="empty">未结束事件</Option>
+                <Option value="valid">{t("已结束事件")}</Option>
+                <Option value="empty">{t("未结束事件")}</Option>
               </Select>
               {/* <Select
                 mode="multiple"
@@ -624,10 +625,10 @@ const App: React.FC = () => {
                 <Button
                   danger
                   icon={<DeleteOutlined />}
-                  onClick={() => message.success("批量删除成功")}
+                  onClick={() => message.success(t("批量删除成功"))}
                   className="!rounded-button"
                 >
-                  批量删除
+                  {t("批量删除")}
                 </Button>
               )}
               <UploadExcel />
@@ -636,16 +637,20 @@ const App: React.FC = () => {
                 size="middle"
                 onClick={() => {
                   try {
-                    exportEventLogsToExcel([], "事件日志", `事件日志_${dayjs().format("YYYY-MM-DD")}.xlsx`);
-                    message.success("导出成功");
+                    exportEventLogsToExcel(
+                      [],
+                      t("事件日志"),
+                      t("事件日志_{{value}}.xlsx", { value: dayjs().format("YYYY-MM-DD") }),
+                    );
+                    message.success(t("导出成功"));
                   } catch (e) {
                     console.error(e);
-                    message.error("导出失败，请稍后重试");
+                    message.error(t("导出失败，请稍后重试"));
                   }
                 }}
                 className="!rounded-button"
               >
-                导出事件
+                {t("导出事件")}
               </Button>
             </Space>
           </div>
@@ -697,7 +702,7 @@ const App: React.FC = () => {
                 }
               },
               // showQuickJumper: true,
-              showTotal: (total) => `共 ${total} 条记录`,
+              showTotal: (total) => t("共 {{total}} 条记录", { total: total }),
             }}
             // className="px-6"
           />
@@ -716,19 +721,21 @@ const App: React.FC = () => {
                 pointerEvents: "none",
               }}
             >
-              <Spin tip={`数据加载中... 已加载 ${logData.length}/${total}`} />
+              <Spin
+                tip={t("数据加载中... 已加载 {{length}}/{{total}}", { length: logData.length, total: total })}
+              />
             </div>
           )}
         </div>
       </div>
       <Modal
-        title={form.getFieldValue("id") ? "编辑事件" : "新增事件"}
+        title={form.getFieldValue("id") ? t("编辑事件") : t("新增事件")}
         open={isModalVisible}
         onOk={handleOk}
         onCancel={() => setIsModalVisible(false)}
         width={800}
-        okText="确定"
-        cancelText="取消"
+        okText={t("确定")}
+        cancelText={t("取消")}
       >
         <Form form={form} layout="vertical" className="pt-2">
           <div className="grid grid-cols-2 gap-x-6">
@@ -736,9 +743,13 @@ const App: React.FC = () => {
             <Form.Item name="id" style={{ display: "none" }}>
               <Input type="hidden" />
             </Form.Item>
-            <Form.Item name="venue_id" label="场地" rules={[{ required: true, message: "请选择场地" }]}>
+            <Form.Item
+              name="venue_id"
+              label={t("场地")}
+              rules={[{ required: true, message: t("请选择场地") }]}
+            >
               <Select
-                placeholder="请选择场地"
+                placeholder={t("请选择场地")}
                 size="middle"
                 allowClear
                 showSearch
@@ -768,18 +779,27 @@ const App: React.FC = () => {
             </Form.Item> */}
             <Form.Item
               name="start_time"
-              label="开始时间"
-              rules={[{ required: true, message: "请选择开始时间" }]}
+              label={t("开始时间")}
+              rules={[{ required: true, message: t("请选择开始时间") }]}
             >
               <DatePicker size="middle" showTime className="w-full" />
             </Form.Item>
             <Form.Item
               name="log_type"
-              label="事件类型"
-              rules={[{ required: true, message: "请选择事件类型" }]}
+              label={t("事件类型")}
+              rules={[{ required: true, message: t("请选择事件类型") }]}
             >
-              <Select size="middle" placeholder="请选择事件类型">
-                {["电力", "高温", "极端天气", "日常维护", "设备故障", "网络", "限电", "其他"].map((type) => (
+              <Select size="middle" placeholder={t("请选择事件类型")}>
+                {[
+                  t("电力"),
+                  t("高温"),
+                  t("极端天气"),
+                  t("日常维护"),
+                  t("设备故障"),
+                  t("网络"),
+                  t("限电"),
+                  t("其他"),
+                ].map((type) => (
                   <Option key={type} value={type}>
                     {type}
                   </Option>
@@ -788,43 +808,53 @@ const App: React.FC = () => {
             </Form.Item>
             <Form.Item
               name="end_time"
-              label="结束时间"
-              rules={[{ required: false, message: "请选择结束时间" }]}
+              label={t("结束时间")}
+              rules={[{ required: false, message: t("请选择结束时间") }]}
             >
               <DatePicker size="middle" showTime className="w-full" />
             </Form.Item>
             <Form.Item
               name="impact_count"
-              label="影响台数"
+              label={t("影响台数")}
               style={{ fontSize: "12px" }}
-              rules={[{ required: true, message: "请输入影响台数" }]}
+              rules={[{ required: true, message: t("请输入影响台数") }]}
             >
-              <Input size="middle" type="number" placeholder="请输入影响台数" style={{ fontSize: "12px" }} />
+              <Input
+                size="middle"
+                type="number"
+                placeholder={t("请输入影响台数")}
+                style={{ fontSize: "12px" }}
+              />
             </Form.Item>
             <Form.Item
               name="impact_power_loss"
-              label="影响算力"
+              label={t("影响算力")}
               style={{ fontSize: "12px" }}
-              rules={[{ required: false, message: "请输入影响算力" }]}
+              rules={[{ required: false, message: t("请输入影响算力") }]}
             >
-              <Input size="middle" type="number" placeholder="请输入影响算力" style={{ fontSize: "12px" }} />
+              <Input
+                size="middle"
+                type="number"
+                placeholder={t("请输入影响算力")}
+                style={{ fontSize: "12px" }}
+              />
             </Form.Item>
           </div>
           <Form.Item
             name="event_reason"
-            label="事件原因"
+            label={t("事件原因")}
             style={{ fontSize: "12px" }}
-            rules={[{ required: false, message: "请输入事件原因" }]}
+            rules={[{ required: false, message: t("请输入事件原因") }]}
           >
-            <TextArea size="middle" rows={4} placeholder="请输入事件原因" style={{ fontSize: "12px" }} />
+            <TextArea size="middle" rows={4} placeholder={t("请输入事件原因")} style={{ fontSize: "12px" }} />
           </Form.Item>
           <Form.Item
             name="resolution_measures"
-            label="解决措施"
+            label={t("解决措施")}
             style={{ fontSize: "12px" }}
-            rules={[{ required: false, message: "请输入解决措施" }]}
+            rules={[{ required: false, message: t("请输入解决措施") }]}
           >
-            <TextArea size="middle" rows={4} placeholder="请输入解决措施" style={{ fontSize: "12px" }} />
+            <TextArea size="middle" rows={4} placeholder={t("请输入解决措施")} style={{ fontSize: "12px" }} />
           </Form.Item>
         </Form>
       </Modal>

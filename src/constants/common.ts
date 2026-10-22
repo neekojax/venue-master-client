@@ -1,12 +1,12 @@
 export const ROUTE_PATHS = {
   login: "/login",
   user: "/user", // 用户中心～修改密码
+  userManagement: "/user-management",
   notFound: "/not-found",
   landing: "/index",
   logs: "/ops_logs",
   logsDetail: (id: string | number) => `/ops_logs/detail/${id}`,
-  // base: "/base",
-  userManagement: "/user-management",
+  rbacCenter: "/rbac-center",
   echartsDemo: "/echarts-demo",
   pieChartDemo: "/pie-chart-demo",
   custodyMenu: "/custody-menu",
@@ -26,7 +26,16 @@ export const ROUTE_PATHS = {
   miningSetting: "/mining/setting",
   // miningSettingDetail: "/mining/setting/detail",
   miningDetail: (venueId: string | number, poolId: string | number) => `/mining/detail/${venueId}/${poolId}`, // 子账户详情，需传参数
+  recentSubAccountStatus: (venueType: string | number, poolId: string | number) =>
+    `/recent-sub-account-status/${venueType}/${poolId}`,
   miningHashRate: "/mining/hash",
+
+  farmMonitor: "/mining/farm-monitor",
+  farmAbnormalHistory: "/mining/farm-monitor/abnormal-history",
+  miningAgentSetting: "/mining/agent-setting",
+  assetHashrateHistory: "/mining/asset-hashrate-history",
+  faultMonitor: "/mining/fault-monitor",
+  abnormalAnalysis: "/mining/abnormal-analysis",
 
   venue: "/venue",
   miningSiteData: "/venue/running-kpi",
@@ -35,6 +44,7 @@ export const ROUTE_PATHS = {
   venueWeather: "/venue/weather",
   venueBill: "/venue/bill",
   miningSiteDetail: (venueId: string | number) => `/venue/detail/${venueId}`, // 场地详情，需传参数
+  venueWeeklyReportDetail: (venueId: string | number) => `/venue/weekly-report/${venueId}`,
   eventLog: "/venue/event-log",
   eventAnalysis: "/venue/event-analysis",
   eventLogList: (venueId: string | number) => `/venue/event-loglist/${venueId}`, // 场地详情，需传参数
@@ -45,6 +55,7 @@ export const ROUTE_PATHS = {
 
   report: "/report",
   dailyReport: "/report/daily",
+  dailySnapshot: "/report/daily/snapshots",
   dataSummary: "/report/data-summary", // 数据概览
   dataSummaryList: "/report/data-summary/list", // 数据概览更多界面
   dataSummaryProfitList: "/report/data-summary/profit-list", // 数据概览更多界面
@@ -56,18 +67,4 @@ export const ROUTE_PATHS = {
   poolHashHistory: (poolName: any) => `/pool-hash/history/${encodeURIComponent(poolName)}`,
 };
 
-export const getCookieDomain = () => {
-  const hostname = window.location.hostname;
-  // 处理 IP 和 localhost
-  if (/^(\d{1,3}\.){3}\d{1,3}$/.test(hostname) || hostname === "localhost") {
-    return hostname;
-  }
-  // 获取主域名 (例如 a.test.com 返回 .test.com)
-  const parts = hostname.split(".");
-  if (parts.length >= 2) {
-    return `.${parts.slice(-2).join(".")}`;
-  }
-  return `.${hostname}`;
-};
-
-export const COOKIE_DOMAIN = import.meta.env.VITE_COOKIE_DOMAIN || getCookieDomain();
+export const COOKIE_DOMAIN = import.meta.env.VITE_COOKIE_DOMAIN || ".test.com";

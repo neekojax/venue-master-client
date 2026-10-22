@@ -45,7 +45,8 @@
   /* height: clamp(2.625rem, 5vw, 3.75rem); */
 }
 
-.ant-menu-light .ant-menu-item a {
+.ant-menu-light .ant-menu-item a,
+.ant-menu-light .ant-menu-item .ant-menu-title-content {
   /* color: #b6b9c8; */
   color: #bbb;
   font-size: 14px;
@@ -66,7 +67,8 @@
 
   /* padding-left: 24px; */
 }
-.ant-menu-light .ant-menu-item a:hover {
+.ant-menu-light .ant-menu-item a:hover,
+.ant-menu-light .ant-menu-item:hover .ant-menu-title-content {
   color: #fff;
 }
 .ant-app .ant-menu-light .ant-menu-item-selected {
@@ -75,7 +77,8 @@
   border-radius: 0.2rem;
   color: #fff !important;
 }
-.ant-app .ant-menu-light .ant-menu-item-selected a {
+.ant-app .ant-menu-light .ant-menu-item-selected a,
+.ant-app .ant-menu-light .ant-menu-item-selected .ant-menu-title-content {
   color: #fff !important;
 }
 .ant-menu .ant-menu-submenu .ant-menu a::before {

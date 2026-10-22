@@ -17,6 +17,7 @@ import {
 import type { ColumnsType } from "antd/es/table";
 import dayjs from "dayjs";
 
+import { t } from "@/locales";
 import {
   useHostRecordCreate,
   useHostRecordDelete,
@@ -107,10 +108,10 @@ const HostList: React.FC = () => {
     try {
       if (editingRecord) {
         await updateMutation.mutateAsync({ ...(payload as HostRecordUpdate), id: editingRecord.id });
-        message.success("已更新");
+        message.success(t("已更新"));
       } else {
         await createMutation.mutateAsync(payload as HostRecordCreate);
-        message.success("已新增");
+        message.success(t("已新增"));
       }
       setIsModalOpen(false);
       form.resetFields();
@@ -123,7 +124,7 @@ const HostList: React.FC = () => {
   const handleDelete = async (record: HostRecord) => {
     try {
       await deleteMutation.mutateAsync(record.id);
-      message.success("已删除");
+      message.success(t("已删除"));
     } catch (e) {
       // 已在 hook 中处理 onError
       console.log(e);
@@ -131,32 +132,33 @@ const HostList: React.FC = () => {
   };
 
   const columns: ColumnsType<HostRecord> = [
-    { title: "开始时间", dataIndex: "start_time", key: "start_time" },
-    { title: "结束时间", dataIndex: "end_time", key: "end_time" },
-    { title: "托管价格", dataIndex: "hosting_price", key: "hosting_price" },
-    { title: "托管到期日", dataIndex: "hosting_expiry_date", key: "hosting_expiry_date" },
-    { title: "运维价格", dataIndex: "maintenance_price", key: "maintenance_price" },
-    { title: "功耗", dataIndex: "power_consumption", key: "power_consumption" },
+    { title: t("开始时间"), dataIndex: "start_time", key: "start_time" },
+    { title: t("结束时间"), dataIndex: "end_time", key: "end_time" },
+    { title: t("托管价格"), dataIndex: "hosting_price", key: "hosting_price" },
+    { title: t("托管到期日"), dataIndex: "hosting_expiry_date", key: "hosting_expiry_date" },
+    { title: t("运维价格"), dataIndex: "maintenance_price", key: "maintenance_price" },
+    { title: t("功耗"), dataIndex: "power_consumption", key: "power_consumption" },
     {
-      title: "是否寄售期",
+      title: t("是否寄售期"),
       dataIndex: "is_in_consignment",
       key: "is_in_consignment",
-      render: (value: boolean) => (value ? <Tag color="green">是</Tag> : <Tag color="red">否</Tag>),
+      render: (value: boolean) =>
+        value ? <Tag color="green">{t("是")}</Tag> : <Tag color="red">{t("否")}</Tag>,
     },
     {
-      title: "操作",
+      title: t("操作"),
       key: "action",
       width: 160,
       render: (_, record) => (
         <div className="flex gap-3">
-          <a onClick={() => openEdit(record)}>修改</a>
+          <a onClick={() => openEdit(record)}>{t("修改")}</a>
           <Popconfirm
-            title="确认删除该记录？"
+            title={t("确认删除该记录？")}
             onConfirm={() => handleDelete(record)}
-            okText="删除"
-            cancelText="取消"
+            okText={t("删除")}
+            cancelText={t("取消")}
           >
-            <a>删除</a>
+            <a>{t("删除")}</a>
           </Popconfirm>
         </div>
       ),
@@ -169,7 +171,7 @@ const HostList: React.FC = () => {
         {/* <div className="text-lg font-semibold">托管信息</div> */}
         <div></div>
         <Button type="primary" size="small" onClick={openCreate}>
-          + 新增记录
+          {t("+ 新增记录")}
         </Button>
       </div>
 
@@ -244,7 +246,7 @@ const HostList: React.FC = () => {
             </Modal> */}
 
       <Modal
-        title={editingRecord ? "编辑记录" : "新增记录"}
+        title={editingRecord ? t("编辑记录") : t("新增记录")}
         open={isModalOpen}
         onOk={handleSubmit}
         onCancel={() => setIsModalOpen(false)}
@@ -255,18 +257,18 @@ const HostList: React.FC = () => {
           <Row gutter={16}>
             <Col span={12}>
               <Form.Item
-                label="开始时间"
+                label={t("开始时间")}
                 name="start_time"
-                rules={[{ required: true, message: "请选择开始时间" }]}
+                rules={[{ required: true, message: t("请选择开始时间") }]}
               >
                 <DatePicker size="middle" showTime style={{ width: "100%" }} />
               </Form.Item>
             </Col>
             <Col span={12}>
               <Form.Item
-                label="结束时间"
+                label={t("结束时间")}
                 name="end_time"
-                rules={[{ required: true, message: "请选择结束时间" }]}
+                rules={[{ required: true, message: t("请选择结束时间") }]}
               >
                 <DatePicker size="middle" showTime style={{ width: "100%" }} />
               </Form.Item>
@@ -276,20 +278,20 @@ const HostList: React.FC = () => {
           <Row gutter={16}>
             <Col span={12}>
               <Form.Item
-                label="托管单价"
+                label={t("托管单价")}
                 name="hosting_price"
-                rules={[{ required: true, message: "请输入托管单价" }]}
+                rules={[{ required: true, message: t("请输入托管单价") }]}
               >
-                <Input size="middle" type="number" placeholder="请输入托管单价" />
+                <Input size="middle" type="number" placeholder={t("请输入托管单价")} />
               </Form.Item>
             </Col>
             <Col span={12}>
               <Form.Item
-                label="运维单价"
+                label={t("运维单价")}
                 name="maintenance_price"
-                rules={[{ required: true, message: "请输入运维单价" }]}
+                rules={[{ required: true, message: t("请输入运维单价") }]}
               >
-                <Input size="middle" type="number" placeholder="请输入运维单价" />
+                <Input size="middle" type="number" placeholder={t("请输入运维单价")} />
               </Form.Item>
             </Col>
           </Row>
@@ -297,21 +299,21 @@ const HostList: React.FC = () => {
           <Row gutter={16}>
             <Col span={12}>
               <Form.Item
-                label="功耗"
+                label={t("功耗")}
                 name="power_consumption"
-                rules={[{ required: true, message: "请输入功耗" }]}
+                rules={[{ required: true, message: t("请输入功耗") }]}
               >
-                <Input size="middle" type="number" placeholder="请输入功耗" />
+                <Input size="middle" type="number" placeholder={t("请输入功耗")} />
               </Form.Item>
             </Col>
             <Col span={12}>
               <Form.Item
-                label="是否在寄售期"
+                label={t("是否在寄售期")}
                 name="is_in_consignment"
                 valuePropName="checked"
-                rules={[{ required: true, message: "请选择是否在寄售期" }]}
+                rules={[{ required: true, message: t("请选择是否在寄售期") }]}
               >
-                <Switch checkedChildren="是" unCheckedChildren="否" />
+                <Switch checkedChildren={t("是")} unCheckedChildren={t("否")} />
               </Form.Item>
             </Col>
           </Row>
@@ -319,9 +321,9 @@ const HostList: React.FC = () => {
           <Row gutter={16}>
             <Col span={12}>
               <Form.Item
-                label="托管到期日"
+                label={t("托管到期日")}
                 name="hosting_expiry_date"
-                rules={[{ required: true, message: "请输入托管到期日" }]}
+                rules={[{ required: true, message: t("请输入托管到期日") }]}
               >
                 <DatePicker size="middle" showTime style={{ width: "100%" }} />
               </Form.Item>

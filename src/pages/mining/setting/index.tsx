@@ -1,24 +1,28 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { FaAdn, FaFish } from "react-icons/fa6";
 import { Link } from "react-router-dom";
 import {
   CopyOutlined,
   DeleteOutlined,
+  EllipsisOutlined,
   ExportOutlined,
   FormOutlined,
   ImportOutlined,
+  LinkOutlined,
+  RedoOutlined,
   SearchOutlined,
 } from "@ant-design/icons";
 import { CaretDownOutlined, CaretUpOutlined } from "@ant-design/icons";
 import {
   Button,
   Col,
+  DatePicker,
+  Dropdown,
   Form,
   Input,
   InputNumber,
   message,
   Modal,
-  Popconfirm,
   Radio,
   Row,
   Select,
@@ -27,9 +31,11 @@ import {
   Tag,
   Tooltip,
 } from "antd";
+import dayjs, { Dayjs } from "dayjs";
 import ActionButton, { ActionButtonMode } from "@/components/action-button";
 import EditTable from "@/components/edit-table";
 import { FavoriteButton } from "@/components/FavoriteButton";
+import { ROUTE_PATHS } from "@/constants/common";
 import useAuthRedirect from "@/hooks/useAuthRedirect.ts";
 // import PoolSwitcher from "./components/select.tsx";
 import { useSelector, useSettingsStore } from "@/stores";
@@ -39,32 +45,138 @@ import { getShortenedLink } from "@/utils/short-link.ts";
 const { Option } = Select;
 import ExcelUpload from "@/components/excel-upload";
 
+import { t } from "@/locales";
+import ResizableHeaderCell from "@/pages/custody-statistics/statistics/components/ResizableHeaderCell";
 import { uploadMiningPoolExcel } from "@/pages/mining/api.tsx";
 import EditForm from "@/pages/mining/components/edit-form.tsx";
 import {
+  useAssetPoolRecordRebuild,
+  useAssetSiteInfoList,
+  useAssetSiteInfoUpdateMapping,
   useMiningPoolDelete,
   useMiningPoolList,
   useMiningPoolNew,
   useMiningPoolUpdate,
 } from "@/pages/mining/hook.ts";
-import { MiningPool, MiningPoolUpdate } from "@/pages/mining/type.tsx";
+import { AccountLeaseStatus, AssetSiteInfo, MiningPool, MiningPoolUpdate } from "@/pages/mining/type.tsx";
 import { useVenueList } from "@/pages/venue/hook/hook.ts";
 
 const emptyData = {
   name: "",
   pool_type: "",
   country: "",
-  status: 0, // 状态：0 关机，1 活跃
+  owner_type: 2,
+  status: 0, // 状态：0 关机，1 活跃，2 已撤场，3 入库
   hosted_machine: 0,
   // pool_category: "",
   theoretical_hashrate: 0,
+  is_overclocked: 0,
+  overclock_hashrate_per_machine: null,
   // energy_ratio: 0,
   // basic_hosting_fee: 0,
   master_link: "",
   backup_link: "",
 };
 
+/** 表头统一处理：放得下完整显示，放不下单行省略号，鼠标移入 Tooltip 显示全称 */
+function headerTitle(text: string) {
+  return (
+    <Tooltip title={text} mouseEnterDelay={0.2}>
+      <span className="block truncate">{text}</span>
+    </Tooltip>
+  );
+}
+
 const StoragePrefix = "mining-setting";
+const LEASE_STATUS_PARTIAL = "部分租赁" as const;
+const LEASE_STATUS_FULL = "全部租赁" as const;
+const LEASE_STATUS_PARTIAL_POWER = "部分租赁算力" as const;
+const LEASE_STATUS_NONE = "非租赁" as const;
+const LEASE_STATUS_PENDING_REMOVAL = "待撤场" as const;
+const ASSET_SWITCH_ENABLED_FILTER = "资产接管已开启" as const;
+
+type StatusFilterValue =
+  | number
+  | typeof LEASE_STATUS_PARTIAL
+  | typeof LEASE_STATUS_FULL
+  | typeof LEASE_STATUS_PENDING_REMOVAL
+  | typeof ASSET_SWITCH_ENABLED_FILTER
+  | null;
+
+const LEASE_STATUS_COLOR_MAP: Record<AccountLeaseStatus, string> = {
+  全部租赁: "#7c3aed",
+  部分租赁: "#d97706",
+  部分租赁算力: "#0891b2",
+  非租赁: "#6b7280",
+  待撤场: "#d9480f",
+};
+
+const copyText = async (text: string) => {
+  try {
+    if (navigator.clipboard?.writeText) {
+      await navigator.clipboard.writeText(text);
+    } else {
+      const textarea = document.createElement("textarea");
+      textarea.value = text;
+      document.body.appendChild(textarea);
+      textarea.select();
+      document.execCommand("copy");
+      document.body.removeChild(textarea);
+    }
+    message.success(t("已复制"));
+  } catch {
+    message.error(t("复制失败"));
+  }
+};
+
+const getOperationalStatusMeta = (status?: number) => {
+  if (status === 1) {
+    return { text: t("活跃"), color: "green" };
+  }
+  if (status === 0) {
+    return { text: t("关机"), color: "red" };
+  }
+  if (status === 2) {
+    return { text: t("已撤场"), color: "orange" };
+  }
+  if (status === 3) {
+    return { text: t("入库"), color: "#1677ff" };
+  }
+  return { text: "-", color: "#999" };
+};
+
+const formatLeasePower = (leasedPower?: number | null) => {
+  if (leasedPower == null || Number.isNaN(Number(leasedPower))) {
+    return "";
+  }
+
+  return `${Number(leasedPower).toFixed(2)} P`;
+};
+
+type MiningPoolTableRow = {
+  key: number;
+  pool_id: number;
+  venue_id: number;
+  venue_name: string;
+  pool_name: string;
+  country?: string;
+  hosted_machine?: number;
+  status?: number;
+  pool_category?: string;
+  operation_mode?: number;
+  owner_type?: number;
+  theoretical_hashrate?: number | string;
+  is_overclocked?: number | null;
+  overclock_hashrate_per_machine?: number | null;
+  leased_power?: number | null;
+  heat_diss_mode?: number;
+  link?: string;
+  collection?: 0 | 1;
+  asset_site_bound?: boolean;
+  asset_switch_enabled?: number;
+  asset_switch_at?: string;
+  account_lease_status?: AccountLeaseStatus;
+};
 
 export default function MiningSettingPage() {
   useAuthRedirect();
@@ -116,12 +228,26 @@ export default function MiningSettingPage() {
   };
 
   const [hashrateSortOrder, setHashrateSortOrder] = useState<"ascend" | "descend" | null>(null);
+  const [venueNameColumnWidth, setVenueNameColumnWidth] = useState<number>(() => {
+    const storedWidth = localStorage.getItem("mining-setting-venue-name-column-width");
+    return storedWidth ? Number(storedWidth) || 200 : 200;
+  });
 
-  const [poolCategory, setPoolCategoryType] = useState<string>(
-    localStorage.getItem(`${StoragePrefix}_poolCategory`) || "主矿池",
-  );
+  const [poolCategory, setPoolCategoryType] = useState<string>(() => {
+    // 矿池类别是与后端约定的数据值，必须保持中文，不随界面语言切换
+    const saved = localStorage.getItem(`${StoragePrefix}_poolCategory`);
+    return saved === "主矿池" || saved === "备用矿池" ? saved : "主矿池";
+  });
 
   const { data: poolsData, isLoading: isLoadingPools } = useMiningPoolList(poolType, poolCategory);
+  const [isAssetBindModalOpen, setIsAssetBindModalOpen] = useState(false);
+  const [assetBindingRow, setAssetBindingRow] = useState<MiningPoolTableRow | null>(null);
+  const [selectedAssetSiteId, setSelectedAssetSiteId] = useState<number | undefined>();
+  const [assetSwitchEnabled, setAssetSwitchEnabled] = useState<number>(0);
+  const [assetSwitchAt, setAssetSwitchAt] = useState<Dayjs | null | undefined>(undefined);
+  const { data: assetSiteInfoData, isLoading: isLoadingAssetSiteInfo } = useAssetSiteInfoList();
+  const assetSiteMappingMutation = useAssetSiteInfoUpdateMapping();
+  const assetPoolRecordRebuildMutation = useAssetPoolRecordRebuild();
 
   const [columns, setColumns] = useState<any>([]);
   const [tableData, setTableData] = useState<any>([]);
@@ -129,11 +255,36 @@ export default function MiningSettingPage() {
     // 初始化时从 localStorage 取值
     return localStorage.getItem("showCollectionOnly") === "true";
   });
+  const [permissionIds, setPermissionIds] = useState<string>(localStorage.getItem("permission_ids") || "");
 
   // 当值变化时写入 localStorage
   useEffect(() => {
     localStorage.setItem("showCollectionOnly", String(showCollectionOnly));
   }, [showCollectionOnly]);
+
+  useEffect(() => {
+    const updatePermissionIds = () => {
+      setPermissionIds(localStorage.getItem("permission_ids") || "");
+    };
+
+    const onStorage = (event: StorageEvent) => {
+      if (event.key === "permission_ids") {
+        updatePermissionIds();
+      }
+    };
+
+    const onPermissionUpdated = () => {
+      updatePermissionIds();
+    };
+
+    window.addEventListener("storage", onStorage);
+    window.addEventListener("permission_ids_updated", onPermissionUpdated as EventListener);
+
+    return () => {
+      window.removeEventListener("storage", onStorage);
+      window.removeEventListener("permission_ids_updated", onPermissionUpdated as EventListener);
+    };
+  }, []);
 
   const newMutation = useMiningPoolNew();
   const updateMutation = useMiningPoolUpdate();
@@ -142,16 +293,55 @@ export default function MiningSettingPage() {
   const [isLoadingNewPool, setIsLoadingNewPool] = useState(false);
 
   const [searchTerm, setSearchTerm] = useState(""); // 新增搜索状态;
-  const [statusFilter, setStatusFilter] = useState<number | null>(null); // 状态筛选
+  const [statusFilter, setStatusFilter] = useState<StatusFilterValue>(null); // 状态筛选
+  const [operationModeFilter, setOperationModeFilter] = useState<number | null>(null);
+  const [ownerTypeFilter, setOwnerTypeFilter] = useState<number | null>(null);
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [excelUploadModalVisible, setExcelUploadModalVisible] = useState(false);
   const [currentRow, setCurrentRow] = useState<MiningPoolUpdate | null>(null);
   const [editableKey, setEditableRowKey] = useState<number>(0);
+  const [rebuildingPoolId, setRebuildingPoolId] = useState<number | null>(null);
 
   const { data: venueList } = useVenueList(poolType);
 
   const [form] = Form.useForm();
+  const assetSiteList: AssetSiteInfo[] = useMemo(
+    () => assetSiteInfoData?.data?.list ?? [],
+    [assetSiteInfoData],
+  );
+  const isSuperAdmin = permissionIds
+    .split(",")
+    .map((item) => item.trim())
+    .filter(Boolean)
+    .includes("role-super-admin");
+  const currentBoundAssetSite = assetBindingRow
+    ? assetSiteList.find(
+        (item) =>
+          Number(item.venue_id) === Number(assetBindingRow.venue_id) &&
+          Number(item.pool_id) === Number(assetBindingRow.pool_id),
+      )
+    : undefined;
+
+  useEffect(() => {
+    if (!isAssetBindModalOpen || !currentBoundAssetSite) return;
+
+    setSelectedAssetSiteId((prev) => prev ?? currentBoundAssetSite.id);
+  }, [currentBoundAssetSite, isAssetBindModalOpen]);
+
+  useEffect(() => {
+    if (!isAssetBindModalOpen) return;
+
+    const selectedSite = assetSiteList.find((item) => Number(item.id) === Number(selectedAssetSiteId));
+    if (!selectedSite) {
+      setAssetSwitchEnabled(0);
+      setAssetSwitchAt(undefined);
+      return;
+    }
+
+    setAssetSwitchEnabled(Number(selectedSite.asset_switch_enabled ?? 0));
+    setAssetSwitchAt(selectedSite.asset_switch_at ? dayjs(selectedSite.asset_switch_at) : null);
+  }, [assetSiteList, isAssetBindModalOpen, selectedAssetSiteId]);
 
   const showModal = (record: any) => {
     setCurrentRow(record);
@@ -168,9 +358,12 @@ export default function MiningSettingPage() {
     pool_type?: string;
     status?: number;
     country?: string;
+    owner_type?: number;
     hosted_machine: number;
     pool_category?: string;
     theoretical_hashrate?: number;
+    is_overclocked?: number;
+    overclock_hashrate_per_machine?: number | null;
     // energy_ratio?: number;
     // basic_hosting_fee?: number;
     heat_diss_mode?: number;
@@ -217,23 +410,131 @@ export default function MiningSettingPage() {
   const handleCancel = () => {
     setIsModalOpen(false);
   };
-  // @ts-ignore
-  const StatusColumn = ({ status }) => {
-    let statusText = "";
-    let statusStyle = {};
 
-    if (status === 1) {
-      statusText = "活跃";
-      statusStyle = { color: "green" }; // 活跃状态，绿色
-    } else if (status === 0) {
-      statusText = "关机";
-      statusStyle = { color: "red" }; // 关机状态，红色
-    } else if (status === 2) {
-      statusText = "已撤场";
-      statusStyle = { color: "orange" }; // 已撤场状态，红色
+  const openAssetBindModal = (record: MiningPoolTableRow) => {
+    if (record.pool_category !== "主矿池") {
+      message.warning(t("只能为主矿池绑定资产系统场地"));
+      return;
     }
 
-    return <span style={statusStyle}>{statusText}</span>;
+    setAssetBindingRow(record);
+    setSelectedAssetSiteId(undefined);
+    setAssetSwitchEnabled(0);
+    setAssetSwitchAt(undefined);
+    setIsAssetBindModalOpen(true);
+  };
+
+  const closeAssetBindModal = () => {
+    setIsAssetBindModalOpen(false);
+    setAssetBindingRow(null);
+    setSelectedAssetSiteId(undefined);
+    setAssetSwitchEnabled(0);
+    setAssetSwitchAt(undefined);
+  };
+
+  const handleRebuildAssetHistory = useCallback(
+    async (record: MiningPoolTableRow) => {
+      if (record.pool_category !== "主矿池") {
+        message.warning(t("仅主矿池支持重建资产变更历史"));
+        return;
+      }
+
+      setRebuildingPoolId(record.pool_id);
+      try {
+        await assetPoolRecordRebuildMutation.mutateAsync({
+          venue_id: record.venue_id,
+          pool_id: record.pool_id,
+        });
+        message.success(t("已触发 {{pool_name}} 的资产变更历史重建", { pool_name: record.pool_name }));
+      } catch (error) {
+        message.error((error as Error).message || t("重建资产变更历史失败"));
+      } finally {
+        setRebuildingPoolId(null);
+      }
+    },
+    [assetPoolRecordRebuildMutation],
+  );
+
+  const handleDelete = useCallback(
+    (recordId: number): Promise<void> => {
+      return new Promise(() => {
+        deleteMutation.mutate(recordId, {
+          onSuccess: () => {
+            message.success(t("删除记录成功"));
+          },
+          onError: (error) => {
+            message.error(t("删除记录失败: {{message}}", { message: error.message }));
+          },
+        });
+      });
+    },
+    [deleteMutation],
+  );
+
+  const handleAssetSiteBind = async () => {
+    if (!assetBindingRow) {
+      message.warning(t("未找到当前账户信息"));
+      return;
+    }
+
+    if (!selectedAssetSiteId) {
+      message.warning(t("请选择资产系统场地"));
+      return;
+    }
+
+    try {
+      const result = await assetSiteMappingMutation.mutateAsync({
+        id: selectedAssetSiteId,
+        venue_id: Number(assetBindingRow.venue_id),
+        pool_id: Number(assetBindingRow.pool_id),
+        asset_switch_enabled: Number(assetSwitchEnabled ?? 0),
+        asset_switch_at: assetSwitchAt ? dayjs(assetSwitchAt).format("YYYY-MM-DD HH:mm:ss") : "",
+      });
+
+      setTableData((prev: MiningPoolTableRow[]) =>
+        prev.map((item) => (item.key === assetBindingRow.key ? { ...item, asset_site_bound: true } : item)),
+      );
+      message.success(t("已绑定资产场地：{{value}}", { value: result?.data?.name ?? selectedAssetSiteId }));
+      closeAssetBindModal();
+    } catch (error: any) {
+      message.error(t("绑定失败: {{message}}", { message: error.message }));
+    }
+  };
+  const StatusColumn = ({
+    status,
+    accountLeaseStatus,
+    leasedPower,
+  }: {
+    status?: number;
+    accountLeaseStatus?: AccountLeaseStatus;
+    leasedPower?: number | null;
+  }) => {
+    const operationalStatus = getOperationalStatusMeta(status);
+    const shouldHideOperationalStatus =
+      accountLeaseStatus === LEASE_STATUS_PENDING_REMOVAL ||
+      accountLeaseStatus === LEASE_STATUS_PARTIAL ||
+      accountLeaseStatus === LEASE_STATUS_FULL;
+    const shouldShowLeaseStatus = accountLeaseStatus && accountLeaseStatus !== LEASE_STATUS_NONE;
+    const leasePowerText =
+      accountLeaseStatus === LEASE_STATUS_PARTIAL && formatLeasePower(leasedPower)
+        ? t("租赁算力 {{value}}", { value: formatLeasePower(leasedPower) })
+        : "";
+
+    return (
+      <div style={{ display: "flex", flexDirection: "column", lineHeight: 1.4 }}>
+        {!shouldHideOperationalStatus ? (
+          <span style={{ color: operationalStatus.color }}>{operationalStatus.text}</span>
+        ) : null}
+        {shouldShowLeaseStatus ? (
+          <div className="flex flex-col gap-0.5">
+            <span style={{ color: LEASE_STATUS_COLOR_MAP[accountLeaseStatus], fontSize: 12 }}>
+              {t(accountLeaseStatus)}
+            </span>
+            {leasePowerText && <span className="text-xs text-gray-500 tabular-nums">{leasePowerText}</span>}
+          </div>
+        ) : null}
+      </div>
+    );
   };
 
   useEffect(() => {
@@ -242,41 +543,75 @@ export default function MiningSettingPage() {
         (
           item: {
             id: any;
+            venue_info?: { id: any; venue_name: any; operation_mode?: any };
             venue_name: any;
             venue_id: any;
             pool_name: any;
             country: any;
+            owner_type: any;
             hosted_machine: any;
             status: any;
             pool_category: any;
+            operation_mode: any;
             theoretical_hashrate: any;
+            is_overclocked: any;
+            overclock_hashrate_per_machine: any;
+            leased_power: any;
+            asset_site_bound: any;
+            asset_switch_enabled?: any;
+            asset_switch_at?: any;
             // energy_ratio: any;
             // basic_hosting_fee: any;
             heat_diss_mode: any;
             link: any;
             collection: any;
+            account_lease_status: AccountLeaseStatus;
           },
           index: any,
-        ) => ({
-          serialNumber: index + 1,
-          key: item.id, // 使用 ID 作为唯一 key
-          pool_id: item.id,
+        ) => {
           // @ts-ignore
-          venue_id: item.venue_info.id,
-          // @ts-ignore
-          venue_name: item.venue_info.venue_name,
-          pool_name: item.pool_name,
-          country: item.country,
-          hosted_machine: item.hosted_machine,
-          status: item.status,
-          pool_category: item.pool_category,
-          theoretical_hashrate: item.theoretical_hashrate,
-          // energy_ratio: item.energy_ratio,
-          // basic_hosting_fee: item.basic_hosting_fee,
-          heat_diss_mode: item.heat_diss_mode,
-          link: item.link,
-          collection: item.collection,
-        }),
+          const venueId = Number(item.venue_info.id);
+          const poolId = Number(item.id);
+          const matchedAssetSite = assetSiteList.find(
+            (assetSite) => Number(assetSite.venue_id) === venueId && Number(assetSite.pool_id) === poolId,
+          );
+
+          return {
+            serialNumber: index + 1,
+            key: item.id, // 使用 ID 作为唯一 key
+            pool_id: item.id,
+            venue_id: venueId,
+            // @ts-ignore
+            venue_name: item.venue_info.venue_name,
+            pool_name: item.pool_name,
+            country: item.country,
+            owner_type: Number(item.owner_type ?? 2),
+            hosted_machine: item.hosted_machine,
+            status: item.status,
+            pool_category: item.pool_category,
+            // operation_mode 属于场地信息；兼容后端平铺返回该字段的情况。
+            operation_mode: Number(item.venue_info?.operation_mode ?? item.operation_mode ?? 1),
+            theoretical_hashrate: item.theoretical_hashrate,
+            is_overclocked: item.is_overclocked,
+            overclock_hashrate_per_machine: item.overclock_hashrate_per_machine,
+            leased_power: item.leased_power,
+            asset_site_bound: Boolean(item.asset_site_bound),
+            asset_switch_enabled: Number(
+              item.asset_switch_enabled ?? matchedAssetSite?.asset_switch_enabled ?? 0,
+            ),
+            asset_switch_at: item.asset_switch_at ?? matchedAssetSite?.asset_switch_at,
+            // energy_ratio: item.energy_ratio,
+            // basic_hosting_fee: item.basic_hosting_fee,
+            heat_diss_mode: item.heat_diss_mode,
+            link: item.link,
+            collection: item.collection,
+            // 两种接口值统一按“部分租赁”展示和筛选。
+            account_lease_status:
+              item.account_lease_status === LEASE_STATUS_PARTIAL_POWER
+                ? LEASE_STATUS_PARTIAL
+                : item.account_lease_status,
+          };
+        },
       );
       setTableData(newData); // 设置表格数据源
     }
@@ -284,7 +619,7 @@ export default function MiningSettingPage() {
       //console.log("56565", currentRow?.id);
       form.setFieldsValue(currentRow); // 设置表单初始值
     }
-  }, [poolsData, currentRow, editableKey]);
+  }, [assetSiteList, poolsData, currentRow, editableKey]);
 
   // 表头定义
   useEffect(() => {
@@ -307,10 +642,18 @@ export default function MiningSettingPage() {
         },
       },
       {
-        title: "场地",
+        title: headerTitle(t("场地")),
         dataIndex: "venue_name",
         key: "venue_name",
-        width: 200,
+        width: venueNameColumnWidth,
+        onHeaderCell: () =>
+          ({
+            width: venueNameColumnWidth,
+            onColumnResize: (nextWidth: number) => {
+              setVenueNameColumnWidth(nextWidth);
+              localStorage.setItem("mining-setting-venue-name-column-width", String(nextWidth));
+            },
+          }) as any,
         // render: (text: any) => <span style={{ color: "#333" }}>{text}</span>,
         render: (text: string, record: { venue_id?: any; collection?: any }) => {
           const isSpecialVenue = text === "Arct-HF01-J XP-AR-US"; // 判断是否为特殊场地
@@ -365,6 +708,17 @@ export default function MiningSettingPage() {
                 >
                   {text}
                 </Link>
+                <Button
+                  type="text"
+                  size="small"
+                  aria-label={t("复制")}
+                  icon={<CopyOutlined />}
+                  onClick={(event) => {
+                    event.preventDefault();
+                    event.stopPropagation();
+                    void copyText(text);
+                  }}
+                />
 
                 {/* 收藏按钮 */}
                 <FavoriteButton
@@ -382,7 +736,7 @@ export default function MiningSettingPage() {
                 {/* 特殊场地标记 */}
                 {isSpecialVenue && (
                   <Tag color="red" style={{ marginLeft: 4 }}>
-                    补充
+                    {t("补充")}
                   </Tag>
                 )}
               </div>
@@ -391,64 +745,127 @@ export default function MiningSettingPage() {
         },
       },
       {
-        title: "子账户",
+        title: headerTitle(t("场地属性")),
+        dataIndex: "operation_mode",
+        key: "operation_mode",
+        width: 100,
+        render: (value: number | undefined) => {
+          const isHosted = Number(value) === 2;
+          return (
+            <Tag
+              style={
+                isHosted
+                  ? { marginInlineEnd: 0, color: "#2B64CB", background: "#EEF3FF", borderColor: "#B8C8FF" }
+                  : { marginInlineEnd: 0, color: "#C47B16", background: "#FFF7E6", borderColor: "#FFD49F" }
+              }
+            >
+              {isHosted ? t("托管") : t("代管")}
+            </Tag>
+          );
+        },
+      },
+      {
+        title: headerTitle(t("子账户")),
         dataIndex: "pool_name",
         key: "pool_name",
         width: 200,
         // render: (text: any) => <span style={{ color: "#333" }}>{text}</span>,
-        render: (text: any, record: { venue_id?: any; pool_id?: any }) => (
-          // render: (text: any) => (
-          <Tooltip
-            title={text}
-            placement="top"
-            overlayInnerStyle={{ color: "white" }}
-            style={{ color: "white" }}
-          >
-            <div
-              style={{
-                width: "100%",
-                overflow: "hidden",
-                color: "#333",
-                textOverflow: "ellipsis",
-                whiteSpace: "nowrap",
-              }}
+        render: (text: any, record: { venue_id?: any; pool_id?: any; owner_type?: number }) => {
+          const ownerType = Number(record.owner_type ?? 2);
+          const ownerMeta =
+            ownerType === 0
+              ? { label: t("自营"), color: "#2F8F5B", background: "#F0FFF4", borderColor: "#B7E4C7" }
+              : ownerType === 1
+                ? { label: t("客户"), color: "#7C5CC4", background: "#F6F0FF", borderColor: "#D8C4FF" }
+                : { label: t("合资"), color: "#C47B16", background: "#FFF7E6", borderColor: "#FFD49F" };
+
+          return (
+            // render: (text: any) => (
+            <Tooltip
+              title={text}
+              placement="top"
+              overlayInnerStyle={{ color: "white" }}
+              style={{ color: "white" }}
             >
-              <Link
-                to={`/mining/detail/${record.venue_id}/${record.pool_id}`}
-                className="text-blue-500 hover:underline"
+              <div
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 8,
+                  width: "100%",
+                  overflow: "hidden",
+                  color: "#333",
+                }}
               >
-                {" "}
-                {text}
-              </Link>
-              {/* {text} */}
-            </div>
-          </Tooltip>
-        ),
+                <Link
+                  to={ROUTE_PATHS.miningDetail(record.venue_id, record.pool_id)}
+                  className="text-blue-500 hover:underline"
+                  style={{ flex: 1, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}
+                >
+                  {text}
+                </Link>
+                <Button
+                  type="text"
+                  size="small"
+                  aria-label={t("复制")}
+                  icon={<CopyOutlined />}
+                  onClick={(event) => {
+                    event.preventDefault();
+                    event.stopPropagation();
+                    void copyText(text);
+                  }}
+                />
+                <Tag
+                  style={{
+                    marginInlineEnd: 0,
+                    marginLeft: "auto",
+                    color: ownerMeta.color,
+                    background: ownerMeta.background,
+                    borderColor: ownerMeta.borderColor,
+                  }}
+                >
+                  {ownerMeta.label}
+                </Tag>
+              </div>
+            </Tooltip>
+          );
+        },
       },
       {
-        title: "场地类型",
-        dataIndex: "pool_category",
-        key: "pool_category",
-        width: 75,
-      },
-      {
-        title: "所属国家",
+        title: headerTitle(t("所属国家")),
         dataIndex: "country",
         key: "country",
         width: 75,
       },
       {
-        title: "托管机器",
+        title: headerTitle(t("托管机器")),
         dataIndex: "hosted_machine",
         key: "hosted_machine",
-        width: 75,
+        width: 90,
+        align: "right",
+        render: (value: number | null) => (
+          <span className="tabular-nums">{value == null ? "-" : Number(value).toLocaleString()}</span>
+        ),
       },
       {
-        title: "状态",
+        title: headerTitle(t("状态")),
         dataIndex: "status",
         key: "status",
-        width: 75,
-        render: (_text: any, record: { status: unknown }) => <StatusColumn status={record.status} />,
+        width: 90,
+        render: (
+          _text: any,
+          record: {
+            status?: number;
+            account_lease_status?: AccountLeaseStatus;
+            leased_power?: number | null;
+          },
+        ) => (
+          <StatusColumn
+            status={record.status}
+            accountLeaseStatus={record.account_lease_status}
+            leasedPower={record.leased_power}
+          />
+        ),
       },
       {
         title: (
@@ -458,13 +875,45 @@ export default function MiningSettingPage() {
               setHashrateSortOrder((prev) => (prev === "ascend" ? "descend" : "ascend"));
             }}
           >
-            <span>理论算力(PH/s)</span>
+            <span>{t("理论算力(PH/s)")}</span>
             <SortIcon order={hashrateSortOrder} />
           </span>
         ),
         dataIndex: "theoretical_hashrate",
         key: "theoretical_hashrate",
-        width: 140,
+        width: 115,
+        align: "right",
+        render: (value: number | null) => (
+          <span className="tabular-nums">{value == null ? "-" : Number(value).toFixed(2)}</span>
+        ),
+      },
+      {
+        title: headerTitle(t("是否变频")),
+        dataIndex: "is_overclocked",
+        key: "is_overclocked",
+        width: 80,
+        render: (value: number | null | undefined) => {
+          if (value === 1) {
+            return <Tag color="processing">{t("是")}</Tag>;
+          }
+          if (value === 0) {
+            return <Tag color="default">{t("否")}</Tag>;
+          }
+          return <span>-</span>;
+        },
+      },
+      {
+        title: headerTitle(t("变频单机算力")),
+        dataIndex: "overclock_hashrate_per_machine",
+        key: "overclock_hashrate_per_machine",
+        width: 90,
+        align: "right",
+        render: (value: number | null | undefined) => {
+          if (value == null) {
+            return <span>-</span>;
+          }
+          return <span className="tabular-nums">{Number(value).toFixed(2)}</span>;
+        },
       },
       // {
       //   title: "理论算力(PH/s)",
@@ -489,22 +938,64 @@ export default function MiningSettingPage() {
       //   width: 120,
       // },
       {
-        title: "散热模式",
+        title: headerTitle(t("散热模式")),
         dataIndex: "heat_diss_mode",
         key: "heat_diss_mode",
         width: 120,
         render: (value: number) => {
           if (value === 1) {
-            return <Tag color="green">风冷</Tag>;
+            return <Tag color="green">{t("风冷")}</Tag>;
           }
           if (value === 2) {
-            return <Tag color="geekblue">水冷</Tag>;
+            return <Tag color="geekblue">{t("水冷")}</Tag>;
           }
-          return <Tag color="default">未知</Tag>;
+          return <Tag color="default">{t("未知")}</Tag>;
         },
       },
       {
-        title: "链接",
+        title: headerTitle(t("资产接管")),
+        dataIndex: "asset_switch_enabled",
+        key: "asset_switch_enabled",
+        width: 110,
+        render: (value: number | undefined) => {
+          if (Number(value) === 1) {
+            return <Tag color="blue">{t("已开启")}</Tag>;
+          }
+          return <span>-</span>;
+        },
+      },
+      {
+        title: headerTitle(t("生效时间")),
+        dataIndex: "asset_switch_at",
+        key: "asset_switch_at",
+        width: 210,
+        render: (value: string | undefined, record: MiningPoolTableRow) => {
+          if (Number(record.asset_switch_enabled) !== 1) {
+            return <span>-</span>;
+          }
+          if (!value) {
+            return <Tag color="default">{t("未设置")}</Tag>;
+          }
+          const effectiveAt = dayjs(value);
+          if (!effectiveAt.isValid()) {
+            return <span>{value}</span>;
+          }
+
+          const isEffective = effectiveAt.isBefore(dayjs()) || effectiveAt.isSame(dayjs());
+          return (
+            <div className="flex flex-col leading-[1.3]">
+              <span style={{ color: isEffective ? "#16a34a" : "#d97706", fontWeight: 500 }}>
+                {effectiveAt.format("YYYY-MM-DD HH:mm:ss")}
+              </span>
+              <span style={{ color: isEffective ? "#16a34a" : "#d97706", fontSize: 12 }}>
+                {isEffective ? t("已生效") : t("待生效")}
+              </span>
+            </div>
+          );
+        },
+      },
+      {
+        title: headerTitle(t("链接")),
         dataIndex: "link",
         key: "link",
         width: 160,
@@ -519,7 +1010,7 @@ export default function MiningSettingPage() {
             >
               {link.length > 40 ? getShortenedLink(link) : link}
             </a>
-            <Tooltip title="复制链接" placement="top">
+            <Tooltip title={t("复制链接")} placement="top">
               <a
                 onClick={async (e) => {
                   e.preventDefault();
@@ -534,10 +1025,10 @@ export default function MiningSettingPage() {
                       document.execCommand("copy");
                       document.body.removeChild(textarea);
                     }
-                    message.success("已复制");
+                    message.success(t("已复制"));
                   } catch (err) {
                     console.log(err);
-                    message.error("复制失败");
+                    message.error(t("复制失败"));
                   }
                 }}
                 style={{ color: "#555" }}
@@ -549,28 +1040,101 @@ export default function MiningSettingPage() {
         ),
       },
       {
-        title: "操作",
+        title: headerTitle(t("操作")),
         valueType: "option1",
         key: "operation",
-        width: 100,
-        render: (_text: any, record: any) => (
-          <>
-            <a key={`edit-${record.key}`} onClick={() => showModal(record)} style={{ marginRight: "7px" }}>
-              <FormOutlined />
-            </a>
-            <Popconfirm
-              title="确认删除此记录吗？"
-              onConfirm={() => handleDelete(record.key)} // 调用 onDelete
-              okText="是"
-              cancelText="否"
-            >
-              <a key={`delete-${record.key}`}>
-                {/* 删除 */}
-                <DeleteOutlined style={{ color: "red" }} />
-              </a>
-            </Popconfirm>
-          </>
-        ),
+        width: 150,
+        render: (_text: any, record: MiningPoolTableRow) => {
+          const isBound = Boolean(record.asset_site_bound);
+          const isMainPool = record.pool_category === "主矿池";
+
+          return (
+            <div className="flex items-center gap-2">
+              <Tooltip title={t("编辑")}>
+                <Button
+                  type="text"
+                  size="small"
+                  aria-label={t("编辑")}
+                  icon={<FormOutlined />}
+                  onClick={() => showModal(record)}
+                />
+              </Tooltip>
+              <Tooltip title={t("删除")}>
+                <Button
+                  type="text"
+                  size="small"
+                  danger
+                  aria-label={t("删除")}
+                  icon={<DeleteOutlined />}
+                  onClick={() =>
+                    Modal.confirm({
+                      title: t("确认删除此记录吗？"),
+                      okText: t("删除"),
+                      cancelText: t("取消"),
+                      okButtonProps: { danger: true },
+                      onOk: () => handleDelete(record.key),
+                    })
+                  }
+                />
+              </Tooltip>
+              {isSuperAdmin && (
+                <Dropdown
+                  trigger={["click"]}
+                  menu={{
+                    items: [
+                      {
+                        key: "bind",
+                        label: (
+                          <Tooltip
+                            title={
+                              !isMainPool
+                                ? t("仅主矿池支持绑定")
+                                : isBound
+                                  ? t("已绑定资产系统场地")
+                                  : t("当前未绑定资产系统场地")
+                            }
+                          >
+                            <span
+                              style={{ color: !isMainPool ? "#94a3b8" : isBound ? "#16a34a" : "#d97706" }}
+                            >
+                              {t("资产绑定")}
+                            </span>
+                          </Tooltip>
+                        ),
+                        icon: <LinkOutlined />,
+                      },
+                      {
+                        key: "rebuild",
+                        label: t("重建历史"),
+                        icon: <RedoOutlined />,
+                        disabled: !isMainPool || assetPoolRecordRebuildMutation.isPending,
+                      },
+                    ],
+                    onClick: ({ key }) => {
+                      if (key === "bind") openAssetBindModal(record);
+                      if (key === "rebuild" && isMainPool)
+                        Modal.confirm({
+                          title: t("确认重建该账户的资产变更历史？"),
+                          content: t("将按当前资产数据重新生成该主矿池的资产变更历史。"),
+                          okText: t("重建"),
+                          cancelText: t("取消"),
+                          onOk: () => handleRebuildAssetHistory(record),
+                        });
+                    },
+                  }}
+                >
+                  <Button
+                    type="text"
+                    size="small"
+                    aria-label={t("更多操作")}
+                    icon={<EllipsisOutlined />}
+                    loading={assetPoolRecordRebuildMutation.isPending && rebuildingPoolId === record.pool_id}
+                  />
+                </Dropdown>
+              )}
+            </div>
+          );
+        },
         // render: (record: { key: number }, action: { startEditable: (arg0: any) => void }) => [
         //   <a key={`edit-${record.key}`} onClick={() => showModal(record.key, record)}>
         //     {/* // <a key={`edit-${record.key}`} onClick={() => showModal(record.key)}> */}
@@ -591,37 +1155,42 @@ export default function MiningSettingPage() {
         // ],
       },
     ]);
-  }, [hashrateSortOrder]);
+  }, [
+    assetPoolRecordRebuildMutation.isPending,
+    handleDelete,
+    handleRebuildAssetHistory,
+    hashrateSortOrder,
+    isSuperAdmin,
+    rebuildingPoolId,
+    venueNameColumnWidth,
+  ]);
 
   // Loading 状态
   if (isLoadingPools) {
-    return <Spin tip="加载中..." />;
+    return <Spin tip={t("加载中...")} />;
   }
 
   const handleNewMiningPool = async (values: MiningPool) => {
+    const payload: MiningPool = {
+      ...values,
+      owner_type: Number(values.owner_type ?? 2),
+      theoretical_hashrate: String(values.theoretical_hashrate),
+      is_overclocked: values.is_overclocked ?? 0,
+      overclock_hashrate_per_machine:
+        values.is_overclocked === 1 && values.overclock_hashrate_per_machine != null
+          ? Number(values.overclock_hashrate_per_machine)
+          : null,
+    };
     setIsLoadingNewPool(true); // 开始加载
-    newMutation.mutate(values, {
+    newMutation.mutate(payload, {
       onSuccess: () => {
-        message.success("添加成功");
+        message.success(t("添加成功"));
         setIsLoadingNewPool(false); // 请求成功，停止加载
       },
       onError: (error) => {
-        message.error(`添加失败: ${error.message}`);
+        message.error(t("添加失败: {{message}}", { message: error.message }));
         setIsLoadingNewPool(false); // 请求成功，停止加载
       },
-    });
-  };
-
-  const handleDelete = (recordId: number): Promise<void> => {
-    return new Promise(() => {
-      deleteMutation.mutate(recordId, {
-        onSuccess: () => {
-          message.success("删除记录成功");
-        },
-        onError: (error) => {
-          message.error(`删除记录失败: ${error.message}`);
-        },
-      });
     });
   };
 
@@ -632,10 +1201,16 @@ export default function MiningSettingPage() {
       pool_name: data.pool_name,
       pool_type: poolType,
       country: data.country,
+      owner_type: Number(data.owner_type ?? 2),
       hosted_machine: Number(data.hosted_machine),
       status: data.status,
       pool_category: data.pool_category,
       theoretical_hashrate: String(data.theoretical_hashrate),
+      is_overclocked: data.is_overclocked ?? 0,
+      overclock_hashrate_per_machine:
+        data.is_overclocked === 1 && data.overclock_hashrate_per_machine != null
+          ? Number(data.overclock_hashrate_per_machine)
+          : null,
       // energy_ratio: String(data.energy_ratio),
       // basic_hosting_fee: String(data.basic_hosting_fee),
       heat_diss_mode: Number(data.heat_diss_mode),
@@ -645,10 +1220,10 @@ export default function MiningSettingPage() {
     return new Promise(() => {
       updateMutation.mutate(miningPoolUpdate, {
         onSuccess: () => {
-          message.success("更新成功");
+          message.success(t("更新成功"));
         },
         onError: (error) => {
-          message.error(`更新失败: ${error.message}`);
+          message.error(t("更新失败: {{message}}", { message: error.message }));
         },
       });
     });
@@ -670,7 +1245,7 @@ export default function MiningSettingPage() {
   };
 
   // 处理状态筛选变化
-  const handleStatusFilterChange = (value: number | null) => {
+  const handleStatusFilterChange = (value: StatusFilterValue) => {
     // console.log("》〉》value", value);
     if (value === null || String(value).trim() === "" || value === undefined) {
       setStatusFilter(null);
@@ -736,6 +1311,9 @@ export default function MiningSettingPage() {
         search === "" ||
         String(item?.venue_name || "")
           .toLowerCase()
+          .includes(search) ||
+        String(item?.pool_name || "")
+          .toLowerCase()
           .includes(search);
 
       // 2️⃣ 收藏过滤
@@ -743,9 +1321,23 @@ export default function MiningSettingPage() {
 
       // 3️⃣ 状态过滤
       const matchesStatus =
-        statusFilter === null || String(item?.status ?? "").trim() === "" || item.status === statusFilter;
+        statusFilter === null
+          ? true
+          : typeof statusFilter === "number"
+            ? (String(item?.status ?? "").trim() === "" || item.status === statusFilter) &&
+              (statusFilter !== 1 ||
+                (item.account_lease_status !== LEASE_STATUS_PENDING_REMOVAL &&
+                  item.account_lease_status !== LEASE_STATUS_PARTIAL &&
+                  item.account_lease_status !== LEASE_STATUS_FULL))
+            : statusFilter === ASSET_SWITCH_ENABLED_FILTER
+              ? Number(item.asset_switch_enabled) === 1
+              : item.account_lease_status === statusFilter;
 
-      return matchesSearch && matchesCollection && matchesStatus;
+      const matchesOperationMode =
+        operationModeFilter === null || Number(item.operation_mode) === operationModeFilter;
+      const matchesOwnerType = ownerTypeFilter === null || Number(item.owner_type) === ownerTypeFilter;
+
+      return matchesSearch && matchesCollection && matchesStatus && matchesOperationMode && matchesOwnerType;
     })
     .sort((a: any, b: any) => {
       if (hashrateSortOrder) {
@@ -759,101 +1351,177 @@ export default function MiningSettingPage() {
       return nameA.localeCompare(nameB);
     });
 
+  const selectedAssetSite = assetSiteList.find((item) => Number(item.id) === Number(selectedAssetSiteId));
+  const isSelectedCurrentBoundAssetSite =
+    Boolean(currentBoundAssetSite) && Number(currentBoundAssetSite?.id) === Number(selectedAssetSite?.id);
+
   // @ts-ignore
   return (
     <div>
       <div
         style={{ background: "#fff", color: "grey", borderRadius: "0.5rem", padding: "20px 0px" }}
-        className="longdataTable"
+        className="longdataTable [&_.ant-table-tbody>tr>td.ant-table-cell]:!py-2"
       >
-        <Row gutter={[16, 16]} justify="space-between" align="middle" style={{ marginLeft: "8px" }}>
-          <Col xs={24} sm={24} md={12}>
-            <span style={{ marginRight: "15px", marginLeft: "10px" }}>
-              <Switch size="small" checked={showCollectionOnly} onChange={setShowCollectionOnly} /> 我的自选{" "}
-            </span>
-            <Radio.Group
-              size="small"
-              onChange={handlePoolCategoryChange}
-              value={poolCategory}
-              style={{ marginLeft: "10px", marginRight: "15px", fontSize: "13px" }}
+        <Row style={{ marginLeft: "8px", marginRight: "8px" }}>
+          <Col span={24}>
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                flexWrap: "nowrap",
+                gap: 12,
+                overflowX: "auto",
+                marginBottom: 16,
+                color: "#000",
+                padding: "0 2px",
+              }}
             >
-              <Radio.Button value="主矿池" style={{ fontSize: "12px" }}>
-                主矿池
-              </Radio.Button>
-              <Radio.Button value="备用矿池" style={{ fontSize: "12px" }}>
-                备用矿池
-              </Radio.Button>
-            </Radio.Group>
-
-            <ActionButton
-              label={"添加矿池"}
-              size="small"
-              // @ts-ignore
-              initialValues={emptyData}
-              onSubmit={handleNewMiningPool}
-              FormComponent={EditForm}
-              mode={ActionButtonMode.ADD}
-            />
-          </Col>
-          <Col xs={24} sm={24} md={12} style={{ textAlign: "right" }}>
-            <div style={{ marginBottom: 16, marginRight: "0px", color: "#000" }}>
-              <Input
-                prefix={<SearchOutlined style={{ color: "rgba(0, 0, 0, 0.25)" }} size={18} />}
-                placeholder="请输入搜索字段"
-                value={searchTerm}
-                size="middle"
-                onChange={handleSearch}
-                style={{ width: 250, fontSize: "12px", marginRight: "15px" }} // 设定宽度
-                className="text-sm"
-              />
-              <Select
-                size="middle"
-                className="small-select"
-                placeholder="筛选状态"
-                allowClear
-                value={statusFilter}
-                onChange={handleStatusFilterChange}
-                dropdownClassName="small-select-dropdown"
-                style={{ width: 120, fontSize: "12px", marginRight: "15px", textAlign: "left" }}
-              >
-                <Option value={1} style={{ fontSize: "12px", textAlign: "left" }}>
-                  <span className="status-dot status-active" />
-                  <span>活跃</span>
-                </Option>
-                <Option value={0} style={{ fontSize: "12px", textAlign: "left" }}>
-                  <span className="status-dot status-removed" />
-                  <span>关机</span>
-                </Option>
-                <Option value={2} style={{ fontSize: "12px", textAlign: "left" }}>
-                  <span className="status-dot status-offline " />
-                  <span>已撤场</span>
-                </Option>
-              </Select>
-
-              <Button
-                type="primary"
+              <span style={{ flexShrink: 0 }}>
+                <Switch size="small" checked={showCollectionOnly} onChange={setShowCollectionOnly} />{" "}
+                {t("我的自选")}{" "}
+              </span>
+              <Radio.Group
                 size="small"
-                // ghost
-                icon={<ImportOutlined />}
-                style={{ marginRight: "15px" }}
-                onClick={showExcelUploadModal}
+                onChange={handlePoolCategoryChange}
+                value={poolCategory}
+                style={{ flexShrink: 0, fontSize: "13px" }}
               >
-                导入托管信息
-              </Button>
+                <Radio.Button value="主矿池" style={{ fontSize: "12px" }}>
+                  {t("主矿池")}
+                </Radio.Button>
+                <Radio.Button value="备用矿池" style={{ fontSize: "12px" }}>
+                  {t("备用矿池")}
+                </Radio.Button>
+              </Radio.Group>
 
-              <Button
-                type="primary"
-                // icon={<DownloadOutlined />}
-                icon={<ExportOutlined />}
-                // size="middle"
-                // ghost
-                size="small"
-                className={"exportButton"}
-                style={{ marginLeft: "0px", color: "#fff", marginRight: "8px" }}
-                onClick={onDownload}
+              <span style={{ display: "inline-flex", flexShrink: 0 }}>
+                <ActionButton
+                  label={t("添加矿池")}
+                  size="small"
+                  // @ts-ignore
+                  initialValues={emptyData}
+                  onSubmit={handleNewMiningPool}
+                  FormComponent={EditForm}
+                  mode={ActionButtonMode.ADD}
+                />
+              </span>
+              <div
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  flexShrink: 0,
+                  gap: 12,
+                  marginLeft: "auto",
+                }}
               >
-                导出
-              </Button>
+                <Input
+                  prefix={<SearchOutlined style={{ color: "rgba(0, 0, 0, 0.25)" }} size={18} />}
+                  placeholder={t("筛选场地和子账户")}
+                  value={searchTerm}
+                  size="middle"
+                  onChange={handleSearch}
+                  style={{ flexShrink: 0, width: 220, fontSize: "12px" }}
+                  className="text-sm"
+                />
+                <Select
+                  size="middle"
+                  className="small-select"
+                  placeholder={t("筛选状态")}
+                  allowClear
+                  value={statusFilter}
+                  onChange={handleStatusFilterChange}
+                  dropdownClassName="small-select-dropdown"
+                  style={{ flexShrink: 0, width: 120, fontSize: "12px", textAlign: "left" }}
+                >
+                  <Option value={1} style={{ fontSize: "12px", textAlign: "left" }}>
+                    <span className="status-dot status-active" />
+                    <span>{t("活跃")}</span>
+                  </Option>
+                  <Option value={0} style={{ fontSize: "12px", textAlign: "left" }}>
+                    <span className="status-dot status-removed" />
+                    <span>{t("关机")}</span>
+                  </Option>
+                  <Option value={2} style={{ fontSize: "12px", textAlign: "left" }}>
+                    <span className="status-dot status-offline " />
+                    <span>{t("已撤场")}</span>
+                  </Option>
+                  <Option value={3} style={{ fontSize: "12px", textAlign: "left" }}>
+                    <span className="status-dot status-active" />
+                    <span>{t("入库")}</span>
+                  </Option>
+                  <Option
+                    value={LEASE_STATUS_PENDING_REMOVAL}
+                    style={{ fontSize: "12px", textAlign: "left" }}
+                  >
+                    <span style={{ color: LEASE_STATUS_COLOR_MAP[LEASE_STATUS_PENDING_REMOVAL] }}>
+                      {t("待撤场")}
+                    </span>
+                  </Option>
+                  <Option value={LEASE_STATUS_PARTIAL} style={{ fontSize: "12px", textAlign: "left" }}>
+                    <span style={{ color: LEASE_STATUS_COLOR_MAP[LEASE_STATUS_PARTIAL] }}>
+                      {t("部分租赁")}
+                    </span>
+                  </Option>
+                  <Option value={LEASE_STATUS_FULL} style={{ fontSize: "12px", textAlign: "left" }}>
+                    <span style={{ color: LEASE_STATUS_COLOR_MAP[LEASE_STATUS_FULL] }}>{t("全部租赁")}</span>
+                  </Option>
+                  <Option value={ASSET_SWITCH_ENABLED_FILTER} style={{ fontSize: "12px", textAlign: "left" }}>
+                    <span style={{ color: "#2563eb" }}>{t("资产接管已开启")}</span>
+                  </Option>
+                </Select>
+                <Select
+                  size="middle"
+                  className="small-select"
+                  placeholder={t("场地属性")}
+                  allowClear
+                  value={operationModeFilter}
+                  onChange={(value) => setOperationModeFilter(value ?? null)}
+                  dropdownClassName="small-select-dropdown"
+                  style={{ flexShrink: 0, width: 120, fontSize: "12px", textAlign: "left" }}
+                >
+                  <Option value={1}>{t("代管")}</Option>
+                  <Option value={2}>{t("托管")}</Option>
+                </Select>
+                <Select
+                  size="middle"
+                  className="small-select"
+                  placeholder={t("子账户属性")}
+                  allowClear
+                  value={ownerTypeFilter}
+                  onChange={(value) => setOwnerTypeFilter(value ?? null)}
+                  dropdownClassName="small-select-dropdown"
+                  style={{ flexShrink: 0, width: 130, fontSize: "12px", textAlign: "left" }}
+                >
+                  <Option value={0}>{t("自营")}</Option>
+                  <Option value={1}>{t("客户")}</Option>
+                  <Option value={2}>{t("合资")}</Option>
+                </Select>
+
+                <Button
+                  type="primary"
+                  size="small"
+                  // ghost
+                  icon={<ImportOutlined />}
+                  style={{ flexShrink: 0 }}
+                  onClick={showExcelUploadModal}
+                >
+                  {t("导入托管信息")}
+                </Button>
+
+                <Button
+                  type="primary"
+                  // icon={<DownloadOutlined />}
+                  icon={<ExportOutlined />}
+                  // size="middle"
+                  // ghost
+                  size="small"
+                  className={"exportButton"}
+                  style={{ flexShrink: 0, color: "#fff" }}
+                  onClick={onDownload}
+                >
+                  {t("导出")}
+                </Button>
+              </div>
             </div>
           </Col>
         </Row>
@@ -861,7 +1529,7 @@ export default function MiningSettingPage() {
         {/* 覆盖在 EditTable 上方的 Spin */}
         {isLoadingNewPool && (
           <Spin
-            tip="正在添加矿池..."
+            tip={t("正在添加矿池...")}
             size="large"
             style={{
               position: "absolute", // 绝对定位
@@ -880,12 +1548,162 @@ export default function MiningSettingPage() {
             tableData={filteredData}
             setTableData={setTableData}
             columns={columns}
+            components={{ header: { cell: ResizableHeaderCell } }}
             handleDelete={handleDelete}
             handleSave={handleSave}
           />
         )}
         <Modal
-          title="修改矿池"
+          title={t("绑定资产系统场地")}
+          open={isAssetBindModalOpen}
+          onOk={handleAssetSiteBind}
+          onCancel={closeAssetBindModal}
+          okText={t("确认绑定")}
+          cancelText={t("取消")}
+          confirmLoading={assetSiteMappingMutation.isPending}
+          destroyOnClose
+        >
+          <div className="flex flex-col gap-4">
+            <div className="rounded-lg border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-700">
+              <div className="mb-2 text-sm font-medium text-slate-900">{t("当前账户")}</div>
+              <div>{t("场地：{{value}}", { value: assetBindingRow?.venue_name || "-" })}</div>
+              <div>{t("子账户：{{value}}", { value: assetBindingRow?.pool_name || "-" })}</div>
+              <div>{t("系统场地 ID：{{value}}", { value: assetBindingRow?.venue_id ?? "-" })}</div>
+              <div>{t("系统主矿池 ID：{{value}}", { value: assetBindingRow?.pool_id ?? "-" })}</div>
+            </div>
+
+            <div>
+              <div className="mb-2 text-sm font-medium text-slate-900">{t("选择资产系统场地")}</div>
+              <Select
+                showSearch
+                className="w-full"
+                placeholder={t("请选择资产系统场地")}
+                value={selectedAssetSiteId}
+                loading={isLoadingAssetSiteInfo}
+                optionFilterProp="label"
+                onChange={(value) => setSelectedAssetSiteId(value)}
+                options={assetSiteList.map((item) => ({
+                  value: item.id,
+                  label: `${item.name}（ID: ${item.id}）`,
+                }))}
+                notFoundContent={isLoadingAssetSiteInfo ? t("加载中...") : t("暂无资产场地")}
+              />
+            </div>
+
+            <div className="rounded-lg border border-slate-200 px-4 py-3 text-sm text-slate-700">
+              <div className="mb-2 text-sm font-medium text-slate-900">{t("当前绑定情况")}</div>
+              {currentBoundAssetSite ? (
+                <div className="space-y-1">
+                  <div className="flex items-center gap-2">
+                    <span>{t("当前已绑定资产场地：")}</span>
+                    <Tag color="green">{currentBoundAssetSite.name}</Tag>
+                  </div>
+                  <div>{t("资产场地 ID：{{id}}", { id: currentBoundAssetSite.id })}</div>
+                  <div>{t("组织 ID：{{value}}", { value: currentBoundAssetSite.group_id || "-" })}</div>
+                  <div className="flex items-center gap-2">
+                    <span>{t("状态：")}</span>
+                    <Tag color={currentBoundAssetSite.status === "active" ? "green" : "default"}>
+                      {currentBoundAssetSite.status || "-"}
+                    </Tag>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span>{t("资产接管：")}</span>
+                    <Tag
+                      color={
+                        Number(currentBoundAssetSite.asset_switch_enabled ?? 0) === 1 ? "blue" : "default"
+                      }
+                    >
+                      {Number(currentBoundAssetSite.asset_switch_enabled ?? 0) === 1
+                        ? t("已开启")
+                        : t("未开启")}
+                    </Tag>
+                  </div>
+                  <div>
+                    {t("切换时间：{{value}}", { value: currentBoundAssetSite.asset_switch_at || "-" })}
+                  </div>
+                </div>
+              ) : assetBindingRow?.asset_site_bound && isLoadingAssetSiteInfo ? (
+                <div>{t("当前已绑定资产系统场地，正在加载绑定详情...")}</div>
+              ) : (
+                <div>{t("当前未绑定资产系统场地")}</div>
+              )}
+            </div>
+
+            <div className="rounded-lg border border-slate-200 px-4 py-3 text-sm text-slate-700">
+              <div className="mb-3 text-sm font-medium text-slate-900">{t("资产接管配置")}</div>
+              <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                <div>
+                  <div className="mb-2 text-xs text-slate-500">{t("是否启用资产接管")}</div>
+                  <Switch
+                    checked={Number(assetSwitchEnabled ?? 0) === 1}
+                    checkedChildren={t("开启")}
+                    unCheckedChildren={t("关闭")}
+                    onChange={(checked) => setAssetSwitchEnabled(checked ? 1 : 0)}
+                  />
+                </div>
+                <div>
+                  <div className="mb-2 text-xs text-slate-500">{t("查询切换时间")}</div>
+                  <DatePicker
+                    showTime
+                    allowClear
+                    className="w-full"
+                    value={assetSwitchAt ?? null}
+                    onChange={(value) => setAssetSwitchAt(value)}
+                    placeholder={t("未设置则为空")}
+                  />
+                </div>
+              </div>
+              <div className="mt-3 text-xs text-slate-400">
+                {t("未设置切换时间时，新表仍会继续同步；切换配置只影响查询读取口径。")}
+              </div>
+            </div>
+
+            {selectedAssetSite ? (
+              <div
+                className={`rounded-lg px-4 py-3 text-sm ${
+                  isSelectedCurrentBoundAssetSite
+                    ? "border border-emerald-200 bg-emerald-50 text-emerald-900"
+                    : "border border-blue-200 bg-blue-50 text-slate-700"
+                }`}
+              >
+                <div
+                  className={`mb-2 flex items-center gap-2 text-sm font-medium ${
+                    isSelectedCurrentBoundAssetSite ? "text-emerald-900" : "text-slate-900"
+                  }`}
+                >
+                  <span>{isSelectedCurrentBoundAssetSite ? t("当前绑定资产场地") : t("待绑定资产场地")}</span>
+                  <Tag color={isSelectedCurrentBoundAssetSite ? "green" : "blue"}>
+                    {isSelectedCurrentBoundAssetSite ? t("已绑定") : t("待切换")}
+                  </Tag>
+                </div>
+                <div>{t("名称：{{name}}", { name: selectedAssetSite.name })}</div>
+                <div>{t("资产场地 ID：{{id}}", { id: selectedAssetSite.id })}</div>
+                <div>{t("组织 ID：{{value}}", { value: selectedAssetSite.group_id || "-" })}</div>
+                <div className="flex items-center gap-2">
+                  <span>{t("状态：")}</span>
+                  <Tag color={selectedAssetSite.status === "active" ? "green" : "default"}>
+                    {selectedAssetSite.status || "-"}
+                  </Tag>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span>{t("资产接管：")}</span>
+                  <Tag color={Number(assetSwitchEnabled ?? 0) === 1 ? "blue" : "default"}>
+                    {Number(assetSwitchEnabled ?? 0) === 1 ? t("已开启") : t("未开启")}
+                  </Tag>
+                </div>
+                <div>
+                  {t("切换时间：{{value}}", {
+                    value: assetSwitchAt ? dayjs(assetSwitchAt).format("YYYY-MM-DD HH:mm:ss") : "-",
+                  })}
+                </div>
+                <div>{t("当前映射场地 ID：{{value}}", { value: selectedAssetSite.venue_id ?? 0 })}</div>
+                <div>{t("当前映射主矿池 ID：{{value}}", { value: selectedAssetSite.pool_id ?? 0 })}</div>
+              </div>
+            ) : null}
+          </div>
+        </Modal>
+        <Modal
+          title={t("修改矿池")}
           className="editModal"
           closable={{ "aria-label": "Custom Close Button" }}
           open={isModalOpen}
@@ -896,6 +1714,7 @@ export default function MiningSettingPage() {
             name="basic"
             form={form}
             labelCol={{ span: 8 }}
+            labelWrap
             wrapperCol={{ span: 16 }}
             style={{ maxWidth: 600 }}
             initialValues={{ remember: true }}
@@ -910,7 +1729,7 @@ export default function MiningSettingPage() {
             <Input />
           </Form.Item> */}
             <Form.Item<FieldType>
-              label="子账户名称"
+              label={t("子账户名称")}
               name="pool_name"
               rules={[{ required: true, message: "Please input your pool pool_name!" }]}
             >
@@ -918,13 +1737,13 @@ export default function MiningSettingPage() {
             </Form.Item>
 
             <Form.Item<FieldType>
-              label="场地"
+              label={t("场地")}
               name="venue_id" // 用于存储选中的场地 ID
-              rules={[{ required: true, message: "请选择场地!" }]} // 添加验证规则
+              rules={[{ required: true, message: t("请选择场地!") }]} // 添加验证规则
             >
               <Select
                 disabled
-                placeholder="请选择场地"
+                placeholder={t("请选择场地")}
                 allowClear
                 style={{ width: "100%" }} // 设置宽度为100%
               >
@@ -945,38 +1764,50 @@ export default function MiningSettingPage() {
           </Form.Item> */}
 
             <Form.Item<FieldType>
-              label="场地类型"
+              label={t("场地类型")}
               name="pool_category"
               rules={[{ required: true, message: "Please input your pool_category!" }]}
             >
               <Select
-                placeholder="请选择场地类型"
+                placeholder={t("请选择场地类型")}
                 // onChange={onGenderChange}
                 allowClear
                 style={{ backgroundColor: "white" }}
               >
-                <Option value="主矿池">主矿池</Option>
-                <Option value="备用矿池">备用矿池</Option>
+                <Option value="主矿池">{t("主矿池")}</Option>
+                <Option value="备用矿池">{t("备用矿池")}</Option>
               </Select>
             </Form.Item>
 
             <Form.Item<FieldType>
-              label="所属国家"
+              label={t("所属国家")}
               name="country"
               rules={[{ required: true, message: "Please input your country!" }]}
             >
               <Input />
             </Form.Item>
             <Form.Item<FieldType>
-              label="托管机器"
+              label={t("账户归属")}
+              name="owner_type"
+              initialValue={2}
+              rules={[{ required: true, message: t("请选择账户归属") }]}
+            >
+              <Select>
+                <Option value={0}>{t("自营")}</Option>
+                <Option value={1}>{t("客户")}</Option>
+                <Option value={2}>{t("合资")}</Option>
+              </Select>
+            </Form.Item>
+            <Form.Item<FieldType>
+              label={t("托管机器")}
               name="hosted_machine"
-              rules={[{ required: true, message: "Please input your 托管机器!" }]}
+              rules={[{ required: true, message: t("Please input your 托管机器!") }]}
             >
               <Input />
             </Form.Item>
 
             <Form.Item<FieldType>
-              label="状态"
+              label={t("状态")}
               name="status"
               rules={[{ required: true, message: "Please input your country!" }]}
             >
@@ -984,15 +1815,16 @@ export default function MiningSettingPage() {
                 name="radiogroup"
                 defaultValue={1}
                 options={[
-                  { value: 0, label: "关机" },
-                  { value: 1, label: "活跃" },
-                  { value: 2, label: "已撤场" },
+                  { value: 0, label: t("关机") },
+                  { value: 1, label: t("活跃") },
+                  { value: 2, label: t("已撤场") },
+                  { value: 3, label: t("入库") },
                 ]}
               />
             </Form.Item>
 
             <Form.Item<FieldType>
-              label="散热模式"
+              label={t("散热模式")}
               name="heat_diss_mode"
               rules={[{ required: true, message: "Please input your heat_diss_mode!" }]}
             >
@@ -1000,15 +1832,15 @@ export default function MiningSettingPage() {
                 name="heat_diss_mode"
                 defaultValue={1}
                 options={[
-                  { value: 1, label: "风冷" },
-                  { value: 2, label: "水冷" },
-                  { value: 0, label: "其他" },
+                  { value: 1, label: t("风冷") },
+                  { value: 2, label: t("水冷") },
+                  { value: 0, label: t("其他") },
                 ]}
               />
             </Form.Item>
 
             <Form.Item<FieldType>
-              label="理论算力"
+              label={t("理论算力")}
               name="theoretical_hashrate"
               rules={[{ required: true, message: "Please input your theoretical_hashrate!" }]}
             >
@@ -1021,6 +1853,38 @@ export default function MiningSettingPage() {
                 step="0.01"
                 stringMode
               />
+            </Form.Item>
+
+            <Form.Item<FieldType>
+              label={t("是否变频")}
+              name="is_overclocked"
+              rules={[{ required: true, message: t("请选择是否变频!") }]}
+            >
+              <Radio.Group
+                options={[
+                  { value: 0, label: t("否") },
+                  { value: 1, label: t("是") },
+                ]}
+                onChange={(e) => {
+                  if (e.target.value !== 1) {
+                    form.setFieldValue("overclock_hashrate_per_machine", null);
+                  }
+                }}
+              />
+            </Form.Item>
+
+            <Form.Item noStyle shouldUpdate={(prev, curr) => prev.is_overclocked !== curr.is_overclocked}>
+              {({ getFieldValue }) =>
+                getFieldValue("is_overclocked") === 1 ? (
+                  <Form.Item<FieldType>
+                    label={t("变频单机算力")}
+                    name="overclock_hashrate_per_machine"
+                    rules={[{ required: true, message: "Please input your variable-frequency hashrate!" }]}
+                  >
+                    <InputNumber style={{ width: 200 }} min={0} max={100000} step="0.01" />
+                  </Form.Item>
+                ) : null
+              }
             </Form.Item>
 
             {/* <Form.Item<FieldType>
@@ -1067,7 +1931,7 @@ export default function MiningSettingPage() {
 
         {/* Excel上传Modal */}
         <Modal
-          title="Excel文件导入"
+          title={t("Excel文件导入")}
           open={excelUploadModalVisible}
           onCancel={hideExcelUploadModal}
           footer={null}
@@ -1077,8 +1941,8 @@ export default function MiningSettingPage() {
             onUpload={handleExcelUpload}
             accept=".xlsx,.xls"
             maxSize={10}
-            title="点击或拖拽Excel文件到此区域上传"
-            description="支持.xlsx和.xls格式，文件大小不超过10MB"
+            title={t("点击或拖拽Excel文件到此区域上传")}
+            description={t("支持.xlsx和.xls格式，文件大小不超过10MB")}
           />
         </Modal>
       </div>

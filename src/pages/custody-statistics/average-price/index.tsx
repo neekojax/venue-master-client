@@ -6,6 +6,7 @@ import EditTable from "@/components/edit-table";
 import { ReactEcharts } from "@/components/react-echarts";
 import useAuthRedirect from "@/hooks/useAuthRedirect.ts";
 
+import { t } from "@/locales";
 import { useDailyAveragePriceList } from "@/pages/custody-statistics/hook/hook.ts";
 
 export default function StatisticsPage() {
@@ -41,19 +42,19 @@ export default function StatisticsPage() {
   useEffect(() => {
     setColumns([
       {
-        title: "序号", // 使用英文标题
+        title: t("序号"), // 使用英文标题
         dataIndex: "serialNumber",
         key: "serialNumber",
         width: 50, // 设置序号列的宽度
       },
       {
-        title: "日期",
+        title: t("日期"),
         dataIndex: "date",
         key: "date",
         width: 150,
       },
       {
-        title: "日平均价格",
+        title: t("日平均价格"),
         dataIndex: "utc_avg_price",
         key: "utc_avg_price",
         render: (text: any) => (
@@ -73,12 +74,12 @@ export default function StatisticsPage() {
 
   // Loading 状态
   if (isLoading) {
-    return <Spin tip="加载中..." />;
+    return <Spin tip={t("加载中...")} />;
   }
 
   // 错误状态
   if (error) {
-    return <Alert message="错误" description={error.message} type="error" showIcon />;
+    return <Alert message={t("错误")} description={error.message} type="error" showIcon />;
   }
   //   const data = [...tableData].reverse().map(({ date, utc_avg_price }) => (
   //     {
@@ -143,7 +144,7 @@ export default function StatisticsPage() {
     },
     yAxis: {
       type: "value",
-      name: "日平均价格 (USD)",
+      name: t("日平均价格 (USD)"),
       nameTextStyle: {
         color: "steelblue",
         padding: [0, 0, 0, 30],
@@ -176,7 +177,7 @@ export default function StatisticsPage() {
       },
     ],
     title: {
-      text: "比特币价格曲线",
+      text: t("比特币价格曲线"),
     },
     tooltip: {
       trigger: "axis",

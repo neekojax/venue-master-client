@@ -1,17 +1,21 @@
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import {
+  CopyOutlined,
   DeleteOutlined,
   EditOutlined,
   ImportOutlined,
   PlusOutlined,
   SearchOutlined,
 } from "@ant-design/icons";
-import { Button, Form, Input, message, Modal, Select, Space, Table } from "antd";
+import { Button, Form, Input, InputNumber, message, Modal, Select, Space, Table, Tag } from "antd";
 import ExcelUpload from "@/components/excel-upload";
 import useAuthRedirect from "@/hooks/useAuthRedirect.ts";
 import { useSelector, useSettingsStore } from "@/stores";
 
+import { t } from "@/locales";
+import ResizableHeaderCell from "@/pages/custody-statistics/statistics/components/ResizableHeaderCell";
+import { useMiningPoolList } from "@/pages/mining/hook.ts";
 import { uploadVenueExcel } from "@/pages/venue/api.tsx";
 import { useVenueList, useVenueNew, useVenueUpdate } from "@/pages/venue/hook/hook.ts";
 import { VenueInfoParam } from "@/pages/venue/type.tsx";
@@ -24,6 +28,8 @@ interface Pool {
   pool_type: string;
   pool_name: string;
   status: number; // 活跃
+  account_lease_status?: "全部租赁" | "部分租赁" | "部分租赁算力" | "非租赁" | "待撤场";
+  leased_power?: number | null;
 }
 interface Venue {
   id: number;
@@ -32,17 +38,28 @@ interface Venue {
   venue_code: string | null;
   country: string | null;
   address: string | null;
+  latitude?: number | null;
+  longitude?: number | null;
   agent_key: string | null;
+  operation_mode: number;
   hosted_machine: number;
   miner_type: string | null;
   pools: Pool[];
 }
 
+type PoolStatusFilter = number | "待撤场" | "部分租赁" | "全部租赁" | null;
+
 const VenueManagement: React.FC = () => {
   useAuthRedirect();
   const { poolType } = useSettingsStore(useSelector(["poolType"]));
+  const [venueNameColumnWidth, setVenueNameColumnWidth] = useState<number>(() => {
+    const storedWidth = localStorage.getItem("venue-setting-venue-name-column-width");
+    return storedWidth ? Number(storedWidth) || 220 : 220;
+  });
 
   const { data } = useVenueList(poolType);
+  const { data: mainPoolData } = useMiningPoolList(poolType, "主矿池");
+  const { data: backupPoolData } = useMiningPoolList(poolType, "备用矿池");
   const [excelUploadModalVisible, setExcelUploadModalVisible] = useState(false);
   // const [data] = useState<any>();
   const [venues, setVenues] = useState<Venue[]>([]);
@@ -50,7 +67,8 @@ const VenueManagement: React.FC = () => {
   // const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([]);
   const [searchText, setSearchText] = useState("");
   const [countryFilter, setCountryFilter] = useState<string | null>(null);
-  const [poolStatusFilter, setPoolStatusFilter] = useState<number | null>(null);
+  const [operationModeFilter, setOperationModeFilter] = useState<number | null>(null);
+  const [poolStatusFilter, setPoolStatusFilter] = useState<PoolStatusFilter>(null);
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [currentVenue, setCurrentVenue] = useState<Venue | null>(null);
   const [form] = Form.useForm();
@@ -63,6 +81,15 @@ const VenueManagement: React.FC = () => {
   // 当获取到数据时更新 venues 和 filteredVenues
   useEffect(() => {
     if (data) {
+      const leaseInfoByPoolId = new Map<number, Pick<Pool, "account_lease_status" | "leased_power">>(
+        [...(mainPoolData?.data || []), ...(backupPoolData?.data || [])].map((pool: any) => [
+          Number(pool.id),
+          {
+            account_lease_status: pool.account_lease_status,
+            leased_power: pool.leased_power,
+          },
+        ]),
+      );
       // console.log(data);
       if (Array.isArray(data.data)) {
         const formattedData = data.data.map((item: any) => ({
@@ -72,18 +99,24 @@ const VenueManagement: React.FC = () => {
           venue_code: item.venue_code,
           country: item.country,
           address: item.address,
+          latitude: item.latitude,
+          longitude: item.longitude,
           agent_key: item.agent_key,
+          operation_mode: item.operation_mode ?? 1,
           hosted_machine: item.hosted_machine,
           miner_type: item.miner_type,
-          pools: item.pools || [], // 补充池数据，默认空数组
+          pools: (item.pools || []).map((pool: Pool) => ({
+            ...pool,
+            ...leaseInfoByPoolId.get(Number(pool.pool_id)),
+          })),
         }));
         setVenues(formattedData);
         setFilteredVenues(formattedData);
       } else {
-        message.error(`获取场地数据失败: ${data.data.message}`);
+        message.error(t("获取场地数据失败: {{message}}", { message: data.data.message }));
       }
     }
-  }, [data]);
+  }, [backupPoolData, data, mainPoolData]);
 
   // 搜索和过滤
   useEffect(() => {
@@ -100,13 +133,27 @@ const VenueManagement: React.FC = () => {
     if (countryFilter) {
       result = result.filter((item) => item.country === countryFilter);
     }
+    if (operationModeFilter !== null) {
+      result = result.filter((item) => Number(item.operation_mode) === operationModeFilter);
+    }
     if (poolStatusFilter !== null) {
       result = result.filter(
-        (item) => Array.isArray(item.pools) && item.pools.some((p) => Number(p?.status) === poolStatusFilter),
+        (item) =>
+          Array.isArray(item.pools) &&
+          item.pools.some((pool) =>
+            typeof poolStatusFilter === "number"
+              ? Number(pool?.status) === poolStatusFilter &&
+                (poolStatusFilter !== 1 ||
+                  !["待撤场", "部分租赁", "部分租赁算力", "全部租赁"].includes(
+                    pool.account_lease_status || "",
+                  ))
+              : pool.account_lease_status === poolStatusFilter ||
+                (poolStatusFilter === "部分租赁" && pool.account_lease_status === "部分租赁算力"),
+          ),
       );
     }
     setFilteredVenues(result);
-  }, [searchText, countryFilter, poolStatusFilter, venues]);
+  }, [searchText, countryFilter, operationModeFilter, poolStatusFilter, venues]);
 
   const handleSearch = (value: string) => {
     setSearchText(value);
@@ -130,11 +177,11 @@ const VenueManagement: React.FC = () => {
 
   const handleDelete = (id: number) => {
     Modal.confirm({
-      title: "确认删除",
-      content: "确定要删除这个场地吗？",
+      title: t("确认删除"),
+      content: t("确定要删除这个场地吗？"),
       onOk: () => {
         setVenues(venues.filter((item) => item.id !== id));
-        message.success("删除成功");
+        message.success(t("删除成功"));
       },
     });
   };
@@ -158,20 +205,23 @@ const VenueManagement: React.FC = () => {
 
   const handleModalOk = () => {
     form.validateFields().then((values) => {
+      // API convention: latitude is longitude; longitude is latitude.
+      values.latitude = values.latitude ?? null;
+      values.longitude = values.longitude ?? null;
       if (currentVenue) {
         // 编辑
         const hostedMachineValue = Number(values.hosted_machine);
         if (isNaN(hostedMachineValue)) {
-          message.error("hosted_machine 不是有效的数字");
+          message.error(t("hosted_machine 不是有效的数字"));
           return; // 或者抛出错误，阻止继续执行
         }
         values.hosted_machine = hostedMachineValue;
         updateMutation.mutate(values, {
           onSuccess: () => {
-            message.success("更新成功");
+            message.success(t("更新成功"));
           },
           onError: (error) => {
-            message.error(`更新失败: ${error.message}`);
+            message.error(t("更新失败: {{message}}", { message: error.message }));
           },
         });
       } else {
@@ -182,7 +232,10 @@ const VenueManagement: React.FC = () => {
           venue_code: values.venue_code,
           country: values.country,
           address: values.address,
+          latitude: values.latitude,
+          longitude: values.longitude,
           agent_key: values.agent_key,
+          operation_mode: Number(values.operation_mode ?? 1),
           hosted_machine: Number(values.hosted_machine),
           miner_type: values.miner_type,
         };
@@ -191,10 +244,10 @@ const VenueManagement: React.FC = () => {
           { poolType, data: venueUpdate },
           {
             onSuccess: () => {
-              message.success("创建成功");
+              message.success(t("创建成功"));
             },
             onError: (error) => {
-              message.error(`创建失败: ${error.message}`);
+              message.error(t("创建失败: {{message}}", { message: error.message }));
             },
           },
         );
@@ -206,50 +259,177 @@ const VenueManagement: React.FC = () => {
   const handleModalCancel = () => {
     setIsModalVisible(false);
   };
+
+  const handleCopyVenueName = async (venueName: string) => {
+    try {
+      if (navigator.clipboard?.writeText) {
+        await navigator.clipboard.writeText(venueName);
+      } else {
+        const textarea = document.createElement("textarea");
+        textarea.value = venueName;
+        document.body.appendChild(textarea);
+        textarea.select();
+        document.execCommand("copy");
+        document.body.removeChild(textarea);
+      }
+      message.success(t("已复制"));
+    } catch {
+      message.error(t("复制失败"));
+    }
+  };
+
   // 表格列定义
   const columns = [
     {
-      title: "序号",
+      title: t("序号"),
       dataIndex: "id",
       width: 60,
-      render(text: string, record: any, index: number) {
-        if (record.id == -1) {
-          console.log(text, record.id);
-        }
+      onHeaderCell: () => ({ style: { whiteSpace: "nowrap" as const } }),
+      onCell: () => ({ style: { whiteSpace: "nowrap" as const } }),
+      render(_text: string, _record: any, index: number) {
         return index + 1;
       },
     },
     {
-      title: "场地名称",
+      title: t("场地名称"),
       dataIndex: "venue_name",
-      render: (text: string, record: { id?: any }) => {
+      width: venueNameColumnWidth,
+      fixed: "left" as const,
+      onHeaderCell: () =>
+        ({
+          width: venueNameColumnWidth,
+          onColumnResize: (nextWidth: number) => {
+            setVenueNameColumnWidth(nextWidth);
+            localStorage.setItem("venue-setting-venue-name-column-width", String(nextWidth));
+          },
+        }) as any,
+      render: (text: string, record: { id?: any; operation_mode?: number }) => {
+        const isHosted = Number(record.operation_mode) === 2;
         return (
-          <Link to={`/venue/detail/${record.id}`} className="text-blue-500 hover:underline">
-            {text}
-          </Link>
+          <div style={{ display: "flex", alignItems: "center", gap: 8, width: "100%", overflow: "hidden" }}>
+            <div style={{ display: "flex", alignItems: "center", flex: 1, minWidth: 0, gap: 4 }}>
+              <Link
+                to={`/venue/detail/${record.id}`}
+                className="text-blue-500 hover:underline"
+                style={{ flex: 1, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}
+              >
+                {text}
+              </Link>
+              <Button
+                type="text"
+                size="small"
+                aria-label={t("复制")}
+                icon={<CopyOutlined />}
+                onClick={(event) => {
+                  event.preventDefault();
+                  event.stopPropagation();
+                  void handleCopyVenueName(text);
+                }}
+              />
+            </div>
+            <Tag
+              style={
+                isHosted
+                  ? {
+                      marginInlineEnd: 0,
+                      marginLeft: "auto",
+                      color: "#2B64CB",
+                      background: "#EEF3FF",
+                      borderColor: "#B8C8FF",
+                    }
+                  : {
+                      marginInlineEnd: 0,
+                      marginLeft: "auto",
+                      color: "#C47B16",
+                      background: "#FFF7E6",
+                      borderColor: "#FFD49F",
+                    }
+              }
+            >
+              {isHosted ? t("托管") : t("代管")}
+            </Tag>
+          </div>
         );
       },
       sorter: (a: Venue, b: Venue) => a.venue_name.localeCompare(b.venue_name),
     },
     {
-      title: "子账户",
+      title: t("子账户"),
       dataIndex: "pools",
-      width: 200,
+      width: 260,
       render: (pools: Pool[]) => {
         return (
           <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
             {Array.isArray(pools) &&
               pools.map((pool, idx) => {
                 const s = Number(pool?.status ?? -1);
-                const color = s === 1 ? "green" : s === 0 ? "red" : s === 2 ? "orange" : "#666";
-                const text = s === 1 ? "活跃" : s === 0 ? "关机" : s === 2 ? "已撤场" : "未知";
+                const operationalStatus =
+                  s === 1
+                    ? { text: t("活跃"), color: "green" }
+                    : s === 0
+                      ? { text: t("关机"), color: "red" }
+                      : s === 2
+                        ? { text: t("已撤场"), color: "orange" }
+                        : s === 3
+                          ? { text: t("入库"), color: "#1677ff" }
+                          : { text: "-", color: "#999" };
+                const leaseStatus =
+                  pool.account_lease_status === "部分租赁算力" ? "部分租赁" : pool.account_lease_status;
+                const shouldHideOperationalStatus =
+                  leaseStatus === "待撤场" || leaseStatus === "部分租赁" || leaseStatus === "全部租赁";
+                const shouldShowLeaseStatus = leaseStatus && leaseStatus !== "非租赁";
+                const leaseStatusColor =
+                  leaseStatus === "全部租赁"
+                    ? "#7c3aed"
+                    : leaseStatus === "部分租赁"
+                      ? "#d97706"
+                      : leaseStatus === "待撤场"
+                        ? "#d9480f"
+                        : "#6b7280";
+                const leasePower = Number(pool.leased_power);
+                const leasePowerText =
+                  leaseStatus === "部分租赁" && pool.leased_power != null && Number.isFinite(leasePower)
+                    ? t("租赁算力 {{value}}", { value: `${leasePower.toFixed(2)} P` })
+                    : "";
                 return (
                   <span
                     key={`${pool.pool_id}-${idx}`}
-                    style={{ whiteSpace: "nowrap", display: "block", width: "100%" }}
+                    style={{ display: "flex", alignItems: "center", gap: 8, lineHeight: 1.4, width: "100%" }}
                   >
-                    <span style={{ color: "#333" }}>{pool.pool_name}</span>
-                    <span style={{ color, marginLeft: 4 }}>（{text}）</span>
+                    <span
+                      style={{
+                        flex: 1,
+                        minWidth: 0,
+                        overflow: "hidden",
+                        textOverflow: "ellipsis",
+                        whiteSpace: "nowrap",
+                        color: "#333",
+                      }}
+                    >
+                      {pool.pool_name}
+                    </span>
+                    <span
+                      style={{
+                        display: "flex",
+                        flexDirection: "column",
+                        alignItems: "flex-end",
+                        flexShrink: 0,
+                      }}
+                    >
+                      {!shouldHideOperationalStatus ? (
+                        <span style={{ color: operationalStatus.color, fontSize: 12 }}>
+                          {operationalStatus.text}
+                        </span>
+                      ) : null}
+                      {shouldShowLeaseStatus ? (
+                        <>
+                          <span style={{ color: leaseStatusColor, fontSize: 12 }}>{t(leaseStatus)}</span>
+                          {leasePowerText ? (
+                            <span className="text-xs text-gray-500 tabular-nums">{leasePowerText}</span>
+                          ) : null}
+                        </>
+                      ) : null}
+                    </span>
                   </span>
                 );
               })}
@@ -258,43 +438,72 @@ const VenueManagement: React.FC = () => {
       },
     },
     {
-      title: "场地代码",
+      title: t("场地代码"),
       dataIndex: "venue_code",
+      width: 180,
       sorter: (a: Venue, b: Venue) => (a.venue_code || "").localeCompare(b.venue_code || ""),
     },
     {
-      title: "所在国家",
+      title: t("所在国家"),
       dataIndex: "country",
+      width: 90,
       sorter: (a: Venue, b: Venue) => (a.country || "").localeCompare(b.country || ""),
     },
     {
-      title: "托管机器",
+      title: t("经纬度"),
+      key: "coordinates",
+      width: 200,
+      render: (_: unknown, record: Venue) => {
+        // 接口约定：latitude 存经度，longitude 存纬度。
+        const latitude = record.longitude;
+        const longitude = record.latitude;
+        const formatCoordinate = (value: number, positiveDirection: string, negativeDirection: string) =>
+          `${Math.abs(Number(value)).toFixed(4)}°${Number(value) >= 0 ? positiveDirection : negativeDirection}`;
+
+        if (latitude == null && longitude == null) return <span>—</span>;
+
+        return (
+          <span className="whitespace-nowrap tabular-nums">
+            {longitude != null ? (
+              <span style={{ color: "#d97706" }}>{formatCoordinate(longitude, "E", "W")}</span>
+            ) : null}
+            {latitude != null && longitude != null ? ", " : ""}
+            {latitude != null ? (
+              <span style={{ color: "#1677ff" }}>{formatCoordinate(latitude, "N", "S")}</span>
+            ) : null}
+          </span>
+        );
+      },
+    },
+    {
+      title: t("托管机器"),
       dataIndex: "hosted_machine",
       width: 100,
+      align: "right" as const,
+      render: (value: number | null | undefined) =>
+        value == null ? "—" : <span className="tabular-nums">{Number(value).toLocaleString()}</span>,
     },
     {
-      title: "机型",
-      dataIndex: "miner_type",
-      width: 100,
-    },
-    {
-      title: "场地键值",
-      dataIndex: "agent_key",
-      width: 300,
-    },
-    {
-      title: "详细地址",
-      dataIndex: "address",
-      width: 200,
-    },
-    {
-      title: "操作",
+      title: t("操作"),
       key: "action",
       width: 120,
+      fixed: "right" as const,
       render: (_: any, record: Venue) => (
         <Space size="middle">
-          <Button type="text" icon={<EditOutlined />} onClick={() => handleEdit(record)} />
-          <Button type="text" icon={<DeleteOutlined />} onClick={() => handleDelete(record.id)} />
+          <Button
+            type="text"
+            icon={<EditOutlined />}
+            aria-label={t("编辑")}
+            style={{ color: "#1677ff" }}
+            onClick={() => handleEdit(record)}
+          />
+          <Button
+            type="text"
+            danger
+            icon={<DeleteOutlined />}
+            aria-label={t("删除")}
+            onClick={() => handleDelete(record.id)}
+          />
         </Space>
       ),
     },
@@ -341,7 +550,7 @@ const VenueManagement: React.FC = () => {
             onClick={handleAdd}
             className="!rounded-button whitespace-nowrap"
           >
-            新增场地
+            {t("新增场地")}
           </Button>
           {/* <Button
             size="middle"
@@ -357,14 +566,14 @@ const VenueManagement: React.FC = () => {
         <div className="flex space-x-4">
           <Input
             size="small"
-            placeholder="搜索场地名称、代码或地址"
+            placeholder={t("搜索场地名称、代码或地址")}
             prefix={<SearchOutlined />}
             onChange={(e) => handleSearch(e.target.value)}
             className="w-64"
           />
           <Select
             size="small"
-            placeholder="按国家筛选"
+            placeholder={t("按国家筛选")}
             allowClear
             onChange={handleCountryFilter}
             className="w-40"
@@ -377,7 +586,18 @@ const VenueManagement: React.FC = () => {
           </Select>
           <Select
             size="small"
-            placeholder="按状态筛选"
+            placeholder={t("场地属性")}
+            allowClear
+            value={operationModeFilter}
+            onChange={(value) => setOperationModeFilter(value ?? null)}
+            className="w-32"
+          >
+            <Option value={1}>{t("代管")}</Option>
+            <Option value={2}>{t("托管")}</Option>
+          </Select>
+          <Select
+            size="small"
+            placeholder={t("按状态筛选")}
             allowClear
             value={poolStatusFilter as any}
             onChange={(v) => setPoolStatusFilter(v ?? null)}
@@ -394,7 +614,7 @@ const VenueManagement: React.FC = () => {
                   marginRight: 6,
                 }}
               />
-              活跃
+              {t("活跃")}
             </Option>
             <Option value={0}>
               <span
@@ -407,7 +627,7 @@ const VenueManagement: React.FC = () => {
                   marginRight: 6,
                 }}
               />
-              关机
+              {t("关机")}
             </Option>
             <Option value={2}>
               <span
@@ -420,7 +640,16 @@ const VenueManagement: React.FC = () => {
                   marginRight: 6,
                 }}
               />
-              已撤场
+              {t("已撤场")}
+            </Option>
+            <Option value="待撤场">
+              <span style={{ color: "#d9480f" }}>{t("待撤场")}</span>
+            </Option>
+            <Option value="部分租赁">
+              <span style={{ color: "#d97706" }}>{t("部分租赁")}</span>
+            </Option>
+            <Option value="全部租赁">
+              <span style={{ color: "#7c3aed" }}>{t("全部租赁")}</span>
             </Option>
           </Select>
 
@@ -432,12 +661,14 @@ const VenueManagement: React.FC = () => {
             style={{ marginRight: "15px" }}
             onClick={showExcelUploadModal}
           >
-            导入功耗
+            {t("导入功耗")}
           </Button>
         </div>
       </div>
 
       <Table
+        className="[&_.ant-table-thead>tr>th]:!py-2 [&_.ant-table-tbody>tr:not(.ant-table-measure-row)>td]:!py-2"
+        components={{ header: { cell: ResizableHeaderCell } }}
         columns={columns}
         dataSource={filteredVenues}
         rowKey="id"
@@ -445,70 +676,82 @@ const VenueManagement: React.FC = () => {
         pagination={{
           pageSize: pageSize, // 使用动态 pageSize
           showSizeChanger: true,
-          onShowSizeChange: (current, size) => {
-            console.log("onShowSizeChange", current, size);
+          onShowSizeChange: (_current, size) => {
             setPageSize(size); // 更新 pageSize 状态（注意：第2个参数才是 pageSize）
           },
           onChange: (_page, size) => {
             // 兼容某些版本只触发 onChange 的情况
-            console.log("onChange", _page, size);
             if (size && size !== pageSize) setPageSize(size);
           },
           showQuickJumper: true,
-          showTotal: (total) => `共 ${total} 条`,
+          showTotal: (total) => t("共 {{total}} 条", { total: total }),
         }}
       />
 
       <Modal
-        title={currentVenue ? "编辑场地" : "新增场地"}
+        title={currentVenue ? t("编辑场地") : t("新增场地")}
         visible={isModalVisible}
         onOk={handleModalOk}
         onCancel={handleModalCancel}
         width={600}
         footer={[
           <Button key="back" onClick={handleModalCancel}>
-            取消
+            {t("取消")}
           </Button>,
           <Button key="submit" type="primary" onClick={handleModalOk}>
-            确定
+            {t("确定")}
           </Button>,
         ]}
       >
         <Form form={form} layout="vertical" initialValues={currentVenue || undefined}>
           <Form.Item
             name="venue_name"
-            label="场地名称"
-            rules={[{ required: true, message: "请输入场地名称" }]}
+            label={t("场地名称")}
+            rules={[{ required: true, message: t("请输入场地名称") }]}
           >
-            <Input placeholder="请输入场地名称" />
+            <Input placeholder={t("请输入场地名称")} />
           </Form.Item>
-          <Form.Item name="venue_code" label="场地代码">
-            <Input placeholder="请输入场地代码" />
+          <Form.Item name="venue_code" label={t("场地代码")}>
+            <Input placeholder={t("请输入场地代码")} />
           </Form.Item>
           <Form.Item
             name="country"
-            label="所在国家"
+            label={t("所在国家")}
             rules={[
-              { required: true, message: "请输入国家" },
-              { whitespace: true, message: "国家不能为空" },
+              { required: true, message: t("请输入国家") },
+              { whitespace: true, message: t("国家不能为空") },
             ]}
           >
-            <Input placeholder="请输入国家" />
+            <Input placeholder={t("请输入国家")} />
           </Form.Item>
-          <Form.Item name="hosted_machine" label="托管机器">
-            <Input type="number" placeholder="托管机器" />
+          <Form.Item name="hosted_machine" label={t("托管机器")}>
+            <Input type="number" placeholder={t("托管机器")} />
           </Form.Item>
-          <Form.Item name="miner_type" label="托管机型">
-            <Input placeholder="托管机型" />
+          <Form.Item name="miner_type" label={t("托管机型")}>
+            <Input placeholder={t("托管机型")} />
           </Form.Item>
-          <Form.Item name="agent_key" label="场地键值">
+          <Form.Item name="agent_key" label={t("场地键值")}>
             <Input placeholder="agent_key" />
           </Form.Item>
-          <Form.Item name="address" label="详细地址">
-            <TextArea rows={3} placeholder="请输入详细地址" />
+          <Form.Item name="operation_mode" label={t("场地属性")} initialValue={1}>
+            <Select>
+              <Option value={1}>{t("代管")}</Option>
+              <Option value={2}>{t("托管")}</Option>
+            </Select>
+          </Form.Item>
+          <div className="grid grid-cols-1 gap-x-4 md:grid-cols-2">
+            <Form.Item name="latitude" label={t("经度")} rules={[{ type: "number", min: -180, max: 180 }]}>
+              <InputNumber min={-180} max={180} placeholder={t("可选")} style={{ width: "100%" }} />
+            </Form.Item>
+            <Form.Item name="longitude" label={t("纬度")} rules={[{ type: "number", min: -90, max: 90 }]}>
+              <InputNumber min={-90} max={90} placeholder={t("可选")} style={{ width: "100%" }} />
+            </Form.Item>
+          </div>
+          <Form.Item name="address" label={t("详细地址")}>
+            <TextArea rows={3} placeholder={t("请输入详细地址")} />
           </Form.Item>
           {/* 添加 ID 字段 */}
-          <Form.Item name="id" label="场地ID" style={{ display: "none" }}>
+          <Form.Item name="id" label={t("场地ID")} style={{ display: "none" }}>
             <Input type="hidden" />
           </Form.Item>
         </Form>
@@ -516,7 +759,7 @@ const VenueManagement: React.FC = () => {
 
       {/* Excel上传Modal */}
       <Modal
-        title="Excel文件导入"
+        title={t("Excel文件导入")}
         open={excelUploadModalVisible}
         onCancel={hideExcelUploadModal}
         footer={null}
@@ -526,8 +769,8 @@ const VenueManagement: React.FC = () => {
           onUpload={handleExcelUpload}
           accept=".xlsx,.xls"
           maxSize={10}
-          title="点击或拖拽Excel文件到此区域上传"
-          description="支持.xlsx和.xls格式，文件大小不超过10MB"
+          title={t("点击或拖拽Excel文件到此区域上传")}
+          description={t("支持.xlsx和.xls格式，文件大小不超过10MB")}
         />
       </Modal>
     </div>

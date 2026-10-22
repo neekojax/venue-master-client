@@ -6,7 +6,10 @@ import { InfoCircleOutlined } from "@ant-design/icons";
 import { ReloadOutlined } from "@ant-design/icons";
 import { Button, DatePicker, Select, Switch, Table, Tag, Tooltip } from "antd";
 import type { ColumnsType } from "antd/es/table";
-import { AlertTriangle, BarChart3, Database, ShieldCheck, TrendingUp } from "lucide-react";
+import dayjs from "dayjs";
+import timezone from "dayjs/plugin/timezone";
+import utc from "dayjs/plugin/utc";
+import { AlertTriangle, BarChart3, Database, ShieldCheck, TrendingUp, Warehouse } from "lucide-react";
 import * as XLSX from "xlsx";
 import antIcon from "@/assets/ant-icon.png";
 import emptyAntIcon from "@/assets/empty-ant.png";
@@ -14,18 +17,27 @@ import emptyAntIcon from "@/assets/empty-ant.png";
 import FormulaTooltip from "@/components/tooltip/FormulaTooltip";
 // @ts-ignore
 import FormulaYouxiaolvTooltip from "@/components/tooltip/FormulaYouxiaolvTooltip";
+import { ROUTE_PATHS } from "@/constants/common";
 import { useSelector, useSettingsStore } from "@/stores";
 
+import { getLanguage, t } from "@/locales";
+import ResizableHeaderCell from "@/pages/custody-statistics/statistics/components/ResizableHeaderCell";
 import { fetchDailyReport } from "@/pages/report/api.tsx";
+
+dayjs.extend(utc);
+dayjs.extend(timezone);
 
 interface DataType {
   key: string;
   siteId: string;
   siteName: string;
   btcOutput24h: number;
+  isOverclocked: number;
   theoreticalPower: number;
+  overclockTheoreticalPower: number;
   power24h: number;
   effectiveRate24h: number;
+  overclockEffectiveRate24h: number;
   effectiveRateT2: number;
   totalFailuresT1: number;
   totalFailuresT2: number;
@@ -43,7 +55,7 @@ interface DataType {
   limitImpactRate: number;
   highTemperatureRate: number;
   events: string;
-  shelved: string;
+  shelved: number;
   pendingRepair: string;
   anget_key: string;
   collection: number;
@@ -53,18 +65,72 @@ interface DataType {
   forecastHashEfficiency: number;
   outputEfficiency: number;
 }
-// 是否启用T2
-function isUseT2(record: DataType) {
-  // 北京时间（UTC+8）
-  const beijingHour = (new Date().getUTCHours() + 8) % 24;
-  // console.log("beijingHour:", beijingHour);
-  const useT2 = record.anget_key === "" && record.status_of_filling === 0 && beijingHour > 14; // 大于14点使用T2
-  return useT2;
+
+const OVERCLOCK_TEXT_COLOR = "#1677ff";
+const SHANGHAI_TIMEZONE = "Asia/Shanghai";
+
+function renderOverclockMetric(
+  primary: number,
+  secondary: number,
+  isOverclocked: number,
+  digits: number,
+  suffix = "",
+) {
+  return (
+    <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: "8px" }}>
+      <div
+        style={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          backgroundColor: "#f6f6f6",
+          padding: "2px 10px",
+          borderRadius: "8px",
+          minWidth: "96px",
+          fontWeight: "bold",
+          fontSize: "12px",
+        }}
+      >
+        {primary.toFixed(digits)}
+        {suffix}
+      </div>
+      {isOverclocked === 1 ? (
+        <div
+          style={{
+            border: `1px solid ${OVERCLOCK_TEXT_COLOR}`,
+            color: OVERCLOCK_TEXT_COLOR,
+            backgroundColor: "#f0f8ff",
+            padding: "1px 10px",
+            borderRadius: "999px",
+            fontSize: "12px",
+            fontWeight: "bold",
+            whiteSpace: "nowrap",
+          }}
+        >
+          {secondary.toFixed(digits)}
+          {suffix}
+        </div>
+      ) : null}
+    </div>
+  );
+}
+// 是否启用T2：日报日期结束 38 小时后仍未填写，使用前一天数据。
+function isUseT2(record: DataType, reportDate: string) {
+  if (record.anget_key !== "" || record.status_of_filling !== 0) {
+    return false;
+  }
+
+  const reportDay = dayjs.tz(reportDate, SHANGHAI_TIMEZONE).startOf("day");
+  if (!reportDay.isValid()) {
+    return false;
+  }
+
+  return !dayjs().tz(SHANGHAI_TIMEZONE).isBefore(reportDay.add(38, "hour"));
 }
 
 // 新增：封装 T1/T2 故障显示渲染函数（模块级别）
-function renderFailureRateCell(text: number, record: DataType) {
-  const useT2 = isUseT2(record);
+function renderFailureRateCell(text: number, record: DataType, reportDate: string) {
+  const useT2 = isUseT2(record, reportDate);
   const failureCount = useT2 ? record.totalFailuresT2 : text;
   const rateStr = ((failureCount / record.totalMachines) * 100).toFixed(2);
   const isHighRate = parseFloat(rateStr) > 10;
@@ -180,6 +246,13 @@ const App: React.FC = () => {
   const [reloadTick, setReloadTick] = useState(0);
   const [loading, setLoading] = useState(false);
   const [selectedSites, setSelectedSites] = useState<string[]>([]);
+  const [siteNameColumnWidth, setSiteNameColumnWidth] = useState<number>(() => {
+    const storedWidth = localStorage.getItem("daily-report-site-name-column-width");
+    return storedWidth ? Number(storedWidth) || 250 : 250;
+  });
+  const reportDate = Array.isArray(selectedDate)
+    ? selectedDate[0] || formattedDate
+    : selectedDate || formattedDate;
   const handleSitesChange = (value: string[]) => {
     setSelectedSites(value);
   };
@@ -220,11 +293,19 @@ const App: React.FC = () => {
     //   width: 100,
     // },
     {
-      title: "场地名",
+      title: t("场地名"),
       dataIndex: "siteName",
       key: "siteName",
       fixed: "left",
-      width: 250,
+      width: siteNameColumnWidth,
+      onHeaderCell: () =>
+        ({
+          width: siteNameColumnWidth,
+          onColumnResize: (nextWidth: number) => {
+            setSiteNameColumnWidth(nextWidth);
+            localStorage.setItem("daily-report-site-name-column-width", String(nextWidth));
+          },
+        }) as any,
       render: (text: string, record: { key?: any }) => {
         const isSpecialVenue = text === "Arct-HF01-J XP-AR-US" || text === "ARCT Technologies-HF02-AR-US";
         return (
@@ -246,7 +327,7 @@ const App: React.FC = () => {
             >
               {isSpecialVenue && (
                 <Tag color="red" style={{ marginLeft: 2 }}>
-                  补充
+                  {t("补充")}
                 </Tag>
               )}
               {/* {text} */}
@@ -259,7 +340,7 @@ const App: React.FC = () => {
       },
     },
     {
-      title: "24H产出(BTC)",
+      title: t("24H产出(BTC)"),
       dataIndex: "btcOutput24h",
       key: "btcOutput24h",
       width: 165,
@@ -268,7 +349,7 @@ const App: React.FC = () => {
       sorter: (a, b) => a.btcOutput24h - b.btcOutput24h,
     },
     {
-      title: "产出效率(BTC/EH)",
+      title: t("产出效率(BTC/EH)"),
       dataIndex: "outputEfficiency",
       key: "outputEfficiency",
       width: 170,
@@ -277,16 +358,27 @@ const App: React.FC = () => {
       sorter: (a, b) => a.outputEfficiency - b.outputEfficiency,
     },
     {
-      title: "理论算力(E)",
+      title: (
+        <span>
+          {t("理论算力(E)")}
+          <span style={{ marginLeft: 4 }}>{t("/ 变频")}</span>
+        </span>
+      ),
       dataIndex: "theoreticalPower",
       key: "theoreticalPower",
-      width: 125,
+      width: 210,
       align: "left",
-      render: (value) => value.toFixed(6),
+      render: (_value, record) =>
+        renderOverclockMetric(
+          record.theoreticalPower,
+          record.overclockTheoreticalPower,
+          record.isOverclocked,
+          6,
+        ),
       sorter: (a, b) => a.theoreticalPower - b.theoreticalPower,
     },
     {
-      title: "24H算力(E)",
+      title: t("24H算力(E)"),
       dataIndex: "power24h",
       key: "power24h",
       width: 145,
@@ -295,19 +387,31 @@ const App: React.FC = () => {
       sorter: (a, b) => a.power24h - b.power24h,
     },
     {
-      title: "24H有效率",
+      title: (
+        <span>
+          {t("24H有效率")}
+          <span style={{ marginLeft: 4 }}>{t("/ 变频")}</span>
+        </span>
+      ),
       dataIndex: "effectiveRate24h",
       key: "effectiveRate24h",
-      width: 140,
+      width: 210,
       align: "left",
-      render: (value) => `${value.toFixed(2)}%`,
+      render: (_value, record) =>
+        renderOverclockMetric(
+          record.effectiveRate24h,
+          record.overclockEffectiveRate24h,
+          record.isOverclocked,
+          2,
+          "%",
+        ),
       sorter: (a, b) => a.effectiveRate24h - b.effectiveRate24h,
     },
     {
-      title: "托管台数",
+      title: <span className="whitespace-nowrap">{t("托管台数")}</span>,
       dataIndex: "totalMachines",
       key: "totalMachines",
-      width: 105,
+      width: 160,
       align: "left",
       render: (value) => value.toLocaleString(),
       sorter: (a, b) => a.totalMachines - b.totalMachines,
@@ -315,7 +419,7 @@ const App: React.FC = () => {
     {
       title: (
         <div style={{ display: "flex" }}>
-          <span>在架有效率</span>
+          <span>{t("在架有效率")}</span>
           <FormulaTooltip />
         </div>
       ),
@@ -335,23 +439,23 @@ const App: React.FC = () => {
                 <div style={{ maxWidth: 250 }}>
                   <div style={{ fontSize: "14px", lineHeight: 1.6 }}>
                     <div>
-                      <b>24小时算力：</b>
+                      <b>{t("24小时算力：")}</b>
                       {record.power24h}
                     </div>
                     <div>
-                      <b>托管台数：</b>
+                      <b>{t("托管台数：")}</b>
                       {record.totalMachines}
                     </div>
                     <div>
-                      <b>理论算力：</b>
+                      <b>{t("理论算力：")}</b>
                       {record.theoreticalPower}
                     </div>
                     <div>
-                      <b>总故障数：</b>
+                      <b>{t("总故障数：")}</b>
                       {record.totalFailuresT1}
                     </div>
                     <div>
-                      <b>不可抗力影响台数：</b>
+                      <b>{t("不可抗力影响台数：")}</b>
                       {record.impactMachine}
                     </div>
                   </div>
@@ -369,7 +473,7 @@ const App: React.FC = () => {
     {
       title: (
         <div style={{ display: "flex" }}>
-          <span>净有效率</span>
+          <span>{t("净有效率")}</span>
           <FormulaYouxiaolvTooltip />
         </div>
       ),
@@ -381,16 +485,16 @@ const App: React.FC = () => {
       sorter: (a, b) => a.forecastHashEfficiency - b.forecastHashEfficiency,
     },
     {
-      title: "T-1总故障数/占比",
+      title: t("T-1总故障数/占比"),
       dataIndex: "totalFailuresT1",
       key: "totalFailuresT1",
       width: 170,
       align: "center",
-      render: (text: number, record: DataType) => renderFailureRateCell(text, record),
+      render: (text: number, record: DataType) => renderFailureRateCell(text, record, reportDate),
       sorter: (a, b) => a.totalFailuresT1 - b.totalFailuresT1,
     },
     {
-      title: "24H故障数/占比",
+      title: t("24H故障数/占比"),
       dataIndex: "failures24h",
       key: "failures24h",
       width: 170,
@@ -433,7 +537,15 @@ const App: React.FC = () => {
       sorter: (a, b) => a.failures24h - b.failures24h,
     },
     {
-      title: "T-2故障数/占比",
+      title: t("24H上架数"),
+      dataIndex: "shelved",
+      key: "shelved",
+      width: 138,
+      align: "left",
+      render: (value) => value.toLocaleString(),
+    },
+    {
+      title: t("T-2故障数/占比"),
       dataIndex: "totalFailuresT2",
       key: "totalFailuresT2",
       width: 150,
@@ -481,13 +593,13 @@ const App: React.FC = () => {
       sorter: (a, b) => a.failureRateT2 - b.failureRateT2,
     },
     {
-      title: "待修数/占比",
+      title: t("待修数/占比"),
       dataIndex: "pendingRepair",
       key: "pendingRepair",
       width: 150,
       align: "center",
       render: (value, record) => {
-        const useT2 = isUseT2(record);
+        const useT2 = isUseT2(record, reportDate);
         const pendingRepairNum = useT2 ? record.pendingRepairT2 : value;
         const repairRate = ((pendingRepairNum / record.totalMachines) * 100).toFixed(2);
         const isHighRate = parseFloat(repairRate) > 10; // 待修率超过5%标红
@@ -548,15 +660,7 @@ const App: React.FC = () => {
       },
     },
     {
-      title: "24H上架数",
-      dataIndex: "shelved",
-      key: "shelved",
-      width: 138,
-      align: "left",
-      render: (value) => value.toLocaleString(),
-    },
-    {
-      title: "影响算力(E)",
+      title: t("影响算力(E)"),
       dataIndex: "powerImpact",
       key: "powerImpact",
       width: 130,
@@ -565,16 +669,16 @@ const App: React.FC = () => {
       sorter: (a, b) => a.powerImpact - b.powerImpact,
     },
     {
-      title: "影响占比",
+      title: <span className="whitespace-nowrap">{t("影响占比")}</span>,
       dataIndex: "impactRatio",
       key: "impactRatio",
-      width: 105,
+      width: 160,
       align: "left",
       render: (value) => `${value.toFixed(2)}%`,
       sorter: (a, b) => a.impactRatio - b.impactRatio,
     },
     {
-      title: "影响产出(BTC)",
+      title: t("影响产出(BTC)"),
       dataIndex: "outputImpact",
       key: "outputImpact",
       width: 145,
@@ -583,7 +687,7 @@ const App: React.FC = () => {
       sorter: (a, b) => a.outputImpact - b.outputImpact,
     },
     {
-      title: "限电影响",
+      title: t("限电影响"),
       dataIndex: "limitImpactRate",
       key: "limitImpactRate",
       width: 140,
@@ -593,7 +697,7 @@ const App: React.FC = () => {
       sorter: (a, b) => a.limitImpactRate - b.limitImpactRate,
     },
     {
-      title: "高温影响",
+      title: t("高温影响"),
       dataIndex: "highTemperatureRate",
       key: "highTemperatureRate",
       width: 140,
@@ -603,7 +707,7 @@ const App: React.FC = () => {
       sorter: (a, b) => a.highTemperatureRate - b.highTemperatureRate,
     },
     {
-      title: "事件描述",
+      title: t("事件描述"),
       dataIndex: "events",
       key: "events",
       width: 400,
@@ -636,9 +740,12 @@ const App: React.FC = () => {
               siteId: venue.venue_code,
               siteName: venue.venue_name,
               btcOutput24h: venue.btcOutput24h || 0,
+              isOverclocked: Number(venue.isOverclocked ?? venue.is_overclocked ?? 0),
               theoreticalPower: venue.theoreticalPower || 0,
+              overclockTheoreticalPower: venue.overclockTheoreticalPower || 0,
               power24h: venue.power24h || 0,
               effectiveRate24h: venue.effectiveRate24h || 0, // 转换为小数形式
+              overclockEffectiveRate24h: venue.overclockEffectiveRate24h || 0,
               forecastHashEfficiency: venue.forecastHashEfficiency || 0, // 转换为小数形式
               effectiveRateT2: venue.effectiveRateT2 || 0,
               effectiveRateT3: venue.effectiveRateT3 || 0,
@@ -660,7 +767,7 @@ const App: React.FC = () => {
               // "限电影响": item.limitImpactRate,
               // "高温影响": item.highTemperatureRate,
               events: venue.events || "",
-              shelved: venue.shelved || 0,
+              shelved: Number(venue.shelved ?? 0),
               pendingRepair: venue.pendingRepair || 0,
               anget_key: venue.anget_key || "",
               collection: venue.collection || 0,
@@ -706,11 +813,9 @@ const App: React.FC = () => {
             totalWithdrawImpactPower: summary.totalWithdrawImpactPower || 0,
             averageForecastEfficiencyNoWarehouse: summary.averageForecastEfficiencyNoWarehouse || 0,
           });
-        } else {
-          console.error("API 返回的 dailyReportStatistics 无效:", reportData);
         }
-      } catch (error) {
-        console.error("获取日报数据失败:", error);
+      } catch (_error) {
+        void _error;
       } finally {
         setLoading(false);
       }
@@ -776,20 +881,22 @@ const App: React.FC = () => {
       ).toFixed(6),
       // 总故障台数: item.totalFailures.toLocaleString(),
       "24小时故障数": item.failures24h.toLocaleString(),
+      "24小时上架数": item.shelved.toLocaleString(),
       "24小时故障率": item.failureRate24h.toFixed(2) + "%",
       ...(poolType === "CANG" ? { 净有效率: item.forecastHashEfficiency.toFixed(2) + "%" } : {}),
-      "T-1故障数": isUseT2(item)
+      "T-1故障数": isUseT2(item, reportDate)
         ? item.totalFailuresT2.toLocaleString()
         : item.totalFailuresT1.toLocaleString(),
-      "T-1故障率": isUseT2(item)
+      "T-1故障率": isUseT2(item, reportDate)
         ? `${((item.totalFailuresT2 / item.totalMachines) * 100).toFixed(2)}%`
         : `${((item.totalFailuresT1 / item.totalMachines) * 100).toFixed(2)}%`,
       "T-2故障数": item.totalFailuresT2.toLocaleString(),
       "T-2故障率": `${((item.totalFailuresT2 / item.totalMachines) * 100).toFixed(2)}%`,
       // "T-2故障情况": `${item.totalFailuresT2.toLocaleString()} 台 (${item.failureRateT2.toFixed(2)}%)`,
       // "T-3日故障率": item.failureRateT3.toFixed(2) + "%",
-      "24小时上架数": item.shelved,
-      待修数: isUseT2(item) ? item.pendingRepairT2.toLocaleString() : item.pendingRepair.toLocaleString(),
+      待修数: isUseT2(item, reportDate)
+        ? item.pendingRepairT2.toLocaleString()
+        : item.pendingRepair.toLocaleString(),
       待修情况: `${((Number(item.pendingRepair) / item.totalMachines) * 100).toFixed(2)}%`,
       "影响算力（E）": item.powerImpact.toFixed(8),
       影响占比: item.impactRatio.toFixed(2) + "%",
@@ -799,6 +906,8 @@ const App: React.FC = () => {
       限电算力: ((item.theoreticalPower * 1e6 * item.limitImpactRate) / 100).toFixed(2) + "Th/s", //record.theoreticalPower * 1e6 * value / 100
       高温算力: ((item.theoreticalPower * 1e6 * item.highTemperatureRate) / 100).toFixed(2) + "Th/s", //item.highTemperatureRate,
       事件描述: item.events,
+      变频理论算力: (item.isOverclocked === 1 ? item.overclockTheoreticalPower : 0).toFixed(6),
+      变频24小时有效率: (item.isOverclocked === 1 ? item.overclockEffectiveRate24h : 0).toFixed(2) + "%",
     }));
 
     const worksheet = XLSX.utils.json_to_sheet(data);
@@ -832,9 +941,9 @@ const App: React.FC = () => {
       // { wch: 10 }, // 场地编号
       { wch: 30 }, // 场地名
       { wch: 20 }, // 24小时产出（BTC）
-      { wch: 20 }, // 理论算力（E）
+      { wch: 28 }, // 理论算力（E）
       { wch: 20 }, // 24小时算力（E）
-      { wch: 15 }, // 24小时有效率
+      { wch: 22 }, // 24小时有效率
       { wch: 15 }, // T-2日有效率
       { wch: 15 }, // T-3日有效率
       { wch: 15 }, // 托管台数
@@ -852,12 +961,14 @@ const App: React.FC = () => {
       { wch: 15 }, // 高温算力
       { wch: 15 }, // ***遗漏
       { wch: 50 }, // 事件描述
+      { wch: 20 }, // 变频理论算力
+      { wch: 20 }, // 变频24小时有效率
     ];
 
     worksheet["!cols"] = columnWidths;
 
-    XLSX.utils.book_append_sheet(workbook, worksheet, "运营日报");
-    XLSX.writeFile(workbook, `运营日报_${selectedDate}.xlsx`);
+    XLSX.utils.book_append_sheet(workbook, worksheet, t("运营日报"));
+    XLSX.writeFile(workbook, t("运营日报_{{selectedDate}}.xlsx", { selectedDate: selectedDate }));
   };
 
   return (
@@ -866,20 +977,25 @@ const App: React.FC = () => {
         <div className="mb-6">
           <div className="flex items-center justify-between mb-6">
             <h1 className="text-2xl font-bold text-gray-800">
-              运营日报
+              {t("运营日报")}
               <span className="text-sm text-gray-500 ml-2"> ({selectedDate || formattedDate})</span>
             </h1>
             <div className="flex items-center gap-2">
+              <Link
+                to={`${ROUTE_PATHS.dailySnapshot}?date=${encodeURIComponent(String(selectedDate || formattedDate))}&reportType=venue`}
+              >
+                <Button>{t("快照")}</Button>
+              </Link>
               <DatePicker
                 className="w-40"
-                placeholder="选择日期"
+                placeholder={t("选择日期")}
                 onChange={(_: any, dateString: string | string[]) => {
                   setSelectedDate(dateString);
                 }}
               />
               <button
                 type="button"
-                title="刷新数据"
+                title={t("刷新数据")}
                 onClick={() => setReloadTick((n) => n + 1)}
                 className="px-2 py-1 rounded border border-gray-300 hover:bg-gray-100 text-gray-700"
               >
@@ -888,14 +1004,21 @@ const App: React.FC = () => {
             </div>
           </div>
           <div className="mt-6 flex flex-row gap-5 overflow-x-auto">
-            <div className="flex-1 basis-0 bg-white border border-slate-200 rounded-2xl p-5 flex items-center gap-4 hover:border-slate-300 hover:shadow-sm transition-all h-28">
+            <div className="relative flex-1 basis-0 bg-white border border-slate-200 rounded-2xl p-5 flex items-center gap-4 hover:border-slate-300 hover:shadow-sm transition-all h-28">
               <div className="p-3 bg-slate-50 rounded-xl shrink-0 shadow-inner">
                 <ShieldCheck className="text-emerald-500 w-5 h-5" />
               </div>
               <div className="flex-1 min-w-0">
                 <div className="text-[10px] font-black text-slate-400 uppercase tracking-tighter truncate flex justify-between items-center">
-                  <span>平均有效率</span>
-                  <Tooltip
+                  <span className="flex items-center gap-1">
+                    {t("平均有效率")}
+                    <Tooltip title={t("不含租赁算力、仓库算力、待撤场算力")}>
+                      <span className="w-3.5 h-3.5 rounded-full border border-slate-300 text-slate-400 flex items-center justify-center text-[9px] font-bold cursor-pointer hover:bg-slate-100 hover:text-slate-600 transition-colors">
+                        !
+                      </span>
+                    </Tooltip>
+                  </span>
+                  {/* <Tooltip
                     title={
                       <div className="text-xs">
                         <div>平均有效率(含仓库)：{(statistics.averageEfficiency || 0).toFixed(2)}%</div>
@@ -906,7 +1029,7 @@ const App: React.FC = () => {
                     <div className="w-3.5 h-3.5 rounded-full border border-slate-300 text-slate-400 flex items-center justify-center text-[9px] font-bold cursor-pointer hover:bg-slate-100 hover:text-slate-600 transition-colors">
                       !
                     </div>
-                  </Tooltip>
+                  </Tooltip> */}
                 </div>
                 <div className="flex items-baseline gap-0.5 leading-none mt-1.5">
                   <span className="text-2xl font-black text-slate-900 tracking-tighter">
@@ -914,12 +1037,25 @@ const App: React.FC = () => {
                     {(statistics.averageEffectiveRateNoWarehouse || 0).toFixed(2)}%
                   </span>
                 </div>
-                <div className="text-[10px] text-slate-400 font-bold truncate mt-2 uppercase tracking-tighter">
-                  净有效率 {(statistics.averageForecastEfficiencyNoWarehouse || 0).toFixed(2)}%
-                </div>
+                <Tooltip
+                  title={t("净有效率 {{value}}%", {
+                    value: (statistics.averageForecastEfficiencyNoWarehouse || 0).toFixed(2),
+                  })}
+                  placement="top"
+                >
+                  <div
+                    className={`text-[10px] text-slate-400 font-bold mt-2 uppercase tracking-tighter ${
+                      getLanguage() === "en" ? "w-[140px] truncate" : "truncate"
+                    }`}
+                  >
+                    {t("净有效率 {{value}}%", {
+                      value: (statistics.averageForecastEfficiencyNoWarehouse || 0).toFixed(2),
+                    })}
+                  </div>
+                </Tooltip>
                 {statistics.totalCloudPower24h != 0 && (
                   <div className="text-[10px] text-slate-400 font-bold truncate mt-2 uppercase tracking-tighter">
-                    包含云算力 {(statistics.totalCloudPower24h || 0).toFixed(2)}E
+                    {t("包含云算力 {{value}}E", { value: (statistics.totalCloudPower24h || 0).toFixed(2) })}
                   </div>
                 )}
                 {/* <div className="text-[10px] text-slate-400 font-bold uppercase tracking-tighter flex items-center justify-between gap-2">
@@ -929,6 +1065,42 @@ const App: React.FC = () => {
                   </span>
                 </div> */}
               </div>
+              <Tooltip
+                title={
+                  <div className="text-xs">
+                    <div>
+                      {t("平均有效率(含仓库)：{{value}}%", {
+                        value: (statistics.averageEfficiency || 0).toFixed(2),
+                      })}
+                    </div>
+                    <div>
+                      {t("净有效率(含仓库)：{{value}}%", {
+                        value: (statistics.averageForecastEfficiency || 0).toFixed(2),
+                      })}
+                    </div>
+                  </div>
+                }
+              >
+                <Tooltip title={t("含仓库")} placement="top">
+                  <div
+                    className={`absolute top-1/2 right-3 inline-flex items-center gap-1 px-2 py-0.5 rounded-full border border-amber-300 bg-amber-50 text-amber-600 text-[10px] font-bold cursor-pointer hover:bg-amber-100 hover:text-amber-700 transition-colors ${
+                      getLanguage() === "en" ? "max-w-[110px]" : ""
+                    }`}
+                    style={{ transform: "translateY(calc(-50% + 15px))" }}
+                  >
+                    <Warehouse className="w-3 h-3 shrink-0" />
+                    <span
+                      className={`${getLanguage() === "en" ? "truncate" : ""} block`}
+                      style={getLanguage() === "en" ? { maxWidth: 80 } : undefined}
+                    ></span>
+                  </div>
+                </Tooltip>
+              </Tooltip>
+              {/* <Tooltip title="不含租赁算力、仓库算力、待撤场算力">
+                <div className="absolute bottom-3 right-5 w-3.5 h-3.5 rounded-full border border-slate-300 text-slate-400 flex items-center justify-center text-[9px] font-bold cursor-pointer hover:bg-slate-100 hover:text-slate-600 transition-colors">
+                  !
+                </div>
+              </Tooltip> */}
             </div>
 
             <div className="flex-1 basis-0 bg-white border border-slate-200 rounded-2xl p-5 flex flex-col justify-between hover:border-slate-300 hover:shadow-sm transition-all h-28">
@@ -938,7 +1110,7 @@ const App: React.FC = () => {
                 </div>
                 <div className="flex-1 min-w-0">
                   <div className="text-[10px] font-black text-slate-400 uppercase tracking-tighter truncate">
-                    总理论算力
+                    {t("总理论算力")}
                   </div>
                   <div className="flex items-baseline gap-0.5 leading-none mt-1.5">
                     <span className="text-2xl font-black text-slate-800 tracking-tighter">
@@ -948,13 +1120,19 @@ const App: React.FC = () => {
                   </div>
 
                   <div className="text-[10px] text-slate-400 font-bold uppercase tracking-tighter flex items-center justify-between gap-2">
-                    <span className="truncate">24H总算力 {(statistics.totalPower24h || 0).toFixed(2)}E</span>
+                    <span className="truncate">
+                      {t("24H总算力 {{value}}E", { value: (statistics.totalPower24h || 0).toFixed(2) })}
+                    </span>
                     {/* <span className="truncate">租赁算力 {(statistics.totalLeasedPower24h || 0).toFixed(2)}E</span> */}
                   </div>
                   <div className="text-[10px] text-slate-400 font-bold uppercase tracking-tighter flex items-center justify-between gap-2">
                     <span className="truncate">
-                      {statistics.totalCloudPower24h != 0 && "剔除"}租赁算力{" "}
-                      {(statistics.totalLeasedPower24h || 0).toFixed(2)}E
+                      {t("租赁算力 {{value}}", { value: (statistics.totalLeasedPower24h || 0).toFixed(2) })}E
+                      {/* {t("{{value}}租赁算力{{value2}} {{value3}}E", {
+                        value: statistics.totalCloudPower24h != 0 && t("剔除"),
+                        value2: " ",
+                        value3: (statistics.totalLeasedPower24h || 0).toFixed(2),
+                      })} */}
                     </span>
                   </div>
                 </div>
@@ -966,7 +1144,7 @@ const App: React.FC = () => {
               </div>
               <div className="flex-1 min-w-0">
                 <div className="text-[10px] font-black text-slate-400 uppercase tracking-tighter truncate">
-                  24H 产出
+                  {t("24H 产出")}
                 </div>
                 <div className="flex items-baseline gap-0.5 leading-none mt-1.5">
                   <span className="text-2xl font-black text-slate-900 tracking-tighter">
@@ -985,23 +1163,23 @@ const App: React.FC = () => {
               </div>
               <div className="flex-1 min-w-0">
                 <div className="text-[10px] font-black text-slate-400 uppercase tracking-tighter truncate">
-                  托管设备
+                  {t("托管设备")}
                 </div>
                 <div className="flex items-baseline gap-0.5 leading-none mt-1.5">
                   <span className="text-2xl font-black text-slate-900 tracking-tighter">
                     {(statistics.totalMachines || 0).toLocaleString()}
                   </span>
-                  <span className="text-[11px] font-bold text-slate-400 ml-1.5 uppercase">台</span>
+                  <span className="text-[11px] font-bold text-slate-400 ml-1.5 uppercase">{t("台")}</span>
                 </div>
                 <div className="text-[10px] text-slate-400 font-bold truncate mt-2 uppercase tracking-tighter">
-                  总故障数 {(statistics.totalFailures24h || 0).toLocaleString()}
+                  {t("总故障数 {{value}}", { value: (statistics.totalFailures24h || 0).toLocaleString() })}
                 </div>
               </div>
             </div>
             <div className="bg-white border border-slate-200 rounded-xl flex items-stretch shadow-sm overflow-hidden h-28 basis-0 grow-[2]">
               <div className="bg-[#0f172a] px-5 flex flex-col justify-center border-r border-slate-800 shrink-0 min-w-[100px]">
                 <div className="flex items-center gap-1.5 text-rose-500 text-[10px] font-black uppercase tracking-tighter mb-1">
-                  <AlertTriangle className="w-3.5 h-3.5" /> 影响分析
+                  <AlertTriangle className="w-3.5 h-3.5" /> {t("影响分析")}
                 </div>
                 <div className="text-2xl font-black text-white leading-none">
                   {(statistics.totalPowerImpact || 0).toFixed(2)}
@@ -1014,7 +1192,7 @@ const App: React.FC = () => {
               <div className="flex-1 flex flex-col justify-center px-2 py-1 gap-1">
                 <div className="flex items-center gap-3">
                   <span className="text-[10px] font-bold text-slate-500 w-14 truncate shrink-0">
-                    限电影响
+                    {t("限电影响")}
                   </span>
                   <div className="flex-1 h-1 bg-slate-100 rounded-full overflow-hidden">
                     <div
@@ -1033,7 +1211,9 @@ const App: React.FC = () => {
                   </div>
                 </div>
                 <div className="flex items-center gap-3 ">
-                  <span className="text-[10px] font-bold text-slate-500 w-14 truncate shrink-0">低功耗</span>
+                  <span className="text-[10px] font-bold text-slate-500 w-14 truncate shrink-0">
+                    {t("低功耗")}
+                  </span>
                   <div className="flex-1 h-1 bg-slate-100 rounded-full overflow-hidden">
                     <div
                       className="h-full bg-amber-500 rounded-full"
@@ -1053,7 +1233,7 @@ const App: React.FC = () => {
                 </div>
                 <div className="flex items-center gap-3">
                   <span className="text-[10px] font-bold text-slate-500 w-14 truncate shrink-0">
-                    撤场影响
+                    {t("撤场影响")}
                   </span>
                   <div className="flex-1 h-1 bg-slate-100 rounded-full overflow-hidden">
                     <div
@@ -1073,7 +1253,9 @@ const App: React.FC = () => {
                   </div>
                 </div>
                 <div className="flex items-center gap-3">
-                  <span className="text-[10px] font-bold text-slate-500 w-14 truncate shrink-0">其他</span>
+                  <span className="text-[10px] font-bold text-slate-500 w-14 truncate shrink-0">
+                    {t("其他")}
+                  </span>
                   <div className="flex-1 h-1 bg-slate-100 rounded-full overflow-hidden">
                     <div
                       className="h-full bg-slate-300 rounded-full"
@@ -1111,14 +1293,14 @@ const App: React.FC = () => {
             <span>
               <Switch size="small" checked={showCollectionOnly} onChange={setShowCollectionOnly} />
               {"  "}
-              <span style={{ marginRight: "10px" }}>我的自选</span>
+              <span style={{ marginRight: "10px" }}>{t("我的自选")}</span>
             </span>
 
             <div style={{ color: "#000" }}>
               <Select
                 mode="multiple"
                 size={"middle"}
-                placeholder="选择场地"
+                placeholder={t("选择场地")}
                 // className="w-80"
                 style={{ minWidth: "300px", marginRight: "15px" }}
                 options={siteOptions}
@@ -1133,11 +1315,12 @@ const App: React.FC = () => {
                 onClick={exportToCSV}
                 className="!rounded-button"
               >
-                导出报表
+                {t("导出报表")}
               </Button>
             </div>
           </div>
           <Table
+            components={{ header: { cell: ResizableHeaderCell } }}
             columns={columnsToRender}
             dataSource={filteredData}
             scroll={{ x: 1500 }}
@@ -1148,7 +1331,7 @@ const App: React.FC = () => {
               showSizeChanger: true,
               pageSizeOptions: ["10", "20", "30", "50"],
               defaultPageSize: 10,
-              showTotal: (total) => `共 ${total} 条`,
+              showTotal: (total) => t("共 {{total}} 条", { total: total }),
               total: filteredData?.length,
               onChange: () => {
                 const tableBody = document.querySelector(".ant-table-body");

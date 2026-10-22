@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Card, Col, Radio, Row } from "antd";
 import { ReactEcharts } from "@/components/react-echarts";
 
+import { t } from "@/locales";
 import { fetchLastestHashRate } from "@/pages/mining/api.tsx";
 
 const MiningHashCard = () => {
@@ -125,7 +126,7 @@ const MiningHashCard = () => {
     <Card bordered={false} className="card-wapper">
       <Row justify="space-between" align="middle">
         <Col>
-          <h3 style={{ margin: 0 }}>日算力</h3>
+          <h3 style={{ margin: 0 }}>{t("日算力")}</h3>
         </Col>
         <Col>
           <Radio.Group
@@ -135,13 +136,13 @@ const MiningHashCard = () => {
             size="middle"
           >
             <Radio.Button value="7" className={`radio-button ${timeFrame === "7" ? "active" : ""}`}>
-              7天
+              {t("7天")}
             </Radio.Button>
             <Radio.Button value="30" className={`radio-button ${timeFrame === "30" ? "active" : ""}`}>
-              30天
+              {t("30天")}
             </Radio.Button>
             <Radio.Button value="90" className={`radio-button ${timeFrame === "90" ? "active" : ""}`}>
-              90天
+              {t("90天")}
             </Radio.Button>
           </Radio.Group>
         </Col>

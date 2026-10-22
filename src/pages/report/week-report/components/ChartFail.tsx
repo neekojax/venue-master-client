@@ -4,6 +4,8 @@ import { GridComponent, TitleComponent, TooltipComponent } from "echarts/compone
 import * as echarts from "echarts/core";
 import { CanvasRenderer } from "echarts/renderers";
 
+import { t } from "@/locales";
+
 // 注册 ECharts 组件
 echarts.use([LineChart, GridComponent, TooltipComponent, TitleComponent, CanvasRenderer]);
 
@@ -80,7 +82,7 @@ const WaveLineCard: React.FC<Props> = ({ failureRate }) => {
       yAxis: [
         {
           type: "value",
-          name: "故障率",
+          name: t("故障率"),
           // min: 0,
           // max: 100,
           splitNumber: 4,
@@ -92,7 +94,7 @@ const WaveLineCard: React.FC<Props> = ({ failureRate }) => {
         },
         {
           type: "value",
-          name: "故障数",
+          name: t("故障数"),
           position: "right",
           show: false,
           // min: 0,
@@ -107,7 +109,7 @@ const WaveLineCard: React.FC<Props> = ({ failureRate }) => {
       series: [
         {
           type: "line",
-          name: "故障率",
+          name: t("故障率"),
           smooth: true,
           itemStyle: {
             color: "rgb(216, 70, 70)", //rgb(216, 70, 70) 点的颜色
@@ -126,7 +128,7 @@ const WaveLineCard: React.FC<Props> = ({ failureRate }) => {
         },
         {
           type: "line",
-          name: "故障数",
+          name: t("故障数"),
           smooth: true,
 
           showSymbol: false,
@@ -168,7 +170,7 @@ const WaveLineCard: React.FC<Props> = ({ failureRate }) => {
   return (
     <>
       <div className="flex justify-between items-center mb-4">
-        <h3 className="text-lg font-semibold">故障率</h3>
+        <h3 className="text-lg font-semibold">{t("故障率")}</h3>
         {/* <Radio.Group
                     value={chart.period}
                     onChange={(e) => {

@@ -1,5 +1,7 @@
 import React from "react";
 
+import { t } from "@/locales";
+
 interface WeatherDetailData {
   date: string;
   day_period: string;
@@ -19,19 +21,19 @@ interface WeatherDetailProps {
 }
 
 const weatherConditions = [
-  { label: "晴天", value: "sunny" },
-  { label: "多云", value: "cloudy" },
-  { label: "雷暴", value: "storm" },
+  { label: t("晴天"), value: "sunny" },
+  { label: t("多云"), value: "cloudy" },
+  { label: t("雷暴"), value: "storm" },
 ];
 
 const normalizeCondition = (w: string): string => {
   // console.log('w', w);
   if (!w) return "sunny";
   const s = w.toLowerCase();
-  if (w.includes("雷") || s.includes("storm")) return "storm";
-  if (w.includes("云") || s.includes("cloud")) return "cloudy";
-  if (w.includes("雨") || w.includes("暴雨") || s.includes("rain")) return "rain";
-  if (w.includes("阴")) return "yin";
+  if (w.includes(t("雷")) || s.includes("storm")) return "storm";
+  if (w.includes(t("云")) || s.includes("cloud")) return "cloudy";
+  if (w.includes(t("雨")) || w.includes(t("暴雨")) || s.includes("rain")) return "rain";
+  if (w.includes(t("阴"))) return "yin";
   return "sunny";
 };
 
@@ -57,7 +59,7 @@ const WeatherDetail: React.FC<WeatherDetailProps> = ({ item }) => {
 
   const defaultDay: WeatherDetailData = {
     date: date ?? "",
-    day_period: "白天",
+    day_period: t("白天"),
     weather: "-",
     min_temperature: 0,
     max_temperature: 0,
@@ -67,7 +69,7 @@ const WeatherDetail: React.FC<WeatherDetailProps> = ({ item }) => {
   };
   const defaultNight: WeatherDetailData = {
     date: date ?? "",
-    day_period: "夜间",
+    day_period: t("夜间"),
     weather: "-",
     min_temperature: 0,
     max_temperature: 0,
@@ -97,32 +99,33 @@ const WeatherDetail: React.FC<WeatherDetailProps> = ({ item }) => {
           <div className="grid grid-cols-2 gap-2">
             {/* 白天天气（紧凑） */}
             <div>
-              <h3 className="text-xs text-gray-500 dark:text-gray-400 mb-1">白天</h3>
+              <h3 className="text-xs text-gray-500 dark:text-gray-400 mb-1">{t("白天")}</h3>
               <div className="flex flex-wrap items-center gap-2">
                 <div className="flex items-center">
-                  {(dayData.weather || "").includes("晴") && (
+                  {(dayData.weather || "").includes(t("晴")) && (
                     <span className="text-lg mr-1" role="img" aria-label="sunny">
                       ☀️
                     </span>
                   )}
-                  {(dayData.weather || "").includes("多云") && (
+                  {(dayData.weather || "").includes(t("多云")) && (
                     <span className="text-lg mr-1" role="img" aria-label="cloudy">
                       🌤
                     </span>
                   )}
-                  {(dayData.weather || "").includes("阴") && (
+                  {(dayData.weather || "").includes(t("阴")) && (
                     <span className="text-lg mr-1 text-gray-400" role="img" aria-label="rainy">
                       ☁️
                     </span>
                   )}
                   {/* (dayData.weather || "").includes("多云") || (dayData.weather || "").includes("阴") */}
 
-                  {((dayData.weather || "").includes("大雨") || (dayData.weather || "").includes("暴雨")) && (
+                  {((dayData.weather || "").includes(t("大雨")) ||
+                    (dayData.weather || "").includes(t("暴雨"))) && (
                     <span className="text-lg mr-1" role="img" aria-label="rainy">
                       ⛈️
                     </span>
                   )}
-                  {(dayData.weather || "").includes("小雨") && (
+                  {(dayData.weather || "").includes(t("小雨")) && (
                     <span className="text-lg mr-1" role="img" aria-label="rainy">
                       🌧
                     </span>
@@ -157,12 +160,14 @@ const WeatherDetail: React.FC<WeatherDetailProps> = ({ item }) => {
                   {dayData.min_temperature}~{dayData.max_temperature}°C
                 </div>
                 <div className="flex items-center gap-2 text-xs text-gray-600">
-                  <span>湿度: {dayData.humidity}%</span>
+                  <span>{t("湿度: {{humidity}}%", { humidity: dayData.humidity })}</span>
                   <span>|</span>
-                  <span>风速: {Number(dayData.wind_speed).toFixed(0)} km/h</span>
+                  <span>{t("风速: {{value}} km/h", { value: Number(dayData.wind_speed).toFixed(0) })}</span>
                   <span>|</span>
                   <span>
-                    降水: {dayData.precipitation > 0 ? `${dayData.precipitation.toFixed(2)}mm` : "无"}
+                    {t("降水: {{value}}", {
+                      value: dayData.precipitation > 0 ? `${dayData.precipitation.toFixed(2)}mm` : t("无"),
+                    })}
                   </span>
                 </div>
               </div>
@@ -170,20 +175,20 @@ const WeatherDetail: React.FC<WeatherDetailProps> = ({ item }) => {
 
             {/* 夜间天气（紧凑） */}
             <div>
-              <h3 className="text-xs text-gray-500 dark:text-gray-400 mb-1">夜间</h3>
+              <h3 className="text-xs text-gray-500 dark:text-gray-400 mb-1">{t("夜间")}</h3>
               <div className="flex flex-wrap items-center gap-2">
                 <div className="flex items-center">
-                  {(nightData.weather || "").includes("晴") && (
+                  {(nightData.weather || "").includes(t("晴")) && (
                     <span className="text-lg mr-1" role="img" aria-label="sunny">
                       🌙
                     </span>
                   )}
-                  {(nightData.weather || "").includes("多云") && (
+                  {(nightData.weather || "").includes(t("多云")) && (
                     <span className="text-lg mr-1" role="img" aria-label="cloudy">
                       ☁️
                     </span>
                   )}
-                  {(nightData.weather || "").includes("阴") && (
+                  {(nightData.weather || "").includes(t("阴")) && (
                     <span
                       className="text-lg mr-1 text-gray-400"
                       role="img"
@@ -195,13 +200,13 @@ const WeatherDetail: React.FC<WeatherDetailProps> = ({ item }) => {
                   )}
 
                   {/* (dayData.weather || "").includes("多云") || (dayData.weather || "").includes("阴") */}
-                  {((nightData.weather || "").includes("大雨") ||
-                    (nightData.weather || "").includes("暴雨")) && (
+                  {((nightData.weather || "").includes(t("大雨")) ||
+                    (nightData.weather || "").includes(t("暴雨"))) && (
                     <span className="text-lg mr-1" role="img" aria-label="rainy">
                       ⛈️
                     </span>
                   )}
-                  {(nightData.weather || "").includes("小雨") && (
+                  {(nightData.weather || "").includes(t("小雨")) && (
                     <span className="text-lg mr-1" role="img" aria-label="rainy">
                       🌧
                     </span>
@@ -238,15 +243,22 @@ const WeatherDetail: React.FC<WeatherDetailProps> = ({ item }) => {
                   {nightData.min_temperature}~{nightData.max_temperature}°C
                 </div>
                 <div className="flex items-center gap-2 text-xs text-gray-600">
-                  <span>湿度: {Math.max(0, nightData.humidity ?? 0)}%</span>
-                  <span>|</span>
-                  <span>风速: {parseFloat(Number(nightData.wind_speed).toFixed(0))} km/h</span>
+                  <span>{t("湿度: {{value}}%", { value: Math.max(0, nightData.humidity ?? 0) })}</span>
                   <span>|</span>
                   <span>
-                    降水:{" "}
-                    {nightData.precipitation > 0
-                      ? `${Math.min(10, nightData.precipitation ?? 0).toFixed(2)}mm`
-                      : "无"}
+                    {t("风速: {{value}} km/h", {
+                      value: parseFloat(Number(nightData.wind_speed).toFixed(0)),
+                    })}
+                  </span>
+                  <span>|</span>
+                  <span>
+                    {t("降水:{{value}} {{value2}}", {
+                      value: " ",
+                      value2:
+                        nightData.precipitation > 0
+                          ? `${Math.min(10, nightData.precipitation ?? 0).toFixed(2)}mm`
+                          : t("无"),
+                    })}
                   </span>
                 </div>
               </div>

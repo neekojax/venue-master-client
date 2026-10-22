@@ -4,6 +4,7 @@ import { useParams } from "react-router-dom";
 import { DollarCircleOutlined } from "@ant-design/icons";
 import * as echarts from "echarts";
 
+import { t } from "@/locales";
 import { fetchDailyBtcPrice } from "@/pages/custody-statistics/api";
 
 const PriceApp: React.FC = () => {
@@ -51,7 +52,7 @@ const PriceApp: React.FC = () => {
       const renderChart = () => {
         btcChart.setOption({
           title: {
-            text: "BTC单价趋势（USD）",
+            text: t("BTC单价趋势（USD）"),
             textStyle: {
               fontSize: 16,
               fontWeight: "bold",
@@ -125,16 +126,16 @@ const PriceApp: React.FC = () => {
       <div className="bg-white rounded-xl shadow-md p-6 mb-10 transition-all hover:shadow-lg">
         <div className="flex items-center mb-4">
           <DollarCircleOutlined className="text-blue-500 text-xl mr-2" />
-          <h2 className="text-lg font-semibold text-gray-700">BTC价格走势</h2>
+          <h2 className="text-lg font-semibold text-gray-700">{t("BTC价格走势")}</h2>
         </div>
         <div ref={btcChartRef} className="w-full h-80"></div>
         <div className="mt-4 flex flex-wrap gap-2">
           <div className="bg-blue-50 rounded-lg px-4 py-2">
-            <span className="text-blue-800 font-medium">最高价:</span>
+            <span className="text-blue-800 font-medium">{t("最高价:")}</span>
             <span className="text-blue-600 ml-1">${Math.max(...btcPrices).toLocaleString()}</span>
           </div>
           <div className="bg-blue-50 rounded-lg px-4 py-2">
-            <span className="text-blue-800 font-medium">最低价:</span>
+            <span className="text-blue-800 font-medium">{t("最低价:")}</span>
             <span className="text-blue-600 ml-1">${Math.min(...btcPrices).toLocaleString()}</span>
           </div>
         </div>

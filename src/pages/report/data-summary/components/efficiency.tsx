@@ -6,6 +6,7 @@ import EfficiencyBase from "./efficiencyBase";
 import EfficiencyTable from "./efficiencyTable";
 import { useSelector, useSettingsStore } from "@/stores";
 
+import { t } from "@/locales";
 import { fetchEfficiencyStat } from "@/pages/report/api.tsx";
 
 export type EfficiencyDetail = {
@@ -77,11 +78,11 @@ const Efficiency: React.FC<{ chartDate: string; loading?: boolean; onLoaded?: ()
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-2 text-lg">
             <i className="fas fa-tachometer-alt text-blue-500"></i>
-            <span>CANGO - 效率</span>
+            <span>{t("CANGO - 效率")}</span>
           </div>
           <div className="text-sm text-gray-400">
             <Link to="/report/data-summary/list" className="text-blue-500 hover:underline">
-              查看更多
+              {t("查看更多")}
             </Link>
           </div>
         </div>
@@ -91,30 +92,30 @@ const Efficiency: React.FC<{ chartDate: string; loading?: boolean; onLoaded?: ()
             tableProps={{
               columns: [
                 {
-                  title: "地区",
+                  title: t("地区"),
                   dataIndex: "Category",
                   key: "Category",
                 },
                 {
-                  title: "有效算力",
+                  title: t("有效算力"),
                   dataIndex: "EffectivePower",
                   key: "EffectivePower",
                   render: (value) => `${value.toFixed(2)} EH/s`,
                 },
                 {
-                  title: "有效率",
+                  title: t("有效率"),
                   dataIndex: "Efficiency",
                   key: "Efficiency",
                   render: (value) => `${value.toFixed(2)}%`,
                 },
                 {
-                  title: "日产出",
+                  title: t("日产出"),
                   dataIndex: "DailyOutput",
                   key: "DailyOutput",
                   render: (value) => `${value.toFixed(2)}`,
                 },
                 {
-                  title: "累计产出",
+                  title: t("累计产出"),
                   dataIndex: "CumulativeOutput",
                   key: "CumulativeOutput",
                   render: (value) => `${value.toFixed(2)}`,
@@ -130,30 +131,30 @@ const Efficiency: React.FC<{ chartDate: string; loading?: boolean; onLoaded?: ()
             tableProps={{
               columns: [
                 {
-                  title: "类型",
+                  title: t("类型"),
                   dataIndex: "Category",
                   key: "Category",
                 },
                 {
-                  title: "有效算力",
+                  title: t("有效算力"),
                   dataIndex: "EffectivePower",
                   key: "EffectivePower",
                   render: (value) => `${value.toFixed(2)} EH/s`,
                 },
                 {
-                  title: "有效率",
+                  title: t("有效率"),
                   dataIndex: "Efficiency",
                   key: "Efficiency",
                   render: (value) => `${value.toFixed(2)}%`,
                 },
                 {
-                  title: "日产出",
+                  title: t("日产出"),
                   dataIndex: "DailyOutput",
                   key: "DailyOutput",
                   render: (value) => `${value.toFixed(2)}`,
                 },
                 {
-                  title: "累计产出",
+                  title: t("累计产出"),
                   dataIndex: "CumulativeOutput",
                   key: "CumulativeOutput",
                   render: (value) => `${value.toFixed(2)}`,

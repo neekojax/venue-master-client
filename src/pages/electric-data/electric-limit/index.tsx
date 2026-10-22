@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import EditTable from "@/components/edit-table";
 import { exportElectricDataToExcel, exportElectricDataToExcelT } from "@/utils/excel.ts";
 
+import { t } from "@/locales";
 import { fetchSettlementData } from "@/pages/electric-data/api.tsx";
 import ElectricSelectComponent from "@/pages/electric-data/components/electric-select.tsx";
 import { PRICE_TYPE_REAL_TIME, PRICE_TYPE_T1, SettlementQueryParam } from "@/pages/electric-data/type.tsx";
@@ -21,31 +22,31 @@ export default function ElectricLimit() {
     if (selectedType === PRICE_TYPE_REAL_TIME) {
       setColumns([
         {
-          title: "电力接入点",
+          title: t("电力接入点"),
           dataIndex: "name",
           key: "name",
           width: 300,
         },
         {
-          title: "数据口径",
+          title: t("数据口径"),
           dataIndex: "type",
           key: "type",
           width: 300,
         },
         {
-          title: "限电时间范围",
+          title: t("限电时间范围"),
           dataIndex: "time_range",
           key: "time_range",
         },
         {
-          title: "限电时长",
+          title: t("限电时长"),
           dataIndex: "time_length",
           key: "time_length",
           width: 100,
           sorter: (a: any, b: any) => a.time_length - b.time_length,
           render: (text: any) => (
             <span>
-              {text} <span style={{ fontSize: "em" }}> 分 </span>
+              {text} <span style={{ fontSize: "em" }}> {t("分")} </span>
             </span>
           ),
         },
@@ -53,26 +54,26 @@ export default function ElectricLimit() {
     } else if (selectedType === PRICE_TYPE_T1) {
       setColumns([
         {
-          title: "电力接入点",
+          title: t("电力接入点"),
           dataIndex: "name",
           key: "name",
           width: 100,
         },
         {
-          title: "限电时间范围",
+          title: t("限电时间范围"),
           dataIndex: "time_range",
           key: "time_range",
           width: 100,
         },
         {
-          title: "限电时长",
+          title: t("限电时长"),
           dataIndex: "time_length",
           key: "time_length",
           width: 100,
           sorter: (a: any, b: any) => a.time_length - b.time_length,
           render: (text: any) => (
             <span>
-              {text} <span style={{ fontSize: "em" }}> 小时 </span>
+              {text} <span style={{ fontSize: "em" }}> {t("小时")} </span>
             </span>
           ),
         },
@@ -132,7 +133,7 @@ export default function ElectricLimit() {
             {/*) : (*/}
             <p style={{ fontSize: "16px" }}>
               <i className="fas fa-exclamation-circle" style={{ marginRight: "8px", color: "#f39c12" }}></i>
-              暂无数据, 请选择电网场地搜索数据
+              {t("暂无数据, 请选择电网场地搜索数据")}
             </p>
             {/*)}*/}
           </div>

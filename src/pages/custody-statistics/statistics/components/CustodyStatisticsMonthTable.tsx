@@ -2,15 +2,20 @@ import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { InfoCircleOutlined } from "@ant-design/icons";
 import { Alert, Spin, Table, Tag, Tooltip } from "antd";
+import ResizableHeaderCell from "./ResizableHeaderCell";
 import { useSelector, useSettingsStore } from "@/stores";
 import { formatAmount } from "@/utils/num";
 
+import { t } from "@/locales";
 import { useMonthlyHostingFeeRatioList } from "@/pages/custody-statistics/hook/hook.ts";
+
+const VENUE_COLUMN_WIDTH_STORAGE_KEY = "custody-statistics-venue-column-width";
 
 type Props = {
   month: string; // YYYY-MM
   selectedVenues: string[];
   showHighFeeOnly: boolean;
+  showCollectionOnly?: boolean;
   discountFilter?: "全部状态" | "打折" | "不变" | "分润";
   visibleColumns?: string[];
   onVenueOptionsReady?: (options: { label: string; value: string }[]) => void;
@@ -22,6 +27,7 @@ export default function CustodyStatisticsMonthTable({
   month,
   selectedVenues,
   showHighFeeOnly,
+  showCollectionOnly = false,
   discountFilter,
   visibleColumns,
   onVenueOptionsReady,
@@ -55,6 +61,10 @@ export default function CustodyStatisticsMonthTable({
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(20);
   const [alertMessage, setAlertMessage] = useState("");
+  const [venueColumnWidth, setVenueColumnWidth] = useState<number>(() => {
+    const storedWidth = localStorage.getItem(VENUE_COLUMN_WIDTH_STORAGE_KEY);
+    return storedWidth ? Number(storedWidth) || 200 : 200;
+  });
 
   const venueOptions = useMemo(() => {
     const names = Array.from(new Set(tableData.map((i: any) => i.venue_name))).filter(Boolean) as string[];
@@ -102,6 +112,7 @@ export default function CustodyStatisticsMonthTable({
         downclock_before_profit: item.downclock_before_profit,
         downclock_after_profit: item.downclock_after_profit,
         shutdown_price: item.shutdown_price,
+        collection: Number(item.collection ?? 0),
       }));
       setTableData(newData);
     } else {
@@ -192,11 +203,19 @@ export default function CustodyStatisticsMonthTable({
       //   },
       // },
       {
-        title: <span className="fee-ratio-title">场地名</span>,
+        title: <span className="fee-ratio-title">{t("场地名")}</span>,
         dataIndex: "venue_name",
         key: "venue_name",
-        onHeaderCell: () => ({ className: "fee-ratio-header" }),
-        width: 200,
+        onHeaderCell: () =>
+          ({
+            className: "fee-ratio-header",
+            width: venueColumnWidth,
+            onColumnResize: (nextWidth: number) => {
+              setVenueColumnWidth(nextWidth);
+              localStorage.setItem(VENUE_COLUMN_WIDTH_STORAGE_KEY, String(nextWidth));
+            },
+          }) as any,
+        width: venueColumnWidth,
         sorter: (a: any, b: any) => a.venue_name.localeCompare(b.venue_name),
         render: (text: string) => {
           const isSpecialVenue = text === "Arct-HF01-J XP-AR-US" || text === "ARCT Technologies-HF02-AR-US";
@@ -209,7 +228,7 @@ export default function CustodyStatisticsMonthTable({
             >
               <div
                 style={{
-                  width: "200px",
+                  width: `${Math.max(120, venueColumnWidth - 24)}px`,
                   overflow: "hidden",
                   color: isSpecialVenue ? "red" : "#333",
                   textOverflow: "ellipsis",
@@ -219,7 +238,7 @@ export default function CustodyStatisticsMonthTable({
               >
                 {isSpecialVenue && (
                   <Tag color="red" style={{ marginLeft: 2 }}>
-                    补充
+                    {t("补充")}
                   </Tag>
                 )}
                 <span>{text}</span>
@@ -244,7 +263,7 @@ export default function CustodyStatisticsMonthTable({
       //   ),
       // },
       {
-        title: <span className="fee-ratio-title">收益(BTC/USD/净USD)</span>,
+        title: <span className="fee-ratio-title">{t("收益(BTC/USD/净USD)")}</span>,
         dataIndex: "total_income_btc",
         key: "total_income_btc",
         width: 280,
@@ -269,8 +288,8 @@ export default function CustodyStatisticsMonthTable({
       {
         title: (
           <span className="fee-ratio-title">
-            预估功耗{" "}
-            <Tooltip title="收到的最新一期电费账单总功耗，等于“账单分摊电量/对应期间矿池算力”">
+            {t("预估功耗")}{" "}
+            <Tooltip title={t("收到的最新一期电费账单总功耗，等于“账单分摊电量/对应期间矿池算力”")}>
               <InfoCircleOutlined style={{ marginLeft: 6, color: "#999" }} />
             </Tooltip>
           </span>
@@ -290,7 +309,7 @@ export default function CustodyStatisticsMonthTable({
       {
         dataIndex: "nominal_power_consumption",
         key: "nominal_power_consumption",
-        title: <span className="fee-ratio-title">额定功耗</span>,
+        title: <span className="fee-ratio-title">{t("额定功耗")}</span>,
         width: 120,
         render: (text: any) => (
           <>
@@ -304,7 +323,7 @@ export default function CustodyStatisticsMonthTable({
       {
         dataIndex: "power_consumption_diff",
         key: "power_consumption_diff",
-        title: <span className="fee-ratio-title">功耗差异</span>,
+        title: <span className="fee-ratio-title">{t("功耗差异")}</span>,
         width: 120,
         sorter: (a: any, b: any) =>
           (typeof a.power_consumption_diff === "number"
@@ -327,7 +346,7 @@ export default function CustodyStatisticsMonthTable({
       {
         dataIndex: "hosting_fee_ratio",
         key: "hosting_fee_ratio",
-        title: <span className="fee-ratio-title">总托管费</span>,
+        title: <span className="fee-ratio-title">{t("总托管费")}</span>,
         width: 140,
         render: (text: any, record: any) => (
           <span>
@@ -337,7 +356,7 @@ export default function CustodyStatisticsMonthTable({
         ),
       },
       {
-        title: <span className="fee-ratio-title">正常托管费占比</span>,
+        title: <span className="fee-ratio-title">{t("正常托管费占比")}</span>,
         dataIndex: "hosting_fee_ratio",
         key: "hosting_fee_ratio",
         width: 140,
@@ -373,7 +392,7 @@ export default function CustodyStatisticsMonthTable({
         },
       },
       {
-        title: <span className="fee-ratio-title">正常托管单价</span>,
+        title: <span className="fee-ratio-title">{t("正常托管单价")}</span>,
         dataIndex: "basic_hosting_fee",
         key: "basic_hosting_fee",
         onHeaderCell: () => ({ className: "fee-ratio-header" }),
@@ -389,8 +408,8 @@ export default function CustodyStatisticsMonthTable({
       {
         title: (
           <span className="fee-ratio-title">
-            预期折扣效果{" "}
-            <Tooltip title="假定寄售期均可执行分润1%策略">
+            {t("预期折扣效果")}{" "}
+            <Tooltip title={t("假定寄售期均可执行分润1%策略")}>
               <InfoCircleOutlined style={{ marginLeft: 6, color: "#999" }} />
             </Tooltip>
           </span>
@@ -403,17 +422,17 @@ export default function CustodyStatisticsMonthTable({
         render: (text: any) => {
           // 允许后端返回英文或中文状态，统一到三类：打折、不变、分润
           const status = String(text || "").toUpperCase();
-          let label = "不变";
+          let label = t("不变");
           let color: any = "default";
 
-          if (status.includes("DISCOUNT") || text.includes("打折")) {
+          if (status.includes("DISCOUNT") || text.includes(t("打折"))) {
             label = text;
             color = "green"; // 打折：绿色
           } else if (status.includes("PROFIT") || text === "分润") {
-            label = "分润";
+            label = t("分润");
             color = "geekblue"; // 分润：蓝色
           } else {
-            label = "不变";
+            label = t("不变");
             color = "orange"; // 不变：橙色
           }
 
@@ -436,8 +455,8 @@ export default function CustodyStatisticsMonthTable({
       {
         title: (
           <span className="fee-ratio-title">
-            预估执行托管单价{" "}
-            <Tooltip title="寄售期统一依据我方留存收入1%作为利润、收入99%用于支付托管运维费倒推托管单价">
+            {t("预估执行托管单价")}{" "}
+            <Tooltip title={t("寄售期统一依据我方留存收入1%作为利润、收入99%用于支付托管运维费倒推托管单价")}>
               <InfoCircleOutlined style={{ marginLeft: 6, color: "#999" }} />
             </Tooltip>
           </span>
@@ -456,8 +475,8 @@ export default function CustodyStatisticsMonthTable({
       {
         title: (
           <span className="fee-ratio-title">
-            折后托管费占比{" "}
-            <Tooltip title="等于“打折或分润后托管费/（该期产币数*平均币价）”">
+            {t("折后托管费占比")}{" "}
+            <Tooltip title={t("等于“打折或分润后托管费/（该期产币数*平均币价）”")}>
               <InfoCircleOutlined style={{ marginLeft: 6, color: "#999" }} />
             </Tooltip>
           </span>
@@ -492,8 +511,8 @@ export default function CustodyStatisticsMonthTable({
       {
         title: (
           <span className="fee-ratio-title">
-            折后成本比
-            <Tooltip title="等于“（打折或分润后托管费+运维费）/（该期产币数*平均币价）”">
+            {t("折后成本比")}
+            <Tooltip title={t("等于“（打折或分润后托管费+运维费）/（该期产币数*平均币价）”")}>
               <InfoCircleOutlined style={{ marginLeft: 6, color: "#999" }} />
             </Tooltip>
           </span>
@@ -525,7 +544,7 @@ export default function CustodyStatisticsMonthTable({
         },
       },
       {
-        title: <span className="fee-ratio-title">降频后折扣</span>,
+        title: <span className="fee-ratio-title">{t("降频后折扣")}</span>,
         width: 120,
         dataIndex: "downclock_discount",
         key: "downclock_discount",
@@ -534,16 +553,16 @@ export default function CustodyStatisticsMonthTable({
         // render: (text: any) => (text === "MONTHLY" ? "月" : "日"),
         render: (text: any) => {
           const status = String(text || "").toUpperCase();
-          let label = "不变";
+          let label = t("不变");
           let color: any = "default";
-          if (status.includes("DISCOUNT") || text.includes("打折")) {
+          if (status.includes("DISCOUNT") || text.includes(t("打折"))) {
             label = text;
             color = "green";
           } else if (status.includes("PROFIT") || text === "分润") {
-            label = "分润";
+            label = t("分润");
             color = "geekblue";
           } else {
-            label = "不变";
+            label = t("不变");
             color = "orange";
           }
           return (
@@ -554,7 +573,7 @@ export default function CustodyStatisticsMonthTable({
         },
       },
       {
-        title: <span className="fee-ratio-title">降频后托管费占比</span>,
+        title: <span className="fee-ratio-title">{t("降频后托管费占比")}</span>,
         width: 140,
         dataIndex: "downclock_discount_hosting_fee_ratio",
         key: "downclock_discount_hosting_fee_ratio",
@@ -586,7 +605,7 @@ export default function CustodyStatisticsMonthTable({
         },
       },
       {
-        title: <span className="fee-ratio-title">降频后成本比</span>,
+        title: <span className="fee-ratio-title">{t("降频后成本比")}</span>,
         width: 140,
         dataIndex: "downclock_discount_cost_ratio",
         key: "downclock_discount_cost_ratio",
@@ -618,7 +637,7 @@ export default function CustodyStatisticsMonthTable({
         },
       },
       {
-        title: <span className="fee-ratio-title">关机币价</span>,
+        title: <span className="fee-ratio-title">{t("关机币价")}</span>,
         width: 120,
         dataIndex: "shutdown_price",
         key: "shutdown_price",
@@ -635,7 +654,7 @@ export default function CustodyStatisticsMonthTable({
       },
 
       {
-        title: <span className="fee-ratio-title">降频价格区间</span>,
+        title: <span className="fee-ratio-title">{t("降频价格区间")}</span>,
         width: 120,
         dataIndex: "downclock_price_ranges",
         key: "downclock_price_ranges",
@@ -657,7 +676,7 @@ export default function CustodyStatisticsMonthTable({
         },
       },
       {
-        title: <span className="fee-ratio-title">降频前利润</span>,
+        title: <span className="fee-ratio-title">{t("降频前利润")}</span>,
         width: 120,
         dataIndex: "downclock_before_profit",
         key: "downclock_before_profit",
@@ -669,7 +688,7 @@ export default function CustodyStatisticsMonthTable({
         },
       },
       {
-        title: <span className="fee-ratio-title">降频后利润</span>,
+        title: <span className="fee-ratio-title">{t("降频后利润")}</span>,
         width: 120,
         dataIndex: "downclock_after_profit",
         key: "downclock_after_profit",
@@ -681,7 +700,7 @@ export default function CustodyStatisticsMonthTable({
         },
       },
       {
-        title: <span className="fee-ratio-title">周期类型</span>,
+        title: <span className="fee-ratio-title">{t("周期类型")}</span>,
         width: 120,
         dataIndex: "period_type",
         key: "period_type",
@@ -707,7 +726,7 @@ export default function CustodyStatisticsMonthTable({
         ? allColumns.filter((c: any) => !c.key || visibleColumns.includes(c.key))
         : allColumns;
     setColumns(cols);
-  }, [startDate, endDate, currentPage, pageSize, visibleColumns]);
+  }, [startDate, endDate, currentPage, pageSize, venueColumnWidth, visibleColumns]);
 
   // 父驱动的筛选条件联动刷新 filteredData
   useEffect(() => {
@@ -726,13 +745,14 @@ export default function CustodyStatisticsMonthTable({
       const matchesHighFee = showHighFeeOnly ? ratioNum > 90 : true;
       const matchesSelectedVenues =
         selectedVenues.length > 0 ? selectedVenues.includes(item.venue_name) : true;
-      const df = discountFilter ?? "全部状态";
+      const df = discountFilter ?? t("全部状态");
       const matchesDiscount =
         df === "全部状态" ? true : normalizeDiscountStatus(item?.discount_status) === df;
-      return matchesHighFee && matchesSelectedVenues && matchesDiscount;
+      const matchesCollection = !showCollectionOnly || Number(item?.collection ?? 0) === 1;
+      return matchesHighFee && matchesSelectedVenues && matchesDiscount && matchesCollection;
     });
     setFilteredData(filtered);
-  }, [tableData, showHighFeeOnly, selectedVenues, discountFilter]);
+  }, [tableData, showHighFeeOnly, showCollectionOnly, selectedVenues, discountFilter]);
 
   // 通知父组件：过滤后的数据
   useEffect(() => {
@@ -743,7 +763,7 @@ export default function CustodyStatisticsMonthTable({
     return <Spin style={{ marginTop: 20 }} />;
   }
   if (error) {
-    return <Alert message="错误" description={error.message} type="error" showIcon />;
+    return <Alert message={t("错误")} description={error.message} type="error" showIcon />;
   }
 
   return (
@@ -753,18 +773,19 @@ export default function CustodyStatisticsMonthTable({
           className="bg-yellow-100 border border-yellow-400 text-yellow-700 px-4 py-3 rounded relative"
           role="alert"
         >
-          <strong className="font-bold">提示：</strong>
+          <strong className="font-bold">{t("提示：")}</strong>
           <span className="block sm:inline">{alertMessage}</span>
         </div>
       ) : (
         <>
           <Table
+            components={{ header: { cell: ResizableHeaderCell } }}
             pagination={{
               position: ["bottomCenter"],
               showSizeChanger: true,
               pageSizeOptions: ["10", "20", "30", "50"],
               defaultPageSize: 20,
-              showTotal: (total) => `共 ${total} 条`,
+              showTotal: (total) => t("共 {{total}} 条", { total: total }),
               total: filteredData?.length,
               onChange: (page, pageSize) => {
                 setCurrentPage(page);

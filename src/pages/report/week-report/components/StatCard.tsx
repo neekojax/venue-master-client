@@ -2,8 +2,6 @@ import React from "react";
 import {
   AlertTriangle,
   BatteryLow,
-  Cloud,
-  LogOut,
   ShieldCheck,
   Thermometer,
   TrendingDown,
@@ -11,6 +9,8 @@ import {
   ZapOff,
 } from "lucide-react";
 import { formatPercent } from "@/utils/format.ts";
+
+import { t } from "@/locales";
 
 const StatCard: React.FC<{ statistics: any | null }> = ({ statistics }) => {
   // Clean Stat Item for Weekly Report Panel
@@ -57,7 +57,7 @@ const StatCard: React.FC<{ statistics: any | null }> = ({ statistics }) => {
             <div className="p-1.5 bg-emerald-100 rounded-md">
               <ShieldCheck className="w-4 h-4 text-emerald-600" />
             </div>
-            <span>平均算力有效率</span>
+            <span>{t("平均算力有效率")}</span>
           </div>
           <div className="relative inline-block">
             <span className="text-6xl xl:text-7xl font-black text-slate-900 tracking-tight leading-none">
@@ -78,12 +78,12 @@ const StatCard: React.FC<{ statistics: any | null }> = ({ statistics }) => {
                   className={`mt-4 flex items-center gap-2 ${cls} px-3 py-1.5 rounded-full text-sm font-bold shadow-sm`}
                 >
                   {isUp ? <TrendingUp className="w-3.5 h-3.5" /> : <TrendingDown className="w-3.5 h-3.5" />}
-                  {isUp ? `${val} 较上周` : `${val} 较上周下降`}
+                  {isUp ? t("{{val}} 较上周", { val: val }) : t("{{val}} 较上周下降", { val: val })}
                 </div>
                 <p className="mt-4 text-xs text-slate-400 max-w-[200px] leading-relaxed">
                   {isUp
-                    ? "整体运行平稳，较上周效率提升显著，故障率控制在预期范围内。"
-                    : "本周效率较上周下降，需关注故障与环境因素并优化运行。"}
+                    ? t("整体运行平稳，较上周效率提升显著，故障率控制在预期范围内。")
+                    : t("本周效率较上周下降，需关注故障与环境因素并优化运行。")}
                 </p>
               </>
             );
@@ -92,7 +92,7 @@ const StatCard: React.FC<{ statistics: any | null }> = ({ statistics }) => {
         <div className="hidden lg:block w-px bg-slate-100 my-2"></div>
         <div className="flex-[2.5] grid grid-cols-2 md:grid-cols-3 gap-y-10 gap-x-8 xl:gap-x-12 content-center">
           <StatItem
-            label="总故障率"
+            label={t("总故障率")}
             value={formatPercent(statistics?.TotalFailureRate)}
             trend={
               statistics?.WeeklyFailureRateChange ? formatPercent(statistics?.WeeklyFailureRateChange) : ""
@@ -102,39 +102,41 @@ const StatCard: React.FC<{ statistics: any | null }> = ({ statistics }) => {
             color="rose"
           />
           <StatItem
-            label="高温影响率"
+            label={t("高温影响率")}
             value={formatPercent(statistics?.TotalHighTemperatureImpactRate)}
             trend=""
             icon={Thermometer}
             color="orange"
           />
           <StatItem
-            label="限电影响率"
+            label={t("限电影响率")}
             value={formatPercent(statistics?.TotalLimitImpactRate)}
             trend=""
             icon={ZapOff}
             color="amber"
           />
           <StatItem
-            label="低功耗比例"
+            label={t("低功耗比例")}
             value={formatPercent(statistics?.TotalLowPowerImpactRate)}
             trend=""
             icon={BatteryLow}
             color="blue"
           />
           <StatItem
-            label="撤场比例"
-            value={formatPercent(statistics?.TotalWithdrawImpactRate)}
+            label={t("电力影响率")}
+            value={formatPercent(
+              statistics?.TotalPowerEventImpactRate ?? statistics?.TotalWithdrawImpactRate,
+            )}
             trend=""
-            icon={LogOut}
-            color="slate"
+            icon={ZapOff}
+            color="amber"
           />
           <StatItem
-            label="云算力比例"
-            value={formatPercent(statistics?.TotalCloudPowerRate)}
+            label={t("设备故障影响率")}
+            value={formatPercent(statistics?.TotalDeviceFaultImpactRate ?? statistics?.TotalCloudPowerRate)}
             trend=""
-            icon={Cloud}
-            color="violet"
+            icon={AlertTriangle}
+            color="rose"
           />
         </div>
       </div>

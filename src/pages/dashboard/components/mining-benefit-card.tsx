@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { Card, Col, Row, Statistic } from "antd";
 import { ROUTE_PATHS } from "@/constants/common.ts";
 
+import { t } from "@/locales";
 import { fetchTotalLastProfitStatus } from "@/pages/mining/api.tsx";
 
 interface MiningPoolCardProps {
@@ -44,7 +45,7 @@ const MiningBenefitCard: React.FC<MiningPoolCardProps> = ({ poolType }) => {
   return (
     <div>
       <Card
-        title={"效益"}
+        title={t("效益")}
         loading={loading}
         bordered={false}
         className="card-wapper"
@@ -69,7 +70,7 @@ const MiningBenefitCard: React.FC<MiningPoolCardProps> = ({ poolType }) => {
         <Row gutter={24}>
           <Col span={24}>
             <Statistic
-              title={`昨日总收益`}
+              title={t("昨日总收益")}
               value={lastProfitStatus?.last_day_income_statistics.income_btc} // 假设昨日总收益在状态中
               valueStyle={{ color: "green", fontSize: "20px", fontWeight: "bold" }}
               // prefix={<BiLogoBitcoin style={{ fontSize: "20px", color: "gold" }} />}
@@ -140,7 +141,7 @@ const MiningBenefitCard: React.FC<MiningPoolCardProps> = ({ poolType }) => {
         </Row> */}
       </Card>
       <Card
-        title={"电费占比"}
+        title={t("电费占比")}
         loading={loading}
         bordered={false}
         className="card-wapper"
@@ -165,7 +166,7 @@ const MiningBenefitCard: React.FC<MiningPoolCardProps> = ({ poolType }) => {
         <Row gutter={24}>
           <Col span={8} style={{ borderLeft: "1px solid #f0f0f0", paddingLeft: "16px" }}>
             <Statistic
-              title={`昨日电费占比`}
+              title={t("昨日电费占比")}
               value={lastProfitStatus?.last_day_hosting_fee_ratio} // 假设效率值在状态中
               valueStyle={{ fontSize: "14px", fontWeight: "bold" }}
               // suffix="%"
@@ -173,7 +174,7 @@ const MiningBenefitCard: React.FC<MiningPoolCardProps> = ({ poolType }) => {
           </Col>
           <Col span={8} style={{ borderLeft: "1px solid #f0f0f0", paddingLeft: "16px" }}>
             <Statistic
-              title="近14天电费占比"
+              title={t("近14天电费占比")}
               value={lastProfitStatus?.last_2week_hosting_fee_ratio} // 假设一周平均效率在状态中
               valueStyle={{ fontSize: "14px", fontWeight: "bold" }}
               // suffix="%"
@@ -181,7 +182,7 @@ const MiningBenefitCard: React.FC<MiningPoolCardProps> = ({ poolType }) => {
           </Col>
           <Col span={8} style={{ borderLeft: "1px solid #f0f0f0", paddingLeft: "16px" }}>
             <Statistic
-              title={`${lastProfitStatus?.month}月电费占比`} // 使用模板字符串来动态插入月份
+              title={t("{{value}}月电费占比", { value: lastProfitStatus?.month })} // 使用模板字符串来动态插入月份
               value={lastProfitStatus?.month_hosting_fee_ratio} // 假设一周平均效率在状态中
               valueStyle={{ fontSize: "14px", fontWeight: "bold" }}
               // suffix="%"

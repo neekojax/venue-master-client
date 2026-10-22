@@ -16,6 +16,8 @@ import SiteOnlineNote from "@/components/tooltip/SiteOnlineNote.jsx";
 import SiteStockWithNote from "@/components/tooltip/SiteStockWithNote.jsx";
 import EfficiencyGauge from "./gauge";
 
+import { t } from "@/locales";
+
 const MultiProgress = (props: { values: number[]; colors: string[] }) => {
   const { values, colors } = props;
   const total = values.reduce((a, b) => a + b, 0);
@@ -127,21 +129,21 @@ const App: React.FC<{ data: any; loading: boolean }> = ({ data, loading }) => {
         },
         series: [
           {
-            name: "总数",
+            name: t("总数"),
             type: "pie",
             radius: ["72%", "90%"],
             // label: { },
             label: { show: false, position: "center", formatter: "{b}\n{c}" },
-            data: [{ value: total, name: "总数", itemStyle: { color: "#1890ff" } }],
+            data: [{ value: total, name: t("总数"), itemStyle: { color: "#1890ff" } }],
           },
           {
-            name: "故障数",
+            name: t("故障数"),
             type: "pie",
             radius: ["52%", "70%"],
             label: { show: false },
             data: [
-              { value: guzhang, name: "故障数", itemStyle: { color: "red" } }, //rgb(246, 15, 15)
-              { value: total - guzhang, name: "故障数", itemStyle: { color: "transparent" } },
+              { value: guzhang, name: t("故障数"), itemStyle: { color: "red" } }, //rgb(246, 15, 15)
+              { value: total - guzhang, name: t("故障数"), itemStyle: { color: "transparent" } },
             ],
           },
           // {
@@ -186,12 +188,16 @@ const App: React.FC<{ data: any; loading: boolean }> = ({ data, loading }) => {
         <Col span={8}>
           <Skeleton loading={loading} active>
             <Card
-              title="机器汇总"
+              title={t("机器汇总")}
               bordered={false}
               actions={[
                 <span key="setting">
                   <CloseCircleOutlined style={{ color: "red", fontSize: 16, marginRight: "10px" }} />
-                  <span>故障率：{((data.totalFailures24h / data.totalMachines) * 100)?.toFixed(2)}%</span>
+                  <span>
+                    {t("故障率：{{value}}%", {
+                      value: ((data.totalFailures24h / data.totalMachines) * 100)?.toFixed(2),
+                    })}
+                  </span>
                 </span>,
               ]}
             >
@@ -207,7 +213,7 @@ const App: React.FC<{ data: any; loading: boolean }> = ({ data, loading }) => {
                       textOverflow: "ellipsis",
                     }}
                   >
-                    托管台数：
+                    {t("托管台数：")}
                   </Typography.Text>
                   <Typography.Text
                     style={{
@@ -261,7 +267,7 @@ const App: React.FC<{ data: any; loading: boolean }> = ({ data, loading }) => {
                       textOverflow: "ellipsis",
                     }}
                   >
-                    故障台数：
+                    {t("故障台数：")}
                   </Typography.Text>
                   <Typography.Text
                     style={{
@@ -313,18 +319,20 @@ const App: React.FC<{ data: any; loading: boolean }> = ({ data, loading }) => {
         <Col span={8}>
           <Skeleton loading={loading} active>
             <Card
-              title="算力汇总"
+              title={t("算力汇总")}
               bordered={false}
               actions={[
                 <span key="setting">
                   <SettingOutlined style={{ fontSize: 16, color: "#1890ff", marginRight: "10px" }} />
                   {/* <ThunderboltOutlined style={{ color: 'orange', fontSize: 16, marginRight: '10px' }} /> */}
-                  <span>算力有效率：{(data?.averageEffectiveRate || 0)?.toFixed(2)}%</span>
+                  <span>
+                    {t("算力有效率：{{value}}%", { value: (data?.averageEffectiveRate || 0)?.toFixed(2) })}
+                  </span>
                 </span>,
                 <span key="setting">
                   {/* <SettingOutlined /> */}
                   <CheckCircleOutlined style={{ color: "green", fontSize: 16, marginRight: "10px" }} />
-                  <span>在架有效率：{data.totalOnlineRatio?.toFixed(2)}%</span>
+                  <span>{t("在架有效率：{{value}}%", { value: data.totalOnlineRatio?.toFixed(2) })}</span>
                 </span>,
               ]}
             >
@@ -341,7 +349,7 @@ const App: React.FC<{ data: any; loading: boolean }> = ({ data, loading }) => {
                       textOverflow: "ellipsis",
                     }}
                   >
-                    有效算力：
+                    {t("有效算力：")}
                   </Typography.Text>
                   <Typography.Text
                     style={{
@@ -371,7 +379,7 @@ const App: React.FC<{ data: any; loading: boolean }> = ({ data, loading }) => {
                       textOverflow: "ellipsis",
                     }}
                   >
-                    在架理论算力：
+                    {t("在架理论算力：")}
                   </Typography.Text>
                   <Typography.Text
                     style={{
@@ -401,7 +409,7 @@ const App: React.FC<{ data: any; loading: boolean }> = ({ data, loading }) => {
                       textOverflow: "ellipsis",
                     }}
                   >
-                    理论算力：
+                    {t("理论算力：")}
                   </Typography.Text>
                   <Typography.Text
                     style={{
@@ -429,7 +437,7 @@ const App: React.FC<{ data: any; loading: boolean }> = ({ data, loading }) => {
         </Col>
         <Col span={8}>
           <Skeleton loading={loading} active>
-            <Card title="影响占比">
+            <Card title={t("影响占比")}>
               <div style={{ height: "20px" }}></div>
               <MultiProgress
                 values={[Number(yingxiangZhanbi?.toFixed(2))]} // 三个值
@@ -464,20 +472,24 @@ const App: React.FC<{ data: any; loading: boolean }> = ({ data, loading }) => {
                   <Col span={12} style={{ textAlign: "left" }}>
                     <WarningOutlined style={{ color: "#faad14", marginRight: 8 }} />
                     {/* <CheckCircleOutlined style={{ color: 'green', fontSize: 16, marginRight: 8 }} /> */}
-                    影响占比：{yingxiangZhanbi?.toFixed(2)}%
+                    {t("影响占比：")}
+                    {yingxiangZhanbi?.toFixed(2)}%
                   </Col>
                   <Col span={12} style={{ textAlign: "right" }}>
                     <CloseCircleOutlined style={{ color: "#ff4d4f", marginRight: 8 }} />
-                    总故障率：{guzhanglv?.toFixed(2)}%
+                    {t("总故障率：")}
+                    {guzhanglv?.toFixed(2)}%
                   </Col>
                   <Col span={12} style={{ textAlign: "left" }}>
                     <ThunderboltOutlined style={{ color: "#faad14", marginRight: 8 }} />
                     {/* <CheckCircleOutlined style={{ color: 'green', fontSize: 16, marginRight: 8 }} /> */}
-                    限电占比：{data.totalLimitImpactRatio?.toFixed(2)}%
+                    {t("限电占比：")}
+                    {data.totalLimitImpactRatio?.toFixed(2)}%
                   </Col>
                   <Col span={12} style={{ textAlign: "right" }}>
                     <FireOutlined style={{ color: "#ff4d4f", marginRight: 8 }} />
-                    高温占比：{data.totalHighTemperatureImpactRatio?.toFixed(2)}%
+                    {t("高温占比：")}
+                    {data.totalHighTemperatureImpactRatio?.toFixed(2)}%
                   </Col>
                 </Row>
                 <div></div>

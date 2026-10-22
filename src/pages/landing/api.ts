@@ -8,3 +8,7 @@ import { fetchGet } from "@/helper/fetchHelper.ts";
 export const fetchMiningBenefitLine = async (poolType: string, day: string) => {
   return await fetchGet(`miningPool/getLastestProfitLineData/${poolType}/${day}`);
 };
+
+export const fetchFailureStatistics = async (poolType: string) => {
+  return await fetchGet(`report/failure-statistics/${poolType}`);
+};

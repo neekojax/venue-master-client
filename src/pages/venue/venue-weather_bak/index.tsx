@@ -10,6 +10,7 @@ import { CanvasRenderer } from "echarts/renderers";
 import { SiteCard } from "./components/siteCard";
 import { useSelector, useSettingsStore } from "@/stores";
 
+import { t } from "@/locales";
 import { fetchWeatherList } from "@/pages/venue/api";
 echarts.use([LineChart, CanvasRenderer, TitleComponent, TooltipComponent, GridComponent]);
 
@@ -153,7 +154,7 @@ const App: React.FC = () => {
   }, [filteredData]);
 
   // 基于当前数据生成场地名下拉选项
-  const venueOptions = Array.from(new Set(filteredData.map((v) => v.venue_name || "未知场地"))).map(
+  const venueOptions = Array.from(new Set(filteredData.map((v) => v.venue_name || t("未知场地")))).map(
     (name) => ({ value: name, label: name }),
   );
 
@@ -169,7 +170,7 @@ const App: React.FC = () => {
     (acc, v) => {
       const key = Number(v.venue_id ?? 0);
       acc[key] = {
-        venue: { id: key, name: v.venue_name ?? "未知场地" },
+        venue: { id: key, name: v.venue_name ?? t("未知场地") },
         items: Array.isArray(v.grouped_list) ? v.grouped_list : [],
       };
       return acc;
@@ -189,7 +190,7 @@ const App: React.FC = () => {
           <div>
             <DatePicker
               size="middle"
-              placeholder={"选择日期"}
+              placeholder={t("选择日期")}
               className="w-40"
               format="YYYY-MM-DD"
               value={selectedDate ? dayjs(selectedDate) : undefined}
@@ -221,7 +222,7 @@ const App: React.FC = () => {
                   size="middle"
                   showSearch
                   allowClear
-                  placeholder="搜索场地名称..."
+                  placeholder={t("搜索场地名称...")}
                   style={{ fontSize: "12px" }}
                   className="w-full select-placeholder-12"
                   onSearch={(val) => setSearchTerm(val)}
@@ -240,7 +241,7 @@ const App: React.FC = () => {
                   className="mr-1"
                 />
                 <span className="text-sm" style={{ fontSize: "12px" }}>
-                  我的场地
+                  {t("我的场地")}
                 </span>
               </div>
             </div>
@@ -248,7 +249,7 @@ const App: React.FC = () => {
         </div>
       </div>
       {/* 主体内容区域 */}
-      <Spin spinning={loading} tip="加载中...">
+      <Spin spinning={loading} tip={t("加载中...")}>
         <div className=" flex-grow">
           <div className="mx-auto ">
             {/* 分组显示天气数据 */}
@@ -304,8 +305,8 @@ const App: React.FC = () => {
                 <div className="text-5xl mb-4 text-gray-300">
                   <i className="fas fa-cloud-sun"></i>
                 </div>
-                <h3 className="text-xl font-medium mb-2">未找到匹配的天气数据</h3>
-                <p className="text-gray-500 dark:text-gray-400">请尝试调整筛选条件或搜索关键词</p>
+                <h3 className="text-xl font-medium mb-2">{t("未找到匹配的天气数据")}</h3>
+                <p className="text-gray-500 dark:text-gray-400">{t("请尝试调整筛选条件或搜索关键词")}</p>
               </div>
             )}
           </div>

@@ -13,6 +13,8 @@ import { miningRoute } from "@/router/modules/mining.tsx";
 import { poolHashHistoryRoute } from "@/router/modules/pool-hash-history.tsx";
 import { poolProfitHistoryRoute } from "@/router/modules/pool-profit-history.tsx";
 import { profitDetailRoute } from "@/router/modules/profit-detail.tsx";
+import { rbacCenterRoute } from "@/router/modules/rbac-center.tsx";
+import { recentSubAccountStatusRoute } from "@/router/modules/recent-sub-account-status.tsx";
 import { reportRoute } from "@/router/modules/report.tsx";
 import { utilityRoute } from "@/router/modules/utility.tsx";
 import { venueRoute } from "@/router/modules/venue.tsx";
@@ -48,11 +50,13 @@ const routes: RouteObject[] = [
       baseRoute,
       hashDetailRoute,
       profitDetailRoute,
+      recentSubAccountStatusRoute,
       poolProfitHistoryRoute,
       poolHashHistoryRoute,
       custodyMenuRoute,
       electricMenuRoute,
       utilityRoute,
+      rbacCenterRoute,
       logsRoute,
     ],
   },

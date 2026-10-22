@@ -3,6 +3,8 @@ import { CloudRain, Droplets, Thermometer, Wind } from "lucide-react";
 import { WeatherCondition, WeatherData } from "../types/weather";
 import { WeatherIcon } from "./WeatherIcon";
 
+import { t as i18nT } from "@/locales";
+
 interface Props {
   label: string;
   data: WeatherData;
@@ -15,11 +17,11 @@ export const DayNightRow: React.FC<Props> = ({ label, data, isNight }) => {
     // console.log('w', w);
     if (!w) return "sunny";
     const s = w.toLowerCase();
-    if (w.includes("雷") || s.includes("storm")) return "stormy";
-    if (w.includes("云") || s.includes("cloud")) return "cloudy";
-    if (w.includes("雨") || w.includes("暴雨") || s.includes("rain")) return "rainy";
-    if (w.includes("雪") || s.includes("snow")) return "snowy";
-    if (w.includes("阴")) return "cloudy";
+    if (w.includes(i18nT("雷")) || s.includes("storm")) return "stormy";
+    if (w.includes(i18nT("云")) || s.includes("cloud")) return "cloudy";
+    if (w.includes(i18nT("雨")) || w.includes(i18nT("暴雨")) || s.includes("rain")) return "rainy";
+    if (w.includes(i18nT("雪")) || s.includes("snow")) return "snowy";
+    if (w.includes(i18nT("阴"))) return "cloudy";
     return "sunny";
   };
   // const weatherConditions = [
@@ -38,7 +40,7 @@ export const DayNightRow: React.FC<Props> = ({ label, data, isNight }) => {
         </div>
         <span style={{ fontSize: "0.75rem", fontWeight: "bold" }}>
           <span>{label} &nbsp;</span>
-          {data.weather.replace("（白天）", "").replace("（夜间）", "")}
+          {data.weather.replace(i18nT("（白天）"), "").replace(i18nT("（夜间）"), "")}
         </span>
       </div>
 

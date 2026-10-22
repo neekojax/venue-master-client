@@ -1,6 +1,8 @@
-import { Link, type RouteObject } from "react-router-dom";
+import { Link, Navigate, type RouteObject } from "react-router-dom";
 import { ProgressBar } from "@/components/progress-bar";
 import { ROUTE_PATHS } from "@/constants/common";
+
+import { t } from "@/locales";
 
 export const reportRoute: RouteObject = {
   path: ROUTE_PATHS.report,
@@ -9,10 +11,20 @@ export const reportRoute: RouteObject = {
   }),
   HydrateFallback: ProgressBar,
   handle: {
-    title: "报表",
-    crumb: () => "报表",
+    title: t("报表"),
+    crumb: () => t("报表"),
   },
   children: [
+    {
+      path: ROUTE_PATHS.dailySnapshot,
+      lazy: async () => ({ Component: (await import("@/pages/report/daily-snapshot")).default }),
+      HydrateFallback: ProgressBar,
+      handle: { title: t("运营日报快照"), crumb: () => t("运营日报快照") },
+    },
+    {
+      index: true,
+      element: <Navigate replace to={ROUTE_PATHS.weekReport} />,
+    },
     {
       path: ROUTE_PATHS.dataSummary,
       lazy: async () => ({
@@ -20,8 +32,8 @@ export const reportRoute: RouteObject = {
       }),
       HydrateFallback: ProgressBar,
       handle: {
-        title: "数据概览",
-        crumb: () => <Link to={ROUTE_PATHS.dataSummary}>数据概览</Link>,
+        title: t("数据概览"),
+        crumb: () => <Link to={ROUTE_PATHS.dataSummary}>{t("数据概览")}</Link>,
       },
     },
     {
@@ -31,8 +43,8 @@ export const reportRoute: RouteObject = {
       }),
       HydrateFallback: ProgressBar,
       handle: {
-        title: "数据概览详情",
-        crumb: () => <Link to={ROUTE_PATHS.dataSummaryList}>数据概览详情</Link>,
+        title: t("数据概览详情"),
+        crumb: () => <Link to={ROUTE_PATHS.dataSummaryList}>{t("数据概览详情")}</Link>,
       },
     },
     {
@@ -42,8 +54,8 @@ export const reportRoute: RouteObject = {
       }),
       HydrateFallback: ProgressBar,
       handle: {
-        title: "数据概览利润详情",
-        crumb: () => <Link to={ROUTE_PATHS.dataSummaryProfitList}>数据概览利润详情</Link>,
+        title: t("数据概览利润详情"),
+        crumb: () => <Link to={ROUTE_PATHS.dataSummaryProfitList}>{t("数据概览利润详情")}</Link>,
       },
     },
     {
@@ -53,8 +65,8 @@ export const reportRoute: RouteObject = {
       }),
       HydrateFallback: ProgressBar,
       handle: {
-        title: "运营日报",
-        crumb: () => <Link to={ROUTE_PATHS.dailyReport}>运营日报</Link>,
+        title: t("运营日报"),
+        crumb: () => <Link to={ROUTE_PATHS.dailyReport}>{t("运营日报")}</Link>,
       },
     },
     {
@@ -64,8 +76,8 @@ export const reportRoute: RouteObject = {
       }),
       HydrateFallback: ProgressBar,
       handle: {
-        title: "账户日报",
-        crumb: () => <Link to={ROUTE_PATHS.subAccountDailyReport}>账户日报</Link>,
+        title: t("账户日报"),
+        crumb: () => <Link to={ROUTE_PATHS.subAccountDailyReport}>{t("账户日报")}</Link>,
       },
     },
     {
@@ -75,8 +87,8 @@ export const reportRoute: RouteObject = {
       }),
       HydrateFallback: ProgressBar,
       handle: {
-        title: "运营周报",
-        crumb: () => <Link to={ROUTE_PATHS.weekReport}>运营周报</Link>,
+        title: t("运营周报"),
+        crumb: () => <Link to={ROUTE_PATHS.weekReport}>{t("运营周报")}</Link>,
       },
     },
     {

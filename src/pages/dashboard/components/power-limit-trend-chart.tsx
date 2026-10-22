@@ -2,6 +2,8 @@ import { AiOutlineThunderbolt } from "react-icons/ai"; // 新图标
 import { Card, Col, Row } from "antd";
 import { ReactEcharts } from "@/components/react-echarts";
 
+import { t } from "@/locales";
+
 const PowerLimitationTrendChart = () => {
   const generatePowerLimitationData = () => {
     const data = [];
@@ -83,7 +85,7 @@ const PowerLimitationTrendChart = () => {
             <AiOutlineThunderbolt style={{ fontSize: "20px", marginRight: "5px" }} /> {/* 新图标 */}
           </Col>
           <Col>
-            <h3 style={{ marginLeft: 5, fontSize: "14px" }}>限电率曲线</h3>
+            <h3 style={{ marginLeft: 5, fontSize: "14px" }}>{t("限电率曲线")}</h3>
           </Col>
         </Row>
       }

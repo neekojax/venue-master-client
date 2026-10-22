@@ -2,6 +2,8 @@ import React, { useRef, useState } from "react";
 import { AlertTriangle, CloudRain, LayoutList, Server, Thermometer, Wifi, Zap } from "lucide-react";
 import { EventType } from "./types";
 
+import { t } from "@/locales";
+
 const StackedBarChart: React.FC<{
   data: { label: string; values: Record<EventType, number> }[];
   mode: "daily" | "monthly";
@@ -10,27 +12,37 @@ const StackedBarChart: React.FC<{
   const containerRef = useRef<HTMLDivElement>(null);
   const EVENT_CONFIG: Record<EventType, { label: string; color: string; bg: string; icon: React.ReactNode }> =
     {
-      limit: { label: "限电", color: "#f59e0b", bg: "bg-amber-50", icon: <Zap size={14} /> }, // Amber
-      high_temperature: { label: "高温", color: "#ef4444", bg: "bg-red-50", icon: <Thermometer size={14} /> }, // Red
-      power: { label: "电力", color: "#8b5cf6", bg: "bg-purple-50", icon: <AlertTriangle size={14} /> }, // Purple
-      device_failure: { label: "设备故障", color: "#6b7280", bg: "bg-gray-50", icon: <Server size={14} /> }, // Gray
-      network: { label: "网络", color: "#3b82f6", bg: "bg-blue-50", icon: <Wifi size={14} /> }, // Blue
+      limit: { label: t("限电"), color: "#f59e0b", bg: "bg-amber-50", icon: <Zap size={14} /> }, // Amber
+      high_temperature: {
+        label: t("高温"),
+        color: "#ef4444",
+        bg: "bg-red-50",
+        icon: <Thermometer size={14} />,
+      }, // Red
+      power: { label: t("电力"), color: "#8b5cf6", bg: "bg-purple-50", icon: <AlertTriangle size={14} /> }, // Purple
+      device_failure: {
+        label: t("设备故障"),
+        color: "#6b7280",
+        bg: "bg-gray-50",
+        icon: <Server size={14} />,
+      }, // Gray
+      network: { label: t("网络"), color: "#3b82f6", bg: "bg-blue-50", icon: <Wifi size={14} /> }, // Blue
       extreme_weather: {
-        label: "极端天气",
+        label: t("极端天气"),
         color: "#10b981",
         bg: "bg-emerald-50",
         icon: <CloudRain size={14} />,
       }, // Emerald
       // low_power: { label: "低功耗", color: "#f4b359ff", bg: "bg-red-300", icon: <LayoutList size={14} /> }, // Red
       maintenance: {
-        label: "日常维护",
+        label: t("日常维护"),
         color: "#f4b092ff",
         bg: "bg-red-100",
         icon: <LayoutList size={14} />,
       }, // Blue
       // other: { label: "其他", color: "#a2f492ff", bg: "bg-green-100", icon: <LayoutList size={14} /> }, // Blue
-      low_power: { label: "低功耗", color: "#a2f492ff", bg: "bg-green-50", icon: <Zap size={14} /> }, // Green
-      other: { label: "其他", color: "#cdcecdff", bg: "bg-gray-100", icon: <LayoutList size={14} /> }, // Green
+      low_power: { label: t("低功耗"), color: "#a2f492ff", bg: "bg-green-50", icon: <Zap size={14} /> }, // Green
+      other: { label: t("其他"), color: "#cdcecdff", bg: "bg-gray-100", icon: <LayoutList size={14} /> }, // Green
     };
 
   const [tooltipData, setTooltipData] = useState<{
@@ -59,7 +71,7 @@ const StackedBarChart: React.FC<{
   const getY = (val: number) => height - paddingY - (val / maxTotal) * (height - paddingY * 2);
 
   if (data.length === 0)
-    return <div className="h-full flex items-center justify-center text-gray-400"> 暂无数据 </div>;
+    return <div className="h-full flex items-center justify-center text-gray-400"> {t("暂无数据")} </div>;
 
   return (
     <div ref={containerRef} className="w-full h-full relative group">

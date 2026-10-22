@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { Card, Col, Row } from "antd";
 import { ROUTE_PATHS } from "@/constants/common.ts";
 
+import { t } from "@/locales";
 import { fetchTotalLastProfitStatus } from "@/pages/mining/api.tsx";
 
 interface MiningPoolCardProps {
@@ -44,7 +45,7 @@ const MiningBenefitShCard: React.FC<MiningPoolCardProps> = ({ poolType }) => {
   return (
     <div>
       <Card
-        title={"产出数量"}
+        title={t("产出数量")}
         loading={loading}
         bordered={false}
         className="card-wapper"
@@ -71,7 +72,7 @@ const MiningBenefitShCard: React.FC<MiningPoolCardProps> = ({ poolType }) => {
             <Row gutter={24}>
               <Col span={10}>
                 <Col span={24} style={{ fontSize: "14px", color: "gray", marginBottom: "12px" }}>
-                  {`${lastProfitStatus?.month}月产出数量`}
+                  {t("{{value}}月产出数量", { value: lastProfitStatus?.month })}
                 </Col>
                 {/* <Col span={24} style={{ fontSize: "14px", color: "gray", marginBottom: "12px" }}>
                   {`${lastProfitStatus?.month}月产出价值`}
@@ -132,7 +133,7 @@ const MiningBenefitShCard: React.FC<MiningPoolCardProps> = ({ poolType }) => {
       </Card>
 
       <Card
-        title={"产出价值"}
+        title={t("产出价值")}
         loading={loading}
         bordered={false}
         className="card-wapper"
@@ -174,14 +175,14 @@ const MiningBenefitShCard: React.FC<MiningPoolCardProps> = ({ poolType }) => {
                   span={24}
                   style={{ fontSize: "14px", color: "black", marginBottom: "12px", fontWeight: "bold" }}
                 >
-                  {`${lastProfitStatus?.month}月产出价值`}：{" "}
+                  {t("{{value}}月产出价值", { value: lastProfitStatus?.month })}：{" "}
                   {`${lastProfitStatus?.month_statistics.income_usd} $`}
                 </Col>
                 <Col
                   span={24}
                   style={{ fontSize: "14px", color: "black", marginBottom: "12px", fontWeight: "bold" }}
                 >
-                  {`${lastProfitStatus?.month}月托管+运维`}：{" "}
+                  {t("{{value}}月托管+运维", { value: lastProfitStatus?.month })}：{" "}
                   {`${lastProfitStatus?.month_statistics.hosting_fee} $`}
                 </Col>
               </Col>

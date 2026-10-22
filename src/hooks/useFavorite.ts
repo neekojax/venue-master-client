@@ -2,6 +2,7 @@ import { useState } from "react";
 import { message } from "antd";
 
 import { fetchPost } from "@/helper/fetchHelper.ts";
+import { t } from "@/locales";
 
 export function useFavorite() {
   const [loading, setLoading] = useState(false);
@@ -19,10 +20,10 @@ export function useFavorite() {
         venue_id: Number(venueId), // 对应 Go 的 venue_id
       };
       await fetchPost(url, param_data);
-      message.success(isFavorite == 1 ? "已取消收藏" : "收藏成功");
+      message.success(isFavorite == 1 ? t("已取消收藏") : t("收藏成功"));
       return isFavorite == 1 ? 0 : 1; // 返回更新后的收藏状态
     } catch (error) {
-      message.error("操作失败，请稍后再试" + error);
+      message.error(t("操作失败，请稍后再试") + error);
       return isFavorite; // 保持原状态
     } finally {
       setLoading(false);

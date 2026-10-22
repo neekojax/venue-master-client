@@ -4,12 +4,14 @@ import { MdMonitorHeart } from "react-icons/md";
 import { SiNginxproxymanager } from "react-icons/si";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { HomeOutlined, ProductOutlined } from "@ant-design/icons"; //<RadiusSettingOutlined />
-import { Layout, Menu, type MenuProps } from "antd";
-import { FileText, Wrench } from "lucide-react";
+import { Layout, Menu, type MenuProps, Tooltip } from "antd";
+import { FileText, ShieldCheck, Wrench } from "lucide-react";
 import { useTheme } from "@/components/theme-provider";
 import logo from "../../../public/logo_middle.png";
 import { ROUTE_PATHS } from "@/constants/common";
 import { useSelector, useSettingsStore } from "@/stores";
+
+import { t } from "@/locales";
 
 // 递归函数，找到匹配的菜单项
 const findSelectedKeys = (items: MenuProps["items"], pathname: string, path: string[] = []) => {
@@ -36,8 +38,14 @@ const findSelectedKeys = (items: MenuProps["items"], pathname: string, path: str
 };
 
 const SiderItems = (permissionIds: string, permissionRoutes: string, selectedKeys?: string[]) => {
+  const roleIds = permissionIds
+    .split(",")
+    .map((item) => item.trim())
+    .filter(Boolean);
+  const isSuperAdmin = roleIds.includes("role-super-admin");
+
   const hasPermission = (route: string) => {
-    if (permissionIds == "role-super-admin") {
+    if (isSuperAdmin) {
       return false;
     }
     const routerArr = permissionRoutes.split(",");
@@ -51,31 +59,56 @@ const SiderItems = (permissionIds: string, permissionRoutes: string, selectedKey
   return [
     {
       icon: <HomeOutlined />,
-      label: <Link to={ROUTE_PATHS.landing}>首页</Link>,
+      label: t("首页"),
       key: ROUTE_PATHS.landing,
       hidden: hasPermission(ROUTE_PATHS.landing),
     },
     {
       icon: <MdMonitorHeart />,
-      label: "算力监控",
+      label: t("算力监控", { context: "nav" }),
       key: ROUTE_PATHS.mining,
       hidden: hasPermission(ROUTE_PATHS.mining),
       children: [
         {
           key: ROUTE_PATHS.miningHashRate,
           hidden: hasPermission(ROUTE_PATHS.miningHashRate),
-          label: <Link to={ROUTE_PATHS.miningHashRate}>实时算力</Link>,
+          label: t("实时算力", { context: "nav" }),
+        },
+        {
+          key: ROUTE_PATHS.farmMonitor,
+          hidden: hasPermission(ROUTE_PATHS.farmMonitor),
+          label: t("矿机监控", { context: "nav" }),
+        },
+        {
+          key: ROUTE_PATHS.faultMonitor,
+          hidden: hasPermission(ROUTE_PATHS.faultMonitor),
+          label: t("故障机监控", { context: "nav", defaultValue: "故障监控" }),
+        },
+        {
+          key: ROUTE_PATHS.abnormalAnalysis,
+          hidden: hasPermission(ROUTE_PATHS.abnormalAnalysis),
+          label: t("异常数分析", { context: "nav", defaultValue: "异常分析" }),
         },
         {
           key: ROUTE_PATHS.miningSetting,
           hidden: hasPermission(ROUTE_PATHS.miningSetting),
-          label: <Link to={ROUTE_PATHS.miningSetting}>账户列表</Link>,
+          label: t("账户列表", { context: "nav" }),
+        },
+        {
+          key: ROUTE_PATHS.miningAgentSetting,
+          hidden: hasPermission(ROUTE_PATHS.miningAgentSetting),
+          label: t("矿机代理设置", { context: "nav", defaultValue: "代理设置" }),
+        },
+        {
+          key: ROUTE_PATHS.assetHashrateHistory,
+          hidden: hasPermission(ROUTE_PATHS.assetHashrateHistory),
+          label: t("资产变更历史", { context: "nav", defaultValue: "资产历史" }),
         },
       ],
     },
     {
       icon: <SiNginxproxymanager />,
-      label: "场地管理",
+      label: t("场地管理", { context: "nav" }),
       key: ROUTE_PATHS.venue,
       hidden: hasPermission(ROUTE_PATHS.venue),
       children: [
@@ -88,12 +121,12 @@ const SiderItems = (permissionIds: string, permissionRoutes: string, selectedKey
               {
                 key: ROUTE_PATHS.venueEnvironment,
                 hidden: hasPermission(ROUTE_PATHS.venueEnvironment),
-                label: <Link to={ROUTE_PATHS.venueEnvironment}>场地环境</Link>,
+                label: t("场地环境", { context: "nav" }),
               },
               {
                 key: ROUTE_PATHS.venueWeather,
                 hidden: hasPermission(ROUTE_PATHS.venueWeather),
-                label: <Link to={ROUTE_PATHS.venueWeather}>场地天气</Link>,
+                label: t("场地天气", { context: "nav" }),
               },
             ]
           : []),
@@ -105,18 +138,18 @@ const SiderItems = (permissionIds: string, permissionRoutes: string, selectedKey
         {
           key: ROUTE_PATHS.eventAnalysis,
           hidden: hasPermission(ROUTE_PATHS.eventAnalysis),
-          label: <Link to={ROUTE_PATHS.eventAnalysis}>事件日志</Link>,
+          label: t("事件日志"),
         },
         {
           key: ROUTE_PATHS.venueSetting,
           hidden: hasPermission(ROUTE_PATHS.venueSetting),
-          label: <Link to={ROUTE_PATHS.venueSetting}>场地列表</Link>,
+          label: t("场地列表", { context: "nav" }),
         },
       ],
     },
     {
       icon: <FaRegChartBar />,
-      label: "报表",
+      label: t("报表", { context: "nav" }),
       key: ROUTE_PATHS.report,
       hidden: hasPermission(ROUTE_PATHS.report),
       children: [
@@ -125,16 +158,16 @@ const SiderItems = (permissionIds: string, permissionRoutes: string, selectedKey
               {
                 key: ROUTE_PATHS.dataSummary,
                 hidden: hasPermission(ROUTE_PATHS.dataSummary),
-                label: <Link to={ROUTE_PATHS.dataSummary}>数据概览</Link>,
+                label: t("数据概览", { context: "nav" }),
               },
             ]
           : []),
-        ...(showNDPoolType !== "LN" && showNDPoolType !== "ND1" && showNDPoolType !== "ND2"
+        ...(showNDPoolType !== "ND1" && showNDPoolType !== "ND2"
           ? [
               {
                 key: ROUTE_PATHS.dailyReport,
                 hidden: hasPermission(ROUTE_PATHS.dailyReport),
-                label: <Link to={ROUTE_PATHS.dailyReport}>运营日报</Link>,
+                label: t("运营日报", { context: "nav" }),
               },
             ]
           : []),
@@ -143,20 +176,20 @@ const SiderItems = (permissionIds: string, permissionRoutes: string, selectedKey
               {
                 key: ROUTE_PATHS.subAccountDailyReport,
                 hidden: hasPermission(ROUTE_PATHS.subAccountDailyReport),
-                label: <Link to={ROUTE_PATHS.subAccountDailyReport}>账户日报</Link>,
+                label: t("账户日报", { context: "nav" }),
               },
             ]
           : []),
         {
           key: ROUTE_PATHS.weekReport,
           hidden: hasPermission(ROUTE_PATHS.weekReport),
-          label: <Link to={ROUTE_PATHS.weekReport}>运营周报</Link>,
+          label: t("运营周报", { context: "nav" }),
         },
       ].filter(Boolean),
     },
     {
       icon: <ProductOutlined />,
-      label: "电费监控",
+      label: t("电费监控", { context: "nav" }),
       key: ROUTE_PATHS.custodyMenu,
       hidden: hasPermission(ROUTE_PATHS.custodyMenu),
       // hidden: localStorage.getItem("permission_ids") !== "role-venue-ops",
@@ -168,14 +201,14 @@ const SiderItems = (permissionIds: string, permissionRoutes: string, selectedKey
         {
           key: ROUTE_PATHS.statistics,
           hidden: hasPermission(ROUTE_PATHS.statistics),
-          label: <Link to={ROUTE_PATHS.statistics}>费用统计</Link>,
+          label: t("费用统计", { context: "nav" }),
         },
         ...(showNDPoolType == "CANG"
           ? [
               {
                 key: ROUTE_PATHS.venueBill,
                 hidden: hasPermission(ROUTE_PATHS.venueBill),
-                label: <Link to={ROUTE_PATHS.venueBill}>电费参数</Link>,
+                label: t("电费参数", { context: "nav" }),
               },
             ]
           : []),
@@ -192,7 +225,17 @@ const SiderItems = (permissionIds: string, permissionRoutes: string, selectedKey
         <Wrench size={18} style={{ color: "#bbb" }} />
       ),
       key: ROUTE_PATHS.utility,
-      label: <Link to={ROUTE_PATHS.utility}>实用工具</Link>,
+      label: t("实用工具", { context: "nav" }),
+    },
+    {
+      icon: selectedKeys?.includes(ROUTE_PATHS.rbacCenter) ? (
+        <ShieldCheck size={18} />
+      ) : (
+        <ShieldCheck size={18} style={{ color: "#bbb" }} />
+      ),
+      key: ROUTE_PATHS.rbacCenter,
+      hidden: hasPermission(ROUTE_PATHS.rbacCenter),
+      label: t("权限管理", { context: "nav" }),
     },
     {
       icon: selectedKeys?.includes(ROUTE_PATHS.logs) ? (
@@ -202,7 +245,7 @@ const SiderItems = (permissionIds: string, permissionRoutes: string, selectedKey
       ),
       key: ROUTE_PATHS.logs,
       hidden: hasPermission(ROUTE_PATHS.logs),
-      label: <Link to={ROUTE_PATHS.logs}>操作日志</Link>,
+      label: t("操作日志", { context: "nav" }),
     },
 
     // {
@@ -268,12 +311,12 @@ export default function SiderBar() {
 
   useEffect(() => {
     const update = (value?: string) => {
-      setPermissionIds(value || localStorage.getItem("access_level") || "");
+      setPermissionIds(value || localStorage.getItem("permission_ids") || "");
       setPermissionRoutes(localStorage.getItem("permission_routes") || "");
     };
     const onStorage = (e: StorageEvent) => {
-      if (e.key === "access_level") {
-        update(e.newValue ?? "");
+      if (e.key === "permission_ids" || e.key === "permission_routes") {
+        update(e.key === "permission_ids" ? (e.newValue ?? "") : undefined);
       }
     };
     const onCustom = (e: Event) => {
@@ -298,7 +341,7 @@ export default function SiderBar() {
     }
     // 将首次渲染标记设置为false
     firstRenderRef.current = false;
-  }, [location.pathname]);
+  }, [location.pathname, permissionIds, permissionRoutes]);
 
   return (
     <Layout.Sider
@@ -320,9 +363,15 @@ export default function SiderBar() {
             <img src={logo} alt="Logo" className="size-10 rounded" />
           </div>
           {collapsed ? null : (
-            <div className="leading-none mt-0 ml-2" style={{ marginTop: "12px" }}>
-              <h1 className="text-white font-semibold text-sm leading-none">运营管理系统</h1>
-              <p className="text-[10px] text-slate-400 leading-none">Operation System</p>
+            <div className="leading-none mt-0 ml-2 min-w-0" style={{ marginTop: "12px" }}>
+              <Tooltip title={t("运营管理系统")} placement="right">
+                <h1 className="text-white font-semibold text-sm leading-none max-w-[176px] truncate cursor-default">
+                  {t("运营管理系统")}
+                </h1>
+              </Tooltip>
+              <p className="text-[10px] text-slate-400 leading-none max-w-[176px] truncate">
+                Operation System
+              </p>
             </div>
           )}
         </div>
@@ -339,7 +388,11 @@ export default function SiderBar() {
         openKeys={openKeys}
         onOpenChange={(openKeys) => setOpenKeys(openKeys)}
         className="!border-e-0"
-        onClick={({ key }) => navigate(key)} // ✅ 跳转页面
+        onClick={({ key }) => {
+          if (typeof key === "string" && key.startsWith("/") && key !== location.pathname) {
+            navigate(key);
+          }
+        }}
       />
       {/* </div> */}
     </Layout.Sider>

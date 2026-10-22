@@ -5,6 +5,7 @@ import { InfoCircleOutlined } from "@ant-design/icons";
 import { Card, Col, Flex, Progress, ProgressProps, Row, Statistic, Tooltip } from "antd";
 import { ROUTE_PATHS } from "@/constants/common.ts";
 
+import { t } from "@/locales";
 import { fetchTotalLastHashStatus, fetchTotalRealTimeStatus } from "@/pages/mining/api.tsx";
 
 interface MiningPoolCardProps {
@@ -70,7 +71,7 @@ const MiningPoolCard: React.FC<MiningPoolCardProps> = ({ poolType }) => {
   return (
     <div>
       <Card
-        title={"实时总算力"}
+        title={t("实时总算力")}
         loading={loading}
         bordered={false}
         className="card-wapper"
@@ -99,13 +100,13 @@ const MiningPoolCard: React.FC<MiningPoolCardProps> = ({ poolType }) => {
               valueStyle={{ fontSize: "2.5rem", color: "#071437", fontWeight: "600" }}
             />
             <span className="fs-6 text-gray-500 fw-semibold">
-              实时总算力(PH/s){" "}
+              {t("实时总算力(PH/s)")}{" "}
               <Tooltip
                 title={
                   <>
-                    主矿池算力: {realTimeStatus?.totalMasterCurrentHashrate} PH/s
+                    {t("主矿池算力:")} {realTimeStatus?.totalMasterCurrentHashrate} PH/s
                     <br />
-                    备用矿池算力: {realTimeStatus?.totalBackUpCurrentHashrate} PH/s
+                    {t("备用矿池算力:")} {realTimeStatus?.totalBackUpCurrentHashrate} PH/s
                   </>
                 }
               >
@@ -116,7 +117,7 @@ const MiningPoolCard: React.FC<MiningPoolCardProps> = ({ poolType }) => {
         </Row>
       </Card>
       <Card
-        title={"算力达成率"}
+        title={t("算力达成率")}
         loading={loading}
         bordered={false}
         className="card-wapper"
@@ -143,16 +144,20 @@ const MiningPoolCard: React.FC<MiningPoolCardProps> = ({ poolType }) => {
             <Flex gap="middle" vertical>
               {[
                 // { title: "实时", desc: "算力达成率", value: realTimeStatus?.realTimeHashEfficiency },
-                { title: "24小时", desc: "平均算力达成率", value: lastHashStatus?.last24HourEfficiency },
-                { title: "近一周", desc: "平均算力达成率", value: lastHashStatus?.lastWeekEfficiency },
                 {
-                  title: `${lastHashStatus?.lastMonth}月`,
-                  desc: "平均算力达成率",
+                  title: t("24小时"),
+                  desc: t("平均算力达成率"),
+                  value: lastHashStatus?.last24HourEfficiency,
+                },
+                { title: t("近一周"), desc: t("平均算力达成率"), value: lastHashStatus?.lastWeekEfficiency },
+                {
+                  title: t("{{value}}月", { value: lastHashStatus?.lastMonth }),
+                  desc: t("平均算力达成率"),
                   value: lastHashStatus?.lastMonthEfficiency,
                 },
                 {
-                  title: `${lastHashStatus?.last2Month}月`,
-                  desc: "平均算力达成率",
+                  title: t("{{value}}月", { value: lastHashStatus?.last2Month }),
+                  desc: t("平均算力达成率"),
                   value: lastHashStatus?.last2MonthEfficiency,
                 },
               ].map((item, index) => (

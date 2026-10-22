@@ -1,0 +1,1375 @@
+import { useEffect, useMemo, useState } from "react";
+import {
+  AlertOutlined,
+  CheckCircleOutlined,
+  CloseCircleOutlined,
+  CopyOutlined,
+  DownloadOutlined,
+  EnvironmentOutlined,
+  FullscreenExitOutlined,
+  FullscreenOutlined,
+  QuestionCircleOutlined,
+  ReloadOutlined,
+  SearchOutlined,
+  SlidersOutlined,
+} from "@ant-design/icons";
+import {
+  Badge,
+  Button,
+  Col,
+  DatePicker,
+  Empty,
+  Input,
+  message,
+  Row,
+  Select,
+  Spin,
+  Table,
+  Tag,
+  Tooltip,
+  Typography,
+} from "antd";
+import type { ColumnsType, SorterResult, SortOrder } from "antd/es/table/interface";
+import { type Dayjs } from "dayjs";
+import { ReactEcharts } from "@/components/react-echarts";
+import {
+  type AbnormalAnalysisDetailItem,
+  type AbnormalAnalysisDetailMinerCodeGroup,
+  type AbnormalAnalysisDetailParams,
+  type AbnormalAnalysisDetailResponse,
+  type AllSiteAnomalyStatsResponse,
+  type AnomalyStats,
+  fetchAbnormalAnalysisDetail,
+  fetchAbnormalAnalysisDetailExport,
+  fetchAllSiteAnomalyStats,
+  fetchSiteAnomalySiteList,
+  fetchSiteAnomalyStats,
+  type SiteAnomalySiteListItem,
+  type SiteAnomalySiteListResponse,
+  type SiteAnomalyStatsResponse,
+} from "./api";
+import { type SiteInfo, SITES } from "./data";
+import useAuthRedirect from "@/hooks/useAuthRedirect";
+import { useSelector, useSettingsStore } from "@/stores";
+
+import "./index.css";
+
+import { t } from "@/locales";
+import ResizableHeaderCell from "@/pages/custody-statistics/statistics/components/ResizableHeaderCell";
+import { downloadExcelBlobResponse } from "@/pages/farm-monitor/utils";
+
+const { Text } = Typography;
+
+type HistoryPoint = { date: string; abnormalCount: number; onShelfMax?: number; refreshedCount?: number };
+type DismantledFilter = "all" | "在架" | "下架" | "未知";
+type AssetFilter = "all" | "自有" | "非自有" | "未知";
+type DetailOrderBy = "refreshTimeDesc" | "refreshTimeAsc";
+
+const refreshTimeSortDirections: SortOrder[] = ["descend", "ascend", "descend"];
+
+function safeSiteAnomalyList(data: SiteAnomalySiteListResponse | null): SiteAnomalySiteListItem[] {
+  return Array.isArray(data?.list) ? data.list : [];
+}
+
+function safeDailyPoints(data: AllSiteAnomalyStatsResponse | null) {
+  return Array.isArray(data?.dailyLast30Days) ? data.dailyLast30Days : [];
+}
+
+function safeStringArray(value: unknown): string[] {
+  return Array.isArray(value)
+    ? value
+        .filter((item): item is string => typeof item === "string")
+        .map((item) => item.trim())
+        .filter((item) => item.length > 0 && item !== "null" && item !== "undefined" && item !== "-")
+    : [];
+}
+
+function safeMinerCodeGroups(value: unknown): AbnormalAnalysisDetailMinerCodeGroup[] {
+  if (!Array.isArray(value)) return [];
+
+  return value
+    .map((item) => {
+      if (!item || typeof item !== "object") return null;
+      const siteValue = pickValue(
+        (item as { site?: unknown }).site,
+        (item as { siteName?: unknown }).siteName,
+      );
+      const site = typeof siteValue === "string" ? siteValue.trim() : "";
+      const minerCode = safeStringArray((item as { minerCode?: unknown }).minerCode);
+      if (!site) return null;
+      return { site, minerCode };
+    })
+    .filter((item): item is AbnormalAnalysisDetailMinerCodeGroup => Boolean(item));
+}
+
+function pickValue<T>(...values: T[]): T | undefined {
+  return values.find((value) => value !== undefined && value !== null);
+}
+
+function statsCards(stats: SiteInfo["abnormalStats"]) {
+  return [
+    { label: t("最近1日异常"), val: stats.yesterday, color: "text-rose-600", bg: "bg-rose-50" },
+    { label: t("最近7日异常"), val: stats.day7, color: "text-orange-600", bg: "bg-orange-50" },
+    { label: t("最近15日异常"), val: stats.day15, color: "text-indigo-600", bg: "bg-indigo-50" },
+    { label: t("最近30日异常"), val: stats.day30, color: "text-slate-600", bg: "bg-slate-100" },
+    { label: t("累计异常"), val: stats.all, color: "text-purple-600", bg: "bg-purple-50" },
+  ].map((item, idx) => (
+    <div
+      key={idx}
+      className={`p-2 px-3 rounded-lg border border-slate-100/80 ${item.bg} transition-all hover:scale-[1.02] flex flex-col justify-between ${
+        idx === 4 ? "col-span-2 sm:col-span-1" : ""
+      }`}
+    >
+      <div className="text-[11px] text-slate-500 font-medium mb-0.5">{item.label}</div>
+      <div className={`text-lg font-bold font-mono ${item.color}`}>
+        {item.val} <span className="text-[10px] font-sans text-slate-400 font-normal">{t("台")}</span>
+      </div>
+    </div>
+  ));
+}
+
+function buildLineOption(data: HistoryPoint[], lineColor: string, tooltipBg: string) {
+  return {
+    tooltip: {
+      trigger: "axis",
+      backgroundColor: tooltipBg,
+      borderRadius: 8,
+      borderWidth: 0,
+      textStyle: { color: "#f8fafc" },
+      formatter: (params: any) => {
+        const p = Array.isArray(params) ? params[0] : params;
+        const point = data[p.dataIndex];
+        if (!point) return "";
+        const onShelf = point.onShelfMax ?? "-";
+        const refreshed = point.refreshedCount ?? "-";
+        return t(
+          "{{date}}<br/>异常矿机数：{{abnormalCount}}<br/>期望在架：{{onShelf}}<br/>刷新数：{{refreshed}}",
+          { date: point.date, abnormalCount: point.abnormalCount, onShelf: onShelf, refreshed: refreshed },
+        );
+      },
+    },
+    grid: { left: 0, right: 10, top: 8, bottom: 0, containLabel: true },
+    xAxis: {
+      type: "category",
+      boundaryGap: false,
+      data: data.map((d) => d.date),
+      axisLine: { lineStyle: { color: "#e2e8f0" } },
+      axisTick: { show: false },
+      axisLabel: { color: "#64748b", fontSize: 11 },
+    },
+    yAxis: {
+      type: "value",
+      axisLine: { show: false },
+      axisTick: { show: false },
+      axisLabel: { color: "#64748b", fontSize: 11 },
+      splitLine: { lineStyle: { color: "#e2e8f0", type: "dashed" } },
+    },
+    series: [
+      {
+        name: t("异常矿机数"),
+        type: "line",
+        smooth: true,
+        symbol: "circle",
+        symbolSize: 5,
+        data: data.map((d) => d.abnormalCount),
+        lineStyle: { color: lineColor, width: 2.5 },
+        itemStyle: { color: lineColor },
+      },
+    ],
+  };
+}
+
+export default function AbnormalAnalysisPage() {
+  useAuthRedirect();
+
+  // 场地异常统计选中场地
+  const [selectedSiteName, setSelectedSiteName] = useState<string>(SITES[0].name);
+  // 全场统计：真实接口数据（昨日/7日/15日/30日/全部 + 最近30日逐日曲线）
+  const { poolType } = useSettingsStore(useSelector(["poolType"]));
+  const [allSiteData, setAllSiteData] = useState<AllSiteAnomalyStatsResponse | null>(null);
+  const [allSiteLoading, setAllSiteLoading] = useState(false);
+  const [siteAnomalyListData, setSiteAnomalyListData] = useState<SiteAnomalySiteListResponse | null>(null);
+  const [siteAnomalyListLoading, setSiteAnomalyListLoading] = useState(false);
+  const [selectedSiteData, setSelectedSiteData] = useState<SiteAnomalyStatsResponse | null>(null);
+  const [selectedSiteLoading, setSelectedSiteLoading] = useState(false);
+  const [detailData, setDetailData] = useState<AbnormalAnalysisDetailResponse | null>(null);
+  const [detailLoading, setDetailLoading] = useState(false);
+  const [detailMinerCodeSource, setDetailMinerCodeSource] = useState<AbnormalAnalysisDetailMinerCodeGroup[]>(
+    [],
+  );
+  const [detailMinerCodeLoading, setDetailMinerCodeLoading] = useState(false);
+  const [detailExporting, setDetailExporting] = useState(false);
+  const [detailPage, setDetailPage] = useState(1);
+  const [detailPageSize, setDetailPageSize] = useState(20);
+  const [detailOrderBy, setDetailOrderBy] = useState<DetailOrderBy>("refreshTimeDesc");
+  const [detailFilterExpanded, setDetailFilterExpanded] = useState(true);
+  const [detailFullscreen, setDetailFullscreen] = useState(false);
+  const [detailSiteColumnWidth, setDetailSiteColumnWidth] = useState(() => {
+    const savedWidth = Number(localStorage.getItem("abnormal-analysis-site-column-width"));
+    return Number.isFinite(savedWidth) && savedWidth >= 160 ? savedWidth : 220;
+  });
+  const detailFullscreenTargetId = "abnormal-analysis-detail-fullscreen";
+
+  useEffect(() => {
+    const onFullscreenChange = () => {
+      const element = document.getElementById(detailFullscreenTargetId);
+      setDetailFullscreen(document.fullscreenElement === element);
+    };
+    document.addEventListener("fullscreenchange", onFullscreenChange);
+    return () => document.removeEventListener("fullscreenchange", onFullscreenChange);
+  }, []);
+
+  useEffect(() => {
+    if (!poolType) return;
+    let active = true;
+    setAllSiteLoading(true);
+    fetchAllSiteAnomalyStats(poolType)
+      .then((res) => {
+        if (active) setAllSiteData((res?.data as AllSiteAnomalyStatsResponse) ?? null);
+      })
+      .catch((err) => {
+        console.log("allSiteAnomalyStats error", err);
+        if (active) setAllSiteData(null);
+      })
+      .finally(() => {
+        if (active) setAllSiteLoading(false);
+      });
+    return () => {
+      active = false;
+    };
+  }, [poolType]);
+
+  useEffect(() => {
+    if (!poolType) return;
+    let active = true;
+    setSiteAnomalyListLoading(true);
+    fetchSiteAnomalySiteList(poolType)
+      .then((res) => {
+        if (active) {
+          const data = (res?.data as SiteAnomalySiteListResponse) ?? null;
+          const list = safeSiteAnomalyList(data);
+          setSiteAnomalyListData(data);
+          const firstSiteName = list[0]?.siteName;
+          if (firstSiteName) {
+            setSelectedSiteName((current) => {
+              const exists = list.some((item) => item.siteName === current);
+              return exists ? current : firstSiteName;
+            });
+          }
+        }
+      })
+      .catch((err) => {
+        console.log("siteAnomalySiteList error", err);
+        if (active) setSiteAnomalyListData(null);
+      })
+      .finally(() => {
+        if (active) setSiteAnomalyListLoading(false);
+      });
+    return () => {
+      active = false;
+    };
+  }, [poolType]);
+
+  // 搜索筛选参数
+  const [searchSite, setSearchSite] = useState<string>("all");
+  const [searchMac, setSearchMac] = useState<string>("");
+  const [searchSN, setSearchSN] = useState<string>("");
+  const [searchHashBoardSN, setSearchHashBoardSN] = useState<string>("");
+  const [searchMinerId, setSearchMinerId] = useState<string>("");
+  const [searchRefreshTimeFrom, setSearchRefreshTimeFrom] = useState<Dayjs | null>(null);
+  const [searchDismantled, setSearchDismantled] = useState<DismantledFilter>("all");
+  const [searchAsset, setSearchAsset] = useState<AssetFilter>("all");
+
+  // 已应用的筛选（点击搜索后生效）
+  const [filters, setFilters] = useState({
+    site: "all" as string,
+    mac: "",
+    sn: "",
+    hashBoardSN: "",
+    minerId: "",
+    refreshTimeFrom: "",
+    dismantled: "all" as DismantledFilter,
+    asset: "all" as AssetFilter,
+  });
+
+  const handleSearch = () => {
+    setDetailPage(1);
+    setFilters({
+      site: searchSite,
+      mac: searchMac.trim(),
+      sn: searchSN.trim(),
+      hashBoardSN: searchHashBoardSN.trim(),
+      minerId: searchMinerId.trim(),
+      refreshTimeFrom: searchRefreshTimeFrom ? searchRefreshTimeFrom.format("YYYY-MM-DD HH:mm:ss") : "",
+      dismantled: searchDismantled,
+      asset: searchAsset,
+    });
+    message.success(t("筛选已应用"));
+  };
+
+  const handleReset = () => {
+    setDetailPage(1);
+    setSearchSite("all");
+    setSearchMac("");
+    setSearchSN("");
+    setSearchHashBoardSN("");
+    setSearchMinerId("");
+    setSearchRefreshTimeFrom(null);
+    setSearchDismantled("all");
+    setSearchAsset("all");
+    setFilters({
+      site: "all",
+      mac: "",
+      sn: "",
+      hashBoardSN: "",
+      minerId: "",
+      refreshTimeFrom: "",
+      dismantled: "all",
+      asset: "all",
+    });
+    message.info(t("筛选已重置"));
+  };
+
+  const handleDetailRefresh = () => {
+    setFilters((current) => ({ ...current }));
+  };
+
+  const handleDetailFullscreen = () => {
+    const element = document.getElementById(detailFullscreenTargetId);
+    if (!element) return;
+    if (document.fullscreenElement === element) {
+      void document.exitFullscreen?.();
+      return;
+    }
+    void element.requestFullscreen?.();
+  };
+
+  useEffect(() => {
+    if (!poolType) return;
+    let active = true;
+    setDetailLoading(true);
+    fetchAbnormalAnalysisDetail(poolType, buildDetailQueryParams())
+      .then((res) => {
+        if (active) setDetailData((res?.data as AbnormalAnalysisDetailResponse) ?? null);
+      })
+      .catch((err) => {
+        console.log("abnormalAnalysisDetail error", err);
+        if (active) setDetailData(null);
+      })
+      .finally(() => {
+        if (active) setDetailLoading(false);
+      });
+    return () => {
+      active = false;
+    };
+  }, [detailOrderBy, detailPage, detailPageSize, filters, poolType]);
+
+  useEffect(() => {
+    if (!poolType) {
+      setDetailMinerCodeSource([]);
+      setDetailMinerCodeLoading(false);
+      return;
+    }
+    let active = true;
+    setDetailMinerCodeLoading(true);
+    setDetailMinerCodeSource([]);
+    fetchAbnormalAnalysisDetail(poolType, {
+      ...(searchSite !== "all" ? { siteName: searchSite } : {}),
+      page: 1,
+      pageSize: 1,
+    })
+      .then((res) => {
+        if (active) {
+          const data = (res?.data as AbnormalAnalysisDetailResponse) ?? null;
+          setDetailMinerCodeSource(safeMinerCodeGroups(data?.minerCode));
+        }
+      })
+      .catch((err) => {
+        console.log("abnormalAnalysisDetail minerCode source error", err);
+        if (active) setDetailMinerCodeSource([]);
+      })
+      .finally(() => {
+        if (active) setDetailMinerCodeLoading(false);
+      });
+    return () => {
+      active = false;
+    };
+  }, [poolType, searchSite]);
+
+  const detailList = useMemo<AbnormalAnalysisDetailItem[]>(
+    () => (Array.isArray(detailData?.list) ? detailData!.list : []),
+    [detailData],
+  );
+  const detailMinerCodeOptions = useMemo(() => {
+    const codes =
+      searchSite === "all"
+        ? detailMinerCodeSource.flatMap((item) => item.minerCode)
+        : detailMinerCodeSource.filter((item) => item.site === searchSite).flatMap((item) => item.minerCode);
+
+    return Array.from(new Set(codes)).map((item) => ({
+      value: item,
+      label: item,
+    }));
+  }, [detailMinerCodeSource, searchSite]);
+  const detailTotal = typeof detailData?.total === "number" ? detailData.total : detailList.length;
+
+  useEffect(() => {
+    if (!searchMinerId) return;
+    const exists = detailMinerCodeOptions.some((item) => item.value === searchMinerId);
+    if (!exists) {
+      setSearchMinerId("");
+    }
+  }, [detailMinerCodeOptions, searchMinerId]);
+
+  const selectedSite = useMemo((): SiteInfo => {
+    return SITES.find((s) => s.name === selectedSiteName) || SITES[0];
+  }, [selectedSiteName]);
+
+  const siteAnomalyList = useMemo(() => safeSiteAnomalyList(siteAnomalyListData), [siteAnomalyListData]);
+  const hasSiteListData = siteAnomalyList.length > 0;
+
+  const selectedSiteSummary = useMemo((): SiteAnomalySiteListItem | null => {
+    return siteAnomalyList.find((site) => site.siteName === selectedSiteName) ?? null;
+  }, [selectedSiteName, siteAnomalyList]);
+
+  useEffect(() => {
+    if (!poolType || !selectedSiteSummary?.siteCode) {
+      setSelectedSiteData(null);
+      setSelectedSiteLoading(false);
+      return;
+    }
+    let active = true;
+    setSelectedSiteLoading(true);
+    fetchSiteAnomalyStats(poolType, selectedSiteSummary.siteCode)
+      .then((res) => {
+        if (active) setSelectedSiteData((res?.data as SiteAnomalyStatsResponse) ?? null);
+      })
+      .catch((err) => {
+        console.log("siteAnomalyStats error", err);
+        if (active) setSelectedSiteData(null);
+      })
+      .finally(() => {
+        if (active) setSelectedSiteLoading(false);
+      });
+    return () => {
+      active = false;
+    };
+  }, [poolType, selectedSiteSummary?.siteCode]);
+
+  const handleCopyText = (text: string, type: string) => {
+    navigator.clipboard.writeText(text);
+    message.success(t("{{type}} 已复制到剪贴板", { type: type }));
+  };
+
+  const buildDetailQueryParams = (options?: {
+    includePagination?: boolean;
+  }): AbnormalAnalysisDetailParams => {
+    const includePagination = options?.includePagination ?? true;
+    return {
+      ...(filters.site !== "all" ? { siteName: filters.site } : {}),
+      ...(filters.mac ? { mac: filters.mac } : {}),
+      ...(filters.sn ? { controlBoardSN: filters.sn } : {}),
+      ...(filters.hashBoardSN ? { hashBoardSN: filters.hashBoardSN } : {}),
+      ...(filters.minerId ? { minerId: filters.minerId } : {}),
+      ...(filters.refreshTimeFrom ? { refreshTimeFrom: filters.refreshTimeFrom } : {}),
+      ...(filters.dismantled !== "all" ? { isDismantled: filters.dismantled } : {}),
+      ...(filters.asset !== "all" ? { assetOwnership: filters.asset } : {}),
+      orderBy: detailOrderBy,
+      ...(includePagination ? { page: detailPage, pageSize: detailPageSize } : {}),
+    };
+  };
+
+  const handleDownloadCurrentPage = async () => {
+    if (detailExporting || !poolType) {
+      return;
+    }
+    setDetailExporting(true);
+    try {
+      const res = await fetchAbnormalAnalysisDetailExport(
+        poolType,
+        buildDetailQueryParams({ includePagination: false }),
+      );
+      downloadExcelBlobResponse(
+        res,
+        `abnormal_analysis_detail_${new Date().toISOString().slice(0, 10)}.xlsx`,
+      );
+      message.success(t("下载成功"));
+    } catch (error) {
+      console.error("abnormalAnalysisDetail export error", error);
+      message.error(t("下载失败，请稍后重试"));
+    } finally {
+      setDetailExporting(false);
+    }
+  };
+
+  // 全场折线图：基于真实接口的 dailyLast30Days（逐日 anomaly）
+  const globalLineData: HistoryPoint[] = useMemo(
+    () =>
+      safeDailyPoints(allSiteData).map((d) => ({
+        date: d.date,
+        abnormalCount: d.anomaly,
+        onShelfMax: d.onShelfMax,
+        refreshedCount: d.refreshedCount,
+      })),
+    [allSiteData],
+  );
+  const globalLineOption = useMemo(
+    () => buildLineOption(globalLineData, "#4f46e5", "#0f172a"),
+    [globalLineData],
+  );
+  const hasAllSiteTrendData = globalLineData.length > 0;
+  const selectedSiteLineData: HistoryPoint[] = useMemo(() => {
+    const apiPoints = Array.isArray(selectedSiteData?.dailyLast30Days)
+      ? selectedSiteData!.dailyLast30Days
+      : [];
+    if (apiPoints.length > 0) {
+      return apiPoints.map((d) => ({
+        date: d.date,
+        abnormalCount: d.anomaly,
+        onShelfMax: d.onShelfMax,
+        refreshedCount: d.refreshedCount,
+      }));
+    }
+    return selectedSite.history30Days;
+  }, [selectedSite.history30Days, selectedSiteData]);
+  const siteLineOption = useMemo(
+    () => buildLineOption(selectedSiteLineData, "#0d9488", "#134e4a"),
+    [selectedSiteLineData],
+  );
+  const hasSelectedSiteTrendData = selectedSiteLineData.length > 0;
+
+  const selectedSiteStatsCards = useMemo(() => {
+    if (selectedSiteData?.stats) {
+      const stats = selectedSiteData.stats;
+      const windows = [
+        {
+          label: t("最近1日异常"),
+          val: stats.yesterday?.anomaly ?? 0,
+          color: "text-rose-600",
+          bg: "bg-rose-50",
+        },
+        {
+          label: t("最近7日异常"),
+          val: stats.last7Days?.anomaly ?? 0,
+          color: "text-orange-600",
+          bg: "bg-orange-50",
+        },
+        {
+          label: t("最近15日异常"),
+          val: stats.last15Days?.anomaly ?? 0,
+          color: "text-indigo-600",
+          bg: "bg-indigo-50",
+        },
+        {
+          label: t("最近30日异常"),
+          val: stats.last30Days?.anomaly ?? 0,
+          color: "text-slate-600",
+          bg: "bg-slate-100",
+        },
+        {
+          label: t("累计异常"),
+          val: stats.allTime?.anomaly ?? 0,
+          color: "text-purple-600",
+          bg: "bg-purple-50",
+        },
+      ];
+      return windows.map((item, idx) => (
+        <div
+          key={idx}
+          className={`p-2 px-3 rounded-lg border border-slate-100/80 ${item.bg} transition-all hover:scale-[1.02] flex flex-col justify-between ${
+            idx === 4 ? "col-span-2 sm:col-span-1" : ""
+          }`}
+        >
+          <div className="text-[11px] text-slate-500 font-medium mb-0.5">{item.label}</div>
+          <div className={`text-lg font-bold font-mono ${item.color}`}>
+            {item.val} <span className="text-[10px] font-sans text-slate-400 font-normal">{t("台")}</span>
+          </div>
+        </div>
+      ));
+    }
+
+    if (selectedSiteSummary) {
+      const windows = [
+        { label: t("全部异常"), val: selectedSiteSummary.anomaly, color: "text-rose-600", bg: "bg-rose-50" },
+        {
+          label: t("期望在架"),
+          val: selectedSiteSummary.onShelfMax,
+          color: "text-slate-700",
+          bg: "bg-slate-100",
+        },
+        {
+          label: t("刷新数"),
+          val: selectedSiteSummary.refreshedCount,
+          color: "text-teal-700",
+          bg: "bg-teal-50",
+        },
+        {
+          label: t("异常比例"),
+          val: `${selectedSiteSummary.anomalyRatio}%`,
+          color: "text-amber-700",
+          bg: "bg-amber-50",
+        },
+      ];
+      return windows.map((item, idx) => (
+        <div
+          key={idx}
+          className={`p-2 px-3 rounded-lg border border-slate-100/80 ${item.bg} transition-all hover:scale-[1.02] flex flex-col justify-between`}
+        >
+          <div className="text-[11px] text-slate-500 font-medium mb-0.5">{item.label}</div>
+          <div className={`text-lg font-bold font-mono ${item.color}`}>
+            {item.val}
+            {typeof item.val === "number" ? (
+              <span className="text-[10px] font-sans text-slate-400 font-normal"> {t("台")}</span>
+            ) : null}
+          </div>
+        </div>
+      ));
+    }
+
+    return statsCards(selectedSite.abnormalStats);
+  }, [selectedSite.abnormalStats, selectedSiteData, selectedSiteSummary]);
+
+  const columns: ColumnsType<AbnormalAnalysisDetailItem> = [
+    {
+      title: t("场地"),
+      dataIndex: "site",
+      key: "site",
+      width: detailSiteColumnWidth,
+      fixed: "left",
+      onHeaderCell: () =>
+        ({
+          width: detailSiteColumnWidth,
+          onColumnResize: (nextWidth: number) => {
+            setDetailSiteColumnWidth(nextWidth);
+            localStorage.setItem("abnormal-analysis-site-column-width", String(nextWidth));
+          },
+        }) as any,
+      render: (text: string) => (
+        <span className="font-medium text-slate-700 flex min-w-0 items-center gap-1.5">
+          <Text ellipsis={{ tooltip: text }} className="min-w-0 flex-1 !text-inherit">
+            {text}
+          </Text>
+        </span>
+      ),
+    },
+    {
+      title: t("MAC 地址"),
+      dataIndex: "mac",
+      key: "mac",
+      width: 180,
+      render: (text: string) => <span className="text-[#1677ff]">{text}</span>,
+    },
+    {
+      title: t("控制板 SN"),
+      dataIndex: "controlBoardSN",
+      key: "controlBoardSN",
+      width: 180,
+      render: (text: string) => (
+        <span className="font-mono text-xs text-slate-500 flex items-center justify-between group max-w-[150px]">
+          <span>{text}</span>
+          <Tooltip title={t("复制 SN")}>
+            <CopyOutlined
+              className="text-slate-400 hover:text-blue-500 cursor-pointer ml-1.5 opacity-0 group-hover:opacity-100 transition-opacity"
+              onClick={() => handleCopyText(text, t("控制板 SN"))}
+            />
+          </Tooltip>
+        </span>
+      ),
+    },
+    {
+      title: t("机型"),
+      dataIndex: "model",
+      key: "model",
+      width: 260,
+      render: (text: string) => <Tag color="blue">{text}</Tag>,
+    },
+    {
+      title: t("算力板序列号"),
+      dataIndex: "hashBoardSN",
+      key: "hashBoardSN",
+      width: 560,
+      render: (value: string[]) => {
+        const list = safeStringArray(value);
+        if (list.length === 0) return <span className="text-slate-400">-</span>;
+        return (
+          <div className="flex items-start justify-between gap-2 group">
+            <div className="flex flex-nowrap gap-1 overflow-x-auto whitespace-nowrap pb-1 max-w-[500px]">
+              {list.map((item) => (
+                <Tag key={item} color="blue">
+                  {item}
+                </Tag>
+              ))}
+            </div>
+            <Tooltip title={t("复制算力板序列号")}>
+              <CopyOutlined
+                className="text-slate-400 hover:text-blue-500 cursor-pointer opacity-0 group-hover:opacity-100 transition-opacity mt-1"
+                onClick={() => handleCopyText(list.join(", "), t("算力板序列号"))}
+              />
+            </Tooltip>
+          </div>
+        );
+      },
+    },
+    {
+      title: t("矿工号"),
+      dataIndex: "minerCode",
+      key: "minerCode",
+      width: 220,
+      render: (value: string[]) => {
+        const list = safeStringArray(value);
+        if (list.length === 0) return <span className="text-slate-400">-</span>;
+        const text = list.join(", ");
+        return (
+          <span className="font-mono text-xs text-slate-500 flex items-center justify-between gap-2 group max-w-[220px]">
+            <span className="truncate">{text}</span>
+            <Tooltip title={t("复制矿工号")}>
+              <CopyOutlined
+                className="text-slate-400 hover:text-blue-500 cursor-pointer opacity-0 group-hover:opacity-100 transition-opacity"
+                onClick={() => handleCopyText(text, t("矿工号"))}
+              />
+            </Tooltip>
+          </span>
+        );
+      },
+    },
+    {
+      title: t("IP 地址"),
+      dataIndex: "ipAddress",
+      key: "ipAddress",
+      width: 220,
+      render: (value: string[]) => {
+        const list = safeStringArray(value);
+        if (list.length === 0) return <span className="text-slate-400">-</span>;
+        const text = list.join(", ");
+        return (
+          <span className="font-mono text-xs text-slate-600 flex items-center justify-between gap-2 group max-w-[220px]">
+            <span className="truncate">{text}</span>
+            <Tooltip title={t("复制 IP")}>
+              <CopyOutlined
+                className="text-slate-400 hover:text-blue-500 cursor-pointer opacity-0 group-hover:opacity-100 transition-opacity"
+                onClick={() => handleCopyText(text, t("IP 地址"))}
+              />
+            </Tooltip>
+          </span>
+        );
+      },
+    },
+    {
+      title: t("刷新时间"),
+      dataIndex: "refreshTime",
+      key: "refreshTime",
+      width: 180,
+      sorter: true,
+      sortDirections: refreshTimeSortDirections,
+      sortOrder: detailOrderBy === "refreshTimeDesc" ? ("descend" as const) : ("ascend" as const),
+      render: (text: string) => {
+        if (!text) return <span className="text-slate-400">-</span>;
+        return (
+          <div className="flex items-center gap-1.5">
+            <span className="relative flex h-2 w-2">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+              <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+            </span>
+            <span className="text-slate-700 font-medium">{text || "-"}</span>
+          </div>
+        );
+      },
+    },
+    {
+      title: t("是否下架"),
+      dataIndex: "isDismantled",
+      key: "isDismantled",
+      width: 110,
+      render: (text: string) => {
+        if (text === "下架") {
+          return (
+            <Tag color="error" icon={<CloseCircleOutlined />}>
+              {t("下架")}
+            </Tag>
+          );
+        } else if (text === "在架") {
+          return (
+            <Tag color="success" icon={<CheckCircleOutlined />}>
+              {t("在架")}
+            </Tag>
+          );
+        } else {
+          return (
+            <Tag color="warning" icon={<QuestionCircleOutlined />}>
+              {t("未知")}
+            </Tag>
+          );
+        }
+      },
+    },
+    {
+      title: t("下架时间"),
+      dataIndex: "dismantledTime",
+      key: "dismantledTime",
+      width: 180,
+      render: (text: string) => <span className="text-xs text-slate-500">{text}</span>,
+    },
+    {
+      title: t("产权"),
+      dataIndex: "assetOwnership",
+      key: "assetOwnership",
+      width: 100,
+      render: (text: string) => {
+        let color = "default";
+        if (text === "自有") color = "processing";
+        else if (text === "非自有") color = "warning";
+        return <Tag color={color}>{text}</Tag>;
+      },
+    },
+  ];
+
+  // 全场统计卡片：基于真实接口的五个时间窗口（anomaly 为异常矿机数）
+  const allSiteStatsCards = (stats?: AnomalyStats) => {
+    const windows = [
+      {
+        label: t("最近1日异常"),
+        val: stats?.yesterday?.anomaly ?? 0,
+        color: "text-rose-600",
+        bg: "bg-rose-50",
+      },
+      {
+        label: t("最近7日异常"),
+        val: stats?.last7Days?.anomaly ?? 0,
+        color: "text-orange-600",
+        bg: "bg-orange-50",
+      },
+      {
+        label: t("最近15日异常"),
+        val: stats?.last15Days?.anomaly ?? 0,
+        color: "text-indigo-600",
+        bg: "bg-indigo-50",
+      },
+      {
+        label: t("最近30日异常"),
+        val: stats?.last30Days?.anomaly ?? 0,
+        color: "text-slate-600",
+        bg: "bg-slate-100",
+      },
+      {
+        label: t("累计异常"),
+        val: stats?.allTime?.anomaly ?? 0,
+        color: "text-purple-600",
+        bg: "bg-purple-50",
+      },
+    ];
+    return windows.map((item, idx) => (
+      <div
+        key={idx}
+        className={`p-2 px-3 rounded-lg border border-slate-100/80 ${item.bg} transition-all hover:scale-[1.02] flex flex-col justify-between ${
+          idx === 4 ? "col-span-2 sm:col-span-1" : ""
+        }`}
+      >
+        <div className="text-[11px] text-slate-500 font-medium mb-0.5">{item.label}</div>
+        <div className={`text-lg font-bold font-mono ${item.color}`}>
+          {item.val} <span className="text-[10px] font-sans text-slate-400 font-normal">{t("台")}</span>
+        </div>
+      </div>
+    ));
+  };
+
+  return (
+    <div className="min-h-full bg-slate-50 -m-4 p-6 flex flex-col gap-6">
+      <div className="max-w-[1600px] mx-auto w-full space-y-6">
+        <Row gutter={[20, 20]}>
+          {/* 左侧: 全场统计 + 场地异常统计 */}
+          <Col xs={24} lg={16} xl={17} className="space-y-6">
+            {/* 1. 全场统计 */}
+            <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+              <div className="px-4 py-2.5 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
+                <div className="flex items-center gap-2">
+                  <div className="w-1 h-4 bg-indigo-600 rounded-full"></div>
+                  <span className="text-sm font-bold text-slate-800">{t("全场统计")}</span>
+                </div>
+                <Tag color="purple">
+                  {t("全部场地 · {{value}} 个", { value: allSiteData?.siteCount ?? "-" })}
+                </Tag>
+              </div>
+              <Spin spinning={allSiteLoading} tip={t("全场统计加载中...")}>
+                <div className="p-3.5">
+                  <div className="grid grid-cols-2 sm:grid-cols-5 gap-2 mb-3">
+                    {allSiteStatsCards(allSiteData?.stats)}
+                  </div>
+                  <div className="mt-2.5">
+                    <div className="flex items-center justify-between mb-2">
+                      <Text className="text-xs font-bold text-slate-500 font-mono">
+                        {t("全场折线图 (最近30日折线图)")}
+                      </Text>
+                      <span className="text-[11px] text-slate-400">{t("实时更新")}</span>
+                    </div>
+                    <div className="h-[135px] w-full">
+                      {hasAllSiteTrendData ? (
+                        <ReactEcharts option={globalLineOption} />
+                      ) : (
+                        <div className="h-full flex items-center justify-center">
+                          <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} description={t("暂无全场趋势数据")} />
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              </Spin>
+            </div>
+
+            {/* 2. XX场地异常统计 */}
+            <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden border-t-2 border-t-teal-500">
+              <div className="px-4 py-2.5 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
+                <div className="flex items-center gap-2">
+                  <div className="w-1 h-4 bg-teal-600 rounded-full"></div>
+                  <span className="text-sm font-bold text-slate-800">
+                    {t("{{value}}异常统计", { value: selectedSiteSummary?.siteName ?? selectedSiteName })}
+                  </span>
+                </div>
+                <Tag color="cyan">
+                  {selectedSiteSummary?.siteCode ?? (hasSiteListData ? t("当前场地") : t("暂无数据"))}
+                </Tag>
+              </div>
+              <Spin spinning={selectedSiteLoading} tip={t("场地统计加载中...")}>
+                <div className="p-3.5">
+                  {hasSiteListData ? (
+                    <>
+                      <div
+                        className={`grid gap-2 mb-3 ${
+                          selectedSiteData?.stats
+                            ? "grid-cols-2 sm:grid-cols-5"
+                            : "grid-cols-2 sm:grid-cols-4"
+                        }`}
+                      >
+                        {selectedSiteStatsCards}
+                      </div>
+                      <div className="mt-2.5">
+                        <div className="flex items-center justify-between mb-2">
+                          <Text className="text-xs font-bold text-slate-500 font-mono">
+                            {t("{{selectedSiteName}}折线图 (最近30日折线图)", {
+                              selectedSiteName: selectedSiteName,
+                            })}
+                          </Text>
+                          {selectedSiteData?.stats ? (
+                            <span className="text-xs text-teal-600 font-medium">
+                              {t("30日异常: {{value}} 台", {
+                                value: selectedSiteData.stats.last30Days?.anomaly ?? 0,
+                              })}
+                            </span>
+                          ) : selectedSiteSummary ? (
+                            <span className="text-xs text-teal-600 font-medium">
+                              {t("期望在架: {{onShelfMax}} 台", {
+                                onShelfMax: selectedSiteSummary.onShelfMax,
+                              })}
+                            </span>
+                          ) : (
+                            <span className="text-xs text-teal-600 font-medium">
+                              {t("矿机总数: {{totalRigs}} 台", { totalRigs: selectedSite.totalRigs })}
+                            </span>
+                          )}
+                        </div>
+                        <div className="h-[135px] w-full">
+                          {hasSelectedSiteTrendData ? (
+                            <ReactEcharts option={siteLineOption} />
+                          ) : (
+                            <div className="h-full flex items-center justify-center">
+                              <Empty
+                                image={Empty.PRESENTED_IMAGE_SIMPLE}
+                                description={t("暂无场地趋势数据")}
+                              />
+                            </div>
+                          )}
+                        </div>
+                        {selectedSiteSummary && !selectedSiteData?.stats ? (
+                          <div className="mt-2 text-[11px] text-slate-400">
+                            {t("当前仅场地列表接入真实接口，单场地最近30日曲线仍使用页面示例数据。")}
+                          </div>
+                        ) : null}
+                      </div>
+                    </>
+                  ) : (
+                    <div className="py-10">
+                      <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} description={t("暂无场地异常数据")} />
+                    </div>
+                  )}
+                </div>
+              </Spin>
+            </div>
+          </Col>
+
+          {/* 右侧: 场地列表 */}
+          <Col xs={24} lg={8} xl={7}>
+            <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden h-full flex flex-col">
+              <div className="px-4 py-2.5 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
+                <div className="flex items-center gap-2">
+                  <SlidersOutlined className="text-slate-500" />
+                  <span className="text-sm font-bold text-slate-800">{t("场地列表")}</span>
+                </div>
+                <Badge count={siteAnomalyListData?.total ?? 0} color="#0f172a" />
+              </div>
+              <Spin spinning={siteAnomalyListLoading} tip={t("场地列表加载中...")}>
+                <div className="p-3.5 flex flex-col flex-1">
+                  <div className="text-xs text-slate-400 mb-3 font-mono leading-relaxed">
+                    {t("点击下方场地卡片，查看该场地昨日异常汇总")}
+                  </div>
+                  <div className="abnormal-slider flex flex-col gap-3 overflow-y-auto pr-1 max-h-[505px]">
+                    {hasSiteListData ? (
+                      siteAnomalyList.map((site) => {
+                        const isSelected = selectedSiteName === site.siteName;
+                        const normalCount = site.onShelfMax - Math.max(site.anomaly, 0);
+                        const barPercent =
+                          site.onShelfMax > 0
+                            ? Math.min(100, Math.max(0, (normalCount / site.onShelfMax) * 100))
+                            : 0;
+
+                        return (
+                          <div
+                            key={site.siteCode || site.siteName}
+                            onClick={() => {
+                              setSelectedSiteName(site.siteName);
+                              message.info(t("已选择场地: {{siteName}}", { siteName: site.siteName }));
+                            }}
+                            className={`group relative py-2.5 px-3 rounded-lg border cursor-pointer transition-all duration-300 select-none ${
+                              isSelected
+                                ? "bg-slate-900 border-slate-900 shadow-md text-white scale-[1.01]"
+                                : "bg-white border-slate-200 text-slate-800 hover:border-slate-400 hover:bg-slate-50 shadow-sm"
+                            }`}
+                          >
+                            {isSelected && (
+                              <div className="absolute right-3.5 top-3 h-1.5 w-1.5 rounded-full bg-teal-400 animate-ping"></div>
+                            )}
+
+                            <div className="flex items-start justify-between mb-1.5 gap-2">
+                              <div className="flex items-center gap-1.5 min-w-0">
+                                <EnvironmentOutlined
+                                  className={
+                                    isSelected
+                                      ? "text-amber-400"
+                                      : "text-slate-400 group-hover:text-slate-600"
+                                  }
+                                />
+                                <Tooltip title={site.siteName} mouseEnterDelay={0.2}>
+                                  <span
+                                    className={`font-semibold text-xs transition-colors truncate ${
+                                      isSelected ? "text-white" : "text-slate-800"
+                                    }`}
+                                  >
+                                    {site.siteName}
+                                  </span>
+                                </Tooltip>
+                              </div>
+                              <span
+                                className={`shrink-0 text-[10px] font-mono px-1.5 py-0.5 rounded-full ${
+                                  isSelected ? "bg-slate-800 text-amber-400" : "bg-slate-100 text-slate-600"
+                                }`}
+                              >
+                                {t("异常 {{anomaly}} 台", { anomaly: site.anomaly })}
+                              </span>
+                            </div>
+
+                            <div className="space-y-1">
+                              <div className="flex justify-between text-[11px] gap-2">
+                                <span className={isSelected ? "text-slate-400" : "text-slate-500"}>
+                                  {t("刷新/期望:")}{" "}
+                                  <span className="font-mono">
+                                    {site.refreshedCount}/{site.onShelfMax}
+                                  </span>
+                                </span>
+                                <span
+                                  className={`font-mono font-semibold ${
+                                    site.anomalyRatio > 1.5
+                                      ? isSelected
+                                        ? "text-rose-400"
+                                        : "text-rose-600"
+                                      : isSelected
+                                        ? "text-teal-400"
+                                        : "text-teal-600"
+                                  }`}
+                                >
+                                  {t("异常 {{anomalyRatio}}%", { anomalyRatio: site.anomalyRatio })}
+                                </span>
+                              </div>
+
+                              <div
+                                className={`w-full h-1 rounded-full overflow-hidden ${
+                                  isSelected ? "bg-slate-800" : "bg-slate-100"
+                                }`}
+                              >
+                                <div
+                                  className={`h-full rounded-full transition-all duration-500 ${
+                                    site.anomalyRatio > 1.5
+                                      ? isSelected
+                                        ? "bg-rose-400"
+                                        : "bg-rose-500"
+                                      : isSelected
+                                        ? "bg-emerald-400"
+                                        : "bg-emerald-500"
+                                  }`}
+                                  style={{ width: `${barPercent}%` }}
+                                ></div>
+                              </div>
+                            </div>
+                          </div>
+                        );
+                      })
+                    ) : (
+                      <div className="py-10">
+                        <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} description={t("暂无场地列表数据")} />
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </Spin>
+            </div>
+          </Col>
+        </Row>
+
+        {/* 异常信息详情栏 */}
+        <div className="w-full min-w-0 max-w-full bg-white rounded-lg border border-gray-200 shadow-sm overflow-hidden">
+          <div
+            id={detailFullscreenTargetId}
+            className="bg-white min-w-0 [&:fullscreen]:flex [&:fullscreen]:flex-col [&:fullscreen]:h-screen [&:fullscreen]:overflow-auto"
+          >
+            <div className="px-5 pt-4 pb-3 border-b border-gray-200 bg-white flex items-center justify-between gap-3">
+              <h2 className="text-lg font-semibold text-gray-800 m-0">{t("异常信息详情栏")}</h2>
+              <span className="text-xs text-slate-500 whitespace-nowrap">
+                {t("检索到")} <span className="font-bold text-slate-900 font-mono">{detailTotal}</span>{" "}
+                {t("台矿机")}
+              </span>
+            </div>
+
+            {detailFilterExpanded ? (
+              <div className="px-5 py-4 border-b border-gray-200 bg-white">
+                <Row gutter={[16, 16]}>
+                  <Col xs={24} sm={12} md={6} lg={6}>
+                    <div className="text-xs text-slate-500 mb-1.5 font-medium">{t("场地")}</div>
+                    <Select
+                      showSearch
+                      allowClear={false}
+                      style={{ width: "100%" }}
+                      placeholder={t("选择场地")}
+                      value={searchSite}
+                      onChange={(val) => setSearchSite(val)}
+                      optionFilterProp="label"
+                      filterOption={(input, option) =>
+                        String(option?.label ?? "")
+                          .toLowerCase()
+                          .includes(input.toLowerCase())
+                      }
+                      options={[
+                        { value: "all", label: t("全部场地") },
+                        ...siteAnomalyList.map((s) => ({ value: s.siteName, label: s.siteName })),
+                      ]}
+                    />
+                  </Col>
+                  <Col xs={24} sm={12} md={6} lg={6}>
+                    <div className="text-xs text-slate-500 mb-1.5 font-medium">{t("MAC 地址")}</div>
+                    <Input
+                      placeholder={t("搜索 MAC 模糊匹配")}
+                      value={searchMac}
+                      onChange={(e) => setSearchMac(e.target.value)}
+                      allowClear
+                    />
+                  </Col>
+                  <Col xs={24} sm={12} md={6} lg={6}>
+                    <div className="text-xs text-slate-500 mb-1.5 font-medium">{t("控制板 SN")}</div>
+                    <Input
+                      placeholder={t("控制板 SN")}
+                      value={searchSN}
+                      onChange={(e) => setSearchSN(e.target.value)}
+                      allowClear
+                    />
+                  </Col>
+                  <Col xs={24} sm={12} md={6} lg={6}>
+                    <div className="text-xs text-slate-500 mb-1.5 font-medium">{t("算力板序列号")}</div>
+                    <Input
+                      placeholder={t("搜索算力板序列号")}
+                      value={searchHashBoardSN}
+                      onChange={(e) => setSearchHashBoardSN(e.target.value)}
+                      allowClear
+                    />
+                  </Col>
+                  <Col xs={24} sm={12} md={6} lg={6}>
+                    <div className="text-xs text-slate-500 mb-1.5 font-medium">{t("矿工号")}</div>
+                    <Select
+                      showSearch
+                      allowClear
+                      style={{ width: "100%" }}
+                      placeholder={t("选择矿工号")}
+                      loading={detailMinerCodeLoading}
+                      value={searchMinerId}
+                      onChange={(val) => setSearchMinerId(val || "")}
+                      optionFilterProp="label"
+                      options={detailMinerCodeOptions}
+                    />
+                  </Col>
+                  <Col xs={24} sm={12} md={6} lg={6}>
+                    <div className="text-xs text-slate-500 mb-1.5 font-medium">{t("统计起始时间")}</div>
+                    <DatePicker
+                      showTime
+                      style={{ width: "100%" }}
+                      placeholder={t("选择统计起始时间")}
+                      value={searchRefreshTimeFrom}
+                      onChange={(value) => setSearchRefreshTimeFrom(value)}
+                      allowClear
+                    />
+                  </Col>
+                  <Col xs={24} sm={12} md={6} lg={6}>
+                    <div className="text-xs text-slate-500 mb-1.5 font-medium">{t("下架")}</div>
+                    <Select
+                      style={{ width: "100%" }}
+                      placeholder={t("是否下架")}
+                      value={searchDismantled}
+                      onChange={(val) => setSearchDismantled(val)}
+                      options={[
+                        { value: "all", label: t("全部") },
+                        { value: "在架", label: t("在架") },
+                        { value: "下架", label: t("下架") },
+                        { value: "未知", label: t("未知") },
+                      ]}
+                    />
+                  </Col>
+                  <Col xs={24} sm={12} md={6} lg={6}>
+                    <div className="text-xs text-slate-500 mb-1.5 font-medium">{t("产权")}</div>
+                    <Select
+                      style={{ width: "100%" }}
+                      placeholder={t("产权")}
+                      value={searchAsset}
+                      onChange={(val) => setSearchAsset(val)}
+                      options={[
+                        { value: "all", label: t("全部") },
+                        { value: "自有", label: t("自有") },
+                        { value: "非自有", label: t("非自有") },
+                        { value: "未知", label: t("未知") },
+                      ]}
+                    />
+                  </Col>
+                </Row>
+
+                <div className="flex justify-end gap-3 mt-4 pt-3 border-t border-dashed border-slate-200">
+                  <Button onClick={handleReset} className="hover:border-slate-400">
+                    {t("重置")}
+                  </Button>
+                  <Button type="primary" onClick={handleSearch}>
+                    {t("搜索")}
+                  </Button>
+                </div>
+              </div>
+            ) : null}
+
+            <div className="w-full min-w-0 overflow-x-auto bg-white">
+              <div className="flex justify-end items-center gap-1 border-b border-gray-100 px-4 py-2">
+                <Tooltip title={detailFilterExpanded ? t("收起筛选") : t("展开筛选")}>
+                  <Button
+                    type="text"
+                    shape="circle"
+                    icon={
+                      <SearchOutlined className={detailFilterExpanded ? "text-[#1677ff]" : "text-gray-500"} />
+                    }
+                    className={detailFilterExpanded ? "!bg-[#e6f4ff]" : undefined}
+                    onClick={() => setDetailFilterExpanded((expanded) => !expanded)}
+                  />
+                </Tooltip>
+                <Tooltip title={t("下载明细")}>
+                  <Button
+                    type="text"
+                    shape="circle"
+                    icon={<DownloadOutlined />}
+                    loading={detailExporting}
+                    disabled={detailExporting}
+                    onClick={handleDownloadCurrentPage}
+                  />
+                </Tooltip>
+                <Tooltip title={t("刷新")}>
+                  <Button
+                    type="text"
+                    shape="circle"
+                    icon={<ReloadOutlined />}
+                    loading={detailLoading}
+                    onClick={handleDetailRefresh}
+                  />
+                </Tooltip>
+                <Tooltip title={detailFullscreen ? t("退出全屏") : t("全屏")}>
+                  <Button
+                    type="text"
+                    shape="circle"
+                    icon={detailFullscreen ? <FullscreenExitOutlined /> : <FullscreenOutlined />}
+                    onClick={handleDetailFullscreen}
+                  />
+                </Tooltip>
+              </div>
+
+              <div className="px-4 pb-4">
+                <Table
+                  loading={detailLoading}
+                  columns={columns}
+                  dataSource={detailList}
+                  rowKey="id"
+                  components={{ header: { cell: ResizableHeaderCell } }}
+                  size="middle"
+                  bordered={false}
+                  scroll={{ x: 2000 }}
+                  onChange={(
+                    pagination: any,
+                    _filters: any,
+                    sorter:
+                      | SorterResult<AbnormalAnalysisDetailItem>
+                      | SorterResult<AbnormalAnalysisDetailItem>[],
+                    extra: { action?: "paginate" | "sort" | "filter" },
+                  ) => {
+                    const activeSorter = Array.isArray(sorter) ? sorter[0] : sorter;
+                    const nextPage = pagination?.current ?? 1;
+                    const nextPageSize = pagination?.pageSize ?? 10;
+
+                    if (extra?.action === "paginate") {
+                      if (nextPage !== detailPage) setDetailPage(nextPage);
+                      if (nextPageSize !== detailPageSize) setDetailPageSize(nextPageSize);
+                      return;
+                    }
+
+                    if (extra?.action === "sort" && activeSorter?.columnKey === "refreshTime") {
+                      const nextOrderBy =
+                        activeSorter.order === "ascend"
+                          ? "refreshTimeAsc"
+                          : activeSorter.order === "descend"
+                            ? "refreshTimeDesc"
+                            : detailOrderBy;
+
+                      if (nextOrderBy !== detailOrderBy) {
+                        setDetailOrderBy(nextOrderBy);
+                      }
+                      if (detailPage !== 1) {
+                        setDetailPage(1);
+                      }
+                    }
+                  }}
+                  pagination={{
+                    current: detailPage,
+                    pageSize: detailPageSize,
+                    total: detailTotal,
+                    showSizeChanger: true,
+                    pageSizeOptions: ["10", "20", "50", "100"],
+                    showTotal: (total: number) => t("共 {{total}} 项", { total: total }),
+                    className: "px-6 py-4",
+                  }}
+                  locale={{
+                    emptyText: (
+                      <div className="py-12 text-center">
+                        <AlertOutlined className="text-4xl text-slate-300 mb-3" />
+                        <div className="text-slate-500 font-medium">{t("没有找到符合条件的矿机数据")}</div>
+                        <div className="text-xs text-slate-400 mt-1">
+                          {t("请尝试放宽筛选条件，或重置搜索筛选器。")}
+                        </div>
+                        <Button onClick={handleReset} className="mt-4" size="small">
+                          {t("重置筛选")}
+                        </Button>
+                      </div>
+                    ),
+                  }}
+                />
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}

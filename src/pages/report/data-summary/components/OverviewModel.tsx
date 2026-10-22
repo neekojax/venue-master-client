@@ -4,6 +4,7 @@ import { Button, message, Modal, Spin } from "antd";
 import { fetchSummaryOverview } from "../../api";
 import { useSelector, useSettingsStore } from "@/stores";
 
+import { t } from "@/locales";
 import type { SummaryOverview } from "@/pages/report/type";
 
 const OverviewModel: React.FC<{ chartDate: string }> = ({ chartDate }) => {
@@ -22,17 +23,17 @@ const OverviewModel: React.FC<{ chartDate: string }> = ({ chartDate }) => {
       })
       .catch((err) => {
         console.error(err);
-        message.error("加载数据失败，请稍后重试");
+        message.error(t("加载数据失败，请稍后重试"));
       })
       .finally(() => setLoading(false));
   }, [open, chartDate, poolType]);
 
   const summaryText = useMemo(() => {
     if (!overview) {
-      return `日期：${chartDate}\n矿机类型：${poolType}`;
+      return t("日期：{{chartDate}} 矿机类型：{{poolType}}", { chartDate: chartDate, poolType: poolType });
     }
     const p = (n: number, digits = 2) => {
-      const sign = n >= 0 ? "上升" : "下降";
+      const sign = n >= 0 ? t("上升") : t("下降");
       const abs = Math.abs(n).toFixed(digits);
       return { sign, abs };
     };
@@ -47,27 +48,53 @@ const OverviewModel: React.FC<{ chartDate: string }> = ({ chartDate }) => {
     const shareDiff = p(overview.hashMarketShareDiff);
 
     const lines: string[] = [];
-    lines.push(" 1.市场行情 ");
-    lines.push(` 今日市价${fmtUSD(overview.btcPrice, 0)}$，相比昨日同期${priceDiff.sign}${priceDiff.abs}%；`);
+    lines.push(t("1.市场行情"));
     lines.push(
-      ` 全网算力${fmtEH(overview.networkHashRate)}，环比${netHashDiff.sign}${netHashDiff.abs}%；市场份额${fmtPercent(overview.hashMarketShare)}，环比${shareDiff.sign}${shareDiff.abs}%；`,
+      t("今日市价{{value}}$，相比昨日同期{{sign}}{{abs}}%；", {
+        value: fmtUSD(overview.btcPrice, 0),
+        sign: priceDiff.sign,
+        abs: priceDiff.abs,
+      }),
+    );
+    lines.push(
+      t("全网算力{{value}}，环比{{sign}}{{abs}}%；市场份额{{value2}}，环比{{sign2}}{{abs2}}%；", {
+        value: fmtEH(overview.networkHashRate),
+        sign: netHashDiff.sign,
+        abs: netHashDiff.abs,
+        value2: fmtPercent(overview.hashMarketShare),
+        sign2: shareDiff.sign,
+        abs2: shareDiff.abs,
+      }),
     );
     lines.push(" ");
     lines.push(
-      " 2.昨日有效算力" +
+      t("2.昨日有效算力") +
         `${fmtEH(overview.hashRate)},` +
-        `算力有效率${fmtPercent(overview.hashEfficiency)},` +
-        `新增故障率${fmtPercent(overview.newFailureRate)},` +
-        `总故障率${fmtPercent(overview.failureRate)};`,
+        t("算力有效率{{value}},", { value: fmtPercent(overview.hashEfficiency) }) +
+        t("新增故障率{{value}},", { value: fmtPercent(overview.newFailureRate) }) +
+        t("总故障率{{value}};", { value: fmtPercent(overview.failureRate) }),
     );
     lines.push(" ");
     lines.push(
-      ` 3.昨日产出${Number(overview.btcOutput).toFixed(2)}枚，价值${fmtUSD(overview.usdOutput, 0)}$；MTD产出${Number(overview.mtdBtcOutput).toFixed(2)}枚，MTD产出价值${fmtUSD(overview.mtdUsdOutput, 0)}$，累计产出${Number(overview.cumulativeBtcOutput).toFixed(2)}枚，累计产出价值${fmtUSD(overview.cumulativeUsdOutput, 0)}$；`,
+      t(
+        "3.昨日产出{{value}}枚，价值{{value2}}$；MTD产出{{value3}}枚，MTD产出价值{{value4}}$，累计产出{{value5}}枚，累计产出价值{{value6}}$；",
+        {
+          value: Number(overview.btcOutput).toFixed(2),
+          value2: fmtUSD(overview.usdOutput, 0),
+          value3: Number(overview.mtdBtcOutput).toFixed(2),
+          value4: fmtUSD(overview.mtdUsdOutput, 0),
+          value5: Number(overview.cumulativeBtcOutput).toFixed(2),
+          value6: fmtUSD(overview.cumulativeUsdOutput, 0),
+        },
+      ),
     );
     lines.push(" ");
     lines.push(
-      " 4. 共计影响日算力" +
-        `${Number(overview.powerImpact).toFixed(2)}E，影响日产出${Number(overview.outputImpact).toFixed(4)}枚`,
+      t("4. 共计影响日算力") +
+        t("{{value}}E，影响日产出{{value2}}枚", {
+          value: Number(overview.powerImpact).toFixed(2),
+          value2: Number(overview.outputImpact).toFixed(4),
+        }),
     );
     return lines.join("\n");
   }, [overview, chartDate, poolType]);
@@ -87,24 +114,24 @@ const OverviewModel: React.FC<{ chartDate: string }> = ({ chartDate }) => {
         document.execCommand("copy");
         document.body.removeChild(textarea);
       }
-      message.success("已复制到剪贴板");
+      message.success(t("已复制到剪贴板"));
     } catch (e) {
       console.error(e);
-      message.error("复制失败，请手动选择后复制");
+      message.error(t("复制失败，请手动选择后复制"));
     }
   };
 
   return (
     <>
       <Button icon={<EyeOutlined />} onClick={() => setOpen(true)}>
-        数据概览
+        {t("数据概览")}
       </Button>
       <Modal
         title={
           <div className="flex items-center justify-between">
-            <span>数据概览</span>
+            <span>{t("数据概览")}</span>
             <Button type="link" icon={<CopyOutlined />} onClick={handleCopy}>
-              复制
+              {t("复制")}
             </Button>
           </div>
         }

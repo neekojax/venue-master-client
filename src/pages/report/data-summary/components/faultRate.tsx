@@ -5,6 +5,7 @@ import BarFaultData from "./BarFaultData";
 import FaultRateTable from "./faultRateTable";
 import { useSelector, useSettingsStore } from "@/stores";
 
+import { t } from "@/locales";
 import { fetchMachineStat } from "@/pages/report/api.tsx";
 
 export type MachineStat = {
@@ -81,11 +82,11 @@ const FaultRate: React.FC<{ chartDate: string; loading?: boolean; onLoaded?: () 
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-2 text-lg">
             <i className="fas fa-robot text-blue-500"></i>
-            <span>CANGO - 故障率</span>
+            <span>{t("CANGO - 故障率")}</span>
           </div>
           <div className="text-sm text-gray-400">
             <Link to="/report/data-summary/list" className="text-blue-500 hover:underline">
-              查看更多
+              {t("查看更多")}
             </Link>
           </div>
           {/* <button
@@ -104,13 +105,13 @@ const FaultRate: React.FC<{ chartDate: string; loading?: boolean; onLoaded?: () 
                 <div>
                   <div className="flex items-center gap-4 mb-4">
                     <div className="text-gray-500" style={{ minWidth: "80px" }}>
-                      新增故障台数
+                      {t("新增故障台数")}
                     </div>
                     <div className="text-2xl text-gray-800">{data.TotalNewFailure}</div>
                   </div>
                   <div className="flex items-center gap-4">
                     <div className="text-gray-500" style={{ minWidth: "80px" }}>
-                      新增故障率
+                      {t("新增故障率")}
                     </div>
                     <div className="text-2xl text-gray-800">{data.TotalNewFailureRate}%</div>
                   </div>
@@ -118,13 +119,13 @@ const FaultRate: React.FC<{ chartDate: string; loading?: boolean; onLoaded?: () 
                 <div>
                   <div className="flex items-center gap-4 mb-4">
                     <div className="text-gray-500" style={{ minWidth: "80px" }}>
-                      总故障台数
+                      {t("总故障台数")}
                     </div>
                     <div className="text-2xl text-gray-800">{data.TotalFailure}</div>
                   </div>
                   <div className="flex items-center gap-4">
                     <div className="text-gray-500" style={{ minWidth: "80px" }}>
-                      总故障率
+                      {t("总故障率")}
                     </div>
                     <div className="text-2xl text-gray-800">{data.TotalFailureRate}%</div>
                   </div>
@@ -139,20 +140,20 @@ const FaultRate: React.FC<{ chartDate: string; loading?: boolean; onLoaded?: () 
             tableProps={{
               columns: [
                 {
-                  title: "地区",
+                  title: t("地区"),
                   dataIndex: "Category",
                 },
                 {
-                  title: "新增故障数",
+                  title: t("新增故障数"),
                   dataIndex: "NewFailure",
                 },
                 {
-                  title: "新增故障率",
+                  title: t("新增故障率"),
                   dataIndex: "NewFailureRate",
                   render: (value) => `${value.toFixed(2)}%`,
                 },
                 {
-                  title: "总故障台数",
+                  title: t("总故障台数"),
                   dataIndex: "TotalFailure",
                 },
               ],
@@ -167,20 +168,20 @@ const FaultRate: React.FC<{ chartDate: string; loading?: boolean; onLoaded?: () 
             tableProps={{
               columns: [
                 {
-                  title: "类型",
+                  title: t("类型"),
                   dataIndex: "Category",
                 },
                 {
-                  title: "新增故障数",
+                  title: t("新增故障数"),
                   dataIndex: "NewFailure",
                 },
                 {
-                  title: "新增故障率",
+                  title: t("新增故障率"),
                   dataIndex: "NewFailureRate",
                   render: (value) => `${value.toFixed(2)}%`,
                 },
                 {
-                  title: "总故障台数",
+                  title: t("总故障台数"),
                   dataIndex: "TotalFailure",
                 },
               ],

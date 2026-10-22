@@ -3,6 +3,8 @@ import { PlusOutlined } from "@ant-design/icons";
 import { Button, message } from "antd";
 import EditModal from "../edit-modal/index.tsx";
 
+import { t } from "@/locales";
+
 // 定义模式的枚举
 export enum ActionButtonMode {
   ADD = "add",
@@ -36,7 +38,7 @@ export const ActionButton = <T,>({
       handleModalClose();
     } catch (error) {
       // @ts-ignore
-      message.error(`${label}失败: ${error.message}`);
+      message.error(t("{{label}}失败: {{message}}", { label: label, message: error.message }));
     }
   };
 
@@ -59,7 +61,7 @@ export const ActionButton = <T,>({
         </Button>
       ) : (
         <Button type="link" size="small" onClick={handleModalOpen}>
-          编辑
+          {t("编辑")}
         </Button>
       )}
       <EditModal

@@ -13,6 +13,7 @@ import {
 } from "@ant-design/icons";
 import { useSelector, useSettingsStore } from "@/stores";
 
+import { t } from "@/locales";
 import { getVenueDailyStat } from "@/pages/venue/api.tsx";
 
 interface VenueStats {
@@ -64,26 +65,26 @@ const BasicData: React.FC = () => {
 
   const statusCards = [
     {
-      title: "理论台数",
-      value: stats?.totalMachines + " 台",
-      description: "满负荷运行中",
+      title: t("理论台数"),
+      value: stats?.totalMachines + t("台"),
+      description: t("满负荷运行中"),
       icon: <DatabaseOutlined className="text-gray-400" />,
     },
     {
-      title: "故障总台数",
-      value: stats?.totalFailures + " 台",
-      description: "需要检修",
+      title: t("故障总台数"),
+      value: stats?.totalFailures + t("台"),
+      description: t("需要检修"),
       textColor: "text-yellow-500",
       icon: <AlertOutlined className="text-gray-400 font-12" />,
     },
     {
-      title: "理论算力",
+      title: t("理论算力"),
       value: stats?.theoreticalPower?.toFixed(2) + " PH/s",
-      description: "标准水平",
+      description: t("标准水平"),
       icon: <ThunderboltOutlined className="text-gray-400 font-12" />,
     },
     {
-      title: "24 小时算力",
+      title: t("24 小时算力"),
       value: stats?.power24h + " PH/s",
       // description: "较昨日下降 1.2%",
       textColor: "text-yellow-500",
@@ -94,27 +95,27 @@ const BasicData: React.FC = () => {
 
   const impactCards = [
     {
-      title: "故障占比",
+      title: t("故障占比"),
       value: stats?.failureRate24h.toFixed(2) + " %",
-      description: "一般水平",
+      description: t("一般水平"),
       icon: <ToolOutlined className="text-gray-400 font-12" />,
     },
     {
-      title: "高温占比",
+      title: t("高温占比"),
       value: stats?.highTemperatureRate.toFixed(2) + " %",
-      description: "正常范围",
+      description: t("正常范围"),
       icon: <CloudOutlined className="text-gray-400 font-12" style={{ fontSize: "0.95rem" }} />,
     },
     {
-      title: "限电占比",
+      title: t("限电占比"),
       value: stats?.limitImpactRate.toFixed(2) + " %",
-      description: "正常范围",
+      description: t("正常范围"),
       icon: <ThunderboltOutlined className="text-gray-500 font-12" />,
     },
     {
-      title: "其他占比",
+      title: t("其他占比"),
       value: (Number(qitaRate) < 0 ? 0 : qitaRate) + " %",
-      description: "正常范围",
+      description: t("正常范围"),
       icon: <EllipsisOutlined className="text-gray-500 font-12" />,
     },
   ];
@@ -165,7 +166,7 @@ const BasicData: React.FC = () => {
       >
         <h3 className="text-xl font-bold mb-6 text-gray-800 pl-2">
           <AreaChartOutlined className={`mr-2 ${getCardStyles(stats?.effectiveRate24h || 0).textColor}`} />
-          算力运行状态
+          {t("算力运行状态")}
         </h3>
         <div className="bg-white rounded-lg grid grid-cols-5 gap-4">
           <div
@@ -179,7 +180,7 @@ const BasicData: React.FC = () => {
               <span
                 className={`text-lg font-semibold ${getCardStyles(stats?.effectiveRate24h || 0).textColor}`}
               >
-                算力有效率
+                {t("算力有效率")}
               </span>
               <AreaChartOutlined
                 className={` text-xl ${getCardStyles(stats?.effectiveRate24h || 0).textColor}`}
@@ -212,12 +213,12 @@ const BasicData: React.FC = () => {
       >
         <h3 className="text-xl font-bold mb-6 text-gray-800 pl-2">
           <ExclamationCircleOutlined className="mr-2 text-red-500" />
-          算力影响因素
+          {t("算力影响因素")}
         </h3>
         <div className="bg-white rounded-lg grid grid-cols-5 gap-4">
           <div className="p-4 rounded-lg bg-gradient-to-br shadow-demo from-red-100 to-red-50 border-2 border-red-200">
             <div className="flex items-center justify-between mb-2">
-              <span className="text-lg font-semibold text-red-600">算力影响</span>
+              <span className="text-lg font-semibold text-red-600">{t("算力影响")}</span>
               <ExclamationCircleOutlined className="text-red-500 text-xl" />
             </div>
             <div className="text-4xl font-bold text-red-500">{stats?.impactRatio.toFixed(2)} %</div>

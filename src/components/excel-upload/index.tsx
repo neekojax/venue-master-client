@@ -3,6 +3,8 @@ import { InboxOutlined, UploadOutlined } from "@ant-design/icons";
 import type { UploadFile, UploadProps } from "antd";
 import { Alert, Button, message, Modal, Progress, Upload } from "antd";
 
+import { t } from "@/locales";
+
 interface ExcelUploadProps {
   onUpload: (file: File) => Promise<any>;
   accept?: string;
@@ -24,8 +26,8 @@ const ExcelUpload: React.FC<ExcelUploadProps> = ({
   accept = ".xlsx,.xls",
   maxSize = 10,
   disabled = false,
-  title = "导入",
-  description = "支持.xlsx和.xls格式，文件大小不超过10MB",
+  title = t("导入"),
+  description = t("支持.xlsx和.xls格式，文件大小不超过10MB"),
 }) => {
   const [fileList, setFileList] = useState<UploadFile[]>([]);
   const [uploading, setUploading] = useState(false);
@@ -42,14 +44,14 @@ const ExcelUpload: React.FC<ExcelUploadProps> = ({
       file.name.endsWith(".xls");
 
     if (!isExcel) {
-      message.error("只能上传Excel文件！");
+      message.error(t("只能上传Excel文件！"));
       return false;
     }
 
     // 检查文件大小
     const isLtMaxSize = file.size / 1024 / 1024 < maxSize;
     if (!isLtMaxSize) {
-      message.error(`文件大小不能超过${maxSize}MB！`);
+      message.error(t("文件大小不能超过{{maxSize}}MB！", { maxSize: maxSize }));
       return false;
     }
 
@@ -58,7 +60,7 @@ const ExcelUpload: React.FC<ExcelUploadProps> = ({
 
   const handleUpload = async () => {
     if (fileList.length === 0) {
-      message.warning("请先选择文件！");
+      message.warning(t("请先选择文件！"));
       return;
     }
 
@@ -90,28 +92,28 @@ const ExcelUpload: React.FC<ExcelUploadProps> = ({
 
       setUploadResult({
         success: isSuccess,
-        message: result.message || "导入完成",
+        message: result.message || t("导入完成"),
         data: result.data,
         errors: hasErrors ? result.data.error_details : [],
       });
 
       if (isSuccess && !hasErrors) {
-        message.success("文件导入成功！");
+        message.success(t("文件导入成功！"));
       } else if (isSuccess && hasErrors) {
-        message.warning("文件导入完成，但存在部分错误");
+        message.warning(t("文件导入完成，但存在部分错误"));
       } else {
-        message.error("文件导入失败");
+        message.error(t("文件导入失败"));
       }
 
       setResultModalVisible(true);
     } catch (error: any) {
       setUploadResult({
         success: false,
-        message: error.message || "上传失败",
+        message: error.message || t("上传失败"),
         errors: error.errors || [],
       });
 
-      message.error("文件上传失败！");
+      message.error(t("文件上传失败！"));
       setResultModalVisible(true);
     } finally {
       setUploading(false);
@@ -150,7 +152,7 @@ const ExcelUpload: React.FC<ExcelUploadProps> = ({
         <p className="ant-upload-drag-icon">
           <InboxOutlined />
         </p>
-        <p className="ant-upload-text">点击或拖拽文件到此区域上传</p>
+        <p className="ant-upload-text">{t("点击或拖拽文件到此区域上传")}</p>
         <p className="ant-upload-hint">{description}</p>
       </Upload.Dragger>
 
@@ -168,17 +170,17 @@ const ExcelUpload: React.FC<ExcelUploadProps> = ({
           loading={uploading}
           disabled={fileList.length === 0 || disabled}
         >
-          {uploading ? "上传中..." : "开始上传"}
+          {uploading ? t("上传中...") : t("开始上传")}
         </Button>
       </div>
 
       <Modal
-        title="上传结果"
+        title={t("上传结果")}
         open={resultModalVisible}
         onCancel={handleResultModalClose}
         footer={[
           <Button key="close" onClick={handleResultModalClose}>
-            关闭
+            {t("关闭")}
           </Button>,
         ]}
       >
@@ -199,19 +201,20 @@ const ExcelUpload: React.FC<ExcelUploadProps> = ({
 
             {uploadResult.data && (
               <div style={{ marginBottom: 16 }}>
-                <h4>导入统计：</h4>
+                <h4>{t("导入统计：")}</h4>
                 <div style={{ background: "#f5f5f5", padding: 12, borderRadius: 4 }}>
                   <p>
-                    <strong>成功导入：</strong>
-                    {uploadResult.data.success_count || 0} 条
+                    <strong>{t("成功导入：")}</strong>
+                    {uploadResult.data.success_count || 0} {t("条")}
                   </p>
                   <p>
-                    <strong>失败数量：</strong>
-                    {uploadResult.data.failure_count || 0} 条
+                    <strong>{t("失败数量：")}</strong>
+                    {uploadResult.data.failure_count || 0} {t("条")}
                   </p>
                   <p>
-                    <strong>总计处理：</strong>
-                    {(uploadResult.data.success_count || 0) + (uploadResult.data.failure_count || 0)} 条
+                    <strong>{t("总计处理：")}</strong>
+                    {(uploadResult.data.success_count || 0) + (uploadResult.data.failure_count || 0)}{" "}
+                    {t("条")}
                   </p>
                 </div>
               </div>
@@ -219,7 +222,7 @@ const ExcelUpload: React.FC<ExcelUploadProps> = ({
 
             {uploadResult.errors && uploadResult.errors.length > 0 && (
               <div>
-                <h4>错误详情：</h4>
+                <h4>{t("错误详情：")}</h4>
                 <div
                   style={{
                     maxHeight: "200px",
