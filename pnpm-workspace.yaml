@@ -1,0 +1,11 @@
+packages:
+  - '.'
+
+# pnpm v10 默认在存在未获批准的依赖构建脚本时让 `pnpm i` 直接失败
+# （ERR_PNPM_IGNORED_BUILDS，CI 在安装依赖阶段就中断）。
+# 显式批准本项目实际需要的两个带构建脚本的依赖：
+#   @swc/core —— @vitejs/plugin-react-swc 的原生绑定
+#   esbuild   —— vite 的打包器
+onlyBuiltDependencies:
+  - '@swc/core'
+  - esbuild
