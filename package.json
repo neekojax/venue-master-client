@@ -90,5 +90,11 @@
     "src/**/*.{ts,tsx,js,json}": [
       "npm run lint:fix"
     ]
+  },
+  "pnpm": {
+    "onlyBuiltDependencies": [
+      "@swc/core",
+      "esbuild"
+    ]
   }
 }
