@@ -67,4 +67,7 @@ export const ROUTE_PATHS = {
   poolHashHistory: (poolName: any) => `/pool-hash/history/${encodeURIComponent(poolName)}`,
 };
 
-export const COOKIE_DOMAIN = import.meta.env.VITE_COOKIE_DOMAIN || ".test.com";
+// cookie 域：留空 = 按当前站点 host 存储，各环境天然隔离。
+// 写死成生产域名（如 .datastring.cc）会让 uat/测试域名下的浏览器直接拒写该 cookie，
+// 而本项目 token 只存在 cookie 里（无 localStorage 兜底），拒写即等于登录失效。
+export const COOKIE_DOMAIN = import.meta.env.VITE_COOKIE_DOMAIN || "";

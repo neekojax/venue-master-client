@@ -11,7 +11,7 @@ export const UTILITY_TOOLS: UtilityTool[] = [
     icon: <Database className="w-6 h-6 text-purple-500" />,
     // color: "bg-purple-50",
     // isSystem: true,
-    url: "https://asset.datastring.cc/",
+    url: import.meta.env.VITE_ASSET_APP_URL || "https://asset.datastring.cc/",
   },
 
   {
@@ -45,7 +45,7 @@ export const UTILITY_TOOLS: UtilityTool[] = [
     icon: <Wrench className="w-6 h-6 text-rose-500" />,
     // color: "bg-rose-50",
     // isSystem: true,
-    url: "https://repair.datastring.cc/",
+    url: import.meta.env.VITE_MAINTENANCE_APP_URL || "https://repair.datastring.cc/",
   },
   {
     id: "btc-explorer",

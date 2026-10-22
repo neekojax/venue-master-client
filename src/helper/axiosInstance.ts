@@ -21,11 +21,9 @@ const onRefreshed = (newToken: string) => {
 };
 
 const axiosInstance = axios.create({
-  // baseURL: import.meta.env.VITE_API_BASE_URL, // 你的 API 基础 URL
-  // baseURL: "http://localhost:8080/admin-api/", //  周莹本地测试
-  // baseURL: "http://127.0.0.1:8080/admin-api/", // 你的 API 基础 UR
-  // baseURL: "http://45.76.191.253:11001/admin-api/", // 你的 API 基础 UR
-  baseURL: "https://datastring.cc/admin-api", // 线上发布
+  // 后端 API 前缀，来自 .env.production / .env.development
+  // 使用同域相对路径，由 nginx 按环境转发，避免源码里写死具体环境的域名
+  baseURL: import.meta.env.VITE_APP_API_URL,
 });
 
 // 刷新 token 的函数
