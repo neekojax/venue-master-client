@@ -67,7 +67,8 @@ export const ROUTE_PATHS = {
   poolHashHistory: (poolName: any) => `/pool-hash/history/${encodeURIComponent(poolName)}`,
 };
 
-// cookie 域：留空 = 按当前站点 host 存储，各环境天然隔离。
-// 写死成生产域名（如 .datastring.cc）会让 uat/测试域名下的浏览器直接拒写该 cookie，
-// 而本项目 token 只存在 cookie 里（无 localStorage 兜底），拒写即等于登录失效。
-export const COOKIE_DOMAIN = import.meta.env.VITE_COOKIE_DOMAIN || "";
+// cookie 域：来自**后端**下发的运行时配置（见 utils/runtime-config.ts），
+// 共享 cookie 域按环境配在 Apollo 里（部署环境走 Apollo，本机走 config/runtime.yml）。
+// 留空 = 按当前站点 host 存储，各环境天然隔离；兜底才用构建期的 .env 值。
+// 注意：写死成生产域名（如 .datastring.cc）会让 uat/测试域名下的浏览器直接拒写该 cookie。
+export { getCookieDomain } from "@/utils/runtime-config.ts";

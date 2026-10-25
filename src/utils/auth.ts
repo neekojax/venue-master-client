@@ -1,6 +1,6 @@
 // utils/auth.ts
 import Cookies from "js-cookie";
-import { COOKIE_DOMAIN } from "@/constants/common.ts";
+import { getCookieDomain } from "@/constants/common.ts";
 
 export const checkLogin = () => {
   const userId = localStorage.getItem("user_id");
@@ -8,8 +8,9 @@ export const checkLogin = () => {
   if (!userId && window.location.pathname != "/login") {
     localStorage.clear();
     sessionStorage.clear();
-    Cookies.remove("access_token", { domain: COOKIE_DOMAIN, path: "/" });
-    Cookies.remove("refresh_token", { domain: COOKIE_DOMAIN, path: "/" });
+    const domain = getCookieDomain();
+    Cookies.remove("access_token", { domain, path: "/" });
+    Cookies.remove("refresh_token", { domain, path: "/" });
     window.location.href = "/login";
   }
 };

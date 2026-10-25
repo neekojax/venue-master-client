@@ -5,6 +5,12 @@
     <link rel="icon" type="image/svg+xml" href="/favicon.png" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>运营管理系统</title>
+    <!--
+      后端下发的运行时配置（共享 cookie 域 / 跨系统地址）。
+      defer 保证它在业务模块（module）之前执行：两者都按文档顺序在解析完成后执行。
+      取不到时（后端未部署/报错）前端会自动回退到构建期 .env 值，不影响启动。
+    -->
+    <script defer src="/admin-api/runtime-config.js"></script>
   </head>
   <body>
     <!-- <div id="root"></div> -->
