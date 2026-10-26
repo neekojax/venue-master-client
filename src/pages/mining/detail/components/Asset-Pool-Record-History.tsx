@@ -162,7 +162,7 @@ const AssetPoolRecordHistory: React.FC = () => {
     setIsModalOpen(true);
     form.setFieldsValue({
       start_time: dayjs(record.start_time),
-      theoretical_hashrate: record.theoretical_hashrate,
+      theoretical_hashrate: Number(record.theoretical_hashrate ?? 0) / 1000,
       hosted_machine: record.hosted_machine,
       is_cloud_power: record.is_cloud_power ?? 0,
       leased_power: record.leased_power ?? 0,
@@ -189,7 +189,8 @@ const AssetPoolRecordHistory: React.FC = () => {
         venue_id: venueId,
         pool_id: Number(poolId),
         start_time: dayjs(values.start_time).startOf("day").format("YYYY-MM-DD HH:mm:ss"),
-        theoretical_hashrate: Number(values.theoretical_hashrate),
+        // 表单按 PH/s 输入；后端资产记录接口按 TH/s 存储。
+        theoretical_hashrate: Number(values.theoretical_hashrate) * 1000,
         hosted_machine: Number(values.hosted_machine),
         is_cloud_power: Number(values.is_cloud_power ?? 0),
         leased_power: Number(values.leased_power ?? 0),
@@ -435,11 +436,11 @@ const AssetPoolRecordHistory: React.FC = () => {
               <DatePicker className="w-full" showTime />
             </Form.Item>
             <Form.Item
-              label={t("理论算力(TH/s)")}
+              label={t("理论算力(PH/s)")}
               name="theoretical_hashrate"
               rules={[{ required: true, message: t("请输入理论算力") }]}
             >
-              <InputNumber className="w-full" min={0} />
+              <InputNumber className="w-full" min={0} precision={3} />
             </Form.Item>
             <Form.Item
               label={t("托管机器")}
