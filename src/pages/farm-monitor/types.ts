@@ -129,6 +129,34 @@ export interface KpiSummary {
   yesterdayAbnormal: number | null;
 }
 
+export interface MinerCodeAnomaly {
+  minerCode: string;
+  abnormalCount: number;
+}
+
+export interface MinerCodeAnomalySummary {
+  abnormalCount: number;
+  minerCodeTotal: number;
+  minerCodes: string[];
+  minerCodeData: MinerCodeAnomaly[];
+}
+
+/** GET minerHashrate/otherPoolMachineAnomalies/{venueType} 的 data */
+export interface OtherPoolMachineAnomalySummary extends MinerCodeAnomalySummary {
+  venueType: string;
+  siteName: string;
+  businessDate: string;
+  windowStart: string;
+  windowEnd: string;
+}
+
+/** GET minerHashrate/taskAbnormalMinerCount/{venueType}/{taskID} 的 data */
+export interface TaskAbnormalMinerCount extends MinerCodeAnomalySummary {
+  venueType: string;
+  taskId: string;
+  siteCode: string;
+}
+
 export interface TaskSnapshotItem {
   id: number;
   task_id?: string;

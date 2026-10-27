@@ -7,8 +7,22 @@ import KpiCards from "./components/KpiCards";
 import MinerSnapshotPanel, { type MinerSnapshotSearchValues } from "./components/MinerSnapshotPanel";
 import OverviewChart from "./components/OverviewChart";
 import { FARM_MONITOR_TOP_HEIGHT } from "./constants";
-import { useBoundSites, useLatestFinishedProbeTask, useRecentProbeTasks, useTaskSnapshots } from "./hook";
-import type { BoundSiteItem, HashrateTimeSeriesPoint, TaskSnapshotQueryParams, TimeRange } from "./types";
+import {
+  useBoundSites,
+  useLatestFinishedProbeTask,
+  useOtherPoolMachineAnomalies,
+  useRecentProbeTasks,
+  useTaskAbnormalMinerCounts,
+  useTaskSnapshots,
+} from "./hook";
+import type {
+  BoundSiteItem,
+  HashrateTimeSeriesPoint,
+  MinerCodeAnomalySummary,
+  OtherPoolMachineAnomalySummary,
+  TaskSnapshotQueryParams,
+  TimeRange,
+} from "./types";
 import {
   buildTaskSnapshotQueryParams,
   formatTaskIdsForSnapshotApi,
@@ -106,6 +120,13 @@ export default function FarmMonitorPage() {
 
   const latestTaskIds = useMemo(() => resolveLatestProbeTaskIds(latestProbeTask), [latestProbeTask]);
 
+  const {
+    data: latestMinerAnomalyRes,
+    isLoading: isLatestMinerAnomalyLoading,
+    isFetching: isLatestMinerAnomalyFetching,
+    refetch: refetchLatestMinerAnomaly,
+  } = useTaskAbnormalMinerCounts(poolType, latestTaskIds);
+
   const snapshotTaskIdsParam = useMemo(() => formatTaskIdsForSnapshotApi(latestTaskIds), [latestTaskIds]);
 
   const snapshotQueryParams = useMemo(
@@ -170,6 +191,13 @@ export default function FarmMonitorPage() {
     refetch: refetchAbnormalData,
   } = useAbnormalDataDetail(poolType, selectedFarm?.name, abnormalStatsDate);
 
+  const {
+    data: yesterdayMinerAnomalyRes,
+    isLoading: isYesterdayMinerAnomalyLoading,
+    isFetching: isYesterdayMinerAnomalyFetching,
+    refetch: refetchYesterdayMinerAnomaly,
+  } = useOtherPoolMachineAnomalies(poolType, selectedFarm?.name, abnormalStatsDate);
+
   const snapshotData = snapshotsRes?.data;
   const snapshotList = snapshotData?.list ?? [];
   const snapshotTotal = snapshotData?.total ?? 0;
@@ -200,6 +228,14 @@ export default function FarmMonitorPage() {
     () => (abnormalDataRes?.data ?? undefined) as AbnormalDataDetail | undefined,
     [abnormalDataRes],
   );
+  const yesterdayMinerAnomaly = useMemo(
+    () => (yesterdayMinerAnomalyRes?.data ?? undefined) as OtherPoolMachineAnomalySummary | undefined,
+    [yesterdayMinerAnomalyRes],
+  );
+  const latestMinerAnomaly = useMemo(
+    () => latestMinerAnomalyRes as MinerCodeAnomalySummary | undefined,
+    [latestMinerAnomalyRes],
+  );
   const kpiSummary = useMemo(
     () => mapLatestTaskToKpiSummary(latestProbeTask, kpiOnShelfCount, abnormalDataSummary?.abnormalCount),
     [abnormalDataSummary?.abnormalCount, kpiOnShelfCount, latestProbeTask],
@@ -210,6 +246,8 @@ export default function FarmMonitorPage() {
     void refetchLatestTask();
     void refetchSnapshots();
     void refetchAbnormalData();
+    void refetchLatestMinerAnomaly();
+    void refetchYesterdayMinerAnomaly();
     if (abnormalTerminalOpen) {
       void refetchAbnormalLogs();
       void refetchAnomalyHistory();
@@ -221,7 +259,9 @@ export default function FarmMonitorPage() {
     refetchAnomalyHistory,
     refetchProbeTasks,
     refetchLatestTask,
+    refetchLatestMinerAnomaly,
     refetchSnapshots,
+    refetchYesterdayMinerAnomaly,
   ]);
 
   useEffect(() => {
@@ -316,9 +356,18 @@ export default function FarmMonitorPage() {
           <KpiCards
             data={kpiSummary}
             loading={
-              isLatestTaskLoading || isLatestTaskFetching || isAbnormalDataLoading || isAbnormalDataFetching
+              isLatestTaskLoading ||
+              isLatestTaskFetching ||
+              isAbnormalDataLoading ||
+              isAbnormalDataFetching ||
+              isLatestMinerAnomalyLoading ||
+              isLatestMinerAnomalyFetching ||
+              isYesterdayMinerAnomalyLoading ||
+              isYesterdayMinerAnomalyFetching
             }
             onAbnormalClick={openAbnormalManagementTerminal}
+            latestMinerAnomaly={latestMinerAnomaly}
+            yesterdayMinerAnomaly={yesterdayMinerAnomaly}
           />
         </div>
         {abnormalTerminalOpen ? (

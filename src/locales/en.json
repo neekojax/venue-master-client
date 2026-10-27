@@ -1425,6 +1425,7 @@
   "缺少必要参数": "Missing required parameters",
   "网络": "Network",
   "无异常": "No Abnormalities",
+  "收起": "Collapse",
   "当前在架，但未识别到的机器": "Machines expected to be online but not detected.",
   "昨日在架，但未识别到的机器": "Machines expected to be online yesterday but not detected.",
   "最新异常矿工数": "Latest Abnormal Miner Count",
