@@ -102,8 +102,8 @@ export default function AbnormalHistoryPage() {
             </div>
             <div className="abnormal-history-metrics">
               {[
-                [t("异常台数"), latest?.abnormalCount],
-                [t("扫描数"), latest?.scanMachineCount],
+                [t("未识别台数"), latest?.abnormalCount],
+                [t("最新在线数"), latest?.scanMachineCount],
                 [t("在架台数"), latest?.onShelfCount],
               ].map(([label, value], index) => (
                 <div key={String(label)}>
@@ -142,8 +142,8 @@ export default function AbnormalHistoryPage() {
                     itemWidth: 8,
                     itemHeight: 8,
                     selected: {
-                      [t("异常台数")]: true,
-                      [t("扫描数")]: false,
+                      [t("未识别台数")]: true,
+                      [t("最新在线数")]: false,
                       [t("在架台数")]: false,
                     },
                   },
@@ -161,8 +161,8 @@ export default function AbnormalHistoryPage() {
                     splitLine: { lineStyle: { color: "#edf0f4", type: "dashed" } },
                   },
                   series: [
-                    { name: t("异常台数"), key: "abnormalCount" },
-                    { name: t("扫描数"), key: "scanMachineCount" },
+                    { name: t("未识别台数"), key: "abnormalCount" },
+                    { name: t("最新在线数"), key: "scanMachineCount" },
                     { name: t("在架台数"), key: "onShelfCount" },
                   ].map((item, index) => ({
                     name: item.name,
@@ -197,10 +197,10 @@ export default function AbnormalHistoryPage() {
               tableLayout="fixed"
               columns={[
                 { title: t("日期"), dataIndex: "date", width: 140 },
-                { title: t("扫描数"), dataIndex: "scanMachineCount", width: 100, render: number },
+                { title: t("最新在线数"), dataIndex: "scanMachineCount", width: 100, render: number },
                 { title: t("在架台数"), dataIndex: "onShelfCount", width: 100, render: number },
                 {
-                  title: t("异常台数"),
+                  title: t("未识别台数"),
                   dataIndex: "abnormalCount",
                   width: 100,
                   align: "right",

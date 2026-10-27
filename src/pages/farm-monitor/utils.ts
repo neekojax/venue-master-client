@@ -40,7 +40,12 @@ export function mapLatestTaskToKpiSummary(
     onShelfCount ??
     task.on_shelf_count ??
     (online != null && offlineFromApi != null ? online + offlineFromApi : null);
-  const theoreticalOffline = theoreticalOnline != null && online != null ? theoreticalOnline - online : null;
+  const powerLimitEvents = task.event_impact?.limit_impact_count ?? null;
+  const otherImpactEvents = task.event_impact?.other_impact_count ?? null;
+  const theoreticalOffline =
+    theoreticalOnline != null && online != null
+      ? theoreticalOnline - online - (powerLimitEvents ?? 0) - (otherImpactEvents ?? 0)
+      : null;
 
   return {
     theoreticalOnline,
@@ -48,8 +53,8 @@ export function mapLatestTaskToKpiSummary(
     theoreticalOffline,
     lowHashrate: task.fault_total ?? null,
     zeroHashrate: task.zero_hashrate_total ?? null,
-    powerLimitEvents: task.event_impact?.limit_impact_count ?? null,
-    otherImpactEvents: task.event_impact?.other_impact_count ?? null,
+    powerLimitEvents,
+    otherImpactEvents,
     yesterdayAbnormal: yesterdayAbnormal ?? null,
   };
 }

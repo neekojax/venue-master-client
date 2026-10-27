@@ -22,14 +22,14 @@ interface OverviewChartProps {
 
 const LEGEND_ITEMS = [
   { name: t("理论在架数"), color: "#1677ff", type: "dashed" as const },
-  { name: t("扫描数"), color: "#52c41a", type: "solid" as const },
+  { name: t("最新在线数"), color: "#52c41a", type: "solid" as const },
   { name: t("低算力数量"), color: "#fa8c16", type: "solid" as const },
   { name: t("零算力数量"), color: "#ff4d4f", type: "solid" as const },
   { name: t("总算力 E"), color: "#722ed1", type: "solid" as const },
 ];
 
 const HASHRATE_SERIES_NAME = t("总算力 E");
-const DEFAULT_VISIBLE_SERIES_NAMES = new Set([t("理论在架数"), t("扫描数"), HASHRATE_SERIES_NAME]);
+const DEFAULT_VISIBLE_SERIES_NAMES = new Set([t("理论在架数"), t("最新在线数"), HASHRATE_SERIES_NAME]);
 
 const DEFAULT_SERIES_VISIBLE = Object.fromEntries(
   LEGEND_ITEMS.map((item) => [item.name, DEFAULT_VISIBLE_SERIES_NAMES.has(item.name)]),
@@ -96,7 +96,7 @@ export default function OverviewChart({
         smooth: true,
       },
       {
-        name: t("扫描数"),
+        name: t("最新在线数"),
         type: "line" as const,
         yAxisIndex: 0,
         data: data.map((d) => d.online),
