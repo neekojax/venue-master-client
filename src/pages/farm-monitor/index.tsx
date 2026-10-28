@@ -360,13 +360,12 @@ export default function FarmMonitorPage() {
               isLatestTaskFetching ||
               isAbnormalDataLoading ||
               isAbnormalDataFetching ||
-              isLatestMinerAnomalyLoading ||
-              isLatestMinerAnomalyFetching ||
               isYesterdayMinerAnomalyLoading ||
               isYesterdayMinerAnomalyFetching
             }
             onAbnormalClick={openAbnormalManagementTerminal}
             latestMinerAnomaly={latestMinerAnomaly}
+            latestMinerAnomalyLoading={isLatestMinerAnomalyLoading || isLatestMinerAnomalyFetching}
             yesterdayMinerAnomaly={yesterdayMinerAnomaly}
           />
         </div>

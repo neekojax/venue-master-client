@@ -28,7 +28,10 @@ export const fetchOtherPoolMachineAnomalies = async (
 };
 
 export const fetchTaskAbnormalMinerCount = async (venueType: string, taskId: string) => {
-  return await fetchGet(`minerHashrate/taskAbnormalMinerCount/${venueType}/${encodeURIComponent(taskId)}`);
+  // 任务异常统计会随最新扫描结果变化，避免命中浏览器或中间层的旧 GET 缓存。
+  return await fetchGet(`minerHashrate/taskAbnormalMinerCount/${venueType}/${encodeURIComponent(taskId)}`, {
+    _: Date.now(),
+  });
 };
 
 /** 多 Agent 场地按最新任务分别查询，再按矿工号聚合。 */
@@ -39,6 +42,18 @@ export const fetchTaskAbnormalMinerCounts = async (
   const responses = await Promise.all(
     taskIds.map((taskId) => fetchTaskAbnormalMinerCount(venueType, taskId)),
   );
+
+  // 单任务时完全采用后端统计口径，避免根据首个 minerCodeData 项自行推算。
+  if (responses.length === 1) {
+    const summary = responses[0].data as TaskAbnormalMinerCount;
+    return {
+      abnormalCount: Number(summary?.abnormalCount ?? 0),
+      minerCodeTotal: Number(summary?.minerCodeTotal ?? 0),
+      minerCodes: summary?.minerCodes ?? [],
+      minerCodeData: summary?.minerCodeData ?? [],
+    };
+  }
+
   const counts = new Map<string, { minerCode: string; abnormalCount: number }>();
   let abnormalCount = 0;
 

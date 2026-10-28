@@ -18,6 +18,7 @@ interface KpiCardsProps {
   loading?: boolean;
   onAbnormalClick?: () => void;
   latestMinerAnomaly?: MinerCodeAnomalySummary;
+  latestMinerAnomalyLoading?: boolean;
   yesterdayMinerAnomaly?: OtherPoolMachineAnomalySummary;
 }
 
@@ -74,6 +75,7 @@ export default function KpiCards({
   loading = false,
   onAbnormalClick,
   latestMinerAnomaly,
+  latestMinerAnomalyLoading = false,
   yesterdayMinerAnomaly,
 }: KpiCardsProps) {
   const [expandedMinerCard, setExpandedMinerCard] = useState<"latest" | "yesterday" | null>(null);
@@ -95,8 +97,9 @@ export default function KpiCards({
                 : null;
           const isMinerCard = minerCardType != null;
           const minerAnomaly = minerCardType === "latest" ? latestMinerAnomaly : yesterdayMinerAnomaly;
+          const minerCardLoading = minerCardType === "latest" && latestMinerAnomalyLoading;
           const minerCodeData = minerAnomaly?.minerCodeData ?? [];
-          const hasMinerAnomaly = (minerAnomaly?.minerCodeTotal ?? 0) > 0;
+          const hasMinerAnomaly = (minerAnomaly?.abnormalCount ?? 0) > 0;
           const hasMoreMinerCodes = minerCodeData.length > 2;
           const showAllMinerCodes = expandedMinerCard === minerCardType;
           const visibleMinerCodeData = showAllMinerCodes ? minerCodeData : minerCodeData.slice(0, 2);
@@ -117,12 +120,14 @@ export default function KpiCards({
                 clickable ? "hover:border-blue-300 hover:shadow-sm cursor-pointer" : "cursor-default"
               }`}
             >
-              <div
-                className="flex items-center justify-center w-10 h-10 rounded-lg shrink-0"
-                style={{ backgroundColor: card.bg, color: card.color }}
-              >
-                <Icon style={{ fontSize: 20 }} />
-              </div>
+              {!isMinerCard ? (
+                <div
+                  className="flex items-center justify-center w-10 h-10 rounded-lg shrink-0"
+                  style={{ backgroundColor: card.bg, color: card.color }}
+                >
+                  <Icon style={{ fontSize: 20 }} />
+                </div>
+              ) : null}
               <div
                 className={`flex-1 min-w-0 ${
                   isMinerCard
@@ -156,7 +161,7 @@ export default function KpiCards({
                     ))}
                   </div>
                 ) : null}
-                <div className={isMinerCard ? "shrink-0 text-right" : undefined}>
+                <div>
                   <div className="flex items-center justify-end gap-1 text-xs text-gray-500 truncate">
                     <span className="truncate">{card.label}</span>
                     {card.description ? (
@@ -171,10 +176,15 @@ export default function KpiCards({
                     }`}
                   >
                     {isMinerCard ? (
-                      minerAnomaly == null ? (
+                      minerCardLoading ? (
+                        <Spin size="small" />
+                      ) : minerAnomaly == null ? (
                         "-"
                       ) : hasMinerAnomaly ? (
-                        String(minerAnomaly.minerCodeTotal)
+                        <>
+                          {minerAnomaly.abnormalCount}
+                          <span className="ml-1 text-xs font-normal text-gray-400">{t("台")}</span>
+                        </>
                       ) : (
                         <span className="inline-flex items-center gap-1 text-base text-emerald-600">
                           <CheckCircleOutlined />

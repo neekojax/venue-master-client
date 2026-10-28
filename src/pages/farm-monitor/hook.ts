@@ -50,6 +50,7 @@ export const useTaskAbnormalMinerCounts = (venueType: string, taskIds: string[])
     queryKey: ["task-abnormal-miner-counts", venueType, taskIds],
     queryFn: () => fetchTaskAbnormalMinerCounts(venueType, taskIds),
     enabled: Boolean(venueType) && taskIds.length > 0,
+    refetchOnMount: "always",
   });
 };
 
