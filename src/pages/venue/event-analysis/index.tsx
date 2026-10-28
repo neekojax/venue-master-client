@@ -1,12 +1,13 @@
 import React, { useState } from "react";
-import { AlertTriangle, BarChart3, LayoutList } from "lucide-react";
+import { AlertTriangle, BarChart3, LayoutList, ScrollText } from "lucide-react";
 import AnalysisView from "./components/EventImpactAnalysis";
 import EventLogsView from "./components/EventLogNew";
 
 import { t } from "@/locales";
+import DailySnapshotPage from "@/pages/report/daily-snapshot";
 
 const EventImpactAnalysis: React.FC = () => {
-  const [activeTab, setActiveTab] = useState<"analysis" | "logs">("logs");
+  const [activeTab, setActiveTab] = useState<"analysis" | "logs" | "snapshot">("logs");
 
   return (
     <div className="flex flex-col h-full bg-white px-3 sm:px-4">
@@ -51,11 +52,30 @@ const EventImpactAnalysis: React.FC = () => {
             <BarChart3 size={16} aria-hidden="true" />
             {t("事件影响分析")}
           </button>
+          <span aria-hidden="true" className="h-3 w-px bg-gray-200 mb-2" />
+          <button
+            role="tab"
+            aria-selected={activeTab === "snapshot"}
+            onClick={() => setActiveTab("snapshot")}
+            className={`
+               px-2 pt-1 pb-3 text-sm font-medium border-b-2 transition-all flex items-center gap-2
+               ${activeTab === "snapshot" ? "border-blue-600 text-blue-600" : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"}
+             `}
+          >
+            <ScrollText size={16} aria-hidden="true" />
+            {t("事件快照")}
+          </button>
         </div>
       </div>
 
       <div className="flex-1 min-w-0 relative pt-4">
-        {activeTab === "analysis" ? <AnalysisView /> : <EventLogsView />}
+        {activeTab === "analysis" ? (
+          <AnalysisView />
+        ) : activeTab === "snapshot" ? (
+          <DailySnapshotPage embedded />
+        ) : (
+          <EventLogsView />
+        )}
       </div>
     </div>
   );

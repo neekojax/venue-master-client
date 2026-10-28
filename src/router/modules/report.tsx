@@ -19,7 +19,7 @@ export const reportRoute: RouteObject = {
       path: ROUTE_PATHS.dailySnapshot,
       lazy: async () => ({ Component: (await import("@/pages/report/daily-snapshot")).default }),
       HydrateFallback: ProgressBar,
-      handle: { title: t("运营日报快照"), crumb: () => t("运营日报快照") },
+      handle: { title: t("事件快照"), crumb: () => t("事件快照") },
     },
     {
       index: true,
