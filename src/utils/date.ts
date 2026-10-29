@@ -98,3 +98,8 @@ export function getAbnormalStatsDate(now: dayjs.ConfigType = dayjs()) {
   const beijingNow = dayjs(now).tz(SHANGHAI_TIMEZONE);
   return beijingNow.hour() < 8 ? beijingNow.subtract(2, "day") : beijingNow.subtract(1, "day");
 }
+
+/** 昨日异常数据每日北京时间 09:00 起开始拉取。 */
+export function isYesterdayAbnormalCalculating(now: dayjs.ConfigType = dayjs()) {
+  return dayjs(now).tz(SHANGHAI_TIMEZONE).hour() < 9;
+}

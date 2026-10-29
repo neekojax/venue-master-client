@@ -1,8 +1,10 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
-import { Button, DatePicker, Empty, Input, Select, Space, Spin, Table, Tag, Tooltip } from "antd";
+import { DownloadOutlined } from "@ant-design/icons";
+import { Button, DatePicker, Empty, Input, message, Select, Space, Spin, Table, Tag, Tooltip } from "antd";
 import type { ColumnsType } from "antd/es/table";
 import dayjs from "dayjs";
+import * as XLSX from "xlsx";
 import { type DailySnapshot, fetchDailySnapshots, type SnapshotEvent } from "../snapshot-api";
 import { ROUTE_PATHS } from "@/constants/common";
 import { useSelector, useSettingsStore } from "@/stores";
@@ -17,7 +19,38 @@ const display = (value: unknown) =>
 
 const formatImpactPower = (value: unknown) => {
   const numberValue = Number(value);
-  return Number.isFinite(numberValue) ? numberValue.toFixed(2) : "-";
+  return Number.isFinite(numberValue) ? (
+    <span>
+      {numberValue.toFixed(2)} <span className="text-slate-400">T</span>
+    </span>
+  ) : (
+    "-"
+  );
+};
+
+const formatDateTime = (value: unknown) => (value ? dayjs(String(value)).format("YYYY-MM-DD HH:mm:ss") : "-");
+
+const downloadSnapshotEvents = (events: SnapshotEventRow[], reportDate: string) => {
+  const rows = events.map((event) => ({
+    [t("场地")]: display(event.venue_name ?? event.snapshotOwnerName),
+    [t("子账户")]: display(event.sub_account_name),
+    [t("事件类型")]: display(event.log_type),
+    [t("机器型号")]: display(event.machine_model),
+    [t("机器状态")]: display(event.machine_status),
+    [t("时间范围")]: `${display(event.start_time)} - ${display(event.end_time)}`,
+    [t("计算时长(分)")]: display(event.event_duration_minutes),
+    [t("影响台数")]: display(event.event_impact_count),
+    [t("日报影响算力")]: Number.isFinite(Number(event.daily_report_impact_hashrate))
+      ? `${Number(event.daily_report_impact_hashrate).toFixed(2)} T`
+      : "-",
+    [t("事件原因")]: display(event.event_reason),
+    [t("创建时间")]: formatDateTime(event.event_created_at),
+    [t("更新时间")]: formatDateTime(event.event_updated_at),
+  }));
+  const worksheet = XLSX.utils.json_to_sheet(rows);
+  const workbook = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(workbook, worksheet, t("事件快照"));
+  XLSX.writeFile(workbook, t("事件快照_{{value}}.xlsx", { value: reportDate }));
 };
 
 const eventTypeColors: Record<string, string> = {
@@ -152,20 +185,40 @@ export default function DailySnapshotPage({ embedded = false }: DailySnapshotPag
     },
     { title: t("机器型号"), dataIndex: "machine_model", width: 140, render: display },
     { title: t("机器状态"), dataIndex: "machine_status", width: 120, render: display },
-    { title: t("开始时间"), dataIndex: "start_time", width: 175, render: display },
-    { title: t("结束时间"), dataIndex: "end_time", width: 175, render: display },
-    { title: t("参与计算时长（分钟）"), dataIndex: "event_duration_minutes", width: 175, render: display },
-    { title: t("影响台数"), dataIndex: "event_impact_count", width: 110, align: "right", render: display },
     {
-      title: t("影响算力"),
-      dataIndex: "impact_power_loss",
+      title: t("时间范围"),
+      dataIndex: "start_time",
+      width: 280,
+      render: (_text, record) => `${display(record.start_time)} - ${display(record.end_time)}`,
+    },
+    {
+      title: t("计算时长(分)"),
+      dataIndex: "event_duration_minutes",
+      width: 115,
+      align: "right",
+      render: display,
+    },
+    { title: t("影响台数"), dataIndex: "event_impact_count", width: 90, align: "right", render: display },
+    {
+      title: t("日报影响算力"),
+      dataIndex: "daily_report_impact_hashrate",
       width: 130,
       align: "right",
       render: formatImpactPower,
     },
     { title: t("事件原因"), dataIndex: "event_reason", width: 260, ellipsis: true, render: display },
-    { title: t("创建时间"), dataIndex: "created_at", width: 175, render: display },
-    { title: t("更新时间"), dataIndex: "updated_at", width: 175, render: display },
+    {
+      title: t("创建时间"),
+      dataIndex: "event_created_at",
+      width: 200,
+      render: (value) => (value ? dayjs(value).format("YYYY-MM-DD HH:mm:ss") : "-"),
+    },
+    {
+      title: t("更新时间"),
+      dataIndex: "event_updated_at",
+      width: 200,
+      render: (value) => (value ? dayjs(value).format("YYYY-MM-DD HH:mm:ss") : "-"),
+    },
   ];
 
   return (
@@ -211,6 +264,20 @@ export default function DailySnapshotPage({ embedded = false }: DailySnapshotPag
             <Button onClick={() => setRefresh((value) => value + 1)} loading={loading}>
               {t("刷新")}
             </Button>
+            <Button
+              icon={<DownloadOutlined />}
+              disabled={!selected || !filteredEvents.length}
+              onClick={() => {
+                if (!filteredEvents.length) {
+                  message.warning(t("当前页没有数据可导出"));
+                  return;
+                }
+                downloadSnapshotEvents(filteredEvents, date);
+                message.success(t("事件快照下载成功"));
+              }}
+            >
+              {t("下载事件快照")}
+            </Button>
           </Space>
         </div>
         {loading ? (
@@ -220,7 +287,7 @@ export default function DailySnapshotPage({ embedded = false }: DailySnapshotPag
         ) : error ? (
           <div className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-red-600">{error}</div>
         ) : !selected ? (
-          <Empty description={t("该日期暂无快照")} />
+          <Empty description={t("该日期的日报尚未生成，请选择其他日期查看事件快照")} />
         ) : (
           <Table<SnapshotEventRow>
             rowKey="key"

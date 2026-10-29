@@ -17,6 +17,7 @@ interface KpiCardsProps {
   data: KpiSummary;
   loading?: boolean;
   onAbnormalClick?: () => void;
+  yesterdayAbnormalCalculating?: boolean;
   latestMinerAnomaly?: MinerCodeAnomalySummary;
   latestMinerAnomalyLoading?: boolean;
   yesterdayMinerAnomaly?: OtherPoolMachineAnomalySummary;
@@ -74,6 +75,7 @@ export default function KpiCards({
   data,
   loading = false,
   onAbnormalClick,
+  yesterdayAbnormalCalculating = false,
   latestMinerAnomaly,
   latestMinerAnomalyLoading = false,
   yesterdayMinerAnomaly,
@@ -87,8 +89,14 @@ export default function KpiCards({
           const Icon = card.icon;
           const isNoAbnormal =
             (card.key === "theoreticalOffline" && data.theoreticalOffline === 0) ||
-            (card.key === "yesterdayAbnormal" && data.yesterdayAbnormal === 0);
-          const clickable = card.key === "yesterdayAbnormal" && onAbnormalClick;
+            (card.key === "yesterdayAbnormal" &&
+              data.yesterdayAbnormal === 0 &&
+              !yesterdayAbnormalCalculating);
+          const isYesterdayAbnormalCalculating =
+            card.key === "yesterdayAbnormal" &&
+            (yesterdayAbnormalCalculating || data.yesterdayAbnormal == null);
+          const clickable =
+            card.key === "yesterdayAbnormal" && !isYesterdayAbnormalCalculating && onAbnormalClick;
           const minerCardType =
             card.key === "powerLimitEvents"
               ? "latest"
@@ -191,6 +199,8 @@ export default function KpiCards({
                           {t("无异常")}
                         </span>
                       )
+                    ) : isYesterdayAbnormalCalculating ? (
+                      <span className="text-base font-medium text-slate-400">{t("计算中")}</span>
                     ) : isNoAbnormal ? (
                       <span className="inline-flex items-center gap-1 text-base text-emerald-600">
                         <CheckCircleOutlined />

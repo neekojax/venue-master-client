@@ -36,7 +36,7 @@ import { ROUTE_PATHS } from "@/constants/common";
 import useAuthRedirect from "@/hooks/useAuthRedirect";
 import { useSettingsStore } from "@/stores";
 import { useSelector } from "@/stores/selectors";
-import { getAbnormalStatsDate } from "@/utils";
+import { getAbnormalStatsDate, isYesterdayAbnormalCalculating } from "@/utils";
 
 import type { AbnormalLogSearchValues } from "@/pages/fault-machine-monitor/components/AbnormalLogPanel";
 import AbnormalManagementDrawer from "@/pages/fault-machine-monitor/components/AbnormalManagementDrawer";
@@ -170,6 +170,7 @@ export default function FarmMonitorPage() {
   } = useAbnormalLogs(poolType, abnormalQueryParams, abnormalTerminalOpen && Boolean(selectedFarmId));
 
   const abnormalStatsDate = getAbnormalStatsDate().format("YYYY-MM-DD");
+  const yesterdayAbnormalCalculating = isYesterdayAbnormalCalculating();
   const {
     data: anomalyHistoryRes,
     isLoading: isAnomalyHistoryLoading,
@@ -364,6 +365,7 @@ export default function FarmMonitorPage() {
               isYesterdayMinerAnomalyFetching
             }
             onAbnormalClick={openAbnormalManagementTerminal}
+            yesterdayAbnormalCalculating={yesterdayAbnormalCalculating}
             latestMinerAnomaly={latestMinerAnomaly}
             latestMinerAnomalyLoading={isLatestMinerAnomalyLoading || isLatestMinerAnomalyFetching}
             yesterdayMinerAnomaly={yesterdayMinerAnomaly}
