@@ -64,45 +64,26 @@ export default function MainLayout() {
       try {
         const res = await checkPermission();
         const data = res?.data ?? {};
-        // 组织列表
-        const organizations: string[] = Array.isArray((data as any)?.organizations)
-          ? (data as any).organizations
+        const domainMap = (data as any)?.domains;
+        const organizations: string[] =
+          domainMap && typeof domainMap === "object" ? Object.keys(domainMap) : [];
+        const assignments: any[] = Array.isArray((data as any)?.assignments) ? (data as any).assignments : [];
+        const permissionKeys: string[] = Array.isArray((data as any)?.permissions)
+          ? (data as any).permissions
           : [];
-
-        // 角色列表
-        const roles: any[] = Array.isArray((data as any)?.roles) ? (data as any).roles : [];
-
-        // const frontend_routes: string[] = Array.isArray((data as any)?.frontend_routes)
-        //   ? (data as any).frontend_routes
-        //   : [];
-
-        // 角色ID拼接字符串
-        // const permissionIdString = roles
-        //   .map((role: any) => role?.id)
-        //   .filter((id: any) => typeof id === "string" && id.length > 0)
-        //   .join(",");
-
-        // 汇总接口权限
-        const frontend_routes = Array.from(
-          new Set(
-            roles
-              .flatMap((role: any) => (Array.isArray(role?.frontend_routes) ? role.frontend_routes : []))
-              .map((item: any) => item?.path)
-              .filter((p: any) => typeof p === "string" && p.length > 0),
-          ),
-        ).join(",");
-
-        // 汇总接口权限
-        const apiPermissions = roles.flatMap((role: any) =>
-          Array.isArray(role?.api_permissions) ? role.api_permissions : [],
-        );
-        const api_permissions_paths = apiPermissions
-          .map((item: any) => item?.path_pattern || item?.path)
-          .filter((p: any) => typeof p === "string" && p.length > 0)
+        const frontendRouteItems: any[] = Array.isArray((data as any)?.frontend_routes)
+          ? (data as any).frontend_routes
+          : [];
+        const frontend_routes = frontendRouteItems
+          .map((item: any) => (typeof item === "string" ? item : item?.path))
+          .filter((path: any) => typeof path === "string" && path.length > 0)
           .join(",");
-
-        // 前端路由权限
-        const access_level = roles.flatMap((role: any) => role?.id || "").join(",");
+        const access_level = assignments
+          .map((item: any) => item?.role_template_id)
+          .filter((id: any) => typeof id === "string" && id.length > 0)
+          .join(",");
+        const apiPermissions: any[] = [];
+        const api_permissions_paths = "";
         // console.log(" poolType", poolType);
         // console.log("organizations", organizations);
         // console.log("poolType", poolType);
@@ -115,6 +96,8 @@ export default function MainLayout() {
         }
         localStorage.setItem("api_permissions", JSON.stringify(apiPermissions));
         localStorage.setItem("api_permissions_paths", api_permissions_paths);
+        localStorage.setItem("authz_permissions", permissionKeys.join(","));
+        localStorage.setItem("authz_policy_version", String((data as any)?.policy_version ?? ""));
         localStorage.setItem("groups", JSON.stringify(organizations));
 
         // localStorge.setItem("access_level", access_level);
@@ -135,6 +118,7 @@ export default function MainLayout() {
                 access_level,
                 frontend_routes,
                 api_permissions_paths,
+                authz_permissions: permissionKeys.join(","),
               },
             }),
           );

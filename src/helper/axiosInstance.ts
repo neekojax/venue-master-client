@@ -23,9 +23,9 @@ const onRefreshed = (newToken: string) => {
 const axiosInstance = axios.create({
   // baseURL: import.meta.env.VITE_API_BASE_URL, // 你的 API 基础 URL
   // baseURL: "http://localhost:8080/admin-api/", //  周莹本地测试
-  // baseURL: "http://127.0.0.1:8080/admin-api/", // 你的 API 基础 UR
+  baseURL: "http://127.0.0.1:8080/admin-api/", // 你的 API 基础 UR
   // baseURL: "http://45.76.191.253:11001/admin-api/", // 你的 API 基础 UR
-  baseURL: "https://datastring.cc/admin-api", // 线上发布
+  // baseURL: "https://datastring.cc/admin-api", // 线上发布
 });
 
 // 刷新 token 的函数
@@ -124,8 +124,8 @@ const getErrorMessage = (response: any) => {
   let errorMessage = t("网络响应不正常");
   try {
     const errorData = response.data;
-    if (errorData && errorData.error) {
-      errorMessage = errorData.error; // 提取服务器返回的错误信息
+    if (errorData && (errorData.error || errorData.message)) {
+      errorMessage = errorData.error || errorData.message; // 展示接口返回的具体错误信息
     }
   } catch {
     // 如果解析失败，保留默认错误信息

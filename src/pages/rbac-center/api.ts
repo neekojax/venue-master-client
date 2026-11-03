@@ -1,159 +1,250 @@
 import { fetchDelete, fetchGet, fetchPost, fetchPut } from "@/helper/fetchHelper";
 
-export interface RbacRole {
+export type BinaryStatus = 0 | 1;
+export type PrincipalType = "user" | "service";
+export type RiskLevel = "low" | "medium" | "high" | "critical";
+export type PublicMode = "protected" | "public" | "hmac_read" | "hmac_write";
+export type RequirementType = "any" | "all" | "authenticated";
+
+export interface AuthzPermission {
+  id: number;
+  permission_key: string;
+  resource: string;
+  action: string;
+  name: string;
+  description: string;
+  risk_level: RiskLevel;
+  status: BinaryStatus;
+  add_time: string;
+  update_time: string;
+}
+
+export interface AuthzRoleTemplate {
   id: string;
   name: string;
   description: string;
-  status: number;
-  business_modules?: Array<{ slug: string; name: string }>;
-  api_modules?: Array<{ slug?: string; name: string; api_count: number }>;
-  business_module_count?: number;
-  api_count?: number;
+  builtin: BinaryStatus;
+  frontend_configured?: BinaryStatus;
+  status: BinaryStatus;
+  add_time: string;
+  update_time: string;
 }
 
-export interface RbacUser {
-  user_id: string;
-  username: string;
+export interface AuthzAssignment {
+  id: number;
+  principal_type: PrincipalType;
+  principal_id: string;
+  role_template_id: string;
+  domain: string;
+  enabled: BinaryStatus;
+  add_time: string;
+  update_time: string;
+}
+
+export interface AuthzPrincipal {
+  principal_type: PrincipalType;
+  principal_id: string;
+  name: string;
   nickname: string;
   email: string;
-  status: number;
-  is_root?: number;
-  role_ids: string[];
-  role_names: string[];
+  status: BinaryStatus;
+  assignments: AuthzAssignment[];
 }
 
-export interface RbacBusinessPermission {
-  parent_slug: string;
-  name: string;
-  enabled: number;
-}
-
-export interface RbacApiPermission {
-  api_slug: string;
-  name: string;
+export interface AuthzEndpoint {
+  id: number;
   method: string;
   path_pattern: string;
-  enabled: number;
+  permission_key: string;
+  domain_resolver: string;
+  public_mode: PublicMode;
+  status: BinaryStatus;
+  add_time: string;
+  update_time: string;
 }
 
-export interface RbacApiRouteGroup {
-  route: string;
-  name: string;
-  apis: RbacApiPermission[];
-}
-
-export interface RbacRolePermissions {
-  role_id: string;
-  business_permissions: RbacBusinessPermission[];
-  routes: RbacApiRouteGroup[];
-}
-
-export interface FrontendRoutePermission {
+export interface FrontendRoute {
   id: number;
   path: string;
   name: string;
   description: string;
-  status: number;
-  enabled: number;
+  navigation: string;
+  parent_path: string;
+  route_type: "navigation" | "page" | "detail";
+  list_order: number;
+  status: BinaryStatus;
 }
 
-export interface FrontendRouteItem {
+export type FrontendRouteInput = Pick<FrontendRoute, "path" | "name" | "description" | "status">;
+
+export interface FrontendRequirement {
   id: number;
-  path: string;
-  name: string;
-  description: string;
-  status: number;
+  frontend_route_id: number;
+  permission_key: string;
+  requirement_type: RequirementType;
 }
 
-export const fetchRbacRoles = async () => {
-  return await fetchGet("/rbac/roles");
+export interface RolePermissionOption extends AuthzPermission {
+  granted: boolean;
+}
+
+export interface RoleFrontendRouteOption extends FrontendRoute {
+  granted: boolean;
+  configurable: boolean;
+  requirements_satisfied: boolean;
+  requirements: FrontendRequirement[];
+}
+
+export interface RoleAccessData {
+  role: AuthzRoleTemplate;
+  permissions: RolePermissionOption[];
+  permission_keys: string[];
+  frontend_routes: RoleFrontendRouteOption[];
+  frontend_route_ids: number[];
+  policy_version: number;
+}
+
+export interface ReplaceRoleAccessRequest {
+  permission_keys: string[];
+  frontend_route_ids: number[];
+}
+
+export interface AuthzOptions {
+  principal_types: PrincipalType[];
+  risk_levels: RiskLevel[];
+  public_modes: PublicMode[];
+  requirement_types: RequirementType[];
+  domain_resolvers: string[];
+  statuses: BinaryStatus[];
+}
+
+export interface AuthzDomain {
+  code: string;
+  name: string;
+  wildcard: boolean;
+}
+
+export interface AuthorizationSnapshot {
+  policy_version: number;
+  assignments: AuthzAssignment[];
+  permissions: string[];
+  domains: Record<string, string[]>;
+  frontend_routes: FrontendRoute[];
+}
+
+export interface PageData<T> {
+  list: T[];
+  total: number;
+  page: number;
+  page_size: number;
+}
+
+export interface RoleTemplatePage extends PageData<AuthzRoleTemplate> {
+  permissions: Record<string, string[]>;
+}
+
+export interface FrontendRoutePage extends PageData<FrontendRoute> {
+  requirements: FrontendRequirement[];
+}
+
+export interface PolicyResult {
+  policy_version: number;
+}
+
+const unwrap = async <T>(request: Promise<any>): Promise<T> => {
+  const response = await request;
+  if (response?.success !== true || response?.code !== 0) {
+    throw new Error(response?.message || "请求失败");
+  }
+  return response.data as T;
 };
 
-export const fetchRbacUsers = async () => {
-  return await fetchGet("/rbac/users");
+const encoded = (value: string | number) => encodeURIComponent(String(value));
+
+export const fetchAuthorization = () => unwrap<AuthorizationSnapshot>(fetchGet("/profile/authorization"));
+export const fetchAuthzOptions = () => unwrap<AuthzOptions>(fetchGet("/authz/options"));
+export const fetchAuthzDomains = async () => {
+  const data = await unwrap<{ list: AuthzDomain[]; wildcard?: AuthzDomain }>(fetchGet("/authz/domains"));
+  return data.wildcard ? [...data.list, data.wildcard] : data.list;
 };
 
-export const fetchRolePermissions = async (roleId: string) => {
-  return await fetchGet(`/rbac/role/${roleId}/permissions`);
-};
+export const fetchPrincipals = (params: Record<string, unknown>) =>
+  unwrap<{ list: AuthzPrincipal[]; total: number }>(fetchGet("/authz/principals", params));
+export const fetchPrincipalAuthorization = (type: PrincipalType, id: string) =>
+  unwrap<AuthorizationSnapshot>(fetchGet(`/authz/principals/${type}/${encoded(id)}/authorization`));
 
-export const updateRoleApiPermission = async (roleId: string, apiSlug: string, enabled: number) => {
-  return await fetchPut(`/rbac/role/${roleId}/api-permission`, {
-    api_slug: apiSlug,
-    enabled,
-  });
-};
+export const createAssignment = (payload: {
+  principal_type: PrincipalType;
+  principal_id: string;
+  role_template_id: string;
+  domain: string;
+}) => unwrap<PolicyResult>(fetchPost("/authz/assignments", payload));
+export const updateAssignment = (
+  id: number,
+  payload: Pick<AuthzAssignment, "role_template_id" | "domain" | "enabled">,
+) => unwrap<PolicyResult>(fetchPut(`/authz/assignments/${id}`, payload));
+export const deleteAssignment = (id: number) => unwrap<PolicyResult>(fetchDelete(`/authz/assignments/${id}`));
 
-export const fetchRoleFrontendRoutes = async (roleId: string) => {
-  return await fetchGet(`/rbac/role/${roleId}/frontend-routes`);
-};
+export const fetchRoleTemplates = (params: Record<string, unknown>) =>
+  unwrap<RoleTemplatePage>(fetchGet("/authz/role-templates", params));
+export const createRoleTemplate = (payload: Pick<AuthzRoleTemplate, "id" | "name" | "description">) =>
+  unwrap<PolicyResult>(fetchPost("/authz/role-templates", payload));
+export const updateRoleTemplate = (
+  id: string,
+  payload: Pick<AuthzRoleTemplate, "name" | "description" | "status">,
+) => unwrap<PolicyResult>(fetchPut(`/authz/role-templates/${encoded(id)}`, payload));
+export const deleteRoleTemplate = (id: string) =>
+  unwrap<PolicyResult>(fetchDelete(`/authz/role-templates/${encoded(id)}`));
+export const replaceRolePermissions = (id: string, permissionKeys: string[]) =>
+  unwrap<PolicyResult>(
+    fetchPut(`/authz/role-templates/${encoded(id)}/permissions`, { permission_keys: permissionKeys }),
+  );
+export const fetchRoleAccess = (id: string) =>
+  unwrap<RoleAccessData>(fetchGet(`/authz/role-templates/${encoded(id)}/access`));
+export const replaceRoleAccess = (id: string, payload: ReplaceRoleAccessRequest) =>
+  unwrap<PolicyResult>(fetchPut(`/authz/role-templates/${encoded(id)}/access`, payload));
 
-export const updateRoleFrontendRoutePermission = async (
-  roleId: string,
-  frontendRouteId: number,
-  enabled: number,
-) => {
-  return await fetchPut(`/rbac/role/${roleId}/frontend-route-permission`, {
-    frontend_route_id: frontendRouteId,
-    enabled,
-  });
-};
+export const fetchPermissions = (params: Record<string, unknown>) =>
+  unwrap<PageData<AuthzPermission>>(fetchGet("/authz/permissions", params));
+export const fetchPermission = (key: string) =>
+  unwrap<AuthzPermission>(fetchGet(`/authz/permissions/${encoded(key)}`));
+export const createPermission = (payload: Omit<AuthzPermission, "id" | "add_time" | "update_time">) =>
+  unwrap<PolicyResult>(fetchPost("/authz/permissions", payload));
+export const updatePermission = (
+  key: string,
+  payload: Omit<AuthzPermission, "id" | "add_time" | "update_time">,
+) => unwrap<PolicyResult>(fetchPut(`/authz/permissions/${encoded(key)}`, payload));
+export const deletePermission = (key: string) =>
+  unwrap<PolicyResult>(fetchDelete(`/authz/permissions/${encoded(key)}`));
 
-export const createRole = async (payload: { role_id?: string; name: string; description?: string }) => {
-  return await fetchPost("/rbac/roles", payload);
-};
+export const fetchEndpoints = (params: Record<string, unknown>) =>
+  unwrap<PageData<AuthzEndpoint>>(fetchGet("/authz/endpoints", params));
+export const createEndpoint = (payload: Omit<AuthzEndpoint, "id" | "add_time" | "update_time">) =>
+  unwrap<PolicyResult>(fetchPost("/authz/endpoints", payload));
+export const updateEndpoint = (id: number, payload: Omit<AuthzEndpoint, "id" | "add_time" | "update_time">) =>
+  unwrap<PolicyResult>(fetchPut(`/authz/endpoints/${id}`, payload));
+export const deleteEndpoint = (id: number) => unwrap<PolicyResult>(fetchDelete(`/authz/endpoints/${id}`));
 
-export const deleteRole = async (roleId: string) => {
-  return await fetchDelete(`/rbac/roles/${roleId}`);
-};
+export const fetchFrontendRoutes = (params: Record<string, unknown>) =>
+  unwrap<FrontendRoutePage>(fetchGet("/authz/frontend-routes", params));
+export const createFrontendRoute = (payload: FrontendRouteInput) =>
+  unwrap<PolicyResult>(fetchPost("/authz/frontend-routes", payload));
+export const updateFrontendRoute = (id: number, payload: FrontendRouteInput) =>
+  unwrap<PolicyResult>(fetchPut(`/authz/frontend-routes/${id}`, payload));
+export const deleteFrontendRoute = (id: number) =>
+  unwrap<PolicyResult>(fetchDelete(`/authz/frontend-routes/${id}`));
+export const replaceFrontendRequirements = (
+  id: number,
+  requirements: Array<Pick<FrontendRequirement, "permission_key" | "requirement_type">>,
+) => unwrap<PolicyResult>(fetchPut(`/authz/frontend-routes/${id}/requirements`, { requirements }));
 
-export const updateUserRoles = async (payload: { user_id: string; role_ids: string[] }) => {
-  return await fetchPut("/rbac/user-roles", payload);
-};
-
-export const createUser = async (payload: {
+// 账号生命周期仍由旧账号管理接口负责；角色和组织授权不得使用这些接口。
+export const createUser = (payload: {
   username: string;
   nickname?: string;
   email?: string;
   password: string;
-}) => {
-  return await fetchPost("/rbac/users", payload);
-};
-
-export const deleteUser = async (userId: string) => {
-  return await fetchDelete(`/rbac/users/${userId}`);
-};
-
-export const updateUserPassword = async (userId: string, password: string) => {
-  return await fetchPut(`/rbac/users/${userId}/password`, { password });
-};
-
-export const fetchFrontendRoutesWithStatus = async () => {
-  return await fetchGet("/rbac/frontend-routes/all");
-};
-
-export const createFrontendRoute = async (payload: {
-  path: string;
-  name: string;
-  description?: string;
-  status?: number;
-}) => {
-  return await fetchPost("/rbac/frontend-routes", payload);
-};
-
-export const updateFrontendRoute = async (
-  routeId: number,
-  payload: { path: string; name: string; description?: string; status?: number },
-) => {
-  return await fetchPut(`/rbac/frontend-routes/${routeId}`, payload);
-};
-
-export const deleteFrontendRoute = async (routeId: number) => {
-  return await fetchDelete(`/rbac/frontend-routes/${routeId}`);
-};
-
-export const deleteRoleFrontendRoute = async (roleId: string, frontendRouteId: number) => {
-  return await fetchDelete(`/rbac/role/${roleId}/frontend-route`, {
-    frontend_route_id: frontendRouteId,
-  });
-};
+}) => unwrap<unknown>(fetchPost("/rbac/users", payload));
+export const deleteUser = (userId: string) => unwrap<unknown>(fetchDelete(`/rbac/users/${encoded(userId)}`));
+export const updateUserPassword = (userId: string, password: string) =>
+  unwrap<unknown>(fetchPut(`/rbac/users/${encoded(userId)}/password`, { password }));

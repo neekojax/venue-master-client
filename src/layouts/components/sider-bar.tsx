@@ -3,7 +3,17 @@ import { FaRegChartBar } from "react-icons/fa";
 import { MdMonitorHeart } from "react-icons/md";
 import { SiNginxproxymanager } from "react-icons/si";
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { HomeOutlined, ProductOutlined } from "@ant-design/icons"; //<RadiusSettingOutlined />
+import {
+  ApiOutlined,
+  ArrowLeftOutlined,
+  BranchesOutlined,
+  HomeOutlined,
+  ProductOutlined,
+  ProfileOutlined,
+  SafetyCertificateOutlined,
+  TeamOutlined,
+  UserSwitchOutlined,
+} from "@ant-design/icons"; //<RadiusSettingOutlined />
 import { Layout, Menu, type MenuProps, Tooltip } from "antd";
 import { FileText, ShieldCheck, Wrench } from "lucide-react";
 import { useTheme } from "@/components/theme-provider";
@@ -37,14 +47,28 @@ const findSelectedKeys = (items: MenuProps["items"], pathname: string, path: str
   return { selectedKeys, openKeys };
 };
 
-const SiderItems = (permissionIds: string, permissionRoutes: string, selectedKeys?: string[]) => {
+const SiderItems = (
+  permissionIds: string,
+  permissionRoutes: string,
+  authzPermissions: string,
+  showNDPoolType: string,
+  selectedKeys?: string[],
+) => {
   const roleIds = permissionIds
     .split(",")
     .map((item) => item.trim())
     .filter(Boolean);
-  const isSuperAdmin = roleIds.includes("role-super-admin");
+  const permissionKeys = authzPermissions
+    .split(",")
+    .map((item) => item.trim())
+    .filter(Boolean);
+  const isSuperAdmin = permissionKeys.includes("system:all") || roleIds.includes("system-super-admin");
+  const canReadAuthz = isSuperAdmin || permissionKeys.includes("authz:read");
 
   const hasPermission = (route: string) => {
+    if (route === ROUTE_PATHS.rbacCenter) {
+      return !canReadAuthz;
+    }
     if (isSuperAdmin) {
       return false;
     }
@@ -55,7 +79,6 @@ const SiderItems = (permissionIds: string, permissionRoutes: string, selectedKey
     // console.log(permissionRoutes);
     return !routerArr.includes(route);
   };
-  const showNDPoolType = useSettingsStore((state) => state.poolType);
   return [
     {
       icon: <HomeOutlined />,
@@ -302,20 +325,44 @@ export default function SiderBar() {
   const [permissionRoutes, setPermissionRoutes] = useState<string>(
     localStorage.getItem("permission_routes") || "",
   );
+  const [authzPermissions, setAuthzPermissions] = useState<string>(
+    localStorage.getItem("authz_permissions") || "",
+  );
 
   const { collapsed } = useSettingsStore(useSelector(["collapsed"]));
+  const showNDPoolType = useSettingsStore((state) => state.poolType);
 
   const { isDarkMode } = useTheme();
 
-  const itemList: any = SiderItems(permissionIds, permissionRoutes, selectedKeys);
+  const isAuthzCenter = location.pathname === ROUTE_PATHS.rbacCenter;
+  const requestedAuthzTab = new URLSearchParams(location.search).get("tab");
+  const authzTab = ["principals", "roles", "permissions", "endpoints", "routes", "overview"].includes(
+    requestedAuthzTab || "",
+  )
+    ? requestedAuthzTab!
+    : "principals";
+  const authzItems = [
+    { key: "back", icon: <ArrowLeftOutlined />, label: "返回主导航" },
+    { type: "divider" as const },
+    { key: "principals", icon: <UserSwitchOutlined />, label: "用户授权" },
+    { key: "roles", icon: <TeamOutlined />, label: "角色模板" },
+    { key: "permissions", icon: <SafetyCertificateOutlined />, label: "权限定义" },
+    { key: "endpoints", icon: <ApiOutlined />, label: "API 映射" },
+    { key: "routes", icon: <BranchesOutlined />, label: "前端页面" },
+    { key: "overview", icon: <ProfileOutlined />, label: "权限总览" },
+  ];
+  const itemList: any = isAuthzCenter
+    ? authzItems
+    : SiderItems(permissionIds, permissionRoutes, authzPermissions, showNDPoolType, selectedKeys);
 
   useEffect(() => {
     const update = (value?: string) => {
       setPermissionIds(value || localStorage.getItem("permission_ids") || "");
       setPermissionRoutes(localStorage.getItem("permission_routes") || "");
+      setAuthzPermissions(localStorage.getItem("authz_permissions") || "");
     };
     const onStorage = (e: StorageEvent) => {
-      if (e.key === "permission_ids" || e.key === "permission_routes") {
+      if (e.key === "permission_ids" || e.key === "permission_routes" || e.key === "authz_permissions") {
         update(e.key === "permission_ids" ? (e.newValue ?? "") : undefined);
       }
     };
@@ -332,7 +379,7 @@ export default function SiderBar() {
   }, []);
 
   useEffect(() => {
-    if (location.pathname === "/") return;
+    if (location.pathname === "/" || isAuthzCenter) return;
     const { selectedKeys, openKeys } = findSelectedKeys(itemList, location.pathname);
     setSelectedKeys(selectedKeys);
     // 首次渲染时，设置默认值
@@ -341,7 +388,7 @@ export default function SiderBar() {
     }
     // 将首次渲染标记设置为false
     firstRenderRef.current = false;
-  }, [location.pathname, permissionIds, permissionRoutes]);
+  }, [location.pathname, permissionIds, permissionRoutes, authzPermissions, isAuthzCenter]);
 
   return (
     <Layout.Sider
@@ -381,7 +428,7 @@ export default function SiderBar() {
         theme={isDarkMode ? "dark" : "light"}
         mode="inline"
         items={itemList}
-        selectedKeys={selectedKeys}
+        selectedKeys={isAuthzCenter ? [authzTab] : selectedKeys}
         onSelect={({ selectedKeys }) => {
           setSelectedKeys(selectedKeys);
         }}
@@ -389,8 +436,18 @@ export default function SiderBar() {
         onOpenChange={(openKeys) => setOpenKeys(openKeys)}
         className="!border-e-0"
         onClick={({ key }) => {
+          if (isAuthzCenter) {
+            if (key === "back") navigate(location.state?.authzReturnTo || ROUTE_PATHS.landing);
+            else navigate(`${ROUTE_PATHS.rbacCenter}?tab=${key}`, { state: location.state, replace: true });
+            return;
+          }
           if (typeof key === "string" && key.startsWith("/") && key !== location.pathname) {
-            navigate(key);
+            navigate(
+              key,
+              key === ROUTE_PATHS.rbacCenter
+                ? { state: { authzReturnTo: location.pathname + location.search } }
+                : undefined,
+            );
           }
         }}
       />
