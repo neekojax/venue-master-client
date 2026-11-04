@@ -150,6 +150,32 @@ export interface OtherPoolMachineAnomalySummary extends MinerCodeAnomalySummary 
   windowEnd: string;
 }
 
+export interface OtherPoolMachineAnomalyMachine {
+  mac: string;
+  controlBoardSN: string;
+  minerCodes: string[];
+}
+
+export interface OtherPoolMachineAnomalyHistoryItem extends MinerCodeAnomalySummary {
+  businessDate: string;
+  windowStart: string;
+  windowEnd: string;
+  machineData: OtherPoolMachineAnomalyMachine[];
+}
+
+/** GET minerHashrate/otherPoolMachineAnomalies/{venueType}/history 的 data */
+export interface OtherPoolMachineAnomalyHistoryData {
+  venueType: string;
+  siteName: string;
+  startDate: string;
+  endDate: string;
+  list: OtherPoolMachineAnomalyHistoryItem[];
+  total: number;
+  page: number;
+  pageSize: number;
+  hasMore: boolean;
+}
+
 /** GET minerHashrate/taskAbnormalMinerCount/{venueType}/{taskID} 的 data */
 export interface TaskAbnormalMinerCount extends MinerCodeAnomalySummary {
   venueType: string;

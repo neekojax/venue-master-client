@@ -48,6 +48,14 @@ export const miningRoute: RouteObject = {
       handle: { title: t("场地异常历史"), crumb: () => t("场地异常历史") },
     },
     {
+      path: ROUTE_PATHS.farmMinerAnomalyHistory,
+      lazy: async () => ({
+        Component: (await import("@/pages/farm-monitor/miner-anomaly-history")).default,
+      }),
+      HydrateFallback: ProgressBar,
+      handle: { title: t("异常矿工历史"), crumb: () => t("异常矿工历史") },
+    },
+    {
       path: ROUTE_PATHS.faultMonitor,
       lazy: async () => ({
         Component: (await import("@/pages/fault-machine-monitor")).default,

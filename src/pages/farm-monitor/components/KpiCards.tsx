@@ -17,6 +17,7 @@ interface KpiCardsProps {
   data: KpiSummary;
   loading?: boolean;
   onAbnormalClick?: () => void;
+  onYesterdayMinerAnomalyClick?: () => void;
   yesterdayAbnormalCalculating?: boolean;
   latestMinerAnomaly?: MinerCodeAnomalySummary;
   latestMinerAnomalyLoading?: boolean;
@@ -75,6 +76,7 @@ export default function KpiCards({
   data,
   loading = false,
   onAbnormalClick,
+  onYesterdayMinerAnomalyClick,
   yesterdayAbnormalCalculating = false,
   latestMinerAnomaly,
   latestMinerAnomalyLoading = false,
@@ -95,8 +97,13 @@ export default function KpiCards({
           const isYesterdayAbnormalCalculating =
             card.key === "yesterdayAbnormal" &&
             (yesterdayAbnormalCalculating || data.yesterdayAbnormal == null);
-          const clickable =
-            card.key === "yesterdayAbnormal" && !isYesterdayAbnormalCalculating && onAbnormalClick;
+          const clickHandler =
+            card.key === "yesterdayAbnormal" && !isYesterdayAbnormalCalculating
+              ? onAbnormalClick
+              : card.key === "otherImpactEvents"
+                ? onYesterdayMinerAnomalyClick
+                : undefined;
+          const clickable = Boolean(clickHandler);
           const minerCardType =
             card.key === "powerLimitEvents"
               ? "latest"
@@ -114,11 +121,11 @@ export default function KpiCards({
           return (
             <div
               key={card.key}
-              onClick={clickable ? onAbnormalClick : undefined}
+              onClick={clickHandler}
               onKeyDown={
                 clickable
                   ? (event) => {
-                      if (event.key === "Enter" || event.key === " ") onAbnormalClick?.();
+                      if (event.key === "Enter" || event.key === " ") clickHandler?.();
                     }
                   : undefined
               }

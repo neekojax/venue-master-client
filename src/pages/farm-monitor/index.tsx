@@ -321,6 +321,12 @@ export default function FarmMonitorPage() {
     navigate(`${ROUTE_PATHS.farmAbnormalHistory}?${params}`);
   }, [navigate, selectedFarm, selectedFarmId]);
 
+  const openYesterdayMinerAnomalyHistory = useCallback(() => {
+    if (!selectedFarm?.name || !selectedFarmId) return;
+    const params = new URLSearchParams({ siteName: selectedFarm.name, siteCode: selectedFarmId });
+    navigate(`${ROUTE_PATHS.farmMinerAnomalyHistory}?${params}`);
+  }, [navigate, selectedFarm, selectedFarmId]);
+
   useEffect(() => {
     if (!abnormalTerminalOpen || !selectedFarmId) return;
     const nextValues: AbnormalLogSearchValues = {
@@ -365,6 +371,7 @@ export default function FarmMonitorPage() {
               isYesterdayMinerAnomalyFetching
             }
             onAbnormalClick={openAbnormalManagementTerminal}
+            onYesterdayMinerAnomalyClick={openYesterdayMinerAnomalyHistory}
             yesterdayAbnormalCalculating={yesterdayAbnormalCalculating}
             latestMinerAnomaly={latestMinerAnomaly}
             latestMinerAnomalyLoading={isLatestMinerAnomalyLoading || isLatestMinerAnomalyFetching}

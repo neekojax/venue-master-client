@@ -49,6 +49,7 @@ const entryHints: Array<[prefix: string, hint: string]> = [
   ["/pool-profit/history", "点击矿池名称进入"],
   ["/recent-sub-account-status", "点击「查看历史状态」链接进入"],
   ["/mining/farm-monitor/abnormal-history", "从矿机监控页进入"],
+  ["/mining/farm-monitor/miner-anomaly-history", "点击「昨日异常矿工」卡片进入"],
 ];
 
 const entryHintOf = (path: string): string =>
