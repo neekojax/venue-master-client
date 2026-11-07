@@ -327,8 +327,14 @@ export default function PrincipalsTab() {
     (snapshot.frontend_routes || [])
       .filter((route) => route.route_type !== "navigation")
       .map((route) => [route.name, route.path, routeTypeLabel(route.route_type)]);
-  const userLabel = (principal: AuthzPrincipal) =>
-    `${principal.name || principal.nickname || principal.principal_id}（${principal.principal_id}）`;
+  const userLabel = (principal: AuthzPrincipal, index: number) => {
+    const identity = [
+      principal.name,
+      principal.nickname && principal.nickname !== principal.name ? principal.nickname : "",
+      principal.email,
+    ].filter(Boolean);
+    return identity.join(" · ") || `用户 ${index + 1}`;
+  };
 
   // 一键导出所有用户的有效授权 PDF：账号总览 + 每人「角色 / 组织、有效权限、可访问页面」三个小节（书签按账号分组）。
   const handleExportUserPdf = async () => {
@@ -361,12 +367,13 @@ export default function PrincipalsTab() {
       const sections: MatrixPdfSection[] = [
         {
           title: `一、账号总览（${list.length}）`,
-          head: ["账号", "名称", "状态", "角色 / 组织", "权限数", "页面数", "接口数"],
+          head: ["名称", "昵称", "邮箱", "状态", "角色 / 组织", "权限数", "页面数", "接口数"],
           body: list.map((item, index) => {
             const snapshot = snapshots[index];
             return [
-              item.principal_id,
-              item.name || item.nickname || "—",
+              item.name || "—",
+              item.nickname || "—",
+              item.email || "—",
               item.status === 1 ? "启用" : "禁用",
               assignmentSummary(item),
               snapshot ? String(effectivePermissionKeys(snapshot).length) : "加载失败",
@@ -375,21 +382,22 @@ export default function PrincipalsTab() {
             ];
           }),
           columnStyles: {
-            0: { cellWidth: 100 },
-            1: { cellWidth: 100 },
-            2: { cellWidth: 50 },
-            4: { cellWidth: 56 },
-            5: { cellWidth: 56 },
-            6: { cellWidth: 56 },
+            0: { cellWidth: 80 },
+            1: { cellWidth: 80 },
+            2: { cellWidth: 125 },
+            3: { cellWidth: 44 },
+            5: { cellWidth: 48 },
+            6: { cellWidth: 48 },
+            7: { cellWidth: 48 },
           },
-          centerColumns: [2, 4, 5, 6],
-          statusColumns: [2],
+          centerColumns: [3, 5, 6, 7],
+          statusColumns: [3],
         },
       ];
 
       list.forEach((item, index) => {
         const snapshot = snapshots[index];
-        const label = userLabel(item);
+        const label = userLabel(item, index);
         sections.push({
           title: `${label} · 角色 / 组织`,
           bookmarkParent: label,
@@ -460,8 +468,8 @@ export default function PrincipalsTab() {
           title: "一、账号信息",
           head: ["项目", "内容"],
           body: [
-            ["账号", principal.principal_id],
-            ["名称", principal.name || principal.nickname || "—"],
+            ["名称", principal.name || "—"],
+            ["昵称", principal.nickname || "—"],
             ["邮箱", principal.email || "—"],
             ["状态", principal.status === 1 ? "启用" : "禁用"],
             ["角色 / 组织", assignmentSummary(principal)],
@@ -503,7 +511,7 @@ export default function PrincipalsTab() {
       await exportMatrixPdf(
         sections,
         { title: "用户权限文档", generatedAt: new Date().toLocaleString("zh-CN", { hour12: false }) },
-        `用户权限-${principal.principal_id}-${stamp}.pdf`,
+        `用户权限-${principal.name || principal.nickname || "用户"}-${stamp}.pdf`,
       );
       messageApi.success(`已导出「${principal.name || principal.principal_id}」的权限 PDF`);
     } catch (error) {
