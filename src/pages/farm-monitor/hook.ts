@@ -7,6 +7,8 @@ import {
   fetchTaskAbnormalMinerCounts,
   fetchTaskSnapshots,
 } from "./api";
+import { fetchDailyMacOverview } from "./daily-mac-stats-api";
+import { fetchPowerTrend } from "./miner-power-api";
 import type { TaskSnapshotQueryParams, TimeRange } from "./types";
 import { FARM_MONITOR_CACHE_OPTIONS, type FarmMonitorQueryOptions } from "./view-state";
 
@@ -93,3 +95,31 @@ export const useTaskSnapshots = (
     ...options,
   });
 };
+
+export const useYesterdayMacOverview = (
+  venueType: string,
+  siteCode: string | null,
+  businessDate: string,
+  options: FarmMonitorQueryOptions = {},
+) =>
+  useQuery({
+    queryKey: ["site-agent-daily-mac-overview", venueType, siteCode, businessDate],
+    queryFn: ({ signal }) => fetchDailyMacOverview(venueType, siteCode!, businessDate, signal),
+    enabled: Boolean(venueType && siteCode && businessDate),
+    ...FARM_MONITOR_CACHE_OPTIONS,
+    ...options,
+  });
+
+export const useYesterdayPowerOverview = (
+  venueType: string,
+  siteCode: string | null,
+  businessDate: string,
+  options: FarmMonitorQueryOptions = {},
+) =>
+  useQuery({
+    queryKey: ["site-agent-power-trend", venueType, siteCode, businessDate, businessDate, ""],
+    queryFn: ({ signal }) => fetchPowerTrend(venueType, siteCode!, businessDate, businessDate, "", signal),
+    enabled: Boolean(venueType && siteCode && businessDate),
+    ...FARM_MONITOR_CACHE_OPTIONS,
+    ...options,
+  });

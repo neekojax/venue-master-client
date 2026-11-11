@@ -7,6 +7,10 @@ import FarmSiteList from "./components/FarmSiteList";
 import KpiCards from "./components/KpiCards";
 import MinerSnapshotPanel, { type MinerSnapshotSearchValues } from "./components/MinerSnapshotPanel";
 import OverviewChart from "./components/OverviewChart";
+import YesterdaySummaryCard, {
+  YesterdayMacSummary,
+  YesterdayPowerSummary,
+} from "./components/YesterdaySummaryCard";
 import { FARM_MONITOR_TOP_HEIGHT } from "./constants";
 import {
   useBoundSites,
@@ -15,6 +19,8 @@ import {
   useRecentProbeTasks,
   useTaskAbnormalMinerCounts,
   useTaskSnapshots,
+  useYesterdayMacOverview,
+  useYesterdayPowerOverview,
 } from "./hook";
 import type {
   BoundSiteItem,
@@ -45,6 +51,7 @@ import { useSettingsStore } from "@/stores";
 import { useSelector } from "@/stores/selectors";
 import { getAbnormalStatsDate, isYesterdayAbnormalCalculating } from "@/utils";
 
+import { t } from "@/locales";
 import type { AbnormalLogSearchValues } from "@/pages/fault-machine-monitor/components/AbnormalLogPanel";
 import AbnormalManagementDrawer from "@/pages/fault-machine-monitor/components/AbnormalManagementDrawer";
 import {
@@ -256,6 +263,18 @@ function FarmMonitorContent({ poolType, userId }: { poolType: string; userId: st
 
   const abnormalStatsDate = getAbnormalStatsDate().format("YYYY-MM-DD");
   const yesterdayAbnormalCalculating = isYesterdayAbnormalCalculating();
+  const yesterdayMacQuery = useYesterdayMacOverview(poolType, visibleFarmId, abnormalStatsDate, cacheOptions);
+  const yesterdayPowerQuery = useYesterdayPowerOverview(
+    poolType,
+    visibleFarmId,
+    abnormalStatsDate,
+    cacheOptions,
+  );
+  const yesterdayPower = yesterdayPowerQuery.data?.list.find(
+    (day) => day.business_date === abnormalStatsDate,
+  );
+  const refetchYesterdayMac = yesterdayMacQuery.refetch;
+  const refetchYesterdayPower = yesterdayPowerQuery.refetch;
   const {
     data: anomalyHistoryRes,
     isLoading: isAnomalyHistoryLoading,
@@ -335,6 +354,10 @@ function FarmMonitorContent({ poolType, userId }: { poolType: string; userId: st
     void refetchAbnormalData();
     void refetchLatestMinerAnomaly();
     void refetchYesterdayMinerAnomaly();
+    if (visibleFarmId) {
+      void refetchYesterdayMac();
+      void refetchYesterdayPower();
+    }
     if (abnormalTerminalOpen) {
       void refetchAbnormalLogs();
       void refetchAnomalyHistory();
@@ -350,6 +373,9 @@ function FarmMonitorContent({ poolType, userId }: { poolType: string; userId: st
     refetchLatestMinerAnomaly,
     refetchSnapshots,
     refetchYesterdayMinerAnomaly,
+    visibleFarmId,
+    refetchYesterdayMac,
+    refetchYesterdayPower,
   ]);
 
   const previousSnapshotScope = useRef({ siteCode: selectedFarmId, taskIds: snapshotTaskIdsParam });
@@ -427,7 +453,7 @@ function FarmMonitorContent({ poolType, userId }: { poolType: string; userId: st
     navigate(`${ROUTE_PATHS.farmMinerAnomalyHistory}?${params}`);
   }, [navigate, rememberView, selectedFarm, selectedFarmId]);
 
-  const openMoreFeature = (path: string) => {
+  const openSiteStatistics = (path: string) => {
     if (!selectedFarm || !selectedFarmId) return;
     rememberView();
     const params = new URLSearchParams({
@@ -489,6 +515,30 @@ function FarmMonitorContent({ poolType, userId }: { poolType: string; userId: st
             latestMinerAnomaly={latestMinerAnomaly}
             latestMinerAnomalyLoading={isLatestMinerAnomalyLoading || isLatestMinerAnomalyFetching}
             yesterdayMinerAnomaly={yesterdayMinerAnomaly}
+            yesterdayChangeCard={
+              <YesterdaySummaryCard
+                title={t("昨日变化")}
+                disabled={!selectedFarm}
+                businessDate={abnormalStatsDate}
+                loading={yesterdayMacQuery.isFetching}
+                error={yesterdayMacQuery.error}
+                onMore={() => openSiteStatistics(ROUTE_PATHS.farmDailyMacStats)}
+              >
+                <YesterdayMacSummary rows={yesterdayMacQuery.data ?? []} />
+              </YesterdaySummaryCard>
+            }
+            yesterdayPowerCard={
+              <YesterdaySummaryCard
+                title={t("昨日功耗")}
+                disabled={!selectedFarm}
+                businessDate={abnormalStatsDate}
+                loading={yesterdayPowerQuery.isFetching}
+                error={yesterdayPowerQuery.error}
+                onMore={() => openSiteStatistics(ROUTE_PATHS.farmMinerPower)}
+              >
+                <YesterdayPowerSummary day={yesterdayPower} />
+              </YesterdaySummaryCard>
+            }
           />
         </div>
         {abnormalTerminalOpen ? (
@@ -557,11 +607,8 @@ function FarmMonitorContent({ poolType, userId }: { poolType: string; userId: st
         onSearch={onSearch}
         onReset={onReset}
         onRefresh={handleRefresh}
-        hasSelectedSite={Boolean(selectedFarm && selectedFarmId)}
         filterExpanded={filterExpanded}
         onFilterExpandedChange={setFilterExpanded}
-        onDailyMacStatsClick={() => openMoreFeature(ROUTE_PATHS.farmDailyMacStats)}
-        onMinerPowerClick={() => openMoreFeature(ROUTE_PATHS.farmMinerPower)}
         onPageChange={(p, ps) => {
           setPage(p);
           setPageSize(ps || 20);

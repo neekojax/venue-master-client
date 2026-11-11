@@ -1927,5 +1927,13 @@
   "请选择场地查看功耗统计": "Select a site to view power statistics",
   "日平均功耗 = 总平均功耗 − 黑名单平均功耗，单位 MW，保留 3 位小数。缺失数据断开显示，0 正常展示。": "Daily average power = total average power minus blacklisted average power, in MW to 3 decimal places. Missing data creates gaps; zero values are displayed.",
   "橙色菱形表示数据不完整，场地合计为可用数据合计。": "Orange diamonds indicate incomplete data. The site total includes available data only.",
-  "每日功耗统计": "Daily power statistics"
+  "每日功耗统计": "Daily power statistics",
+  "昨日变化": "Yesterday's MAC Changes",
+  "昨日功耗": "Yesterday's Power",
+  "{{title}}更多": "View more: {{title}}",
+  "暂无昨日数据": "No data for the previous reporting day",
+  "各 Agent 独立统计": "Statistics are calculated separately for each agent",
+  "共 {{count}} 个 Agent": "{{count}} agents",
+  "次日": "Next day",
+  "更多": "More"
 }

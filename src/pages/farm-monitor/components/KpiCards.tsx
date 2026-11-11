@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { Fragment, type ReactNode, useState } from "react";
 import {
   ApiOutlined,
   CheckCircleOutlined,
@@ -22,6 +22,8 @@ interface KpiCardsProps {
   latestMinerAnomaly?: MinerCodeAnomalySummary;
   latestMinerAnomalyLoading?: boolean;
   yesterdayMinerAnomaly?: OtherPoolMachineAnomalySummary;
+  yesterdayChangeCard?: ReactNode;
+  yesterdayPowerCard?: ReactNode;
 }
 
 const CARDS: Array<{
@@ -81,12 +83,16 @@ export default function KpiCards({
   latestMinerAnomaly,
   latestMinerAnomalyLoading = false,
   yesterdayMinerAnomaly,
+  yesterdayChangeCard,
+  yesterdayPowerCard,
 }: KpiCardsProps) {
   const [expandedMinerCard, setExpandedMinerCard] = useState<"latest" | "yesterday" | null>(null);
 
   return (
     <Spin spinning={loading}>
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+      <div
+        className={`grid grid-cols-2 md:grid-cols-4 ${yesterdayChangeCard && yesterdayPowerCard ? "xl:grid-cols-5" : ""} gap-3`}
+      >
         {CARDS.map((card) => {
           const Icon = card.icon;
           const isNoAbnormal =
@@ -119,107 +125,110 @@ export default function KpiCards({
           const showAllMinerCodes = expandedMinerCard === minerCardType;
           const visibleMinerCodeData = showAllMinerCodes ? minerCodeData : minerCodeData.slice(0, 2);
           return (
-            <div
-              key={card.key}
-              onClick={clickHandler}
-              onKeyDown={
-                clickable
-                  ? (event) => {
-                      if (event.key === "Enter" || event.key === " ") clickHandler?.();
-                    }
-                  : undefined
-              }
-              role={clickable ? "button" : undefined}
-              tabIndex={clickable ? 0 : undefined}
-              className={`bg-white rounded-lg border border-gray-200 px-4 py-3 flex items-center gap-3 w-full text-left ${
-                clickable ? "hover:border-blue-300 hover:shadow-sm cursor-pointer" : "cursor-default"
-              }`}
-            >
-              {!isMinerCard ? (
-                <div
-                  className="flex items-center justify-center w-10 h-10 rounded-lg shrink-0"
-                  style={{ backgroundColor: card.bg, color: card.color }}
-                >
-                  <Icon style={{ fontSize: 20 }} />
-                </div>
-              ) : null}
+            <Fragment key={card.key}>
               <div
-                className={`flex-1 min-w-0 ${
-                  isMinerCard
-                    ? `flex items-center gap-3 ${hasMinerAnomaly ? "" : "justify-end"}`
-                    : "text-right"
+                onClick={clickHandler}
+                onKeyDown={
+                  clickable
+                    ? (event) => {
+                        if (event.key === "Enter" || event.key === " ") clickHandler?.();
+                      }
+                    : undefined
+                }
+                role={clickable ? "button" : undefined}
+                tabIndex={clickable ? 0 : undefined}
+                className={`bg-white rounded-lg border border-gray-200 px-4 py-3 flex items-center gap-3 w-full text-left ${
+                  clickable ? "hover:border-blue-300 hover:shadow-sm cursor-pointer" : "cursor-default"
                 }`}
               >
-                {isMinerCard && hasMinerAnomaly ? (
-                  <div className="min-w-0 flex-1 text-left text-xs leading-5 text-gray-500">
-                    {visibleMinerCodeData.map((item, index) => (
-                      <div key={item.minerCode} className="truncate" title={item.minerCode}>
-                        <span className="text-gray-700">{item.minerCode}</span>
-                        <span className="ml-1 text-gray-400">
-                          {item.abnormalCount} {t("台")}
-                        </span>
-                        {hasMoreMinerCodes && index === visibleMinerCodeData.length - 1 ? (
-                          <button
-                            type="button"
-                            className="ml-2 text-blue-500 hover:text-blue-600"
-                            onClick={(event) => {
-                              event.stopPropagation();
-                              setExpandedMinerCard((current) =>
-                                current === minerCardType ? null : minerCardType,
-                              );
-                            }}
-                          >
-                            {t(showAllMinerCodes ? "收起" : "更多")}
-                          </button>
-                        ) : null}
-                      </div>
-                    ))}
+                {!isMinerCard ? (
+                  <div
+                    className="flex items-center justify-center w-10 h-10 rounded-lg shrink-0"
+                    style={{ backgroundColor: card.bg, color: card.color }}
+                  >
+                    <Icon style={{ fontSize: 20 }} />
                   </div>
                 ) : null}
-                <div>
-                  <div className="flex items-center justify-end gap-1 text-xs text-gray-500 truncate">
-                    <span className="truncate">{card.label}</span>
-                    {card.description ? (
-                      <Tooltip title={card.description}>
-                        <QuestionCircleOutlined className="shrink-0 cursor-help text-gray-400" />
-                      </Tooltip>
-                    ) : null}
-                  </div>
-                  <div
-                    className={`text-2xl font-semibold text-gray-800 leading-tight ${
-                      clickable ? "hover:underline underline-offset-4" : ""
-                    }`}
-                  >
-                    {isMinerCard ? (
-                      minerCardLoading ? (
-                        <Spin size="small" />
-                      ) : minerAnomaly == null ? (
-                        "-"
-                      ) : hasMinerAnomaly ? (
-                        <>
-                          {minerAnomaly.abnormalCount}
-                          <span className="ml-1 text-xs font-normal text-gray-400">{t("台")}</span>
-                        </>
-                      ) : (
+                <div
+                  className={`flex-1 min-w-0 ${
+                    isMinerCard
+                      ? `flex items-center gap-3 ${hasMinerAnomaly ? "" : "justify-end"}`
+                      : "text-right"
+                  }`}
+                >
+                  {isMinerCard && hasMinerAnomaly ? (
+                    <div className="min-w-0 flex-1 text-left text-xs leading-5 text-gray-500">
+                      {visibleMinerCodeData.map((item, index) => (
+                        <div key={item.minerCode} className="truncate" title={item.minerCode}>
+                          <span className="text-gray-700">{item.minerCode}</span>
+                          <span className="ml-1 text-gray-400">
+                            {item.abnormalCount} {t("台")}
+                          </span>
+                          {hasMoreMinerCodes && index === visibleMinerCodeData.length - 1 ? (
+                            <button
+                              type="button"
+                              className="ml-2 text-blue-500 hover:text-blue-600"
+                              onClick={(event) => {
+                                event.stopPropagation();
+                                setExpandedMinerCard((current) =>
+                                  current === minerCardType ? null : minerCardType,
+                                );
+                              }}
+                            >
+                              {t(showAllMinerCodes ? "收起" : "更多")}
+                            </button>
+                          ) : null}
+                        </div>
+                      ))}
+                    </div>
+                  ) : null}
+                  <div>
+                    <div className="flex items-center justify-end gap-1 text-xs text-gray-500 truncate">
+                      <span className="truncate">{card.label}</span>
+                      {card.description ? (
+                        <Tooltip title={card.description}>
+                          <QuestionCircleOutlined className="shrink-0 cursor-help text-gray-400" />
+                        </Tooltip>
+                      ) : null}
+                    </div>
+                    <div
+                      className={`text-2xl font-semibold text-gray-800 leading-tight ${
+                        clickable ? "hover:underline underline-offset-4" : ""
+                      }`}
+                    >
+                      {isMinerCard ? (
+                        minerCardLoading ? (
+                          <Spin size="small" />
+                        ) : minerAnomaly == null ? (
+                          "-"
+                        ) : hasMinerAnomaly ? (
+                          <>
+                            {minerAnomaly.abnormalCount}
+                            <span className="ml-1 text-xs font-normal text-gray-400">{t("台")}</span>
+                          </>
+                        ) : (
+                          <span className="inline-flex items-center gap-1 text-base text-emerald-600">
+                            <CheckCircleOutlined />
+                            {t("无异常")}
+                          </span>
+                        )
+                      ) : isYesterdayAbnormalCalculating ? (
+                        <span className="text-base font-medium text-slate-400">{t("计算中")}</span>
+                      ) : isNoAbnormal ? (
                         <span className="inline-flex items-center gap-1 text-base text-emerald-600">
                           <CheckCircleOutlined />
                           {t("无异常")}
                         </span>
-                      )
-                    ) : isYesterdayAbnormalCalculating ? (
-                      <span className="text-base font-medium text-slate-400">{t("计算中")}</span>
-                    ) : isNoAbnormal ? (
-                      <span className="inline-flex items-center gap-1 text-base text-emerald-600">
-                        <CheckCircleOutlined />
-                        {t("无异常")}
-                      </span>
-                    ) : (
-                      formatKpiValue(data[card.key])
-                    )}
+                      ) : (
+                        formatKpiValue(data[card.key])
+                      )}
+                    </div>
                   </div>
                 </div>
               </div>
-            </div>
+              {card.key === "yesterdayAbnormal" ? yesterdayChangeCard : null}
+              {card.key === "otherImpactEvents" ? yesterdayPowerCard : null}
+            </Fragment>
           );
         })}
       </div>

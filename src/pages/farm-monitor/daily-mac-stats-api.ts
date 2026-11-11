@@ -93,6 +93,24 @@ export function fetchMachineDailyRecords(
   );
 }
 
+export async function fetchDailyMacOverview(
+  venueType: string,
+  siteCode: string,
+  statDate: string,
+  signal?: AbortSignal,
+): Promise<AgentDailyMacStat[]> {
+  const rows: AgentDailyMacStat[] = [];
+  let page = 1;
+  // 接口没有日期筛选，按日期倒序翻页，取齐目标业务日的所有 Agent 后停止。
+  while (true) {
+    const data = await fetchAgentDailyMacStats(venueType, siteCode, page, 500, signal);
+    rows.push(...data.list.filter((row) => row.stat_date === statDate));
+    const lastDate = data.list.at(-1)?.stat_date;
+    if (!data.hasMore || !lastDate || lastDate < statDate) return rows;
+    page += 1;
+  }
+}
+
 export async function exportMachineDailyRecords(venueType: string, siteCode: string, statDate: string) {
   const response = await axiosInstance.get<Blob>(
     `minerHashrate/machineDailyRecords/${encodeURIComponent(venueType)}/export`,

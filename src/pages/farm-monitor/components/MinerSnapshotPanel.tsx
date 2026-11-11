@@ -20,7 +20,6 @@ import {
 import type { TaskSnapshotItem, TaskSnapshotQueryParams } from "../types";
 import { buildTaskSnapshotExportParams, downloadExcelBlobResponse } from "../utils";
 import ColumnSettingsPopover from "./ColumnSettingsPopover";
-import MinerMoreFeatures from "./MinerMoreFeatures";
 
 import { getLanguage, t } from "@/locales";
 
@@ -57,11 +56,8 @@ interface MinerSnapshotPanelProps {
   onSearch: (values: MinerSnapshotSearchValues) => void;
   onReset: () => void;
   onRefresh: () => void;
-  hasSelectedSite: boolean;
   filterExpanded: boolean;
   onFilterExpandedChange: (expanded: boolean) => void;
-  onDailyMacStatsClick: () => void;
-  onMinerPowerClick: () => void;
   onPageChange: (page: number, pageSize: number) => void;
 }
 
@@ -81,11 +77,8 @@ export default function MinerSnapshotPanel({
   onSearch,
   onReset,
   onRefresh,
-  hasSelectedSite,
   filterExpanded,
   onFilterExpandedChange,
-  onDailyMacStatsClick,
-  onMinerPowerClick,
   onPageChange,
 }: MinerSnapshotPanelProps) {
   const [isFullscreen, setIsFullscreen] = useState(false);
@@ -164,11 +157,6 @@ export default function MinerSnapshotPanel({
       >
         <div className="flex items-center justify-between gap-3 px-5 pt-4 pb-3 border-b border-gray-200 bg-white">
           <h2 className="text-lg font-semibold text-gray-800 m-0">{t("矿机信息管理")}</h2>
-          <MinerMoreFeatures
-            hasSelectedSite={hasSelectedSite}
-            onDailyMacStatsClick={onDailyMacStatsClick}
-            onMinerPowerClick={onMinerPowerClick}
-          />
         </div>
         <div
           hidden={!filterExpanded}
