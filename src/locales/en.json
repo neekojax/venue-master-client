@@ -1935,5 +1935,6 @@
   "各 Agent 独立统计": "Statistics are calculated separately for each agent",
   "共 {{count}} 个 Agent": "{{count}} agents",
   "次日": "Next day",
-  "更多": "More"
+  "更多": "More",
+  "展开": "Expand"
 }
