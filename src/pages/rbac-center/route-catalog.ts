@@ -51,7 +51,7 @@ const entryHints: Array<[prefix: string, hint: string]> = [
   ["/mining/farm-monitor/abnormal-history", "点击矿机监控概览中「昨日异常」卡片的「更多」进入"],
   ["/mining/farm-monitor/miner-anomaly-history", "点击矿机监控概览中「昨日异常矿工」卡片的「更多」进入"],
   ["/mining/farm-monitor/daily-mac-stats", "点击矿机监控概览中「昨日变化」卡片的「更多」进入"],
-  ["/mining/farm-monitor/miner-power", "点击矿机监控概览中「昨日功耗」卡片的「更多」进入"],
+  ["/mining/farm-monitor/miner-power", "点击矿机监控概览中「昨日平均功耗」卡片的「更多」进入"],
 ];
 
 const entryHintOf = (path: string): string =>

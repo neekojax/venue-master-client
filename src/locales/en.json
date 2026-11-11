@@ -1929,7 +1929,7 @@
   "橙色菱形表示数据不完整，场地合计为可用数据合计。": "Orange diamonds indicate incomplete data. The site total includes available data only.",
   "每日功耗统计": "Daily power statistics",
   "昨日变化": "Yesterday's MAC Changes",
-  "昨日功耗": "Yesterday's Power",
+  "昨日平均功耗": "Yesterday's Average Power Consumption",
   "{{title}}更多": "View more: {{title}}",
   "暂无昨日数据": "No data for the previous reporting day",
   "各 Agent 独立统计": "Statistics are calculated separately for each agent",

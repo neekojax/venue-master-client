@@ -2,8 +2,8 @@ import type { ReactNode } from "react";
 import { ArrowRightOutlined } from "@ant-design/icons";
 import { Spin, Tooltip } from "antd";
 import type { AgentDailyMacStat } from "../daily-mac-stats-api";
-import type { DailyPowerTrend } from "../miner-power-api";
-import { formatPower, powerDayStatus } from "../miner-power-utils";
+import type { DailyPowerDetailData } from "../miner-power-api";
+import { formatPower } from "../miner-power-utils";
 
 import { t } from "@/locales";
 
@@ -104,13 +104,13 @@ export function YesterdayMacSummary({ rows }: { rows: AgentDailyMacStat[] }) {
   );
 }
 
-export function YesterdayPowerSummary({ day }: { day?: DailyPowerTrend }) {
-  if (day?.total_power_mw == null) return <span className="text-gray-400">{t("暂无昨日数据")}</span>;
-  const partial = powerDayStatus(day) === "partial";
+export function YesterdayPowerSummary({ data }: { data?: DailyPowerDetailData }) {
+  if (data?.total_power_mw == null) return <span className="text-gray-400">{t("暂无昨日数据")}</span>;
+  const partial = data.list.some((agent) => agent.status !== "valid");
   return (
     <Tooltip title={partial ? `${t("数据不完整")} · ${t("可用数据合计")}` : undefined}>
       <div className="min-w-0 text-right text-2xl font-semibold leading-tight text-gray-800 tabular-nums">
-        {formatPower(day.total_power_mw)}
+        {formatPower(data.total_power_mw)}
         <span className="ml-1 text-xs font-normal text-gray-400">MW</span>
         {partial ? (
           <span aria-label={t("数据不完整")} className="ml-1 align-middle text-xs text-amber-600">

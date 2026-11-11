@@ -270,9 +270,6 @@ function FarmMonitorContent({ poolType, userId }: { poolType: string; userId: st
     abnormalStatsDate,
     cacheOptions,
   );
-  const yesterdayPower = yesterdayPowerQuery.data?.list.find(
-    (day) => day.business_date === abnormalStatsDate,
-  );
   const refetchYesterdayMac = yesterdayMacQuery.refetch;
   const refetchYesterdayPower = yesterdayPowerQuery.refetch;
   const {
@@ -529,14 +526,14 @@ function FarmMonitorContent({ poolType, userId }: { poolType: string; userId: st
             }
             yesterdayPowerCard={
               <YesterdaySummaryCard
-                title={t("昨日功耗")}
+                title={t("昨日平均功耗")}
                 disabled={!selectedFarm}
                 businessDate={abnormalStatsDate}
                 loading={yesterdayPowerQuery.isFetching}
                 error={yesterdayPowerQuery.error}
                 onMore={() => openSiteStatistics(ROUTE_PATHS.farmMinerPower)}
               >
-                <YesterdayPowerSummary day={yesterdayPower} />
+                <YesterdayPowerSummary data={yesterdayPowerQuery.data} />
               </YesterdaySummaryCard>
             }
           />

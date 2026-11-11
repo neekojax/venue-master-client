@@ -8,7 +8,7 @@ import {
   fetchTaskSnapshots,
 } from "./api";
 import { fetchDailyMacOverview } from "./daily-mac-stats-api";
-import { fetchPowerTrend } from "./miner-power-api";
+import { fetchDailyPowerDetail } from "./miner-power-api";
 import type { TaskSnapshotQueryParams, TimeRange } from "./types";
 import { FARM_MONITOR_CACHE_OPTIONS, type FarmMonitorQueryOptions } from "./view-state";
 
@@ -117,8 +117,8 @@ export const useYesterdayPowerOverview = (
   options: FarmMonitorQueryOptions = {},
 ) =>
   useQuery({
-    queryKey: ["site-agent-power-trend", venueType, siteCode, businessDate, businessDate, ""],
-    queryFn: ({ signal }) => fetchPowerTrend(venueType, siteCode!, businessDate, businessDate, "", signal),
+    queryKey: ["site-agent-daily-power-detail", venueType, siteCode, businessDate, ""],
+    queryFn: ({ signal }) => fetchDailyPowerDetail(venueType, siteCode!, businessDate, "", signal),
     enabled: Boolean(venueType && siteCode && businessDate),
     ...FARM_MONITOR_CACHE_OPTIONS,
     ...options,
