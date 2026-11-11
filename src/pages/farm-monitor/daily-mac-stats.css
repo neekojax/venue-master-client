@@ -1,0 +1,146 @@
+.daily-mac-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px 24px;
+}
+
+.daily-mac-header-title,
+.daily-mac-header-actions,
+.daily-mac-site-field {
+  display: flex;
+  align-items: center;
+  min-width: 0;
+}
+
+.daily-mac-header-title,
+.daily-mac-header-actions {
+  gap: 12px;
+}
+
+.daily-mac-header-actions {
+  margin-left: auto;
+}
+
+.daily-mac-site-field {
+  gap: 8px;
+}
+
+.daily-mac-site-field label {
+  color: #6b7280;
+  font-size: 13px;
+  white-space: nowrap;
+}
+
+.daily-mac-header .daily-mac-header-icon {
+  flex: 0 0 32px;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  color: #6b7280;
+}
+
+.daily-mac-header-icon .anticon {
+  font-size: 16px;
+}
+
+.daily-mac-site-select {
+  width: 320px;
+}
+
+.daily-mac-site-select .ant-select-selector,
+.daily-mac-site-select .ant-select-selection-item,
+.daily-mac-site-select .ant-select-selection-placeholder,
+.daily-mac-site-select .ant-select-selection-search-input,
+.daily-mac-site-popup .ant-select-item {
+  font-family: XPK, Arial, sans-serif;
+  font-size: 13px !important;
+  font-weight: 400;
+}
+
+.daily-mac-site-select .ant-select-selection-item,
+.daily-mac-site-select .ant-select-selection-search-input,
+.daily-mac-site-popup .ant-select-item-option {
+  color: #202327;
+}
+
+.daily-mac-site-popup .ant-select-item-option-selected:not(.ant-select-item-option-disabled) {
+  color: #202327;
+  font-weight: 400;
+}
+
+.daily-mac-stats .ant-table {
+  color: #202327;
+  font-size: 13px;
+  font-variant-numeric: tabular-nums;
+}
+
+.daily-mac-stats .ant-table-wrapper .ant-table-container {
+  border: 0;
+  border-radius: 0;
+}
+
+.daily-mac-stats .ant-table-wrapper .ant-table .ant-table-thead > tr > th {
+  padding: 12px 16px;
+  background: #fff !important;
+  color: #202327;
+  font-size: 14px;
+  font-weight: 600;
+  border-bottom: 1px solid #dfe2e6;
+}
+
+.daily-mac-stats .ant-table-thead > tr > th::before {
+  display: none;
+}
+
+.daily-mac-stats .ant-table-wrapper .ant-table.ant-table-middle .ant-table-tbody > tr > td {
+  padding: 14px 16px;
+  font-size: 13px;
+  border-bottom: 1px solid #f0f1f3;
+}
+
+.daily-mac-stats .ant-table-tbody > tr:last-child > td {
+  border-bottom: 0;
+}
+
+.daily-mac-stats .ant-table-tbody .ant-tag {
+  font-family: inherit;
+  font-size: inherit;
+}
+
+.daily-mac-stats .daily-mac-date {
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+  transition: color 0.15s;
+}
+
+.daily-mac-stats .daily-mac-date:hover,
+.daily-mac-stats .daily-mac-date:focus-visible {
+  color: #1677ff;
+}
+
+@media (max-width: 768px) {
+  .daily-mac-header-actions {
+    width: 100%;
+  }
+
+  .daily-mac-site-field {
+    flex: 1;
+  }
+
+  .daily-mac-site-select {
+    flex: 1;
+    min-width: 0;
+    width: 0;
+  }
+
+  .daily-mac-stats .ant-table-wrapper .ant-table .ant-table-thead > tr > th,
+  .daily-mac-stats .ant-table-wrapper .ant-table.ant-table-middle .ant-table-tbody > tr > td {
+    padding: 12px;
+  }
+}

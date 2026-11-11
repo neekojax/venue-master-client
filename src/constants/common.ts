@@ -33,6 +33,8 @@ export const ROUTE_PATHS = {
   farmMonitor: "/mining/farm-monitor",
   farmAbnormalHistory: "/mining/farm-monitor/abnormal-history",
   farmMinerAnomalyHistory: "/mining/farm-monitor/miner-anomaly-history",
+  farmDailyMacStats: "/mining/farm-monitor/daily-mac-stats",
+  farmMinerPower: "/mining/farm-monitor/miner-power",
   miningAgentSetting: "/mining/agent-setting",
   assetHashrateHistory: "/mining/asset-hashrate-history",
   faultMonitor: "/mining/fault-monitor",

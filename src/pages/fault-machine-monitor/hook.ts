@@ -79,11 +79,13 @@ export const useAbnormalDataDetail = (
   siteName: string | undefined,
   date: string,
   enabled = true,
+  options: { gcTime?: number; staleTime?: number; refetchOnMount?: boolean | "always" } = {},
 ) => {
   return useQuery({
     queryKey: ["abnormal-data-detail", venueType, siteName ?? "", date],
     queryFn: () => fetchAbnormalDataDetail(venueType, { siteName: siteName!, date }),
     enabled: enabled && Boolean(venueType) && Boolean(siteName),
+    ...options,
   });
 };
 

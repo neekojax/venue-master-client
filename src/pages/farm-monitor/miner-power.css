@@ -1,0 +1,37 @@
+.miner-power-filters,
+.miner-power-filter {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+}
+
+.miner-power-filters {
+  gap: 16px 24px;
+}
+
+.miner-power-filter label {
+  color: #6b7280;
+  font-size: 13px;
+  white-space: nowrap;
+}
+
+.miner-power-agent {
+  width: 240px;
+}
+
+.miner-power-agent .ant-select-selector,
+.miner-power-agent .ant-select-selection-item,
+.miner-power-agent .ant-select-selection-search-input,
+.miner-power-filters .ant-picker-input > input {
+  font-family: XPK, Arial, sans-serif;
+  font-size: 13px !important;
+  font-weight: 400;
+}
+
+@media (max-width: 768px) {
+  .miner-power-filter,
+  .miner-power-filter .ant-picker {
+    max-width: 100%;
+  }
+}

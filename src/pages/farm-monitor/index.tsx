@@ -1,5 +1,6 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
-import { useNavigate, useSearchParams } from "react-router-dom";
+import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
+import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
+import { useQueryClient } from "@tanstack/react-query";
 import { Form } from "antd";
 import dayjs from "dayjs";
 import FarmSiteList from "./components/FarmSiteList";
@@ -32,6 +33,12 @@ import {
   mapProbeTasksToOverviewPoints,
   resolveLatestProbeTaskIds,
 } from "./utils";
+import {
+  FARM_MONITOR_CACHE_OPTIONS,
+  FARM_MONITOR_RESTORE_OPTIONS,
+  farmMonitorViewKey,
+  type FarmMonitorViewState,
+} from "./view-state";
 import { ROUTE_PATHS } from "@/constants/common";
 import useAuthRedirect from "@/hooks/useAuthRedirect";
 import { useSettingsStore } from "@/stores";
@@ -54,58 +61,136 @@ import type {
 import { mapAbnormalLogListToRecords } from "@/pages/fault-machine-monitor/utils";
 
 export default function FarmMonitorPage() {
+  const { poolType } = useSettingsStore(useSelector(["poolType"]));
+  const userId = localStorage.getItem("user_id") ?? "";
+  return <FarmMonitorContent key={`${userId}:${poolType}`} poolType={poolType} userId={userId} />;
+}
+
+function FarmMonitorContent({ poolType, userId }: { poolType: string; userId: string }) {
   useAuthRedirect();
   const navigate = useNavigate();
+  const location = useLocation();
+  const queryClient = useQueryClient();
   const [searchParams] = useSearchParams();
-  const { poolType } = useSettingsStore(useSelector(["poolType"]));
+  const viewKey = useMemo(() => farmMonitorViewKey(userId, poolType), [poolType, userId]);
+  const [restoredView] = useState(() => {
+    const cached = queryClient.getQueryData<FarmMonitorViewState>(viewKey);
+    const requestedSite = searchParams.get("siteCode");
+    if (!cached) return undefined;
+    // 浏览器后退回到原历史记录时，以离开前实际选中的场地为准。
+    return cached.locationKey === location.key || !requestedSite || cached.siteCode === requestedSite
+      ? cached
+      : undefined;
+  });
+  const cacheOptions = restoredView ? FARM_MONITOR_RESTORE_OPTIONS : FARM_MONITOR_CACHE_OPTIONS;
 
   const [form] = Form.useForm<MinerSnapshotSearchValues>();
   const [abnormalForm] = Form.useForm<AbnormalLogSearchValues>();
-  const [timeRange, setTimeRange] = useState<TimeRange>("24h");
-  const [snapshotFilters, setSnapshotFilters] = useState<TaskSnapshotQueryParams>({});
-  const [page, setPage] = useState(1);
-  const [pageSize, setPageSize] = useState(20);
+  const [timeRange, setTimeRange] = useState<TimeRange>(restoredView?.timeRange ?? "24h");
+  const [snapshotFilters, setSnapshotFilters] = useState<TaskSnapshotQueryParams>(
+    restoredView?.snapshotFilters ?? {},
+  );
+  const [page, setPage] = useState(restoredView?.page ?? 1);
+  const [pageSize, setPageSize] = useState(restoredView?.pageSize ?? 20);
+  const [filterExpanded, setFilterExpanded] = useState(restoredView?.filterExpanded ?? true);
   const [abnormalFilters, setAbnormalFilters] = useState<AbnormalLogFilters>({});
   const [abnormalPage, setAbnormalPage] = useState(1);
   const [abnormalPageSize, setAbnormalPageSize] = useState(20);
   const [abnormalTerminalOpen, setAbnormalTerminalOpen] = useState(false);
-  const { data: boundSitesRes, isLoading: isSitesLoading } = useBoundSites(poolType);
+  const {
+    data: boundSitesRes,
+    isLoading: isSitesLoading,
+    refetch: refetchBoundSites,
+  } = useBoundSites(poolType, cacheOptions);
 
   const farmSites = useMemo(() => {
     const list: BoundSiteItem[] = boundSitesRes?.data?.list ?? [];
     return list.map(mapBoundSiteToFarmSite);
   }, [boundSitesRes]);
 
-  const [selectedFarmId, setSelectedFarmId] = useState<string | null>(() => searchParams.get("siteCode"));
+  const [selectedFarmId, setSelectedFarmId] = useState<string | null>(
+    () => restoredView?.siteCode ?? searchParams.get("siteCode"),
+  );
+
+  const selectFarm = useCallback(
+    (id: string | null) => {
+      if (id === selectedFarmId) return;
+      setSelectedFarmId(id);
+      setPage(1);
+      setSnapshotFilters({});
+      form.resetFields();
+    },
+    [form, selectedFarmId],
+  );
 
   useEffect(() => {
     if (farmSites.length === 0) return;
-    setSelectedFarmId((prev) => {
-      if (prev && farmSites.some((s) => s.id === prev)) return prev;
-      return farmSites[0].id;
+    if (selectedFarmId && farmSites.some((site) => site.id === selectedFarmId)) return;
+    selectFarm(farmSites[0].id);
+  }, [farmSites, selectFarm, selectedFarmId]);
+
+  const selectedFarm = useMemo(
+    () => farmSites.find((s) => s.id === selectedFarmId) ?? null,
+    [farmSites, selectedFarmId],
+  );
+  const visibleFarmId = selectedFarm?.id ?? null;
+
+  useEffect(() => {
+    if (restoredView) form.setFieldsValue(restoredView.formValues);
+  }, [form, restoredView]);
+
+  useLayoutEffect(() => {
+    if (!restoredView) return;
+    const restoreScroll = () => window.scrollTo({ top: restoredView.scrollY, left: 0, behavior: "instant" });
+    restoreScroll();
+    const frame = requestAnimationFrame(restoreScroll);
+    return () => cancelAnimationFrame(frame);
+  }, [restoredView]);
+
+  const rememberView = useCallback(() => {
+    queryClient.setQueryDefaults(viewKey, FARM_MONITOR_CACHE_OPTIONS);
+    queryClient.setQueryData<FarmMonitorViewState>(viewKey, {
+      locationKey: location.key,
+      siteCode: selectedFarmId,
+      timeRange,
+      snapshotFilters,
+      formValues: form.getFieldsValue(true),
+      page,
+      pageSize,
+      filterExpanded,
+      scrollY: window.scrollY,
     });
-  }, [farmSites]);
+  }, [
+    filterExpanded,
+    form,
+    location.key,
+    page,
+    pageSize,
+    queryClient,
+    selectedFarmId,
+    snapshotFilters,
+    timeRange,
+    viewKey,
+  ]);
 
   const {
     data: probeTasksRes,
     isLoading: isProbeTasksLoading,
     isFetching: isProbeTasksFetching,
     refetch: refetchProbeTasks,
-  } = useRecentProbeTasks(poolType, selectedFarmId, timeRange);
+  } = useRecentProbeTasks(poolType, visibleFarmId, timeRange, cacheOptions);
 
   const {
     data: latestTaskRes,
     isLoading: isLatestTaskLoading,
     isFetching: isLatestTaskFetching,
     refetch: refetchLatestTask,
-  } = useLatestFinishedProbeTask(poolType, selectedFarmId);
+  } = useLatestFinishedProbeTask(poolType, visibleFarmId, cacheOptions);
 
-  const selectedFarm = useMemo(
-    () => farmSites.find((s) => s.id === selectedFarmId) ?? null,
-    [farmSites, selectedFarmId],
+  const hashrateSeries = useMemo<HashrateTimeSeriesPoint[]>(
+    () => probeTasksRes?.data?.list ?? [],
+    [probeTasksRes],
   );
-
-  const hashrateSeries: HashrateTimeSeriesPoint[] = probeTasksRes?.data?.list ?? [];
 
   const overviewData = useMemo(
     () => mapProbeTasksToOverviewPoints(hashrateSeries, timeRange),
@@ -125,7 +210,7 @@ export default function FarmMonitorPage() {
     isLoading: isLatestMinerAnomalyLoading,
     isFetching: isLatestMinerAnomalyFetching,
     refetch: refetchLatestMinerAnomaly,
-  } = useTaskAbnormalMinerCounts(poolType, latestTaskIds);
+  } = useTaskAbnormalMinerCounts(poolType, latestTaskIds, cacheOptions);
 
   const snapshotTaskIdsParam = useMemo(() => formatTaskIdsForSnapshotApi(latestTaskIds), [latestTaskIds]);
 
@@ -160,7 +245,7 @@ export default function FarmMonitorPage() {
     isLoading: isSnapshotsLoading,
     isFetching: isSnapshotsFetching,
     refetch: refetchSnapshots,
-  } = useTaskSnapshots(poolType, snapshotTaskIdsParam, snapshotQueryParams);
+  } = useTaskSnapshots(poolType, snapshotTaskIdsParam, snapshotQueryParams, cacheOptions);
 
   const {
     data: abnormalLogsRes,
@@ -190,14 +275,14 @@ export default function FarmMonitorPage() {
     isLoading: isAbnormalDataLoading,
     isFetching: isAbnormalDataFetching,
     refetch: refetchAbnormalData,
-  } = useAbnormalDataDetail(poolType, selectedFarm?.name, abnormalStatsDate);
+  } = useAbnormalDataDetail(poolType, selectedFarm?.name, abnormalStatsDate, true, cacheOptions);
 
   const {
     data: yesterdayMinerAnomalyRes,
     isLoading: isYesterdayMinerAnomalyLoading,
     isFetching: isYesterdayMinerAnomalyFetching,
     refetch: refetchYesterdayMinerAnomaly,
-  } = useOtherPoolMachineAnomalies(poolType, selectedFarm?.name, abnormalStatsDate);
+  } = useOtherPoolMachineAnomalies(poolType, selectedFarm?.name, abnormalStatsDate, cacheOptions);
 
   const snapshotData = snapshotsRes?.data;
   const snapshotList = snapshotData?.list ?? [];
@@ -243,6 +328,7 @@ export default function FarmMonitorPage() {
   );
 
   const handleRefresh = useCallback(() => {
+    void refetchBoundSites();
     void refetchProbeTasks();
     void refetchLatestTask();
     void refetchSnapshots();
@@ -255,6 +341,7 @@ export default function FarmMonitorPage() {
     }
   }, [
     abnormalTerminalOpen,
+    refetchBoundSites,
     refetchAbnormalLogs,
     refetchAbnormalData,
     refetchAnomalyHistory,
@@ -265,7 +352,18 @@ export default function FarmMonitorPage() {
     refetchYesterdayMinerAnomaly,
   ]);
 
+  const previousSnapshotScope = useRef({ siteCode: selectedFarmId, taskIds: snapshotTaskIdsParam });
   useEffect(() => {
+    const previous = previousSnapshotScope.current;
+    previousSnapshotScope.current = { siteCode: selectedFarmId, taskIds: snapshotTaskIdsParam };
+    // 返回时保留原筛选/分页；只有同一场地刷新出了新任务时才重置。
+    if (
+      previous.siteCode !== selectedFarmId ||
+      !previous.taskIds ||
+      !snapshotTaskIdsParam ||
+      previous.taskIds === snapshotTaskIdsParam
+    )
+      return;
     setPage(1);
     setSnapshotFilters({});
     form.resetFields();
@@ -317,15 +415,30 @@ export default function FarmMonitorPage() {
 
   const openAbnormalManagementTerminal = useCallback(() => {
     if (!selectedFarm?.name || !selectedFarmId) return;
+    rememberView();
     const params = new URLSearchParams({ siteName: selectedFarm.name, siteCode: selectedFarmId });
     navigate(`${ROUTE_PATHS.farmAbnormalHistory}?${params}`);
-  }, [navigate, selectedFarm, selectedFarmId]);
+  }, [navigate, rememberView, selectedFarm, selectedFarmId]);
 
   const openYesterdayMinerAnomalyHistory = useCallback(() => {
     if (!selectedFarm?.name || !selectedFarmId) return;
+    rememberView();
     const params = new URLSearchParams({ siteName: selectedFarm.name, siteCode: selectedFarmId });
     navigate(`${ROUTE_PATHS.farmMinerAnomalyHistory}?${params}`);
-  }, [navigate, selectedFarm, selectedFarmId]);
+  }, [navigate, rememberView, selectedFarm, selectedFarmId]);
+
+  const openMoreFeature = (path: string) => {
+    if (!selectedFarm || !selectedFarmId) return;
+    rememberView();
+    const params = new URLSearchParams({
+      venueType: poolType,
+      siteName: selectedFarm.name,
+      siteCode: selectedFarmId,
+    });
+    navigate(`${path}?${params}`, {
+      state: { farmMonitorReturn: { venueType: poolType, siteCode: selectedFarmId } },
+    });
+  };
 
   useEffect(() => {
     if (!abnormalTerminalOpen || !selectedFarmId) return;
@@ -347,7 +460,7 @@ export default function FarmMonitorPage() {
   }, [abnormalForm, abnormalLogRange, abnormalTerminalOpen, selectedFarmId]);
 
   return (
-    <div className="min-h-full bg-[#f5f5f5] -m-4 p-4">
+    <div className="min-h-full bg-[#f5f5f5] -m-4 p-4 [overflow-anchor:none]">
       <div className="flex gap-4 items-start mb-4">
         <div className="flex-1 min-w-0 flex flex-col gap-4">
           <OverviewChart
@@ -415,10 +528,7 @@ export default function FarmMonitorPage() {
                 setAbnormalPage(p);
                 setAbnormalPageSize(ps || 20);
               }}
-              onSiteChange={(siteCode) => {
-                setSelectedFarmId(siteCode);
-                setPage(1);
-              }}
+              onSiteChange={selectFarm}
               onHistoryRefresh={() => void refetchAnomalyHistory()}
             />
           </div>
@@ -427,10 +537,7 @@ export default function FarmMonitorPage() {
           sites={farmSites}
           selectedId={selectedFarmId}
           loading={isSitesLoading}
-          onSelect={(id) => {
-            setSelectedFarmId(id);
-            setPage(1);
-          }}
+          onSelect={selectFarm}
         />
       </div>
 
@@ -450,6 +557,11 @@ export default function FarmMonitorPage() {
         onSearch={onSearch}
         onReset={onReset}
         onRefresh={handleRefresh}
+        hasSelectedSite={Boolean(selectedFarm && selectedFarmId)}
+        filterExpanded={filterExpanded}
+        onFilterExpandedChange={setFilterExpanded}
+        onDailyMacStatsClick={() => openMoreFeature(ROUTE_PATHS.farmDailyMacStats)}
+        onMinerPowerClick={() => openMoreFeature(ROUTE_PATHS.farmMinerPower)}
         onPageChange={(p, ps) => {
           setPage(p);
           setPageSize(ps || 20);

@@ -20,6 +20,7 @@ import {
 import type { TaskSnapshotItem, TaskSnapshotQueryParams } from "../types";
 import { buildTaskSnapshotExportParams, downloadExcelBlobResponse } from "../utils";
 import ColumnSettingsPopover from "./ColumnSettingsPopover";
+import MinerMoreFeatures from "./MinerMoreFeatures";
 
 import { getLanguage, t } from "@/locales";
 
@@ -56,6 +57,11 @@ interface MinerSnapshotPanelProps {
   onSearch: (values: MinerSnapshotSearchValues) => void;
   onReset: () => void;
   onRefresh: () => void;
+  hasSelectedSite: boolean;
+  filterExpanded: boolean;
+  onFilterExpandedChange: (expanded: boolean) => void;
+  onDailyMacStatsClick: () => void;
+  onMinerPowerClick: () => void;
   onPageChange: (page: number, pageSize: number) => void;
 }
 
@@ -75,9 +81,13 @@ export default function MinerSnapshotPanel({
   onSearch,
   onReset,
   onRefresh,
+  hasSelectedSite,
+  filterExpanded,
+  onFilterExpandedChange,
+  onDailyMacStatsClick,
+  onMinerPowerClick,
   onPageChange,
 }: MinerSnapshotPanelProps) {
-  const [filterExpanded, setFilterExpanded] = useState(true);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [exporting, setExporting] = useState(false);
   const [columnConfigs, setColumnConfigs] = useState<SnapshotColumnConfig[]>(() =>
@@ -152,69 +162,75 @@ export default function MinerSnapshotPanel({
         id={fullscreenTargetId}
         className="bg-white min-w-0 [&:fullscreen]:flex [&:fullscreen]:flex-col [&:fullscreen]:h-screen [&:fullscreen]:overflow-auto [&:fullscreen]:p-0"
       >
-        <div className="px-5 pt-4 pb-3 border-b border-gray-200 bg-white">
+        <div className="flex items-center justify-between gap-3 px-5 pt-4 pb-3 border-b border-gray-200 bg-white">
           <h2 className="text-lg font-semibold text-gray-800 m-0">{t("矿机信息管理")}</h2>
+          <MinerMoreFeatures
+            hasSelectedSite={hasSelectedSite}
+            onDailyMacStatsClick={onDailyMacStatsClick}
+            onMinerPowerClick={onMinerPowerClick}
+          />
         </div>
-        {filterExpanded ? (
-          <div className="px-5 py-4 border-b border-gray-200 filter-form miner-snapshot-filter bg-white">
-            <Form
-              form={form}
-              layout="horizontal"
-              labelAlign="left"
-              colon={false}
-              labelWrap
-              onFinish={onSearch}
-              labelCol={{ flex: getLanguage() === "en" ? "0 0 150px" : "0 0 96px" }}
-              wrapperCol={{ flex: "1 1 0" }}
-              className="[&_.ant-form-item]:!mb-0 [&_.ant-form-item-label>label]:!font-semibold [&_.ant-form-item-label>label]:!text-gray-800"
-            >
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-x-6 gap-y-4 items-end">
-                <Form.Item name="fullType" label={t("机型")} className="!mb-0 min-w-0">
-                  <Select
-                    allowClear
-                    showSearch
-                    optionFilterProp="label"
-                    placeholder={t("请选择")}
-                    options={fullTypeOptions.map((value) => ({ label: value, value }))}
-                  />
-                </Form.Item>
-                <Form.Item name="minerCode" label={t("矿工号")} className="!mb-0 min-w-0">
-                  <Select
-                    allowClear
-                    showSearch
-                    optionFilterProp="label"
-                    placeholder={t("请选择")}
-                    options={minerCodeOptions.map((value) => ({ label: value, value }))}
-                  />
-                </Form.Item>
-                <Form.Item name="controlBoardSN" label={t("控制板序列号")} className="!mb-0 min-w-0">
-                  <Input allowClear placeholder={t("请输入控制板序列号")} />
-                </Form.Item>
-                <Form.Item name="zeroHashrate" label={t("零算力")} className="!mb-0 min-w-0">
-                  <Select allowClear placeholder={t("请选择")} options={BOOL_FILTER_OPTIONS} />
-                </Form.Item>
-                <Form.Item name="ip" label={t("矿机IP地址")} className="!mb-0 min-w-0">
-                  <Input allowClear placeholder={t("请输入矿机IP地址")} />
-                </Form.Item>
-                <Form.Item name="macAddress" label={t("矿机MAC地址")} className="!mb-0 min-w-0">
-                  <Input allowClear placeholder={t("请输入矿机MAC地址")} />
-                </Form.Item>
-                <Form.Item name="sn" label={t("算力板序列号")} className="!mb-0 min-w-0">
-                  <Input allowClear placeholder={t("请输入算力板序列号")} />
-                </Form.Item>
-                <Form.Item name="hashrateFault" label={t("低算力")} className="!mb-0 min-w-0">
-                  <Select allowClear placeholder={t("请选择")} options={BOOL_FILTER_OPTIONS} />
-                </Form.Item>
-                <div className="flex min-w-0 justify-end gap-2 pb-0.5 md:col-span-2 lg:col-span-4">
-                  <Button onClick={onReset}>{t("重置")}</Button>
-                  <Button type="primary" htmlType="submit">
-                    {t("搜索")}
-                  </Button>
-                </div>
+        <div
+          hidden={!filterExpanded}
+          className="px-5 py-4 border-b border-gray-200 filter-form miner-snapshot-filter bg-white"
+        >
+          <Form
+            form={form}
+            layout="horizontal"
+            labelAlign="left"
+            colon={false}
+            labelWrap
+            onFinish={onSearch}
+            labelCol={{ flex: getLanguage() === "en" ? "0 0 150px" : "0 0 96px" }}
+            wrapperCol={{ flex: "1 1 0" }}
+            className="[&_.ant-form-item]:!mb-0 [&_.ant-form-item-label>label]:!font-semibold [&_.ant-form-item-label>label]:!text-gray-800"
+          >
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-x-6 gap-y-4 items-end">
+              <Form.Item name="fullType" label={t("机型")} className="!mb-0 min-w-0">
+                <Select
+                  allowClear
+                  showSearch
+                  optionFilterProp="label"
+                  placeholder={t("请选择")}
+                  options={fullTypeOptions.map((value) => ({ label: value, value }))}
+                />
+              </Form.Item>
+              <Form.Item name="minerCode" label={t("矿工号")} className="!mb-0 min-w-0">
+                <Select
+                  allowClear
+                  showSearch
+                  optionFilterProp="label"
+                  placeholder={t("请选择")}
+                  options={minerCodeOptions.map((value) => ({ label: value, value }))}
+                />
+              </Form.Item>
+              <Form.Item name="controlBoardSN" label={t("控制板序列号")} className="!mb-0 min-w-0">
+                <Input allowClear placeholder={t("请输入控制板序列号")} />
+              </Form.Item>
+              <Form.Item name="zeroHashrate" label={t("零算力")} className="!mb-0 min-w-0">
+                <Select allowClear placeholder={t("请选择")} options={BOOL_FILTER_OPTIONS} />
+              </Form.Item>
+              <Form.Item name="ip" label={t("矿机IP地址")} className="!mb-0 min-w-0">
+                <Input allowClear placeholder={t("请输入矿机IP地址")} />
+              </Form.Item>
+              <Form.Item name="macAddress" label={t("矿机MAC地址")} className="!mb-0 min-w-0">
+                <Input allowClear placeholder={t("请输入矿机MAC地址")} />
+              </Form.Item>
+              <Form.Item name="sn" label={t("算力板序列号")} className="!mb-0 min-w-0">
+                <Input allowClear placeholder={t("请输入算力板序列号")} />
+              </Form.Item>
+              <Form.Item name="hashrateFault" label={t("低算力")} className="!mb-0 min-w-0">
+                <Select allowClear placeholder={t("请选择")} options={BOOL_FILTER_OPTIONS} />
+              </Form.Item>
+              <div className="flex min-w-0 justify-end gap-2 pb-0.5 md:col-span-2 lg:col-span-4">
+                <Button onClick={onReset}>{t("重置")}</Button>
+                <Button type="primary" htmlType="submit">
+                  {t("搜索")}
+                </Button>
               </div>
-            </Form>
-          </div>
-        ) : null}
+            </div>
+          </Form>
+        </div>
 
         <div className="longdataTable w-full min-w-0 overflow-x-auto bg-white">
           <div className="flex justify-end items-center gap-1 border-b border-gray-100 px-4 py-2">
@@ -224,7 +240,7 @@ export default function MinerSnapshotPanel({
                 shape="circle"
                 icon={<SearchOutlined className={filterExpanded ? "text-[#1677ff]" : "text-gray-500"} />}
                 className={filterExpanded ? "!bg-[#e6f4ff]" : undefined}
-                onClick={() => setFilterExpanded((v) => !v)}
+                onClick={() => onFilterExpandedChange(!filterExpanded)}
               />
             </Tooltip>
             <Tooltip title={t("导出")}>

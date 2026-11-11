@@ -56,6 +56,20 @@ export const miningRoute: RouteObject = {
       handle: { title: t("异常矿工历史"), crumb: () => t("异常矿工历史") },
     },
     {
+      path: ROUTE_PATHS.farmDailyMacStats,
+      lazy: async () => ({
+        Component: (await import("@/pages/farm-monitor/daily-mac-stats")).default,
+      }),
+      HydrateFallback: ProgressBar,
+      handle: { title: t("每日 MAC 地址统计"), crumb: () => t("每日 MAC 地址统计") },
+    },
+    {
+      path: ROUTE_PATHS.farmMinerPower,
+      lazy: async () => ({ Component: (await import("@/pages/farm-monitor/miner-power")).default }),
+      HydrateFallback: ProgressBar,
+      handle: { title: t("矿机功耗"), crumb: () => t("矿机功耗") },
+    },
+    {
       path: ROUTE_PATHS.faultMonitor,
       lazy: async () => ({
         Component: (await import("@/pages/fault-machine-monitor")).default,

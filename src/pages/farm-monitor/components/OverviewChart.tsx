@@ -1,9 +1,11 @@
 import { useCallback, useMemo, useState } from "react";
 import { ReloadOutlined } from "@ant-design/icons";
-import { Button, Radio, Space, Spin, Typography } from "antd";
+import { Button, Radio, Spin, Tooltip, Typography } from "antd";
 import { ReactEcharts } from "@/components/react-echarts";
 import { FARM_STATUS_COLOR, type FarmStatus } from "../mockData";
 import type { OverviewPoint, TimeRange } from "../types";
+
+import "./OverviewChart.css";
 
 import { t } from "@/locales";
 
@@ -206,21 +208,20 @@ export default function OverviewChart({
   }, [data, seriesVisible]);
 
   return (
-    <div className="bg-white rounded-lg border border-gray-200 p-5">
-      <div className="flex items-center justify-between gap-3 mb-4 min-w-0">
-        <h2 className="text-lg font-semibold m-0 flex flex-1 min-w-0 items-center gap-2 overflow-hidden">
-          <span className="text-gray-800 shrink-0">{t("运行概览")}</span>
-          {farmName ? (
-            <>
-              <span className="text-gray-300 shrink-0">|</span>
-              <span className="shrink-0" style={{ color: FARM_STATUS_COLOR[farmStatus] }}>
-                {farmName}
-              </span>
-            </>
-          ) : null}
+    <div className="farm-overview bg-white rounded-lg border border-gray-200 p-5">
+      <div className="farm-overview-header">
+        <h2 className="farm-overview-heading text-lg font-semibold">
+          <span className="shrink-0 text-gray-800">{t("运行概览")}</span>
+          <span className="shrink-0 font-normal text-gray-300">|</span>
+          <Tooltip title={farmName}>
+            <span className="farm-overview-site" style={{ color: FARM_STATUS_COLOR[farmStatus] }}>
+              {farmName || "—"}
+            </span>
+          </Tooltip>
         </h2>
-        <Space size="middle">
+        <div className="farm-overview-actions">
           <Radio.Group
+            className="farm-overview-time-range"
             value={timeRange}
             onChange={(e) => onTimeRangeChange(e.target.value)}
             optionType="button"
@@ -231,11 +232,20 @@ export default function OverviewChart({
               { label: t("7天"), value: "7d" },
             ]}
           />
-          <Text type="secondary" className="text-xs">
-            {t("更新于 {{lastUpdated}}", { lastUpdated: lastUpdated })}
-          </Text>
-          <Button type="text" icon={<ReloadOutlined />} onClick={onRefresh} />
-        </Space>
+          <Tooltip title={t("更新于 {{lastUpdated}}", { lastUpdated })}>
+            <Text type="secondary" className="farm-overview-updated">
+              {t("更新于 {{lastUpdated}}", { lastUpdated })}
+            </Text>
+          </Tooltip>
+          <Button
+            className="farm-overview-refresh"
+            type="text"
+            size="small"
+            aria-label={t("刷新")}
+            icon={<ReloadOutlined />}
+            onClick={onRefresh}
+          />
+        </div>
       </div>
       <div className="flex flex-wrap gap-4 mb-3">
         {LEGEND_ITEMS.map((item) => {
