@@ -314,7 +314,7 @@ export default function MiningSettingPage() {
     .split(",")
     .map((item) => item.trim())
     .filter(Boolean)
-    .includes("role-super-admin");
+    .includes("system-super-admin");
   const currentBoundAssetSite = assetBindingRow
     ? assetSiteList.find(
         (item) =>

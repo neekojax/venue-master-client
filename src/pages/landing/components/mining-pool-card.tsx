@@ -119,11 +119,11 @@ const MiningPoolCard: React.FC<MiningPoolCardProps> = ({ poolType }) => {
             <span>{t("实时总算力")}</span>
             <Tooltip
               title={
-                <>
+                <span style={{ fontSize: 11, lineHeight: 1.6, letterSpacing: 0.2 }}>
                   {t("主矿池算力:")} {realTimeStatus?.totalMasterCurrentHashrate} PH/s
                   <br />
                   {t("备用矿池算力:")} {realTimeStatus?.totalBackUpCurrentHashrate} PH/s
-                </>
+                </span>
               }
             >
               <InfoCircleOutlined style={{ fontSize: 12, cursor: "pointer" }} />
@@ -135,11 +135,11 @@ const MiningPoolCard: React.FC<MiningPoolCardProps> = ({ poolType }) => {
               PH/s
               <Tooltip
                 title={
-                  <>
+                  <span style={{ fontSize: 11, lineHeight: 1.6, letterSpacing: 0.2 }}>
                     {t("主矿池算力:")} {realTimeStatus?.totalMasterCurrentHashrate} PH/s
                     <br />
                     {t("备用矿池算力:")} {realTimeStatus?.totalBackUpCurrentHashrate} PH/s
-                  </>
+                  </span>
                 }
               >
                 <InfoCircleOutlined style={{ fontSize: 12, cursor: "pointer" }} />

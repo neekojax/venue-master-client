@@ -1075,20 +1075,14 @@ const App: React.FC = () => {
                   </div>
                 }
               >
-                <Tooltip title={t("含仓库")} placement="top">
-                  <div
-                    className={`absolute top-1/2 right-3 inline-flex items-center gap-1 px-2 py-0.5 rounded-full border border-amber-300 bg-amber-50 text-amber-600 text-[10px] font-bold cursor-pointer hover:bg-amber-100 hover:text-amber-700 transition-colors ${
-                      getLanguage() === "en" ? "max-w-[110px]" : ""
-                    }`}
-                    style={{ transform: "translateY(calc(-50% + 15px))" }}
-                  >
-                    <Warehouse className="w-3 h-3 shrink-0" />
-                    <span
-                      className={`${getLanguage() === "en" ? "truncate" : ""} block`}
-                      style={getLanguage() === "en" ? { maxWidth: 80 } : undefined}
-                    ></span>
-                  </div>
-                </Tooltip>
+                <button
+                  type="button"
+                  aria-label={t("含仓库")}
+                  className="absolute top-1/2 right-3 inline-flex items-center px-2 py-0.5 rounded-full border border-amber-300 bg-amber-50 text-amber-600 text-[10px] font-bold cursor-pointer hover:bg-amber-100 hover:text-amber-700 transition-colors"
+                  style={{ transform: "translateY(calc(-50% + 15px))" }}
+                >
+                  <Warehouse className="w-3 h-3 shrink-0" />
+                </button>
               </Tooltip>
               {/* <Tooltip title="不含租赁算力、仓库算力、待撤场算力">
                 <div className="absolute bottom-3 right-5 w-3.5 h-3.5 rounded-full border border-slate-300 text-slate-400 flex items-center justify-center text-[9px] font-bold cursor-pointer hover:bg-slate-100 hover:text-slate-600 transition-colors">
