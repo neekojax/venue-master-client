@@ -14,6 +14,8 @@ export interface SiteAgentBindingPayload {
   agentName: string;
   version?: string;
   assetSiteID?: number;
+  startMinute?: number | null;
+  agentIps?: string[];
   minerCodeWhitelist?: string[];
   minerCodeBlacklist?: string[];
   machineTypeBlacklist?: string[];
@@ -33,6 +35,8 @@ export interface SiteAgentBindingRecord {
   minerCodeBlacklist: string[];
   machineTypeBlacklist: string[];
   ipRanges: string[];
+  startMinute?: number;
+  agentIps: string[];
   createdAt?: string;
   updatedAt?: string;
 }
@@ -62,6 +66,8 @@ export interface SiteAgentBindingFormValues {
   minerCodeBlacklist?: string;
   machineTypeBlacklist?: string;
   ipRanges?: string;
+  startMinute?: number | null;
+  agentIps?: string;
 }
 
 export type SiteDailyAnomalyRefreshScopeType = "site" | "all_site";

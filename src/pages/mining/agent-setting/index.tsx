@@ -94,6 +94,8 @@ function normalizeRecord(item: any): SiteAgentBindingRecord {
     minerCodeBlacklist: normalizeList(pickValue(item?.minerCodeBlacklist, item?.miner_code_blacklist)),
     machineTypeBlacklist: normalizeList(pickValue(item?.machineTypeBlacklist, item?.machine_type_blacklist)),
     ipRanges: normalizeList(pickValue(item?.ipRanges, item?.ip_ranges)),
+    startMinute: normalizeNumber(pickValue(item?.startMinute, item?.start_minute)),
+    agentIps: normalizeList(pickValue(item?.agentIps, item?.agent_ips)),
     createdAt: pickValue(item?.createdAt, item?.created_at),
     updatedAt: pickValue(item?.updatedAt, item?.updated_at),
   };
@@ -101,21 +103,23 @@ function normalizeRecord(item: any): SiteAgentBindingRecord {
 
 function buildPayload(
   values: SiteAgentBindingFormValues,
-  options?: {
-    version?: string;
-  },
+  existing: SiteAgentBindingRecord | null,
 ): SiteAgentBindingPayload {
+  const startMinute = values.startMinute ?? null;
+  const agentIps = normalizeList(values.agentIps);
   return {
     siteCode: values.siteCode.trim(),
     siteName: values.siteName.trim(),
     agentCode: values.agentCode?.trim() || undefined,
     agentName: values.agentName.trim(),
-    version: options?.version,
+    version: existing?.version,
     assetSiteID: normalizeNumber(values.assetSiteId),
     minerCodeWhitelist: normalizeList(values.minerCodeWhitelist),
     minerCodeBlacklist: normalizeList(values.minerCodeBlacklist),
     machineTypeBlacklist: normalizeList(values.machineTypeBlacklist),
     ipRanges: normalizeList(values.ipRanges),
+    startMinute: !existing || startMinute !== (existing.startMinute ?? null) ? startMinute : undefined,
+    agentIps: !existing || agentIps.join("\n") !== existing.agentIps.join("\n") ? agentIps : undefined,
   };
 }
 
@@ -285,6 +289,8 @@ export default function MiningAgentSettingPage() {
         minerCodeBlacklist: listToText(record.minerCodeBlacklist),
         machineTypeBlacklist: listToText(record.machineTypeBlacklist),
         ipRanges: listToText(record.ipRanges),
+        startMinute: record.startMinute ?? null,
+        agentIps: listToText(record.agentIps),
       });
       setIsModalOpen(true);
     },
@@ -379,7 +385,7 @@ export default function MiningAgentSettingPage() {
   const handleSubmit = useCallback(async () => {
     try {
       const values = await modalForm.validateFields();
-      const payload = buildPayload(values, { version: editingRecord?.version });
+      const payload = buildPayload(values, editingRecord);
 
       if (editingRecord) {
         await updateMutation.mutateAsync({ agentName: editingRecord.agentName, payload });
@@ -431,6 +437,13 @@ export default function MiningAgentSettingPage() {
             <div className="text-xs text-gray-500 mt-1 break-all">{record.agentCode || "-"}</div>
           </div>
         ),
+      },
+      {
+        title: t("代理 IP"),
+        dataIndex: "agentIps",
+        key: "agentIps",
+        width: 230,
+        render: (value: string[]) => renderBlacklistTags(value),
       },
       {
         title: t("矿工号白名单"),
@@ -494,6 +507,13 @@ export default function MiningAgentSettingPage() {
             </div>
           );
         },
+      },
+      {
+        title: t("启动分钟"),
+        dataIndex: "startMinute",
+        key: "startMinute",
+        width: 105,
+        render: (value: number | undefined) => value ?? "-",
       },
       {
         title: t("资产场地ID"),
@@ -779,7 +799,7 @@ export default function MiningAgentSettingPage() {
                 loading={listQuery.isLoading || listQuery.isFetching}
                 size="middle"
                 bordered={false}
-                scroll={{ x: 1600 }}
+                scroll={{ x: 1935 }}
                 locale={tableLocale}
                 pagination={pagination}
               />
@@ -831,6 +851,10 @@ export default function MiningAgentSettingPage() {
             </Form.Item>
           </div>
 
+          <Form.Item name="agentIps" label={t("代理 IP")} className="!mb-3">
+            <Input.TextArea rows={3} placeholder={t("每行或逗号分隔一个 IPv4 或 IPv6 地址")} />
+          </Form.Item>
+
           <Form.Item name="minerCodeBlacklist" label={t("矿机编号黑名单")} className="!mb-3">
             <Input.TextArea rows={4} placeholder={t("每行或逗号分隔一个矿机编号")} />
           </Form.Item>
@@ -845,6 +869,15 @@ export default function MiningAgentSettingPage() {
 
           <Form.Item name="ipRanges" label={t("IP 范围")} className="!mb-0">
             <Input.TextArea rows={4} placeholder={t("每行或逗号分隔一个 IP 范围")} />
+          </Form.Item>
+
+          <Form.Item
+            name="startMinute"
+            label={t("启动分钟")}
+            rules={[{ type: "integer", min: 0, max: 59, message: t("启动分钟必须是 0 到 59 的整数") }]}
+            className="!mb-3"
+          >
+            <InputNumber className="!w-full" min={0} max={59} placeholder={t("留空表示未配置，0 表示整点")} />
           </Form.Item>
 
           <Form.Item name="assetSiteId" label={t("资产场地ID")} className="!mb-0">
