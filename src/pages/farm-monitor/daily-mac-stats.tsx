@@ -5,6 +5,7 @@ import { useQuery } from "@tanstack/react-query";
 import { Alert, Button, Empty, Pagination, Select, Table, Tooltip } from "antd";
 import type { ColumnsType } from "antd/es/table";
 import dayjs from "dayjs";
+import DailyMacChangesDrawer from "./components/DailyMacChangesDrawer";
 import DailyMachineRecordsDrawer from "./components/DailyMachineRecordsDrawer";
 import { type AgentDailyMacStat, fetchAgentDailyMacStats } from "./daily-mac-stats-api";
 import { useBoundSites } from "./hook";
@@ -40,6 +41,7 @@ export default function DailyMacStatsPage() {
   const rawDate = searchParams.get("stat_date") ?? "";
   const statDate =
     /^\d{4}-\d{2}-\d{2}$/.test(rawDate) && dayjs(rawDate).format("YYYY-MM-DD") === rawDate ? rawDate : "";
+  const showChanges = searchParams.get("details") === "changes";
   const recordsPage = positiveInteger(searchParams.get("recordsPage"), 1);
   const recordsPageSize = Math.min(500, positiveInteger(searchParams.get("recordsPageSize"), 20));
   const queryVenueType = searchParams.get("venueType");
@@ -60,7 +62,7 @@ export default function DailyMacStatsPage() {
     if (inCurrentOrganization && sitesQuery.isSuccess) {
       const site = sites.find((item) => item.site_code === siteCode) ?? sites[0];
       if (site?.site_code !== siteCode) {
-        ["page", "stat_date", "recordsPage", "recordsPageSize"].forEach((key) => next.delete(key));
+        ["page", "stat_date", "recordsPage", "recordsPageSize", "details"].forEach((key) => next.delete(key));
       }
       if (site) {
         next.set("siteCode", site.site_code);
@@ -101,13 +103,16 @@ export default function DailyMacStatsPage() {
   };
 
   const closeRecords = () =>
-    updateSearchParams({ stat_date: null, recordsPage: null, recordsPageSize: null });
-  const openRecords = (date: string) => updateSearchParams({ stat_date: date, recordsPage: "1" });
+    updateSearchParams({ stat_date: null, recordsPage: null, recordsPageSize: null, details: null });
+  const openRecords = (date: string) =>
+    updateSearchParams({ stat_date: date, recordsPage: "1", details: null });
+  const openChanges = (date: string) =>
+    updateSearchParams({ stat_date: date, details: "changes", recordsPage: null, recordsPageSize: null });
   const columns: ColumnsType<AgentDailyMacStat> = [
     {
       title: t("业务日期"),
       dataIndex: "stat_date",
-      width: 210,
+      width: 160,
       render: (value: string, row) => (
         <div>
           <Tooltip title={t("查看当日机器记录")}>
@@ -115,7 +120,7 @@ export default function DailyMacStatsPage() {
               {value}
             </button>
           </Tooltip>
-          <div className="mt-1 max-w-[180px] truncate text-xs text-gray-400" title={row.agent_name}>
+          <div className="mt-1 max-w-[130px] truncate text-xs text-gray-400" title={row.agent_name}>
             {row.agent_name || "—"}
           </div>
         </div>
@@ -164,6 +169,20 @@ export default function DailyMacStatsPage() {
             <div className="mt-1 text-xs text-gray-400">{t("缺少前日基准")}</div>
           ) : null}
         </div>
+      ),
+    },
+    {
+      title: t("操作"),
+      key: "actions",
+      width: 100,
+      align: "center",
+      fixed: "right",
+      render: (_, row) => (
+        <Tooltip title={t("查看场地 MAC 增减详情")}>
+          <Button type="link" size="small" onClick={() => openChanges(row.stat_date)}>
+            {t("详情")}
+          </Button>
+        </Tooltip>
       ),
     },
   ];
@@ -220,6 +239,7 @@ export default function DailyMacStatsPage() {
                     stat_date: null,
                     recordsPage: null,
                     recordsPageSize: null,
+                    details: null,
                   });
                 }}
               />
@@ -270,7 +290,7 @@ export default function DailyMacStatsPage() {
             dataSource={data?.list ?? []}
             loading={statsQuery.isFetching || sitesQuery.isLoading}
             pagination={false}
-            scroll={{ x: 1080 }}
+            scroll={{ x: 1130 }}
             size="middle"
             locale={{
               emptyText: (
@@ -304,7 +324,7 @@ export default function DailyMacStatsPage() {
           ) : null}
         </section>
       </div>
-      {selectedSite && statDate ? (
+      {selectedSite && statDate && !showChanges ? (
         <DailyMachineRecordsDrawer
           key={`${poolType}_${siteCode}_${statDate}`}
           venueType={poolType}
@@ -317,6 +337,16 @@ export default function DailyMacStatsPage() {
           onPageChange={(nextPage, nextPageSize) =>
             updateSearchParams({ recordsPage: String(nextPage), recordsPageSize: String(nextPageSize) })
           }
+        />
+      ) : null}
+      {selectedSite && statDate && showChanges ? (
+        <DailyMacChangesDrawer
+          key={`${poolType}_${siteCode}_${statDate}_changes`}
+          venueType={poolType}
+          siteCode={siteCode}
+          siteName={selectedSite.site_name}
+          statDate={statDate}
+          onClose={closeRecords}
         />
       ) : null}
     </div>

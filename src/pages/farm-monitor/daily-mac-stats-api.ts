@@ -29,6 +29,60 @@ export interface MachineDailyRecord {
   updated_at: string;
 }
 
+export interface DailyMacChangeDetail extends MachineDailyRecord {
+  site_name: string;
+  agent_name: string;
+  compare_date: string;
+}
+
+export interface DailyMacChangesData {
+  venueType: string;
+  siteCode: string;
+  stat_date: string;
+  comparisons: { agent_name: string; compare_date: string }[];
+  added_count: number;
+  removed_count: number;
+  added: DailyMacChangeDetail[];
+  removed: DailyMacChangeDetail[];
+}
+
+export async function fetchDailyMacChanges(
+  venueType: string,
+  siteCode: string,
+  statDate: string,
+  signal?: AbortSignal,
+): Promise<DailyMacChangesData> {
+  const body = await axiosInstance.get<
+    unknown,
+    {
+      success?: boolean;
+      code?: number;
+      message?: string;
+      data?: DailyMacChangesData;
+    }
+  >(`minerHashrate/dailyMacChanges/${encodeURIComponent(venueType)}`, {
+    params: { siteCode, date: statDate },
+    signal,
+  });
+  if (body.success === false || (typeof body.code === "number" && body.code !== 0)) {
+    throw new Error(body.message || t("操作失败"));
+  }
+  const data = body.data;
+  if (
+    !data ||
+    !Array.isArray(data.added) ||
+    !Array.isArray(data.removed) ||
+    !Array.isArray(data.comparisons) ||
+    !Number.isSafeInteger(data.added_count) ||
+    !Number.isSafeInteger(data.removed_count) ||
+    data.added_count !== data.added.length ||
+    data.removed_count !== data.removed.length
+  ) {
+    throw new Error(t("MAC 增减明细数据格式不正确"));
+  }
+  return data;
+}
+
 export interface DailyMacListData<T> {
   siteCode?: string;
   miner_code?: string;
