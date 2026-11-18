@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
 import { ReloadOutlined, SearchOutlined } from "@ant-design/icons";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import { Alert, Button, Card, Col, Form, Input, Row, Select, Space, Statistic, Table } from "antd";
 import type { ColumnsType } from "antd/es/table";
 import { fetchMachines, fetchOverview, fetchSiteRankings, fetchSites } from "./api";
@@ -19,87 +19,17 @@ import { t } from "@/locales";
 import { useVenueList } from "@/pages/venue/hook/hook";
 
 export default function FaultPrediction() {
-  const [manualSession, setSession] = useState<PredictionSession & { poolType: string }>();
-  const [autoSessionId] = useState(() => crypto.randomUUID());
+  const [sessionId] = useState(() => crypto.randomUUID());
   const poolType = useSettingsStore((state) => state.poolType);
-  const client = useQueryClient();
-  // 系统将 CANGO 存储为 CANG，两种标识均对应组织 1。
-  const defaultGroupId = poolType === "CANG" || poolType === "CANGO" ? "1" : undefined;
-  const session = defaultGroupId
-    ? { group_id: defaultGroupId, sessionId: `${autoSessionId}-${poolType}` }
-    : manualSession?.poolType === poolType
-      ? manualSession
-      : undefined;
-  if (!session)
-    return (
-      <Card title={t("选择预测组织")}>
-        <Alert
-          className="mb-5"
-          type="info"
-          showIcon
-          message={t("使用当前系统登录状态")}
-          description={t("预测接口仍要求单个组织 ID，请选择组织后加载。")}
-        />
-        <Form
-          layout="vertical"
-          className="max-w-xl"
-          onFinish={(values: { group_id: string }) =>
-            setSession({
-              poolType,
-              group_id: values.group_id.trim(),
-              sessionId: crypto.randomUUID(),
-            })
-          }
-        >
-          <Form.Item
-            name="group_id"
-            label={t("组织 ID")}
-            rules={[
-              { required: true, whitespace: true, message: t("请填写组织 ID") },
-              {
-                pattern: /^\S{1,12}$/,
-                message: t("填写一个组织 ID，最多 12 个字符且不含空白或逗号"),
-              },
-              {
-                validator: (_, value: string) =>
-                  value?.includes(",")
-                    ? Promise.reject(new Error(t("只允许单个组织 ID")))
-                    : Promise.resolve(),
-              },
-            ]}
-          >
-            <Input autoComplete="off" placeholder={t("组织 ID")} maxLength={12} />
-          </Form.Item>
-          <Button type="primary" htmlType="submit">
-            {t("加载预测")}
-          </Button>
-        </Form>
-      </Card>
-    );
-  return (
-    <PredictionDashboard
-      key={`${session.sessionId}-${poolType}`}
-      session={session}
-      disconnect={
-        defaultGroupId
-          ? undefined
-          : () => {
-              setSession(undefined);
-              void client.cancelQueries({ queryKey: ["fault-predictions"] });
-              client.removeQueries({ queryKey: ["fault-predictions"] });
-            }
-      }
-    />
-  );
+  // CANG 使用预测组织 1，其他运营组织使用组织 2；切换时隔离页面状态。
+  const session: PredictionSession = {
+    group_id: poolType === "CANG" ? "1" : "2",
+    sessionId: `${sessionId}-${poolType}`,
+  };
+  return <PredictionDashboard key={session.sessionId} session={session} />;
 }
 
-export function PredictionDashboard({
-  session,
-  disconnect,
-}: {
-  session: PredictionSession;
-  disconnect?: () => void;
-}) {
+export function PredictionDashboard({ session }: { session: PredictionSession }) {
   const [form] = Form.useForm<PredictionFilters>();
   const poolType = useSettingsStore((state) => state.poolType);
   const currentSites = useVenueList(poolType);
@@ -221,7 +151,6 @@ export function PredictionDashboard({
           >
             {t("刷新")}
           </Button>
-          {disconnect && <Button onClick={disconnect}>{t("切换组织")}</Button>}
         </Space>
       </div>
       <RequestError error={currentSites.error} retry={() => void currentSites.refetch()} />
