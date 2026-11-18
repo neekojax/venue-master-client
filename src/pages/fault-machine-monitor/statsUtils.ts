@@ -36,7 +36,7 @@ export function formatFrequencyTooltip(point: FrequencyPoint | undefined, axisLa
 
   const lines: string[] = [`<div style="font-weight:600;margin-bottom:4px">${title}</div>`];
   lines.push(
-    `<div style="font-size:12px">${t("异常")} <span style="font-weight:600">${point.count}</span> ${t("条")}</div>`,
+    `<div style="font-size:12px">${t("故障")} <span style="font-weight:600">${point.count}</span> ${t("条")}</div>`,
   );
 
   if (breakdown.length > 0) {

@@ -208,17 +208,17 @@ export default function AbnormalLogPanel({
   };
 
   return (
-    <div className="w-full min-w-0 max-w-full bg-white rounded-lg border border-gray-200 shadow-sm overflow-hidden">
+    <div className="fault-table-panel w-full min-w-0 max-w-full bg-white rounded-lg border border-gray-200 shadow-sm overflow-hidden">
       <div
         id={fullscreenTargetId}
         className="bg-white min-w-0 [&:fullscreen]:flex [&:fullscreen]:flex-col [&:fullscreen]:h-screen [&:fullscreen]:overflow-auto"
       >
-        <div className="px-5 pt-4 pb-3 border-b border-gray-200 bg-white">
+        <div className="fault-table-heading px-5 pt-4 pb-3 border-b border-gray-200 bg-white">
           <h2 className="text-lg font-semibold text-gray-800 m-0">{title}</h2>
         </div>
 
         {filterExpanded ? (
-          <div className="px-5 py-4 border-b border-gray-200 filter-form bg-white">
+          <div className="fault-filterbar px-5 py-4 border-b border-gray-200 filter-form bg-white">
             <Form
               form={form}
               layout="horizontal"

@@ -191,7 +191,7 @@ export default function AbnormalManagementDrawer({
         status: "pending",
       });
       onHistoryRefresh?.();
-      message.success(t("异常处理记录已添加"));
+      message.success(t("故障处理记录已添加"));
     } catch (error) {
       if (error instanceof Error) {
         message.error(error.message);
@@ -238,7 +238,7 @@ export default function AbnormalManagementDrawer({
         setNewReason("");
         setNewAbnormalCount(summary?.abnormalCount ?? abnormalCount);
         onHistoryRefresh?.();
-        message.success(t("异常处理记录已添加"));
+        message.success(t("故障处理记录已添加"));
       })
       .catch((error) => {
         if (error instanceof Error) {
@@ -268,7 +268,7 @@ export default function AbnormalManagementDrawer({
   const handleSaveEdit = async (recordId: string) => {
     const reason = editingReason.trim();
     if (!reason) {
-      message.warning(t("异常原因不能为空"));
+      message.warning(t("故障原因不能为空"));
       return;
     }
     if (editingAbnormalCount < 0) {
@@ -287,7 +287,7 @@ export default function AbnormalManagementDrawer({
       setEditingStatus("pending");
       setEditingAbnormalCount(0);
       onHistoryRefresh?.();
-      message.success(t("异常记录已更新"));
+      message.success(t("故障记录已更新"));
     } catch (error) {
       if (error instanceof Error) {
         message.error(error.message);
@@ -359,7 +359,7 @@ export default function AbnormalManagementDrawer({
             </div>
             <div className="min-w-0">
               <h3 className="text-sm font-bold flex items-center gap-1.5 leading-none">
-                <span className="truncate">{t("异常管理终端")}</span>
+                <span className="truncate">{t("故障管理终端")}</span>
                 {siteBadge ? (
                   <span className="text-[10px] bg-red-500/20 text-red-300 border border-red-500/30 px-1.5 py-0.5 rounded font-normal shrink-0">
                     {siteBadge}
@@ -384,7 +384,7 @@ export default function AbnormalManagementDrawer({
           <div className="bg-gradient-to-br from-slate-50 to-slate-100/50 p-3.5 rounded-xl border border-gray-200 flex items-center justify-between">
             <div>
               <p className="text-[10px] text-gray-400 font-medium">
-                {t("昨日异常设备数（{{yesterdayLabel}}）", { yesterdayLabel: yesterdayLabel })}
+                {t("昨日故障设备数（{{yesterdayLabel}}）", { yesterdayLabel: yesterdayLabel })}
               </p>
               <p className="text-[30px] font-black text-red-600 mt-1 leading-none">
                 {summaryAbnormalCount ?? "-"}{" "}
@@ -393,7 +393,7 @@ export default function AbnormalManagementDrawer({
             </div>
             <div className="text-right text-[10px] text-gray-500 space-y-0.5">
               <div>
-                {t("异常占比:")}{" "}
+                {t("故障占比:")}{" "}
                 <strong className="text-red-500">{abnormalRatio ? `${abnormalRatio}%` : "-"}</strong>
               </div>
               <div>
@@ -405,7 +405,7 @@ export default function AbnormalManagementDrawer({
           <div className="bg-white border border-gray-150 rounded-xl p-4 shadow-xs">
             <h4 className="text-xs font-bold text-gray-800 mb-3 flex items-center gap-1.5 border-b border-gray-50 pb-2">
               <PlusOutlined className="text-blue-500" />
-              {t("上传异常报告")}
+              {t("上传故障报告")}
             </h4>
 
             <form onSubmit={handleInlineAddRecord} className="space-y-3">
@@ -449,7 +449,7 @@ export default function AbnormalManagementDrawer({
                 </div>
                 <div>
                   <label className="block text-[10px] font-bold text-gray-400 uppercase tracking-wide mb-0.5">
-                    {t("异常台数")}
+                    {t("故障台数")}
                   </label>
                   <input
                     type="number"
@@ -490,7 +490,7 @@ export default function AbnormalManagementDrawer({
           <div className="space-y-3">
             <h4 className="text-xs font-bold text-gray-800 flex items-center gap-1.5 border-b border-gray-100 pb-1.5">
               <HistoryOutlined className="text-gray-500" />
-              {t("异常处理历史轨迹")}
+              {t("故障处理历史轨迹")}
               <span className="text-[10px] bg-slate-100 text-gray-500 px-1.5 py-0.5 rounded-full font-semibold ml-auto">
                 {t("{{length}} 个事件", { length: currentRecords.length })}
               </span>
@@ -635,7 +635,7 @@ export default function AbnormalManagementDrawer({
             </span>
             <div className="min-w-0">
               <h2 className="text-base font-semibold m-0 flex items-center gap-2 flex-wrap">
-                <span className="truncate">{t("异常管理终端")}</span>
+                <span className="truncate">{t("故障管理终端")}</span>
                 {siteBadge ? (
                   <span className="text-[11px] font-normal bg-red-500/20 text-red-300 border border-red-500/30 px-2 py-0.5 rounded-full">
                     {siteBadge}
@@ -643,7 +643,7 @@ export default function AbnormalManagementDrawer({
                 ) : null}
               </h2>
               <p className="text-xs text-slate-400 mt-1 mb-0">
-                {t("快速查看异常日志、筛选记录并导出当前场地故障明细")}
+                {t("快速查看故障日志、筛选记录并导出当前场地故障明细")}
               </p>
             </div>
           </div>
@@ -680,7 +680,7 @@ export default function AbnormalManagementDrawer({
         <div className={`grid gap-4 mb-4 ${showLogPanel ? "grid-cols-1 md:grid-cols-3" : "grid-cols-1"}`}>
           <div className="rounded-2xl border border-red-100 bg-gradient-to-br from-red-50 to-white p-4 shadow-sm">
             <div className="text-xs text-gray-500 mb-2">
-              {t("昨日异常设备数（{{yesterdayLabel}}）", { yesterdayLabel: yesterdayLabel })}
+              {t("昨日故障设备数（{{yesterdayLabel}}）", { yesterdayLabel: yesterdayLabel })}
             </div>
             <div className="text-3xl font-semibold text-red-600 leading-none">
               {summaryAbnormalCount ?? "-"}
@@ -709,7 +709,7 @@ export default function AbnormalManagementDrawer({
           >
             <div className="flex items-center gap-2 text-sm font-semibold text-gray-800 mb-4">
               <FormOutlined className="text-blue-500" />
-              {t("上传异常报告")}
+              {t("上传故障报告")}
             </div>
             <Form form={managementForm} layout="vertical" colon={false} className="[&_.ant-form-item]:!mb-3">
               <Form.Item
@@ -722,9 +722,9 @@ export default function AbnormalManagementDrawer({
               <Form.Item
                 name="reason"
                 label={t("故障诱因与情况描述")}
-                rules={[{ required: true, message: t("请输入异常情况描述") }]}
+                rules={[{ required: true, message: t("请输入故障情况描述") }]}
               >
-                <Input.TextArea rows={4} placeholder={t("请输入异常原因、处理背景或需要跟进的说明")} />
+                <Input.TextArea rows={4} placeholder={t("请输入故障原因、处理背景或需要跟进的说明")} />
               </Form.Item>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                 <Form.Item
@@ -770,7 +770,7 @@ export default function AbnormalManagementDrawer({
             <div className="flex items-center justify-between gap-3 mb-4">
               <div className="flex items-center gap-2 text-sm font-semibold text-gray-800">
                 <HistoryOutlined className="text-gray-500" />
-                {t("异常处理历史轨迹")}
+                {t("故障处理历史轨迹")}
               </div>
               <span className="text-xs text-gray-400">
                 {t("{{length}} 个事件", { length: currentRecords.length })}
@@ -887,7 +887,7 @@ export default function AbnormalManagementDrawer({
 
         {showLogPanel ? (
           <AbnormalLogPanel
-            title={t("异常日志明细")}
+            title={t("故障日志明细")}
             form={form}
             siteOptions={siteOptions}
             exportFilters={exportFilters}

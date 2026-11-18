@@ -88,7 +88,7 @@ export default function FaultStatsPanel({
         type: "value",
         minInterval: 1,
         boundaryGap: ["0%", "6%"],
-        name: t("异常条数"),
+        name: t("故障条数"),
         nameLocation: "middle",
         nameRotate: 90,
         nameGap: 42,
@@ -155,16 +155,16 @@ export default function FaultStatsPanel({
       const item = codeDistribution[hoveredCodeIndex];
       return { main: `${item.percentage}%`, sub: item.code };
     }
-    return { main: `${selectedSiteCount}`, sub: t("异常条数") };
+    return { main: `${selectedSiteCount}`, sub: t("故障条数") };
   }, [codeDistribution, hoveredCodeIndex, selectedSiteCount]);
 
   return (
-    <div className="bg-white rounded-lg border border-gray-200 p-5">
-      <div className="flex flex-wrap items-center justify-between gap-3 mb-4 pb-4 border-b border-gray-100">
+    <div className="fault-panel fault-monitor-overview bg-white rounded-lg border border-gray-200 p-5">
+      <div className="fault-command-header flex flex-wrap items-center justify-between gap-3 mb-4 pb-4 border-b border-gray-100">
         <div className="min-w-0">
-          <h2 className="text-lg font-semibold m-0 text-gray-800 flex items-center gap-2 flex-wrap">
+          <h2 className="text-lg font-semibold m-0 flex items-center gap-2 flex-wrap">
             <span className="w-2 h-2 rounded-full bg-red-500 shrink-0" aria-hidden />
-            {t("运维监控大盘")}
+            {t("故障监控")}
             <span className="text-[11px] font-medium text-emerald-700 bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded-md shrink-0">
               {t("数据实时更新")}
             </span>
@@ -175,7 +175,7 @@ export default function FaultStatsPanel({
             ) : null}
           </h2>
           <p className="text-xs text-gray-500 mt-1.5 mb-0 leading-relaxed max-w-3xl">
-            {t("智能汇总及动态监测所辖各矿池设备的在线运行异常")}
+            {t("智能汇总及动态监测所辖各矿池设备的在线运行故障")}
           </p>
         </div>
         <div className="flex flex-wrap items-center gap-2">
@@ -205,10 +205,27 @@ export default function FaultStatsPanel({
         </div>
       </div>
 
+      <div className="fault-kpi-strip" aria-label="监控概览">
+        <div>
+          <span className="fault-kpi-label">{t("监测场地")}</span>
+          <strong>{loading ? "—" : siteDistribution.length.toLocaleString()}</strong>
+          <span className="fault-kpi-unit">{t("个场地")}</span>
+        </div>
+        <div>
+          <span className="fault-kpi-label">{t("当前场地告警")}</span>
+          <strong>{loading ? "—" : selectedSiteCount.toLocaleString()}</strong>
+          <span className="fault-kpi-unit">{t("条记录")}</span>
+        </div>
+        <div>
+          <span className="fault-kpi-label">{t("故障编码")}</span>
+          <strong>{loading ? "—" : codeDistribution.length.toLocaleString()}</strong>
+          <span className="fault-kpi-unit">{t("类编码")}</span>
+        </div>
+      </div>
       <Spin spinning={loading} tip={t("加载中...")}>
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
           {/* 场地分布 */}
-          <div className="lg:col-span-3 bg-gray-50/80 rounded-lg border border-gray-100 p-4 flex flex-col min-h-[360px]">
+          <div className="fault-chart-panel lg:col-span-3 bg-gray-50/80 rounded-lg border border-gray-100 p-4 flex flex-col min-h-[360px]">
             <div className="flex items-center justify-between mb-3 pb-2 border-b border-gray-200/80">
               <h3 className="text-xs font-bold text-gray-800 m-0 flex items-center gap-1.5">
                 <EnvironmentOutlined className="text-gray-500" />
@@ -269,11 +286,11 @@ export default function FaultStatsPanel({
                 <AlertOutlined className="text-rose-400 shrink-0" />
                 <div className="min-w-0">
                   <Tooltip
-                    title={t("{{value}} 异常计次", { value: selectedSiteName ?? t("当前场地") })}
+                    title={t("{{value}} 故障计次", { value: selectedSiteName ?? t("当前场地") })}
                     mouseEnterDelay={0.2}
                   >
                     <div className="text-[10px] text-gray-400 truncate cursor-default">
-                      {t("{{value}} 异常计次", { value: selectedSiteName ?? t("当前场地") })}
+                      {t("{{value}} 故障计次", { value: selectedSiteName ?? t("当前场地") })}
                     </div>
                   </Tooltip>
                   <div className="text-base font-bold font-mono">
@@ -286,11 +303,11 @@ export default function FaultStatsPanel({
           </div>
 
           {/* 异常频次变化曲线 */}
-          <div className="lg:col-span-6 bg-gray-50/80 rounded-lg border border-gray-100 p-4 flex flex-col min-h-[360px]">
+          <div className="fault-chart-panel lg:col-span-6 bg-gray-50/80 rounded-lg border border-gray-100 p-4 flex flex-col min-h-[360px]">
             <div className="flex items-center justify-between mb-2 pb-2 border-b border-gray-200/80">
               <h3 className="text-xs font-bold text-gray-800 m-0 flex items-center gap-1.5">
                 <LineChartOutlined className="text-gray-500" />
-                {t("异常频次变化曲线")}
+                {t("故障频次变化曲线")}
               </h3>
               <span className="text-[10px] text-gray-400 font-mono">
                 {timeMode === "24h" ? t("近24小时") : timeLabel}
@@ -299,7 +316,7 @@ export default function FaultStatsPanel({
             {frequencyPoints.every((p) => p.count === 0) ? (
               <div className="flex-1 flex flex-col items-center justify-center text-gray-400 text-xs min-h-[240px]">
                 <BarChartOutlined className="text-3xl mb-2 text-gray-300" />
-                {t("该时段暂无异常记录")}
+                {t("该时段暂无故障记录")}
               </div>
             ) : (
               <div className="relative flex-1 min-h-[240px]">
@@ -313,11 +330,11 @@ export default function FaultStatsPanel({
           </div>
 
           {/* 异常原因分布 */}
-          <div className="lg:col-span-3 bg-gray-50/80 rounded-lg border border-gray-100 p-4 flex flex-col min-h-[360px]">
+          <div className="fault-chart-panel lg:col-span-3 bg-gray-50/80 rounded-lg border border-gray-100 p-4 flex flex-col min-h-[360px]">
             <div className="flex items-center justify-between mb-2 pb-2 border-b border-gray-200/80">
               <h3 className="text-xs font-bold text-gray-800 m-0 flex items-center gap-1.5">
                 <BarChartOutlined className="text-gray-500" />
-                {t("异常原因分布")}
+                {t("故障原因分布")}
               </h3>
               <span className="text-[10px] text-gray-400">
                 {t("{{length}} 类", { length: codeDistribution.length })}
