@@ -31,6 +31,14 @@ function normalizeMachineData(value: unknown): OtherPoolMachineAnomalyMachine[] 
   return value.map((item) => {
     const row = item as Partial<OtherPoolMachineAnomalyMachine>;
     return {
+      duration:
+        row.duration &&
+        Number.isSafeInteger(row.duration.samples) &&
+        row.duration.samples > 0 &&
+        Number.isSafeInteger(row.duration.seconds) &&
+        row.duration.seconds >= 0
+          ? row.duration
+          : null,
       mac: String(row.mac ?? ""),
       controlBoardSN: String(row.controlBoardSN ?? ""),
       minerCodes: Array.isArray(row.minerCodes) ? row.minerCodes.map(String) : [],
@@ -65,11 +73,20 @@ export async function fetchOtherPoolMachineAnomalyHistory(
   page: number,
   pageSize: number,
   signal?: AbortSignal,
+  includeDuration = false,
 ): Promise<OtherPoolMachineAnomalyHistoryData> {
   const body = await axiosInstance.get<unknown, HistoryResponseEnvelope>(
     `minerHashrate/otherPoolMachineAnomalies/${encodeURIComponent(venueType)}/history`,
     {
-      params: { siteName, siteCode: siteCode || undefined, startDate, endDate, page, pageSize },
+      params: {
+        siteName,
+        siteCode: siteCode || undefined,
+        startDate,
+        endDate,
+        page,
+        pageSize,
+        includeDuration: includeDuration || undefined,
+      },
       signal,
     },
   );

@@ -151,6 +151,7 @@ export interface OtherPoolMachineAnomalySummary extends MinerCodeAnomalySummary 
 }
 
 export interface OtherPoolMachineAnomalyMachine {
+  duration: { seconds: number; samples: number } | null;
   mac: string;
   controlBoardSN: string;
   minerCodes: string[];

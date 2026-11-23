@@ -187,40 +187,6 @@ export default function MinerAnomalyHistoryPage() {
     },
   ];
 
-  const machineColumns: ColumnsType<OtherPoolMachineAnomalyMachine> = [
-    {
-      title: "MAC",
-      dataIndex: "mac",
-      key: "mac",
-      width: 220,
-      render: (value: string) => value || "-",
-    },
-    {
-      title: t("控制板 SN"),
-      dataIndex: "controlBoardSN",
-      key: "controlBoardSN",
-      width: 240,
-      render: (value: string) => value || "-",
-    },
-    {
-      title: t("异常矿工号"),
-      dataIndex: "minerCodes",
-      key: "minerCodes",
-      render: (minerCodes: string[]) =>
-        minerCodes.length ? (
-          <div className="flex flex-wrap gap-1.5">
-            {minerCodes.map((minerCode) => (
-              <Tag key={minerCode} color="blue" className="!m-0">
-                {minerCode}
-              </Tag>
-            ))}
-          </div>
-        ) : (
-          <span className="text-gray-400">-</span>
-        ),
-    },
-  ];
-
   const goBack = () => {
     const params = new URLSearchParams();
     if (siteCode) params.set("siteCode", siteCode);
@@ -334,16 +300,7 @@ export default function MinerAnomalyHistoryPage() {
               pagination={false}
               expandable={{
                 rowExpandable: (row) => row.machineData.length > 0,
-                expandedRowRender: (row) => (
-                  <Table<OtherPoolMachineAnomalyMachine>
-                    rowKey={(machine) => `${machine.mac}-${machine.controlBoardSN}`}
-                    columns={machineColumns}
-                    dataSource={row.machineData}
-                    pagination={false}
-                    size="small"
-                    locale={{ emptyText: t("暂无异常矿工历史") }}
-                  />
-                ),
+                expandedRowRender: (row) => <DailyAnomalyMachines venueType={poolType} row={row} />,
               }}
             />
             <div className="mt-4 flex justify-end">
@@ -365,5 +322,105 @@ export default function MinerAnomalyHistoryPage() {
         </Spin>
       </div>
     </div>
+  );
+}
+
+function DailyAnomalyMachines({
+  venueType,
+  row,
+}: {
+  venueType: string;
+  row: OtherPoolMachineAnomalyHistoryItem;
+}) {
+  // 新统计直接使用日快照；仅在展开缺少时长的历史日期时，按场地和日期补查一次。
+  const detail = useQuery({
+    queryKey: ["other-pool-machine-anomaly-history", venueType, "duration", row.siteCode, row.businessDate],
+    enabled: Boolean(row.siteCode) && row.machineData.some((machine) => !machine.duration),
+    queryFn: ({ signal }) =>
+      fetchOtherPoolMachineAnomalyHistory(
+        venueType,
+        "",
+        row.siteCode,
+        row.businessDate,
+        row.businessDate,
+        1,
+        1,
+        signal,
+        true,
+      ),
+  });
+  const machines =
+    detail.data?.list.find((day) => day.businessDate === row.businessDate)?.machineData ?? row.machineData;
+  const machineColumns: ColumnsType<OtherPoolMachineAnomalyMachine> = [
+    {
+      title: "MAC",
+      dataIndex: "mac",
+      key: "mac",
+      width: 220,
+      render: (value: string) => value || "-",
+    },
+    {
+      title: t("控制板 SN"),
+      dataIndex: "controlBoardSN",
+      key: "controlBoardSN",
+      width: 240,
+      render: (value: string) => value || "-",
+    },
+    {
+      title: t("异常矿工号"),
+      dataIndex: "minerCodes",
+      key: "minerCodes",
+      render: (minerCodes: string[]) =>
+        minerCodes.length ? (
+          <div className="flex flex-wrap gap-1.5">
+            {minerCodes.map((minerCode) => (
+              <Tag key={minerCode} color="blue" className="!m-0">
+                {minerCode}
+              </Tag>
+            ))}
+          </div>
+        ) : (
+          <span className="text-gray-400">-</span>
+        ),
+    },
+    {
+      title: t("当日累计异常时长"),
+      key: "duration",
+      width: 180,
+      render: (_, machine) => {
+        const d = machine.duration;
+        if (!d) return detail.isFetching ? t("计算中") : t("暂无可用时长");
+        if (d.samples === 1) return t("仅发现 1 次");
+        if (d.seconds === 0) return t("{{count}} 次非连续命中", { count: d.samples });
+        const hours = Math.floor(d.seconds / 3600);
+        const minutes = Math.floor(d.seconds / 60) % 60;
+        const seconds = d.seconds % 60;
+        return [hours, minutes, seconds].map((n) => String(n).padStart(2, "0")).join(":");
+      },
+    },
+  ];
+  return (
+    <>
+      <p className="mb-2 text-xs text-gray-500">{t("时长按时:分:秒显示，仅累计连续探测到异常的间隔。")}</p>
+      {detail.isError && (
+        <Alert
+          type="warning"
+          message={t("异常时长加载失败")}
+          action={
+            <Button size="small" onClick={() => void detail.refetch()}>
+              {t("重试")}
+            </Button>
+          }
+        />
+      )}
+      <Table<OtherPoolMachineAnomalyMachine>
+        rowKey={(machine) => JSON.stringify([machine.mac, machine.controlBoardSN])}
+        columns={machineColumns}
+        dataSource={machines}
+        pagination={false}
+        size="small"
+        locale={{ emptyText: t("暂无异常矿工历史") }}
+      />
+    </>
   );
 }
