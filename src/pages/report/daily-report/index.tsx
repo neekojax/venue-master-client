@@ -868,8 +868,14 @@ const App: React.FC = () => {
       "24小时产出（BTC）": item.btcOutput24h.toFixed(8),
       "产出效率(BTC/EH)": item.outputEfficiency.toFixed(4),
       "理论算力（E）": item.theoreticalPower.toFixed(6),
+      变频理论算力: (item.isOverclocked === 1
+        ? item.overclockTheoreticalPower
+        : item.theoreticalPower
+      ).toFixed(6),
       "24小时算力（E）": item.power24h.toFixed(8),
       "24小时有效率": item.effectiveRate24h.toFixed(2) + "%",
+      变频24小时有效率:
+        (item.isOverclocked === 1 ? item.overclockEffectiveRate24h : item.effectiveRate24h).toFixed(2) + "%",
       // "T-2日有效率": item.effectiveRateT2.toFixed(2) + "%",
       // "T-3日有效率": item.effectiveRateT3.toFixed(2) + "%",
       托管台数: item.totalMachines.toLocaleString(),
@@ -905,8 +911,6 @@ const App: React.FC = () => {
       限电算力: ((item.theoreticalPower * 1e6 * item.limitImpactRate) / 100).toFixed(2) + "Th/s", //record.theoreticalPower * 1e6 * value / 100
       高温算力: ((item.theoreticalPower * 1e6 * item.highTemperatureRate) / 100).toFixed(2) + "Th/s", //item.highTemperatureRate,
       事件描述: item.events,
-      变频理论算力: (item.isOverclocked === 1 ? item.overclockTheoreticalPower : 0).toFixed(6),
-      变频24小时有效率: (item.isOverclocked === 1 ? item.overclockEffectiveRate24h : 0).toFixed(2) + "%",
     }));
 
     const worksheet = XLSX.utils.json_to_sheet(data);
@@ -935,36 +939,19 @@ const App: React.FC = () => {
       }
     }
 
-    // 设置列宽
-    const columnWidths = [
-      // { wch: 10 }, // 场地编号
-      { wch: 30 }, // 场地名
-      { wch: 20 }, // 24小时产出（BTC）
-      { wch: 28 }, // 理论算力（E）
-      { wch: 20 }, // 24小时算力（E）
-      { wch: 22 }, // 24小时有效率
-      { wch: 15 }, // T-2日有效率
-      { wch: 15 }, // T-3日有效率
-      { wch: 15 }, // 托管台数
-      { wch: 15 }, // 总故障台数
-      { wch: 15 }, // 24小时故障数
-      { wch: 15 }, // 24小时故障率
-      { wch: 15 }, // T-2日故障率
-      { wch: 15 }, // T-3日故障率
-      { wch: 20 }, // 影响算力（E）
-      { wch: 15 }, // 影响占比
-      { wch: 15 }, // 影响产出（BTC）
-      { wch: 15 }, // 限电影响
-      { wch: 15 }, // 高温影响
-      { wch: 15 }, // 限电算力
-      { wch: 15 }, // 高温算力
-      { wch: 15 }, // ***遗漏
-      { wch: 50 }, // 事件描述
-      { wch: 20 }, // 变频理论算力
-      { wch: 20 }, // 变频24小时有效率
-    ];
-
-    worksheet["!cols"] = columnWidths;
+    const widthsByHeader: Record<string, number> = {
+      场地名: 30,
+      "24小时产出（BTC）": 20,
+      "产出效率(BTC/EH)": 28,
+      "理论算力（E）": 28,
+      变频理论算力: 20,
+      "24小时算力（E）": 20,
+      "24小时有效率": 22,
+      变频24小时有效率: 20,
+      "影响算力（E）": 20,
+      事件描述: 50,
+    };
+    worksheet["!cols"] = Object.keys(data[0] ?? {}).map((header) => ({ wch: widthsByHeader[header] ?? 15 }));
 
     XLSX.utils.book_append_sheet(workbook, worksheet, t("运营日报"));
     XLSX.writeFile(workbook, t("运营日报_{{selectedDate}}.xlsx", { selectedDate: selectedDate }));
