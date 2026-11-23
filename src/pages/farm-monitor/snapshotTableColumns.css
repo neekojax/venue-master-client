@@ -1,0 +1,16 @@
+.snapshot-copy-action {
+  flex: none;
+  width: 0;
+  overflow: hidden;
+  opacity: 0;
+  pointer-events: none;
+}
+
+td:hover .snapshot-copy-action,
+.snapshot-copy-action:has(:focus-visible) {
+  width: auto;
+  margin-inline-start: 4px;
+  overflow: visible;
+  opacity: 1;
+  pointer-events: auto;
+}

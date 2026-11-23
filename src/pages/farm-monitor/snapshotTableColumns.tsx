@@ -1,3 +1,4 @@
+import type { ReactNode } from "react";
 import { Tag, Tooltip, Typography } from "antd";
 import type { ColumnsType } from "antd/es/table";
 import type { HashBoardData, TaskSnapshotItem } from "./types";
@@ -9,9 +10,28 @@ import {
   formatSnapshotTime,
 } from "./utils";
 
+import "./snapshotTableColumns.css";
+
 import { t } from "@/locales";
 
 const { Link } = Typography;
+
+function renderCopyableCell(value: string | number | null | undefined, content?: ReactNode) {
+  const text = formatSnapshotText(value);
+  if (!text.trim() || text === "-") return <span className="text-gray-400">-</span>;
+
+  return (
+    <span className="flex min-w-0 items-center">
+      <span className="min-w-0 truncate" title={text}>
+        {content ?? text}
+      </span>
+      <Typography.Text
+        className="snapshot-copy-action"
+        copyable={{ text, tooltips: [t("复制"), t("已复制")] }}
+      />
+    </span>
+  );
+}
 
 /** 表头统一处理：放得下就完整显示，放不下单行截断显示省略号，鼠标移入 Tooltip 展示全称 */
 function headerTitle(text: string) {
@@ -383,14 +403,14 @@ function buildColumnMap(
       key: "miner_code",
       width: 120,
       ellipsis: true,
-      render: (v: string | undefined) => renderWorkerTag(v),
+      render: (v: string | undefined) => renderCopyableCell(v, renderWorkerTag(v)),
     },
     ip: {
       title: t("机器IP"),
       dataIndex: "ip",
       key: "ip",
       width: 130,
-      render: (v) => formatSnapshotIp(v),
+      render: (v) => renderCopyableCell(formatSnapshotIp(v)),
     },
     mac_address: {
       title: t("MAC地址"),
@@ -399,11 +419,7 @@ function buildColumnMap(
       width: 160,
       ellipsis: true,
       render: (v: string | undefined) =>
-        v ? (
-          <Link className="!text-[#1677ff] !text-xs hover:!text-[#4096ff]">{v}</Link>
-        ) : (
-          <span className="text-gray-400">-</span>
-        ),
+        renderCopyableCell(v, <Link className="!text-[#1677ff] !text-xs hover:!text-[#4096ff]">{v}</Link>),
     },
     control_board_sn: {
       title: t("控制板序列号"),
@@ -411,7 +427,7 @@ function buildColumnMap(
       key: "control_board_sn",
       width: 200,
       ellipsis: true,
-      render: textCell,
+      render: (v: string | undefined) => renderCopyableCell(v),
     },
     full_type: {
       title: t("机型"),
@@ -419,7 +435,7 @@ function buildColumnMap(
       key: "full_type",
       width: 150,
       ellipsis: true,
-      render: (v: string | undefined) => renderWorkerTag(v),
+      render: (v: string | undefined) => renderCopyableCell(v, renderWorkerTag(v)),
     },
     power: {
       title: t("功耗比"),
@@ -463,7 +479,7 @@ function buildColumnMap(
       key: "firmware_version",
       width: 180,
       ellipsis: true,
-      render: textCell,
+      render: (v: string | undefined) => renderCopyableCell(v),
     },
     pool1_worker: {
       title: t("矿池1"),

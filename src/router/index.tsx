@@ -19,7 +19,7 @@ import { reportRoute } from "@/router/modules/report.tsx";
 import { utilityRoute } from "@/router/modules/utility.tsx";
 import { venueRoute } from "@/router/modules/venue.tsx";
 
-import ErrorBoundary from "@/pages/not-found/errorElement";
+import RouteErrorPage from "@/pages/not-found/errorElement";
 
 const routes: RouteObject[] = [
   {
@@ -35,7 +35,7 @@ const routes: RouteObject[] = [
       Component: (await import("@/layouts")).default,
     }),
     HydrateFallback: ProgressBar,
-    errorElement: <ErrorBoundary />,
+    errorElement: <RouteErrorPage />,
     children: [
       {
         index: true,

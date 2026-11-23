@@ -1,44 +1,26 @@
-import React from "react";
+import { useEffect } from "react";
+import { useRouteError } from "react-router-dom";
+import { Button, Result } from "antd";
 
-type ErrorBoundaryProps = {
-  fallback?: React.ReactNode;
-  children?: React.ReactNode; // ✅ 这里要加
-};
+import { t } from "@/locales";
 
-type ErrorBoundaryState = {
-  hasError: boolean;
-};
+export default function RouteErrorPage() {
+  const error = useRouteError();
 
-export class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoundaryState> {
-  constructor(props: ErrorBoundaryProps) {
-    super(props);
-    this.state = { hasError: false };
-  }
+  useEffect(() => {
+    // eslint-disable-next-line no-console
+    console.error("Route failed to load:", error);
+  }, [error]);
 
-  static getDerivedStateFromError(_: Error) {
-    console.log("Error", _);
-    return { hasError: true };
-  }
-
-  componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
-    console.error("ErrorBoundary caught an error", error, errorInfo);
-  }
-
-  render() {
-    const hasReloaded = sessionStorage.getItem("hasReloaded");
-
-    if (this.state.hasError) {
-      if (!hasReloaded) {
-        sessionStorage.setItem("hasReloaded", "true");
-        window.location.reload();
-      } else {
-        sessionStorage.removeItem("hasReloaded");
-        return this.props.fallback ? this.props.fallback : <h2>Something went wrong...</h2>;
+  return (
+    <Result
+      status="error"
+      title={t("页面加载失败")}
+      extra={
+        <Button type="primary" onClick={() => window.location.reload()}>
+          {t("刷新")}
+        </Button>
       }
-    }
-
-    return this.props.children; // ✅ TS 就不会报错
-  }
+    />
+  );
 }
-
-export default ErrorBoundary;

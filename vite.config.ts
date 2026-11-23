@@ -43,6 +43,9 @@ export default defineConfig({
       "@": path.resolve(__dirname, "src"),
     },
   },
+  optimizeDeps: {
+    include: ["echarts", "echarts/core", "echarts/charts", "echarts/components", "echarts/renderers"],
+  },
   define: {
     BUILD_TIME: JSON.stringify(buildTime),
   },
