@@ -6,8 +6,10 @@ import { Alert, Button, DatePicker, Empty, Form, Pagination, Space, Spin, Table,
 import type { ColumnsType } from "antd/es/table";
 import dayjs, { type Dayjs } from "dayjs";
 import { ReactEcharts } from "@/components/react-echarts";
+import OtherPoolDailyReasonCell from "./components/OtherPoolDailyReasonCell";
 import { fetchOtherPoolMachineAnomalyHistory } from "./miner-anomaly-history-api";
 import type { OtherPoolMachineAnomalyHistoryItem, OtherPoolMachineAnomalyMachine } from "./types";
+import useAnomalyReasonPermissions from "./useAnomalyReasonPermissions";
 import { ROUTE_PATHS } from "@/constants/common";
 import useAuthRedirect from "@/hooks/useAuthRedirect";
 import { useSettingsStore } from "@/stores";
@@ -53,11 +55,30 @@ export default function MinerAnomalyHistoryPage() {
     form.setFieldsValue({ dateRange: [dayjs(startDate), dayjs(endDate)] });
   }, [endDate, form, startDate]);
 
+  const { canCreate, canEdit } = useAnomalyReasonPermissions(poolType);
   const historyQuery = useQuery({
-    queryKey: ["other-pool-machine-anomaly-history", poolType, siteName, startDate, endDate, page, pageSize],
+    queryKey: [
+      "other-pool-machine-anomaly-history",
+      poolType,
+      siteName,
+      siteCode,
+      startDate,
+      endDate,
+      page,
+      pageSize,
+    ],
     queryFn: ({ signal }) =>
-      fetchOtherPoolMachineAnomalyHistory(poolType, siteName, startDate, endDate, page, pageSize, signal),
-    enabled: Boolean(poolType && siteName),
+      fetchOtherPoolMachineAnomalyHistory(
+        poolType,
+        siteName,
+        siteCode,
+        startDate,
+        endDate,
+        page,
+        pageSize,
+        signal,
+      ),
+    enabled: Boolean(poolType && (siteCode || siteName)),
   });
 
   const rows = useMemo(() => historyQuery.data?.list ?? [], [historyQuery.data?.list]);
@@ -156,6 +177,14 @@ export default function MinerAnomalyHistoryPage() {
         );
       },
     },
+    {
+      title: t("异常原因"),
+      key: "reason",
+      width: 250,
+      render: (_, row) => (
+        <OtherPoolDailyReasonCell venueType={poolType} row={row} canCreate={canCreate} canEdit={canEdit} />
+      ),
+    },
   ];
 
   const machineColumns: ColumnsType<OtherPoolMachineAnomalyMachine> = [
@@ -209,21 +238,23 @@ export default function MinerAnomalyHistoryPage() {
             <div className="min-w-0">
               <h1 className="m-0 truncate text-xl font-semibold text-gray-900">{t("异常矿工历史")}</h1>
               <div className="mt-1 truncate text-sm text-gray-500">
-                {siteName || t("未选择场地")} · {poolType || "-"}
+                {siteName || siteCode || t("未选择场地")} · {poolType || "-"}
               </div>
             </div>
           </div>
           <Button
             icon={<ReloadOutlined />}
             loading={historyQuery.isFetching}
-            disabled={!siteName}
+            disabled={!siteName && !siteCode}
             onClick={() => void historyQuery.refetch()}
           >
             {t("刷新")}
           </Button>
         </header>
 
-        {!siteName ? <Alert type="warning" showIcon message={t("请从矿机监控选择场地后进入")} /> : null}
+        {!siteName && !siteCode ? (
+          <Alert type="warning" showIcon message={t("请从矿机监控选择场地后进入")} />
+        ) : null}
 
         <section className="rounded-xl border border-gray-200 bg-white p-4 shadow-sm">
           <Form<FilterValues>
@@ -294,11 +325,11 @@ export default function MinerAnomalyHistoryPage() {
           <section className="mt-4 rounded-xl border border-gray-200 bg-white p-4 shadow-sm">
             <h2 className="mb-3 mt-0 text-base font-semibold text-gray-900">{t("异常矿工历史明细")}</h2>
             <Table<OtherPoolMachineAnomalyHistoryItem>
-              rowKey="businessDate"
+              rowKey={(row) => JSON.stringify([poolType, row.siteCode, row.businessDate])}
               columns={columns}
               dataSource={rows}
               loading={historyQuery.isFetching && !historyQuery.isLoading}
-              scroll={{ x: 1050 }}
+              scroll={{ x: 1280 }}
               locale={{ emptyText: t("暂无异常矿工历史") }}
               pagination={false}
               expandable={{

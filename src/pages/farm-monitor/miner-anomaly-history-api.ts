@@ -41,6 +41,10 @@ function normalizeMachineData(value: unknown): OtherPoolMachineAnomalyMachine[] 
 function normalizeHistoryItem(value: unknown): OtherPoolMachineAnomalyHistoryItem {
   const row = value as Partial<OtherPoolMachineAnomalyHistoryItem>;
   return {
+    siteCode: String(row.siteCode ?? ""),
+    reason: String(row.reason ?? ""),
+    updatedBy: String(row.updatedBy ?? ""),
+    updatedAt: row.updatedAt ?? null,
     businessDate: String(row.businessDate ?? ""),
     windowStart: String(row.windowStart ?? ""),
     windowEnd: String(row.windowEnd ?? ""),
@@ -55,6 +59,7 @@ function normalizeHistoryItem(value: unknown): OtherPoolMachineAnomalyHistoryIte
 export async function fetchOtherPoolMachineAnomalyHistory(
   venueType: string,
   siteName: string,
+  siteCode: string,
   startDate: string,
   endDate: string,
   page: number,
@@ -64,7 +69,7 @@ export async function fetchOtherPoolMachineAnomalyHistory(
   const body = await axiosInstance.get<unknown, HistoryResponseEnvelope>(
     `minerHashrate/otherPoolMachineAnomalies/${encodeURIComponent(venueType)}/history`,
     {
-      params: { siteName, startDate, endDate, page, pageSize },
+      params: { siteName, siteCode: siteCode || undefined, startDate, endDate, page, pageSize },
       signal,
     },
   );
@@ -89,4 +94,19 @@ export async function fetchOtherPoolMachineAnomalyHistory(
     pageSize: Number(data.pageSize ?? pageSize),
     hasMore: Boolean(data.hasMore),
   };
+}
+
+export async function saveOtherPoolDailyReason(
+  method: "post" | "put",
+  venueType: string,
+  siteCode: string,
+  businessDate: string,
+  reason: string,
+) {
+  const result = await axiosInstance.request<unknown, { success: boolean; message?: string }>({
+    method,
+    url: `minerHashrate/otherPoolMachineAnomalies/${encodeURIComponent(venueType)}/history/${encodeURIComponent(siteCode)}/${encodeURIComponent(businessDate)}/reason`,
+    data: { reason },
+  });
+  if (!result.success) throw new Error(result.message || t("保存失败"));
 }

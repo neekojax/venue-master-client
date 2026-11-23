@@ -1,9 +1,9 @@
-import { useState } from "react";
-import { EditOutlined, PlusOutlined } from "@ant-design/icons";
+import { useId, useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { Button, DatePicker, Form, Input, InputNumber, message, Modal, Popconfirm, Select } from "antd";
 import dayjs, { type Dayjs } from "dayjs";
 import type { DailyAbnormalReason } from "../abnormal-history-api";
+import ReasonActionButton from "./ReasonActionButton";
 
 import { t } from "@/locales";
 import {
@@ -35,6 +35,7 @@ export default function AbnormalReasonButton({
   record,
 }: Props) {
   const [open, setOpen] = useState(false);
+  const formName = useId();
   const [form] = Form.useForm<Values>();
   const mutation = useCreateAnomalyManagementReport(venueType);
   const updateMutation = useUpdateAnomalyManagement(venueType);
@@ -88,10 +89,9 @@ export default function AbnormalReasonButton({
 
   return (
     <>
-      <Button
-        type={date ? "link" : "primary"}
-        size={date ? "small" : "middle"}
-        icon={record ? <EditOutlined /> : <PlusOutlined />}
+      <ReasonActionButton
+        inline={Boolean(date)}
+        editing={Boolean(record)}
         disabled={!siteName || !venueType || busy}
         onClick={() => {
           form.resetFields();
@@ -104,9 +104,7 @@ export default function AbnormalReasonButton({
           });
           setOpen(true);
         }}
-      >
-        {record ? t("编辑") : t("填写原因")}
-      </Button>
+      />
       {record && (
         <Popconfirm
           title={t("确认删除？")}
@@ -124,7 +122,7 @@ export default function AbnormalReasonButton({
       <Modal
         forceRender
         open={open}
-        title={record ? t("编辑") : t("填写原因")}
+        title={record ? t("编辑原因") : t("填写原因")}
         onCancel={() => {
           if (!busy) setOpen(false);
         }}
@@ -137,7 +135,7 @@ export default function AbnormalReasonButton({
         closable={!busy}
       >
         <p className="mb-4 text-blue-700">{siteName}</p>
-        <Form form={form} layout="vertical" disabled={busy}>
+        <Form name={formName} form={form} layout="vertical" disabled={busy}>
           <Form.Item name="logDate" label={t("日期")} rules={[{ required: true }]}>
             <DatePicker disabled={Boolean(date)} allowClear={false} style={{ width: "100%" }} />
           </Form.Item>

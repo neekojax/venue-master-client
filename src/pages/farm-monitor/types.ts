@@ -157,6 +157,10 @@ export interface OtherPoolMachineAnomalyMachine {
 }
 
 export interface OtherPoolMachineAnomalyHistoryItem extends MinerCodeAnomalySummary {
+  siteCode: string;
+  reason: string;
+  updatedBy: string;
+  updatedAt: string | null;
   businessDate: string;
   windowStart: string;
   windowEnd: string;

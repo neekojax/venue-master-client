@@ -11,6 +11,7 @@ import {
   type DailyEventImpactDetail,
   fetchDailyAbnormalHistory,
 } from "./abnormal-history-api";
+import useAnomalyReasonPermissions from "./useAnomalyReasonPermissions";
 import { ROUTE_PATHS } from "@/constants/common";
 import useAuthRedirect from "@/hooks/useAuthRedirect";
 import { useSettingsStore } from "@/stores";
@@ -31,6 +32,7 @@ export default function AbnormalHistoryPage() {
   const navigate = useNavigate();
   const [params, setParams] = useSearchParams();
   const { poolType } = useSettingsStore(useSelector(["poolType"]));
+  const { canCreate, canEdit } = useAnomalyReasonPermissions(poolType);
   const siteName = params.get("siteName") || "";
   const siteCode = params.get("siteCode") || "";
   const page = positiveInteger(params.get("page"), 1);
@@ -182,11 +184,13 @@ export default function AbnormalHistoryPage() {
           <section className="abnormal-history-detail">
             <div className="abnormal-history-section-heading">
               <h2>{t("每日异常及原因")}</h2>
-              <AbnormalReasonButton
-                key={`${poolType}-${siteName}`}
-                venueType={poolType}
-                siteName={siteName}
-              />
+              {canCreate && (
+                <AbnormalReasonButton
+                  key={`${poolType}-${siteName}`}
+                  venueType={poolType}
+                  siteName={siteName}
+                />
+              )}
             </div>
             <Table<DailyAbnormalRecord>
               key={`${poolType}-${siteName}-${page}-${pageSize}-${rows[0]?.date ?? "empty"}`}
@@ -271,14 +275,14 @@ export default function AbnormalHistoryPage() {
                               <span>
                                 {t("负责人")}: {reason.owner || "—"}
                               </span>
-                              <div>
+                              {canEdit && (
                                 <AbnormalReasonButton
                                   venueType={poolType}
                                   siteName={siteName}
                                   date={row.date}
                                   record={reason}
                                 />
-                              </div>
+                              )}
                             </div>
                           </div>
                         ))}
@@ -290,6 +294,7 @@ export default function AbnormalHistoryPage() {
                 {
                   title: t("操作"),
                   key: "actions",
+                  hidden: !canCreate,
                   width: 120,
                   render: (_, record) => (
                     <AbnormalReasonButton

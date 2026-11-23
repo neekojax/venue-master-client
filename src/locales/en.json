@@ -2090,5 +2090,8 @@
   "告警不存在或不在当前查询范围": "The alert does not exist or is outside the current query scope",
   "告警已被其他人更新，请刷新后重试": "This alert was updated by someone else. Refresh and try again.",
   "维修记录不存在或不属于当前组织和场地": "The repair record does not exist or belongs to another organization or site",
-  "控制板": "Control Board"
+  "控制板": "Control Board",
+  "编辑原因": "Edit reason",
+  "请填写异常原因": "Enter the reason for the anomaly",
+  "保存成功": "Saved"
 }
