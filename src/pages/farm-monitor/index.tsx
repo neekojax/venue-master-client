@@ -85,7 +85,7 @@ function FarmMonitorContent({ poolType, userId }: { poolType: string; userId: st
     const requestedSite = searchParams.get("siteCode");
     if (!cached) return undefined;
     // 浏览器后退回到原历史记录时，以离开前实际选中的场地为准。
-    return cached.locationKey === location.key || !requestedSite || cached.siteCode === requestedSite
+    return cached.locationKey === location.key || (requestedSite && cached.siteCode === requestedSite)
       ? cached
       : undefined;
   });
@@ -110,10 +110,19 @@ function FarmMonitorContent({ poolType, userId }: { poolType: string; userId: st
     refetch: refetchBoundSites,
   } = useBoundSites(poolType, cacheOptions);
 
+  const [sortDesc, setSortDesc] = useState(true);
   const farmSites = useMemo(() => {
     const list: BoundSiteItem[] = boundSitesRes?.data?.list ?? [];
     return list.map(mapBoundSiteToFarmSite);
   }, [boundSitesRes]);
+  const sortedFarmSites = useMemo(
+    () =>
+      [...farmSites].sort((a, b) => {
+        const offlineOrder = Number(a.status === "error") - Number(b.status === "error");
+        return offlineOrder || (sortDesc ? b.hashrate - a.hashrate : a.hashrate - b.hashrate);
+      }),
+    [farmSites, sortDesc],
+  );
 
   const [selectedFarmId, setSelectedFarmId] = useState<string | null>(
     () => restoredView?.siteCode ?? searchParams.get("siteCode"),
@@ -131,10 +140,10 @@ function FarmMonitorContent({ poolType, userId }: { poolType: string; userId: st
   );
 
   useEffect(() => {
-    if (farmSites.length === 0) return;
-    if (selectedFarmId && farmSites.some((site) => site.id === selectedFarmId)) return;
-    selectFarm(farmSites[0].id);
-  }, [farmSites, selectFarm, selectedFarmId]);
+    if (sortedFarmSites.length === 0) return;
+    if (sortedFarmSites.some((site) => site.id === selectedFarmId)) return;
+    selectFarm(sortedFarmSites[0].id);
+  }, [sortedFarmSites, selectFarm, selectedFarmId]);
 
   const selectedFarm = useMemo(
     () => farmSites.find((s) => s.id === selectedFarmId) ?? null,
@@ -581,7 +590,9 @@ function FarmMonitorContent({ poolType, userId }: { poolType: string; userId: st
           </div>
         ) : null}
         <FarmSiteList
-          sites={farmSites}
+          sites={sortedFarmSites}
+          sortDesc={sortDesc}
+          onToggleSort={() => setSortDesc((desc) => !desc)}
           selectedId={selectedFarmId}
           loading={isSitesLoading}
           onSelect={selectFarm}

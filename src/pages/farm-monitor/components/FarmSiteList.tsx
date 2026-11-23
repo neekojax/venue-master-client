@@ -18,24 +18,27 @@ function siteDotColor(status: FarmSite["status"]) {
 
 interface FarmSiteListProps {
   sites: FarmSite[];
+  sortDesc: boolean;
+  onToggleSort: () => void;
   selectedId: string | null;
   loading?: boolean;
   onSelect: (id: string | null) => void;
 }
 
-export default function FarmSiteList({ sites, selectedId, loading, onSelect }: FarmSiteListProps) {
+export default function FarmSiteList({
+  sites,
+  sortDesc,
+  onToggleSort,
+  selectedId,
+  loading,
+  onSelect,
+}: FarmSiteListProps) {
   const [keyword, setKeyword] = useState("");
-  const [sortDesc, setSortDesc] = useState(true);
 
   const filteredSites = useMemo(() => {
     const kw = keyword.trim().toLowerCase();
-    const list = kw ? sites.filter((s) => s.name.toLowerCase().includes(kw)) : [...sites];
-    list.sort((a, b) => {
-      const offlineOrder = Number(a.status === "error") - Number(b.status === "error");
-      return offlineOrder || (sortDesc ? b.hashrate - a.hashrate : a.hashrate - b.hashrate);
-    });
-    return list;
-  }, [sites, keyword, sortDesc]);
+    return kw ? sites.filter((site) => site.name.toLowerCase().includes(kw)) : sites;
+  }, [sites, keyword]);
 
   return (
     <div
@@ -64,7 +67,7 @@ export default function FarmSiteList({ sites, selectedId, loading, onSelect }: F
         <button
           type="button"
           className="flex items-center gap-0.5 text-gray-500 hover:text-blue-500 border-0 bg-transparent cursor-pointer p-0"
-          onClick={() => setSortDesc((v) => !v)}
+          onClick={onToggleSort}
         >
           {t("总算力")}
           <ArrowDownOutlined
