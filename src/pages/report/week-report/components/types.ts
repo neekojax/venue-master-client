@@ -1,4 +1,41 @@
 // Shared types for week report components
+export interface WeeklyReportSummary {
+  TotalHashEffectiveRate?: number;
+  TotalFailureRate?: number;
+  TotalHighTemperatureImpactRate?: number;
+  TotalLimitImpactRate?: number;
+  TotalLowPowerImpactRate?: number;
+  TotalPowerEventImpactRate?: number;
+  TotalDeviceFaultImpactRate?: number;
+  TotalWithdrawImpactRate?: number;
+  TotalCloudPowerRate?: number;
+  WeeklyHashEffectiveRateChange?: number;
+  WeeklyFailureRateChange?: number;
+  WeeklyHighTemperatureImpactRateChange?: number;
+  WeeklyLimitImpactRateChange?: number;
+}
+
+export interface WeeklyReportSnapshot {
+  poolType: string;
+  startDate: string;
+  endDate: string;
+  sites: DataItem[];
+  summary?: WeeklyReportSummary;
+  hashEffectiveRates: DailyHashEffectiveRate[];
+  failureRates: DailyFailureRate[];
+}
+
+export interface DailyHashEffectiveRate {
+  date: string;
+  effectiveRate: number;
+}
+
+export interface DailyFailureRate {
+  date: string;
+  failureRate: number;
+  failure?: number;
+}
+
 export interface DailyData {
   Date: string; // 日期
   VenueName: string; // 场馆名称

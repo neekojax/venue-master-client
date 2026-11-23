@@ -3,27 +3,22 @@ import { LineChart } from "echarts/charts";
 import { GridComponent, TitleComponent, TooltipComponent } from "echarts/components";
 import * as echarts from "echarts/core";
 import { CanvasRenderer } from "echarts/renderers";
+import type { DailyHashEffectiveRate } from "./types";
 
 import { t } from "@/locales";
 
 // 注册 ECharts 组件
 echarts.use([LineChart, GridComponent, TooltipComponent, TitleComponent, CanvasRenderer]);
 
-// 定义返回值类型
-interface HashEffectiveRateItem {
-  date: string;
-  effectiveRate: number;
-}
-
 interface Props {
-  hashEffectiveRate: HashEffectiveRateItem[];
+  hashEffectiveRate: DailyHashEffectiveRate[];
 }
 
 const WaveLineCard: React.FC<Props> = ({ hashEffectiveRate }) => {
   const domRef = useRef<HTMLDivElement | null>(null);
   const chartRef = useRef<echarts.EChartsType | null>(null);
-  const xAxisData = hashEffectiveRate.map((item: any) => item.date);
-  const yAxisData = hashEffectiveRate.map((item: any) => item.effectiveRate);
+  const xAxisData = hashEffectiveRate.map((item) => item.date);
+  const yAxisData = hashEffectiveRate.map((item) => item.effectiveRate);
 
   // 获取当前日期
 

@@ -8,11 +8,12 @@ import {
   TrendingUp,
   ZapOff,
 } from "lucide-react";
+import type { WeeklyReportSummary } from "./types";
 import { formatPercent } from "@/utils/format.ts";
 
 import { t } from "@/locales";
 
-const StatCard: React.FC<{ statistics: any | null }> = ({ statistics }) => {
+const StatCard: React.FC<{ statistics?: WeeklyReportSummary }> = ({ statistics }) => {
   // Clean Stat Item for Weekly Report Panel
   const StatItem = ({ label, value, icon: Icon, color, trend, goodTrend }: any) => {
     const colorStyles: any = {

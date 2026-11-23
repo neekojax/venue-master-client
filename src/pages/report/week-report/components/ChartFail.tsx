@@ -3,28 +3,23 @@ import { LineChart } from "echarts/charts";
 import { GridComponent, TitleComponent, TooltipComponent } from "echarts/components";
 import * as echarts from "echarts/core";
 import { CanvasRenderer } from "echarts/renderers";
+import type { DailyFailureRate } from "./types";
 
 import { t } from "@/locales";
 
 // 注册 ECharts 组件
 echarts.use([LineChart, GridComponent, TooltipComponent, TitleComponent, CanvasRenderer]);
 
-// 定义返回值类型
-interface FailureRate {
-  date: string;
-  failureRate: number;
-}
-
 interface Props {
-  failureRate: FailureRate[];
+  failureRate: DailyFailureRate[];
 }
 
 const WaveLineCard: React.FC<Props> = ({ failureRate }) => {
   const domRef = useRef<HTMLDivElement | null>(null);
   const chartRef = useRef<echarts.EChartsType | null>(null);
-  const xAxisData = failureRate.map((item: any) => item.date);
-  const yAxisData = failureRate.map((item: any) => item.failureRate);
-  const yAxisData_failure_num = failureRate.map((item: any) => item.failure);
+  const xAxisData = failureRate.map((item) => item.date);
+  const yAxisData = failureRate.map((item) => item.failureRate);
+  const yAxisData_failure_num = failureRate.map((item) => item.failure);
 
   // 获取当前日期
   useEffect(() => {

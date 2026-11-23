@@ -1,11 +1,13 @@
 // 代码已包含 CSS：使用 TailwindCSS , 安装 TailwindCSS 后方可看到布局样式效果
-import React, { useEffect, useState } from "react";
-import { DatePicker, Spin, Tabs } from "antd";
+import React, { useEffect, useRef, useState } from "react";
+import { DownloadOutlined } from "@ant-design/icons";
+import { Button, DatePicker, message, Spin, Tabs } from "antd";
 import dayjs from "dayjs";
 import weekOfYear from "dayjs/plugin/weekOfYear";
 import { Calendar as CalendarIcon, Clock } from "lucide-react";
 import ImpactCard from "./components/ImpactCard";
 import StatCard from "./components/StatCard";
+import type { WeeklyReportSnapshot } from "./components/types";
 import VenueTable from "./components/venueTable";
 import { useSelector, useSettingsStore } from "@/stores";
 
@@ -21,33 +23,6 @@ dayjs.extend(weekOfYear);
 dayjs.locale("zh-cn");
 
 const { WeekPicker } = DatePicker;
-
-interface StatisticData {
-  TotalHashEffectiveRate: number;
-  TotalOverclockTheoreticalPower?: number;
-  TotalOverclockHashEffectiveRate?: number;
-  TotalFailureRate: number;
-  TotalHighTemperatureImpactRate: number;
-  TotalLimitImpactRate: number;
-  TotalPowerEventImpactRate?: number;
-  TotalDeviceFaultImpactRate?: number;
-  TotalWithdrawImpactRate?: number;
-  TotalCloudPowerRate?: number;
-  WeeklyFailureRateChange: number;
-  WeeklyHashEffectiveRateChange: number;
-  WeeklyHighTemperatureImpactRateChange: number;
-  WeeklyLimitImpactRateChange: number;
-}
-
-interface HashEffectiveRateItem {
-  date: string;
-  effectiveRate: number;
-}
-
-interface FailureRate {
-  date: string;
-  failureRate: number;
-}
 
 interface Top5Rate {
   venue_name: string;
@@ -67,12 +42,7 @@ const App: React.FC = () => {
   const [filterMode, setFilterMode] = useState<FilterMode>("calendar");
   const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split("T")[0]);
 
-  const [startDate, setStartDate] = useState("");
-  const [endDate, setEndDate] = useState("");
-  const [statistics, setStatistics] = useState<StatisticData | null>(null); // 初始化为对象
   // state 存储接口返回的数组
-  const [hashEffectiveRate, setHashEffectiveRate] = useState<HashEffectiveRateItem[]>([]);
-  const [failureRate, setFailureRate] = useState<FailureRate[]>([]);
   const [top5EffectiveRate, setTop5EffectiveRate] = useState<Top5Rate[]>([]);
   const [top5HighTempImpactRate, setTop5HighTempImpactRate] = useState<Top5Rate[]>([]);
   const [top5LimitImpactRate, setTop5LimitImpactRate] = useState<Top5Rate[]>([]);
@@ -82,7 +52,9 @@ const App: React.FC = () => {
   const [top5FailureRateDiff, setTop5FailureRateDiff] = useState<Top5Rate[]>([]);
   const [top5PendingRepairRateDiff, setTop5PendingRepairRateDiff] = useState<Top5Rate[]>([]);
 
-  const [data, setData] = useState<any[]>([]); // 数据状态
+  const [report, setReport] = useState<WeeklyReportSnapshot>();
+  const [downloading, setDownloading] = useState(false);
+  const latestRequest = useRef(0);
   // const stats = [
   //   {
   //     title: "总算力有效率",
@@ -129,21 +101,20 @@ const App: React.FC = () => {
 
   const lastWeek = dayjs().subtract(1, "week").startOf("week");
   const [selectedWeek, setSelectedWeek] = useState<dayjs.Dayjs>(lastWeek);
-  useEffect(() => {
-    if (filterMode !== "rolling") return;
-    const end = dayjs(selectedDate);
-    const start = end.subtract(6, "day");
-    setStartDate(start.format("YYYY-MM-DD"));
-    setEndDate(end.format("YYYY-MM-DD"));
-  }, [filterMode, selectedDate]);
-
-  useEffect(() => {
-    if (filterMode !== "calendar") return;
-    const monday = selectedWeek.startOf("week"); // 周一
-    const sunday = monday.add(6, "day"); // 周日
-    setStartDate(monday.format("YYYY-MM-DD"));
-    setEndDate(sunday.format("YYYY-MM-DD"));
-  }, [filterMode, selectedWeek]);
+  const start =
+    filterMode === "rolling" ? dayjs(selectedDate).subtract(6, "day") : selectedWeek.startOf("week");
+  const startDate = start.isValid() ? start.format("YYYY-MM-DD") : "";
+  const endDate = start.isValid() ? start.add(6, "day").format("YYYY-MM-DD") : "";
+  const currentReport =
+    report && report.poolType === poolType && report.startDate === startDate && report.endDate === endDate
+      ? report
+      : undefined;
+  const canDownload =
+    currentReport !== undefined &&
+    (currentReport.summary != null ||
+      currentReport.sites.length > 0 ||
+      currentReport.hashEffectiveRates.length > 0 ||
+      currentReport.failureRates.length > 0);
 
   // 禁止选择未结束的周（本周及未来）
   const disabledDate = (current: dayjs.Dayjs) => {
@@ -199,14 +170,13 @@ const App: React.FC = () => {
   }, []);
 
   const fetchReportData = async () => {
+    const request = ++latestRequest.current;
     setLoading(true);
     try {
       const reportData = await fetchWeeklyReport(poolType, startDate, endDate);
+      if (request !== latestRequest.current) return;
       // console.log(reportData);
       if (reportData && reportData.data) {
-        setStatistics(reportData.data.summary);
-        setHashEffectiveRate(reportData.data.hash_effective_rate);
-        setFailureRate(reportData.data.failure_rate);
         setTop5EffectiveRate(reportData.data.top_5_effective_rate);
         setTop5HighTempImpactRate(reportData.data.top_5_high_temp_impact_rate);
         setTop5LimitImpactRate(reportData.data.top_5_limit_impact_rate);
@@ -216,23 +186,52 @@ const App: React.FC = () => {
         setTop5EffectiveRateDiff(reportData.data.top_5_effective_rate_diff || []);
         setTop5FailureRateDiff(reportData.data.top_5_failure_rate_diff || []);
         setTop5PendingRepairRateDiff(reportData.data.top_5_pending_repair_rate_diff || []);
-        setData(reportData.data.detail);
-        setLoading(false);
+        setReport({
+          poolType,
+          startDate,
+          endDate,
+          sites: reportData.data.detail ?? [],
+          summary: reportData.data.summary,
+          hashEffectiveRates: reportData.data.hash_effective_rate ?? [],
+          failureRates: reportData.data.failure_rate ?? [],
+        });
+      } else {
+        setReport(undefined);
       }
-    } catch (error) {
-      console.error("获取日报数据失败:", error);
+    } catch {
+      if (request !== latestRequest.current) return;
+      setReport(undefined);
+      message.error(t("周报加载失败"));
+    } finally {
+      if (request === latestRequest.current) setLoading(false);
     }
   };
 
   useEffect(() => {
-    setLoading(true);
     if (startDate != "" && endDate != "") {
       fetchReportData();
+    } else {
+      setLoading(false);
     }
+    return () => {
+      latestRequest.current += 1;
+    };
   }, [startDate, endDate, poolType]);
 
   const handleReload = () => {
     fetchReportData();
+  };
+  const handleDownload = async () => {
+    if (downloading || loading || !canDownload) return;
+    setDownloading(true);
+    try {
+      const { downloadWeeklyReport } = await import("./export");
+      await downloadWeeklyReport(currentReport);
+    } catch {
+      message.error(t("下载失败，请稍后重试"));
+    } finally {
+      setDownloading(false);
+    }
   };
   const labelDate = filterMode === "rolling" ? dayjs(selectedDate) : selectedWeek;
   return (
@@ -299,17 +298,26 @@ const App: React.FC = () => {
               </div>
             )}
           </div>
+          <Button
+            type="primary"
+            icon={<DownloadOutlined />}
+            loading={downloading}
+            disabled={loading || !canDownload}
+            onClick={handleDownload}
+          >
+            {t("下载周报")}
+          </Button>
         </div>
       </div>
 
       <Spin spinning={loading} tip={t("加载中...")} size="large">
-        <StatCard statistics={statistics} />
+        <StatCard statistics={currentReport?.summary} />
         <div className="grid grid-cols-3 gap-4 mb-6">
           <div className="bg-white p-4 rounded-[4px] border border-[#F0F2F5] shadow-sm">
-            <ChartSuanli hashEffectiveRate={hashEffectiveRate} />
+            <ChartSuanli hashEffectiveRate={currentReport?.hashEffectiveRates ?? []} />
           </div>
           <div className="bg-white p-4 rounded-[4px] border border-[#F0F2F5] shadow-sm">
-            <ChartFail failureRate={failureRate} />
+            <ChartFail failureRate={currentReport?.failureRates ?? []} />
           </div>
           <ImpactCard title={t("场地运行排名")} data={top5EffectiveRate} onReload={handleReload} />
         </div>
@@ -390,7 +398,12 @@ const App: React.FC = () => {
           <ImpactCard title={t("限电影响率排名")} data={top5LimitImpactRate} onReload={handleReload} />
         </div>
 
-        <VenueTable data={data} startDate={startDate} endDate={endDate} onRequestRefresh={fetchReportData} />
+        <VenueTable
+          data={currentReport?.sites ?? []}
+          startDate={startDate}
+          endDate={endDate}
+          onRequestRefresh={fetchReportData}
+        />
       </Spin>
     </div>
   );
