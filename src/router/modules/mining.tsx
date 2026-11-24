@@ -70,6 +70,12 @@ export const miningRoute: RouteObject = {
       handle: { title: t("矿机功耗"), crumb: () => t("矿机功耗") },
     },
     {
+      path: ROUTE_PATHS.hashrateMonitor,
+      lazy: async () => ({ Component: (await import("@/pages/farm-monitor/hashrate-monitor")).default }),
+      HydrateFallback: ProgressBar,
+      handle: { title: t("算力对比"), crumb: () => t("算力对比") },
+    },
+    {
       path: ROUTE_PATHS.faultMonitor,
       lazy: async () => ({
         Component: (await import("@/pages/fault-machine-monitor")).default,

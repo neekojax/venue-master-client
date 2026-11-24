@@ -103,6 +103,11 @@ const SiderItems = (
           label: t("矿机监控", { context: "nav" }),
         },
         {
+          key: ROUTE_PATHS.hashrateMonitor,
+          hidden: hasPermission(ROUTE_PATHS.hashrateMonitor),
+          label: t("算力对比"),
+        },
+        {
           key: ROUTE_PATHS.faultMonitor,
           hidden: hasPermission(ROUTE_PATHS.faultMonitor),
           label: t("故障机监控", { context: "nav", defaultValue: "故障监控" }),

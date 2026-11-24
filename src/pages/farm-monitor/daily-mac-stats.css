@@ -144,3 +144,234 @@
     padding: 12px;
   }
 }
+
+.hashrate-comparison {
+  container: hashrate-comparison / inline-size;
+}
+
+.hashrate-comparison-filters {
+  --filter-border: #d6dee8;
+  --filter-blue: #1a56a8;
+  border: 1px solid var(--filter-border);
+  border-radius: 10px;
+  background: #fff;
+  box-shadow: 0 1px 3px rgb(15 23 42 / 5%);
+}
+
+.hashrate-search-fields,
+.hashrate-view-fields {
+  padding: 12px 16px;
+  gap: 12px 20px;
+}
+
+.hashrate-search-fields {
+  display: grid;
+  grid-template-columns: minmax(0, 20rem) minmax(10rem, 16rem) minmax(14rem, 19rem);
+}
+
+.hashrate-view-fields {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  padding-block: 8px;
+  border-top: 1px solid #e5eaf0;
+  border-radius: 0 0 10px 10px;
+  background: #f8fafc;
+}
+
+.hashrate-filter-field {
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.hashrate-search-fields .hashrate-filter-field {
+  flex-direction: column;
+  align-items: stretch;
+  gap: 5px;
+}
+
+.hashrate-filter-field > label,
+.hashrate-deviation > span {
+  color: #485569;
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 16px;
+}
+
+.hashrate-site-filter {
+  width: 100%;
+  max-width: 20rem;
+}
+
+.hashrate-site-name {
+  min-width: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  text-align: left;
+  text-overflow: ellipsis;
+}
+
+.hashrate-site-filter .ant-select-prefix,
+.hashrate-sort-filter .ant-select-prefix {
+  color: #64748b;
+}
+
+.hashrate-selected-code {
+  flex: 0 0 auto;
+  max-width: 40%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  padding: 1px 5px;
+  border-radius: 4px;
+  background: #eef2f6;
+  color: #435268;
+  font: 11px/16px ui-monospace, monospace;
+}
+
+.hashrate-site-menu.ant-select-dropdown {
+  padding: 5px;
+  border: 1px solid #d7dfe9;
+  border-radius: 9px;
+  box-shadow: 0 8px 24px rgb(15 23 42 / 12%);
+}
+
+.hashrate-site-menu .ant-select-item-option-selected:not(.ant-select-item-option-disabled) {
+  background: #edf4ff;
+}
+
+.hashrate-collection-filter .ant-picker {
+  width: 100%;
+  min-width: 0;
+  height: 32px;
+}
+
+.hashrate-thresholds {
+  display: inline-flex;
+  align-items: center;
+  max-width: 100%;
+  padding: 3px;
+  gap: 2px;
+  border-radius: 7px;
+  background: #e9eef4;
+}
+
+.hashrate-thresholds .ant-btn {
+  min-width: 0;
+  height: 26px;
+  padding-inline: 10px;
+  border: 0;
+  border-radius: 5px;
+  background: transparent;
+  box-shadow: none;
+  color: #49566a;
+  font-size: 13px;
+  font-variant-numeric: tabular-nums;
+}
+
+.hashrate-thresholds .ant-btn[aria-pressed="true"] {
+  background: #fff;
+  color: var(--filter-blue);
+  font-weight: 600;
+  box-shadow: inset 0 0 0 1px #bbcde5, 0 1px 2px rgb(15 23 42 / 9%);
+}
+
+.hashrate-thresholds .ant-btn:focus-visible {
+  outline: 2px solid #3973bd;
+  outline-offset: 1px;
+}
+
+.hashrate-sort-filter .ant-select {
+  width: 13rem;
+  max-width: 100%;
+}
+
+.hashrate-comparison-summary {
+  margin: 0;
+  padding: 10px 2px 6px;
+  color: #546276;
+  font-size: 13px;
+  overflow-wrap: anywhere;
+}
+
+@container hashrate-comparison (max-width: 49rem) {
+  .hashrate-search-fields {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .hashrate-collection-filter {
+    grid-column: 1 / -1;
+    max-width: 19rem;
+  }
+}
+
+@container hashrate-comparison (max-width: 33rem) {
+  .hashrate-search-fields {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .hashrate-search-fields,
+  .hashrate-view-fields {
+    padding: 10px 12px;
+  }
+
+  .hashrate-view-fields {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .hashrate-view-fields .hashrate-filter-field {
+    flex-wrap: wrap;
+    gap: 4px 8px;
+  }
+
+  .hashrate-view-fields .hashrate-filter-field > label,
+  .hashrate-deviation > span {
+    min-width: 4em;
+  }
+
+  .hashrate-deviation .ant-btn {
+    padding-inline: 8px;
+  }
+
+  .hashrate-thresholds .ant-btn > span:not(.anticon) {
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+}
+
+@media (max-width: 760px) {
+  .hashrate-date-menu .ant-picker-panel-container {
+    max-width: calc(100vw - 16px);
+    max-height: 70vh;
+    overflow: auto;
+  }
+
+  .hashrate-date-menu .ant-picker-panel-layout,
+  .hashrate-date-menu .ant-picker-panels {
+    flex-direction: column;
+  }
+
+  .hashrate-date-menu .ant-picker-panel-container .ant-picker-presets {
+    max-width: none;
+    min-height: auto;
+    align-self: stretch;
+  }
+
+  .hashrate-date-menu.ant-picker-dropdown .ant-picker-panel-container .ant-picker-presets ul {
+    display: flex;
+    flex-wrap: wrap;
+    flex: none;
+    height: auto;
+    gap: 4px;
+    border-inline-end: 0;
+    border-bottom: 1px solid #e5eaf0;
+  }
+
+  .hashrate-date-menu.ant-picker-dropdown .ant-picker-presets ul li + li {
+    margin-top: 0;
+  }
+}

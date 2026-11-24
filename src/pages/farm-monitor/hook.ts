@@ -11,10 +11,11 @@ import { fetchDailyMacOverview } from "./daily-mac-stats-api";
 import { fetchDailyPowerDetail } from "./miner-power-api";
 import type { TaskSnapshotQueryParams, TimeRange } from "./types";
 import { FARM_MONITOR_CACHE_OPTIONS, type FarmMonitorQueryOptions } from "./view-state";
+import { getLoginAccountId } from "@/utils/account-preferences";
 
 export const useBoundSites = (venueType: string, options: FarmMonitorQueryOptions = {}) => {
   return useQuery({
-    queryKey: ["miner-bound-sites", venueType],
+    queryKey: ["miner-bound-sites", venueType, getLoginAccountId()],
     queryFn: () => fetchBoundSites(venueType),
     enabled: Boolean(venueType),
     ...FARM_MONITOR_CACHE_OPTIONS,
