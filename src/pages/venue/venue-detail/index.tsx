@@ -1,6 +1,7 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useMemo, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { CalendarOutlined, CloudOutlined, EnvironmentOutlined, ThunderboltOutlined } from "@ant-design/icons";
+import { useQuery } from "@tanstack/react-query";
 import { Segmented, Select, Skeleton, Spin, Tag } from "antd";
 import BasicDataChart from "./components/BasicDataChart";
 import BusinessReport from "./components/Business";
@@ -12,12 +13,10 @@ import {
   mapWeeklyCurvePoints,
   mapWeeklyReportItemsToRows,
   normalizeWeeklyReportResponse,
-  type VenueWeeklyReportResponse,
-  type WeeklyChartPoint,
-  type WeeklyReportRow,
 } from "./components/weeklyMock";
 import type { VenueStats } from "./types";
 import { useSelector, useSettingsStore } from "@/stores";
+import { getLoginAccountId } from "@/utils/account-preferences";
 
 import "./index.css";
 
@@ -43,106 +42,46 @@ interface VenueData {
 // import { Button, Table } from "antd";
 
 const VenueDetail: React.FC = () => {
+  const accountId = getLoginAccountId();
   const { poolType } = useSettingsStore(useSelector(["poolType"]));
   const params = useParams<{ venueId: string }>();
-  const [loading, setLoading] = useState(true);
-  const [stats, setStats] = useState<VenueStats | null>(null);
-  const [weeklyLoading, setWeeklyLoading] = useState(false);
   const venueId = params.venueId!;
   const navigate = useNavigate();
-  const [basicInfo, setBasicInfo] = useState<VenueData | null>(null);
   const [curveMode, setCurveMode] = useState<"day" | "week">("day");
-  const [weeklyReport, setWeeklyReport] = useState<VenueWeeklyReportResponse | null>(null);
-  // 周报数据按需懒加载：进入页面不拉取，切到周视图时才请求
-  const weeklyLoadedRef = useRef(false);
-
-  // 获取场地列表数据
+  const [weeklyRequested, setWeeklyRequested] = useState(false);
   const { data: venueListData } = useVenueList(poolType);
-
-  // 获取数据
-  const fetchData = async () => {
-    try {
-      const response = await getVenueBasicInfo(poolType, Number(venueId));
-      // console.log(response)
-      setBasicInfo(response.data);
-      // 处理响应数据
-    } catch (error) {
-      // 处理错误
-      console.log(error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  // 获取数据
-  const fetchDailyStat = async () => {
-    try {
-      const response = await getVenueDailyStat(poolType, Number(venueId), formattedDate);
-      if (response.data) {
-        // console.log("response.data", response.data);
-        setStats(response.data);
-        // 不在这里直接调用 initChart，而是通过 useEffect 监听 stats 变化
-      }
-      // 处理响应数据
-    } catch (error) {
-      // 处理错误
-      console.log("error", error);
-    }
-  };
-
-  const fetchWeeklyStat = async () => {
-    // 已加载则跳过，避免重复请求；失败时放开以便重试
-    if (weeklyLoadedRef.current) return;
-    weeklyLoadedRef.current = true;
-    setWeeklyLoading(true);
-    try {
-      const response = await getRecent10WeeksWeeklyReport(poolType, Number(venueId));
-      setWeeklyReport(normalizeWeeklyReportResponse(response.data));
-    } catch (error) {
-      console.log("weekly error", error);
-      setWeeklyReport(null);
-      weeklyLoadedRef.current = false;
-    } finally {
-      setWeeklyLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    setLoading(true);
-    // 切换场地时重置周报懒加载状态，清掉上一场地的陈旧数据
-    weeklyLoadedRef.current = false;
-    setWeeklyReport(null);
-    fetchData();
-    fetchDailyStat();
-  }, [venueId]);
-
-  // 切到「运行趋势分析」周维度时按需拉取周报数据
-  useEffect(() => {
-    if (curveMode === "week") {
-      fetchWeeklyStat();
-    }
-  }, [curveMode]);
-
-  const yesterday = new Date(Date.now() - 864e5);
-  const formattedDate = yesterday.toISOString().split("T")[0];
-  const weeklyEffectiveRateData: WeeklyChartPoint[] = weeklyReport
-    ? mapWeeklyCurvePoints(weeklyReport.hashEffectiveRateCurve || [])
-    : [];
-  const weeklyFailureRateData: WeeklyChartPoint[] = weeklyReport
-    ? mapWeeklyCurvePoints(
-        weeklyReport.failureRateCurve || [],
-        (weeklyReport.list || []).map((item) => item.averageFailureRate),
-      )
-    : [];
-  const weeklyHighTemperatureData: WeeklyChartPoint[] = weeklyReport
-    ? mapWeeklyCurvePoints(weeklyReport.highTemperatureImpactRateCurve || [])
-    : [];
-  const weeklyLimitImpactData: WeeklyChartPoint[] = weeklyReport
-    ? mapWeeklyCurvePoints(weeklyReport.limitImpactRateCurve || [])
-    : [];
-  const weeklyRows: WeeklyReportRow[] = weeklyReport
-    ? mapWeeklyReportItemsToRows(weeklyReport.list || [])
-    : [];
+  const formattedDate = new Date(Date.now() - 864e5).toISOString().split("T")[0];
+  const enabled = Boolean(poolType && venueId);
+  const { data: basicInfo, isLoading: loading } = useQuery<VenueData>({
+    queryKey: ["venue-detail-basic", accountId, poolType, venueId],
+    enabled,
+    queryFn: async () => (await getVenueBasicInfo(poolType, Number(venueId))).data,
+  });
+  const { data: stats } = useQuery<VenueStats>({
+    queryKey: ["venue-detail-daily-stat", accountId, poolType, venueId, formattedDate],
+    enabled,
+    queryFn: async () => (await getVenueDailyStat(poolType, Number(venueId), formattedDate)).data,
+  });
+  const weekly = useQuery({
+    queryKey: ["venue-detail-weekly", accountId, poolType, venueId],
+    enabled: enabled && (curveMode === "week" || weeklyRequested),
+    queryFn: async () =>
+      normalizeWeeklyReportResponse((await getRecent10WeeksWeeklyReport(poolType, Number(venueId))).data),
+  });
+  const weeklyReport = weekly.data;
+  const { effective, failure, temperature, limit, rows } = useMemo(
+    () => ({
+      effective: mapWeeklyCurvePoints(weeklyReport?.hashEffectiveRateCurve ?? []),
+      failure: mapWeeklyCurvePoints(
+        weeklyReport?.failureRateCurve ?? [],
+        weeklyReport?.list.map((item) => item.averageFailureRate),
+      ),
+      temperature: mapWeeklyCurvePoints(weeklyReport?.highTemperatureImpactRateCurve ?? []),
+      limit: mapWeeklyCurvePoints(weeklyReport?.limitImpactRateCurve ?? []),
+      rows: mapWeeklyReportItemsToRows(weeklyReport?.list ?? []),
+    }),
+    [weeklyReport],
+  );
 
   return (
     <div className=" mx-auto  min-h-screen">
@@ -251,25 +190,25 @@ const VenueDetail: React.FC = () => {
         />
       </div>
 
-      <Spin spinning={curveMode === "week" && weeklyLoading} tip={t("周报加载中...")}>
+      <Spin spinning={curveMode === "week" && weekly.isFetching} tip={t("周报加载中...")}>
         <div className="grid grid-cols-2 gap-4 mb-8">
           <div className="venue-trend-card venue-trend-card-blue bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
-            <ChartSuanli mode={curveMode} weeklyData={weeklyEffectiveRateData}></ChartSuanli>
+            <ChartSuanli mode={curveMode} weeklyData={effective}></ChartSuanli>
           </div>
 
           <div className="venue-trend-card venue-trend-card-red bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
-            <ChartFail mode={curveMode} weeklyData={weeklyFailureRateData}></ChartFail>
+            <ChartFail mode={curveMode} weeklyData={failure}></ChartFail>
           </div>
 
           <div className="venue-trend-card venue-trend-card-orange bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
             <ChartHighTemperatureImpact
               mode={curveMode}
-              weeklyData={weeklyHighTemperatureData}
+              weeklyData={temperature}
             ></ChartHighTemperatureImpact>
           </div>
 
           <div className="venue-trend-card venue-trend-card-violet bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
-            <ChartLimitImpact mode={curveMode} weeklyData={weeklyLimitImpactData}></ChartLimitImpact>
+            <ChartLimitImpact mode={curveMode} weeklyData={limit}></ChartLimitImpact>
           </div>
         </div>
       </Spin>
@@ -277,9 +216,9 @@ const VenueDetail: React.FC = () => {
       {/* 数据表格 */}
       <BusinessReport
         venueName={basicInfo?.venue_name || ""}
-        weeklyRows={weeklyRows}
-        onRequireWeekly={fetchWeeklyStat}
-        weeklyLoading={weeklyLoading}
+        weeklyRows={rows}
+        onWeeklyViewChange={setWeeklyRequested}
+        weeklyLoading={weekly.isFetching}
       ></BusinessReport>
     </div>
   );

@@ -1,12 +1,14 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import { useParams } from "react-router-dom";
 import { SyncOutlined } from "@ant-design/icons";
-import { Button, Segmented, Spin, Table, Tag } from "antd";
+import { useQuery } from "@tanstack/react-query";
+import { Alert, Button, Segmented, Spin, Table, Tag } from "antd";
 import type { ColumnsType } from "antd/es/table";
 import WeeklyBusinessReport from "./WeeklyBusinessReport";
 import type { WeeklyReportRow } from "./weeklyMock";
 import { useSelector, useSettingsStore } from "@/stores";
+import { getLoginAccountId } from "@/utils/account-preferences";
 import { getTimeDifference } from "@/utils/date";
 
 import { t } from "@/locales";
@@ -62,23 +64,31 @@ interface AbnormalRecord {
 interface BusinessReportProps {
   venueName: string;
   weeklyRows?: WeeklyReportRow[];
-  onRequireWeekly?: () => void;
+  onWeeklyViewChange?: (visible: boolean) => void;
   weeklyLoading?: boolean;
 }
 
 const BusinessReport: React.FC<BusinessReportProps> = ({
   venueName,
   weeklyRows = [],
-  onRequireWeekly,
+  onWeeklyViewChange,
   weeklyLoading = false,
 }) => {
+  const accountId = getLoginAccountId();
   const { poolType } = useSettingsStore(useSelector(["poolType"]));
   const [viewMode, setViewMode] = useState<"daily" | "events" | "weekly">("daily");
-  const [dailyData, setDailyData] = useState<DailyRecord[]>([]);
-  const [abnormalData, setAbnormalData] = useState<AbnormalRecord[]>([]);
-  const [loading, setLoading] = useState(false);
-  const params = useParams<{ venueId: string }>();
-  const venueId = params.venueId!;
+  const { venueId } = useParams<{ venueId: string }>();
+  const daily = useQuery<DailyRecord[]>({
+    queryKey: ["venue-detail-recent-daily", accountId, poolType, venueId],
+    enabled: viewMode === "daily" && Boolean(poolType && venueId),
+    queryFn: async () => (await getLast10DaysDailyStat(poolType, Number(venueId))).data,
+  });
+  const events = useQuery<AbnormalRecord[]>({
+    queryKey: ["venue-detail-recent-events", accountId, poolType, venueId],
+    enabled: viewMode === "events" && Boolean(poolType && venueId),
+    queryFn: async () => (await getLast10Event(poolType, Number(venueId))).data,
+  });
+  const activeQuery = viewMode === "events" ? events : daily;
 
   // 子账户统计表格列配置
   const subAccountColumns: ColumnsType<SubAccountStat> = [
@@ -382,44 +392,6 @@ const BusinessReport: React.FC<BusinessReportProps> = ({
     { title: t("事件原因"), dataIndex: "event_reason", key: "event_reason" },
   ];
 
-  // 获取数据
-  const fetch10EventData = async () => {
-    try {
-      const response = await getLast10Event(poolType, Number(venueId));
-      setAbnormalData(response.data);
-    } catch (error) {
-      console.log(error);
-    }
-  };
-
-  // 获取数据
-  const fetch10DailyData = async () => {
-    try {
-      const response = await getLast10DaysDailyStat(poolType, Number(venueId));
-      // 为每条记录添加key属性
-      const processedData = response.data.map((item: DailyRecord, index: number) => ({
-        ...item,
-        key: item.key || `${item.date}-${index}`,
-      }));
-      setDailyData(processedData);
-    } catch (error) {
-      console.log(error);
-    }
-  };
-
-  // 模拟数据用于测试展开功能
-  const mockData: DailyRecord[] = [];
-
-  useEffect(() => {
-    // 日报与异常事件并行拉取，统一用一个 loading 态覆盖两个 tab
-    setLoading(true);
-    Promise.all([fetch10EventData(), fetch10DailyData()]).finally(() => {
-      setLoading(false);
-    });
-    // 先清空，避免切换场地时短暂残留上一场地数据
-    setDailyData(mockData);
-  }, [venueId]);
-
   return (
     <div className="bg-white rounded-lg shadow-sm p-6">
       <div className="flex justify-between items-center mb-4">
@@ -430,7 +402,7 @@ const BusinessReport: React.FC<BusinessReportProps> = ({
               const mode = value as "daily" | "events" | "weekly";
               setViewMode(mode);
               // 切到「运营周报」时按需拉取周报数据
-              if (mode === "weekly") onRequireWeekly?.();
+              onWeeklyViewChange?.(mode === "weekly");
             }}
             className="venue-detail-segmented"
             options={[
@@ -457,13 +429,20 @@ const BusinessReport: React.FC<BusinessReportProps> = ({
       </div>
 
       <Spin
-        spinning={loading || (viewMode === "weekly" && weeklyLoading)}
+        spinning={viewMode === "weekly" ? weeklyLoading : activeQuery.isFetching}
         tip={viewMode === "weekly" && weeklyLoading ? t("周报加载中...") : t("数据加载中...")}
       >
-        {viewMode === "daily" ? (
+        {viewMode !== "weekly" && activeQuery.isError ? (
+          <Alert
+            type="error"
+            showIcon
+            message={activeQuery.error.message || t("数据加载失败，请稍后重试")}
+            action={<Button onClick={() => void activeQuery.refetch()}>{t("重试")}</Button>}
+          />
+        ) : viewMode === "daily" ? (
           <Table<DailyRecord>
             columns={dailyColumns}
-            dataSource={dailyData}
+            dataSource={daily.data}
             pagination={false}
             scroll={{ x: 1500 }}
             sticky={true}
@@ -488,7 +467,7 @@ const BusinessReport: React.FC<BusinessReportProps> = ({
         ) : viewMode === "events" ? (
           <Table<AbnormalRecord>
             columns={abnormalColumns}
-            dataSource={abnormalData}
+            dataSource={events.data}
             pagination={false}
             rowKey="key"
           />

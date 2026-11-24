@@ -1,5 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
-import { useParams } from "react-router-dom";
+import React, { useEffect, useRef } from "react";
 import { Spin } from "antd";
 import { LineChart } from "echarts/charts";
 import { GridComponent, TitleComponent, TooltipComponent } from "echarts/components";
@@ -14,8 +13,8 @@ import {
   commonSplitLine,
   commonTooltip,
 } from "./chartTheme";
+import { useVenueTrend } from "./useVenueTrend";
 import type { WeeklyChartPoint } from "./weeklyMock";
-import { useSelector, useSettingsStore } from "@/stores";
 
 import { t } from "@/locales";
 import { getLast30DaysHighTemperatureImpactRate } from "@/pages/venue/api.tsx";
@@ -29,51 +28,22 @@ interface HashRecord {
   highTemperatureRate: number;
 }
 
-interface ApiResponse {
-  data: HashRecord[];
-}
-
 const WaveLineCard: React.FC<{ mode?: "day" | "week"; weeklyData?: WeeklyChartPoint[] }> = ({
   mode = "day",
-  weeklyData = [],
+  weeklyData,
 }) => {
-  const { poolType } = useSettingsStore(useSelector(["poolType"]));
   const domRef = useRef<HTMLDivElement | null>(null);
-  const { venueId } = useParams<{ venueId: string }>();
   const chartRef = useRef<echarts.EChartsType | null>(null);
-  const [dates, setDates] = useState<string[]>([]);
-  const [hashValues, setHashValues] = useState<number[]>([]);
-  const [loading, setLoading] = useState(true);
-  // const [dailyData, setDailyData] = useState<string[]>([]);
-
-  // 获取数据
-  const fetchData = async () => {
-    setLoading(true);
-    if (mode === "week") {
-      setDates(weeklyData.map((item) => item.date));
-      setHashValues(weeklyData.map((item) => item.value));
-      setLoading(false);
-      return;
-    }
-    try {
-      const response: ApiResponse = await getLast30DaysHighTemperatureImpactRate(poolType, Number(venueId));
-
-      setDates(response.data.map((item) => item.date).reverse());
-      setHashValues(response.data.map((item) => item.highTemperatureRate).reverse());
-
-      // 处理响应数据
-    } catch (error) {
-      // 处理错误
-      console.log(error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    fetchData();
-  }, [venueId, mode, weeklyData]);
-  // 获取当前日期
+  const { points, loading } = useVenueTrend(
+    "high-temperature",
+    mode,
+    weeklyData,
+    getLast30DaysHighTemperatureImpactRate,
+    (row: HashRecord) => ({
+      date: row.date,
+      value: row.highTemperatureRate,
+    }),
+  );
 
   useEffect(() => {
     if (!domRef.current) return;
@@ -108,7 +78,7 @@ const WaveLineCard: React.FC<{ mode?: "day" | "week"; weeklyData?: WeeklyChartPo
           ...commonAxisLabel,
           formatter: (value: string) => {
             if (mode === "week") {
-              const week = weeklyData.find((item) => item.date === value)?.weekNo;
+              const week = points.find((item) => item.date === value)?.weekNo;
               return week ? t("第{{week}}周", { week: week }) : value;
             }
             const d = new Date(value);
@@ -124,7 +94,7 @@ const WaveLineCard: React.FC<{ mode?: "day" | "week"; weeklyData?: WeeklyChartPo
             return value;
           },
         },
-        data: dates,
+        data: points.map((point) => point.date),
         // data: Array.from({ length: 256 }, (_, i) => i)
       },
       yAxis: {
@@ -140,7 +110,7 @@ const WaveLineCard: React.FC<{ mode?: "day" | "week"; weeklyData?: WeeklyChartPo
           type: "line",
           smooth: true,
           showSymbol: false,
-          data: hashValues,
+          data: points.map((point) => point.value),
           itemStyle: { color: "rgb(216, 70, 70)" },
           lineStyle: { width: 2, color: "#ea580c" },
           areaStyle: {
@@ -167,7 +137,7 @@ const WaveLineCard: React.FC<{ mode?: "day" | "week"; weeklyData?: WeeklyChartPo
       chartRef.current?.dispose();
       chartRef.current = null;
     };
-  }, [dates, hashValues]);
+  }, [mode, points]);
 
   return (
     <>
