@@ -105,7 +105,7 @@ const SiderItems = (
         {
           key: ROUTE_PATHS.hashrateMonitor,
           hidden: hasPermission(ROUTE_PATHS.hashrateMonitor),
-          label: t("算力对比"),
+          label: t("算力核对"),
         },
         {
           key: ROUTE_PATHS.faultMonitor,

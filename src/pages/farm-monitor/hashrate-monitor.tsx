@@ -1,5 +1,11 @@
-import { useEffect, useRef, useState, useSyncExternalStore } from "react";
-import { DownloadOutlined, DownOutlined, SearchOutlined, SwapOutlined } from "@ant-design/icons";
+import { useEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
+import {
+  ClockCircleOutlined,
+  DownloadOutlined,
+  DownOutlined,
+  SearchOutlined,
+  SwapOutlined,
+} from "@ant-design/icons";
 import { useQuery } from "@tanstack/react-query";
 import { Alert, Button, DatePicker, Descriptions, Empty, Input, message, Popover, Select, Table } from "antd";
 import type { ColumnsType } from "antd/es/table";
@@ -163,6 +169,14 @@ function comparisonStatus(row: MachineComparison, due: boolean) {
   }
 }
 
+function columnLabel(label: string, unit: string) {
+  return (
+    <>
+      {label} <small className="whitespace-nowrap text-xs font-normal text-slate-500">{unit}</small>
+    </>
+  );
+}
+
 function columns(
   date: string | undefined,
   due: boolean,
@@ -193,29 +207,55 @@ function columns(
       ),
     },
     {
-      title: t("最近探测"),
+      title: (
+        <span className="hashrate-column-group">
+          <ClockCircleOutlined aria-hidden />
+          {t("矿机最近一次采集")}
+        </span>
+      ),
       children: [
-        { title: t("采集时间（北京时间）"), dataIndex: "lastCollectTime", width: 178, render: beijingTime },
-        { title: t("算力 (TH/s)"), width: 125, align: "right", render: (_, row) => numberText(row.hashrate) },
+        {
+          title: columnLabel(t("最新采集时间"), t("北京时间")),
+          dataIndex: "lastCollectTime",
+          width: 200,
+          render: beijingTime,
+        },
+        {
+          title: columnLabel(t("最新算力"), "TH/s"),
+          dataIndex: "hashrate",
+          width: 145,
+          align: "left",
+          render: (value: number | null) => numberText(value),
+        },
       ],
     },
     {
-      title: [t("昨日算力对比"), date].filter(Boolean).join(" · "),
+      title: (
+        <span className="hashrate-column-group">
+          <SwapOutlined aria-hidden />
+          {t("昨日算力核对")}
+          {date && (
+            <time dateTime={date} className="text-xs font-normal tabular-nums text-slate-500">
+              {date}
+            </time>
+          )}
+        </span>
+      ),
       children: [
         {
-          title: t("矿机日均 (TH/s)"),
+          title: columnLabel(t("矿机日均"), "TH/s"),
           width: 145,
           align: "right",
           render: (_, row) => numberText(row.comparison?.minerDailyAvgThs),
         },
         {
-          title: t("AntPool 日均 (TH/s)"),
+          title: columnLabel(t("AntPool 日均"), "TH/s"),
           width: 155,
           align: "right",
           render: (_, row) => numberText(row.comparison?.antpoolDailyAvgThs),
         },
         {
-          title: t("差值 (TH/s)"),
+          title: columnLabel(t("差值"), "TH/s"),
           width: 125,
           align: "right",
           render: (_, row) => numberText(row.comparison?.hashrateDiffThs, true),
@@ -243,12 +283,20 @@ function HashrateMonitorForOrganization({
 }) {
   const preferenceKey = comparisonSitePreferenceKey(accountId, organization);
   const sitesQuery = useBoundSites(organization);
-  const available: BoundSiteItem[] = sitesQuery.data?.data?.list ?? [];
-  const sites = Array.from(
-    new Map(available.filter((s) => s.site_code).map((s) => [s.site_code, s])).values(),
-  );
-  const [selected, setSelected] = useState(() => readComparisonSite(preferenceKey));
-  const siteCode = sites.find((s) => s.site_code === selected)?.site_code ?? sites[0]?.site_code ?? "";
+  const sites = useMemo(() => {
+    const available: BoundSiteItem[] = sitesQuery.data?.data?.list ?? [];
+    const uniqueSites = new Map(
+      available.filter((site) => site.site_code).map((site) => [site.site_code, site]),
+    );
+    const { compare } = new Intl.Collator("zh-CN", { numeric: true, sensitivity: "base" });
+    return Array.from(uniqueSites.values()).sort(
+      (a, b) =>
+        compare(a.site_name?.trim() || a.site_code, b.site_name?.trim() || b.site_code) ||
+        compare(a.site_code, b.site_code),
+    );
+  }, [sitesQuery.data]);
+  const [selected, setSelected] = useState("");
+  const siteCode = sites.some((site) => site.site_code === selected) ? selected : "";
   const [detail, setDetail] = useState<{ site: string; row: MachineComparison } | null>(null);
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(20);
@@ -257,14 +305,18 @@ function HashrateMonitorForOrganization({
   const [ipInput, setIpInput] = useState("");
   const [downloading, setDownloading] = useState(false);
 
-  // 等场地列表成功返回再确认回退，加载过程中的空列表不能覆盖上次选择。
+  // 自动选场时检查本次扫描；用户仍可手动查看零算力场地。
   useEffect(() => {
-    if (!sitesQuery.isSuccess || sitesQuery.isFetching || selected === siteCode) return;
-    setSelected(siteCode);
+    if (siteCode || !sitesQuery.isSuccess || sitesQuery.isFetching) return;
+    const activeSites = sites.filter((site) => (site.latest_probe_task?.total_hashrate ?? 0) > 0);
+    const preferred = readComparisonSite(preferenceKey);
+    const next = activeSites.find((site) => site.site_code === preferred) ?? activeSites[0];
+    const nextCode = next?.site_code ?? "";
+    if (selected === nextCode) return;
+    setSelected(nextCode);
     setPage(1);
     setDetail(null);
-    saveComparisonSite(preferenceKey, siteCode);
-  }, [preferenceKey, selected, siteCode, sitesQuery.isSuccess, sitesQuery.isFetching]);
+  }, [preferenceKey, selected, siteCode, sites, sitesQuery.isSuccess, sitesQuery.isFetching]);
 
   function updateFilters(change: Partial<ComparisonFilters>) {
     setFilters((current) => ({ ...current, ...change }));
@@ -287,7 +339,7 @@ function HashrateMonitorForOrganization({
     setDownloading(true);
     try {
       const blob = await downloadComparisonCsv(organization, siteCode, data.comparisonStatDate, filters);
-      saveAs(blob, `算力对比-${organization}-${siteCode}-${data.comparisonStatDate}.csv`);
+      saveAs(blob, `算力核对-${organization}-${siteCode}-${data.comparisonStatDate}.csv`);
     } catch (error) {
       message.error(error instanceof Error ? error.message : t("下载失败，请稍后重试"));
     } finally {
@@ -296,10 +348,21 @@ function HashrateMonitorForOrganization({
   }
 
   return (
-    <div className="daily-mac-stats -m-4 min-h-full bg-white p-4 md:p-8">
+    <div className="daily-mac-stats -m-4 min-h-full bg-white p-4 md:px-8 md:pb-8 md:pt-5">
       <div className="hashrate-comparison mx-auto flex max-w-[1600px] flex-col">
-        <div className="mb-3 flex items-center justify-between gap-3">
-          <h1 className="m-0 text-lg font-semibold text-gray-900">{t("算力对比")}</h1>
+        <header className="hashrate-comparison-header">
+          <h1 className="m-0 flex items-center gap-2 text-lg font-semibold text-gray-900">
+            <span
+              aria-hidden="true"
+              className="inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-md bg-blue-50 text-sm text-blue-700"
+            >
+              <SwapOutlined />
+            </span>
+            {t("算力核对")}
+          </h1>
+          <p className="m-0 text-[13px] leading-5 text-slate-600">
+            {t("按 IP 核对矿机端与 AntPool 的昨日平均算力")}
+          </p>
           <Button
             size="middle"
             icon={<DownloadOutlined />}
@@ -309,7 +372,7 @@ function HashrateMonitorForOrganization({
           >
             {t("下载 CSV")}
           </Button>
-        </div>
+        </header>
         <div className="hashrate-comparison-filters">
           <div className="hashrate-search-fields">
             <ComparisonSiteSelect
@@ -386,25 +449,30 @@ function HashrateMonitorForOrganization({
           </div>
         </div>
         {siteCode && !sitesQuery.isError && !query.isError && (
-          <p className="hashrate-comparison-summary" role="status" aria-busy={!data}>
-            {[
-              filters.ip && `IP ${filters.ip}`,
-              collectedDates && [...new Set(collectedDates)].join(" ~ "),
-              filters.minAbsDiffPct !== null && `${t("偏差幅度")} ≥${filters.minAbsDiffPct}%`,
-            ]
-              .filter(Boolean)
-              .join(" · ") || t("全部机器")}
-            {" · "}
-            <strong className="font-semibold tabular-nums text-slate-800">
-              {data && !query.isPlaceholderData ? t("{{count}} 台", { count: data.total }) : "…"}
-            </strong>
-          </p>
+          <div className="hashrate-comparison-summary flex flex-wrap items-baseline gap-x-4 gap-y-1">
+            <p className="m-0" role="status" aria-busy={!data}>
+              {[
+                filters.ip && `IP ${filters.ip}`,
+                collectedDates && [...new Set(collectedDates)].join(" ~ "),
+                filters.minAbsDiffPct !== null && `${t("偏差幅度")} ≥${filters.minAbsDiffPct}%`,
+              ]
+                .filter(Boolean)
+                .join(" · ") || t("全部机器")}
+              {" · "}
+              <strong className="font-semibold tabular-nums text-slate-800">
+                {data && !query.isPlaceholderData ? t("{{count}} 台", { count: data.total }) : "…"}
+              </strong>
+            </p>
+            {!!data?.list.length && (
+              <span className="text-xs text-slate-500">{t("点击 IP 查看近 7 天的小时算力")}</span>
+            )}
+          </div>
         )}
         {sitesQuery.isError || query.isError ? (
           <Alert
             type="error"
             showIcon
-            message={(sitesQuery.error ?? query.error)?.message || t("获取算力对比失败")}
+            message={(sitesQuery.error ?? query.error)?.message || t("获取算力核对数据失败")}
             action={
               <Button onClick={() => void (sitesQuery.isError ? sitesQuery.refetch() : query.refetch())}>
                 {t("重试")}
@@ -420,12 +488,14 @@ function HashrateMonitorForOrganization({
               setDetail({ site: siteCode, row }),
             )}
             dataSource={data?.list ?? []}
-            scroll={{ x: 1125 }}
+            scroll={{ x: 1170 }}
             locale={{
               emptyText: (
                 <Empty
                   image={Empty.PRESENTED_IMAGE_SIMPLE}
-                  description={siteCode ? t("暂无符合条件的机器") : t("暂无可查询场地")}
+                  description={
+                    siteCode ? t("暂无符合条件的机器") : sites.length ? t("请选择场地") : t("暂无可查询场地")
+                  }
                 />
               ),
             }}

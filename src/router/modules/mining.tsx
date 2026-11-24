@@ -73,7 +73,7 @@ export const miningRoute: RouteObject = {
       path: ROUTE_PATHS.hashrateMonitor,
       lazy: async () => ({ Component: (await import("@/pages/farm-monitor/hashrate-monitor")).default }),
       HydrateFallback: ProgressBar,
-      handle: { title: t("算力对比"), crumb: () => t("算力对比") },
+      handle: { title: t("算力核对"), crumb: () => t("算力核对") },
     },
     {
       path: ROUTE_PATHS.faultMonitor,

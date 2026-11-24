@@ -80,22 +80,26 @@ export async function fetchMachineComparisons(
     params: { ...comparisonParams(filters), page, pageSize },
     signal,
   });
-  if (!response.success) throw new Error(response.message || t("获取算力对比失败"));
+  if (!response.success) throw new Error(response.message || t("获取算力核对数据失败"));
   if (!response.data?.comparisonStatDate || !Array.isArray(response.data.list))
-    throw new Error(t("算力对比数据格式不正确"));
+    throw new Error(t("算力核对数据格式不正确"));
   return response.data;
 }
 
-export async function downloadComparisonCsv(
+export function downloadComparisonCsv(
   organization: string,
   siteCode: string,
   statDate: string,
   filters: ComparisonFilters,
 ) {
-  const { data } = await axiosInstance.get<Blob>(`${comparisonPath(organization, siteCode)}/export`, {
-    params: { ...comparisonParams(filters), statDate },
-    responseType: "blob",
+  return downloadCsv(`${comparisonPath(organization, siteCode)}/export`, {
+    ...comparisonParams(filters),
+    statDate,
   });
+}
+
+async function downloadCsv(path: string, params: Record<string, string | number | undefined>) {
+  const { data } = await axiosInstance.get<Blob>(path, { params, responseType: "blob" });
   if (data.type.includes("json")) {
     const body = JSON.parse(await data.text()) as { message?: string };
     throw new Error(body.message || t("下载失败，请稍后重试"));
@@ -122,6 +126,20 @@ interface MachineHistory {
   hours: MachineHour[];
 }
 
+function hourlyHistoryPath(organization: string, siteCode: string) {
+  return `minerHashrate/machineHourlyHistory/${encodeURIComponent(organization)}/${encodeURIComponent(siteCode)}`;
+}
+
+export function downloadMachineHourlyCsv(
+  organization: string,
+  siteCode: string,
+  agentCode: string,
+  ip: string,
+  asOf: string,
+) {
+  return downloadCsv(`${hourlyHistoryPath(organization, siteCode)}/export`, { agentCode, ip, asOf });
+}
+
 export async function fetchMachineHourlyHistory(
   organization: string,
   siteCode: string,
@@ -132,10 +150,7 @@ export async function fetchMachineHourlyHistory(
   const response = await axiosInstance.get<
     unknown,
     { success: boolean; message?: string; data?: MachineHistory }
-  >(
-    `minerHashrate/machineHourlyHistory/${encodeURIComponent(organization)}/${encodeURIComponent(siteCode)}`,
-    { params: { agentCode, ip }, signal },
-  );
+  >(hourlyHistoryPath(organization, siteCode), { params: { agentCode, ip }, signal });
   if (!response.success || !Array.isArray(response.data?.hours)) {
     throw new Error(response.message || t("获取小时算力失败"));
   }

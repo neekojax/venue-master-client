@@ -1,8 +1,15 @@
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
+import { DownloadOutlined } from "@ant-design/icons";
 import { useQuery } from "@tanstack/react-query";
-import { Alert, Button, Drawer, Empty, Spin, Table } from "antd";
+import { Alert, Button, Drawer, Empty, message, Spin, Table } from "antd";
+import { saveAs } from "file-saver";
 import { ReactEcharts } from "@/components/react-echarts";
-import { fetchMachineHourlyHistory, type HourlySample, type MachineHour } from "../hashrate-comparison-api";
+import {
+  downloadMachineHourlyCsv,
+  fetchMachineHourlyHistory,
+  type HourlySample,
+  type MachineHour,
+} from "../hashrate-comparison-api";
 import { convertUTCToLocal } from "@/utils/date";
 
 import { t } from "@/locales";
@@ -50,12 +57,26 @@ function sampleCell(sample: HourlySample | null, value: string) {
 }
 
 export default function MachineHourlyDrawer({ organization, siteCode, agentCode, ip, onClose }: Props) {
+  const [downloading, setDownloading] = useState(false);
   const query = useQuery({
     queryKey: ["machine-hourly-history", organization, siteCode, agentCode, ip],
     queryFn: ({ signal }) => fetchMachineHourlyHistory(organization, siteCode, agentCode, ip, signal),
     staleTime: 30_000,
   });
   const history = query.data;
+  async function handleDownload() {
+    if (!history || downloading) return;
+    setDownloading(true);
+    try {
+      const blob = await downloadMachineHourlyCsv(organization, siteCode, agentCode, ip, history.asOf);
+      const filename = `小时算力-${organization}-${siteCode}-${agentCode}-${ip}-${beijing(history.asOf)}.csv`;
+      saveAs(blob, filename.replace(/[\\/:*?"<>|]/g, "-"));
+    } catch (error) {
+      message.error(error instanceof Error ? error.message : t("下载失败，请稍后重试"));
+    } finally {
+      setDownloading(false);
+    }
+  }
   const hours = history?.hours;
   const option = useMemo(
     () => ({
@@ -119,7 +140,22 @@ export default function MachineHourlyDrawer({ organization, siteCode, agentCode,
           ? t("Agent 绑定不唯一，无法定位 AntPool 场地")
           : "";
   return (
-    <Drawer open onClose={onClose} width="min(920px, 100vw)" title={`${ip} · ${t("最近 7 天小时算力")}`}>
+    <Drawer
+      open
+      onClose={onClose}
+      width="min(920px, 100vw)"
+      title={`${ip} · ${t("最近 7 天小时算力")}`}
+      extra={
+        <Button
+          icon={<DownloadOutlined />}
+          disabled={!history}
+          loading={downloading}
+          onClick={() => void handleDownload()}
+        >
+          {t("下载 CSV")}
+        </Button>
+      }
+    >
       <div className="flex flex-col gap-4">
         <div className="text-sm text-gray-600">
           {siteCode} · {agentCode}

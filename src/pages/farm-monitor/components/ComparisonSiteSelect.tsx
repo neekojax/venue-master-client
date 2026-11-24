@@ -21,13 +21,14 @@ export default function ComparisonSiteSelect({ sites, value, loading, onChange }
     label: site.site_name?.trim() || site.site_code,
     value: site.site_code,
   }));
+  const selectedName = options.find((option) => option.value === value)?.label;
+  const selectedTitle = selectedName && selectedName !== value ? `${selectedName} · ${value}` : value;
   let matches = options;
   if (words.length) {
     matches = options.filter((option) => {
       const text = `${option.label} ${option.value}`.toLowerCase();
       return words.every((word) => text.includes(word));
     });
-    matches.sort((a, b) => Number(b.value.toLowerCase() === query) - Number(a.value.toLowerCase() === query));
   }
 
   const escapedWords = words.map((word) => word.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"));
@@ -51,6 +52,7 @@ export default function ComparisonSiteSelect({ sites, value, loading, onChange }
       <label htmlFor="hashrate-site">{t("场地")}</label>
       <Select
         id="hashrate-site"
+        title={open ? undefined : selectedTitle || undefined}
         size="middle"
         classNames={{ popup: { root: "hashrate-site-menu" } }}
         showSearch
@@ -74,10 +76,7 @@ export default function ComparisonSiteSelect({ sites, value, loading, onChange }
           open ? (
             <span className="text-gray-500">{hint}</span>
           ) : (
-            <span
-              className="flex min-w-0 items-center gap-2"
-              title={label === code ? String(code) : `${label} · ${code}`}
-            >
+            <span className="flex min-w-0 items-center gap-2">
               <span className="hashrate-site-name min-w-0" dir="rtl">
                 <bdi>{label}</bdi>
               </span>

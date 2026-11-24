@@ -1,0 +1,319 @@
+import { useEffect, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { Alert, Button, Descriptions, Empty, Form, InputNumber, Select, Table, Tag } from "antd";
+import type { ColumnsType } from "antd/es/table";
+import {
+  type ComparisonFilters,
+  fetchMachineComparisons,
+  type MachineComparison,
+} from "./hashrate-comparison-api";
+import MachineHourlyDrawer from "./components/MachineHourlyDrawer";
+import { useBoundSites } from "./hook";
+import type { BoundSiteItem } from "./types";
+import useAuthRedirect from "@/hooks/useAuthRedirect";
+import { useSettingsStore } from "@/stores";
+import { useSelector } from "@/stores/selectors";
+import { convertUTCToLocal } from "@/utils/date";
+
+import "./daily-mac-stats.css";
+
+import { t } from "@/locales";
+
+const defaultFilters: ComparisonFilters = { sort: "latest", minAbsDiffPct: null };
+
+function numberText(value: number | null | undefined, signed = false, suffix = "") {
+  if (value == null) return "—";
+  return `${signed && value > 0 ? "+" : ""}${value.toLocaleString(undefined, { maximumFractionDigits: 3 })}${suffix}`;
+}
+
+function beijingTime(value: string | null) {
+  return value ? convertUTCToLocal(value, "YYYY-MM-DD HH:mm:ss", false, "Asia/Shanghai") : "—";
+}
+
+function comparisonStatus(row: MachineComparison, due: boolean) {
+  if (!row.comparison) return due ? t("昨日无记录") : t("待结算");
+  switch (row.comparison.compareStatus) {
+    case "complete":
+      return t("已完成");
+    case "partial":
+      return t("部分采样");
+    case "no_pool_samples":
+      return t("缺少矿池样本");
+    case "no_tasks":
+      return t("无探测任务");
+    case "waiting_tasks":
+      return t("等待探测完成");
+    case "no_source":
+      return t("无矿池来源");
+    case "ambiguous_source":
+      return t("矿池来源不唯一");
+    case "ambiguous_ip":
+      return t("IP 归属冲突");
+    case null:
+    case "pending":
+      return due ? t("待比对") : t("待结算");
+    default:
+      return row.comparison.compareStatus;
+  }
+}
+
+function columns(
+  date: string | undefined,
+  due: boolean,
+  onOpen: (row: MachineComparison) => void,
+): ColumnsType<MachineComparison> {
+  return [
+    {
+      title: "IP",
+      dataIndex: "ipAddress",
+      fixed: "left",
+      width: 153,
+      render: (ip: string, row) => (
+        <div>
+          <Button
+            type="link"
+            size="small"
+            className="!h-auto !p-0 font-medium tabular-nums"
+            onClick={() => onOpen(row)}
+          >
+            {ip}
+          </Button>
+          {row.model && (
+            <div className="truncate text-xs text-gray-500" title={row.model}>
+              {row.model}
+            </div>
+          )}
+        </div>
+      ),
+    },
+    {
+      title: t("最近探测"),
+      children: [
+        { title: t("采集时间（北京时间）"), dataIndex: "lastCollectTime", width: 178, render: beijingTime },
+        {
+          title: t("探测状态"),
+          width: 105,
+          render: (_, row) => (
+            <Tag color={row.status === "success" && row.reachable ? "green" : "default"}>
+              {row.reachable
+                ? row.status === "success"
+                  ? t("探测成功")
+                  : row.status || t("可达")
+                : t("不可达")}
+            </Tag>
+          ),
+        },
+        { title: t("算力 (TH/s)"), width: 125, align: "right", render: (_, row) => numberText(row.hashrate) },
+      ],
+    },
+    {
+      title: [t("昨日算力对比"), date].filter(Boolean).join(" · "),
+      children: [
+        {
+          title: t("矿机日均 (TH/s)"),
+          width: 145,
+          align: "right",
+          render: (_, row) => numberText(row.comparison?.minerDailyAvgThs),
+        },
+        {
+          title: t("AntPool 日均 (TH/s)"),
+          width: 155,
+          align: "right",
+          render: (_, row) => numberText(row.comparison?.antpoolDailyAvgThs),
+        },
+        {
+          title: t("差值 (TH/s)"),
+          width: 125,
+          align: "right",
+          render: (_, row) => numberText(row.comparison?.hashrateDiffThs, true),
+        },
+        {
+          title: t("差异率"),
+          width: 110,
+          align: "right",
+          render: (_, row) => numberText(row.comparison?.hashrateDiffPct, true, "%"),
+        },
+        { title: t("比对状态"), width: 135, render: (_, row) => comparisonStatus(row, due) },
+      ],
+    },
+  ];
+}
+
+function HashrateMonitorForOrganization({ organization }: { organization: string }) {
+  const sitesQuery = useBoundSites(organization);
+  const available: BoundSiteItem[] = sitesQuery.data?.data?.list ?? [];
+  const sites = Array.from(
+    new Map(available.filter((s) => s.site_code).map((s) => [s.site_code, s])).values(),
+  );
+  const [selected, setSelected] = useState("");
+  const siteCode = sites.find((s) => s.site_code === selected)?.site_code ?? sites[0]?.site_code ?? "";
+  const [detail, setDetail] = useState<{ site: string; row: MachineComparison } | null>(null);
+  const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(20);
+  const [filters, setFilters] = useState(defaultFilters);
+  const query = useQuery({
+    queryKey: ["site-machine-comparisons", organization, siteCode, page, pageSize, filters],
+    queryFn: ({ signal }) => fetchMachineComparisons(organization, siteCode, page, pageSize, filters, signal),
+    enabled: Boolean(organization && siteCode),
+  });
+  const data = query.data;
+  // 数据刷新后总数可能缩小，回到最后一个仍有效的分页。
+  useEffect(() => {
+    if (data) setPage((current) => Math.min(current, Math.max(1, Math.ceil(data.total / pageSize))));
+  }, [data, pageSize]);
+
+  return (
+    <div className="daily-mac-stats -m-4 min-h-full bg-white p-4 md:p-8">
+      <div className="mx-auto flex max-w-[1600px] flex-col gap-5">
+        <header className="flex flex-wrap items-center justify-between gap-3">
+          <h1 className="m-0 text-lg font-semibold text-gray-900">{t("算力对比")}</h1>
+          <div className="flex max-w-full items-center gap-2">
+            <label htmlFor="hashrate-site">{t("场地")}</label>
+            <Select
+              id="hashrate-site"
+              className="w-64 max-w-full md:w-80"
+              showSearch
+              optionFilterProp="label"
+              placeholder={t("请选择场地")}
+              value={siteCode || undefined}
+              loading={sitesQuery.isFetching}
+              options={sites.map((s) => ({ value: s.site_code, label: s.site_name || s.site_code }))}
+              onChange={(value) => {
+                setDetail(null);
+                setSelected(value);
+                setPage(1);
+              }}
+            />
+          </div>
+        </header>
+
+        <Form<ComparisonFilters>
+          layout="inline"
+          initialValues={defaultFilters}
+          className="flex flex-wrap gap-y-3"
+          onFinish={(values) => {
+            if (!siteCode) return;
+            const next = { sort: values.sort, minAbsDiffPct: values.minAbsDiffPct ?? null };
+            if (page === 1 && next.sort === filters.sort && next.minAbsDiffPct === filters.minAbsDiffPct)
+              void query.refetch();
+            setPage(1);
+            setFilters(next);
+          }}
+        >
+          <Form.Item name="sort" label={t("排序")}>
+            <Select
+              className="min-w-44"
+              options={[
+                { value: "latest", label: t("最近刷新优先") },
+                { value: "absolute", label: t("偏差最大优先") },
+                { value: "negative", label: t("差异率从低到高") },
+                { value: "positive", label: t("差异率从高到低") },
+              ]}
+            />
+          </Form.Item>
+          <Form.Item
+            name="minAbsDiffPct"
+            label={t("最小绝对差异率")}
+            rules={[{ type: "number", min: 0, message: t("请输入非负数") }]}
+          >
+            <InputNumber min={0} addonAfter="%" placeholder={t("全部")} style={{ width: 130 }} />
+          </Form.Item>
+          <Button type="primary" htmlType="submit" disabled={!siteCode}>
+            {t("查询")}
+          </Button>
+        </Form>
+        {sitesQuery.isError || query.isError ? (
+          <Alert
+            type="error"
+            showIcon
+            message={(sitesQuery.error ?? query.error)?.message || t("获取算力对比失败")}
+            action={
+              <Button onClick={() => void (sitesQuery.isError ? sitesQuery.refetch() : query.refetch())}>
+                {t("重试")}
+              </Button>
+            }
+          />
+        ) : (
+          <Table<MachineComparison>
+            size="middle"
+            rowKey={(row) => JSON.stringify([row.agentCode, row.ipAddress])}
+            loading={sitesQuery.isLoading || query.isFetching}
+            columns={columns(data?.comparisonStatDate, data?.comparisonDue ?? false, (row) =>
+              setDetail({ site: siteCode, row }),
+            )}
+            dataSource={data?.list ?? []}
+            scroll={{ x: 1230 }}
+            locale={{
+              emptyText: (
+                <Empty
+                  image={Empty.PRESENTED_IMAGE_SIMPLE}
+                  description={siteCode ? t("暂无符合条件的机器") : t("暂无可查询场地")}
+                />
+              ),
+            }}
+            expandable={{
+              expandedRowRender: (row) => (
+                <Descriptions
+                  size="small"
+                  column={{ xs: 1, md: 2, xl: 4 }}
+                  items={[
+                    { key: "agent", label: "Agent", children: row.agentCode },
+                    { key: "mac", label: "MAC", children: row.macAddress || "—" },
+                    {
+                      key: "task",
+                      label: t("探测任务小时数"),
+                      children: numberText(row.comparison?.minerTaskHours),
+                    },
+                    {
+                      key: "miner",
+                      label: t("矿机实采小时数"),
+                      children: numberText(row.comparison?.minerSampleHours),
+                    },
+                    {
+                      key: "pool",
+                      label: t("AntPool 实采小时数"),
+                      children: numberText(row.comparison?.antpoolSampleHours),
+                    },
+                    {
+                      key: "time",
+                      label: t("比对时间（北京时间）"),
+                      children: beijingTime(row.comparison?.comparedAt ?? null),
+                    },
+                  ]}
+                />
+              ),
+            }}
+            pagination={{
+              current: page,
+              pageSize,
+              total: data?.total ?? 0,
+              showSizeChanger: true,
+              pageSizeOptions: [20, 50, 100, 200, 500],
+              showTotal: (total) => t("共 {{count}} 条", { count: total }),
+              onChange: (nextPage, nextSize) => {
+                setPage(nextSize === pageSize ? nextPage : 1);
+                setPageSize(nextSize);
+              },
+            }}
+          />
+        )}
+        {detail && detail.site === siteCode && (
+          <MachineHourlyDrawer
+            key={JSON.stringify([siteCode, detail.row.agentCode, detail.row.ipAddress])}
+            organization={organization}
+            siteCode={siteCode}
+            agentCode={detail.row.agentCode}
+            ip={detail.row.ipAddress}
+            onClose={() => setDetail(null)}
+          />
+        )}
+      </div>
+    </div>
+  );
+}
+
+export default function HashrateMonitorPage() {
+  useAuthRedirect();
+  const { poolType } = useSettingsStore(useSelector(["poolType"]));
+  return <HashrateMonitorForOrganization key={poolType} organization={poolType} />;
+}

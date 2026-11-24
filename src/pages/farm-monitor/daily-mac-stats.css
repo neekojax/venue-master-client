@@ -149,6 +149,34 @@
   container: hashrate-comparison / inline-size;
 }
 
+.hashrate-comparison-header {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 4px 16px;
+  margin-bottom: 14px;
+}
+
+.hashrate-comparison .ant-table-wrapper .ant-table .ant-table-thead th[colspan] {
+  padding-block: 0;
+  border-bottom: 0;
+}
+
+.hashrate-column-group {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  padding-block: 8px;
+  border-bottom: 1px solid #d6dee8;
+  color: #334155;
+  font-size: 13px;
+}
+
+.hashrate-column-group .anticon {
+  color: #526e8f;
+}
+
 .hashrate-comparison-filters {
   --filter-border: #d6dee8;
   --filter-blue: #1a56a8;
@@ -204,6 +232,11 @@
 .hashrate-site-filter {
   width: 100%;
   max-width: 20rem;
+}
+
+/* 场地名称会在展开时切换成搜索提示，让点击直接落到下方的输入框。 */
+.hashrate-site-filter .ant-select-selection-item {
+  pointer-events: none;
 }
 
 .hashrate-site-name {
@@ -298,6 +331,16 @@
 }
 
 @container hashrate-comparison (max-width: 49rem) {
+  .hashrate-comparison-header {
+    grid-template-columns: minmax(0, 1fr) auto;
+  }
+
+  .hashrate-comparison-header > p {
+    grid-column: 1 / -1;
+    grid-row: 2;
+    padding-inline-start: 2rem;
+  }
+
   .hashrate-search-fields {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
