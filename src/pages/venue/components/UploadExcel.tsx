@@ -2,8 +2,8 @@
 import React, { useState } from "react";
 import { UploadOutlined } from "@ant-design/icons";
 import { Button, message, Upload } from "antd";
-import axios from "axios";
 
+import axiosInstance from "@/helper/axiosInstance";
 import { t } from "@/locales";
 
 const UploadExcel: React.FC = () => {
@@ -42,7 +42,7 @@ const UploadExcel: React.FC = () => {
       try {
         const token = localStorage.getItem("access_token");
         setLoading(true); // 开始 loading
-        const response = await axios.post("https://datastring.cc/admin-api/event/import", formData, {
+        const response = await axiosInstance.post("event/import", formData, {
           headers: {
             "Content-Type": "multipart/form-data", // 确保设置了正确的内容类型
             Authorization: `Bearer ${token}`, // 添加 token 到请求头
@@ -50,7 +50,7 @@ const UploadExcel: React.FC = () => {
         });
 
         message.success(t("上传成功"));
-        return response.data; // 返回服务器响应的数据
+        return response; // axiosInstance 响应拦截器已直接返回业务数据
       } catch (error) {
         // console.error("上传失败:", error);
         message.error(t("上传失败"));

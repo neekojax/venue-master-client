@@ -1,0 +1,23 @@
+packages:
+  - '.'
+
+# pnpm v11 起，pnpm 只从 pnpm-workspace.yaml 读取设置（.npmrc 仅保留 registry/auth），
+# 并且 onlyBuiltDependencies / ignoredBuiltDependencies 已被 allowBuilds 取代，
+# strict-dep-builds 改名为 strictDepBuilds。
+# 显式批准本项目真正需要执行安装脚本的两个依赖：
+#   @swc/core —— @vitejs/plugin-react-swc 的原生绑定
+#   esbuild   —— vite 的打包器
+allowBuilds:
+  '@swc/core': true
+  esbuild: true
+
+# pnpm v10 的读法（packageManager 锁定到 pnpm 10.5.0 时生效）
+onlyBuiltDependencies:
+  - '@swc/core'
+  - esbuild
+
+# 未在 allowBuilds 中列出的依赖若带安装脚本，只告警不中断安装
+strictDepBuilds: false
+
+# 影响 node_modules 布局的结构类设置，pnpm v11+ 只能写在 pnpm-workspace.yaml
+shamefullyHoist: true

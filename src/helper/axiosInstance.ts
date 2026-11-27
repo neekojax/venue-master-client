@@ -2,7 +2,7 @@
 import axios from "axios";
 import Cookies from "js-cookie";
 import eventBus from "@/components/event-bus";
-import { COOKIE_DOMAIN, ROUTE_PATHS } from "@/constants/common.ts";
+import { getCookieDomain, ROUTE_PATHS } from "@/constants/common.ts";
 
 import { t } from "@/locales";
 
@@ -21,11 +21,7 @@ const onRefreshed = (newToken: string) => {
 };
 
 const axiosInstance = axios.create({
-  // baseURL: import.meta.env.VITE_API_BASE_URL, // 你的 API 基础 URL
-  // baseURL: "http://localhost:8080/admin-api/", //  周莹本地测试
-  // baseURL: "http://127.0.0.1:8080/admin-api/", // 你的 API 基础 UR
-  // baseURL: "http://45.76.191.253:11001/admin-api/", // 你的 API 基础 UR
-  baseURL: "https://datastring.cc/admin-api", // 线上发布
+  baseURL: import.meta.env.VITE_APP_API_URL,
 });
 
 // 刷新 token 的函数
@@ -77,7 +73,7 @@ axiosInstance.interceptors.response.use(
         isRefreshing = true;
         try {
           const newTokenData = await refreshToken();
-          Cookies.set("access_token", newTokenData.access_token, { domain: COOKIE_DOMAIN, path: "/" }); // 更新存储的 token
+          Cookies.set("access_token", newTokenData.access_token, { domain: getCookieDomain(), path: "/" }); // 更新存储的 token
 
           onRefreshed(newTokenData.access_token); // 通知所有订阅者
           isRefreshing = false; // 重新设置为 false
@@ -103,7 +99,7 @@ axiosInstance.interceptors.response.use(
 
     // 处理 token 刷新
     if (response && response.data?.code === 200205) {
-      Cookies.remove("access_token", { domain: COOKIE_DOMAIN, path: "/" });
+      Cookies.remove("access_token", { domain: getCookieDomain(), path: "/" });
       eventBus.emit("redirect", ROUTE_PATHS.login); // Emit the redirect event
       return Promise.reject(new Error("User needs to log in")); // 直接返回，后续逻辑不再执行
     }

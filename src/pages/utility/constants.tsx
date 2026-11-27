@@ -1,5 +1,6 @@
 import { Bitcoin, Calculator, Cpu, Database, Globe, Search, TrendingUp, Wrench } from "lucide-react";
 import { ChartDataPoint, UtilityTool } from "./types.ts";
+import { getAssetAppUrl, getMaintenanceAppUrl } from "@/utils/runtime-config.ts";
 
 import { t } from "@/locales";
 
@@ -11,7 +12,8 @@ export const UTILITY_TOOLS: UtilityTool[] = [
     icon: <Database className="w-6 h-6 text-purple-500" />,
     // color: "bg-purple-50",
     // isSystem: true,
-    url: "https://asset.datastring.cc/",
+    // 地址来自后端下发的运行时配置（见 utils/runtime-config.ts），构建期 .env 仅作兜底
+    url: getAssetAppUrl() || "https://asset.datastring.cc/",
   },
 
   {
@@ -45,7 +47,7 @@ export const UTILITY_TOOLS: UtilityTool[] = [
     icon: <Wrench className="w-6 h-6 text-rose-500" />,
     // color: "bg-rose-50",
     // isSystem: true,
-    url: "https://repair.datastring.cc/",
+    url: getMaintenanceAppUrl() || "https://repair.datastring.cc/",
   },
   {
     id: "btc-explorer",

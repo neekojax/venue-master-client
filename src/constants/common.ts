@@ -71,4 +71,4 @@ export const ROUTE_PATHS = {
   poolHashHistory: (poolName: any) => `/pool-hash/history/${encodeURIComponent(poolName)}`,
 };
 
-export const COOKIE_DOMAIN = import.meta.env.VITE_COOKIE_DOMAIN || ".test.com";
+export { getCookieDomain } from "@/utils/runtime-config.ts";
